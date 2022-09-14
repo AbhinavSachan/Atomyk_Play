@@ -8,6 +8,6 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="tertiary_bg">#2E4053</color>
-    <color name="primary_bg">#839192</color>
+    <color name="primary_bg">#880A24</color>
     <color name="secondary_bg">#F4D03F</color>
 </resources>
