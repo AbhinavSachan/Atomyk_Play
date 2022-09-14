@@ -22,7 +22,10 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewAda
     Context context;
     ArrayList<MusicDataCapsule> musicData = new ArrayList<>(); // I Initialized this 4 you (may cause errors later)
 
-
+    public MusicAdapter(Context context, ArrayList<MusicDataCapsule> musicData) {
+        this.context = context;
+        this.musicData = musicData;
+    }
 
     @NonNull
     @Override
@@ -42,13 +45,6 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewAda
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }else {
-            try {
-                Glide.with(context).load(R.drawable.ic_music_list).apply(new RequestOptions()
-                        .override(70, 70)).into(holder.imageView);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
         holder.imageButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -57,7 +53,9 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewAda
             }
         });
 
-        holder.nameText.setText(currentItem.getsName());
+        String sName = currentItem.getsName().replace(".mp3","").replace(".aac","").replace(".wac","");
+
+        holder.nameText.setText(sName);
         holder.artistText.setText(currentItem.getsArtist());
         holder.durationText.setText(currentItem.getsLength());
 

@@ -1,14 +1,14 @@
 package com.atomykcoder.atomykplay;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.Manifest;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.musicload.MusicAdapter;
 import com.atomykcoder.atomykplay.musicload.MusicDataCapsule;
@@ -31,33 +31,34 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //Checks permissions (method somewhere down in the script)
+        checkPermission();
+
+
         RecyclerView recyclerView = findViewById(R.id.music_recycler);
 
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
 
-        //Checks permissions (method somewhere down in the script)
-        checkPermission();
 
-        //Fetch Music List along with it's metadata and save it in "datalist"
+        //Fetch Music List along with it's metadata and save it in "dataList"
         fetchMusic(dataList);
 
         //Prints Song Details in LogCat
-        for (int i = 0; i < dataList.size(); i++)
-        {
+        for (int i = 0; i < dataList.size(); i++) {
             Log.i("TAG", dataList.get(i).getsName());
             Log.i("TAG", dataList.get(i).getsArtist());
             Log.i("TAG", dataList.get(i).getsLength());
         }
 
         //Setting up adapter
-        adapter = new MusicAdapter();
+        adapter = new MusicAdapter(MainActivity.this, dataList);
         recyclerView.setAdapter(adapter);
     }
 
     //Checks whether user granted permissions for external storage or not
     //if not then shows dialogue to grant permissions
-    void checkPermission(){
+    void checkPermission() {
 
         Dexter.withContext(getApplicationContext())
                 .withPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
@@ -78,7 +79,8 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }).check();
     }
-    void fetchMusic(ArrayList<MusicDataCapsule> dataList){
+
+    void fetchMusic(ArrayList<MusicDataCapsule> dataList) {
         //Creating an array for data types we need
         String[] proj = {
                 MediaStore.Audio.Media.ALBUM_ID,
@@ -98,13 +100,13 @@ public class MainActivity extends AppCompatActivity {
         );
 
         //If cursor is not null then storing data inside a data list.
-        if(audioCursor != null){
-            if(audioCursor.moveToFirst()){
-                do{
+        if (audioCursor != null) {
+            if (audioCursor.moveToFirst()) {
+                do {
                     dataList.add(new MusicDataCapsule(audioCursor.getString(1),
                             audioCursor.getString(2),
                             audioCursor.getString(3)));
-                }while(audioCursor.moveToNext());
+                } while (audioCursor.moveToNext());
             }
         }
 
