@@ -1,6 +1,7 @@
 package com.atomykcoder.atomykplay.musicload;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +20,9 @@ import java.util.ArrayList;
 
 public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewAdapter> {
     Context context;
-    ArrayList<MusicDataCapsule> musicData;
+    ArrayList<MusicDataCapsule> musicData = new ArrayList<>(); // I Initialized this 4 you (may cause errors later)
+
+
 
     @NonNull
     @Override
@@ -34,13 +37,15 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewAda
 
         if (currentItem.getsCover() != null) {
             try {
-                Glide.with(context).load(currentItem.getsCover()).apply(new RequestOptions().override(70, 70)).into(holder.imageView);
+                Glide.with(context).load(currentItem.getsCover()).apply(new RequestOptions()
+                        .override(70, 70)).into(holder.imageView);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }else {
             try {
-                Glide.with(context).load(R.drawable.ic_music_list).apply(new RequestOptions().override(70, 70)).into(holder.imageView);
+                Glide.with(context).load(R.drawable.ic_music_list).apply(new RequestOptions()
+                        .override(70, 70)).into(holder.imageView);
             } catch (Exception e) {
                 e.printStackTrace();
             }

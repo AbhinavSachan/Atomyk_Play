@@ -9,6 +9,11 @@ public class MusicDataCapsule {
         this.sCover = sCover;
         this.sLength = sLength;
     }
+    public MusicDataCapsule(String sName, String sArtist, String sLength) {
+        this.sName = sName;
+        this.sArtist = sArtist;
+        this.sLength = sLength;
+    }
 
     public String getsName() {
         return sName;
