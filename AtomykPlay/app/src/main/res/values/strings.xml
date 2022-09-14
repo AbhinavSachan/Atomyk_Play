@@ -3,4 +3,5 @@
     <string name="song_name_e">Song Name</string>
     <string name="empty">empty</string>
     <string name="song_artist_e">Song Artist</string>
+    <string name="nothing_to_show">Nothing to show</string>
 </resources>

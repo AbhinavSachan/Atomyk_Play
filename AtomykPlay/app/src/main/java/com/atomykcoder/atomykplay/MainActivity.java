@@ -1,10 +1,13 @@
 package com.atomykcoder.atomykplay;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.View;
+import android.widget.LinearLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -23,37 +26,28 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-    private final ArrayList<MusicDataCapsule> dataList = new ArrayList<>();
+    private ArrayList<MusicDataCapsule> dataList;
     private MusicAdapter adapter;
+    private LinearLayout linearLayout;
+    private RecyclerView recyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //Checks permissions (method somewhere down in the script)
-        checkPermission();
 
-
-        RecyclerView recyclerView = findViewById(R.id.music_recycler);
+        //initializations
+        linearLayout = findViewById(R.id.song_not_found_layout);
+        recyclerView = findViewById(R.id.music_recycler);
+        dataList = new ArrayList<>();
 
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
 
 
-        //Fetch Music List along with it's metadata and save it in "dataList"
-        fetchMusic(dataList);
-
-        //Prints Song Details in LogCat
-        for (int i = 0; i < dataList.size(); i++) {
-            Log.i("TAG", dataList.get(i).getsName());
-            Log.i("TAG", dataList.get(i).getsArtist());
-            Log.i("TAG", dataList.get(i).getsLength());
-        }
-
-        //Setting up adapter
-        adapter = new MusicAdapter(MainActivity.this, dataList);
-        recyclerView.setAdapter(adapter);
+        //Checks permissions (method somewhere down in the script)
+        checkPermission();
     }
 
     //Checks whether user granted permissions for external storage or not
@@ -63,14 +57,22 @@ public class MainActivity extends AppCompatActivity {
         Dexter.withContext(getApplicationContext())
                 .withPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
                 .withListener(new PermissionListener() {
+                    @SuppressLint("NotifyDataSetChanged")
                     @Override
                     public void onPermissionGranted(PermissionGrantedResponse permissionGrantedResponse) {
+                        //Fetch Music List along with it's metadata and save it in "dataList"
+                        fetchMusic(dataList);
 
+                        //Setting up adapter
+                        linearLayout.setVisibility(View.GONE);
+                        adapter = new MusicAdapter(MainActivity.this, dataList);
+                        adapter.notifyDataSetChanged();
+                        recyclerView.setAdapter(adapter);
                     }
 
                     @Override
                     public void onPermissionDenied(PermissionDeniedResponse permissionDeniedResponse) {
-
+                        linearLayout.setVisibility(View.VISIBLE);
                     }
 
                     @Override
@@ -83,7 +85,6 @@ public class MainActivity extends AppCompatActivity {
     void fetchMusic(ArrayList<MusicDataCapsule> dataList) {
         //Creating an array for data types we need
         String[] proj = {
-                MediaStore.Audio.Media.ALBUM_ID,
                 MediaStore.Audio.Media.DISPLAY_NAME,
                 MediaStore.Audio.Media.ARTIST,
                 MediaStore.Audio.Media.DURATION
@@ -103,9 +104,12 @@ public class MainActivity extends AppCompatActivity {
         if (audioCursor != null) {
             if (audioCursor.moveToFirst()) {
                 do {
-                    dataList.add(new MusicDataCapsule(audioCursor.getString(1),
-                            audioCursor.getString(2),
-                            audioCursor.getString(3)));
+
+                    String songLength = convertDuration(audioCursor.getString(2));
+
+                    dataList.add(new MusicDataCapsule(audioCursor.getString(0),
+                            audioCursor.getString(1), songLength
+                    ));
                 } while (audioCursor.moveToNext());
             }
         }
@@ -114,5 +118,23 @@ public class MainActivity extends AppCompatActivity {
         assert audioCursor != null;
         audioCursor.close();
 
+    }
+
+    //converting duration from millis to readable time
+    @SuppressLint("DefaultLocale")
+    private String convertDuration(String duration) {
+        String out;
+        int dur = Integer.parseInt(duration);
+
+        int hours = (dur / 3600000);
+        int mns = (dur / 60000) % 60000;
+        int scs = dur % 60000 / 1000;
+
+        if (hours == 0) {
+            out = String.format("%02d:%02d", mns, scs);
+        } else {
+            out = String.format("%02d:%02d:%02d", hours, mns, scs);
+        }
+        return out;
     }
 }

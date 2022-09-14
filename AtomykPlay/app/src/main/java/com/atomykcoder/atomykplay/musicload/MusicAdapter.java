@@ -53,7 +53,15 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewAda
             }
         });
 
-        String sName = currentItem.getsName().replace(".mp3","").replace(".aac","").replace(".wac","");
+        String sName = currentItem.getsName()
+                .replace("y2mate.com - ","")
+                .replace("&#039;","'")
+                .replace("%20"," ")
+                .replace("_"," ")
+                .replace("&amp;",",")
+                .replace(".mp3","")
+                .replace(".aac","")
+                .replace(".wac","");
 
         holder.nameText.setText(sName);
         holder.artistText.setText(currentItem.getsArtist());
