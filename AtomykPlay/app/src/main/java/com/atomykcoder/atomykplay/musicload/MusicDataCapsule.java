@@ -1,18 +1,19 @@
 package com.atomykcoder.atomykplay.musicload;
 
 public class MusicDataCapsule {
-    String sName, sArtist, sCover, sLength;
+    String sName, sArtist, sAlbumUri, sLength, sPath;
 
-    public MusicDataCapsule(String sName, String sArtist, String sCover, String sLength) {
+    public MusicDataCapsule(String sName, String sArtist, String sAlbumUri, String sLength, String sPath) {
         this.sName = sName;
         this.sArtist = sArtist;
-        this.sCover = sCover;
+        this.sAlbumUri = sAlbumUri;
         this.sLength = sLength;
+        this.sPath = sPath;
     }
-    public MusicDataCapsule(String sName, String sArtist, String sLength) {
-        this.sName = sName;
-        this.sArtist = sArtist;
-        this.sLength = sLength;
+
+
+    public String getsPath() {
+        return sPath;
     }
 
     public String getsName() {
@@ -23,8 +24,8 @@ public class MusicDataCapsule {
         return sArtist;
     }
 
-    public String getsCover() {
-        return sCover;
+    public String getsAlbumUri() {
+        return sAlbumUri;
     }
 
     public String getsLength() {

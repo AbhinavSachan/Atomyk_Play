@@ -3,9 +3,9 @@ package com.atomykcoder.atomykplay;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 
@@ -22,6 +22,7 @@ import com.karumi.dexter.listener.PermissionGrantedResponse;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.single.PermissionListener;
 
+import java.io.File;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
@@ -84,10 +85,13 @@ public class MainActivity extends AppCompatActivity {
 
     void fetchMusic(ArrayList<MusicDataCapsule> dataList) {
         //Creating an array for data types we need
+        String selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0";
         String[] proj = {
-                MediaStore.Audio.Media.DISPLAY_NAME,
+                MediaStore.Audio.Media.TITLE,
                 MediaStore.Audio.Media.ARTIST,
-                MediaStore.Audio.Media.DURATION
+                MediaStore.Audio.Media.ALBUM_ID,
+                MediaStore.Audio.Media.DURATION,
+                MediaStore.Audio.Media.DATA,
         };
 
 
@@ -95,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
         Cursor audioCursor = getContentResolver().query(
                 MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 proj,
-                null,
+                selection,
                 null,
                 null
         );
@@ -104,20 +108,24 @@ public class MainActivity extends AppCompatActivity {
         if (audioCursor != null) {
             if (audioCursor.moveToFirst()) {
                 do {
+                    String sTitle = audioCursor.getString(0);
+                    String sArtist = audioCursor.getString(1);
+                    String sAlbumId = audioCursor.getString(2);
+                    String sLength = convertDuration(audioCursor.getString(3));
+                    String sPath = audioCursor.getString(4);
 
-                    String songLength = convertDuration(audioCursor.getString(2));
+                    Uri uri = Uri.parse("content://media/external/audio/albumart");
+                    String sAlbumUri = Uri.withAppendedPath(uri, sAlbumId).toString();
 
-                    dataList.add(new MusicDataCapsule(audioCursor.getString(0),
-                            audioCursor.getString(1), songLength
-                    ));
+                    MusicDataCapsule music = new MusicDataCapsule(sTitle, sArtist, sAlbumUri, sLength, sPath);
+                    File file = new File(music.getsPath());
+                    if (file.exists()) {
+                        dataList.add(music);
+                    }
                 } while (audioCursor.moveToNext());
+                audioCursor.close();
             }
         }
-
-        //Closing Cursor to prevent memory leaks
-        assert audioCursor != null;
-        audioCursor.close();
-
     }
 
     //converting duration from millis to readable time

@@ -1,7 +1,6 @@
 package com.atomykcoder.atomykplay.musicload;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +15,7 @@ import com.atomykcoder.atomykplay.R;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 
+import java.io.File;
 import java.util.ArrayList;
 
 public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewAdapter> {
@@ -38,9 +38,9 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewAda
     public void onBindViewHolder(@NonNull MusicViewAdapter holder, int position) {
         MusicDataCapsule currentItem = musicData.get(position);
 
-        if (currentItem.getsCover() != null) {
+        if (currentItem.getsAlbumUri() != null) {
             try {
-                Glide.with(context).load(currentItem.getsCover()).apply(new RequestOptions()
+                Glide.with(context).load(currentItem.getsAlbumUri()).apply(new RequestOptions()
                         .override(70, 70)).into(holder.imageView);
             } catch (Exception e) {
                 e.printStackTrace();
