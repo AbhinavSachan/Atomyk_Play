@@ -10,9 +10,13 @@ import android.view.View;
 import android.widget.LinearLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.atomykcoder.atomykplay.function.PlayerFragment;
 import com.atomykcoder.atomykplay.musicload.MusicAdapter;
 import com.atomykcoder.atomykplay.musicload.MusicDataCapsule;
 import com.karumi.dexter.Dexter;
@@ -21,6 +25,7 @@ import com.karumi.dexter.listener.PermissionDeniedResponse;
 import com.karumi.dexter.listener.PermissionGrantedResponse;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.single.PermissionListener;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -31,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
     private MusicAdapter adapter;
     private LinearLayout linearLayout;
     private RecyclerView recyclerView;
+    private SlidingUpPanelLayout slidingUpPanelLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,14 +47,27 @@ public class MainActivity extends AppCompatActivity {
         //initializations
         linearLayout = findViewById(R.id.song_not_found_layout);
         recyclerView = findViewById(R.id.music_recycler);
+        slidingUpPanelLayout = findViewById(R.id.sliding_layout);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        toolbar.setTitle(R.string.app_name);
+
         dataList = new ArrayList<>();
 
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
 
 
+        PlayerFragment fragment = new PlayerFragment();
+        FragmentManager manager = getSupportFragmentManager();
+        FragmentTransaction transaction = manager.beginTransaction();
+        transaction.replace(R.id.main_container, fragment);
+        transaction.commit();
+
+
         //Checks permissions (method somewhere down in the script)
         checkPermission();
+
     }
 
     //Checks whether user granted permissions for external storage or not
@@ -83,6 +102,15 @@ public class MainActivity extends AppCompatActivity {
                 }).check();
     }
 
+    @Override
+    public void onBackPressed() {
+        if (slidingUpPanelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.COLLAPSED) {
+            super.onBackPressed();
+        } else {
+            slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+        }
+    }
+
     void fetchMusic(ArrayList<MusicDataCapsule> dataList) {
         //Creating an array for data types we need
         String selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0";
@@ -111,6 +139,7 @@ public class MainActivity extends AppCompatActivity {
                     String sTitle = audioCursor.getString(0);
                     String sArtist = audioCursor.getString(1);
                     String sAlbumId = audioCursor.getString(2);
+                    //converting duration in readable format
                     String sLength = convertDuration(audioCursor.getString(3));
                     String sPath = audioCursor.getString(4);
 

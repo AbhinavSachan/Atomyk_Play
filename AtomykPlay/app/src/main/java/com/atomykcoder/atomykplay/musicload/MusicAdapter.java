@@ -14,13 +14,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.atomykcoder.atomykplay.R;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.google.android.material.card.MaterialCardView;
 
-import java.io.File;
 import java.util.ArrayList;
 
 public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewAdapter> {
     Context context;
-    ArrayList<MusicDataCapsule> musicData = new ArrayList<>(); // I Initialized this 4 you (may cause errors later)
+    ArrayList<MusicDataCapsule> musicData;
+
 
     public MusicAdapter(Context context, ArrayList<MusicDataCapsule> musicData) {
         this.context = context;
@@ -41,33 +42,42 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewAda
         if (currentItem.getsAlbumUri() != null) {
             try {
                 Glide.with(context).load(currentItem.getsAlbumUri()).apply(new RequestOptions()
-                        .override(70, 70)).into(holder.imageView);
+                        .override(150, 150)).into(holder.imageView);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        holder.imageButton.setOnClickListener(new View.OnClickListener() {
+
+        //playing song
+        holder.cardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
             }
         });
 
+
+        //add bottom sheet functions in three dot click
+        holder.imageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+
+            }
+        });
+
         String sName = currentItem.getsName()
-                .replace("y2mate.com - ","")
-                .replace("&#039;","'")
-                .replace("%20"," ")
-                .replace("_"," ")
-                .replace("&amp;",",")
-                .replace(".mp3","")
-                .replace(".aac","")
-                .replace(".wac","");
+                .replace("y2mate.com - ", "")
+                .replace("&#039;", "'")
+                .replace("%20", " ")
+                .replace("_", " ")
+                .replace("&amp;", ",");
 
         holder.nameText.setText(sName);
         holder.artistText.setText(currentItem.getsArtist());
         holder.durationText.setText(currentItem.getsLength());
-
     }
+
 
     @Override
     public int getItemCount() {
@@ -77,6 +87,7 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewAda
     public static class MusicViewAdapter extends RecyclerView.ViewHolder {
         private final ImageView imageView;
         private final ImageButton imageButton;
+        private final MaterialCardView cardView;
         private final TextView nameText, artistText, durationText;
 
         public MusicViewAdapter(@NonNull View itemView) {
@@ -84,6 +95,7 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewAda
 
             imageView = itemView.findViewById(R.id.song_album_cover);
             imageButton = itemView.findViewById(R.id.more_option_i_btn);
+            cardView = itemView.findViewById(R.id.cv_song_play);
             nameText = itemView.findViewById(R.id.song_name);
             artistText = itemView.findViewById(R.id.song_artist_name);
             durationText = itemView.findViewById(R.id.song_length);

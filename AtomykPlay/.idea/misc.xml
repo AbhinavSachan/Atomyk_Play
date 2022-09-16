@@ -3,8 +3,16 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.1" />
+        <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/bottom_sheet_round_rad.xml" value="0.1525" />
+        <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/ic_launcher_background.xml" value="0.1" />
+        <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/ic_music.xml" value="0.1525" />
+        <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/ic_music_list.xml" value="0.1525" />
+        <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/ic_sheet_line.xml" value="0.1525" />
         <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/icon_outline.xml" value="0.1525" />
         <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/layout/activity_main.xml" value="0.23981481481481481" />
+        <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/layout/fragment_bottom_opt_sheet.xml" value="0.23981481481481481" />
+        <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/layout/fragment_player.xml" value="0.23981481481481481" />
         <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/layout/music_item_layout.xml" value="0.23981481481481481" />
         <entry key="..\:/Users/renus/AndroidStudioProjects/AtomykPlay/app/src/main/res/drawable/ic_music.xml" value="0.1525" />
         <entry key="..\:/Users/renus/AndroidStudioProjects/AtomykPlay/app/src/main/res/drawable/ic_option.xml" value="0.1525" />

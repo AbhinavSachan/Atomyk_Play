@@ -49,4 +49,6 @@ dependencies {
     implementation 'androidx.navigation:navigation-ui:2.5.2'
 
     implementation 'com.android.volley:volley:1.2.1'
+    implementation 'com.sothree.slidinguppanel:library:3.0.0'
+
 }
