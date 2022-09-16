@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -32,11 +33,11 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
+    public SlidingUpPanelLayout slidingUpPanelLayout;
     private ArrayList<MusicDataCapsule> dataList;
     private MusicAdapter adapter;
     private LinearLayout linearLayout;
     private RecyclerView recyclerView;
-    private SlidingUpPanelLayout slidingUpPanelLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,23 +58,49 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
 
-
-        PlayerFragment fragment = new PlayerFragment();
-        FragmentManager manager = getSupportFragmentManager();
-        FragmentTransaction transaction = manager.beginTransaction();
-        transaction.replace(R.id.main_container, fragment);
-        transaction.commit();
-
-
         //Checks permissions (method somewhere down in the script)
         checkPermission();
-
+        slidingUpPanelLayout.setPanelSlideListener(onSlideChange());
+        setFragment();
     }
+
+    private SlidingUpPanelLayout.PanelSlideListener onSlideChange() {
+        return new SlidingUpPanelLayout.PanelSlideListener() {
+            @Override
+            public void onPanelSlide(View panel, float slideOffset) {
+                setFragment();
+            }
+
+            @Override
+            public void onPanelCollapsed(View panel) {
+                setFragment();
+            }
+
+            @Override
+            public void onPanelExpanded(View panel) {
+                setFragment();
+            }
+
+            @Override
+            public void onPanelAnchored(View panel) {
+
+            }
+
+            @Override
+            public void onPanelHidden(View panel) {
+
+            }
+        };
+    }
+
+    private void showToast(String string) {
+        Toast.makeText(this, string, Toast.LENGTH_SHORT).show();
+    }
+
 
     //Checks whether user granted permissions for external storage or not
     //if not then shows dialogue to grant permissions
     void checkPermission() {
-
         Dexter.withContext(getApplicationContext())
                 .withPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
                 .withListener(new PermissionListener() {
@@ -155,6 +182,14 @@ public class MainActivity extends AppCompatActivity {
                 audioCursor.close();
             }
         }
+    }
+
+    private void setFragment() {
+        PlayerFragment fragment = new PlayerFragment();
+        FragmentManager manager = getSupportFragmentManager();
+        FragmentTransaction transaction = manager.beginTransaction();
+        transaction.replace(R.id.main_container, fragment);
+        transaction.commit();
     }
 
     //converting duration from millis to readable time
