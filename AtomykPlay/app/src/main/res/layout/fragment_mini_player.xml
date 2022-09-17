@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="68dp"
     android:background="@color/primary_bg"
+    android:id="@+id/mini_player_layout"
     tools:context=".function.PlayerFragment">
 
     <LinearLayout

@@ -61,24 +61,27 @@ public class MainActivity extends AppCompatActivity {
         //Checks permissions (method somewhere down in the script)
         checkPermission();
         slidingUpPanelLayout.setPanelSlideListener(onSlideChange());
-        setFragment();
+        setFragmentInSlider();
     }
 
     private SlidingUpPanelLayout.PanelSlideListener onSlideChange() {
         return new SlidingUpPanelLayout.PanelSlideListener() {
             @Override
             public void onPanelSlide(View panel, float slideOffset) {
-                setFragment();
+                View miniPlayer = PlayerFragment.miniPlayView;
+                miniPlayer.setAlpha(1 - slideOffset * 4);
             }
 
             @Override
             public void onPanelCollapsed(View panel) {
-                setFragment();
+                View miniPlayer = PlayerFragment.miniPlayView;
+                miniPlayer.setAlpha(1);
             }
 
             @Override
             public void onPanelExpanded(View panel) {
-                setFragment();
+                View miniPlayer = PlayerFragment.miniPlayView;
+                miniPlayer.setAlpha(0);
             }
 
             @Override
@@ -184,7 +187,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void setFragment() {
+    private void setFragmentInSlider() {
         PlayerFragment fragment = new PlayerFragment();
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();

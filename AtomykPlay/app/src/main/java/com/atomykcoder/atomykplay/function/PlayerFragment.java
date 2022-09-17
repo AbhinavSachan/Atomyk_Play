@@ -13,17 +13,23 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 public class PlayerFragment extends Fragment {
 
+    public static View miniPlayView;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        MainActivity mainActivity = (MainActivity) getActivity();
+//        MainActivity mainActivity = (MainActivity) getActivity();
         View view;
-        assert mainActivity != null;
-        if (mainActivity.slidingUpPanelLayout.getPanelState() != SlidingUpPanelLayout.PanelState.COLLAPSED) {
-             view = inflater.inflate(R.layout.fragment_player, container, false);
-        } else {
-             view = inflater.inflate(R.layout.fragment_mini_player, container, false);
-        }
+//        assert mainActivity != null;
+        view = inflater.inflate(R.layout.fragment_player, container, false);
+
+        miniPlayView = view.findViewById(R.id.mini_player_layout);
+
+
+//        if (mainActivity.slidingUpPanelLayout.getPanelState() != SlidingUpPanelLayout.PanelState.COLLAPSED) {
+//        } else {
+//             view = inflater.inflate(R.layout.fragment_mini_player, container, false);
+//        }
 
 
 

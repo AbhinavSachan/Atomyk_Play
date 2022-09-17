@@ -7,6 +7,8 @@
     tools:context=".function.PlayerFragment">
 
 
+    <include layout="@layout/fragment_mini_player"/>
+
     <ImageView
         android:layout_width="match_parent"
         android:src="@drawable/no_song_image"
