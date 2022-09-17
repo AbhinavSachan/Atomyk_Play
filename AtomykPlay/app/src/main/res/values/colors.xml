@@ -9,13 +9,13 @@
     <color name="white">#FFFFFFFF</color>
     <color name="tertiary_bg">#2E4053</color>
     <color name="secondary_bg">#F4D03F</color>
+    <color name="primary_bg">#E8BD0D</color>
     <color name="text_color_dark">#2E4053</color>
     <color name="text_color_light">#E4E4E4</color>
     <color name="night_blue">#03203C</color>
     <color name="light_green">#00D84A</color>
     <color name="green_blue">#50DBB4</color>
     <color name="matte_yellow">#DDD101</color>
-    <color name="primary_bg">#E8BD0D</color>
     <color name="mauve_pink">#efcfe3</color>
     <color name="sweet_pink">#fbe7ef</color>
     <color name="rose_yellow">#fff000</color>
