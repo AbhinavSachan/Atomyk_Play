@@ -2,14 +2,17 @@ package com.atomykcoder.atomykplay;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.database.Cursor;
-import android.net.Uri;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.provider.MediaStore;
+import android.os.IBinder;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentManager;
@@ -21,6 +24,7 @@ import com.atomykcoder.atomykplay.function.PlayerFragment;
 import com.atomykcoder.atomykplay.musicload.FetchMusic;
 import com.atomykcoder.atomykplay.musicload.MusicAdapter;
 import com.atomykcoder.atomykplay.musicload.MusicDataCapsule;
+import com.atomykcoder.atomykplay.services.MediaPlayerService;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionDeniedResponse;
@@ -29,16 +33,35 @@ import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.single.PermissionListener;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
-import java.io.File;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
     public SlidingUpPanelLayout slidingUpPanelLayout;
+    boolean serviceBound = false;
     private ArrayList<MusicDataCapsule> dataList;
     private MusicAdapter adapter;
     private LinearLayout linearLayout;
     private RecyclerView recyclerView;
+    private MediaPlayerService mediaPlayerService;
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+
+            MediaPlayerService.LocalBinder binder = (MediaPlayerService.LocalBinder) service;
+            mediaPlayerService = binder.getService();
+            serviceBound = true;
+
+            showToast("Service Bound");
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            showToast("Service Unbound");
+            serviceBound = false;
+        }
+    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +86,18 @@ public class MainActivity extends AppCompatActivity {
         checkPermission();
         slidingUpPanelLayout.setPanelSlideListener(onSlideChange());
         setFragmentInSlider();
+    }
+
+    public void playAudio(String media) {
+        //check is service active
+        if (!serviceBound) {
+            Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
+            playerIntent.putExtra("mediaPath", media);
+            startService(playerIntent);
+            bindService(playerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+        } else {
+            //service is active send media with broadcast receiver
+        }
     }
 
     private SlidingUpPanelLayout.PanelSlideListener onSlideChange() {
@@ -97,6 +132,27 @@ public class MainActivity extends AppCompatActivity {
         };
     }
 
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        outState.putBoolean("serviceState", serviceBound);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        serviceBound = savedInstanceState.getBoolean("serviceState");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (serviceBound) {
+            unbindService(serviceConnection);
+            mediaPlayerService.stopSelf();
+        }
+    }
+
     private void showToast(String string) {
         Toast.makeText(this, string, Toast.LENGTH_SHORT).show();
     }
@@ -112,7 +168,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onPermissionGranted(PermissionGrantedResponse permissionGrantedResponse) {
                         //Fetch Music List along with it's metadata and save it in "dataList"
-                        FetchMusic.fetchMusic(dataList,MainActivity.this);
+                        FetchMusic.fetchMusic(dataList, MainActivity.this);
 
                         //Setting up adapter
                         linearLayout.setVisibility(View.GONE);
