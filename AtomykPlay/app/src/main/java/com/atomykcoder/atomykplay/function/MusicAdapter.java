@@ -1,4 +1,4 @@
-package com.atomykcoder.atomykplay.musicload;
+package com.atomykcoder.atomykplay.function;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -54,7 +54,7 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewAda
             @Override
             public void onClick(View v) {
                 MainActivity mainActivity = (MainActivity) context;
-                mainActivity.playAudio(currentItem.getsPath());
+                mainActivity.playAudio(position);
             }
         });
 

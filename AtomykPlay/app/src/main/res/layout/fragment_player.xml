@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/primary_bg"
-    tools:context=".function.PlayerFragment">
+    tools:context=".player.PlayerFragment">
 
 
     <include layout="@layout/fragment_mini_player"/>

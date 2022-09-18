@@ -1,4 +1,4 @@
-package com.atomykcoder.atomykplay.function;
+package com.atomykcoder.atomykplay.player;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
@@ -8,9 +8,7 @@ import android.view.ViewGroup;
 
 import androidx.fragment.app.Fragment;
 
-import com.atomykcoder.atomykplay.MainActivity;
 import com.atomykcoder.atomykplay.R;
-import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 public class PlayerFragment extends Fragment {
 

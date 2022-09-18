@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="68dp"
     android:background="@color/primary_bg"
-    tools:context=".function.PlayerFragment">
+    tools:context=".player.PlayerFragment">
 
     <LinearLayout
         android:layout_width="match_parent"

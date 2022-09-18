@@ -1,4 +1,4 @@
-package com.atomykcoder.atomykplay.musicload;
+package com.atomykcoder.atomykplay.function;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -20,6 +20,7 @@ public class FetchMusic {
                 MediaStore.Audio.Media.ALBUM_ID,
                 MediaStore.Audio.Media.DURATION,
                 MediaStore.Audio.Media.DATA,
+                MediaStore.Audio.Media.ALBUM,
         };
 
 
@@ -42,11 +43,12 @@ public class FetchMusic {
                     //converting duration in readable format
                     String sLength = convertDuration(audioCursor.getString(3));
                     String sPath = audioCursor.getString(4);
+                    String sAlbum = audioCursor.getString(5);
 
                     Uri uri = Uri.parse("content://media/external/audio/albumart");
                     String sAlbumUri = Uri.withAppendedPath(uri, sAlbumId).toString();
 
-                    MusicDataCapsule music = new MusicDataCapsule(sTitle, sArtist, sAlbumUri, sLength, sPath);
+                    MusicDataCapsule music = new MusicDataCapsule(sTitle, sArtist, sAlbum, sAlbumUri, sLength, sPath);
                     File file = new File(music.getsPath());
                     if (file.exists()) {
                         dataList.add(music);

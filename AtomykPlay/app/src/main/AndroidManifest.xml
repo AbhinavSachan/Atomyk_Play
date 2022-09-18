@@ -30,6 +30,12 @@
             </intent-filter>
         </activity>
         <service android:name=".services.MediaPlayerService"/>
+        <receiver android:name=".services.MediaPlayerService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.PHONE_STATE"/>
+            </intent-filter>
+        </receiver>
     </application>
 
 
