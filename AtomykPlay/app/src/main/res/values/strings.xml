@@ -6,4 +6,6 @@
     <string name="nothing_to_show">Nothing to show</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="search">Search</string>
+    <string name="search_hint">Search songs</string>
 </resources>

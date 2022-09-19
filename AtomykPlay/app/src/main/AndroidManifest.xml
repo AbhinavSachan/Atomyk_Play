@@ -10,6 +10,7 @@
     <permission android:name="android.permission.MEDIA_CONTENT_CONTROL" />
 
     <application
+        android:name=".ApplicationClass"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -18,7 +19,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AtomykPlay"
-        android:name=".ApplicationClass"
         tools:targetApi="31">
         <activity
             android:name=".MainActivity"
@@ -30,8 +30,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name=".services.MediaPlayerService"/>
-    </application>
 
+
+        <service android:name=".services.MediaPlayerService" />
+    </application>
 
 </manifest>

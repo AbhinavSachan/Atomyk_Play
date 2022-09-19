@@ -8,4 +8,5 @@
     <dimen name="d_22sp">22sp</dimen>
     <dimen name="d_24sp">24sp</dimen>
     <dimen name="d_28sp">28sp</dimen>
+    <dimen name="text_margin">16dp</dimen>
 </resources>
