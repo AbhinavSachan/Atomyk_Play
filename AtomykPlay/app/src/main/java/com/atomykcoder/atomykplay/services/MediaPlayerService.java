@@ -1,7 +1,6 @@
 package com.atomykcoder.atomykplay.services;
 
 import android.app.Notification;
-import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -11,7 +10,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.media.AudioManager;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
@@ -130,7 +128,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         }
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     private void buildNotification(PlaybackStatus playbackStatus) {
         int notificationAction = android.R.drawable.ic_media_pause;//needs to be initialized
         PendingIntent play_pauseAction = null;
@@ -144,11 +141,10 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             play_pauseAction = playbackAction(0);
 
         }
-        Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_music_list);
-        
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, CHANNEL_ID);
+        Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.i02_alert);
 
-        notificationBuilder.setShowWhen(false).setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
+        Notification notificationBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setShowWhen(false).setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
                         .setMediaSession(mediaSession.getSessionToken())
                         .setShowActionsInCompactView(0, 1, 2))
                 .setColor(getResources().getColor(R.color.primary_bg))
@@ -156,15 +152,17 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 .setSmallIcon(android.R.drawable.stat_sys_headset)
                 //set content
                 .setContentText(activeMusic.getsArtist())
-                .setContentTitle(activeMusic.getsAlbum())
-                .setContentInfo(activeMusic.getsName())
+                .setContentTitle(activeMusic.getsName())
+                .setContentInfo(activeMusic.getsAlbum())
                 //set control
-                .addAction(android.R.drawable.ic_media_previous, "previous", playbackAction(3))
-                .addAction(notificationAction, "pause", play_pauseAction)
-                .addAction(android.R.drawable.ic_media_next, "next", playbackAction(2));
+                .addAction(android.R.drawable.ic_media_previous, "Previous", playbackAction(3))
+                .addAction(notificationAction, "Pause", play_pauseAction)
+                .addAction(android.R.drawable.ic_media_next, "next", playbackAction(2))
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setContentIntent(PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), PendingIntent.FLAG_IMMUTABLE)).build();
 
-        ((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE)).notify(NOTIFICATION_ID, notificationBuilder.build());
-
+        NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        manager.notify(NOTIFICATION_ID, notificationBuilder);
     }
 
     private PendingIntent playbackAction(int actionNumber) {
@@ -189,7 +187,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                     return PendingIntent.getService(this, actionNumber, playbackIntent, PendingIntent.FLAG_IMMUTABLE);
                 }
             case 3:
-                //play
+                //previous
                 playbackIntent.setAction(ACTION_PREVIOUS);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     return PendingIntent.getService(this, actionNumber, playbackIntent, PendingIntent.FLAG_IMMUTABLE);
