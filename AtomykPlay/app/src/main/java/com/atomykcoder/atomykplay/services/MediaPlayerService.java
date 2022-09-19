@@ -1,5 +1,7 @@
 package com.atomykcoder.atomykplay.services;
 
+import static com.atomykcoder.atomykplay.ApplicationClass.CHANNEL_ID;
+
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -26,7 +28,6 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 
 import com.atomykcoder.atomykplay.MainActivity;
@@ -47,7 +48,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     public static final String ACTION_PREVIOUS = "com.atomykcoder.atomykplay.ACTION_PREVIOUS";
     public static final String ACTION_NEXT = "com.atomykcoder.atomykplay.ACTION_NEXT";
     public static final String ACTION_STOP = "com.atomykcoder.atomykplay.ACTION_STOP";
-    public static final String CHANNEL_ID = "Music_Player";
     //audio player notification ID
     public static final int NOTIFICATION_ID = 101;
     //binder
@@ -129,37 +129,43 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     }
 
     private void buildNotification(PlaybackStatus playbackStatus) {
-        int notificationAction = android.R.drawable.ic_media_pause;//needs to be initialized
+        int notificationAction = R.drawable.ic_pause;//needs to be initialized
         PendingIntent play_pauseAction = null;
 
+        if (MyPhoneStateListener.phoneRinging) {
+            notificationAction = R.drawable.ic_pause;
+        }
         //build a new notification according to media player status
         if (playbackStatus == PlaybackStatus.PLAYING) {
-            notificationAction = android.R.drawable.ic_media_pause;
             play_pauseAction = playbackAction(1);
         } else if (playbackStatus == PlaybackStatus.PAUSED) {
-            notificationAction = android.R.drawable.ic_media_play;
+            notificationAction = R.drawable.ic_play;
             play_pauseAction = playbackAction(0);
 
         }
         Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.i02_alert);
 
-        Notification notificationBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setShowWhen(false).setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
-                        .setMediaSession(mediaSession.getSessionToken())
-                        .setShowActionsInCompactView(0, 1, 2))
-                .setColor(getResources().getColor(R.color.primary_bg))
-                .setLargeIcon(largeIcon)
-                .setSmallIcon(android.R.drawable.stat_sys_headset)
-                //set content
-                .setContentText(activeMusic.getsArtist())
-                .setContentTitle(activeMusic.getsName())
-                .setContentInfo(activeMusic.getsAlbum())
-                //set control
-                .addAction(android.R.drawable.ic_media_previous, "Previous", playbackAction(3))
-                .addAction(notificationAction, "Pause", play_pauseAction)
-                .addAction(android.R.drawable.ic_media_next, "next", playbackAction(2))
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setContentIntent(PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), PendingIntent.FLAG_IMMUTABLE)).build();
+        Notification notificationBuilder = null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            notificationBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                    .setShowWhen(false).setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
+                            .setMediaSession(mediaSession.getSessionToken())
+                            .setShowActionsInCompactView(0, 1, 2))
+                    .setColor(getResources().getColor(R.color.primary_bg))
+                    .setLargeIcon(largeIcon)
+                    .setSmallIcon(android.R.drawable.stat_sys_headset)
+                    //set content
+                    .setContentText(activeMusic.getsArtist())
+                    .setContentTitle(activeMusic.getsName())
+                    .setContentInfo(activeMusic.getsAlbum())
+                    //set control
+                    .addAction(R.drawable.ic_previous, "Previous", playbackAction(3))
+                    .addAction(notificationAction, "Pause", play_pauseAction)
+                    .addAction(R.drawable.ic_next, "next", playbackAction(2))
+                    .setContentIntent(PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), PendingIntent.FLAG_IMMUTABLE))
+                    .setSilent(true)
+                    .setPriority(NotificationCompat.PRIORITY_LOW).build();
+        }
 
         NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         manager.notify(NOTIFICATION_ID, notificationBuilder);
@@ -218,6 +224,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         phoneStateListener = new MyPhoneStateListener();
         telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
+
     }
 
     @Override
