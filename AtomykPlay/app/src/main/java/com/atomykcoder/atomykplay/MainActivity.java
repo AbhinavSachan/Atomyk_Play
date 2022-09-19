@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout linearLayout;
     private RecyclerView recyclerView;
     private MediaPlayerService mediaPlayerService;
-    private ServiceConnection serviceConnection = new ServiceConnection() {
+    private final ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
 
