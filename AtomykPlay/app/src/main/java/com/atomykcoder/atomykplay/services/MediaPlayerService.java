@@ -18,8 +18,10 @@ import android.media.MediaPlayer;
 import android.media.session.MediaSessionManager;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
@@ -61,16 +63,9 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     private ArrayList<MusicDataCapsule> musicList;
     private int musicIndex = -1;
     private MusicDataCapsule activeMusic;//object of currently playing audio
-    //
-    private boolean onGoingCall = false;
-    private PhoneStateListener phoneStateListener;
-    private TelephonyManager telephonyManager;
-    private int resumePosition;
-    private AudioManager audioManager;
-
     //broadcast receivers
     //playing new song
-    private BroadcastReceiver playNewMusic = new BroadcastReceiver() {
+    private final BroadcastReceiver playNewMusic = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             //get the new media index from SP
@@ -88,14 +83,20 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
         }
     };
+    //
+    private boolean onGoingCall = false;
+    private PhoneStateListener phoneStateListener;
+    private TelephonyManager telephonyManager;
+    private int resumePosition;
     //to pause when output device is unplugged
-    private BroadcastReceiver becomingNoisyReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver becomingNoisyReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             pauseMedia();
             buildNotification(PlaybackStatus.PAUSED);
         }
     };
+    private AudioManager audioManager;
 
     private void registerPlayNewMusic() {
         IntentFilter filter = new IntentFilter(MainActivity.Broadcast_PLAY_NEW_MUSIC);
@@ -132,9 +133,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         int notificationAction = R.drawable.ic_pause;//needs to be initialized
         PendingIntent play_pauseAction = null;
 
-        if (MyPhoneStateListener.phoneRinging) {
-            notificationAction = R.drawable.ic_pause;
-        }
         //build a new notification according to media player status
         if (playbackStatus == PlaybackStatus.PLAYING) {
             play_pauseAction = playbackAction(1);
@@ -151,9 +149,10 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                     .setShowWhen(false).setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
                             .setMediaSession(mediaSession.getSessionToken())
                             .setShowActionsInCompactView(0, 1, 2))
-                    .setColor(getResources().getColor(R.color.primary_bg))
+                    .setColor(getResources().getColor(R.color.primary_bg,getTheme()))
+                    .setColorized(true)
                     .setLargeIcon(largeIcon)
-                    .setSmallIcon(android.R.drawable.stat_sys_headset)
+                    .setSmallIcon(R.drawable.ic_headset)
                     //set content
                     .setContentText(activeMusic.getsArtist())
                     .setContentTitle(activeMusic.getsName())
@@ -434,6 +433,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             public void onSeekTo(long pos) {
                 super.onSeekTo(pos);
             }
+
         });
     }
 
@@ -512,6 +512,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         if (mediaPlayer != null) {
             stopMedia();
             mediaPlayer.release();
+            stopSelf();
         }
         removeAudioFocus();
 //        disable phone state listener
@@ -526,6 +527,9 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     private void removeNotification() {
         NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         manager.cancel(NOTIFICATION_ID);
+        if (mediaPlayer != null){
+            mediaPlayer.release();
+        }
     }
 
     private boolean requestAudioFocus() {

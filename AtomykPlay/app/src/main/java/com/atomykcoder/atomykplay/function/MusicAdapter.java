@@ -1,7 +1,10 @@
 package com.atomykcoder.atomykplay.function;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.PorterDuff;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Filter;
@@ -9,6 +12,7 @@ import android.widget.Filterable;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -45,8 +49,9 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewAda
         return new MusicViewAdapter(view);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
-    public void onBindViewHolder(@NonNull MusicViewAdapter holder, int position) {
+    public void onBindViewHolder(@NonNull MusicViewAdapter holder, @SuppressLint("RecyclerView") int position) {
         MusicDataCapsule currentItem = musicData.get(position);
 
         if (currentItem.getsAlbumUri() != null) {
@@ -72,10 +77,10 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewAda
         holder.imageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-
+                Toast.makeText(context, "Clicked", Toast.LENGTH_SHORT).show();
             }
         });
+
 
         String sName = currentItem.getsName()
                 .replace("y2mate.com - ", "")
@@ -134,7 +139,7 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewAda
 
     public static class MusicViewAdapter extends RecyclerView.ViewHolder {
         private final ImageView imageView;
-        private final ImageButton imageButton;
+        private final ImageView imageButton;
         private final MaterialCardView cardView;
         private final TextView nameText, artistText, durationText;
 
