@@ -1,5 +1,3 @@
-import java.sql.Wrapper
-
 plugins {
     id 'com.android.application'
 }
@@ -18,8 +16,12 @@ android {
     }
 
 
-    task wrapper(type: Wrapper){
-        gradleVersion = '7.2'
+    task wrapper {
+
+    }
+
+    task prepareKotlinBuildScriptModel{
+
     }
 
     buildTypes {

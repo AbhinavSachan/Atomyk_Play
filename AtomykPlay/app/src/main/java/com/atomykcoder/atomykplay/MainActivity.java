@@ -14,8 +14,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 import android.widget.SearchView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -181,6 +181,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onPermissionsChecked(MultiplePermissionsReport multiplePermissionsReport) {
                         //Fetch Music List along with it's metadata and save it in "dataList"
+
                         FetchMusic.fetchMusic(dataList, MainActivity.this);
 
                         //Setting up adapter

@@ -13,8 +13,6 @@ import android.widget.TextView;
 import androidx.fragment.app.Fragment;
 
 import com.atomykcoder.atomykplay.R;
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 public class PlayerFragment extends Fragment {
@@ -24,8 +22,8 @@ public class PlayerFragment extends Fragment {
     public static RelativeLayout playerLayout;
     public static ImageView miniCover;
     public static LinearProgressIndicator miniProgress;
-    public static ImageButton miniPause,miniNext;
-    public static TextView miniNameText,miniArtistText;
+    public static ImageButton miniPause, miniNext;
+    public static TextView miniNameText, miniArtistText;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

@@ -2,14 +2,11 @@ package com.atomykcoder.atomykplay.function;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.PorterDuff;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Filter;
 import android.widget.Filterable;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,7 +22,6 @@ import com.google.android.material.card.MaterialCardView;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewAdapter> implements Filterable {
     Context context;
@@ -33,7 +29,32 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewAda
 
     // Copy of list to keep track of all music when filtering
     ArrayList<MusicDataCapsule> musicDataAll;
+    Filter filter = new Filter() {
+        @Override
+        protected FilterResults performFiltering(CharSequence charSequence) {
+            ArrayList<MusicDataCapsule> filteredList = new ArrayList<>();
+            if (charSequence.toString().isEmpty()) {
+                filteredList.addAll(musicDataAll);
+            } else {
+                for (MusicDataCapsule song : musicDataAll) {
+                    if (song.getsName().toLowerCase().contains(charSequence.toString().toLowerCase())) {
+                        filteredList.add(song);
+                    }
+                }
+            }
+            FilterResults filterResults = new FilterResults();
+            filterResults.values = filteredList;
 
+            return filterResults;
+        }
+
+        @Override
+        public void publishResults(CharSequence charSequence, FilterResults filterResults) {
+            musicData.clear();
+            musicData.addAll((Collection<? extends MusicDataCapsule>) filterResults.values);
+            notifyDataSetChanged();
+        }
+    };
 
     public MusicAdapter(Context context, ArrayList<MusicDataCapsule> musicData) {
         this.context = context;
@@ -94,12 +115,10 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewAda
         holder.durationText.setText(currentItem.getsLength());
     }
 
-
     @Override
     public int getItemCount() {
         return musicData.size();
     }
-
 
     //Code for custom filter in recycler view starts here
     //region Custom filter Code for recycler View
@@ -107,33 +126,6 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewAda
     public Filter getFilter() {
         return filter;
     }
-
-    Filter filter = new Filter() {
-        @Override
-        protected FilterResults performFiltering(CharSequence charSequence) {
-            List<MusicDataCapsule> filteredList = new ArrayList<>();
-            if (charSequence.toString().isEmpty()){
-                filteredList.addAll(musicDataAll);
-            } else {
-                for (MusicDataCapsule song : musicDataAll){
-                    if(song.getsName().toLowerCase().contains(charSequence.toString().toLowerCase())){
-                        filteredList.add(song);
-                    }
-                }
-            }
-            FilterResults filterResults = new FilterResults();
-            filterResults.values =  filteredList;
-
-            return filterResults;
-        }
-
-        @Override
-        protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
-            musicData.clear();
-            musicData.addAll((Collection<? extends MusicDataCapsule>) filterResults.values);
-            notifyDataSetChanged();
-        }
-    };
     //endregion
     // Code For custom filter in recycler view ends here
 

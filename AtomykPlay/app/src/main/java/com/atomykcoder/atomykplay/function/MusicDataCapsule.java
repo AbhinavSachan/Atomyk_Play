@@ -12,14 +12,6 @@ public class MusicDataCapsule {
         this.sPath = sPath;
     }
 
-    public String getsAlbum() {
-        return sAlbum;
-    }
-
-    public String getsPath() {
-        return sPath;
-    }
-
     public String getsName() {
         return sName;
     }
@@ -28,11 +20,19 @@ public class MusicDataCapsule {
         return sArtist;
     }
 
+    public String getsAlbum() {
+        return sAlbum;
+    }
+
     public String getsAlbumUri() {
         return sAlbumUri;
     }
 
     public String getsLength() {
         return sLength;
+    }
+
+    public String getsPath() {
+        return sPath;
     }
 }
