@@ -6,10 +6,13 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.text.PrecomputedText;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -35,6 +38,8 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.xml.transform.Result;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -67,7 +72,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
 
         //initializations
         linearLayout = findViewById(R.id.song_not_found_layout);
@@ -112,19 +116,25 @@ public class MainActivity extends AppCompatActivity {
         return new SlidingUpPanelLayout.PanelSlideListener() {
             @Override
             public void onPanelSlide(View panel, float slideOffset) {
-                View miniPlayer = PlayerFragment.miniPlayView;
+                RelativeLayout miniPlayer = PlayerFragment.miniPlayView;
+                RelativeLayout player = PlayerFragment.playerLayout;
+                player.setAlpha(0 + slideOffset * 4);
                 miniPlayer.setAlpha(1 - slideOffset * 4);
             }
 
             @Override
             public void onPanelCollapsed(View panel) {
-                View miniPlayer = PlayerFragment.miniPlayView;
+                RelativeLayout miniPlayer = PlayerFragment.miniPlayView;
+                RelativeLayout player = PlayerFragment.playerLayout;
+                player.setAlpha(0);
                 miniPlayer.setAlpha(1);
             }
 
             @Override
             public void onPanelExpanded(View panel) {
-                View miniPlayer = PlayerFragment.miniPlayView;
+                RelativeLayout miniPlayer = PlayerFragment.miniPlayView;
+                RelativeLayout player = PlayerFragment.playerLayout;
+                player.setAlpha(1);
                 miniPlayer.setAlpha(0);
             }
 
@@ -179,6 +189,8 @@ public class MainActivity extends AppCompatActivity {
                         //Fetch Music List along with it's metadata and save it in "dataList"
                         FetchMusic.fetchMusic(dataList, MainActivity.this);
 
+                        startAsyncTask();
+
                         //Setting up adapter
                         linearLayout.setVisibility(View.GONE);
                         adapter = new MusicAdapter(MainActivity.this, dataList);
@@ -190,6 +202,16 @@ public class MainActivity extends AppCompatActivity {
                         permissionToken.continuePermissionRequest();
                     }
                 }).check();
+    }
+
+    private static void startAsyncTask() {
+        AsyncTask<PrecomputedText.Params, Integer, Result> task = new AsyncTask<PrecomputedText.Params, Integer, Result>() {
+            @Override
+            protected Result doInBackground(PrecomputedText.Params... params) {
+
+                return null;
+            }
+        };
     }
 
     @Override

@@ -1,109 +1,124 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cv_song_play"
     android:layout_width="match_parent"
     android:layout_height="70dp"
     android:layout_margin="2dp"
-    android:clickable="true"
     android:focusable="true"
-    android:id="@+id/cv_song_play"
     app:cardBackgroundColor="@color/secondary_bg"
     app:cardCornerRadius="6dp">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="horizontal"
-        android:padding="8dp"
-        android:weightSum="10">
+        android:layout_gravity="center_horizontal">
 
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:layout_margin="4dp"
-            android:layout_weight="1.4"
-            app:cardBackgroundColor="@color/secondary_bg"
-            app:cardCornerRadius="6dp"
-            app:cardElevation="2dp">
-
-            <ImageView
-                android:id="@+id/song_album_cover"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@drawable/ic_music"
-                android:contentDescription="@string/empty"
-                android:scaleType="centerCrop" />
-
-        </com.google.android.material.card.MaterialCardView>
 
         <LinearLayout
-            android:layout_width="0dp"
+            android:id="@+id/ll_mini"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:layout_marginStart="5dp"
-            android:layout_weight="8"
-            android:gravity="center"
-            android:orientation="vertical">
+            android:layout_marginEnd="30dp"
+            android:orientation="horizontal"
+            android:padding="6dp"
+            android:weightSum="10"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-            <TextView
-                android:id="@+id/song_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ellipsize="marquee"
-                android:marqueeRepeatLimit="marquee_forever"
-                android:singleLine="true"
-                android:text="@string/song_name_e"
-                android:textColor="@color/tertiary_bg"
-                android:textSize="@dimen/d_16sp"
-                android:textStyle="bold" />
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_margin="4dp"
+                android:layout_weight="1.4"
+                app:cardBackgroundColor="@color/secondary_bg"
+                app:cardCornerRadius="6dp"
+                app:cardElevation="2dp">
+
+                <ImageView
+                    android:id="@+id/song_album_cover"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/ic_music"
+                    android:contentDescription="@string/empty"
+                    android:scaleType="centerCrop" />
+
+            </com.google.android.material.card.MaterialCardView>
 
             <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:weightSum="2">
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_marginStart="5dp"
+                android:layout_weight="8.6"
+                android:gravity="center"
+                android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/song_artist_name"
-                    android:layout_width="0dp"
+                    android:id="@+id/song_name"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:ellipsize="marquee"
                     android:marqueeRepeatLimit="marquee_forever"
-                    android:padding="2dp"
                     android:singleLine="true"
-                    android:text="@string/song_artist_e"
+                    android:text="@string/song_name_e"
                     android:textColor="@color/tertiary_bg"
-                    android:textSize="@dimen/d_14sp" />
+                    android:textSize="@dimen/d_16sp"
+                    android:textStyle="bold" />
 
-                <TextView
-                    android:id="@+id/song_length"
-                    android:layout_width="0dp"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="2dp"
-                    android:layout_weight="1"
-                    android:gravity="end"
-                    android:padding="2dp"
-                    android:text="@string/song_artist_e"
-                    android:textColor="@color/tertiary_bg"
-                    android:textSize="@dimen/d_14sp" />
+                    android:orientation="horizontal"
+                    android:weightSum="2">
+
+                    <TextView
+                        android:id="@+id/song_artist_name"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:ellipsize="marquee"
+                        android:marqueeRepeatLimit="marquee_forever"
+                        android:padding="2dp"
+                        android:singleLine="true"
+                        android:text="@string/song_artist_e"
+                        android:textColor="@color/tertiary_bg"
+                        android:textSize="@dimen/d_14sp" />
+
+                    <TextView
+                        android:id="@+id/song_length"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="2dp"
+                        android:layout_weight="1"
+                        android:gravity="end"
+                        android:padding="2dp"
+                        android:text="@string/song_artist_e"
+                        android:textColor="@color/tertiary_bg"
+                        android:textSize="@dimen/d_14sp" />
+
+                </LinearLayout>
 
             </LinearLayout>
 
         </LinearLayout>
 
-        <ImageButton
+        <ImageView
             android:id="@+id/more_option_i_btn"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight=".6"
-            android:background="@android:color/transparent"
-            android:clickable="true"
             android:contentDescription="@string/empty"
             android:focusable="true"
-            android:src="@drawable/ic_option" />
+            android:foreground="?android:attr/selectableItemBackground"
+            android:src="@drawable/ic_option"
+            android:theme="@android:style/ThemeOverlay.Material.Dark"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="UnusedAttribute" />
 
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </com.google.android.material.card.MaterialCardView>

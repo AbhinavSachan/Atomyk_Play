@@ -19,14 +19,14 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:padding="8dp"
-            android:weightSum="10">
+            android:weightSum="11">
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
                 android:layout_margin="4dp"
-                android:layout_weight="1.1"
+                android:layout_weight="1.3"
                 app:cardBackgroundColor="@color/primary_bg"
                 app:cardCornerRadius="6dp"
                 app:cardElevation="2dp">
@@ -46,7 +46,7 @@
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
                 android:layout_marginStart="5dp"
-                android:layout_weight="7"
+                android:layout_weight="7.3"
                 android:gravity="center"
                 android:orientation="vertical">
 
@@ -76,16 +76,34 @@
 
             </LinearLayout>
 
-            <ImageButton
-                android:id="@+id/more_option_i_btn"
+            <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1.9"
-                android:background="@android:color/transparent"
-                android:clickable="true"
-                android:contentDescription="@string/empty"
-                android:focusable="true"
-                android:src="@drawable/ic_play" />
+                android:layout_weight="2.4"
+                android:orientation="horizontal">
+
+
+                <ImageButton
+                    android:id="@+id/more_option_i_btn_play"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/transparent"
+                    android:clickable="true"
+                    android:contentDescription="@string/empty"
+                    android:focusable="true"
+                    android:src="@drawable/ic_play" />
+
+                <ImageButton
+                    android:id="@+id/more_option_i_btn_next"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/transparent"
+                    android:clickable="true"
+                    android:contentDescription="@string/empty"
+                    android:focusable="true"
+                    android:src="@drawable/ic_next" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
@@ -96,8 +114,8 @@
             android:progress="30"
             app:indicatorColor="@color/tertiary_bg"
             app:indicatorDirectionLinear="leftToRight"
-            app:trackCornerRadius="2dp"
             app:trackColor="@color/primary_bg"
+            app:trackCornerRadius="2dp"
             app:trackThickness="3dp" />
     </LinearLayout>
 
