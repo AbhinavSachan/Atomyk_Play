@@ -217,7 +217,7 @@ public class MainActivity extends AppCompatActivity {
     //region Searchbar Functionality Code here
     // Adding SearchView Icon to Toolbar
     // Listening for Queries in Search View
-    // Manipulating musiclist to find music
+    // Manipulating musicList to find music
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
