@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="tertiary_bg">#CED3D8</color>
-    <color name="secondary_bg">#252523</color>
-    <color name="primary_bg">#191817</color>
+    <color name="tertiary_bg">#DBDBDB</color>
+    <color name="secondary_bg">#303030</color>
+    <color name="primary_bg">#222222</color>
 </resources>

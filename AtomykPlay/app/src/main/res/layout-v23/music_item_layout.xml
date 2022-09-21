@@ -6,6 +6,7 @@
     android:layout_height="70dp"
     android:layout_marginStart="6dp"
     android:layout_marginTop="6dp"
+    android:foreground="?android:attr/selectableItemBackground"
     android:focusable="true"
     android:background="@drawable/custom_round_corner_for_music_list">
 
@@ -104,6 +105,7 @@
             android:layout_marginEnd="7dp"
             android:contentDescription="@string/empty"
             android:focusable="true"
+            android:foreground="?android:attr/selectableItemBackground"
             android:src="@drawable/ic_option"
             android:theme="@android:style/ThemeOverlay.Material.Dark"
             app:layout_constraintBottom_toBottomOf="parent"

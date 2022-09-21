@@ -7,7 +7,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Filter;
 import android.widget.Filterable;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -16,9 +18,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.MainActivity;
 import com.atomykcoder.atomykplay.R;
+import com.atomykcoder.atomykplay.player.PlayerFragment;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
-import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -89,10 +92,10 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewAda
             @Override
             public void onClick(View v) {
                 MainActivity mainActivity = (MainActivity) context;
+
                 mainActivity.playAudio(position);
             }
         });
-
 
         //add bottom sheet functions in three dot click
         holder.imageButton.setOnClickListener(new View.OnClickListener() {
@@ -132,7 +135,7 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewAda
     public static class MusicViewAdapter extends RecyclerView.ViewHolder {
         private final ImageView imageView;
         private final ImageView imageButton;
-        private final MaterialCardView cardView;
+        private final RelativeLayout cardView;
         private final TextView nameText, artistText, durationText;
 
         public MusicViewAdapter(@NonNull View itemView) {

@@ -11,6 +11,7 @@ import java.util.ArrayList;
 
 public class StorageUtil {
     private final String STORAGE = "com.atomykcoder.atomykplay.STORAGE";
+    private final String POSITION_STORAGE = "com.atomykcoder.atomykplay.STORAGE_POSITION";
     private final Context context;
     private SharedPreferences sharedPreferences;
 
@@ -50,8 +51,26 @@ public class StorageUtil {
         return sharedPreferences.getInt("musicIndex", 0);
     }
 
-    private void clearCacheAudioPlaylist() {
+    public void storeMusicPosition(int position,String name) {
+        sharedPreferences = context.getSharedPreferences(POSITION_STORAGE, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt(name, position);
+        editor.apply();
+    }
+
+    public int loadMusicPosition(String name) {
+        sharedPreferences = context.getSharedPreferences(POSITION_STORAGE, Context.MODE_PRIVATE);
+        return sharedPreferences.getInt(name, 0);
+    }
+
+    public void clearCacheAudioPlaylist() {
         sharedPreferences = context.getSharedPreferences(STORAGE, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.clear();
+        editor.apply();
+    }
+    public void clearCacheMusicPosition() {
+        sharedPreferences = context.getSharedPreferences(POSITION_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.clear();
         editor.apply();

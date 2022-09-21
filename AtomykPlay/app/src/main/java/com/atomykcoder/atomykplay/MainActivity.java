@@ -43,29 +43,31 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static final String Broadcast_PLAY_NEW_MUSIC = "com.atomykcoder.atomykplay.PlayNewMusic";
-
-    public SlidingUpPanelLayout slidingUpPanelLayout;
-    boolean serviceBound = false;
-    private ArrayList<MusicDataCapsule> dataList;
-    private MusicAdapter adapter;
-    private LinearLayout linearLayout;
-    private RecyclerView recyclerView;
-    private MediaPlayerService mediaPlayerService;
-    private final ServiceConnection serviceConnection = new ServiceConnection() {
+    public static final String BROADCAST_PLAY_NEW_MUSIC = "com.atomykcoder.atomykplay.PlayNewMusic";
+    public static final String BROADCAST_PAUSE_PLAY_MUSIC = "com.atomykcoder.atomykplay.PausePlayMusic";
+    public static final String BROADCAST_PLAY_NEXT_MUSIC = "com.atomykcoder.atomykplay.PlayNextMusic";
+    public static final String BROADCAST_PLAY_PREVIOUS_MUSIC = "com.atomykcoder.atomykplay.PlayPreviousMusic";
+    public static boolean service_bound = false;
+    public static MediaPlayerService media_player_service;
+    public static ServiceConnection service_connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
 
             MediaPlayerService.LocalBinder binder = (MediaPlayerService.LocalBinder) service;
-            mediaPlayerService = binder.getService();
-            serviceBound = true;
+            media_player_service = binder.getService();
+            service_bound = true;
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            serviceBound = false;
+            service_bound = false;
         }
     };
+    public SlidingUpPanelLayout sliding_up_panel_layout;
+    private ArrayList<MusicDataCapsule> dataList;
+    private MusicAdapter adapter;
+    private LinearLayout linearLayout;
+    private RecyclerView recyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,7 +78,10 @@ public class MainActivity extends AppCompatActivity {
         //initializations
         linearLayout = findViewById(R.id.song_not_found_layout);
         recyclerView = findViewById(R.id.music_recycler);
-        slidingUpPanelLayout = findViewById(R.id.sliding_layout);
+        sliding_up_panel_layout = findViewById(R.id.sliding_layout);
+        sliding_up_panel_layout.setPanelSlideListener(onSlideChange());
+
+
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setTitle(R.string.app_name);
@@ -86,28 +91,31 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
 
-        //Checks permissions (method somewhere down in the script)
+        //Checking permissions before activity creation (method somewhere down in the script)
         checkPermission();
-        slidingUpPanelLayout.setPanelSlideListener(onSlideChange());
         setFragmentInSlider();
+
+        if (!service_bound) {
+
+            Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
+            startService(playerIntent);
+            bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
+        }
+
     }
 
     public void playAudio(int position) {
         //check is service active
         StorageUtil storage = new StorageUtil(MainActivity.this);
-        if (!serviceBound) {
-            //Store serializable music list to sharedPreference
-            storage.storeMusicList(dataList);
-            storage.storeMusicIndex(position);
+        //Store serializable music list to sharedPreference
+        storage.storeMusicList(dataList);
+        storage.storeMusicIndex(position);
 
-            Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
-            startService(playerIntent);
-            bindService(playerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
-        } else {
+         if (service_bound){
             //store new position
             storage.storeMusicIndex(position);
             //service is active send media with broadcast receiver
-            Intent broadcastIntent = new Intent(Broadcast_PLAY_NEW_MUSIC);
+            Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEW_MUSIC);
             sendBroadcast(broadcastIntent);
         }
     }
@@ -116,20 +124,20 @@ public class MainActivity extends AppCompatActivity {
         return new SlidingUpPanelLayout.PanelSlideListener() {
             @Override
             public void onPanelSlide(View panel, float slideOffset) {
-                View miniPlayer = PlayerFragment.miniPlayView;
+                View miniPlayer = PlayerFragment.mini_play_view;
                 miniPlayer.setAlpha(1 - slideOffset * 4);
             }
 
             @Override
             public void onPanelCollapsed(View panel) {
-                View miniPlayer = PlayerFragment.miniPlayView;
-                miniPlayer.setAlpha(1);
+                View miniPlayer = PlayerFragment.mini_play_view;
+                miniPlayer.setVisibility(View.VISIBLE);
             }
 
             @Override
             public void onPanelExpanded(View panel) {
-                View miniPlayer = PlayerFragment.miniPlayView;
-                miniPlayer.setAlpha(0);
+                View miniPlayer = PlayerFragment.mini_play_view;
+                miniPlayer.setVisibility(View.GONE);
             }
 
             @Override
@@ -146,23 +154,23 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
-        outState.putBoolean("serviceState", serviceBound);
+        outState.putBoolean("serviceState", service_bound);
         super.onSaveInstanceState(outState);
     }
 
     @Override
     protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        serviceBound = savedInstanceState.getBoolean("serviceState");
+        service_bound = savedInstanceState.getBoolean("serviceState");
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
 
-        if (serviceBound) {
-            unbindService(serviceConnection);
-            mediaPlayerService.stopSelf();
+        if (service_bound) {
+            unbindService(service_connection);
+            media_player_service.stopSelf();
         }
     }
 
@@ -199,12 +207,13 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (slidingUpPanelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.COLLAPSED) {
+        if (sliding_up_panel_layout.getPanelState() == SlidingUpPanelLayout.PanelState.COLLAPSED) {
             super.onBackPressed();
         } else {
-            slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+            sliding_up_panel_layout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
         }
     }
+
 
     private void setFragmentInSlider() {
         PlayerFragment fragment = new PlayerFragment();
@@ -213,7 +222,6 @@ public class MainActivity extends AppCompatActivity {
         transaction.replace(R.id.main_container, fragment);
         transaction.commit();
     }
-
 
     //region Searchbar Functionality Code here
     // Adding SearchView Icon to Toolbar
@@ -241,5 +249,6 @@ public class MainActivity extends AppCompatActivity {
         });
         return super.onCreateOptionsMenu(menu);
     }
+
     //endregion
 }

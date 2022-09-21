@@ -18,10 +18,8 @@ import android.media.MediaPlayer;
 import android.media.session.MediaSessionManager;
 import android.os.Binder;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.ResultReceiver;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
@@ -50,11 +48,12 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     public static final String ACTION_PREVIOUS = "com.atomykcoder.atomykplay.ACTION_PREVIOUS";
     public static final String ACTION_NEXT = "com.atomykcoder.atomykplay.ACTION_NEXT";
     public static final String ACTION_STOP = "com.atomykcoder.atomykplay.ACTION_STOP";
+
     //audio player notification ID
     public static final int NOTIFICATION_ID = 101;
     //binder
     private final IBinder iBinder = new LocalBinder();
-    public MediaPlayer mediaPlayer;
+    public MediaPlayer media_player;
     //media session
     private MediaSessionManager mediaSessionManager;
     private MediaSessionCompat mediaSession;
@@ -63,12 +62,44 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     private ArrayList<MusicDataCapsule> musicList;
     private int musicIndex = -1;
     private MusicDataCapsule activeMusic;//object of currently playing audio
+    //
+    private PhoneStateListener phoneStateListener;
+    private TelephonyManager telephonyManager;
+    private int resumePosition;
     //broadcast receivers
     //playing new song
-    private final BroadcastReceiver playNewMusic = new BroadcastReceiver() {
+    private final BroadcastReceiver playNewMusicReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             //get the new media index from SP
+
+            try {
+                //load data from SharedPref
+                StorageUtil storage = new StorageUtil(getApplicationContext());
+                musicList = storage.loadMusic();
+                musicIndex = storage.loadMusicIndex();
+
+                if (musicIndex != -1 && musicIndex < musicList.size()) {
+                    activeMusic = musicList.get(musicIndex);
+                } else {
+                    stopSelf();
+                }
+
+            } catch (NullPointerException e) {
+                stopSelf();
+            }
+
+            if (mediaSessionManager == null) {
+                try {
+                    initiateMediaSession();
+                    initiateMediaPlayer();
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                    stopSelf();
+                }
+            }
+
+
             musicIndex = new StorageUtil(getApplicationContext()).loadMusicIndex();
             if (musicIndex != -1 && musicIndex < musicList.size()) {
                 activeMusic = musicList.get(musicIndex);
@@ -76,18 +107,84 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 stopSelf();
             }
             stopMedia();
-            mediaPlayer.reset();
+            media_player.reset();
             initiateMediaPlayer();
             updateMetaData();
             buildNotification(PlaybackStatus.PLAYING);
 
         }
     };
-    //
-    private boolean onGoingCall = false;
-    private PhoneStateListener phoneStateListener;
-    private TelephonyManager telephonyManager;
-    private int resumePosition;
+    private final BroadcastReceiver nextMusicReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            //get the new media index from SP
+            try {
+                //load data from SharedPref
+                StorageUtil storage = new StorageUtil(getApplicationContext());
+                musicList = storage.loadMusic();
+                musicIndex = storage.loadMusicIndex();
+
+                if (musicIndex != -1 && musicIndex < musicList.size()) {
+                    activeMusic = musicList.get(musicIndex);
+                } else {
+                    stopSelf();
+                }
+
+            } catch (NullPointerException e) {
+                stopSelf();
+            }
+
+            if (mediaSessionManager == null) {
+                try {
+                    initiateMediaSession();
+                    initiateMediaPlayer();
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                    stopSelf();
+                }
+            }
+
+            skipToNext();
+            updateMetaData();
+            buildNotification(PlaybackStatus.PLAYING);
+
+        }
+    };
+    private final BroadcastReceiver prevMusicReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            try {
+                //load data from SharedPref
+                StorageUtil storage = new StorageUtil(getApplicationContext());
+                musicList = storage.loadMusic();
+                musicIndex = storage.loadMusicIndex();
+
+                if (musicIndex != -1 && musicIndex < musicList.size()) {
+                    activeMusic = musicList.get(musicIndex);
+                } else {
+                    stopSelf();
+                }
+
+            } catch (NullPointerException e) {
+                stopSelf();
+            }
+
+            if (mediaSessionManager == null) {
+                try {
+                    initiateMediaSession();
+                    initiateMediaPlayer();
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                    stopSelf();
+                }
+            }
+
+            skipToPrevious();
+            updateMetaData();
+            buildNotification(PlaybackStatus.PLAYING);
+
+        }
+    };
     //to pause when output device is unplugged
     private final BroadcastReceiver becomingNoisyReceiver = new BroadcastReceiver() {
         @Override
@@ -96,11 +193,66 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             buildNotification(PlaybackStatus.PAUSED);
         }
     };
+    private final BroadcastReceiver pausePlayMusicReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            try {
+                //load data from SharedPref
+                StorageUtil storage = new StorageUtil(getApplicationContext());
+                musicList = storage.loadMusic();
+                musicIndex = storage.loadMusicIndex();
+
+                if (musicIndex != -1 && musicIndex < musicList.size()) {
+                    activeMusic = musicList.get(musicIndex);
+                } else {
+                    stopSelf();
+                }
+
+            } catch (NullPointerException e) {
+                stopSelf();
+            }
+
+            if (mediaSessionManager == null) {
+                try {
+                    initiateMediaSession();
+                    initiateMediaPlayer();
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                    stopSelf();
+                }
+            }
+
+
+            if (media_player.isPlaying()) {
+                pauseMedia();
+                buildNotification(PlaybackStatus.PAUSED);
+            } else {
+                resumeMedia();
+                buildNotification(PlaybackStatus.PLAYING);
+            }
+        }
+    };
     private AudioManager audioManager;
 
     private void registerPlayNewMusic() {
-        IntentFilter filter = new IntentFilter(MainActivity.Broadcast_PLAY_NEW_MUSIC);
-        registerReceiver(playNewMusic, filter);
+        IntentFilter filter = new IntentFilter(MainActivity.BROADCAST_PLAY_NEW_MUSIC);
+        registerReceiver(playNewMusicReceiver, filter);
+    }
+
+    private void registerPausePlayMusic() {
+        IntentFilter filter = new IntentFilter(MainActivity.BROADCAST_PAUSE_PLAY_MUSIC);
+        registerReceiver(pausePlayMusicReceiver, filter);
+    }
+
+    private void registerPlayNextMusic() {
+        IntentFilter filter = new IntentFilter(MainActivity.BROADCAST_PLAY_NEXT_MUSIC);
+        registerReceiver(nextMusicReceiver, filter);
+    }
+
+    private void registerPlayPreviousMusic() {
+        IntentFilter filter = new IntentFilter(MainActivity.BROADCAST_PLAY_PREVIOUS_MUSIC);
+        registerReceiver(prevMusicReceiver, filter);
     }
 
     private void updateMetaData() {
@@ -149,7 +301,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                     .setShowWhen(false).setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
                             .setMediaSession(mediaSession.getSessionToken())
                             .setShowActionsInCompactView(0, 1, 2))
-                    .setColor(getResources().getColor(R.color.primary_bg,getTheme()))
+                    .setColor(getResources().getColor(R.color.primary_bg, getTheme()))
                     .setColorized(true)
                     .setLargeIcon(largeIcon)
                     .setSmallIcon(R.drawable.ic_headset)
@@ -157,13 +309,14 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                     .setContentText(activeMusic.getsArtist())
                     .setContentTitle(activeMusic.getsName())
                     .setContentInfo(activeMusic.getsAlbum())
+                    .setChannelId(CHANNEL_ID)
                     //set control
                     .addAction(R.drawable.ic_previous, "Previous", playbackAction(3))
                     .addAction(notificationAction, "Pause", play_pauseAction)
                     .addAction(R.drawable.ic_next, "next", playbackAction(2))
                     .setContentIntent(PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), PendingIntent.FLAG_IMMUTABLE))
                     .setSilent(true)
-                    .setPriority(NotificationCompat.PRIORITY_LOW).build();
+                    .setPriority(NotificationCompat.PRIORITY_DEFAULT).build();
         }
 
         NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -235,6 +388,10 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         registerBecomingNoisyReceiver();
         //change audio on new click
         registerPlayNewMusic();
+        registerPausePlayMusic();
+        registerPlayNextMusic();
+        registerPlayPreviousMusic();
+
     }
 
     @Nullable
@@ -293,56 +450,70 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
 
     private void initiateMediaPlayer() {
-        mediaPlayer = new MediaPlayer();
+        media_player = new MediaPlayer();
 
         //setup MediaPlayer event listeners
-        mediaPlayer.setOnCompletionListener(this);
-        mediaPlayer.setOnErrorListener(this);
-        mediaPlayer.setOnBufferingUpdateListener(this);
-        mediaPlayer.setOnPreparedListener(this);
-        mediaPlayer.setOnSeekCompleteListener(this);
-        mediaPlayer.setOnInfoListener(this);
+        media_player.setOnCompletionListener(this);
+        media_player.setOnErrorListener(this);
+        media_player.setOnBufferingUpdateListener(this);
+        media_player.setOnPreparedListener(this);
+        media_player.setOnSeekCompleteListener(this);
+        media_player.setOnInfoListener(this);
 
         //reset so that the media player is not pointing to another data source
-        mediaPlayer.reset();
-        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        media_player.reset();
+        media_player.setAudioStreamType(AudioManager.STREAM_MUSIC);
         try {
-            mediaPlayer.setDataSource(activeMusic.getsPath());
+            media_player.setDataSource(activeMusic.getsPath());
         } catch (IOException e) {
             e.printStackTrace();
         }
-        mediaPlayer.prepareAsync();
+        media_player.prepareAsync();
     }
 
     private void playMedia() {
-        if (!mediaPlayer.isPlaying()) {
-            mediaPlayer.start();
+        if (!media_player.isPlaying()) {
+            media_player.start();
         }
     }
 
     private void stopMedia() {
-        if (mediaPlayer == null) {
+        if (media_player == null) {
             return;
         }
-        if (mediaPlayer.isPlaying()) {
-            mediaPlayer.stop();
+        if (media_player.isPlaying()) {
+            media_player.stop();
         }
     }
 
     private void pauseMedia() {
-        if (mediaPlayer.isPlaying()) {
-            mediaPlayer.pause();
-            resumePosition = mediaPlayer.getCurrentPosition();
+        StorageUtil storageUtil = new StorageUtil(getApplicationContext());
+
+        if (media_player.isPlaying()) {
+            media_player.pause();
+            resumePosition = media_player.getCurrentPosition();
+            storageUtil.storeMusicPosition(resumePosition, String.valueOf(musicIndex));
         }
     }
 
     private void resumeMedia() {
-        if (!mediaPlayer.isPlaying()) {
-            mediaPlayer.seekTo(resumePosition);
-            mediaPlayer.start();
+        StorageUtil storageUtil = new StorageUtil(getApplicationContext());
+
+        if (!media_player.isPlaying()) {
+            resumePosition = storageUtil.loadMusicPosition(String.valueOf(musicIndex));
+            media_player.seekTo(resumePosition);
+            media_player.start();
+            new StorageUtil(getApplicationContext()).clearCacheMusicPosition();
         }
     }
 
+    private void seekToPosition(int position) {
+
+        if (!media_player.isPlaying()) {
+            media_player.seekTo(position);
+        }
+        playMedia();
+    }
 
     private void skipToPrevious() {
 
@@ -354,10 +525,11 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         }
         //update stored index
         new StorageUtil(getApplicationContext()).storeMusicIndex(musicIndex);
+        new StorageUtil(getApplicationContext()).clearCacheMusicPosition();
 
         stopMedia();
         //reset player
-        mediaPlayer.reset();
+        media_player.reset();
         initiateMediaPlayer();
 
     }
@@ -373,10 +545,11 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         }
         //update stored index
         new StorageUtil(getApplicationContext()).storeMusicIndex(musicIndex);
+        new StorageUtil(getApplicationContext()).clearCacheMusicPosition();
 
         stopMedia();
         //reset player
-        mediaPlayer.reset();
+        media_player.reset();
         initiateMediaPlayer();
 
     }
@@ -441,65 +614,41 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     public void onAudioFocusChange(int focusState) {
         switch (focusState) {
             case AudioManager.AUDIOFOCUS_GAIN:
-                if (mediaPlayer == null) {
+                if (media_player == null) {
                     initiateMediaPlayer();
-                } else if (!mediaPlayer.isPlaying()) {
-                    mediaPlayer.start();
+                } else if (!media_player.isPlaying()) {
+                    media_player.start();
                 }
                 break;
             case AudioManager.AUDIOFOCUS_LOSS:
-                if (mediaPlayer.isPlaying()) {
-                    mediaPlayer.stop();
+                if (media_player.isPlaying()) {
+                    media_player.stop();
                 }
-                mediaPlayer.release();
-                mediaPlayer = null;
+                media_player.release();
+                media_player = null;
                 break;
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
-                if (mediaPlayer.isPlaying()) {
-                    mediaPlayer.pause();
-                    resumePosition = mediaPlayer.getCurrentPosition();
+                if (media_player.isPlaying()) {
+                    media_player.pause();
+                    resumePosition = media_player.getCurrentPosition();
                 }
                 break;
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
-                if (mediaPlayer.isPlaying()) {
-                    mediaPlayer.setVolume(0.3f, 0.3f);
+                if (media_player.isPlaying()) {
+                    media_player.setVolume(0.3f, 0.3f);
                 }
         }
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        try {
-            //load data from SharedPref
-            StorageUtil storage = new StorageUtil(getApplicationContext());
-            musicList = storage.loadMusic();
-            musicIndex = storage.loadMusicIndex();
 
-            if (musicIndex != -1 && musicIndex < musicList.size()) {
-                activeMusic = musicList.get(musicIndex);
-            } else {
-                stopSelf();
-            }
 
-        } catch (NullPointerException e) {
-            stopSelf();
-        }
         //request audio focus
         if (!requestAudioFocus()) {
             stopSelf();
         }
 
-
-        if (mediaSessionManager == null) {
-            try {
-                initiateMediaSession();
-                initiateMediaPlayer();
-            } catch (RemoteException e) {
-                e.printStackTrace();
-                stopSelf();
-            }
-            buildNotification(PlaybackStatus.PLAYING);
-        }
 
         //Handle Intent action from MediaSession.TransportControls
         handleIncomingActions(intent);
@@ -509,11 +658,15 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (mediaPlayer != null) {
+        StorageUtil storageUtil = new StorageUtil(getApplicationContext());
+        if (media_player != null) {
+            //saving music last position to resume
+            // storageUtil.storeMusicPosition(mediaPlayer.getCurrentPosition());
+            storageUtil.storeMusicPosition(resumePosition, String.valueOf(musicIndex));
             stopMedia();
-            mediaPlayer.release();
-            stopSelf();
+            media_player.release();
         }
+        stopSelf();
         removeAudioFocus();
 //        disable phone state listener
         if (phoneStateListener != null) {
@@ -521,16 +674,20 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         }
         removeNotification();
         unregisterReceiver(becomingNoisyReceiver);
-        unregisterReceiver(playNewMusic);
+        unregisterReceiver(playNewMusicReceiver);
+        unregisterReceiver(pausePlayMusicReceiver);
+        unregisterReceiver(nextMusicReceiver);
+        unregisterReceiver(prevMusicReceiver);
     }
 
     private void removeNotification() {
         NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         manager.cancel(NOTIFICATION_ID);
-        if (mediaPlayer != null){
-            mediaPlayer.release();
+        if (media_player != null) {
+            media_player.release();
         }
     }
+
 
     private boolean requestAudioFocus() {
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
