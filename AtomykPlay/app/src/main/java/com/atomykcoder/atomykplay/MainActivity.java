@@ -14,6 +14,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.SearchView;
 import android.widget.Toast;
 
@@ -43,6 +44,12 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
+    //♥♥☻☻
+    //all public variables are in this format "public_variable"
+    //all public and private static string variables are in this format "PUBLIC_PRIVATE_STATIC_FINAL_STRING"
+    //all private variables are in this format "privateVariable"
+    //♥♥☻☻
+
     public static final String BROADCAST_PLAY_NEW_MUSIC = "com.atomykcoder.atomykplay.PlayNewMusic";
     public static final String BROADCAST_PAUSE_PLAY_MUSIC = "com.atomykcoder.atomykplay.PausePlayMusic";
     public static final String BROADCAST_PLAY_NEXT_MUSIC = "com.atomykcoder.atomykplay.PlayNextMusic";
@@ -56,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
             MediaPlayerService.LocalBinder binder = (MediaPlayerService.LocalBinder) service;
             media_player_service = binder.getService();
             service_bound = true;
+
         }
 
         @Override
@@ -111,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
         storage.storeMusicList(dataList);
         storage.storeMusicIndex(position);
 
-         if (service_bound){
+        if (service_bound) {
             //store new position
             storage.storeMusicIndex(position);
             //service is active send media with broadcast receiver
@@ -125,18 +133,24 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onPanelSlide(View panel, float slideOffset) {
                 View miniPlayer = PlayerFragment.mini_play_view;
+                View mainPlayer = findViewById(R.id.player_layout);
                 miniPlayer.setAlpha(1 - slideOffset * 4);
+                mainPlayer.setAlpha(0 + slideOffset * 4);
             }
 
             @Override
             public void onPanelCollapsed(View panel) {
                 View miniPlayer = PlayerFragment.mini_play_view;
+                View mainPlayer = findViewById(R.id.player_layout);
+                mainPlayer.setVisibility(View.GONE);
                 miniPlayer.setVisibility(View.VISIBLE);
             }
 
             @Override
             public void onPanelExpanded(View panel) {
                 View miniPlayer = PlayerFragment.mini_play_view;
+                View mainPlayer = findViewById(R.id.player_layout);
+                mainPlayer.setVisibility(View.VISIBLE);
                 miniPlayer.setVisibility(View.GONE);
             }
 

@@ -62,7 +62,7 @@ public class FetchMusic {
 
     //converting duration from millis to readable time
     @SuppressLint("DefaultLocale")
-    private static String convertDuration(String duration) {
+    public static String convertDuration(String duration) {
         String out;
         int dur = Integer.parseInt(duration);
 

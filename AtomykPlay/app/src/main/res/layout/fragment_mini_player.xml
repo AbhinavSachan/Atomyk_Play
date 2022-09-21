@@ -30,7 +30,7 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <ImageView
-                android:id="@+id/song_album_cover"
+                android:id="@+id/song_album_cover_mini"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@drawable/ic_music"
@@ -40,14 +40,15 @@
         </com.google.android.material.card.MaterialCardView>
 
         <LinearLayout
-            android:id="@+id/linearLayout"
+            android:id="@+id/linearLayout1"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginStart="58dp"
-            android:layout_marginEnd="34dp"
+            android:layout_marginStart="56dp"
+            android:layout_marginEnd="74dp"
             android:gravity="center"
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/mini_image_ll"
             app:layout_constraintStart_toEndOf="@+id/materialCardView"
             app:layout_constraintTop_toTopOf="parent">
 
@@ -78,6 +79,7 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/mini_image_ll"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:orientation="horizontal"
@@ -121,7 +123,7 @@
         app:indicatorColor="@color/tertiary_bg"
         app:indicatorDirectionLinear="leftToRight"
         app:trackColor="@color/primary_bg"
-        app:trackCornerRadius="2dp"
+        app:trackCornerRadius="0dp"
         app:trackThickness="3dp" />
 
 </RelativeLayout>

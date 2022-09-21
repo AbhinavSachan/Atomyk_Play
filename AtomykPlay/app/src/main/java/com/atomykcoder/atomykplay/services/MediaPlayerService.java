@@ -1,5 +1,6 @@
 package com.atomykcoder.atomykplay.services;
 
+import static android.app.Application.getProcessName;
 import static com.atomykcoder.atomykplay.ApplicationClass.CHANNEL_ID;
 
 import android.app.Notification;
@@ -16,9 +17,12 @@ import android.media.AudioManager;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.media.session.MediaSessionManager;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
@@ -26,6 +30,7 @@ import android.support.v4.media.session.MediaSessionCompat;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
@@ -35,6 +40,8 @@ import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.function.MusicDataCapsule;
 import com.atomykcoder.atomykplay.function.PlaybackStatus;
 import com.atomykcoder.atomykplay.function.StorageUtil;
+import com.atomykcoder.atomykplay.player.PlayerFragment;
+import com.bumptech.glide.Glide;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -66,6 +73,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     private PhoneStateListener phoneStateListener;
     private TelephonyManager telephonyManager;
     private int resumePosition;
+    private static Context context;
     //broadcast receivers
     //playing new song
     private final BroadcastReceiver playNewMusicReceiver = new BroadcastReceiver() {
@@ -114,6 +122,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
         }
     };
+
     private final BroadcastReceiver nextMusicReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -196,10 +205,10 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     private final BroadcastReceiver pausePlayMusicReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            StorageUtil storage = new StorageUtil(getApplicationContext());
 
             try {
                 //load data from SharedPref
-                StorageUtil storage = new StorageUtil(getApplicationContext());
                 musicList = storage.loadMusic();
                 musicIndex = storage.loadMusicIndex();
 
@@ -224,6 +233,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             }
 
 
+            storage.loadMusicPosition(String.valueOf(musicIndex));
             if (media_player.isPlaying()) {
                 pauseMedia();
                 buildNotification(PlaybackStatus.PAUSED);
@@ -233,6 +243,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             }
         }
     };
+    private Runnable runnable;
     private AudioManager audioManager;
 
     private void registerPlayNewMusic() {
@@ -441,6 +452,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     @Override
     public void onPrepared(MediaPlayer mp) {
         playMedia();
+        setSeekBarInMiniPlayer();
+        PlayerFragment.setMiniLayout();
     }
 
     @Override
@@ -475,6 +488,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         if (!media_player.isPlaying()) {
             media_player.start();
         }
+        setIcon(PlaybackStatus.PLAYING);
     }
 
     private void stopMedia() {
@@ -494,6 +508,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             resumePosition = media_player.getCurrentPosition();
             storageUtil.storeMusicPosition(resumePosition, String.valueOf(musicIndex));
         }
+        setIcon(PlaybackStatus.PAUSED);
     }
 
     private void resumeMedia() {
@@ -503,8 +518,20 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             resumePosition = storageUtil.loadMusicPosition(String.valueOf(musicIndex));
             media_player.seekTo(resumePosition);
             media_player.start();
-            new StorageUtil(getApplicationContext()).clearCacheMusicPosition();
         }
+        setIcon(PlaybackStatus.PLAYING);
+    }
+
+    public void setSeekBarInMiniPlayer() {
+        PlayerFragment.mini_progress.setMax(media_player.getDuration());
+        runnable = new Runnable() {
+            @Override
+            public void run() {
+                PlayerFragment.mini_progress.setProgress(media_player.getCurrentPosition());
+                new Handler(Looper.getMainLooper()).postDelayed(runnable, 100);
+            }
+        };
+        new Handler(Looper.getMainLooper()).postDelayed(runnable, 0);
     }
 
     private void seekToPosition(int position) {
@@ -569,6 +596,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             public void onPlay() {
                 super.onPlay();
                 resumeMedia();
+                setIcon(PlaybackStatus.PLAYING);
                 buildNotification(PlaybackStatus.PLAYING);
             }
 
@@ -576,6 +604,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             public void onPause() {
                 super.onPause();
                 pauseMedia();
+                setIcon(PlaybackStatus.PAUSED);
                 buildNotification(PlaybackStatus.PAUSED);
             }
 
@@ -640,15 +669,31 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         }
     }
 
+    public static void setIcon(PlaybackStatus playbackStatus){
+        ImageView imageView = PlayerFragment.mini_pause;
+        if (playbackStatus == PlaybackStatus.PLAYING){
+            try {
+                Glide.with(context).load(R.drawable.ic_pause).into(imageView);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }else if (playbackStatus == PlaybackStatus.PAUSED){
+            try {
+                Glide.with(context).load(R.drawable.ic_play).into(imageView);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
-
+        context = getApplicationContext();
         //request audio focus
         if (!requestAudioFocus()) {
             stopSelf();
         }
-
 
         //Handle Intent action from MediaSession.TransportControls
         handleIncomingActions(intent);
@@ -672,6 +717,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         if (phoneStateListener != null) {
             telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE);
         }
+        storageUtil.clearCacheMusicPosition();
         removeNotification();
         unregisterReceiver(becomingNoisyReceiver);
         unregisterReceiver(playNewMusicReceiver);
