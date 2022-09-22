@@ -13,14 +13,14 @@
             android:id="@+id/player_album_card_view"
             android:layout_width="280dp"
             android:layout_height="290dp"
-            android:clickable="true"
             android:layout_marginTop="54dp"
             android:layout_marginBottom="54dp"
+            android:clickable="true"
             android:focusable="true"
             app:cardCornerRadius="25dp"
             app:cardElevation="32dp"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -28,25 +28,24 @@
             android:id="@+id/materialCardView2"
             android:layout_width="280dp"
             android:layout_height="290dp"
+            android:layout_marginTop="54dp"
             android:layout_marginBottom="54dp"
             android:alpha=".8"
-            android:layout_marginTop="54dp"
             app:cardBackgroundColor="@color/soft_black"
             app:cardCornerRadius="360dp"
             app:cardElevation="30dp"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <androidx.constraintlayout.utils.widget.MotionLabel
-        android:text="kbajdjabkwjjsbjbakjwdbksabwbyasudabhwdbjabsd"
-        android:textSize="50sp"
-        android:textStyle="bold"
-
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_below="@+id/player_layout"
+        android:text="@string/song_name_e"
         android:textColor="@color/space_black"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:textSize="30sp"
+        android:textStyle="bold" />
 
 </RelativeLayout>

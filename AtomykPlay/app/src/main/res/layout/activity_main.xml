@@ -17,53 +17,59 @@
     app:umanoShadowHeight="4dp"
     tools:context=".MainActivity">
 
-    <RelativeLayout
+    <FrameLayout
         android:id="@+id/sec_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@color/primary_bg"
-            android:elevation="16dp"
-            android:fitsSystemWindows="true"
-            android:theme="@style/ThemeOverlay.AppCompat.DayNight"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.DayNight" />
+            android:layout_height="match_parent">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/music_recycler"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_below="@id/toolbar"
-            android:clipToPadding="false"
-            android:paddingBottom="85dp" />
-
-        <LinearLayout
-            android:id="@+id/song_not_found_layout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:orientation="vertical">
-
-            <ImageView
-                android:layout_width="250dp"
-                android:layout_height="250dp"
-                android:contentDescription="@string/empty"
-                android:padding="2dp"
-                android:src="@drawable/no_song_image" />
-
-            <TextView
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
                 android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="@color/primary_bg"
+                android:elevation="16dp"
+                android:fitsSystemWindows="true"
+                android:theme="@style/ThemeOverlay.AppCompat.DayNight"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.DayNight" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/music_recycler"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@id/toolbar"
+                android:clipToPadding="false"
+                android:paddingBottom="85dp" />
+
+            <LinearLayout
+                android:id="@+id/song_not_found_layout"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="center"
-                android:text="@string/nothing_to_show"
-                android:textColor="@color/secondary_bg"
-                android:textSize="@dimen/d_28sp"
-                android:textStyle="bold" />
-        </LinearLayout>
-    </RelativeLayout>
+                android:layout_centerInParent="true"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="250dp"
+                    android:layout_height="250dp"
+                    android:contentDescription="@string/empty"
+                    android:padding="2dp"
+                    android:src="@drawable/no_song_image" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/nothing_to_show"
+                    android:textColor="@color/secondary_bg"
+                    android:textSize="@dimen/d_28sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </RelativeLayout>
+
+    </FrameLayout>
 
     <FrameLayout
         android:id="@+id/main_container"
