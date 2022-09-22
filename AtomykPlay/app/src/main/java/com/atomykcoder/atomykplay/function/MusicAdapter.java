@@ -33,44 +33,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.function.BiFunction;
 
-public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewAdapter> implements Filterable {
+public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewAdapter>{
     Context context;
     ArrayList<MusicDataCapsule> musicData;
 
-    // Copy of list to keep track of all music when filtering
-    ArrayList<MusicDataCapsule> musicDataAll;
-    Filter filter = new Filter() {
-        @Override
-        protected FilterResults performFiltering(CharSequence charSequence) {
-            ArrayList<MusicDataCapsule> filteredList = new ArrayList<>();
-            if (charSequence.toString().isEmpty()) {
-                filteredList.addAll(musicDataAll);
-            } else {
-                for (MusicDataCapsule song : musicDataAll) {
-                    if (song.getsName().toLowerCase().contains(charSequence.toString().toLowerCase())) {
-                        filteredList.add(song);
-                    }
-                }
-            }
-            FilterResults filterResults = new FilterResults();
-            filterResults.values = filteredList;
 
-            return filterResults;
-        }
-
-        @Override
-        public void publishResults(CharSequence charSequence, FilterResults filterResults) {
-            musicData.clear();
-            musicData.addAll((Collection<? extends MusicDataCapsule>) filterResults.values);
-            notifyDataSetChanged();
-        }
-    };
 
     public MusicAdapter(Context context, ArrayList<MusicDataCapsule> musicData) {
         this.context = context;
         this.musicData = musicData;
-        // Copying all music data from old list to new
-        this.musicDataAll = new ArrayList<>(musicData);
     }
 
     @NonNull
@@ -148,14 +119,7 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewAda
         return musicData.size();
     }
 
-    //Code for custom filter in recycler view starts here
-    //region Custom filter Code for recycler View
-    @Override
-    public Filter getFilter() {
-        return filter;
-    }
-    //endregion
-    // Code For custom filter in recycler view ends here
+
 
     public static class MusicViewAdapter extends RecyclerView.ViewHolder {
         private final ImageView imageView;

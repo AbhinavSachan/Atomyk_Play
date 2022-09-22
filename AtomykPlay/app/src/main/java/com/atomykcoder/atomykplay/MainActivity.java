@@ -9,10 +9,12 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.view.MenuItemCompat;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.SearchView;
 import android.widget.Toast;
@@ -28,6 +30,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.atomykcoder.atomykplay.function.FetchMusic;
 import com.atomykcoder.atomykplay.function.MusicAdapter;
 import com.atomykcoder.atomykplay.function.MusicDataCapsule;
+import com.atomykcoder.atomykplay.function.SearchResultsFragment;
 import com.atomykcoder.atomykplay.function.StorageUtil;
 import com.atomykcoder.atomykplay.player.PlayerFragment;
 import com.atomykcoder.atomykplay.services.MediaPlayerService;
@@ -76,6 +79,7 @@ public class MainActivity extends AppCompatActivity {
     private MusicAdapter adapter;
     private LinearLayout linearLayout;
     private RecyclerView recyclerView;
+    private SearchResultsFragment searchResultsFragment; // This being here is very important for search method to work
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,6 +90,8 @@ public class MainActivity extends AppCompatActivity {
         //initializations
         linearLayout = findViewById(R.id.song_not_found_layout);
         recyclerView = findViewById(R.id.music_recycler);
+        searchResultsFragment = new SearchResultsFragment();
+
         sliding_up_panel_layout = findViewById(R.id.sliding_layout);
         sliding_up_panel_layout.setPanelSlideListener(onSlideChange());
 
@@ -134,12 +140,22 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
     private void setFragmentInSlider() {
         PlayerFragment fragment = new PlayerFragment();
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
         transaction.replace(R.id.main_container, fragment);
         transaction.commit();
+    }
+    private void setSearchFragment(){
+
+        FragmentManager manager = getSupportFragmentManager();
+        FragmentTransaction transaction = manager.beginTransaction();
+        transaction.replace(R.id.sec_container, searchResultsFragment);
+        transaction.addToBackStack(searchResultsFragment.toString())
+                .commit();
+        Log.i("TAG", "Search Fragment Deployed");
     }
 
     //Checks whether user granted permissions for external storage or not
@@ -252,7 +268,7 @@ public class MainActivity extends AppCompatActivity {
     //region Searchbar Functionality Code here
     // Adding SearchView Icon to Toolbar
     // Listening for Queries in Search View
-    // Manipulating musicList to find music
+    // Sending Queries to SearchResultFragment to process
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -261,7 +277,13 @@ public class MainActivity extends AppCompatActivity {
         MenuItem searchViewItem = menu.findItem(R.id.app_bar_search);
         SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchViewItem);
 
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        searchView.setOnSearchClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setSearchFragment();
+            }
+        });
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener()  {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 return false;
@@ -269,7 +291,16 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextChange(String query) {
-                adapter.getFilter().filter(query);
+                searchResultsFragment.search(query, dataList);
+                return false;
+            }
+
+        });
+        searchView.setOnCloseListener(new SearchView.OnCloseListener() {
+            @Override
+            public boolean onClose() {
+                FragmentManager manager = getSupportFragmentManager();
+                manager.popBackStack();
                 return false;
             }
         });
