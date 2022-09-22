@@ -21,6 +21,7 @@ public class ApplicationClass extends Application {
             NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID,"Music Notification", NotificationManager.IMPORTANCE_NONE);
             notificationChannel.setDescription("Description");
             notificationChannel.setImportance(NotificationManager.IMPORTANCE_HIGH);
+            notificationChannel.setBypassDnd(false);
             notificationChannel.setLockscreenVisibility(1);
 
             NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);

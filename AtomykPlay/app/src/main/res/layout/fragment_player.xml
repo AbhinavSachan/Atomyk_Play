@@ -7,18 +7,8 @@
     android:orientation="vertical"
     tools:context=".player.PlayerFragment">
 
-
     <include layout="@layout/fragment_mini_player" />
 
-    <RelativeLayout
-        android:id="@+id/player_layout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:src="@drawable/no_song_image" />
-    </RelativeLayout>
+    <include layout="@layout/main_player_layout" />
 
 </LinearLayout>

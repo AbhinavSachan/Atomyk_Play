@@ -3,6 +3,7 @@ package com.atomykcoder.atomykplay.player;
 import static com.atomykcoder.atomykplay.MainActivity.BROADCAST_PAUSE_PLAY_MUSIC;
 import static com.atomykcoder.atomykplay.MainActivity.BROADCAST_PLAY_NEXT_MUSIC;
 import static com.atomykcoder.atomykplay.MainActivity.BROADCAST_PLAY_PREVIOUS_MUSIC;
+import static com.atomykcoder.atomykplay.MainActivity.is_granted;
 import static com.atomykcoder.atomykplay.MainActivity.service_bound;
 
 import android.annotation.SuppressLint;
@@ -31,7 +32,7 @@ public class PlayerFragment extends Fragment {
     @SuppressLint("StaticFieldLeak")
     public static RelativeLayout mini_play_view;
     @SuppressLint("StaticFieldLeak")
-    public static RelativeLayout player_layout;
+    public static View player_layout;
     @SuppressLint("StaticFieldLeak")
     public static ImageView mini_cover, mini_pause, mini_next;
     public static LinearProgressIndicator mini_progress;
@@ -46,20 +47,26 @@ public class PlayerFragment extends Fragment {
 
         StorageUtil storageUtil = new StorageUtil(context);
         ArrayList<MusicDataCapsule> musicList = storageUtil.loadMusic();
-        MusicDataCapsule activeMusic = null;
+        MusicDataCapsule activeMusic;
         int musicIndex;
         musicIndex = storageUtil.loadMusicIndex();
 
         if (musicIndex != -1 && musicIndex < musicList.size()) {
             activeMusic = musicList.get(musicIndex);
+        } else {
+            activeMusic = musicList.get(0);
         }
 
         try {
             assert activeMusic != null;
             Glide.with(context).load(activeMusic.getsAlbumUri())
                     .into(mini_cover);
-            mini_name_text.setText(activeMusic.getsName());
-            mini_artist_text.setText(activeMusic.getsArtist());
+            try {
+                mini_name_text.setText(activeMusic.getsName());
+                mini_artist_text.setText(activeMusic.getsArtist());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -102,7 +109,9 @@ public class PlayerFragment extends Fragment {
         });
 
         //layout setup ☺
-        setMiniLayout();
+        if (is_granted) {
+            setMiniLayout();
+        }
         return view;
     }
 

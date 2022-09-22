@@ -3,6 +3,8 @@ package com.atomykcoder.atomykplay.function;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.MediaStore;
 
@@ -11,7 +13,7 @@ import java.util.ArrayList;
 
 public class FetchMusic {
 
-    public static void fetchMusic(ArrayList<MusicDataCapsule> dataList, Context context) {
+    public static ArrayList<MusicDataCapsule> fetchMusic(ArrayList<MusicDataCapsule> dataList, Context context) {
         //Creating an array for data types we need
         String selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0";
         String[] proj = {
@@ -57,6 +59,7 @@ public class FetchMusic {
                 audioCursor.close();
             }
         }
+        return dataList;
     }
 
 

@@ -14,7 +14,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.SearchView;
 import android.widget.Toast;
 
@@ -55,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String BROADCAST_PLAY_NEXT_MUSIC = "com.atomykcoder.atomykplay.PlayNextMusic";
     public static final String BROADCAST_PLAY_PREVIOUS_MUSIC = "com.atomykcoder.atomykplay.PlayPreviousMusic";
     public static boolean service_bound = false;
+    public static boolean is_granted = false;
     public static MediaPlayerService media_player_service;
     public static ServiceConnection service_connection = new ServiceConnection() {
         @Override
@@ -100,15 +100,15 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
 
         //Checking permissions before activity creation (method somewhere down in the script)
-        checkPermission();
+
         setFragmentInSlider();
+        if (checkPermission())
+            if (!service_bound) {
 
-        if (!service_bound) {
-
-            Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
-            startService(playerIntent);
-            bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
-        }
+                Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
+                startService(playerIntent);
+                bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
+            }
 
     }
 
@@ -119,13 +119,59 @@ public class MainActivity extends AppCompatActivity {
         storage.storeMusicList(dataList);
         storage.storeMusicIndex(position);
 
-        if (service_bound) {
+
+        if (!service_bound) {
+
+            Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
+            startService(playerIntent);
+            bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
+        } else if (service_bound) {
             //store new position
             storage.storeMusicIndex(position);
             //service is active send media with broadcast receiver
             Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEW_MUSIC);
             sendBroadcast(broadcastIntent);
         }
+    }
+
+    private void setFragmentInSlider() {
+        PlayerFragment fragment = new PlayerFragment();
+        FragmentManager manager = getSupportFragmentManager();
+        FragmentTransaction transaction = manager.beginTransaction();
+        transaction.replace(R.id.main_container, fragment);
+        transaction.commit();
+    }
+
+    //Checks whether user granted permissions for external storage or not
+    //if not then shows dialogue to grant permissions
+    private boolean checkPermission() {
+
+        Dexter.withContext(MainActivity.this)
+                .withPermissions(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.READ_PHONE_STATE)
+                .withListener(new MultiplePermissionsListener() {
+                    @SuppressLint("NotifyDataSetChanged")
+                    @Override
+                    public void onPermissionsChecked(MultiplePermissionsReport multiplePermissionsReport) {
+                        //Fetch Music List along with it's metadata and save it in "dataList"
+
+
+                        FetchMusic.fetchMusic(dataList, MainActivity.this);
+
+                        //Setting up adapter
+
+                        linearLayout.setVisibility(View.GONE);
+                        adapter = new MusicAdapter(MainActivity.this, dataList);
+                        recyclerView.setAdapter(adapter);
+                        is_granted = true;
+                    }
+
+                    @Override
+                    public void onPermissionRationaleShouldBeShown(List<PermissionRequest> list, PermissionToken permissionToken) {
+                        permissionToken.continuePermissionRequest();
+                        is_granted = false;
+                    }
+                }).check();
+        return is_granted;
     }
 
     private SlidingUpPanelLayout.PanelSlideListener onSlideChange() {
@@ -142,16 +188,18 @@ public class MainActivity extends AppCompatActivity {
             public void onPanelCollapsed(View panel) {
                 View miniPlayer = PlayerFragment.mini_play_view;
                 View mainPlayer = findViewById(R.id.player_layout);
-                mainPlayer.setVisibility(View.GONE);
                 miniPlayer.setVisibility(View.VISIBLE);
+                miniPlayer.setAlpha(1);
+                mainPlayer.setAlpha(0);
             }
 
             @Override
             public void onPanelExpanded(View panel) {
                 View miniPlayer = PlayerFragment.mini_play_view;
                 View mainPlayer = findViewById(R.id.player_layout);
-                mainPlayer.setVisibility(View.VISIBLE);
                 miniPlayer.setVisibility(View.GONE);
+                miniPlayer.setAlpha(0);
+                mainPlayer.setAlpha(1);
             }
 
             @Override
@@ -192,33 +240,6 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(this, string, Toast.LENGTH_SHORT).show();
     }
 
-
-    //Checks whether user granted permissions for external storage or not
-    //if not then shows dialogue to grant permissions
-    void checkPermission() {
-        Dexter.withContext(getApplicationContext())
-                .withPermissions(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.READ_PHONE_STATE)
-                .withListener(new MultiplePermissionsListener() {
-                    @SuppressLint("NotifyDataSetChanged")
-                    @Override
-                    public void onPermissionsChecked(MultiplePermissionsReport multiplePermissionsReport) {
-                        //Fetch Music List along with it's metadata and save it in "dataList"
-
-                        FetchMusic.fetchMusic(dataList, MainActivity.this);
-
-                        //Setting up adapter
-                        linearLayout.setVisibility(View.GONE);
-                        adapter = new MusicAdapter(MainActivity.this, dataList);
-                        recyclerView.setAdapter(adapter);
-                    }
-
-                    @Override
-                    public void onPermissionRationaleShouldBeShown(List<PermissionRequest> list, PermissionToken permissionToken) {
-                        permissionToken.continuePermissionRequest();
-                    }
-                }).check();
-    }
-
     @Override
     public void onBackPressed() {
         if (sliding_up_panel_layout.getPanelState() == SlidingUpPanelLayout.PanelState.COLLAPSED) {
@@ -226,15 +247,6 @@ public class MainActivity extends AppCompatActivity {
         } else {
             sliding_up_panel_layout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
         }
-    }
-
-
-    private void setFragmentInSlider() {
-        PlayerFragment fragment = new PlayerFragment();
-        FragmentManager manager = getSupportFragmentManager();
-        FragmentTransaction transaction = manager.beginTransaction();
-        transaction.replace(R.id.main_container, fragment);
-        transaction.commit();
     }
 
     //region Searchbar Functionality Code here

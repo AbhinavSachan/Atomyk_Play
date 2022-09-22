@@ -4,7 +4,11 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.1" />
+        <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable-v24/ic_next_for_noti.xml" value="0.1525" />
         <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable-v24/ic_no_album.xml" value="0.1525" />
+        <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable-v24/ic_pause_for_noti.xml" value="0.1525" />
+        <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable-v24/ic_play_for_noti.xml" value="0.1525" />
+        <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable-v24/ic_previous_for_noti.xml" value="0.1525" />
         <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/bottom_sheet_round_rad.xml" value="0.1525" />
         <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/card_round_background.xml" value="0.1525" />
         <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/custom_round_corner_for_music_list.xml" value="0.1525" />
@@ -21,6 +25,7 @@
         <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/layout/fragment_bottom_opt_sheet.xml" value="0.23981481481481481" />
         <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/layout/fragment_mini_player.xml" value="0.23981481481481481" />
         <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/layout/fragment_player.xml" value="0.23981481481481481" />
+        <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/layout/main_player_layout.xml" value="0.23981481481481481" />
         <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/layout/music_item_layout.xml" value="0.23981481481481481" />
         <entry key="..\:/Users/deadm/AndroidStudioProjects/Atomyk_Play/AtomykPlay/app/src/main/res/layout/activity_main.xml" value="0.1" />
         <entry key="..\:/Users/deadm/AndroidStudioProjects/Atomyk_Play/AtomykPlay/app/src/main/res/layout/activity_searchable.xml" value="0.1834117144078666" />

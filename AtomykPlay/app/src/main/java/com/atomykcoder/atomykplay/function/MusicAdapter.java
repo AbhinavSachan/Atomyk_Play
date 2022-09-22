@@ -2,6 +2,10 @@ package com.atomykcoder.atomykplay.function;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.os.ParcelFileDescriptor;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,8 +27,11 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 
+import java.io.FileDescriptor;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.function.BiFunction;
 
 public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewAdapter> implements Filterable {
     Context context;
@@ -79,8 +86,9 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewAda
         MusicDataCapsule currentItem = musicData.get(position);
 
         if (currentItem.getsAlbumUri() != null) {
+
             try {
-                Glide.with(context).load(currentItem.getsAlbumUri()).apply(new RequestOptions()
+                Glide.with(context).load(getAlbumArt(context,currentItem.getsAlbumUri())).apply(new RequestOptions()
                         .override(150, 150)).into(holder.imageView);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -116,6 +124,23 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewAda
         holder.nameText.setText(sName);
         holder.artistText.setText(currentItem.getsArtist());
         holder.durationText.setText(currentItem.getsLength());
+    }
+
+    private static Bitmap getAlbumArt(Context context, String uri) {
+        Bitmap bm = null;
+        BitmapFactory.Options options = new BitmapFactory.Options();
+
+        try {
+            ParcelFileDescriptor parcelFileDescriptor = context.getContentResolver().openFileDescriptor(Uri.parse(uri),"r");
+            if (parcelFileDescriptor != null) {
+                FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
+                bm = BitmapFactory.decodeFileDescriptor(fileDescriptor,null,options);
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        return bm;
     }
 
     @Override
