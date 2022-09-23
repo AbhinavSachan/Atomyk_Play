@@ -418,11 +418,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
     @Override
     public void onCompletion(MediaPlayer mp) {
-        if (mp.isPlaying()) {
-            skipToNext();
-            updateMetaData();
-            buildNotification(PlaybackStatus.PLAYING);
-        }
+        stopMedia();
+        buildNotification(PlaybackStatus.PAUSED);
     }
 
     @Override

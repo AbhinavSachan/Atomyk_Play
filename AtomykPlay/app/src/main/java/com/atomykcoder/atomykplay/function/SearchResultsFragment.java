@@ -2,29 +2,25 @@ package com.atomykcoder.atomykplay.function;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Filter;
-import android.widget.Filterable;
-import android.widget.TextView;
-
 import com.atomykcoder.atomykplay.R;
 
 import java.util.ArrayList;
-import java.util.Collection;
+
 //Search Layout Fragment for Performing Searches and Presenting Results
 public class SearchResultsFragment extends Fragment {
 
     @SuppressLint("StaticFieldLeak")
-    public RecyclerView recyclerView;
+    public RecyclerView recycler_view;
     private ArrayList<MusicDataCapsule> originalMusicList;
     private MusicAdapter adapter;
 
@@ -32,26 +28,27 @@ public class SearchResultsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view =  inflater.inflate(R.layout.fragment_search_results, container, false);
-        recyclerView = view.findViewById(R.id.search_recycler_view);
+        View view = inflater.inflate(R.layout.fragment_search_results, container, false);
+        recycler_view = view.findViewById(R.id.search_recycler_view);
         originalMusicList = new ArrayList<>();
 
-        setAdapter(view);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(view.getContext());
+        recycler_view.setLayoutManager(layoutManager);
+        recycler_view.setItemAnimator(new DefaultItemAnimator());
+
+        setAdapter();
 
         return view;
     }
 
     //Initializing And setting an adapter
-    private void setAdapter(View view) {
+    private void setAdapter() {
         adapter = new MusicAdapter(getContext(), originalMusicList);
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(view.getContext());
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
-        recyclerView.setAdapter(adapter);
+        recycler_view.setAdapter(adapter);
     }
 
     //Function that adds music to an arraylist which is being used to show music in recycler view
-    private void addMusic(MusicDataCapsule song){
+    private void addMusic(MusicDataCapsule song) {
         originalMusicList.add(song);
     }
 
@@ -59,17 +56,20 @@ public class SearchResultsFragment extends Fragment {
     //Function also do cleanup from previous search
     public void search(String query, ArrayList<MusicDataCapsule> dataList) {
         cleanUp();
-        if(!query.isEmpty()) {
+        if (!query.isEmpty()) {
             for (MusicDataCapsule song : dataList) {
-                if (song.getsName().toLowerCase().contains(query)) {
+                //searching by name and artist
+                if (song.getsName().toLowerCase().contains(query) || song.getsArtist().toLowerCase().contains(query)) {
                     addMusic(song);
                 }
             }
-            }
+        }
     }
+
     //Cleaning up any search results left from last search
     //Refreshing list
-    private void cleanUp(){
+    @SuppressLint("NotifyDataSetChanged")
+    private void cleanUp() {
         originalMusicList.clear();
         adapter.notifyDataSetChanged();
     }

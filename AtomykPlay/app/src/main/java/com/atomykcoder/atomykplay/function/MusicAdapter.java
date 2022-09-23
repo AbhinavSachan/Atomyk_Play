@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -70,9 +71,15 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewAda
         holder.cardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MainActivity mainActivity = (MainActivity) context;
+                //check is service active
+                StorageUtil storage = new StorageUtil(context);
+                //Store serializable music list to sharedPreference
+                storage.storeMusicList(musicData);
+                storage.storeMusicIndex(position);
 
+                MainActivity mainActivity = (MainActivity) context;
                 mainActivity.playAudio(position);
+
             }
         });
 

@@ -119,21 +119,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void playAudio(int position) {
-        //check is service active
-        StorageUtil storage = new StorageUtil(MainActivity.this);
-        //Store serializable music list to sharedPreference
-        storage.storeMusicList(dataList);
-        storage.storeMusicIndex(position);
+//        //check is service active
+//        StorageUtil storage = new StorageUtil(MainActivity.this);
+//        //Store serializable music list to sharedPreference
+//        storage.storeMusicList(dataList);
+//        storage.storeMusicIndex(position);
 
 
-        if (!service_bound) {
-
-            Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
-            startService(playerIntent);
-            bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
-        } else if (service_bound) {
+        if (service_bound) {
             //store new position
-            storage.storeMusicIndex(position);
+//            storage.storeMusicIndex(position);
             //service is active send media with broadcast receiver
             Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEW_MUSIC);
             sendBroadcast(broadcastIntent);
@@ -178,6 +173,7 @@ public class MainActivity extends AppCompatActivity {
                         linearLayout.setVisibility(View.GONE);
                         adapter = new MusicAdapter(MainActivity.this, dataList);
                         recyclerView.setAdapter(adapter);
+                        adapter.notifyDataSetChanged();
                         is_granted = true;
                     }
 
@@ -306,6 +302,5 @@ public class MainActivity extends AppCompatActivity {
         });
         return super.onCreateOptionsMenu(menu);
     }
-
     //endregion
 }
