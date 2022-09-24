@@ -6,13 +6,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Filter;
-import android.widget.Filterable;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -23,26 +19,38 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.MainActivity;
 import com.atomykcoder.atomykplay.R;
-import com.atomykcoder.atomykplay.player.PlayerFragment;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
-import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.function.BiFunction;
 
-public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewAdapter>{
+public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewAdapter> {
     Context context;
     ArrayList<MusicDataCapsule> musicData;
-
 
 
     public MusicAdapter(Context context, ArrayList<MusicDataCapsule> musicData) {
         this.context = context;
         this.musicData = musicData;
+    }
+
+    private static Bitmap getAlbumArt(Context context, String uri) {
+        Bitmap bm = null;
+        BitmapFactory.Options options = new BitmapFactory.Options();
+
+        try {
+            ParcelFileDescriptor parcelFileDescriptor = context.getContentResolver().openFileDescriptor(Uri.parse(uri), "r");
+            if (parcelFileDescriptor != null) {
+                FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
+                bm = BitmapFactory.decodeFileDescriptor(fileDescriptor, null, options);
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        return bm;
     }
 
     @NonNull
@@ -60,8 +68,8 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewAda
         if (currentItem.getsAlbumUri() != null) {
 
             try {
-                Glide.with(context).load(getAlbumArt(context,currentItem.getsAlbumUri())).apply(new RequestOptions()
-                        .override(150, 150)).into(holder.imageView);
+                Glide.with(context).load(getAlbumArt(context, currentItem.getsAlbumUri())).apply(new RequestOptions().placeholder(R.drawable.ic_no_album)
+                        .override(75, 75)).into(holder.imageView);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -78,7 +86,7 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewAda
                 storage.storeMusicIndex(position);
 
                 MainActivity mainActivity = (MainActivity) context;
-                mainActivity.playAudio(position);
+                mainActivity.playAudio();
 
             }
         });
@@ -104,28 +112,10 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewAda
         holder.durationText.setText(currentItem.getsLength());
     }
 
-    private static Bitmap getAlbumArt(Context context, String uri) {
-        Bitmap bm = null;
-        BitmapFactory.Options options = new BitmapFactory.Options();
-
-        try {
-            ParcelFileDescriptor parcelFileDescriptor = context.getContentResolver().openFileDescriptor(Uri.parse(uri),"r");
-            if (parcelFileDescriptor != null) {
-                FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
-                bm = BitmapFactory.decodeFileDescriptor(fileDescriptor,null,options);
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        return bm;
-    }
-
     @Override
     public int getItemCount() {
         return musicData.size();
     }
-
 
 
     public static class MusicViewAdapter extends RecyclerView.ViewHolder {

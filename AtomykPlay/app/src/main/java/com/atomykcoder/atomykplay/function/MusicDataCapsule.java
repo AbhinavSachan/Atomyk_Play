@@ -1,7 +1,29 @@
 package com.atomykcoder.atomykplay.function;
 
 public class MusicDataCapsule {
-    String sName, sArtist, sAlbum, sAlbumUri, sLength, sPath;
+    String sName;
+    String sArtist;
+    String sAlbum;
+    String sAlbumUri;
+    String sLength;
+    String sPath;
+    String sBitrate;
+    String sMimeType;
+    String sSize;
+    String sGenre;
+
+    public MusicDataCapsule(String sName, String sArtist, String sAlbum, String sAlbumUri, String sLength, String sPath, String sBitrate, String sMimeType, String sSize, String sGenre) {
+        this.sName = sName;
+        this.sArtist = sArtist;
+        this.sAlbum = sAlbum;
+        this.sAlbumUri = sAlbumUri;
+        this.sLength = sLength;
+        this.sPath = sPath;
+        this.sBitrate = sBitrate;
+        this.sMimeType = sMimeType;
+        this.sSize = sSize;
+        this.sGenre = sGenre;
+    }
 
     public MusicDataCapsule(String sName, String sArtist, String sAlbum, String sAlbumUri, String sLength, String sPath) {
         this.sName = sName;
@@ -10,6 +32,22 @@ public class MusicDataCapsule {
         this.sAlbumUri = sAlbumUri;
         this.sLength = sLength;
         this.sPath = sPath;
+    }
+
+    public String getsBitrate() {
+        return sBitrate;
+    }
+
+    public String getsMimeType() {
+        return sMimeType;
+    }
+
+    public String getsSize() {
+        return sSize;
+    }
+
+    public String getsGenre() {
+        return sGenre;
     }
 
     public String getsName() {

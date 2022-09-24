@@ -1,12 +1,15 @@
 <resources>
     <string name="app_name">Atomyk Play</string>
-    <string name="song_name_e">Song Name</string>
+    <string name="song_name_e">Song</string>
     <string name="empty">Empty</string>
-    <string name="song_artist_e">Song Artist</string>
+    <string name="song_artist_e">Artist</string>
     <string name="nothing_to_show">Nothing to show</string>
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="search">Search</string>
-    <string name="search_hint">Search songs</string>
     <string name="song_dur_e">Duration</string>
+    <string name="extension">EXT</string>
+    <string name="bitrate">FREQ</string>
+    <string name="big_dot">•</string>
+    <string name="lyrics">Lyrics</string>
+    <string name="imageView">"Music cover image"</string>
 </resources>

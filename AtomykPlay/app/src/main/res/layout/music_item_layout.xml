@@ -6,8 +6,8 @@
     android:layout_height="70dp"
     android:layout_marginStart="6dp"
     android:layout_marginTop="6dp"
-    android:background="@drawable/custom_round_corner_for_music_list"
-    android:focusable="true">
+    android:focusable="true"
+    android:background="@drawable/custom_round_corner_for_music_list">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -32,14 +32,12 @@
                 android:id="@+id/song_album_cover"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@drawable/ic_music"
                 android:contentDescription="@string/empty"
                 android:scaleType="centerCrop" />
 
         </com.google.android.material.card.MaterialCardView>
 
         <LinearLayout
-            android:id="@+id/linearLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginStart="58dp"
@@ -85,7 +83,7 @@
                     android:id="@+id/song_length"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="2dp"
+                    android:layout_marginEnd="10dp"
                     android:layout_weight="1.2"
                     android:gravity="end"
                     android:padding="2dp"
@@ -99,11 +97,12 @@
 
         <ImageView
             android:id="@+id/more_option_i_btn"
-            android:layout_width="25dp"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_marginEnd="7dp"
             android:contentDescription="@string/empty"
             android:focusable="true"
+            android:padding="10dp"
             android:src="@drawable/ic_option"
             android:theme="@android:style/ThemeOverlay.Material.Dark"
             app:layout_constraintBottom_toBottomOf="parent"

@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
@@ -23,6 +24,7 @@ import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.function.MusicDataCapsule;
 import com.atomykcoder.atomykplay.function.StorageUtil;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 import java.util.ArrayList;
@@ -38,7 +40,15 @@ public class PlayerFragment extends Fragment {
     public static LinearProgressIndicator mini_progress;
     @SuppressLint("StaticFieldLeak")
     public static TextView mini_name_text, mini_artist_text;
+    //main player seekbar
+    public static SeekBar seekBarMain;
     private static Context context;
+    //cover image view
+    private static ImageView playerCoverImage;
+    private static View lyricsOpenLayout;
+    public static ImageView playImg;
+    private static ImageView queImg, repeatImg, previousImg, nextImg, shuffleImg, favoriteImg, timerImg, optionImg;
+    private static TextView playerSongNameTv, playerArtistNameTv, mimeTypeTv, bitrateTv;
 
     //setting up mini player layout
     //calling it from service when player is prepared and also calling it in this fragment class
@@ -47,25 +57,67 @@ public class PlayerFragment extends Fragment {
 
         StorageUtil storageUtil = new StorageUtil(context);
         ArrayList<MusicDataCapsule> musicList = storageUtil.loadMusic();
-        MusicDataCapsule activeMusic;
+        MusicDataCapsule activeMusic = null;
         int musicIndex;
         musicIndex = storageUtil.loadMusicIndex();
 
-        if (musicIndex != -1 && musicIndex < musicList.size()) {
-            activeMusic = musicList.get(musicIndex);
-        } else {
-            activeMusic = musicList.get(0);
-        }
+        if (musicList != null)
+            if (musicIndex != -1 && musicIndex < musicList.size()) {
+                activeMusic = musicList.get(musicIndex);
+            } else {
+                activeMusic = musicList.get(0);
+            }
 
         try {
-            assert activeMusic != null;
-            Glide.with(context).load(activeMusic.getsAlbumUri())
-                    .into(mini_cover);
-            try {
-                mini_name_text.setText(activeMusic.getsName());
-                mini_artist_text.setText(activeMusic.getsArtist());
-            } catch (Exception e) {
-                e.printStackTrace();
+            if (activeMusic != null) {
+                Glide.with(context).load(activeMusic.getsAlbumUri()).apply(new RequestOptions().placeholder(R.drawable.ic_music))
+                        .override(75, 75)
+                        .into(mini_cover);
+                try {
+                    mini_name_text.setText(activeMusic.getsName());
+                    mini_artist_text.setText(activeMusic.getsArtist());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public static void setMainPlayerLayout() {
+
+        StorageUtil storageUtil = new StorageUtil(context);
+        ArrayList<MusicDataCapsule> musicList = storageUtil.loadMusic();
+        MusicDataCapsule activeMusic = null;
+        int musicIndex;
+        musicIndex = storageUtil.loadMusicIndex();
+
+        if (musicList != null)
+            if (musicIndex != -1 && musicIndex < musicList.size()) {
+                activeMusic = musicList.get(musicIndex);
+            } else {
+                activeMusic = musicList.get(0);
+            }
+
+        try {
+            if (activeMusic != null) {
+                Glide.with(context).load(activeMusic.getsAlbumUri()).apply(new RequestOptions().placeholder(R.drawable.ic_music_thumbnail))
+                        .override(500, 500)
+                        .into(playerCoverImage);
+
+                try {
+                    playerSongNameTv.setText(activeMusic.getsName());
+                    playerArtistNameTv.setText(activeMusic.getsArtist());
+                    mimeTypeTv.setText(activeMusic.getsMimeType());
+                    int bitrateInNum = Integer.parseInt(activeMusic.getsBitrate()) / 1000;
+                    String finalBitrate = bitrateInNum + " KBPS";
+
+                    bitrateTv.setText(finalBitrate);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -83,14 +135,34 @@ public class PlayerFragment extends Fragment {
         } catch (NullPointerException e) {
             e.printStackTrace();
         }
-        player_layout = view.findViewById(R.id.player_layout);
+
+        //Mini player items initializations
         mini_play_view = view.findViewById(R.id.mini_player_layout);
-        mini_cover = mini_play_view.findViewById(R.id.song_album_cover_mini);
-        mini_artist_text = mini_play_view.findViewById(R.id.song_artist_name_mini);
-        mini_name_text = mini_play_view.findViewById(R.id.song_name_mini);
-        mini_next = mini_play_view.findViewById(R.id.more_option_i_btn_next);
-        mini_pause = mini_play_view.findViewById(R.id.more_option_i_btn_play);
-        mini_progress = mini_play_view.findViewById(R.id.mini_player_progress);
+        mini_cover = view.findViewById(R.id.song_album_cover_mini);
+        mini_artist_text = view.findViewById(R.id.song_artist_name_mini);
+        mini_name_text = view.findViewById(R.id.song_name_mini);
+        mini_next = view.findViewById(R.id.more_option_i_btn_next);
+        mini_pause = view.findViewById(R.id.more_option_i_btn_play);
+        mini_progress = view.findViewById(R.id.mini_player_progress);
+
+        //Main player items initializations
+        player_layout = view.findViewById(R.id.player_layout);
+        playerCoverImage = view.findViewById(R.id.player_cover_iv);
+        seekBarMain = view.findViewById(R.id.player_seek_bar);
+        queImg = view.findViewById(R.id.player_que_iv);
+        repeatImg = view.findViewById(R.id.player_repeat_iv);
+        previousImg = view.findViewById(R.id.player_previous_iv);
+        playImg = view.findViewById(R.id.player_play_iv);
+        nextImg = view.findViewById(R.id.player_next_iv);
+        shuffleImg = view.findViewById(R.id.player_shuffle_iv);
+        favoriteImg = view.findViewById(R.id.player_favorite_iv);
+        timerImg = view.findViewById(R.id.player_timer_iv);
+        optionImg = view.findViewById(R.id.player_option_iv);
+        playerSongNameTv = view.findViewById(R.id.player_song_name_tv);
+        playerArtistNameTv = view.findViewById(R.id.player_song_artist_name_tv);
+        mimeTypeTv = view.findViewById(R.id.player_mime_type_iv);
+        bitrateTv = view.findViewById(R.id.player_bitrate_iv);
+        lyricsOpenLayout = view.findViewById(R.id.player_lyrics_ll);
 
         //click listeners on mini player
         //sending broadcast on click
@@ -107,10 +179,29 @@ public class PlayerFragment extends Fragment {
                 playNextAudio();
             }
         });
+        previousImg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                playPreviousAudio();
+            }
+        });
+        nextImg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                playNextAudio();
+            }
+        });
+        playImg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pausePlayAudio();
+            }
+        });
 
         //layout setup ☺
         if (is_granted) {
             setMiniLayout();
+            setMainPlayerLayout();
         }
         return view;
     }

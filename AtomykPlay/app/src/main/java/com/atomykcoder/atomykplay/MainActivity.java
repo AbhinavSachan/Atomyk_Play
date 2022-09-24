@@ -14,7 +14,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.SearchView;
 import android.widget.Toast;
@@ -31,7 +30,6 @@ import com.atomykcoder.atomykplay.function.FetchMusic;
 import com.atomykcoder.atomykplay.function.MusicAdapter;
 import com.atomykcoder.atomykplay.function.MusicDataCapsule;
 import com.atomykcoder.atomykplay.function.SearchResultsFragment;
-import com.atomykcoder.atomykplay.function.StorageUtil;
 import com.atomykcoder.atomykplay.player.PlayerFragment;
 import com.atomykcoder.atomykplay.services.MediaPlayerService;
 import com.karumi.dexter.Dexter;
@@ -48,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
 
     //♥♥☻☻
     //all public variables are in this format "public_variable"
-    //all public and private static string variables are in this format "PUBLIC_PRIVATE_STATIC_FINAL_STRING"
+    //all public and private static final string variables are in this format "PUBLIC_PRIVATE_STATIC_FINAL_STRING"
     //all private variables are in this format "privateVariable"
     //♥♥☻☻
 
@@ -106,29 +104,14 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
 
         //Checking permissions before activity creation (method somewhere down in the script)
+        checkPermission();
 
         setFragmentInSlider();
-        if (checkPermission())
-            if (!service_bound) {
-
-                Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
-                startService(playerIntent);
-                bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
-            }
-
     }
 
-    public void playAudio(int position) {
-//        //check is service active
-//        StorageUtil storage = new StorageUtil(MainActivity.this);
-//        //Store serializable music list to sharedPreference
-//        storage.storeMusicList(dataList);
-//        storage.storeMusicIndex(position);
-
-
+    public void playAudio() {
         if (service_bound) {
             //store new position
-//            storage.storeMusicIndex(position);
             //service is active send media with broadcast receiver
             Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEW_MUSIC);
             sendBroadcast(broadcastIntent);
@@ -143,7 +126,8 @@ public class MainActivity extends AppCompatActivity {
         transaction.replace(R.id.main_container, fragment);
         transaction.commit();
     }
-    private void setSearchFragment(){
+
+    private void setSearchFragment() {
 
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
@@ -155,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
 
     //Checks whether user granted permissions for external storage or not
     //if not then shows dialogue to grant permissions
-    private boolean checkPermission() {
+    private void checkPermission() {
 
         Dexter.withContext(MainActivity.this)
                 .withPermissions(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.READ_PHONE_STATE)
@@ -164,12 +148,16 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onPermissionsChecked(MultiplePermissionsReport multiplePermissionsReport) {
                         //Fetch Music List along with it's metadata and save it in "dataList"
-
-
                         FetchMusic.fetchMusic(dataList, MainActivity.this);
 
-                        //Setting up adapter
+                        //starting the service when permissions are granted
+                        if (!service_bound) {
+                            Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
+                            startService(playerIntent);
+                            bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
+                        }
 
+                        //Setting up adapter
                         linearLayout.setVisibility(View.GONE);
                         adapter = new MusicAdapter(MainActivity.this, dataList);
                         recyclerView.setAdapter(adapter);
@@ -183,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
                         is_granted = false;
                     }
                 }).check();
-        return is_granted;
+
     }
 
     private SlidingUpPanelLayout.PanelSlideListener onSlideChange() {
@@ -240,12 +228,11 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
-
         if (service_bound) {
             unbindService(service_connection);
             media_player_service.stopSelf();
         }
+        super.onDestroy();
     }
 
     private void showToast(String string) {
@@ -279,7 +266,7 @@ public class MainActivity extends AppCompatActivity {
                 setSearchFragment();
             }
         });
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener()  {
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 return false;

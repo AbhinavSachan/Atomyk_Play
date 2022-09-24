@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/player_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/player_layout"
     android:background="@color/primary_bg">
 
     <RelativeLayout
@@ -98,6 +98,7 @@
             android:contentDescription="@string/imageView"
             android:elevation="10dp"
             android:focusable="true"
+            android:foreground="@drawable/round_select_effect_small"
             android:padding="10dp"
             android:src="@drawable/ic_music_list"
             android:theme="@android:style/ThemeOverlay.Material.Dark" />
@@ -124,6 +125,7 @@
             android:contentDescription="@string/imageView"
             android:elevation="10dp"
             android:focusable="true"
+            android:foreground="@drawable/round_select_effect_small"
             android:padding="10dp"
             android:src="@drawable/ic_repeat_empty"
             android:theme="@android:style/ThemeOverlay.Material.Dark" />
@@ -138,6 +140,7 @@
             android:contentDescription="@string/imageView"
             android:elevation="10dp"
             android:focusable="true"
+            android:foreground="@drawable/round_select_effect"
             android:padding="10dp"
             android:src="@drawable/ic_previous_main"
             android:theme="@android:style/ThemeOverlay.Material.Dark" />
@@ -153,6 +156,7 @@
             android:cropToPadding="false"
             android:elevation="4dp"
             android:focusable="true"
+            android:foreground="@drawable/round_select_effect_for_play_btn"
             android:padding="10dp"
             android:src="@drawable/ic_play_main"
             android:theme="@android:style/ThemeOverlay.Material.Dark" />
@@ -166,6 +170,7 @@
             android:contentDescription="@string/imageView"
             android:elevation="10dp"
             android:focusable="true"
+            android:foreground="@drawable/round_select_effect"
             android:padding="10dp"
             android:src="@drawable/ic_next_main"
             android:theme="@android:style/ThemeOverlay.Material.Dark" />
@@ -181,6 +186,7 @@
             android:contentDescription="@string/imageView"
             android:elevation="10dp"
             android:focusable="true"
+            android:foreground="@drawable/round_select_effect_small"
             android:padding="10dp"
             android:src="@drawable/ic_shuffle_empty"
             android:theme="@android:style/ThemeOverlay.Material.Dark" />
@@ -250,6 +256,7 @@
         android:contentDescription="@string/imageView"
         android:elevation="10dp"
         android:focusable="true"
+        android:foreground="@drawable/round_select_effect_small"
         android:padding="10dp"
         android:src="@drawable/ic_favorite_border"
         android:theme="@android:style/ThemeOverlay.Material.Dark" />
@@ -266,6 +273,7 @@
         android:contentDescription="@string/imageView"
         android:elevation="10dp"
         android:focusable="true"
+        android:foreground="@drawable/round_select_effect_small"
         android:padding="10dp"
         android:src="@drawable/ic_timer"
         android:theme="@android:style/ThemeOverlay.Material.Dark" />
@@ -282,6 +290,7 @@
         android:contentDescription="@string/imageView"
         android:elevation="10dp"
         android:focusable="true"
+        android:foreground="@drawable/round_select_effect_small"
         android:padding="12dp"
         android:src="@drawable/ic_more_horizontal"
         android:theme="@android:style/ThemeOverlay.Material.Dark" />

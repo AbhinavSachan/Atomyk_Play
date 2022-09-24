@@ -9,24 +9,52 @@
         <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable-v24/ic_pause_for_noti.xml" value="0.1525" />
         <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable-v24/ic_play_for_noti.xml" value="0.1525" />
         <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable-v24/ic_previous_for_noti.xml" value="0.1525" />
+        <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable-v31/round_select_effect.xml" value="0.164" />
+        <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/border_shadow.xml" value="0.164" />
         <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/bottom_sheet_round_rad.xml" value="0.1525" />
         <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/card_round_background.xml" value="0.1525" />
         <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/custom_round_corner_for_music_list.xml" value="0.1525" />
+        <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/custom_thumb.xml" value="0.164" />
+        <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/ic_favorite.xml" value="0.164" />
+        <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/ic_favorite_border.xml" value="0.164" />
         <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/ic_launcher_background.xml" value="0.1" />
+        <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/ic_more_horizontal.xml" value="0.164" />
         <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/ic_music.xml" value="0.1525" />
         <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/ic_music_list.xml" value="0.1525" />
+        <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/ic_music_thumbnail.xml" value="0.164" />
+        <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/ic_next_main.xml" value="0.164" />
+        <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/ic_option.xml" value="0.164" />
         <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/ic_pause.xml" value="0.1525" />
+        <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/ic_pause_main.xml" value="0.164" />
         <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/ic_play.xml" value="0.1525" />
+        <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/ic_play_main.xml" value="0.164" />
+        <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/ic_previous_main.xml" value="0.164" />
+        <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/ic_repeat_45.xml" value="0.164" />
+        <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/ic_repeat_empty.xml" value="0.164" />
         <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/ic_sheet_line.xml" value="0.1525" />
+        <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/ic_shuffle_45.xml" value="0.164" />
+        <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/ic_shuffle_empty.xml" value="0.164" />
+        <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/ic_sleep.xml" value="0.164" />
+        <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/ic_timer.xml" value="0.164" />
         <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/icon_outline.xml" value="0.1525" />
+        <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/round_corner.xml" value="0.164" />
+        <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/round_select_effect.xml" value="0.164" />
+        <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/round_select_effect_for_play_btn.xml" value="0.164" />
+        <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/round_select_effect_small.xml" value="0.164" />
+        <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/seekbar_custom_thumb.xml" value="0.164" />
+        <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/seekbar_progress.xml" value="0.164" />
+        <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/seekbar_style.xml" value="0.164" />
+        <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/layout-land/main_player_layout.xml" value="0.146875" />
+        <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/layout-notnight/main_player_layout.xml" value="0.2611111111111111" />
         <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/layout-v23/fragment_mini_player.xml" value="0.23981481481481481" />
+        <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/layout-v23/main_player_layout.xml" value="0.2611111111111111" />
         <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/layout-v23/music_item_layout.xml" value="0.23981481481481481" />
         <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/layout/activity_main.xml" value="0.23981481481481481" />
         <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/layout/fragment_bottom_opt_sheet.xml" value="0.23981481481481481" />
         <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/layout/fragment_mini_player.xml" value="0.23981481481481481" />
         <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/layout/fragment_player.xml" value="0.23981481481481481" />
         <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/layout/fragment_search_results.xml" value="0.23981481481481481" />
-        <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/layout/main_player_layout.xml" value="0.23981481481481481" />
+        <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/layout/main_player_layout.xml" value="0.2611111111111111" />
         <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/layout/music_item_layout.xml" value="0.23981481481481481" />
         <entry key="..\:/Users/deadm/AndroidStudioProjects/Atomyk_Play/AtomykPlay/app/src/main/res/layout/activity_main.xml" value="0.1" />
         <entry key="..\:/Users/deadm/AndroidStudioProjects/Atomyk_Play/AtomykPlay/app/src/main/res/layout/activity_searchable.xml" value="0.1834117144078666" />
@@ -41,6 +69,7 @@
         <entry key="..\:/Users/renus/AndroidStudioProjects/AtomykPlay/app/src/main/res/drawable/icon_outline.xml" value="0.1525" />
         <entry key="..\:/Users/renus/AndroidStudioProjects/AtomykPlay/app/src/main/res/layout/activity_main.xml" value="0.23981481481481481" />
         <entry key="..\:/Users/renus/AndroidStudioProjects/AtomykPlay/app/src/main/res/layout/music_item_layout.xml" value="0.264" />
+        <entry key="..\:/Users/renus/AppData/Local/Android/Sdk/platforms/android-32/data/res/drawable/ratingbar_indicator_material.xml" value="0.164" />
       </map>
     </option>
   </component>
@@ -49,5 +78,12 @@
   </component>
   <component name="ProjectType">
     <option name="id" value="Android" />
+  </component>
+  <component name="VisualizationToolProject">
+    <option name="state">
+      <ProjectState>
+        <option name="scale" value="0.136" />
+      </ProjectState>
+    </option>
   </component>
 </project>
