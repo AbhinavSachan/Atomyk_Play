@@ -103,7 +103,7 @@
             android:layout_marginEnd="7dp"
             android:contentDescription="@string/empty"
             android:focusable="true"
-            android:padding="10dp"
+            android:padding="12dp"
             android:foreground="@drawable/round_select_effect_small"
             android:src="@drawable/ic_option"
             android:theme="@android:style/ThemeOverlay.Material.Dark"

@@ -4,6 +4,7 @@ import static com.atomykcoder.atomykplay.MainActivity.BROADCAST_PAUSE_PLAY_MUSIC
 import static com.atomykcoder.atomykplay.MainActivity.BROADCAST_PLAY_NEXT_MUSIC;
 import static com.atomykcoder.atomykplay.MainActivity.BROADCAST_PLAY_PREVIOUS_MUSIC;
 import static com.atomykcoder.atomykplay.MainActivity.is_granted;
+import static com.atomykcoder.atomykplay.MainActivity.media_player_service;
 import static com.atomykcoder.atomykplay.MainActivity.service_bound;
 
 import android.annotation.SuppressLint;
@@ -48,7 +49,7 @@ public class PlayerFragment extends Fragment {
     private static View lyricsOpenLayout;
     public static ImageView playImg;
     private static ImageView queImg, repeatImg, previousImg, nextImg, shuffleImg, favoriteImg, timerImg, optionImg;
-    private static TextView playerSongNameTv, playerArtistNameTv, mimeTypeTv, bitrateTv;
+    private static TextView playerSongNameTv, playerArtistNameTv, mimeTypeTv, bitrateTv, durationTv, curPosTv;
 
     //setting up mini player layout
     //calling it from service when player is prepared and also calling it in this fragment class
@@ -160,12 +161,14 @@ public class PlayerFragment extends Fragment {
         optionImg = view.findViewById(R.id.player_option_iv);
         playerSongNameTv = view.findViewById(R.id.player_song_name_tv);
         playerArtistNameTv = view.findViewById(R.id.player_song_artist_name_tv);
-        mimeTypeTv = view.findViewById(R.id.player_mime_type_iv);
-        bitrateTv = view.findViewById(R.id.player_bitrate_iv);
+        mimeTypeTv = view.findViewById(R.id.player_mime_type_tv);
+        bitrateTv = view.findViewById(R.id.player_bitrate_tv);
+        durationTv = view.findViewById(R.id.player_duration_tv);
+        curPosTv = view.findViewById(R.id.player_current_pos_tv);
         lyricsOpenLayout = view.findViewById(R.id.player_lyrics_ll);
 
         //click listeners on mini player
-        //sending broadcast on click
+        //and sending broadcast on click
         mini_pause.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -236,4 +239,5 @@ public class PlayerFragment extends Fragment {
         super.onDestroy();
 
     }
+
 }

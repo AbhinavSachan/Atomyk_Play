@@ -12,6 +12,8 @@
     <color name="light_slate_gray">#636970</color>
     <color name="click_effect_color">#9A231F1F</color>
     <color name="click_effect_color_inverse">#7CF3C2EC</color>
+    <color name="seekbar_shadow_center">#22000000</color>
+    <color name="seekbar_shadow_start">#44000000</color>
 
 
 </resources>

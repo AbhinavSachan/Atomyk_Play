@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/player_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/player_layout"
     android:background="@color/primary_bg">
 
     <RelativeLayout
@@ -188,23 +188,48 @@
 
     </LinearLayout>
 
-    <SeekBar
-        android:id="@+id/player_seek_bar"
+    <RelativeLayout
+        android:id="@+id/seekbar_relative_l"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/control_ll"
         android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="24dp"
-        android:padding="6dp"
-        android:progressDrawable="@drawable/seekbar_style"
-        android:splitTrack="false"
-        android:thumb="@drawable/seekbar_progress" />
+        android:layout_marginTop="24dp">
+
+        <SeekBar
+            android:id="@+id/player_seek_bar"
+            android:layout_width="match_parent"
+            android:layout_height="16dp"
+            android:padding="6dp"
+            android:progressDrawable="@drawable/seekbar_style"
+            android:splitTrack="false"
+            android:thumbTint="@color/tertiary_bg" />
+
+        <TextView
+            android:id="@+id/player_current_pos_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/player_seek_bar"
+            android:text="@string/empty"
+            android:textColor="@color/light_slate_gray" />
+        <TextView
+            android:id="@+id/player_duration_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_below="@+id/player_seek_bar"
+            android:text="@string/empty"
+            android:textColor="@color/light_slate_gray" />
+
+
+    </RelativeLayout>
 
     <LinearLayout
         android:id="@+id/s_details_ll"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/player_seek_bar"
+        android:layout_below="@id/seekbar_relative_l"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="16dp"
         android:gravity="center_horizontal"
@@ -212,7 +237,7 @@
         android:weightSum="3">
 
         <TextView
-            android:id="@+id/player_mime_type_iv"
+            android:id="@+id/player_mime_type_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -229,7 +254,7 @@
 
 
         <TextView
-            android:id="@+id/player_bitrate_iv"
+            android:id="@+id/player_bitrate_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"

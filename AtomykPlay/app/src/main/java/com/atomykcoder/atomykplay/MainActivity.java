@@ -70,6 +70,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onServiceDisconnected(ComponentName name) {
             service_bound = false;
+            media_player_service = null;
         }
     };
     public SlidingUpPanelLayout sliding_up_panel_layout;
@@ -91,7 +92,6 @@ public class MainActivity extends AppCompatActivity {
         searchResultsFragment = new SearchResultsFragment();
 
         sliding_up_panel_layout = findViewById(R.id.sliding_layout);
-        sliding_up_panel_layout.setPanelSlideListener(onSlideChange());
 
 
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -105,8 +105,20 @@ public class MainActivity extends AppCompatActivity {
 
         //Checking permissions before activity creation (method somewhere down in the script)
         checkPermission();
+        if (checkPermission()) {
+            //starting the service when permissions are granted
+            if (!service_bound) {
+                Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
+                startService(playerIntent);
+                bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
+            }
 
-        setFragmentInSlider();
+        }
+
+        sliding_up_panel_layout.setPanelSlideListener(onSlideChange());
+        if (savedInstanceState == null) {
+            setFragmentInSlider();
+        }
     }
 
     public void playAudio() {
@@ -139,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
 
     //Checks whether user granted permissions for external storage or not
     //if not then shows dialogue to grant permissions
-    private void checkPermission() {
+    private boolean checkPermission() {
 
         Dexter.withContext(MainActivity.this)
                 .withPermissions(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.READ_PHONE_STATE)
@@ -149,13 +161,6 @@ public class MainActivity extends AppCompatActivity {
                     public void onPermissionsChecked(MultiplePermissionsReport multiplePermissionsReport) {
                         //Fetch Music List along with it's metadata and save it in "dataList"
                         FetchMusic.fetchMusic(dataList, MainActivity.this);
-
-                        //starting the service when permissions are granted
-                        if (!service_bound) {
-                            Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
-                            startService(playerIntent);
-                            bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
-                        }
 
                         //Setting up adapter
                         linearLayout.setVisibility(View.GONE);
@@ -171,7 +176,7 @@ public class MainActivity extends AppCompatActivity {
                         is_granted = false;
                     }
                 }).check();
-
+        return is_granted;
     }
 
     private SlidingUpPanelLayout.PanelSlideListener onSlideChange() {
@@ -181,7 +186,7 @@ public class MainActivity extends AppCompatActivity {
                 View miniPlayer = PlayerFragment.mini_play_view;
                 View mainPlayer = findViewById(R.id.player_layout);
                 miniPlayer.setAlpha(1 - slideOffset * 4);
-                mainPlayer.setAlpha(0 + slideOffset * 4);
+                mainPlayer.setAlpha(0 + slideOffset * 2);
             }
 
             @Override
@@ -197,7 +202,7 @@ public class MainActivity extends AppCompatActivity {
             public void onPanelExpanded(View panel) {
                 View miniPlayer = PlayerFragment.mini_play_view;
                 View mainPlayer = findViewById(R.id.player_layout);
-                miniPlayer.setVisibility(View.GONE);
+                miniPlayer.setVisibility(View.INVISIBLE);
                 miniPlayer.setAlpha(0);
                 mainPlayer.setAlpha(1);
             }
@@ -228,10 +233,12 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        if (service_bound) {
-            unbindService(service_connection);
-            media_player_service.stopSelf();
-        }
+        if (media_player_service != null)
+            if (service_bound) {
+                unbindService(service_connection);
+                service_bound = false;
+                media_player_service.stopSelf();
+            }
         super.onDestroy();
     }
 
