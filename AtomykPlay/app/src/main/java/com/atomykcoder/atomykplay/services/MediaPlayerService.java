@@ -36,6 +36,7 @@ import androidx.core.app.NotificationCompat;
 
 import com.atomykcoder.atomykplay.MainActivity;
 import com.atomykcoder.atomykplay.R;
+import com.atomykcoder.atomykplay.function.FetchMusic;
 import com.atomykcoder.atomykplay.function.MusicDataCapsule;
 import com.atomykcoder.atomykplay.function.PlaybackStatus;
 import com.atomykcoder.atomykplay.function.StorageUtil;
@@ -455,7 +456,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
     @Override
     public void onCompletion(MediaPlayer mp) {
-        resetSeekBar();
+        stopMedia();
         setIcon(PlaybackStatus.PAUSED);
         buildNotification(PlaybackStatus.PAUSED);
     }
@@ -497,7 +498,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         playMedia();
         PlayerFragment.setMiniLayout();
         PlayerFragment.setMainPlayerLayout();
-        setSeekBarInMiniPlayer();
+        setSeekBar();
 
     }
 
@@ -559,13 +560,12 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 removeAudioFocus();
             }
         }
-        resetSeekBar();
         stopSelf();
     }
 
-    private void resetSeekBar(){
-        PlayerFragment.mini_progress.setProgress(0);
-        PlayerFragment.seekBarMain.setProgress(0);
+    private void resetSeekBar(int progress) {
+        PlayerFragment.mini_progress.setProgress(progress);
+        PlayerFragment.seekBarMain.setProgress(progress);
     }
 
     public void stoppedByNotification() {
@@ -605,6 +605,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
         if (media_player != null) {
             if (!media_player.isPlaying()) {
+                media_player.seekTo(resumePosition);
                 media_player.start();
                 setIcon(PlaybackStatus.PLAYING);
                 buildNotification(PlaybackStatus.PLAYING);
@@ -615,9 +616,11 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     }
 
     //setting progress on player seekbar and mini progress bar
-    public void setSeekBarInMiniPlayer() {
-        PlayerFragment.mini_progress.setMax(media_player.getDuration());
-        PlayerFragment.seekBarMain.setMax(media_player.getDuration());
+    public void setSeekBar() {
+        if (media_player != null) {
+            PlayerFragment.mini_progress.setMax(media_player.getDuration());
+            PlayerFragment.seekBarMain.setMax(media_player.getDuration());
+        }
         handler = new Handler(Looper.getMainLooper());
 
         if (media_player != null && media_player.isPlaying() && media_player.getCurrentPosition() < media_player.getDuration()) {
@@ -627,6 +630,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 public void run() {
                     PlayerFragment.mini_progress.setProgress(media_player.getCurrentPosition());
                     PlayerFragment.seekBarMain.setProgress(media_player.getCurrentPosition());
+                    String cur = FetchMusic.convertDuration(String.valueOf(media_player.getCurrentPosition()));
+                    PlayerFragment.curPosTv.setText(cur);
                     handler.postDelayed(runnable, 100);
                 }
             };
@@ -810,14 +815,12 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
     @Override
     public void onStartTrackingTouch(SeekBar seekBar) {
-        handler.removeCallbacks(runnable);
+
     }
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
-        handler.removeCallbacks(runnable);
-        media_player.seekTo(seekBar.getProgress());
-        setSeekBarInMiniPlayer();
+
     }
 
     public class LocalBinder extends Binder {

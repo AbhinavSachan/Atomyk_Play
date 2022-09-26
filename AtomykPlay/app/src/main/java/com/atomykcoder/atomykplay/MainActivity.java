@@ -115,6 +115,7 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
+        sliding_up_panel_layout.setFocusableInTouchMode(false);
         sliding_up_panel_layout.setPanelSlideListener(onSlideChange());
         if (savedInstanceState == null) {
             setFragmentInSlider();

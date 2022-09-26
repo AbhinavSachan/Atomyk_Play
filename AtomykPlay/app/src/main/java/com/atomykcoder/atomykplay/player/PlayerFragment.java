@@ -4,7 +4,6 @@ import static com.atomykcoder.atomykplay.MainActivity.BROADCAST_PAUSE_PLAY_MUSIC
 import static com.atomykcoder.atomykplay.MainActivity.BROADCAST_PLAY_NEXT_MUSIC;
 import static com.atomykcoder.atomykplay.MainActivity.BROADCAST_PLAY_PREVIOUS_MUSIC;
 import static com.atomykcoder.atomykplay.MainActivity.is_granted;
-import static com.atomykcoder.atomykplay.MainActivity.media_player_service;
 import static com.atomykcoder.atomykplay.MainActivity.service_bound;
 
 import android.annotation.SuppressLint;
@@ -43,13 +42,13 @@ public class PlayerFragment extends Fragment {
     public static TextView mini_name_text, mini_artist_text;
     //main player seekbar
     public static SeekBar seekBarMain;
+    public static ImageView playImg;
     private static Context context;
     //cover image view
     private static ImageView playerCoverImage;
     private static View lyricsOpenLayout;
-    public static ImageView playImg;
     private static ImageView queImg, repeatImg, previousImg, nextImg, shuffleImg, favoriteImg, timerImg, optionImg;
-    private static TextView playerSongNameTv, playerArtistNameTv, mimeTypeTv, bitrateTv, durationTv, curPosTv;
+    public static TextView playerSongNameTv, playerArtistNameTv, mimeTypeTv, bitrateTv, durationTv, curPosTv;
 
     //setting up mini player layout
     //calling it from service when player is prepared and also calling it in this fragment class
@@ -109,6 +108,7 @@ public class PlayerFragment extends Fragment {
                         .into(playerCoverImage);
 
                 try {
+                    durationTv.setText(activeMusic.getsLength());
                     playerSongNameTv.setText(activeMusic.getsName());
                     playerArtistNameTv.setText(activeMusic.getsArtist());
                     mimeTypeTv.setText(activeMusic.getsMimeType());

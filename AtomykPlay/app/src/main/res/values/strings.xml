@@ -12,4 +12,5 @@
     <string name="big_dot">•</string>
     <string name="lyrics">Lyrics</string>
     <string name="imageView">"Music cover image"</string>
+    <string name="start_pos">00:00</string>
 </resources>

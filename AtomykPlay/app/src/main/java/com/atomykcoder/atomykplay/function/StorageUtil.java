@@ -57,4 +57,23 @@ public class StorageUtil {
         editor.clear();
         editor.apply();
     }
+
+    public int loadMusicLastPos(String name) {
+        sharedPreferences = context.getSharedPreferences(POSITION_STORAGE, Context.MODE_PRIVATE);
+        return sharedPreferences.getInt(name, 0);
+    }
+
+    public void saveMusicLastPos(String name, int position) {
+        sharedPreferences = context.getSharedPreferences(POSITION_STORAGE, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt(name, position);
+        editor.apply();
+    }
+
+    public void clearCacheMusicLastPos() {
+        sharedPreferences = context.getSharedPreferences(POSITION_STORAGE, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.clear();
+        editor.apply();
+    }
 }
