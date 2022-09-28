@@ -20,7 +20,7 @@ public class StorageUtil {
         this.context = context;
     }
 
-    public void storeMusicList(ArrayList<MusicDataCapsule> list) {
+    public void saveMusicList(ArrayList<MusicDataCapsule> list) {
         sharedPreferences = context.getSharedPreferences(STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         Gson gson = new Gson();
@@ -39,7 +39,7 @@ public class StorageUtil {
         return gson.fromJson(json, type);
     }
 
-    public void storeMusicIndex(int index) {
+    public void saveMusicIndex(int index) {
         sharedPreferences = context.getSharedPreferences(STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putInt("musicIndex", index);
@@ -54,26 +54,27 @@ public class StorageUtil {
     public void clearCacheAudioPlaylist() {
         sharedPreferences = context.getSharedPreferences(STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.clear();
+        editor.remove("musicIndex");
+        editor.remove("musicList");
         editor.apply();
     }
 
-    public int loadMusicLastPos(String name) {
+    public int loadMusicLastPos() {
         sharedPreferences = context.getSharedPreferences(POSITION_STORAGE, Context.MODE_PRIVATE);
-        return sharedPreferences.getInt(name, 0);
+        return sharedPreferences.getInt("musicPosition", 0);
     }
 
-    public void saveMusicLastPos(String name, int position) {
+    public void saveMusicLastPos(int position) {
         sharedPreferences = context.getSharedPreferences(POSITION_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putInt(name, position);
+        editor.putInt("musicPosition", position);
         editor.apply();
     }
 
     public void clearCacheMusicLastPos() {
         sharedPreferences = context.getSharedPreferences(POSITION_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.clear();
+        editor.remove("musicPosition");
         editor.apply();
     }
 }

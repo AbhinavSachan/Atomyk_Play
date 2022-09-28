@@ -4,16 +4,18 @@
     android:id="@+id/cv_song_play"
     android:layout_width="match_parent"
     android:layout_height="70dp"
-    android:layout_marginStart="6dp"
-    android:layout_marginTop="6dp"
-    android:foreground="?android:attr/selectableItemBackground"
+    android:background="@color/secondary_bg"
+    android:clickable="true"
     android:focusable="true"
-    android:background="@drawable/custom_round_corner_for_music_list">
+    android:foreground="?android:attr/selectableItemBackground">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="6dp"
+        android:paddingStart="6dp"
+        android:paddingTop="6dp"
+        android:paddingEnd="0dp"
+        android:paddingBottom="6dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -42,7 +44,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginStart="58dp"
-            android:layout_marginEnd="34dp"
+            android:layout_marginEnd="40dp"
             android:gravity="center"
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -100,11 +102,10 @@
             android:id="@+id/more_option_i_btn"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_marginEnd="7dp"
             android:contentDescription="@string/empty"
             android:focusable="true"
-            android:padding="12dp"
             android:foreground="@drawable/round_select_effect_small"
+            android:padding="12dp"
             android:src="@drawable/ic_option"
             android:theme="@android:style/ThemeOverlay.Material.Dark"
             app:layout_constraintBottom_toBottomOf="parent"

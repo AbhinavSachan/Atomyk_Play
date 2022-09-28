@@ -36,9 +36,8 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/music_recycler"
             android:layout_width="match_parent"
-            android:layout_height="838dp"
+            android:layout_height="match_parent"
             android:layout_below="@id/toolbar"
-            android:layout_marginTop="-3dp"
             android:clipToPadding="false"
             android:paddingBottom="85dp">
 

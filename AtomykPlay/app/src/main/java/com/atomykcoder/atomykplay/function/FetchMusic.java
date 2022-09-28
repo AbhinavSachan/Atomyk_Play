@@ -4,10 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
 import android.provider.MediaStore;
-
-import androidx.annotation.RequiresApi;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -27,6 +24,7 @@ public class FetchMusic {
                 MediaStore.Audio.Media.SIZE,
                 MediaStore.Audio.Media.BITRATE,
                 MediaStore.Audio.Media.GENRE,
+                MediaStore.Audio.Media.DATE_ADDED
         };
         //Creating a cursor to store all data of a song
         Cursor audioCursor = context.getContentResolver().query(
@@ -41,11 +39,17 @@ public class FetchMusic {
         if (audioCursor != null) {
             if (audioCursor.moveToFirst()) {
                 do {
-                    String sTitle = audioCursor.getString(0);
+                    String sTitle = audioCursor.getString(0)
+                            .replace("y2mate.com - ", "")
+                            .replace("&#039;", "'")
+                            .replace("%20", " ")
+                            .replace("_", " ")
+                            .replace("&amp;", ",");
+                    ;
                     String sArtist = audioCursor.getString(1);
                     String sAlbumId = audioCursor.getString(2);
                     //converting duration in readable format
-                    String sLength = convertDuration(audioCursor.getString(3));
+                    String sLength = audioCursor.getString(3);
                     String sPath = audioCursor.getString(4);
                     String sAlbum = audioCursor.getString(5);
                     String sMimeType = audioCursor.getString(6);
@@ -64,15 +68,15 @@ public class FetchMusic {
                     music = new MusicDataCapsule(sTitle, sArtist, sAlbum, sAlbumUri, sLength, sPath, sBitrate, sMimeType, sSize, sGenre);
                     File file = new File(music.getsPath());
                     if (file.exists()) {
-                        dataList.add(music);
+                        dataList.add(0,music);
                     }
+
                 } while (audioCursor.moveToNext());
                 audioCursor.close();
             }
         }
         return dataList;
     }
-
 
     //converting duration from millis to readable time
     @SuppressLint("DefaultLocale")

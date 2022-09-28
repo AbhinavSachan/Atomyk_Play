@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.view.MenuItemCompat;
 import android.util.Log;
@@ -30,6 +31,7 @@ import com.atomykcoder.atomykplay.function.FetchMusic;
 import com.atomykcoder.atomykplay.function.MusicAdapter;
 import com.atomykcoder.atomykplay.function.MusicDataCapsule;
 import com.atomykcoder.atomykplay.function.SearchResultsFragment;
+import com.atomykcoder.atomykplay.function.StorageUtil;
 import com.atomykcoder.atomykplay.player.PlayerFragment;
 import com.atomykcoder.atomykplay.services.MediaPlayerService;
 import com.karumi.dexter.Dexter;
@@ -89,42 +91,58 @@ public class MainActivity extends AppCompatActivity {
         //initializations
         linearLayout = findViewById(R.id.song_not_found_layout);
         recyclerView = findViewById(R.id.music_recycler);
+        sliding_up_panel_layout = findViewById(R.id.sliding_layout);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+
+
         searchResultsFragment = new SearchResultsFragment();
 
-        sliding_up_panel_layout = findViewById(R.id.sliding_layout);
 
-
-        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setTitle(R.string.app_name);
 
         dataList = new ArrayList<>();
 
+        recyclerView.setNestedScrollingEnabled(false);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
 
         //Checking permissions before activity creation (method somewhere down in the script)
         checkPermission();
-        if (checkPermission()) {
-            //starting the service when permissions are granted
-            if (!service_bound) {
-                Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
-                startService(playerIntent);
-                bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
-            }
+        if (is_granted) {
+            //Fetch Music List along with it's metadata and save it in "dataList"
+            FetchMusic.fetchMusic(dataList, MainActivity.this);
 
+            //Setting up adapter
+            linearLayout.setVisibility(View.GONE);
+            adapter = new MusicAdapter(MainActivity.this, dataList);
+            recyclerView.setAdapter(adapter);
         }
 
-        sliding_up_panel_layout.setFocusableInTouchMode(false);
         sliding_up_panel_layout.setPanelSlideListener(onSlideChange());
-        if (savedInstanceState == null) {
-            setFragmentInSlider();
-        }
+        setFragmentInSlider();
+
     }
 
     public void playAudio() {
-        if (service_bound) {
-            //store new position
+        //starting the service when permissions are granted
+        //starting service if its not started yet otherwise it will send broadcast msg to service
+        //we can't start service on startup of app it will lead to pausing all other sound playing on device
+
+        if (!service_bound) {
+            Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
+            startService(playerIntent);
+            bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
+            service_bound = true;
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    //service is active send media with broadcast receiver
+                    Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEW_MUSIC);
+                    sendBroadcast(broadcastIntent);
+                }
+            }, 20);
+        } else {
             //service is active send media with broadcast receiver
             Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEW_MUSIC);
             sendBroadcast(broadcastIntent);
@@ -145,29 +163,19 @@ public class MainActivity extends AppCompatActivity {
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
         transaction.replace(R.id.sec_container, searchResultsFragment);
-        transaction.addToBackStack(searchResultsFragment.toString())
-                .commit();
-        Log.i("TAG", "Search Fragment Deployed");
+        transaction.addToBackStack(searchResultsFragment.toString());
+        transaction.commit();
     }
 
     //Checks whether user granted permissions for external storage or not
     //if not then shows dialogue to grant permissions
-    private boolean checkPermission() {
+    private void checkPermission() {
 
         Dexter.withContext(MainActivity.this)
                 .withPermissions(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.READ_PHONE_STATE)
                 .withListener(new MultiplePermissionsListener() {
-                    @SuppressLint("NotifyDataSetChanged")
                     @Override
                     public void onPermissionsChecked(MultiplePermissionsReport multiplePermissionsReport) {
-                        //Fetch Music List along with it's metadata and save it in "dataList"
-                        FetchMusic.fetchMusic(dataList, MainActivity.this);
-
-                        //Setting up adapter
-                        linearLayout.setVisibility(View.GONE);
-                        adapter = new MusicAdapter(MainActivity.this, dataList);
-                        recyclerView.setAdapter(adapter);
-                        adapter.notifyDataSetChanged();
                         is_granted = true;
                     }
 
@@ -177,7 +185,6 @@ public class MainActivity extends AppCompatActivity {
                         is_granted = false;
                     }
                 }).check();
-        return is_granted;
     }
 
     private SlidingUpPanelLayout.PanelSlideListener onSlideChange() {
@@ -233,14 +240,33 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onDestroy() {
+    protected void onStop() {
+        super.onStop();
         if (media_player_service != null)
             if (service_bound) {
                 unbindService(service_connection);
                 service_bound = false;
-                media_player_service.stopSelf();
             }
+    }
+
+
+    @SuppressLint("NotifyDataSetChanged")
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+    }
+
+    @Override
+    protected void onDestroy() {
         super.onDestroy();
+        new StorageUtil(this).clearCacheMusicLastPos();
+
+        if (media_player_service != null)
+            if (service_bound) {
+                unbindService(service_connection);
+                service_bound = false;
+            }
     }
 
     private void showToast(String string) {

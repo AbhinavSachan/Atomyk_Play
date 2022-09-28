@@ -1,11 +1,9 @@
 package com.atomykcoder.atomykplay.function;
 
+import static com.atomykcoder.atomykplay.function.FetchMusic.convertDuration;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
-import android.os.ParcelFileDescriptor;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,8 +20,6 @@ import com.atomykcoder.atomykplay.R;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 
-import java.io.FileDescriptor;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
 public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewAdapter> {
@@ -34,23 +30,6 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewAda
     public MusicAdapter(Context context, ArrayList<MusicDataCapsule> musicData) {
         this.context = context;
         this.musicData = musicData;
-    }
-
-    private static Bitmap getAlbumArt(Context context, String uri) {
-        Bitmap bm = null;
-        BitmapFactory.Options options = new BitmapFactory.Options();
-
-        try {
-            ParcelFileDescriptor parcelFileDescriptor = context.getContentResolver().openFileDescriptor(Uri.parse(uri), "r");
-            if (parcelFileDescriptor != null) {
-                FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
-                bm = BitmapFactory.decodeFileDescriptor(fileDescriptor, null, options);
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        return bm;
     }
 
     @NonNull
@@ -65,15 +44,13 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewAda
     public void onBindViewHolder(@NonNull MusicViewAdapter holder, @SuppressLint("RecyclerView") int position) {
         MusicDataCapsule currentItem = musicData.get(position);
 
-        if (currentItem.getsAlbumUri() != null) {
-
-            try {
-                Glide.with(context).load(getAlbumArt(context, currentItem.getsAlbumUri())).apply(new RequestOptions().placeholder(R.drawable.ic_no_album)
-                        .override(75, 75)).into(holder.imageView);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        try {
+            Glide.with(context).load(currentItem.getsAlbumUri()).apply(new RequestOptions().placeholder(R.drawable.ic_no_album)
+                    .override(75, 75)).into(holder.imageView);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
 
         //playing song
         holder.cardView.setOnClickListener(new View.OnClickListener() {
@@ -82,8 +59,8 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewAda
                 //check is service active
                 StorageUtil storage = new StorageUtil(context);
                 //Store serializable music list to sharedPreference
-                storage.storeMusicList(musicData);
-                storage.storeMusicIndex(position);
+                storage.saveMusicList(musicData);
+                storage.saveMusicIndex(position);
 
                 MainActivity mainActivity = (MainActivity) context;
                 mainActivity.playAudio();
@@ -100,16 +77,10 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewAda
         });
 
 
-        String sName = currentItem.getsName()
-                .replace("y2mate.com - ", "")
-                .replace("&#039;", "'")
-                .replace("%20", " ")
-                .replace("_", " ")
-                .replace("&amp;", ",");
 
-        holder.nameText.setText(sName);
+        holder.nameText.setText(currentItem.getsName());
         holder.artistText.setText(currentItem.getsArtist());
-        holder.durationText.setText(currentItem.getsLength());
+        holder.durationText.setText(convertDuration(currentItem.getsLength()));
     }
 
     @Override
