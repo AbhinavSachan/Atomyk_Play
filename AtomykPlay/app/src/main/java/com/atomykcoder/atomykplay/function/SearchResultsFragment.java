@@ -6,6 +6,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DefaultItemAnimator;
@@ -23,6 +26,8 @@ public class SearchResultsFragment extends Fragment {
     public RecyclerView recycler_view;
     private ArrayList<MusicDataCapsule> originalMusicList;
     private MusicAdapter adapter;
+    private RadioButton songButton, albumButton, artistButton;
+    public RadioGroup radioGroup;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -32,13 +37,35 @@ public class SearchResultsFragment extends Fragment {
         recycler_view = view.findViewById(R.id.search_recycler_view);
         originalMusicList = new ArrayList<>();
 
+        // Filter Buttons Initialization
+        songButton = view.findViewById(R.id.song_button);
+        albumButton = view.findViewById(R.id.album_button);
+        artistButton = view.findViewById(R.id.artist_button);
+        radioGroup = view.findViewById(R.id.radio_group);
+
+        //Clear Filter
+        clearFilters(view);
+
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(view.getContext());
         recycler_view.setLayoutManager(layoutManager);
         recycler_view.setItemAnimator(new DefaultItemAnimator());
-
         setAdapter();
 
         return view;
+    }
+
+    //Clear filter whenever clear button is pressed
+    private void clearFilters(View view){
+        Button clearButton;
+        clearButton = view.findViewById(R.id.clear_filters);
+        clearButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                songButton.setChecked(false);
+                albumButton.setChecked(false);
+                artistButton.setChecked(false);
+            }
+        });
     }
 
     //Initializing And setting an adapter
@@ -54,16 +81,66 @@ public class SearchResultsFragment extends Fragment {
 
     //Function that performs searches and if it finds a match we add that song to our arraylist
     //Function also do cleanup from previous search
+    //Function also searches based on filters selected
     public void search(String query, ArrayList<MusicDataCapsule> dataList) {
         cleanUp();
-        if (!query.isEmpty()) {
-            for (MusicDataCapsule song : dataList) {
-                //searching by name and artist
-                if (song.getsName().toLowerCase().contains(query) || song.getsArtist().toLowerCase().contains(query)) {
-                    addMusic(song);
+
+        //get id from selected button
+        int id = getRadioID();
+
+        // run a codebase based on selected id
+        switch (id) {
+            case 1:
+                if (!query.isEmpty()) {
+                    for (MusicDataCapsule song : dataList) {
+                        if (song.getsName().toLowerCase().contains(query)) {
+                            addMusic(song);
+                        }
+                    }
                 }
-            }
+                break;
+            case 2:
+                if (!query.isEmpty()) {
+                    for (MusicDataCapsule song : dataList) {
+                        if (song.getsAlbum().toLowerCase().contains(query)) {
+                            addMusic(song);
+                        }
+                    }
+                }
+                break;
+            case 3:
+                if (!query.isEmpty()) {
+                    for (MusicDataCapsule song : dataList) {
+                        if (song.getsArtist().toLowerCase().contains(query)) {
+                            addMusic(song);
+                        }
+                    }
+                }
+                break;
+            default:
+                if (!query.isEmpty()) {
+                    for (MusicDataCapsule song : dataList) {
+                        if (song.getsName().toLowerCase().contains(query) || (song.getsArtist().toLowerCase().contains(query))) {
+                            addMusic(song);
+                        }
+                    }
+                }
+                break;
         }
+    }
+
+    //get radio get based on which radio button is selected
+    private int getRadioID(){
+        int radioId = 0;
+
+       if(songButton.isChecked()){
+           radioId = 1;
+       } else if(albumButton.isChecked()){
+           radioId = 2;
+       } else if(artistButton.isChecked()){
+           radioId = 3;
+       }
+       return radioId;
     }
 
     //Cleaning up any search results left from last search

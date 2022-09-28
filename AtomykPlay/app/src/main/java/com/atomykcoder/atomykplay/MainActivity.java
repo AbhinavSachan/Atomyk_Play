@@ -16,6 +16,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.RadioGroup;
 import android.widget.SearchView;
 import android.widget.Toast;
 
@@ -308,6 +309,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextChange(String query) {
+                SearchWithFilters(query);
                 searchResultsFragment.search(query, dataList);
                 return false;
             }
@@ -323,5 +325,20 @@ public class MainActivity extends AppCompatActivity {
         });
         return super.onCreateOptionsMenu(menu);
     }
+
+    //runs Search Method if any radio button is pressed
+    private void SearchWithFilters(String query) {
+
+        //Check if any radio button is pressed
+        searchResultsFragment.radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup radioGroup, int i) {
+                //search if any radio button is pressed
+                searchResultsFragment.search(query, dataList);
+            }
+        });
+    }
     //endregion
+
+
 }
