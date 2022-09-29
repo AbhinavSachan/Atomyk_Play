@@ -29,8 +29,8 @@ import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 
+import com.atomykcoder.atomykplay.MainActivity;
 import com.atomykcoder.atomykplay.R;
-import com.atomykcoder.atomykplay.function.FetchMusic;
 import com.atomykcoder.atomykplay.function.MusicDataCapsule;
 import com.atomykcoder.atomykplay.function.StorageUtil;
 import com.atomykcoder.atomykplay.services.MediaPlayerService;
@@ -59,6 +59,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     private static ImageView queImg, repeatImg, previousImg, nextImg, shuffleImg, favoriteImg, timerImg, optionImg;
     private static TextView playerSongNameTv, playerArtistNameTv, mimeTv, bitrateTv;
     private int resumePosition = -1;
+    private StorageUtil storageUtil;
     //setting up mini player layout
     //calling it from service when player is prepared and also calling it in this fragment class
     //to set it on app start ☺
@@ -214,11 +215,15 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         shuffleImg.setOnClickListener(v -> shuffleList());
         favoriteImg.setOnClickListener(v -> addFavorite());
         timerImg.setOnClickListener(v -> setTimer());
-        lyricsOpenLayout.setOnClickListener(v-> openLyricsPanel());
+        lyricsOpenLayout.setOnClickListener(v -> openLyricsPanel());
         //top right option button
         optionImg.setOnClickListener(v -> optionMenu());
 
         seekBarMain.setOnSeekBarChangeListener(this);
+
+        //StorageUtil initialization
+        storageUtil = new StorageUtil(getContext());
+
 
         //layout setup ☺
         if (is_granted) {
@@ -230,6 +235,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
                 e.printStackTrace();
             }
         }
+
         return view;
     }
 
@@ -239,33 +245,87 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     }
 
     private void optionMenu() {
-        //add a bottom sheet to show music options like set to ringtone ,audio details ,add to favorite ,add to playlist etc.
+        //add a bottom sheet to show music options like set to ringtone ,audio details ,add to playlist etc.
         showToast("option");
     }
 
     private void setTimer() {
         //set a timer to set player turn off
-        showToast("timer");
+        //make a program that opens a custom dialog box where we can set timer by sliding the bars
+        //the difference between bars should be (5) ex-5,10,15,... up to 60 minutes
+        //initial button state would be default drawable and when we set a timer then it will change to ic_timer.xml
+        //and if we click on button again it will immediately cancel the timer without asking
+
     }
 
     private void addFavorite() {
         //add to favorite and save it in shared pref
-        showToast("favorite");
+        if (storageUtil.loadFavorite().equals("no_favorite")){
+            favoriteImg.setImageResource(R.drawable.ic_favorite);
+            storageUtil.saveFavorite("favorite");
+        }else if (storageUtil.loadFavorite().equals("favorite")){
+            favoriteImg.setImageResource(R.drawable.ic_favorite_border);
+            storageUtil.saveFavorite("no_favorite");
+        }
     }
 
     private void shuffleList() {
         //shuffle list program
-        showToast("shuffle");
+        if (storageUtil.loadShuffle().equals("no_shuffle")){
+            shuffleImg.setImageResource(R.drawable.ic_shuffle);
+            storageUtil.saveShuffle("shuffle");
+        }else if (storageUtil.loadShuffle().equals("shuffle")){
+            shuffleImg.setImageResource(R.drawable.ic_shuffle_empty);
+            storageUtil.saveShuffle("no_shuffle");
+        }
     }
 
     private void repeatFun() {
         //function for music list and only one music repeat and save that state in sharedPreference
-        showToast("repeat");
+        if (storageUtil.loadRepeatStatus().equals("no_repeat")){
+            repeatImg.setImageResource(R.drawable.ic_repeat);
+            storageUtil.saveRepeatStatus("repeat");
+        }else if (storageUtil.loadRepeatStatus().equals("repeat")){
+            repeatImg.setImageResource(R.drawable.ic_repeat_one);
+            storageUtil.saveRepeatStatus("repeat_one");
+        }else if (storageUtil.loadRepeatStatus().equals("repeat_one")){
+            repeatImg.setImageResource(R.drawable.ic_repeat_empty);
+            storageUtil.saveRepeatStatus("no_repeat");
+        }
     }
 
     private void openQue() {
         //show now playing music list
         showToast("song list");
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        //setting all buttons state from storage on startup
+        //for repeat button
+        if (storageUtil.loadRepeatStatus().equals("no_repeat")) {
+            repeatImg.setImageResource(R.drawable.ic_repeat_empty);
+        } else if (storageUtil.loadRepeatStatus().equals("repeat")) {
+            repeatImg.setImageResource(R.drawable.ic_repeat);
+        } else if (storageUtil.loadRepeatStatus().equals("repeat_one")) {
+            repeatImg.setImageResource(R.drawable.ic_repeat_one);
+        }
+
+        //for shuffle button
+        if (storageUtil.loadShuffle().equals("no_shuffle")) {
+            shuffleImg.setImageResource(R.drawable.ic_shuffle_empty);
+        } else if (storageUtil.loadShuffle().equals("shuffle")) {
+            shuffleImg.setImageResource(R.drawable.ic_shuffle);
+        }
+
+        //for favorite button
+        if (storageUtil.loadFavorite().equals("no_favorite")){
+            favoriteImg.setImageResource(R.drawable.ic_favorite_border);
+        }else if (storageUtil.loadFavorite().equals("favorite")){
+            favoriteImg.setImageResource(R.drawable.ic_favorite);
+        }
+
     }
 
     public void pausePlayAudio() {
@@ -392,7 +452,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         if (musicList != null)
             if (musicIndex != -1 && musicIndex < musicList.size()) {
                 activeMusic = musicList.get(musicIndex);
-            }else {
+            } else {
                 activeMusic = musicList.get(0);
             }
 

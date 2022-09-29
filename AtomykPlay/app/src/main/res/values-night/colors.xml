@@ -5,10 +5,11 @@
     <color name="primary_bg">#222222</color>
     <color name="space_black">#CDD8D8</color>
     <color name="soft_black">#BDBDBD</color>
-    <color name="light_slate_gray">#7E7F81</color>
+    <color name="light_slate_gray_blue">#7E838E</color>
     <color name="click_effect_color">#7CF3C2EC</color>
     <color name="click_effect_color_inverse">#9A231F1F</color>
     <color name="seekbar_shadow_center">#33FFFFFF</color>
     <color name="seekbar_shadow_start">#11FFFFFF</color>
+    <color name="for_empty_images">#C9858C91</color>
 
 </resources>

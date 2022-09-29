@@ -13,4 +13,8 @@
     <string name="lyrics">Lyrics</string>
     <string name="imageView">"Music cover image"</string>
     <string name="start_pos">00:00</string>
+    <string name="song">Song</string>
+    <string name="album">Album</string>
+    <string name="artist">Artist</string>
+    <string name="genre">Genre</string>
 </resources>

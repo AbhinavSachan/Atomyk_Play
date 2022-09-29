@@ -2,6 +2,7 @@ package com.atomykcoder.atomykplay.services;
 
 import static com.atomykcoder.atomykplay.ApplicationClass.CHANNEL_ID;
 import static com.atomykcoder.atomykplay.MainActivity.service_bound;
+import static com.atomykcoder.atomykplay.function.FetchMusic.convertDuration;
 import static com.atomykcoder.atomykplay.player.PlayerFragment.getEmbeddedImage;
 
 import android.app.Notification;
@@ -37,7 +38,6 @@ import androidx.core.app.NotificationCompat;
 
 import com.atomykcoder.atomykplay.MainActivity;
 import com.atomykcoder.atomykplay.R;
-import com.atomykcoder.atomykplay.function.FetchMusic;
 import com.atomykcoder.atomykplay.function.MusicDataCapsule;
 import com.atomykcoder.atomykplay.function.PlaybackStatus;
 import com.atomykcoder.atomykplay.function.StorageUtil;
@@ -448,12 +448,13 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
     @Override
     public void onCompletion(MediaPlayer mp) {
-        new StorageUtil(getApplicationContext()).clearCacheMusicLastPos();
-        buildNotification(PlaybackStatus.PAUSED);
-        setIcon(PlaybackStatus.PAUSED);
-        PlayerFragment.mini_progress.setProgress(0);
-        PlayerFragment.mini_progress.setMax(0);
-        stopMedia();
+        StorageUtil storageUtil = new StorageUtil(getApplicationContext());
+        storageUtil.clearCacheMusicLastPos();
+
+
+        musicList = storageUtil.loadMusic();
+        musicIndex = storageUtil.loadMusicIndex();
+        
     }
 
     @Override
@@ -533,7 +534,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         if (!requestAudioFocus()) {
             requestAudioFocus();
         }
-        if (audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) == 0f){
+        if (audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) == 0f) {
             Toast.makeText(this, "Volume is OFF", Toast.LENGTH_SHORT).show();
         }
         if (media_player != null)
@@ -582,9 +583,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         if (!requestAudioFocus()) {
             requestAudioFocus();
         }
-        if (audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) == 0f){
-            Toast.makeText(this, "Volume is OFF", Toast.LENGTH_SHORT).show();
-        }
         if (media_player != null) {
             if (!media_player.isPlaying()) {
                 int position = new StorageUtil(getApplicationContext()).loadMusicLastPos();
@@ -622,7 +620,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                     }
                     PlayerFragment.mini_progress.setProgress(position);
                     PlayerFragment.seekBarMain.setProgress(position);
-                    String cur = FetchMusic.convertDuration(String.valueOf(position));
+                    String cur = convertDuration(String.valueOf(position));
                     PlayerFragment.curPosTv.setText(cur);
                     handler.postDelayed(runnable, 100);
                 }
@@ -772,7 +770,9 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     public void onDestroy() {
         super.onDestroy();
         removeNotification();
-        removeAudioFocus();
+        if (!requestAudioFocus()) {
+            removeAudioFocus();
+        }
         new StorageUtil(getApplicationContext()).clearCacheMusicLastPos();
         if (media_player != null) {
             media_player.release();

@@ -2,11 +2,9 @@ package com.atomykcoder.atomykplay.function;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
@@ -24,10 +22,10 @@ public class SearchResultsFragment extends Fragment {
 
     @SuppressLint("StaticFieldLeak")
     public RecyclerView recycler_view;
+    public RadioGroup radioGroup;
     private ArrayList<MusicDataCapsule> originalMusicList;
     private MusicAdapter adapter;
-    private RadioButton songButton, albumButton, artistButton;
-    public RadioGroup radioGroup;
+    private RadioButton songButton, albumButton, artistButton, genreButton;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -41,10 +39,9 @@ public class SearchResultsFragment extends Fragment {
         songButton = view.findViewById(R.id.song_button);
         albumButton = view.findViewById(R.id.album_button);
         artistButton = view.findViewById(R.id.artist_button);
+        genreButton = view.findViewById(R.id.genre_button);
         radioGroup = view.findViewById(R.id.radio_group);
 
-        //Clear Filter
-        clearFilters(view);
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(view.getContext());
         recycler_view.setLayoutManager(layoutManager);
@@ -54,18 +51,11 @@ public class SearchResultsFragment extends Fragment {
         return view;
     }
 
-    //Clear filter whenever clear button is pressed
-    private void clearFilters(View view){
-        Button clearButton;
-        clearButton = view.findViewById(R.id.clear_filters);
-        clearButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                songButton.setChecked(false);
-                albumButton.setChecked(false);
-                artistButton.setChecked(false);
-            }
-        });
+    //this will set the song selected every time you open search bar
+    @Override
+    public void onResume() {
+        super.onResume();
+        songButton.setChecked(true);
     }
 
     //Initializing And setting an adapter
@@ -117,6 +107,16 @@ public class SearchResultsFragment extends Fragment {
                     }
                 }
                 break;
+            case 4:
+                if (!query.isEmpty()) {
+                    for (MusicDataCapsule song : dataList) {
+                        if (song.getsGenre() != null)
+                            if (song.getsGenre().toLowerCase().contains(query)) {
+                                addMusic(song);
+                            }
+                    }
+                }
+                break;
             default:
                 if (!query.isEmpty()) {
                     for (MusicDataCapsule song : dataList) {
@@ -130,17 +130,19 @@ public class SearchResultsFragment extends Fragment {
     }
 
     //get radio get based on which radio button is selected
-    private int getRadioID(){
+    private int getRadioID() {
         int radioId = 0;
 
-       if(songButton.isChecked()){
-           radioId = 1;
-       } else if(albumButton.isChecked()){
-           radioId = 2;
-       } else if(artistButton.isChecked()){
-           radioId = 3;
-       }
-       return radioId;
+        if (songButton.isChecked()) {
+            radioId = 1;
+        } else if (albumButton.isChecked()) {
+            radioId = 2;
+        } else if (artistButton.isChecked()) {
+            radioId = 3;
+        } else if (genreButton.isChecked()) {
+            radioId = 4;
+        }
+        return radioId;
     }
 
     //Cleaning up any search results left from last search

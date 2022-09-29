@@ -211,7 +211,7 @@
             android:layout_below="@+id/player_seek_bar"
             android:layout_alignParentStart="true"
             android:text="@string/start_pos"
-            android:textColor="@color/light_slate_gray" />
+            android:textColor="@color/light_slate_gray_blue" />
 
         <TextView
             android:id="@+id/player_duration_tv"
@@ -220,7 +220,7 @@
             android:layout_below="@+id/player_seek_bar"
             android:layout_alignParentEnd="true"
             android:text="@string/start_pos"
-            android:textColor="@color/light_slate_gray" />
+            android:textColor="@color/light_slate_gray_blue" />
 
 
     </RelativeLayout>
@@ -239,7 +239,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/extension"
-            android:textColor="@color/light_slate_gray" />
+            android:textColor="@color/light_slate_gray_blue" />
 
 
         <TextView
@@ -247,7 +247,7 @@
             android:layout_height="wrap_content"
             android:text="@string/big_dot"
             android:layout_marginHorizontal="3dp"
-            android:textColor="@color/light_slate_gray" />
+            android:textColor="@color/light_slate_gray_blue" />
 
 
         <TextView
@@ -255,7 +255,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/bitrate"
-            android:textColor="@color/light_slate_gray" />
+            android:textColor="@color/light_slate_gray_blue" />
 
 
     </LinearLayout>
@@ -289,7 +289,7 @@
         android:elevation="10dp"
         android:focusable="true"
         android:padding="10dp"
-        android:src="@drawable/ic_timer"
+        android:src="@drawable/ic_timer_add"
         android:theme="@android:style/ThemeOverlay.Material.Dark" />
 
 

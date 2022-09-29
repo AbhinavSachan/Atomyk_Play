@@ -9,11 +9,13 @@
     <color name="primary_bg">#FFC5F2</color>
     <color name="space_black">#2e3131</color>
     <color name="soft_black">#252525</color>
-    <color name="light_slate_gray">#636970</color>
+    <color name="light_slate_gray_blue">#42556A</color>
     <color name="click_effect_color">#9A231F1F</color>
     <color name="click_effect_color_inverse">#7CF3C2EC</color>
     <color name="seekbar_shadow_center">#22000000</color>
     <color name="seekbar_shadow_start">#44000000</color>
+    <color name="red">#CF2121</color>
+    <color name="for_empty_images">#DD99789C</color>
 
 
 </resources>
