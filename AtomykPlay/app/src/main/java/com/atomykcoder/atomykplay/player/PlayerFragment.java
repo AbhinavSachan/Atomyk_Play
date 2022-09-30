@@ -10,17 +10,22 @@ import static com.atomykcoder.atomykplay.MainActivity.service_connection;
 import static com.atomykcoder.atomykplay.function.FetchMusic.convertDuration;
 
 import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.webkit.MimeTypeMap;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
@@ -39,6 +44,8 @@ import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 @SuppressLint("StaticFieldLeak")
 public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeListener {
@@ -60,6 +67,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     private static TextView playerSongNameTv, playerArtistNameTv, mimeTv, bitrateTv;
     private int resumePosition = -1;
     private StorageUtil storageUtil;
+    final private CountDownTimer[] countDownTimer = new CountDownTimer[1];
     //setting up mini player layout
     //calling it from service when player is prepared and also calling it in this fragment class
     //to set it on app start ☺
@@ -169,6 +177,9 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
             e.printStackTrace();
         }
 
+
+
+
         //Mini player items initializations
         mini_play_view = view.findViewById(R.id.mini_player_layout);//○
         mini_cover = view.findViewById(R.id.song_album_cover_mini);//○
@@ -201,6 +212,9 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
 
         //click listeners on mini player
         //and sending broadcast on click
+
+        //set TimerImg Tag
+        timerImg.setTag(1);
 
         //play pause
         mini_pause.setOnClickListener(v -> pausePlayAudio());
@@ -250,12 +264,94 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     }
 
     private void setTimer() {
-        //set a timer to set player turn off
-        //make a program that opens a custom dialog box where we can set timer by sliding the bars
-        //the difference between bars should be (5) ex-5,10,15,... up to 60 minutes
-        //initial button state would be default drawable and when we set a timer then it will change to ic_timer.xml
-        //and if we click on button again it will immediately cancel the timer without asking
 
+        // If Timer icon is set to default
+        if(timerImg.getTag().equals(1)) {
+
+            //Create a dialogue Box
+            final Dialog timerDialogue = new Dialog(PlayerFragment.context);
+            timerDialogue.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            timerDialogue.setCancelable(true);
+            timerDialogue.setContentView(R.layout.timer_dialogue);
+
+            //Initialize Dialogue Box UI Items
+            TextView showTimeText = timerDialogue.findViewById(R.id.timer_time_textview);
+            SeekBar timerSeekBar = timerDialogue.findViewById(R.id.timer_time_seekbar);
+            Button timerConfirmButton = timerDialogue.findViewById(R.id.timer_confirm_button);
+
+            //Seekbar configuration
+            timerSeekBar.incrementProgressBy(5);
+            //Set TextView Initially based on seekbar progress
+            showTimeText.setText(timerSeekBar.getProgress() + 5 + " Minutes");
+
+            //Update Text based on Seekbar Progress
+            timerSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
+                    progress = progress / 5;
+                    progress = progress * 5;
+                    showTimeText.setText(progress + 5 + " Minutes");
+                }
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {}
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {}
+            });
+
+            //Dialogue Box Confirm Button Listener
+            timerConfirmButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    timerDialogue.dismiss();
+                    timerImg.setImageResource(R.drawable.ic_timer);
+                    timerImg.setTag(2);
+
+                    //Sets The already Initialized countdowntimer to a new countdowntimer with given parameters
+                    countDownTimer[0] = new CountDownTimer((timerSeekBar.getProgress() + 5) * 1000L * 60, 1000) {
+
+                        //Variables For storing seconds and minutes
+                        int seconds;
+                        int minutes;
+
+                        //Every Second Do Something
+                        //Update TextView Code Goes Here
+                        @Override
+                        public void onTick(long l) {
+
+                            //Storing Seconds and Minutes on Every Tick
+                             seconds = (int) (l / 1000) % 60 ;
+                             minutes = (int) ((l / (1000*60)) % 60);
+
+                             // Replace This with TextView.setText(View);
+                             Log.i("TIMER", "Time Left: " + minutes + ":" + seconds);
+                        }
+
+
+                        //Code After timer is Finished Goes Here
+                        @Override
+                        public void onFinish() {
+
+                            //Replace This puasePlayAudio() with just a pause Method.
+
+                            pausePlayAudio();
+                            timerImg.setImageResource(R.drawable.ic_timer_add);
+                            timerImg.setTag(1);
+                        }
+                    };
+                    // Start timer
+                    countDownTimer[0].start();
+                }
+            });
+            //Show Timer Dialogue Box
+            timerDialogue.show();
+        }
+        // Else if timer Icon is set to ic_timer already then execute this
+        // Cancel any previous set timer
+        else {
+            countDownTimer[0].cancel();
+            timerImg.setImageResource(R.drawable.ic_timer_add);
+            timerImg.setTag(1);
+        }
     }
 
     private void addFavorite() {
