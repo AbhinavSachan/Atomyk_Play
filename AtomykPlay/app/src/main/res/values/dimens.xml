@@ -4,4 +4,5 @@
     <dimen name="d_16sp">16sp</dimen>
     <dimen name="d_24sp">24sp</dimen>
     <dimen name="d_28sp">28sp</dimen>
+    <dimen name="d_12sp">12sp</dimen>
 </resources>

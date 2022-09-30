@@ -214,16 +214,17 @@
             android:id="@+id/player_current_pos_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
             android:layout_below="@+id/player_seek_bar"
+            android:layout_alignParentStart="true"
             android:text="@string/empty"
             android:textColor="@color/light_slate_gray_blue" />
+
         <TextView
             android:id="@+id/player_duration_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
             android:layout_below="@+id/player_seek_bar"
+            android:layout_alignParentEnd="true"
             android:text="@string/empty"
             android:textColor="@color/light_slate_gray_blue" />
 
@@ -235,8 +236,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/seekbar_relative_l"
-        android:layout_marginTop="16dp"
         android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"
         android:orientation="horizontal">
 
         <TextView
@@ -250,8 +251,8 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/big_dot"
             android:layout_marginHorizontal="3dp"
+            android:text="@string/big_dot"
             android:textColor="@color/light_slate_gray_blue" />
 
 
@@ -264,14 +265,15 @@
 
 
     </LinearLayout>
+
     <ImageView
         android:id="@+id/player_favorite_iv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/linear_bit_layout"
         android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
         android:layout_marginHorizontal="10dp"
-        android:layout_marginTop="54dp"
+        android:layout_marginBottom="16dp"
         android:clickable="true"
         android:contentDescription="@string/imageView"
         android:elevation="10dp"
@@ -281,22 +283,47 @@
         android:src="@drawable/ic_favorite_border"
         android:theme="@android:style/ThemeOverlay.Material.Dark" />
 
-    <ImageView
-        android:id="@+id/player_timer_iv"
+    <RelativeLayout
+        android:id="@+id/timer_relative_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/linear_bit_layout"
         android:layout_alignParentStart="true"
+        android:layout_alignParentBottom="true"
         android:layout_marginHorizontal="10dp"
-        android:layout_marginTop="54dp"
-        android:clickable="true"
-        android:contentDescription="@string/imageView"
-        android:elevation="10dp"
-        android:focusable="true"
-        android:foreground="@drawable/round_select_effect_small"
-        android:padding="10dp"
-        android:src="@drawable/ic_timer_add"
-        android:theme="@android:style/ThemeOverlay.Material.Dark" />
+        android:layout_marginBottom="16dp">
+
+        <!--    this TextView is for countdown timer-->
+
+        <TextView
+            android:id="@+id/countdown_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="@drawable/round_select_effect_small"
+            android:padding="10dp"
+            android:text="@string/start_pos"
+            android:textColor="@color/tertiary_bg"
+            android:textSize="@dimen/d_12sp"
+            android:textStyle="bold"
+            android:theme="@android:style/ThemeOverlay.Material.Dark" />
+
+
+        <ImageView
+            android:id="@+id/player_timer_iv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:contentDescription="@string/imageView"
+            android:elevation="10dp"
+            android:focusable="true"
+            android:foreground="@drawable/round_select_effect_small"
+            android:padding="10dp"
+            android:src="@drawable/ic_timer_add"
+            android:theme="@android:style/ThemeOverlay.Material.Dark" />
+
+    </RelativeLayout>
 
 
     <ImageView
