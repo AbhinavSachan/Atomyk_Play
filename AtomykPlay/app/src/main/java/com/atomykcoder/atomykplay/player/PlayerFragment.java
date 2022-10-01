@@ -43,6 +43,8 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 
+import org.w3c.dom.Text;
+
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -64,7 +66,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     private static ImageView playerCoverImage;
     private static View lyricsOpenLayout;
     private static ImageView queImg, repeatImg, previousImg, nextImg, shuffleImg, favoriteImg, timerImg, optionImg;
-    private static TextView playerSongNameTv, playerArtistNameTv, mimeTv, bitrateTv;
+    private static TextView playerSongNameTv, playerArtistNameTv, mimeTv, bitrateTv, countDownText;
     private int resumePosition = -1;
     private StorageUtil storageUtil;
     final private CountDownTimer[] countDownTimer = new CountDownTimer[1];
@@ -209,12 +211,11 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         durationTv = view.findViewById(R.id.player_duration_tv);//○
         curPosTv = view.findViewById(R.id.player_current_pos_tv);//○
         lyricsOpenLayout = view.findViewById(R.id.player_lyrics_ll);
+        countDownText = view.findViewById(R.id.countdown_tv);
+        countDownText.setVisibility(View.GONE);
 
         //click listeners on mini player
         //and sending broadcast on click
-
-        //set TimerImg Tag
-        timerImg.setTag(1);
 
         //play pause
         mini_pause.setOnClickListener(v -> pausePlayAudio());
@@ -234,6 +235,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         optionImg.setOnClickListener(v -> optionMenu());
 
         seekBarMain.setOnSeekBarChangeListener(this);
+        countDownText.setOnClickListener(v -> cancelTimer());
 
         //StorageUtil initialization
         storageUtil = new StorageUtil(getContext());
@@ -264,9 +266,6 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     }
 
     private void setTimer() {
-
-        // If Timer icon is set to default
-        if(timerImg.getTag().equals(1)) {
 
             //Create a dialogue Box
             final Dialog timerDialogue = new Dialog(PlayerFragment.context);
@@ -303,8 +302,8 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
                 @Override
                 public void onClick(View view) {
                     timerDialogue.dismiss();
-                    timerImg.setImageResource(R.drawable.ic_timer);
-                    timerImg.setTag(2);
+                    timerImg.setVisibility(View.GONE);
+                    countDownText.setVisibility(View.VISIBLE);
 
                     //Sets The already Initialized countdowntimer to a new countdowntimer with given parameters
                     countDownTimer[0] = new CountDownTimer((timerSeekBar.getProgress() + 5) * 1000L * 60, 1000) {
@@ -324,6 +323,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
 
                              // Replace This with TextView.setText(View);
                              Log.i("TIMER", "Time Left: " + minutes + ":" + seconds);
+                             countDownText.setText(minutes + ":" + seconds);
                         }
 
 
@@ -331,11 +331,10 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
                         @Override
                         public void onFinish() {
 
-                            //Replace This puasePlayAudio() with just a pause Method.
-
+                            //Replace This PausePlayAudio() with just a pause Method.
+                            countDownText.setVisibility(View.GONE);
+                            timerImg.setVisibility(View.VISIBLE);
                             pausePlayAudio();
-                            timerImg.setImageResource(R.drawable.ic_timer_add);
-                            timerImg.setTag(1);
                         }
                     };
                     // Start timer
@@ -344,14 +343,13 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
             });
             //Show Timer Dialogue Box
             timerDialogue.show();
-        }
-        // Else if timer Icon is set to ic_timer already then execute this
+    }
+
+    private void cancelTimer(){
         // Cancel any previous set timer
-        else {
-            countDownTimer[0].cancel();
-            timerImg.setImageResource(R.drawable.ic_timer_add);
-            timerImg.setTag(1);
-        }
+        countDownTimer[0].cancel();
+        countDownText.setVisibility(View.GONE);
+        timerImg.setVisibility(View.VISIBLE);
     }
 
     private void addFavorite() {
