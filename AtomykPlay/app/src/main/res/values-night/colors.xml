@@ -4,6 +4,7 @@
     <color name="secondary_bg">#303030</color>
     <color name="primary_bg">#222222</color>
     <color name="space_black">#CDD8D8</color>
+    <color name="sub_text_grey">#D6D6D6</color>
     <color name="soft_black">#BDBDBD</color>
     <color name="light_slate_gray_blue">#7E838E</color>
     <color name="click_effect_color">#7CF3C2EC</color>

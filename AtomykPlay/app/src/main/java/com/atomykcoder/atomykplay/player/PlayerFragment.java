@@ -19,7 +19,6 @@ import android.media.MediaMetadataRetriever;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -62,7 +61,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     private static ImageView playerCoverImage;
     private static View lyricsOpenLayout;
     private static ImageView queImg, repeatImg, previousImg, nextImg, shuffleImg, favoriteImg, timerImg, optionImg;
-    private static TextView playerSongNameTv, playerArtistNameTv, mimeTv, bitrateTv;
+    private static TextView playerSongNameTv, playerArtistNameTv, mimeTv, bitrateTv, timerTv;
     final private CountDownTimer[] countDownTimer = new CountDownTimer[1];
     private int resumePosition = -1;
     private StorageUtil storageUtil;
@@ -205,12 +204,11 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         durationTv = view.findViewById(R.id.player_duration_tv);//○
         curPosTv = view.findViewById(R.id.player_current_pos_tv);//○
         lyricsOpenLayout = view.findViewById(R.id.player_lyrics_ll);
+        timerTv = view.findViewById(R.id.countdown_tv);
+
 
         //click listeners on mini player
         //and sending broadcast on click
-
-        //set TimerImg Tag
-        timerImg.setTag(1);
 
         //play pause
         mini_pause.setOnClickListener(v -> pausePlayAudio());
@@ -225,6 +223,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         shuffleImg.setOnClickListener(v -> shuffleList());
         favoriteImg.setOnClickListener(v -> addFavorite());
         timerImg.setOnClickListener(v -> setTimer());
+        timerTv.setOnClickListener(v -> cancelTimer());
         lyricsOpenLayout.setOnClickListener(v -> openLyricsPanel());
         //top right option button
         optionImg.setOnClickListener(v -> optionMenu());
@@ -249,6 +248,14 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         return view;
     }
 
+    private void cancelTimer() {
+        // Else if timer Icon is set to ic_timer already then execute this
+        // Cancel any previous set timer
+        countDownTimer[0].cancel();
+        timerTv.setVisibility(View.GONE);
+        timerImg.setVisibility(View.VISIBLE);
+    }
+
     private void openLyricsPanel() {
         //show lyrics in bottom sheet
         showToast("lyrics");
@@ -260,98 +267,86 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     }
 
     private void setTimer() {
+        //Create a dialogue Box
+        final Dialog timerDialogue = new Dialog(PlayerFragment.context);
+        timerDialogue.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        timerDialogue.setCancelable(true);
+        timerDialogue.setContentView(R.layout.timer_dialogue);
 
-        // If Timer icon is set to default
-        if (timerImg.getTag().equals(1)) {
+        //Initialize Dialogue Box UI Items
+        TextView showTimeText = timerDialogue.findViewById(R.id.timer_time_textview);
+        SeekBar timerSeekBar = timerDialogue.findViewById(R.id.timer_time_seekbar);
+        Button timerConfirmButton = timerDialogue.findViewById(R.id.timer_confirm_button);
 
-            //Create a dialogue Box
-            final Dialog timerDialogue = new Dialog(PlayerFragment.context);
-            timerDialogue.requestWindowFeature(Window.FEATURE_NO_TITLE);
-            timerDialogue.setCancelable(true);
-            timerDialogue.setContentView(R.layout.timer_dialogue);
+        //Set TextView Initially based on seekbar progress
+        showTimeText.setText(timerSeekBar.getProgress() + 5 + " Minutes");
 
-            //Initialize Dialogue Box UI Items
-            TextView showTimeText = timerDialogue.findViewById(R.id.timer_time_textview);
-            SeekBar timerSeekBar = timerDialogue.findViewById(R.id.timer_time_seekbar);
-            Button timerConfirmButton = timerDialogue.findViewById(R.id.timer_confirm_button);
+        //Update Text based on Seekbar Progress
+        timerSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
 
-            //Seekbar configuration
-            timerSeekBar.incrementProgressBy(5);
-            //Set TextView Initially based on seekbar progress
-            showTimeText.setText(timerSeekBar.getProgress() + 5 + " Minutes");
+                progress = progress * 5;
+                showTimeText.setText(progress + 5 + " Minutes");
+            }
 
-            //Update Text based on Seekbar Progress
-            timerSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                @Override
-                public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
-                    progress = progress / 5;
-                    progress = progress * 5;
-                    showTimeText.setText(progress + 5 + " Minutes");
-                }
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
 
-                @Override
-                public void onStartTrackingTouch(SeekBar seekBar) {
-                }
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
+        });
 
-                @Override
-                public void onStopTrackingTouch(SeekBar seekBar) {
-                }
-            });
+        //Dialogue Box Confirm Button Listener
+        timerConfirmButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                timerDialogue.dismiss();
+                timerTv.setVisibility(View.VISIBLE);
+                timerImg.setVisibility(View.GONE);
 
-            //Dialogue Box Confirm Button Listener
-            timerConfirmButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    timerDialogue.dismiss();
-                    timerImg.setImageResource(R.drawable.ic_timer);
-                    timerImg.setTag(2);
+                //Sets The already Initialized countDownTimer to a new countDownTimer with given parameters
+                countDownTimer[0] = new CountDownTimer((timerSeekBar.getProgress()* 5L + 5) * 1000L * 60, 1000) {
 
-                    //Sets The already Initialized countDownTimer to a new countDownTimer with given parameters
-                    countDownTimer[0] = new CountDownTimer((timerSeekBar.getProgress() + 5) * 1000L * 60, 1000) {
+                    //Variables For storing seconds and minutes
+                    int seconds;
+                    int minutes;
 
-                        //Variables For storing seconds and minutes
-                        int seconds;
-                        int minutes;
+                    //Every Second Do Something
+                    //Update TextView Code Goes Here
+                    @Override
+                    public void onTick(long l) {
 
-                        //Every Second Do Something
-                        //Update TextView Code Goes Here
-                        @Override
-                        public void onTick(long l) {
+                        //Storing Seconds and Minutes on Every Tick
+                        seconds = (int) (l / 1000) % 60;
+                        minutes = (int) ((l / (1000 * 60)) % 60);
 
-                            //Storing Seconds and Minutes on Every Tick
-                            seconds = (int) (l / 1000) % 60;
-                            minutes = (int) ((l / (1000 * 60)) % 60);
-
-                            // Replace This with TextView.setText(View);
-                            Log.i("TIMER", "Time Left: " + minutes + ":" + seconds);
-                        }
+                        // Replace This with TextView.setText(View);
+                        timerTv.setText(minutes + ":" + seconds);
+                    }
 
 
-                        //Code After timer is Finished Goes Here
-                        @Override
-                        public void onFinish() {
+                    //Code After timer is Finished Goes Here
+                    @Override
+                    public void onFinish() {
 
-                            //Replace This puasePlayAudio() with just a pause Method.
+                        //Replace This pausePlayAudio() with just a pause Method.
+                        //Replaced it
+                        media_player_service.pauseMedia();
+                        timerTv.setVisibility(View.GONE);
+                        timerImg.setVisibility(View.VISIBLE);
+                    }
+                };
+                // Start timer
+                countDownTimer[0].start();
+            }
+        });
+        //Show Timer Dialogue Box
+        timerDialogue.show();
 
-                            pausePlayAudio();
-                            timerImg.setImageResource(R.drawable.ic_timer_add);
-                            timerImg.setTag(1);
-                        }
-                    };
-                    // Start timer
-                    countDownTimer[0].start();
-                }
-            });
-            //Show Timer Dialogue Box
-            timerDialogue.show();
-        }
-        // Else if timer Icon is set to ic_timer already then execute this
-        // Cancel any previous set timer
-        else {
-            countDownTimer[0].cancel();
-            timerImg.setImageResource(R.drawable.ic_timer_add);
-            timerImg.setTag(1);
-        }
+
     }
 
     private void addFavorite() {

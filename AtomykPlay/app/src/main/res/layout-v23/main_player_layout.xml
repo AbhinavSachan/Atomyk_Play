@@ -307,6 +307,7 @@
             android:textColor="@color/tertiary_bg"
             android:textSize="@dimen/d_12sp"
             android:textStyle="bold"
+            android:visibility="gone"
             android:theme="@android:style/ThemeOverlay.Material.Dark" />
 
 
