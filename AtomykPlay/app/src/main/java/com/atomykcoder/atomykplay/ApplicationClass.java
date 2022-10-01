@@ -24,7 +24,6 @@ public class ApplicationClass extends Application {
             notificationChannel.setDescription("Description");
             notificationChannel.setImportance(NotificationManager.IMPORTANCE_LOW);
             notificationChannel.setBypassDnd(false);
-            notificationChannel.setLockscreenVisibility(1);
 
             NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
             manager.createNotificationChannel(notificationChannel);

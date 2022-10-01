@@ -32,7 +32,7 @@ public class StorageUtil {
         editor.apply();
     }
 
-    public ArrayList<MusicDataCapsule> loadMusic() {
+    public ArrayList<MusicDataCapsule> loadMusicList() {
 
         sharedPreferences = context.getSharedPreferences(STORAGE, Context.MODE_PRIVATE);
         Gson gson = new Gson();

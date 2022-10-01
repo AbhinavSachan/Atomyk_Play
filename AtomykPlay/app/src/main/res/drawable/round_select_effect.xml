@@ -2,9 +2,13 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item>
-        <ripple android:color="@color/click_effect_color" android:radius="32dp"/>
+        <ripple
+            android:color="@color/click_effect_color"
+            android:radius="32dp" />
         <shape>
-            <size android:width="45dp" android:height="45dp"/>
+            <size
+                android:width="45dp"
+                android:height="45dp" />
         </shape>
     </item>
 
