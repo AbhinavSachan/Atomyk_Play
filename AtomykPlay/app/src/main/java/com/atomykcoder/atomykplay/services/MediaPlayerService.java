@@ -580,10 +580,10 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         if (media_player != null)
             if (media_player.isPlaying()) {
                 new StorageUtil(getApplicationContext()).saveMusicLastPos(media_player.getCurrentPosition());
-                setIcon(PlaybackStatus.PAUSED);
                 media_player.stop();
-                removeNotification();
             }
+        setIcon(PlaybackStatus.PAUSED);
+        removeNotification();
     }
 
     public void pauseMedia() {

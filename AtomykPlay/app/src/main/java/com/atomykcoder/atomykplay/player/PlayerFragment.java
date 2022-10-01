@@ -306,7 +306,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
                     timerImg.setImageResource(R.drawable.ic_timer);
                     timerImg.setTag(2);
 
-                    //Sets The already Initialized countdowntimer to a new countdowntimer with given parameters
+                    //Sets The already Initialized countDownTimer to a new countDownTimer with given parameters
                     countDownTimer[0] = new CountDownTimer((timerSeekBar.getProgress() + 5) * 1000L * 60, 1000) {
 
                         //Variables For storing seconds and minutes
@@ -500,10 +500,13 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         super.onResume();
         if (service_bound) {
             media_player_service.setSeekBar();
-            if (media_player_service.media_player.isPlaying()) {
-                media_player_service.setIcon(PlaybackStatus.PLAYING);
-            } else {
-                media_player_service.setIcon(PlaybackStatus.PAUSED);
+
+            if (media_player_service.media_player != null) {
+                if (media_player_service.media_player.isPlaying()) {
+                    media_player_service.setIcon(PlaybackStatus.PLAYING);
+                } else {
+                    media_player_service.setIcon(PlaybackStatus.PAUSED);
+                }
             }
         }
     }
