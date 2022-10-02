@@ -65,6 +65,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     public MediaPlayer media_player;
     public Runnable runnable;
     public Handler handler;
+    public Notification notificationBuilder = null;
     //media session
     private MediaSessionManager mediaSessionManager;
     private MediaSessionCompat mediaSession;
@@ -210,8 +211,10 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             }
 
             if (media_player == null) {
-                Intent playerIntent = new Intent(getApplicationContext(), MediaPlayerService.class);
-                startService(playerIntent);
+                if (media_player_service == null) {
+                    Intent playerIntent = new Intent(getApplicationContext(), MediaPlayerService.class);
+                    startService(playerIntent);
+                }
                 try {
                     initiateMediaSession();
                 } catch (RemoteException e) {
@@ -293,11 +296,11 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
         }
         Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.dj);
-        Notification notificationBuilder = null;
+
 
         //building notification for player
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (musicList != null)
+        if (musicList != null)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 notificationBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
                         .setShowWhen(false).setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
                                 .setMediaSession(mediaSession.getSessionToken())
@@ -321,17 +324,41 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                         .setSilent(true)
                         .setPriority(NotificationCompat.PRIORITY_LOW)
                         .build();
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                mediaSession.setMetadata(new MediaMetadataCompat.Builder()
-                        .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, media_player.getDuration())
-                        .build());
-                mediaSession.setPlaybackState(new PlaybackStateCompat.Builder()
-                        .setState(PlaybackStateCompat.STATE_PLAYING, media_player.getCurrentPosition(), playbackSpeed)
-                        .setActions(PlaybackStateCompat.ACTION_SEEK_TO).build());
+            }else {
+                notificationBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                        .setShowWhen(false).setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
+                                .setMediaSession(mediaSession.getSessionToken())
+                                .setShowActionsInCompactView(0, 1, 2))
+                        .setColor(getResources().getColor(R.color.primary_bg))
+                        .setColorized(true)
+                        .setLargeIcon(largeIcon)
+                        .setSmallIcon(R.drawable.ic_headset)
+                        //set content
+                        .setContentText(activeMusic.getsArtist())
+                        .setContentTitle(activeMusic.getsName())
+                        .setContentInfo(activeMusic.getsAlbum())
+                        .setDeleteIntent(playbackAction(4))
+                        .setChannelId(CHANNEL_ID)
+                        //set control
+                        .addAction(R.drawable.ic_previous_for_noti, "Previous", playbackAction(3))
+                        .addAction(notificationAction, "Pause", play_pauseAction)
+                        .addAction(R.drawable.ic_next_for_noti, "next", playbackAction(2))
+                        .addAction(R.drawable.ic_close, "stop", playbackAction(4))
+                        .setContentIntent(PendingIntent.getActivity(this, 0, new Intent(getApplicationContext(), MainActivity.class), PendingIntent.FLAG_IMMUTABLE))
+                        .setSilent(true)
+                        .setPriority(NotificationCompat.PRIORITY_LOW)
+                        .build();
             }
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            mediaSession.setMetadata(new MediaMetadataCompat.Builder()
+                    .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, media_player.getDuration())
+                    .build());
+            mediaSession.setPlaybackState(new PlaybackStateCompat.Builder()
+                    .setState(PlaybackStateCompat.STATE_PLAYING, media_player.getCurrentPosition(), playbackSpeed)
+                    .setActions(PlaybackStateCompat.ACTION_SEEK_TO).build());
         }
+
         startForeground(NOTIFICATION_ID, notificationBuilder);
 
     }
@@ -808,7 +835,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     @Override
     public void onDestroy() {
         super.onDestroy();
-        stopForeground(true);
+        removeNotification();
         if (!requestAudioFocus()) {
             removeAudioFocus();
         }

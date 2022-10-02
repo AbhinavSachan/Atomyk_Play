@@ -105,7 +105,7 @@
             android:contentDescription="@string/empty"
             android:focusable="true"
             android:foreground="@drawable/round_select_effect_small"
-            android:padding="12dp"
+            android:padding="13dp"
             android:src="@drawable/ic_option"
             android:theme="@android:style/ThemeOverlay.Material.Dark"
             app:layout_constraintBottom_toBottomOf="parent"

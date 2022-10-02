@@ -47,8 +47,7 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewAda
         try {
             Glide.with(context).load(currentItem.getsAlbumUri()).apply(new RequestOptions().placeholder(R.drawable.ic_no_album)
                     .override(75, 75)).into(holder.imageView);
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ignored) {
         }
 
 

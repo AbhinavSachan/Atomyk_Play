@@ -126,6 +126,6 @@
         app:indicatorDirectionLinear="leftToRight"
         app:trackColor="@color/primary_bg"
         app:trackCornerRadius="0dp"
-        app:trackThickness="3dp" />
+        app:trackThickness="2dp" />
 
 </RelativeLayout>

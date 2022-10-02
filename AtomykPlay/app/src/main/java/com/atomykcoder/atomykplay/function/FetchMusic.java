@@ -11,7 +11,9 @@ import java.util.ArrayList;
 
 public class FetchMusic {
 
-    public static ArrayList<MusicDataCapsule> fetchMusic(ArrayList<MusicDataCapsule> dataList, Context context) {
+    public static int filter;
+
+    public static void fetchMusic(ArrayList<MusicDataCapsule> dataList, Context context) {
         String selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0";
         @SuppressLint("InlinedApi") String[] proj = {
                 MediaStore.Audio.Media.TITLE,
@@ -68,14 +70,15 @@ public class FetchMusic {
                     music = new MusicDataCapsule(sTitle, sArtist, sAlbum, sAlbumUri, sLength, sPath, sBitrate, sMimeType, sSize, sGenre);
                     File file = new File(music.getsPath());
                     if (file.exists()) {
-                        dataList.add(0,music);
+                        if (filter <= Integer.parseInt(music.getsLength())) {
+                            dataList.add(0,music);
+                        }
                     }
 
                 } while (audioCursor.moveToNext());
                 audioCursor.close();
             }
         }
-        return dataList;
     }
 
     //converting duration from millis to readable time
