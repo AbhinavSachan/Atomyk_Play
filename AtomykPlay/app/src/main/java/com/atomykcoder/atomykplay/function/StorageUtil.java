@@ -8,6 +8,7 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Map;
 
 public class StorageUtil {
     private final String STORAGE = "com.atomykcoder.atomykplay.STORAGE";
@@ -98,15 +99,26 @@ public class StorageUtil {
         editor.apply();
     }
 
-    public String loadFavorite() {
+    public String loadFavorite(String id) {
         sharedPreferences = context.getSharedPreferences(FAVORITE_STORAGE, Context.MODE_PRIVATE);
-        return sharedPreferences.getString("favorite", "no_favorite");
+        return sharedPreferences.getString(id, "no_favorite");
+    }
+    public Map<String, ?> getFavouriteList() {
+        sharedPreferences = context.getSharedPreferences(FAVORITE_STORAGE, Context.MODE_PRIVATE);
+        return sharedPreferences.getAll();
     }
 
-    public void saveFavorite(String name) {
+    public void saveFavorite(String id) {
         sharedPreferences = context.getSharedPreferences(FAVORITE_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString("favorite", name);
+        editor.putString(id, "favorite");
+        editor.apply();
+    }
+
+    public void removeFavorite(String id){
+        sharedPreferences = context.getSharedPreferences(FAVORITE_STORAGE, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.remove(id);
         editor.apply();
     }
 

@@ -19,6 +19,7 @@ import android.media.MediaMetadataRetriever;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,7 +43,9 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Map;
 
 @SuppressLint("StaticFieldLeak")
 public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeListener {
@@ -233,6 +236,17 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         //StorageUtil initialization
         storageUtil = new StorageUtil(getContext());
 
+        //region Log Favourite Music
+        try {
+            Map<String, ?> allEntries = storageUtil.getFavouriteList();
+            for (Map.Entry<String, ?> entry : allEntries.entrySet()) {
+                Log.i("STORAGE", entry.getKey() + " :  " + entry.getValue().toString());
+            }
+        } catch(NullPointerException e)
+        {
+            e.printStackTrace();
+        }
+        //endregion
 
         //layout setup ☺
         if (is_granted) {
@@ -350,14 +364,32 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     }
 
     private void addFavorite() {
-        //add to favorite and save it in shared pref
-        if (storageUtil.loadFavorite().equals("no_favorite")) {
-            favoriteImg.setImageResource(R.drawable.ic_favorite);
-            storageUtil.saveFavorite("favorite");
-        } else if (storageUtil.loadFavorite().equals("favorite")) {
-            favoriteImg.setImageResource(R.drawable.ic_favorite_border);
-            storageUtil.saveFavorite("no_favorite");
+        MusicDataCapsule activeMusic = getMusic();
+        if(activeMusic != null){
+            if (storageUtil.loadFavorite(activeMusic.getsName()).equals("no_favorite")) {
+                favoriteImg.setImageResource(R.drawable.ic_favorite);
+                storageUtil.saveFavorite(activeMusic.getsName());
+            } else if (storageUtil.loadFavorite(activeMusic.getsName()).equals("favorite")) {
+                favoriteImg.setImageResource(R.drawable.ic_favorite_border);
+                storageUtil.removeFavorite(activeMusic.getsName());
+            }
         }
+    }
+
+    private MusicDataCapsule getMusic() {
+        StorageUtil storageUtil = new StorageUtil(context);
+        ArrayList<MusicDataCapsule> musicList = storageUtil.loadMusicList();
+        MusicDataCapsule activeMusic = null;
+        int musicIndex;
+        musicIndex = storageUtil.loadMusicIndex();
+
+        if (musicList != null)
+            if (musicIndex != -1 && musicIndex < musicList.size()) {
+                activeMusic = musicList.get(musicIndex);
+            } else {
+                activeMusic = musicList.get(0);
+            }
+        return activeMusic;
     }
 
     private void shuffleList() {
@@ -409,15 +441,8 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         } else if (storageUtil.loadShuffle().equals("shuffle")) {
             shuffleImg.setImageResource(R.drawable.ic_shuffle);
         }
-
-        //for favorite button
-        if (storageUtil.loadFavorite().equals("no_favorite")) {
-            favoriteImg.setImageResource(R.drawable.ic_favorite_border);
-        } else if (storageUtil.loadFavorite().equals("favorite")) {
-            favoriteImg.setImageResource(R.drawable.ic_favorite);
-        }
-
     }
+
 
     public void pausePlayAudio() {
         if (!service_bound) {
@@ -502,6 +527,17 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
                 } else {
                     media_player_service.setIcon(PlaybackStatus.PAUSED);
                 }
+            }
+        }
+
+        //On Start Favourite Code Moved Here
+        //for favorite
+        MusicDataCapsule activeMusic = getMusic();
+        if (activeMusic != null) {
+            if (storageUtil.loadFavorite(activeMusic.getsName()).equals("no_favorite")) {
+                favoriteImg.setImageResource(R.drawable.ic_favorite_border);
+            } else if (storageUtil.loadFavorite(activeMusic.getsName()).equals("favorite")) {
+                favoriteImg.setImageResource(R.drawable.ic_favorite);
             }
         }
     }
