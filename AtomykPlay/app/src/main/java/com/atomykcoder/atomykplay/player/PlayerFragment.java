@@ -249,8 +249,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
             for (Map.Entry<String, ?> entry : allEntries.entrySet()) {
                 Log.i("STORAGE", entry.getKey() + " :  " + entry.getValue().toString());
             }
-        } catch(NullPointerException e)
-        {
+        } catch (NullPointerException e) {
             e.printStackTrace();
         }
         //endregion
@@ -269,13 +268,6 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         return view;
     }
 
-    private void cancelTimer() {
-        // Else if timer Icon is set to ic_timer already then execute this
-        // Cancel any previous set timer
-        countDownTimer[0].cancel();
-        timerTv.setVisibility(View.GONE);
-        timerImg.setVisibility(View.VISIBLE);
-    }
 
     private void openLyricsPanel() {
         //show lyrics in bottom sheet
@@ -287,6 +279,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         showToast("option");
     }
 
+    //region Timer setup
     private void setTimer() {
         //Create a dialogue Box
         final Dialog timerDialogue = new Dialog(PlayerFragment.context);
@@ -300,7 +293,8 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         Button timerConfirmButton = timerDialogue.findViewById(R.id.timer_confirm_button);
 
         //Set TextView Initially based on seekbar progress
-        showTimeText.setText(timerSeekBar.getProgress() + 5 + " Minutes");
+        String finalTextTime = timerSeekBar.getProgress() + 5 + " Minutes";
+        showTimeText.setText(finalTextTime);
 
         //Update Text based on Seekbar Progress
         timerSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -308,7 +302,8 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
             public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
 
                 progress = progress * 5;
-                showTimeText.setText(progress + 5 + " Minutes");
+                String finalProgress = progress + 5 + " Minutes";
+                showTimeText.setText(finalProgress);
             }
 
             @Override
@@ -345,7 +340,8 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
                         minutes = (int) ((l / (1000 * 60)) % 60);
 
                         // Replace This with TextView.setText(View);
-                        timerTv.setText(minutes + ":" + seconds);
+                        String finalCDTimer = minutes + ":" + seconds;
+                        timerTv.setText(finalCDTimer);
                     }
 
 
@@ -370,9 +366,19 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
 
     }
 
+    private void cancelTimer() {
+        // Else if timer Icon is set to ic_timer already then execute this
+        // Cancel any previous set timer
+        countDownTimer[0].cancel();
+        timerTv.setVisibility(View.GONE);
+        timerImg.setVisibility(View.VISIBLE);
+    }
+
+    //endregion
+
     private void addFavorite() {
         MusicDataCapsule activeMusic = getMusic();
-        if(activeMusic != null){
+        if (activeMusic != null) {
             if (storageUtil.loadFavorite(activeMusic.getsName()).equals("no_favorite")) {
                 favoriteImg.setImageResource(R.drawable.ic_favorite);
                 storageUtil.saveFavorite(activeMusic.getsName());

@@ -143,7 +143,6 @@ public class MainActivity extends AppCompatActivity {
         if (service_bound) {
             if (media_player_service.media_player != null) {
                 if (!media_player_service.media_player.isPlaying()) {
-                    Toast.makeText(this, "destroyed in main", Toast.LENGTH_SHORT).show();
                     unbindService(service_connection);
                     stopService(new Intent(this,MediaPlayerService.class));
                     service_bound = false;

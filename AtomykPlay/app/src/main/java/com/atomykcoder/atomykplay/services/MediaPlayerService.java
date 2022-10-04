@@ -6,6 +6,7 @@ import static com.atomykcoder.atomykplay.MainActivity.service_bound;
 import static com.atomykcoder.atomykplay.function.FetchMusic.convertDuration;
 import static com.atomykcoder.atomykplay.player.PlayerFragment.getEmbeddedImage;
 
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -74,10 +75,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     private ArrayList<MusicDataCapsule> musicList;
     private int musicIndex = -1;
     private MusicDataCapsule activeMusic = null;//object of currently playing audio
-    //
-    private PhoneStateListener phoneStateListener;
-    private TelephonyManager telephonyManager;
-    private AudioManager audioManager;
     //to pause when output device is unplugged
     private final BroadcastReceiver becomingNoisyReceiver = new BroadcastReceiver() {
         @Override
@@ -86,6 +83,10 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 pauseMedia();
         }
     };
+    //
+    private PhoneStateListener phoneStateListener;
+    private TelephonyManager telephonyManager;
+    private AudioManager audioManager;
     //broadcast receivers
     //playing new song
     private final BroadcastReceiver playNewMusicReceiver = new BroadcastReceiver() {
@@ -284,6 +285,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     }
 
     //playback speed is used in setting the speed of seekbar in notification 1f = 1s/s, 0f = stopped
+    @SuppressLint("InlinedApi")
     public void buildNotification(PlaybackStatus playbackStatus, float playbackSpeed) {
         int notificationAction = R.drawable.ic_pause_for_noti;//needs to be initialized
         PendingIntent play_pauseAction = null;
@@ -326,6 +328,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                         .setSilent(true)
                         .setOngoing(true)
                         .setPriority(NotificationCompat.PRIORITY_LOW)
+                        .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_DEFERRED)
                         .build();
             } else {
                 notificationBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
@@ -351,7 +354,9 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                         .setSilent(true)
                         .setOngoing(true)
                         .setPriority(NotificationCompat.PRIORITY_LOW)
+                        .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_DEFERRED)
                         .build();
+
             }
 
         if (media_player != null) {
@@ -671,13 +676,15 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         if (!requestAudioFocus()) {
             requestAudioFocus();
         }
-        if (media_player != null)
-            if (!media_player.isPlaying()) {
-                media_player.start();
-                setIcon(PlaybackStatus.PLAYING);
-                buildNotification(PlaybackStatus.PLAYING, 1f);
-            }
-        is_playing = true;
+        if (!phone_ringing) {
+            if (media_player != null)
+                if (!media_player.isPlaying()) {
+                    media_player.start();
+                    setIcon(PlaybackStatus.PLAYING);
+                    buildNotification(PlaybackStatus.PLAYING, 1f);
+                }
+            is_playing = true;
+        }
 
     }
 
@@ -721,19 +728,21 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         if (audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) == 0f) {
             Toast.makeText(this, "Volume is OFF", Toast.LENGTH_SHORT).show();
         }
-        if (media_player != null) {
-            if (!media_player.isPlaying()) {
-                int position = new StorageUtil(getApplicationContext()).loadMusicLastPos();
-                media_player.seekTo(position);
-                media_player.start();
-                new StorageUtil(getApplicationContext()).clearMusicLastPos();
-                setIcon(PlaybackStatus.PLAYING);
-                buildNotification(PlaybackStatus.PLAYING, 1f);
+        if (!phone_ringing) {
+            if (media_player != null) {
+                if (!media_player.isPlaying()) {
+                    int position = new StorageUtil(getApplicationContext()).loadMusicLastPos();
+                    media_player.seekTo(position);
+                    media_player.start();
+                    new StorageUtil(getApplicationContext()).clearMusicLastPos();
+                    setIcon(PlaybackStatus.PLAYING);
+                    buildNotification(PlaybackStatus.PLAYING, 1f);
+                }
+            } else {
+                initiateMediaPlayer();
             }
-        } else {
-            initiateMediaPlayer();
+            is_playing = true;
         }
-        is_playing = true;
     }
 
     //setting progress on player seekbar and mini progress bar
@@ -900,7 +909,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 if (media_player != null) {
                     buildNotification(PlaybackStatus.PAUSED, 0f);
                     setIcon(PlaybackStatus.PAUSED);
-                    stopMedia();
+                    pauseMedia();
                 }
                 media_player = null;
                 break;
@@ -949,7 +958,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         if (phoneStateListener != null) {
             telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE);
         }
-        Toast.makeText(this, "destroyed in service", Toast.LENGTH_SHORT).show();
 
         unregisterReceiver(becomingNoisyReceiver);
         unregisterReceiver(playNewMusicReceiver);
