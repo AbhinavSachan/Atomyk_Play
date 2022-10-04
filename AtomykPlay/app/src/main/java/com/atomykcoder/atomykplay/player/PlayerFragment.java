@@ -120,6 +120,14 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
                 activeMusic = musicList.get(0);
             }
 
+        if (activeMusic != null) {
+            if (storageUtil.loadFavorite(activeMusic.getsName()).equals("no_favorite")) {
+                favoriteImg.setImageResource(R.drawable.ic_favorite_border);
+            } else if (storageUtil.loadFavorite(activeMusic.getsName()).equals("favorite")) {
+                favoriteImg.setImageResource(R.drawable.ic_favorite);
+            }
+        }
+
         try {
             if (activeMusic != null) {
                 Glide.with(context).load(getEmbeddedImage(activeMusic.getsPath())).apply(new RequestOptions().placeholder(R.drawable.ic_music_thumbnail))
@@ -425,6 +433,18 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     @Override
     public void onStart() {
         super.onStart();
+        if (service_bound) {
+            media_player_service.setSeekBar();
+
+            if (media_player_service.media_player != null) {
+                if (media_player_service.media_player.isPlaying()) {
+                    media_player_service.setIcon(PlaybackStatus.PLAYING);
+                } else {
+                    media_player_service.setIcon(PlaybackStatus.PAUSED);
+                }
+            }
+        }
+
         //setting all buttons state from storage on startup
         //for repeat button
         if (storageUtil.loadRepeatStatus().equals("no_repeat")) {
@@ -441,6 +461,31 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         } else if (storageUtil.loadShuffle().equals("shuffle")) {
             shuffleImg.setImageResource(R.drawable.ic_shuffle);
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        //On Start Favourite Code Moved Here
+        //for favorite
+        MusicDataCapsule activeMusic = getMusic();
+        if (activeMusic != null) {
+            if (storageUtil.loadFavorite(activeMusic.getsName()).equals("no_favorite")) {
+                favoriteImg.setImageResource(R.drawable.ic_favorite_border);
+            } else if (storageUtil.loadFavorite(activeMusic.getsName()).equals("favorite")) {
+                favoriteImg.setImageResource(R.drawable.ic_favorite);
+            }
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
     }
 
 
@@ -511,50 +556,6 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     }
 
     @Override
-<<<<<<< Updated upstream
-    public void onDestroy() {
-        super.onDestroy();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (service_bound) {
-            media_player_service.setSeekBar();
-
-            if (media_player_service.media_player != null) {
-                if (media_player_service.media_player.isPlaying()) {
-                    media_player_service.setIcon(PlaybackStatus.PLAYING);
-                } else {
-                    media_player_service.setIcon(PlaybackStatus.PAUSED);
-                }
-            }
-        }
-
-        //On Start Favourite Code Moved Here
-        //for favorite
-        MusicDataCapsule activeMusic = getMusic();
-        if (activeMusic != null) {
-            if (storageUtil.loadFavorite(activeMusic.getsName()).equals("no_favorite")) {
-                favoriteImg.setImageResource(R.drawable.ic_favorite_border);
-            } else if (storageUtil.loadFavorite(activeMusic.getsName()).equals("favorite")) {
-                favoriteImg.setImageResource(R.drawable.ic_favorite);
-            }
-        }
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (service_bound)
-            if (media_player_service.handler != null) {
-                media_player_service.handler.removeCallbacks(media_player_service.runnable);
-            }
-    }
-
-    @Override
-=======
->>>>>>> Stashed changes
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
         //this will change time and audio in realtime
         if (service_bound) {
@@ -609,21 +610,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     }
 
     private void setPreviousData() {
-        ArrayList<MusicDataCapsule> musicList;
-        MusicDataCapsule activeMusic = null;
-        int musicIndex;
-
-        //load data from SharedPref
-        StorageUtil storage = new StorageUtil(getContext());
-        musicList = storage.loadMusicList();
-        musicIndex = storage.loadMusicIndex();
-
-        if (musicList != null)
-            if (musicIndex != -1 && musicIndex < musicList.size()) {
-                activeMusic = musicList.get(musicIndex);
-            } else {
-                activeMusic = musicList.get(0);
-            }
+        MusicDataCapsule activeMusic = getMusic();
 
         if (activeMusic != null) {
             seekBarMain.setMax(Integer.parseInt(activeMusic.getsLength()));
