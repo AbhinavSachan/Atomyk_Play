@@ -45,7 +45,9 @@ import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Map;
+import java.util.Random;
 
 @SuppressLint("StaticFieldLeak")
 public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeListener {
@@ -68,6 +70,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     final private CountDownTimer[] countDownTimer = new CountDownTimer[1];
     private int resumePosition = -1;
     private StorageUtil storageUtil;
+    private ArrayList<Integer> shuffleList = new ArrayList<>();
     //setting up mini player layout
     //calling it from service when player is prepared and also calling it in this fragment class
     //to set it on app start ☺
@@ -393,13 +396,22 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     }
 
     private void shuffleList() {
+
         //shuffle list program
         if (storageUtil.loadShuffle().equals("no_shuffle")) {
             shuffleImg.setImageResource(R.drawable.ic_shuffle);
             storageUtil.saveShuffle("shuffle");
+
+            ArrayList<MusicDataCapsule> musicList = storageUtil.loadMusicList();
+
+            for(int i = 0; i < musicList.size(); i++){
+                shuffleList.add(i);
+            }
+            Collections.shuffle(shuffleList);
         } else if (storageUtil.loadShuffle().equals("shuffle")) {
             shuffleImg.setImageResource(R.drawable.ic_shuffle_empty);
             storageUtil.saveShuffle("no_shuffle");
+
         }
     }
 
