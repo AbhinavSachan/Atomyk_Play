@@ -1,7 +1,6 @@
 package com.atomykcoder.atomykplay;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -130,8 +129,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         if (is_granted) {
-            Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
-            bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
+            if (!service_bound) {
+                Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
+                bindService(playerIntent, service_connection, Context.BIND_IMPORTANT);
+            }
         }
         super.onStart();
     }
@@ -140,12 +141,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         if (service_bound) {
-            unbindService(service_connection);
-            Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
-            Toast.makeText(this, "destroyed in main", Toast.LENGTH_SHORT).show();
-
-            service_bound = false;
-
+            if (media_player_service.media_player != null) {
+                if (!media_player_service.media_player.isPlaying()) {
+                    Toast.makeText(this, "destroyed in main", Toast.LENGTH_SHORT).show();
+                    unbindService(service_connection);
+                    stopService(new Intent(this,MediaPlayerService.class));
+                    service_bound = false;
+                }
+            }
         }
     }
 
@@ -153,12 +156,12 @@ public class MainActivity extends AppCompatActivity {
         //starting the service when permissions are granted
         //starting service if its not started yet otherwise it will send broadcast msg to service
         //we can't start service on startup of app it will lead to pausing all other sound playing on device
-        new StorageUtil(this).clearCacheMusicLastPos();
+        new StorageUtil(this).clearMusicLastPos();
 
         if (!service_bound) {
             Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
             startService(playerIntent);
-            bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
+            bindService(playerIntent, service_connection, Context.BIND_IMPORTANT);
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {

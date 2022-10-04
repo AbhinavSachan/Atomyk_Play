@@ -22,7 +22,7 @@ public class ApplicationClass extends Application {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
             NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID,"Music Notification", NotificationManager.IMPORTANCE_NONE);
             notificationChannel.setDescription("Description");
-            notificationChannel.setImportance(NotificationManager.IMPORTANCE_LOW);
+            notificationChannel.setImportance(NotificationManager.IMPORTANCE_MIN);
             notificationChannel.setBypassDnd(false);
 
             NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);

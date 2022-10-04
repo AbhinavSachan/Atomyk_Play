@@ -43,7 +43,6 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -493,7 +492,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         if (!service_bound) {
             Intent playerIntent = new Intent(getContext(), MediaPlayerService.class);
             context.startService(playerIntent);
-            context.bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
+            context.bindService(playerIntent, service_connection, Context.BIND_IMPORTANT);
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -514,7 +513,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         if (!service_bound) {
             Intent playerIntent = new Intent(getContext(), MediaPlayerService.class);
             context.startService(playerIntent);
-            context.bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
+            context.bindService(playerIntent, service_connection, Context.BIND_IMPORTANT);
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -534,7 +533,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         if (!service_bound) {
             Intent playerIntent = new Intent(getContext(), MediaPlayerService.class);
             context.startService(playerIntent);
-            context.bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
+            context.bindService(playerIntent, service_connection, Context.BIND_IMPORTANT);
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -587,7 +586,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
         //clearing the storage before putting new value
-        new StorageUtil(getContext()).clearCacheMusicLastPos();
+        new StorageUtil(getContext()).clearMusicLastPos();
 
         //storing the current position of seekbar in storage so we can access it from services
         new StorageUtil(getContext()).saveMusicLastPos(seekBar.getProgress());

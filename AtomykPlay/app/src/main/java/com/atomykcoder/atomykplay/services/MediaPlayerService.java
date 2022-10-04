@@ -78,7 +78,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     private PhoneStateListener phoneStateListener;
     private TelephonyManager telephonyManager;
     private AudioManager audioManager;
-    private Notification notificationBuilder = null;
     //to pause when output device is unplugged
     private final BroadcastReceiver becomingNoisyReceiver = new BroadcastReceiver() {
         @Override
@@ -285,7 +284,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     }
 
     //playback speed is used in setting the speed of seekbar in notification 1f = 1s/s, 0f = stopped
-    public Notification buildNotification(PlaybackStatus playbackStatus, float playbackSpeed) {
+    public void buildNotification(PlaybackStatus playbackStatus, float playbackSpeed) {
         int notificationAction = R.drawable.ic_pause_for_noti;//needs to be initialized
         PendingIntent play_pauseAction = null;
 
@@ -298,6 +297,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
         }
         Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.dj);
+
+        Notification notificationBuilder = null;
 
         //building notification for player
         if (musicList != null)
@@ -323,6 +324,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                         .addAction(R.drawable.ic_close, "stop", playbackAction(4))
                         .setContentIntent(PendingIntent.getActivity(this, 0, new Intent(getApplicationContext(), MainActivity.class), PendingIntent.FLAG_IMMUTABLE))
                         .setSilent(true)
+                        .setOngoing(true)
                         .setPriority(NotificationCompat.PRIORITY_LOW)
                         .build();
             } else {
@@ -347,6 +349,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                         .addAction(R.drawable.ic_close, "stop", playbackAction(4))
                         .setContentIntent(PendingIntent.getActivity(this, 0, new Intent(getApplicationContext(), MainActivity.class), PendingIntent.FLAG_IMMUTABLE))
                         .setSilent(true)
+                        .setOngoing(true)
                         .setPriority(NotificationCompat.PRIORITY_LOW)
                         .build();
             }
@@ -364,7 +367,91 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         if (notificationBuilder != null) {
             startForeground(NOTIFICATION_ID, notificationBuilder);
         }
-        return notificationBuilder;
+    }
+
+    public void buildRemovableNotification(PlaybackStatus playbackStatus, float playbackSpeed) {
+        int notificationAction = R.drawable.ic_pause_for_noti;//needs to be initialized
+        PendingIntent play_pauseAction = null;
+
+        //build a new notification according to media player status
+        if (playbackStatus == PlaybackStatus.PLAYING) {
+            play_pauseAction = playbackAction(1);
+        } else if (playbackStatus == PlaybackStatus.PAUSED) {
+            notificationAction = R.drawable.ic_play_for_noti;
+            play_pauseAction = playbackAction(0);
+
+        }
+        Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.dj);
+
+        Notification notificationBuilder = null;
+
+        //building notification for player
+        if (musicList != null)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                notificationBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                        .setShowWhen(false).setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
+                                .setMediaSession(mediaSession.getSessionToken())
+                                .setShowActionsInCompactView(0, 1, 2))
+                        .setColor(getResources().getColor(R.color.primary_bg, getTheme()))
+                        .setColorized(true)
+                        .setLargeIcon(largeIcon)
+                        .setSmallIcon(R.drawable.ic_headset)
+                        //set content
+                        .setContentText(activeMusic.getsArtist())
+                        .setContentTitle(activeMusic.getsName())
+                        .setContentInfo(activeMusic.getsAlbum())
+                        .setDeleteIntent(playbackAction(4))
+                        .setChannelId(CHANNEL_ID)
+                        //set control
+                        .addAction(R.drawable.ic_previous_for_noti, "Previous", playbackAction(3))
+                        .addAction(notificationAction, "Pause", play_pauseAction)
+                        .addAction(R.drawable.ic_next_for_noti, "next", playbackAction(2))
+                        .addAction(R.drawable.ic_close, "stop", playbackAction(4))
+                        .setContentIntent(PendingIntent.getActivity(this, 0, new Intent(getApplicationContext(), MainActivity.class), PendingIntent.FLAG_IMMUTABLE))
+                        .setSilent(true)
+                        .setOngoing(false)
+                        .setPriority(NotificationCompat.PRIORITY_LOW)
+                        .build();
+            } else {
+                notificationBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                        .setShowWhen(false).setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
+                                .setMediaSession(mediaSession.getSessionToken())
+                                .setShowActionsInCompactView(0, 1, 2))
+                        .setColor(getResources().getColor(R.color.primary_bg))
+                        .setColorized(true)
+                        .setLargeIcon(largeIcon)
+                        .setSmallIcon(R.drawable.ic_headset)
+                        //set content
+                        .setContentText(activeMusic.getsArtist())
+                        .setContentTitle(activeMusic.getsName())
+                        .setContentInfo(activeMusic.getsAlbum())
+                        .setDeleteIntent(playbackAction(4))
+                        .setChannelId(CHANNEL_ID)
+                        //set control
+                        .addAction(R.drawable.ic_previous_for_noti, "Previous", playbackAction(3))
+                        .addAction(notificationAction, "Pause", play_pauseAction)
+                        .addAction(R.drawable.ic_next_for_noti, "next", playbackAction(2))
+                        .addAction(R.drawable.ic_close, "stop", playbackAction(4))
+                        .setContentIntent(PendingIntent.getActivity(this, 0, new Intent(getApplicationContext(), MainActivity.class), PendingIntent.FLAG_IMMUTABLE))
+                        .setSilent(true)
+                        .setOngoing(false)
+                        .setPriority(NotificationCompat.PRIORITY_LOW)
+                        .build();
+            }
+
+        if (media_player != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                mediaSession.setMetadata(new MediaMetadataCompat.Builder()
+                        .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, media_player.getDuration())
+                        .build());
+                mediaSession.setPlaybackState(new PlaybackStateCompat.Builder()
+                        .setState(PlaybackStateCompat.STATE_PLAYING, media_player.getCurrentPosition(), playbackSpeed)
+                        .setActions(PlaybackStateCompat.ACTION_SEEK_TO).build());
+            }
+        }
+        if (notificationBuilder != null) {
+            startForeground(NOTIFICATION_ID, notificationBuilder);
+        }
     }
 
     private PendingIntent playbackAction(int actionNumber) {
@@ -490,7 +577,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     @Override
     public void onCompletion(MediaPlayer mp) {
         StorageUtil storageUtil = new StorageUtil(getApplicationContext());
-        storageUtil.clearCacheMusicLastPos();
+        storageUtil.clearMusicLastPos();
         musicList = storageUtil.loadMusicList();
         musicIndex = storageUtil.loadMusicIndex();
         if (media_player.isPlaying()) {
@@ -621,7 +708,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 new StorageUtil(getApplicationContext()).saveMusicLastPos(media_player.getCurrentPosition());
                 media_player.pause();
                 setIcon(PlaybackStatus.PAUSED);
-                buildNotification(PlaybackStatus.PAUSED, 0f);
+                buildRemovableNotification(PlaybackStatus.PAUSED, 0f);
             }
         is_playing = false;
     }
@@ -639,7 +726,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 int position = new StorageUtil(getApplicationContext()).loadMusicLastPos();
                 media_player.seekTo(position);
                 media_player.start();
-                new StorageUtil(getApplicationContext()).clearCacheMusicLastPos();
+                new StorageUtil(getApplicationContext()).clearMusicLastPos();
                 setIcon(PlaybackStatus.PLAYING);
                 buildNotification(PlaybackStatus.PLAYING, 1f);
             }
@@ -685,7 +772,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     }
 
     public void skipToPrevious() {
-        new StorageUtil(getApplicationContext()).clearCacheMusicLastPos();
+        new StorageUtil(getApplicationContext()).clearMusicLastPos();
 
         if (musicList != null)
             if (musicIndex == 0) {
@@ -705,7 +792,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     }
 
     public void skipToNext() {
-        new StorageUtil(getApplicationContext()).clearCacheMusicLastPos();
+        new StorageUtil(getApplicationContext()).clearMusicLastPos();
 
         if (musicList != null)
             if (musicIndex == musicList.size() - 1) {
@@ -772,7 +859,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             public void onSeekTo(long pos) {
                 super.onSeekTo(pos);
                 //clearing the storage before putting new value
-                new StorageUtil(getApplicationContext()).clearCacheMusicLastPos();
+                new StorageUtil(getApplicationContext()).clearMusicLastPos();
 
                 //storing the current position of seekbar in storage so we can access it from services
                 new StorageUtil(getApplicationContext()).saveMusicLastPos(Math.toIntExact(pos));
