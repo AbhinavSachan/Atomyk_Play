@@ -417,10 +417,12 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
 
             ArrayList<MusicDataCapsule> musicList = storageUtil.loadMusicList();
 
+
             for(int i = 0; i < musicList.size(); i++){
                 shuffleList.add(i);
             }
             Collections.shuffle(shuffleList);
+            storageUtil.saveShuffleIndexList(shuffleList);
         } else if (storageUtil.loadShuffle().equals("shuffle")) {
             shuffleImg.setImageResource(R.drawable.ic_shuffle_empty);
             storageUtil.saveShuffle("no_shuffle");

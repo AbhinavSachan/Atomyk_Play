@@ -135,7 +135,7 @@ public class StorageUtil {
         editor.apply();
     }
 
-    public void saveQueueMusicList(ArrayList<MusicDataCapsule> list) {
+    public void saveShuffleIndexList(ArrayList<Integer> list) {
         sharedPreferences = context.getSharedPreferences(QUEUE_LIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         Gson gson = new Gson();
@@ -144,16 +144,16 @@ public class StorageUtil {
         editor.apply();
     }
 
-    public ArrayList<MusicDataCapsule> loadQueueMusicList() {
+    public ArrayList<Integer> loadShuffleIndexList() {
 
         sharedPreferences = context.getSharedPreferences(QUEUE_LIST_STORAGE, Context.MODE_PRIVATE);
         Gson gson = new Gson();
         String json = sharedPreferences.getString("queueMusicList", null);
-        Type type = new TypeToken<ArrayList<MusicDataCapsule>>() {
+        Type type = new TypeToken<ArrayList<Integer>>() {
         }.getType();
         return gson.fromJson(json, type);
     }
-    public void clearQueueAudioPlaylist() {
+    public void clearShuffleIndexList() {
         sharedPreferences = context.getSharedPreferences(QUEUE_LIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.remove("queueMusicList");
