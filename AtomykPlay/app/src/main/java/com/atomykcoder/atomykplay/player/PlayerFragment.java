@@ -322,7 +322,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
                 timerImg.setVisibility(View.GONE);
 
                 //Sets The already Initialized countDownTimer to a new countDownTimer with given parameters
-                countDownTimer[0] = new CountDownTimer((timerSeekBar.getProgress()* 5L + 5) * 1000L * 60, 1000) {
+                countDownTimer[0] = new CountDownTimer((timerSeekBar.getProgress() * 5L + 5) * 1000L * 60, 1000) {
 
                     //Variables For storing seconds and minutes
                     int seconds;

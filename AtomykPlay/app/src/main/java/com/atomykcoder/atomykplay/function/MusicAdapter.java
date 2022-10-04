@@ -20,6 +20,7 @@ import com.atomykcoder.atomykplay.R;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 
+import java.io.File;
 import java.util.ArrayList;
 
 public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewAdapter> {
@@ -49,20 +50,23 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewAda
                     .override(75, 75)).into(holder.imageView);
         } catch (Exception ignored) {
         }
-
-
-        //playing song
+//playing song
         holder.cardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //check is service active
-                StorageUtil storage = new StorageUtil(context);
-                //Store serializable music list to sharedPreference
-                storage.saveMusicList(musicData);
-                storage.saveMusicIndex(position);
+                File file = new File(currentItem.getsPath());
+                if (file.exists()) {
+                    //check is service active
+                    StorageUtil storage = new StorageUtil(context);
+                    //Store serializable music list to sharedPreference
+                    storage.saveMusicList(musicData);
+                    storage.saveMusicIndex(position);
 
-                MainActivity mainActivity = (MainActivity) context;
-                mainActivity.playAudio();
+                    MainActivity mainActivity = (MainActivity) context;
+                    mainActivity.playAudio();
+                }else {
+                    Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show();
+                }
 
             }
         });
@@ -74,7 +78,6 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewAda
                 Toast.makeText(context, "Clicked", Toast.LENGTH_SHORT).show();
             }
         });
-
 
 
         holder.nameText.setText(currentItem.getsName());
