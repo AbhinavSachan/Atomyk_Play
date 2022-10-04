@@ -426,7 +426,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         } else if (storageUtil.loadShuffle().equals("shuffle")) {
             shuffleImg.setImageResource(R.drawable.ic_shuffle_empty);
             storageUtil.saveShuffle("no_shuffle");
-
+            storageUtil.clearShuffleIndexList();
         }
     }
 
