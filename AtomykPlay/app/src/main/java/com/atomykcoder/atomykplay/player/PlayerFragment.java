@@ -43,7 +43,6 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
@@ -122,6 +121,14 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
             } else {
                 activeMusic = musicList.get(0);
             }
+
+        if (activeMusic != null) {
+            if (storageUtil.loadFavorite(activeMusic.getsName()).equals("no_favorite")) {
+                favoriteImg.setImageResource(R.drawable.ic_favorite_border);
+            } else if (storageUtil.loadFavorite(activeMusic.getsName()).equals("favorite")) {
+                favoriteImg.setImageResource(R.drawable.ic_favorite);
+            }
+        }
 
         try {
             if (activeMusic != null) {
@@ -245,8 +252,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
             for (Map.Entry<String, ?> entry : allEntries.entrySet()) {
                 Log.i("STORAGE", entry.getKey() + " :  " + entry.getValue().toString());
             }
-        } catch(NullPointerException e)
-        {
+        } catch (NullPointerException e) {
             e.printStackTrace();
         }
         //endregion
@@ -265,13 +271,6 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         return view;
     }
 
-    private void cancelTimer() {
-        // Else if timer Icon is set to ic_timer already then execute this
-        // Cancel any previous set timer
-        countDownTimer[0].cancel();
-        timerTv.setVisibility(View.GONE);
-        timerImg.setVisibility(View.VISIBLE);
-    }
 
     private void openLyricsPanel() {
         //show lyrics in bottom sheet
@@ -283,6 +282,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         showToast("option");
     }
 
+    //region Timer setup
     private void setTimer() {
         //Create a dialogue Box
         final Dialog timerDialogue = new Dialog(PlayerFragment.context);
@@ -296,7 +296,8 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         Button timerConfirmButton = timerDialogue.findViewById(R.id.timer_confirm_button);
 
         //Set TextView Initially based on seekbar progress
-        showTimeText.setText(timerSeekBar.getProgress() + 5 + " Minutes");
+        String finalTextTime = timerSeekBar.getProgress() + 5 + " Minutes";
+        showTimeText.setText(finalTextTime);
 
         //Update Text based on Seekbar Progress
         timerSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -304,7 +305,8 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
             public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
 
                 progress = progress * 5;
-                showTimeText.setText(progress + 5 + " Minutes");
+                String finalProgress = progress + 5 + " Minutes";
+                showTimeText.setText(finalProgress);
             }
 
             @Override
@@ -325,7 +327,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
                 timerImg.setVisibility(View.GONE);
 
                 //Sets The already Initialized countDownTimer to a new countDownTimer with given parameters
-                countDownTimer[0] = new CountDownTimer((timerSeekBar.getProgress()* 5L + 5) * 1000L * 60, 1000) {
+                countDownTimer[0] = new CountDownTimer((timerSeekBar.getProgress() * 5L + 5) * 1000L * 60, 1000) {
 
                     //Variables For storing seconds and minutes
                     int seconds;
@@ -341,7 +343,8 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
                         minutes = (int) ((l / (1000 * 60)) % 60);
 
                         // Replace This with TextView.setText(View);
-                        timerTv.setText(minutes + ":" + seconds);
+                        String finalCDTimer = minutes + ":" + seconds;
+                        timerTv.setText(finalCDTimer);
                     }
 
 
@@ -366,9 +369,19 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
 
     }
 
+    private void cancelTimer() {
+        // Else if timer Icon is set to ic_timer already then execute this
+        // Cancel any previous set timer
+        countDownTimer[0].cancel();
+        timerTv.setVisibility(View.GONE);
+        timerImg.setVisibility(View.VISIBLE);
+    }
+
+    //endregion
+
     private void addFavorite() {
         MusicDataCapsule activeMusic = getMusic();
-        if(activeMusic != null){
+        if (activeMusic != null) {
             if (storageUtil.loadFavorite(activeMusic.getsName()).equals("no_favorite")) {
                 favoriteImg.setImageResource(R.drawable.ic_favorite);
                 storageUtil.saveFavorite(activeMusic.getsName());
@@ -437,6 +450,18 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     @Override
     public void onStart() {
         super.onStart();
+        if (service_bound) {
+            media_player_service.setSeekBar();
+
+            if (media_player_service.media_player != null) {
+                if (media_player_service.media_player.isPlaying()) {
+                    media_player_service.setIcon(PlaybackStatus.PLAYING);
+                } else {
+                    media_player_service.setIcon(PlaybackStatus.PAUSED);
+                }
+            }
+        }
+
         //setting all buttons state from storage on startup
         //for repeat button
         if (storageUtil.loadRepeatStatus().equals("no_repeat")) {
@@ -455,12 +480,37 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         }
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        //On Start Favourite Code Moved Here
+        //for favorite
+        MusicDataCapsule activeMusic = getMusic();
+        if (activeMusic != null) {
+            if (storageUtil.loadFavorite(activeMusic.getsName()).equals("no_favorite")) {
+                favoriteImg.setImageResource(R.drawable.ic_favorite_border);
+            } else if (storageUtil.loadFavorite(activeMusic.getsName()).equals("favorite")) {
+                favoriteImg.setImageResource(R.drawable.ic_favorite);
+            }
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+    }
+
 
     public void pausePlayAudio() {
         if (!service_bound) {
             Intent playerIntent = new Intent(getContext(), MediaPlayerService.class);
             context.startService(playerIntent);
-            context.bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
+            context.bindService(playerIntent, service_connection, Context.BIND_IMPORTANT);
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -481,7 +531,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         if (!service_bound) {
             Intent playerIntent = new Intent(getContext(), MediaPlayerService.class);
             context.startService(playerIntent);
-            context.bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
+            context.bindService(playerIntent, service_connection, Context.BIND_IMPORTANT);
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -501,7 +551,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         if (!service_bound) {
             Intent playerIntent = new Intent(getContext(), MediaPlayerService.class);
             context.startService(playerIntent);
-            context.bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
+            context.bindService(playerIntent, service_connection, Context.BIND_IMPORTANT);
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -520,47 +570,6 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
 
     private void showToast(String option) {
         Toast.makeText(context, option, Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (service_bound) {
-            media_player_service.setSeekBar();
-
-            if (media_player_service.media_player != null) {
-                if (media_player_service.media_player.isPlaying()) {
-                    media_player_service.setIcon(PlaybackStatus.PLAYING);
-                } else {
-                    media_player_service.setIcon(PlaybackStatus.PAUSED);
-                }
-            }
-        }
-
-        //On Start Favourite Code Moved Here
-        //for favorite
-        MusicDataCapsule activeMusic = getMusic();
-        if (activeMusic != null) {
-            if (storageUtil.loadFavorite(activeMusic.getsName()).equals("no_favorite")) {
-                favoriteImg.setImageResource(R.drawable.ic_favorite_border);
-            } else if (storageUtil.loadFavorite(activeMusic.getsName()).equals("favorite")) {
-                favoriteImg.setImageResource(R.drawable.ic_favorite);
-            }
-        }
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (service_bound)
-            if (media_player_service.handler != null) {
-                media_player_service.handler.removeCallbacks(media_player_service.runnable);
-            }
     }
 
     @Override
@@ -595,7 +604,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
         //clearing the storage before putting new value
-        new StorageUtil(getContext()).clearCacheMusicLastPos();
+        new StorageUtil(getContext()).clearMusicLastPos();
 
         //storing the current position of seekbar in storage so we can access it from services
         new StorageUtil(getContext()).saveMusicLastPos(seekBar.getProgress());
@@ -618,21 +627,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     }
 
     private void setPreviousData() {
-        ArrayList<MusicDataCapsule> musicList;
-        MusicDataCapsule activeMusic = null;
-        int musicIndex;
-
-        //load data from SharedPref
-        StorageUtil storage = new StorageUtil(getContext());
-        musicList = storage.loadMusicList();
-        musicIndex = storage.loadMusicIndex();
-
-        if (musicList != null)
-            if (musicIndex != -1 && musicIndex < musicList.size()) {
-                activeMusic = musicList.get(musicIndex);
-            } else {
-                activeMusic = musicList.get(0);
-            }
+        MusicDataCapsule activeMusic = getMusic();
 
         if (activeMusic != null) {
             seekBarMain.setMax(Integer.parseInt(activeMusic.getsLength()));

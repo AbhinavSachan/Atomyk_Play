@@ -312,7 +312,7 @@
             android:elevation="10dp"
             android:focusable="true"
             android:padding="10dp"
-            android:src="@drawable/ic_timer"
+            android:src="@drawable/ic_timer_add"
             android:theme="@android:style/ThemeOverlay.Material.Dark" />
 
     </RelativeLayout>

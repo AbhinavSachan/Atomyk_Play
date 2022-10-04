@@ -11,7 +11,8 @@ import java.util.ArrayList;
 import java.util.Map;
 
 public class StorageUtil {
-    private final String STORAGE = "com.atomykcoder.atomykplay.STORAGE";
+    private final String MUSIC_LIST_STORAGE = "com.atomykcoder.atomykplay.MUSIC_LIST_STORAGE";
+    private final String QUEUE_LIST_STORAGE = "com.atomykcoder.atomykplay.QUEUE_LIST_STORAGE";
     private final String POSITION_STORAGE = "com.atomykcoder.atomykplay.STORAGE_POSITION";
     private final String REPEAT_STATUS_STORAGE = "com.atomykcoder.atomykplay.REPEAT_STATUS_STORAGE";
     private final String SHUFFLE_STORAGE = "com.atomykcoder.atomykplay.SHUFFLE_STORAGE";
@@ -25,7 +26,7 @@ public class StorageUtil {
     }
 
     public void saveMusicList(ArrayList<MusicDataCapsule> list) {
-        sharedPreferences = context.getSharedPreferences(STORAGE, Context.MODE_PRIVATE);
+        sharedPreferences = context.getSharedPreferences(MUSIC_LIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         Gson gson = new Gson();
         String json = gson.toJson(list);
@@ -35,7 +36,7 @@ public class StorageUtil {
 
     public ArrayList<MusicDataCapsule> loadMusicList() {
 
-        sharedPreferences = context.getSharedPreferences(STORAGE, Context.MODE_PRIVATE);
+        sharedPreferences = context.getSharedPreferences(MUSIC_LIST_STORAGE, Context.MODE_PRIVATE);
         Gson gson = new Gson();
         String json = sharedPreferences.getString("musicList", null);
         Type type = new TypeToken<ArrayList<MusicDataCapsule>>() {
@@ -44,25 +45,25 @@ public class StorageUtil {
     }
 
     public void saveMusicIndex(int index) {
-        sharedPreferences = context.getSharedPreferences(STORAGE, Context.MODE_PRIVATE);
+        sharedPreferences = context.getSharedPreferences(MUSIC_LIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putInt("musicIndex", index);
         editor.apply();
     }
 
     public int loadMusicIndex() {
-        sharedPreferences = context.getSharedPreferences(STORAGE, Context.MODE_PRIVATE);
+        sharedPreferences = context.getSharedPreferences(MUSIC_LIST_STORAGE, Context.MODE_PRIVATE);
         return sharedPreferences.getInt("musicIndex", 0);
     }
 
-    public void clearCacheAudioPlaylist() {
-        sharedPreferences = context.getSharedPreferences(STORAGE, Context.MODE_PRIVATE);
+    public void clearAudioPlaylist() {
+        sharedPreferences = context.getSharedPreferences(MUSIC_LIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.remove("musicList");
         editor.apply();
     }
- public void clearCacheAudioIndex() {
-        sharedPreferences = context.getSharedPreferences(STORAGE, Context.MODE_PRIVATE);
+ public void clearAudioIndex() {
+        sharedPreferences = context.getSharedPreferences(MUSIC_LIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.remove("musicIndex");
         editor.apply();
@@ -80,7 +81,7 @@ public class StorageUtil {
         editor.apply();
     }
 
-    public void clearCacheMusicLastPos() {
+    public void clearMusicLastPos() {
         sharedPreferences = context.getSharedPreferences(POSITION_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.remove("musicPosition");
@@ -131,6 +132,31 @@ public class StorageUtil {
         sharedPreferences = context.getSharedPreferences(SHUFFLE_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString("shuffle", name);
+        editor.apply();
+    }
+
+    public void saveQueueMusicList(ArrayList<MusicDataCapsule> list) {
+        sharedPreferences = context.getSharedPreferences(QUEUE_LIST_STORAGE, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(list);
+        editor.putString("queueMusicList", json);
+        editor.apply();
+    }
+
+    public ArrayList<MusicDataCapsule> loadQueueMusicList() {
+
+        sharedPreferences = context.getSharedPreferences(QUEUE_LIST_STORAGE, Context.MODE_PRIVATE);
+        Gson gson = new Gson();
+        String json = sharedPreferences.getString("queueMusicList", null);
+        Type type = new TypeToken<ArrayList<MusicDataCapsule>>() {
+        }.getType();
+        return gson.fromJson(json, type);
+    }
+    public void clearQueueAudioPlaylist() {
+        sharedPreferences = context.getSharedPreferences(QUEUE_LIST_STORAGE, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.remove("queueMusicList");
         editor.apply();
     }
 

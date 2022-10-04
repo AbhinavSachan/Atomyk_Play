@@ -11,7 +11,7 @@ import java.util.ArrayList;
 
 public class FetchMusic {
 
-    public static int filter;
+    public static int filter = 20000;
 
     public static void fetchMusic(ArrayList<MusicDataCapsule> dataList, Context context) {
         String selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0";

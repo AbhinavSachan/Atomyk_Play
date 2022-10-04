@@ -1,12 +1,10 @@
 package com.atomykcoder.atomykplay;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -32,6 +30,7 @@ import com.atomykcoder.atomykplay.function.FetchMusic;
 import com.atomykcoder.atomykplay.function.MusicAdapter;
 import com.atomykcoder.atomykplay.function.MusicDataCapsule;
 import com.atomykcoder.atomykplay.function.SearchResultsFragment;
+import com.atomykcoder.atomykplay.function.StorageUtil;
 import com.atomykcoder.atomykplay.player.PlayerFragment;
 import com.atomykcoder.atomykplay.services.MediaPlayerService;
 import com.karumi.dexter.Dexter;
@@ -116,24 +115,52 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        if (is_granted) {
-            Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
-            bindService(playerIntent, service_connection, BIND_AUTO_CREATE);
-        }
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        outState.putBoolean("serviceState", service_bound);
+        super.onSaveInstanceState(outState);
+    }
 
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        service_bound = savedInstanceState.getBoolean("serviceState");
+    }
+
+    @Override
+    protected void onStart() {
+        if (is_granted) {
+            if (!service_bound) {
+                Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
+                bindService(playerIntent, service_connection, Context.BIND_IMPORTANT);
+            }
+        }
+        super.onStart();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (service_bound) {
+            if (media_player_service.media_player != null) {
+                if (!media_player_service.media_player.isPlaying()) {
+                    unbindService(service_connection);
+                    stopService(new Intent(this,MediaPlayerService.class));
+                    service_bound = false;
+                }
+            }
+        }
     }
 
     public void playAudio() {
         //starting the service when permissions are granted
         //starting service if its not started yet otherwise it will send broadcast msg to service
         //we can't start service on startup of app it will lead to pausing all other sound playing on device
+        new StorageUtil(this).clearMusicLastPos();
 
         if (!service_bound) {
             Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
             startService(playerIntent);
-            bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
+            bindService(playerIntent, service_connection, Context.BIND_IMPORTANT);
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -148,7 +175,6 @@ public class MainActivity extends AppCompatActivity {
             sendBroadcast(broadcastIntent);
         }
     }
-
 
     private void setFragmentInSlider() {
         PlayerFragment fragment = new PlayerFragment();
@@ -171,53 +197,29 @@ public class MainActivity extends AppCompatActivity {
     //if not then shows dialogue to grant permissions
     private void checkPermission() {
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            Dexter.withContext(MainActivity.this)
-                    .withPermissions(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.READ_PHONE_STATE, Manifest.permission.FOREGROUND_SERVICE)
-                    .withListener(new MultiplePermissionsListener() {
-                        @Override
-                        public void onPermissionsChecked(MultiplePermissionsReport multiplePermissionsReport) {
-                            //Fetch Music List along with it's metadata and save it in "dataList"
-                            FetchMusic.fetchMusic(dataList, MainActivity.this);
+        Dexter.withContext(MainActivity.this)
+                .withPermissions(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.READ_PHONE_STATE)
+                .withListener(new MultiplePermissionsListener() {
+                    @Override
+                    public void onPermissionsChecked(MultiplePermissionsReport multiplePermissionsReport) {
+                        //Fetch Music List along with it's metadata and save it in "dataList"
+                        FetchMusic.fetchMusic(dataList, MainActivity.this);
 
-                            //Setting up adapter
-                            linearLayout.setVisibility(View.GONE);
-                            adapter = new MusicAdapter(MainActivity.this, dataList);
-                            recyclerView.setAdapter(adapter);
+                        //Setting up adapter
+                        linearLayout.setVisibility(View.GONE);
+                        adapter = new MusicAdapter(MainActivity.this, dataList);
+                        recyclerView.setAdapter(adapter);
 
-                            is_granted = true;
-                        }
+                        is_granted = true;
+                    }
 
-                        @Override
-                        public void onPermissionRationaleShouldBeShown(List<PermissionRequest> list, PermissionToken permissionToken) {
-                            permissionToken.continuePermissionRequest();
-                            is_granted = false;
-                        }
-                    }).check();
-        }else {
-            Dexter.withContext(MainActivity.this)
-                    .withPermissions(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.READ_PHONE_STATE)
-                    .withListener(new MultiplePermissionsListener() {
-                        @Override
-                        public void onPermissionsChecked(MultiplePermissionsReport multiplePermissionsReport) {
-                            //Fetch Music List along with it's metadata and save it in "dataList"
-                            FetchMusic.fetchMusic(dataList, MainActivity.this);
+                    @Override
+                    public void onPermissionRationaleShouldBeShown(List<PermissionRequest> list, PermissionToken permissionToken) {
+                        permissionToken.continuePermissionRequest();
+                        is_granted = false;
+                    }
+                }).check();
 
-                            //Setting up adapter
-                            linearLayout.setVisibility(View.GONE);
-                            adapter = new MusicAdapter(MainActivity.this, dataList);
-                            recyclerView.setAdapter(adapter);
-
-                            is_granted = true;
-                        }
-
-                        @Override
-                        public void onPermissionRationaleShouldBeShown(List<PermissionRequest> list, PermissionToken permissionToken) {
-                            permissionToken.continuePermissionRequest();
-                            is_granted = false;
-                        }
-                    }).check();
-        }
     }
 
     private SlidingUpPanelLayout.PanelSlideListener onSlideChange() {
@@ -258,43 +260,6 @@ public class MainActivity extends AppCompatActivity {
 
             }
         };
-    }
-
-    @Override
-    protected void onSaveInstanceState(@NonNull Bundle outState) {
-        outState.putBoolean("serviceState", service_bound);
-        super.onSaveInstanceState(outState);
-    }
-
-    @Override
-    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        service_bound = savedInstanceState.getBoolean("serviceState");
-    }
-
-    @SuppressLint("NotifyDataSetChanged")
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (media_player_service != null)
-            if (!media_player_service.media_player.isPlaying()) {
-                if (service_bound) {
-                    unbindService(service_connection);
-                    Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
-                    stopService(playerIntent);
-                    service_bound = false;
-                }
-            }
-    }
-
-    private void showToast(String string) {
-        Toast.makeText(this, string, Toast.LENGTH_SHORT).show();
     }
 
     @Override
