@@ -511,6 +511,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     }
 
     @Override
+<<<<<<< Updated upstream
     public void onDestroy() {
         super.onDestroy();
     }
@@ -552,6 +553,8 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     }
 
     @Override
+=======
+>>>>>>> Stashed changes
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
         //this will change time and audio in realtime
         if (service_bound) {
