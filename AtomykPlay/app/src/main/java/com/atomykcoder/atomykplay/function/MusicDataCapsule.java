@@ -25,15 +25,6 @@ public class MusicDataCapsule {
         this.sGenre = sGenre;
     }
 
-    public MusicDataCapsule(String sName, String sArtist, String sAlbum, String sAlbumUri, String sLength, String sPath) {
-        this.sName = sName;
-        this.sArtist = sArtist;
-        this.sAlbum = sAlbum;
-        this.sAlbumUri = sAlbumUri;
-        this.sLength = sLength;
-        this.sPath = sPath;
-    }
-
     public String getsBitrate() {
         return sBitrate;
     }

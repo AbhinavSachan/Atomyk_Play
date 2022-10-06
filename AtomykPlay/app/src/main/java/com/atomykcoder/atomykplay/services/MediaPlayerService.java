@@ -11,6 +11,7 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -32,6 +33,7 @@ import android.support.v4.media.session.PlaybackStateCompat;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -61,7 +63,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     //audio player notification ID
     public static final int NOTIFICATION_ID = 414141;
     public static boolean phone_ringing = false;
-    public static boolean is_playing = false;
     //binder
     private final IBinder iBinder = new LocalBinder();
     public MediaPlayer media_player;
@@ -683,7 +684,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                     setIcon(PlaybackStatus.PLAYING);
                     buildNotification(PlaybackStatus.PLAYING, 1f);
                 }
-            is_playing = true;
         }
 
     }
@@ -696,17 +696,17 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             media_player.stop();
         }
         media_player = null;
-        is_playing = false;
     }
 
     public void stoppedByNotification() {
         if (media_player != null)
             if (media_player.isPlaying()) {
-                media_player.stop();
+                new StorageUtil(getApplicationContext()).saveMusicLastPos(media_player.getCurrentPosition());
+                buildRemovableNotification(PlaybackStatus.PAUSED, 0f);
+                media_player.pause();
             }
-        is_playing = false;
         setIcon(PlaybackStatus.PAUSED);
-        removeNotification();
+        stopForeground(true);
     }
 
     public void pauseMedia() {
@@ -717,11 +717,9 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 setIcon(PlaybackStatus.PAUSED);
                 buildRemovableNotification(PlaybackStatus.PAUSED, 0f);
             }
-        is_playing = false;
     }
 
     public void resumeMedia() {
-
         if (!requestAudioFocus()) {
             requestAudioFocus();
         }
@@ -741,7 +739,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             } else {
                 initiateMediaPlayer();
             }
-            is_playing = true;
         }
     }
 
@@ -876,18 +873,17 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 //first checking setting the media seek to current position of seek bar and then setting all data in UI•
                 if (service_bound) {
                     //removing handler so that we can seek without glitches handler will restart in setSeekBar() method☻
-                    if (media_player_service.handler != null)
-                        media_player_service.handler.removeCallbacks(media_player_service.runnable);
-                    if (media_player_service.media_player != null) {
-                        media_player_service.media_player.seekTo(Math.toIntExact(pos));
-                        if (media_player_service.media_player.isPlaying()) {
-                            media_player_service.buildNotification(PlaybackStatus.PLAYING, 1f);
+                    if (handler != null)
+                        handler.removeCallbacks(runnable);
+                    if (media_player != null) {
+                        media_player.seekTo(Math.toIntExact(pos));
+                        if (media_player.isPlaying()) {
+                            buildNotification(PlaybackStatus.PLAYING, 1f);
                         } else {
-                            media_player_service.buildNotification(PlaybackStatus.PAUSED, 0f);
-
+                            buildRemovableNotification(PlaybackStatus.PAUSED, 0f);
                         }
                     }
-                    media_player_service.setSeekBar();
+                    setSeekBar();
                 }
             }
 
@@ -928,10 +924,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        //request audio focus
-        if (!requestAudioFocus()) {
-            stopSelf();
-        }
 
         //Handle Intent action from MediaSession.TransportControls
         handleIncomingActions(intent);
@@ -944,17 +936,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         super.onDestroy();
         new StorageUtil(getApplicationContext()).saveMusicLastPos(media_player.getCurrentPosition());
         removeNotification();
-        if (!requestAudioFocus()) {
-            removeAudioFocus();
-        }
-        if (media_player != null) {
-            media_player.release();
-            if (mediaSessionManager != null) {
-                mediaSession.release();
-            }
-        }
-
-        //        disable phone state listener ♣
+        //disable phone state listener ♣
         if (phoneStateListener != null) {
             telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE);
         }
@@ -968,12 +950,12 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
     private void removeNotification() {
         if (media_player != null) {
+            if (!media_player.isPlaying()) {
+                stopForeground(true);
+            }
             media_player.release();
         }
         media_player = null;
-        if (!is_playing) {
-            stopForeground(true);
-        }
         stopSelf();
     }
 

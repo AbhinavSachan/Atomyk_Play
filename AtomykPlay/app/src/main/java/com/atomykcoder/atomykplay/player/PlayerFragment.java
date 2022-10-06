@@ -33,20 +33,22 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.function.MusicDataCapsule;
+import com.atomykcoder.atomykplay.function.MusicQueueAdapter;
 import com.atomykcoder.atomykplay.function.PlaybackStatus;
 import com.atomykcoder.atomykplay.function.StorageUtil;
 import com.atomykcoder.atomykplay.services.MediaPlayerService;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Map;
-import java.util.Random;
 
 @SuppressLint("StaticFieldLeak")
 public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeListener {
@@ -67,12 +69,13 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     private static ImageView queImg, repeatImg, previousImg, nextImg, shuffleImg, favoriteImg, timerImg, optionImg;
     private static TextView playerSongNameTv, playerArtistNameTv, mimeTv, bitrateTv, timerTv;
     final private CountDownTimer[] countDownTimer = new CountDownTimer[1];
+    public static BottomSheetDialog queueSheetfragment;
     private int resumePosition = -1;
-    private StorageUtil storageUtil;
 
     //setting up mini player layout
     //calling it from service when player is prepared and also calling it in this fragment class
     //to set it on app start ☺
+    private StorageUtil storageUtil;
 
     public static void setMiniLayout() {
 
@@ -257,20 +260,8 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         }
         //endregion
 
-        //layout setup ☺
-        if (is_granted) {
-            try {
-                setMiniLayout();
-                setMainPlayerLayout();
-                setPreviousData();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
         return view;
     }
-
 
     private void openLyricsPanel() {
         //show lyrics in bottom sheet
@@ -369,6 +360,8 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
 
     }
 
+    //endregion
+
     private void cancelTimer() {
         // Else if timer Icon is set to ic_timer already then execute this
         // Cancel any previous set timer
@@ -376,8 +369,6 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         timerTv.setVisibility(View.GONE);
         timerImg.setVisibility(View.VISIBLE);
     }
-
-    //endregion
 
     private void addFavorite() {
         MusicDataCapsule activeMusic = getMusic();
@@ -414,16 +405,10 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
             shuffleImg.setImageResource(R.drawable.ic_shuffle);
             storageUtil.saveShuffle("shuffle");
 
-            ArrayList<Integer> shuffleList = new ArrayList<>();
-            ArrayList<MusicDataCapsule> musicList = storageUtil.loadMusicList();
-            for(int i = 0; i < musicList.size(); i++){ shuffleList.add(i); }
-            Collections.shuffle(shuffleList);
-            storageUtil.saveShuffleIndexList(shuffleList);
 
         } else if (storageUtil.loadShuffle().equals("shuffle")) {
             shuffleImg.setImageResource(R.drawable.ic_shuffle_empty);
             storageUtil.saveShuffle("no_shuffle");
-            storageUtil.clearShuffleIndexList();
         }
     }
 
@@ -443,12 +428,36 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
 
     private void openQue() {
         //show now playing music list
-        showToast("song list");
+        queueSheetfragment = new BottomSheetDialog(context);
+        queueSheetfragment.setContentView(R.layout.bottom_sheet_fragment_queue_layout);
+        RecyclerView recyclerView = queueSheetfragment.findViewById(R.id.queue_music_recycler);
+        ArrayList<MusicDataCapsule> dataList;
+        //Setting up adapter
+
+        if (recyclerView != null) {
+            dataList = new StorageUtil(getContext()).loadMusicList();
+            recyclerView.setNestedScrollingEnabled(false);
+            recyclerView.setHasFixedSize(true);
+            recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+            MusicQueueAdapter adapter = new MusicQueueAdapter(getContext(), dataList);
+            recyclerView.setAdapter(adapter);
+        }
+        queueSheetfragment.show();
     }
 
     @Override
     public void onStart() {
         super.onStart();
+        //layout setup ☺
+        if (is_granted) {
+            try {
+                setMiniLayout();
+                setMainPlayerLayout();
+                setPreviousData();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
         if (service_bound) {
             media_player_service.setSeekBar();
 
@@ -577,11 +586,10 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         if (service_bound) {
             if (fromUser) {
                 if (media_player_service.media_player != null) {
-                    media_player_service.media_player.seekTo(progress);
                     if (media_player_service.media_player.isPlaying()) {
                         media_player_service.buildNotification(PlaybackStatus.PLAYING, 1f);
                     } else {
-                        media_player_service.buildNotification(PlaybackStatus.PAUSED, 0f);
+                        media_player_service.buildRemovableNotification(PlaybackStatus.PAUSED, 0f);
 
                     }
                 }
@@ -617,7 +625,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
                 if (media_player_service.media_player.isPlaying()) {
                     media_player_service.buildNotification(PlaybackStatus.PLAYING, 1f);
                 } else {
-                    media_player_service.buildNotification(PlaybackStatus.PAUSED, 0f);
+                    media_player_service.buildRemovableNotification(PlaybackStatus.PAUSED, 0f);
                 }
             }
             media_player_service.setSeekBar();

@@ -13,10 +13,12 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.SearchView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -27,7 +29,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.function.FetchMusic;
-import com.atomykcoder.atomykplay.function.MusicAdapter;
+import com.atomykcoder.atomykplay.function.MusicMainAdapter;
 import com.atomykcoder.atomykplay.function.MusicDataCapsule;
 import com.atomykcoder.atomykplay.function.SearchResultsFragment;
 import com.atomykcoder.atomykplay.function.StorageUtil;
@@ -76,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
     };
     public SlidingUpPanelLayout sliding_up_panel_layout;
     private ArrayList<MusicDataCapsule> dataList;
-    private MusicAdapter adapter;
+    private MusicMainAdapter adapter;
     private LinearLayout linearLayout;
     private RecyclerView recyclerView;
     private SearchResultsFragment searchResultsFragment; // This being here is very important for search method to work
@@ -111,7 +113,6 @@ public class MainActivity extends AppCompatActivity {
 
         sliding_up_panel_layout.setPanelSlideListener(onSlideChange());
         setFragmentInSlider();
-
     }
 
     @Override
@@ -141,6 +142,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         if (service_bound) {
+            //if media player is not playing it will stop the service
             if (media_player_service.media_player != null) {
                 if (!media_player_service.media_player.isPlaying()) {
                     unbindService(service_connection);
@@ -193,6 +195,7 @@ public class MainActivity extends AppCompatActivity {
         transaction.commit();
     }
 
+
     //Checks whether user granted permissions for external storage or not
     //if not then shows dialogue to grant permissions
     private void checkPermission() {
@@ -207,7 +210,7 @@ public class MainActivity extends AppCompatActivity {
 
                         //Setting up adapter
                         linearLayout.setVisibility(View.GONE);
-                        adapter = new MusicAdapter(MainActivity.this, dataList);
+                        adapter = new MusicMainAdapter(MainActivity.this, dataList);
                         recyclerView.setAdapter(adapter);
 
                         is_granted = true;
@@ -243,8 +246,19 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onPanelExpanded(View panel) {
+                try {
+                    InputMethodManager manager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+                    manager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),0);
+                    FragmentManager manager1 = getSupportFragmentManager();
+                    manager1.popBackStack();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+
                 View miniPlayer = PlayerFragment.mini_play_view;
                 View mainPlayer = findViewById(R.id.player_layout);
+
                 miniPlayer.setVisibility(View.INVISIBLE);
                 miniPlayer.setAlpha(0);
                 mainPlayer.setAlpha(1);

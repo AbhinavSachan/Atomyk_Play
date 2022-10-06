@@ -24,7 +24,7 @@ public class SearchResultsFragment extends Fragment {
     public RecyclerView recycler_view;
     public RadioGroup radioGroup;
     private ArrayList<MusicDataCapsule> originalMusicList;
-    private MusicAdapter adapter;
+    private MusicMainAdapter adapter;
     private RadioButton songButton, albumButton, artistButton, genreButton;
 
     @Override
@@ -60,7 +60,7 @@ public class SearchResultsFragment extends Fragment {
 
     //Initializing And setting an adapter
     private void setAdapter() {
-        adapter = new MusicAdapter(getContext(), originalMusicList);
+        adapter = new MusicMainAdapter(getContext(), originalMusicList);
         recycler_view.setAdapter(adapter);
     }
 

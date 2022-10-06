@@ -17,33 +17,32 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.MainActivity;
 import com.atomykcoder.atomykplay.R;
+import com.atomykcoder.atomykplay.player.PlayerFragment;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 
 import java.io.File;
 import java.util.ArrayList;
 
-public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewAdapter> {
+public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.MusicViewAdapter> {
     Context context;
-    ArrayList<MusicDataCapsule> musicData;
+    ArrayList<MusicDataCapsule> musicArrayList;
 
-
-    public MusicAdapter(Context context, ArrayList<MusicDataCapsule> musicData) {
+    public MusicQueueAdapter(Context context, ArrayList<MusicDataCapsule> musicArrayList) {
         this.context = context;
-        this.musicData = musicData;
+        this.musicArrayList = musicArrayList;
     }
 
     @NonNull
     @Override
-    public MusicViewAdapter onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.music_item_layout, parent, false);
+    public MusicQueueAdapter.MusicViewAdapter onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(context).inflate(R.layout.queue_music_item_layout, parent, false);
         return new MusicViewAdapter(view);
     }
 
-    @SuppressLint("ClickableViewAccessibility")
     @Override
-    public void onBindViewHolder(@NonNull MusicViewAdapter holder, @SuppressLint("RecyclerView") int position) {
-        MusicDataCapsule currentItem = musicData.get(position);
+    public void onBindViewHolder(@NonNull MusicQueueAdapter.MusicViewAdapter holder, @SuppressLint("RecyclerView") int position) {
+        MusicDataCapsule currentItem = musicArrayList.get(position);
 
         try {
             Glide.with(context).load(currentItem.getsAlbumUri()).apply(new RequestOptions().placeholder(R.drawable.ic_no_album)
@@ -59,54 +58,57 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewAda
                     //check is service active
                     StorageUtil storage = new StorageUtil(context);
                     //Store serializable music list to sharedPreference
-                    storage.saveMusicList(musicData);
                     storage.saveMusicIndex(position);
-
                     MainActivity mainActivity = (MainActivity) context;
+                    if (PlayerFragment.queueSheetfragment != null)
+                        if (PlayerFragment.queueSheetfragment.isShowing()) {
+                            PlayerFragment.queueSheetfragment.dismiss();
+                        }
                     mainActivity.playAudio();
-                }else {
-                    Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(context, "Audio file is unavailable", Toast.LENGTH_SHORT).show();
                 }
 
             }
         });
 
         //add bottom sheet functions in three dot click
-        holder.imageButton.setOnClickListener(new View.OnClickListener() {
+        holder.imageButton.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
-            public void onClick(View v) {
+            public boolean onLongClick(View v) {
                 Toast.makeText(context, "Clicked", Toast.LENGTH_SHORT).show();
+                return false;
             }
         });
 
 
         holder.nameText.setText(currentItem.getsName());
+        String index = String.valueOf(position + 1);
+        holder.musicIndex.setText(index);
         holder.artistText.setText(currentItem.getsArtist());
         holder.durationText.setText(convertDuration(currentItem.getsLength()));
     }
 
     @Override
     public int getItemCount() {
-        return musicData.size();
+        return musicArrayList.size();
     }
-
 
     public static class MusicViewAdapter extends RecyclerView.ViewHolder {
         private final ImageView imageView;
         private final ImageView imageButton;
         private final RelativeLayout cardView;
-        private final TextView nameText, artistText, durationText;
+        private final TextView nameText, artistText, durationText, musicIndex;
 
         public MusicViewAdapter(@NonNull View itemView) {
             super(itemView);
-
-            imageView = itemView.findViewById(R.id.song_album_cover);
-            imageButton = itemView.findViewById(R.id.more_option_i_btn);
-            cardView = itemView.findViewById(R.id.cv_song_play);
-            nameText = itemView.findViewById(R.id.song_name);
-            artistText = itemView.findViewById(R.id.song_artist_name);
-            durationText = itemView.findViewById(R.id.song_length);
-
+            imageView = itemView.findViewById(R.id.song_album_cover_queue);
+            imageButton = itemView.findViewById(R.id.more_option_i_btn_queue);
+            cardView = itemView.findViewById(R.id.cv_song_play_queue);
+            nameText = itemView.findViewById(R.id.song_name_queue);
+            musicIndex = itemView.findViewById(R.id.song_index_num_queue);
+            artistText = itemView.findViewById(R.id.song_artist_name_queue);
+            durationText = itemView.findViewById(R.id.song_length_queue);
         }
     }
 }
