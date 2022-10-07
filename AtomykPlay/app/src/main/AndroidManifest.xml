@@ -52,4 +52,5 @@
         <service android:name=".services.MediaPlayerService" />
     </application>
 
+
 </manifest>

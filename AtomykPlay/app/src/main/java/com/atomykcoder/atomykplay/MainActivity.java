@@ -5,16 +5,17 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.media.AudioManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.support.v4.view.MenuItemCompat;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
@@ -29,8 +30,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.function.FetchMusic;
-import com.atomykcoder.atomykplay.function.MusicMainAdapter;
 import com.atomykcoder.atomykplay.function.MusicDataCapsule;
+import com.atomykcoder.atomykplay.function.MusicMainAdapter;
 import com.atomykcoder.atomykplay.function.SearchResultsFragment;
 import com.atomykcoder.atomykplay.function.StorageUtil;
 import com.atomykcoder.atomykplay.player.PlayerFragment;
@@ -82,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout linearLayout;
     private RecyclerView recyclerView;
     private SearchResultsFragment searchResultsFragment; // This being here is very important for search method to work
+    private AudioManager audioManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         searchResultsFragment = new SearchResultsFragment();
-
+        audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
 
         setSupportActionBar(toolbar);
         toolbar.setTitle(R.string.app_name);
@@ -114,6 +116,7 @@ public class MainActivity extends AppCompatActivity {
         sliding_up_panel_layout.setPanelSlideListener(onSlideChange());
         setFragmentInSlider();
     }
+
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
@@ -133,6 +136,13 @@ public class MainActivity extends AppCompatActivity {
             if (!service_bound) {
                 Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
                 bindService(playerIntent, service_connection, Context.BIND_IMPORTANT);
+
+                //this will start playing song as soon as it app starts if its connected to headset
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    if (audioManager.isWiredHeadsetOn()){
+                        playAudio();
+                    }
+                }
             }
         }
         super.onStart();
@@ -146,7 +156,7 @@ public class MainActivity extends AppCompatActivity {
             if (media_player_service.media_player != null) {
                 if (!media_player_service.media_player.isPlaying()) {
                     unbindService(service_connection);
-                    stopService(new Intent(this,MediaPlayerService.class));
+                    stopService(new Intent(this, MediaPlayerService.class));
                     service_bound = false;
                 }
             }
@@ -248,7 +258,7 @@ public class MainActivity extends AppCompatActivity {
             public void onPanelExpanded(View panel) {
                 try {
                     InputMethodManager manager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-                    manager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),0);
+                    manager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
                     FragmentManager manager1 = getSupportFragmentManager();
                     manager1.popBackStack();
                 } catch (Exception e) {

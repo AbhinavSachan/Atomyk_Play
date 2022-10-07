@@ -62,6 +62,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     public static SeekBar seekBarMain;
     public static ImageView playImg;
     public static TextView curPosTv, durationTv;
+    public static BottomSheetDialog queueSheetfragment;
     private static Context context;
     //cover image view
     private static ImageView playerCoverImage;
@@ -69,7 +70,6 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     private static ImageView queImg, repeatImg, previousImg, nextImg, shuffleImg, favoriteImg, timerImg, optionImg;
     private static TextView playerSongNameTv, playerArtistNameTv, mimeTv, bitrateTv, timerTv;
     final private CountDownTimer[] countDownTimer = new CountDownTimer[1];
-    public static BottomSheetDialog queueSheetfragment;
     private int resumePosition = -1;
 
     //setting up mini player layout
@@ -179,6 +179,68 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         }
     }
 
+    public static void pausePlayAudio() {
+        if (!service_bound) {
+            Intent playerIntent = new Intent(context, MediaPlayerService.class);
+            context.startService(playerIntent);
+            context.bindService(playerIntent, service_connection, Context.BIND_IMPORTANT);
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    //service is active send media with broadcast receiver
+                    Intent broadcastIntent = new Intent(BROADCAST_PAUSE_PLAY_MUSIC);
+                    context.sendBroadcast(broadcastIntent);
+                }
+            }, 20);
+        } else {
+            //service is active send media with broadcast receiver
+            Intent broadcastIntent = new Intent(BROADCAST_PAUSE_PLAY_MUSIC);
+            context.sendBroadcast(broadcastIntent);
+        }
+
+    }
+
+    public static void playNextAudio() {
+        if (!service_bound) {
+            Intent playerIntent = new Intent(context, MediaPlayerService.class);
+            context.startService(playerIntent);
+            context.bindService(playerIntent, service_connection, Context.BIND_IMPORTANT);
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    //service is active send media with broadcast receiver
+                    Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEXT_MUSIC);
+                    context.sendBroadcast(broadcastIntent);
+                }
+            }, 20);
+        } else {
+            //service is active send media with broadcast receiver
+            Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEXT_MUSIC);
+            context.sendBroadcast(broadcastIntent);
+        }
+    }
+
+    public static void playPreviousAudio() {
+        if (!service_bound) {
+            Intent playerIntent = new Intent(context, MediaPlayerService.class);
+            context.startService(playerIntent);
+            context.bindService(playerIntent, service_connection, Context.BIND_IMPORTANT);
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    //service is active send media with broadcast receiver
+                    Intent broadcastIntent = new Intent(BROADCAST_PLAY_PREVIOUS_MUSIC);
+                    context.sendBroadcast(broadcastIntent);
+                }
+            }, 20);
+
+        } else {
+            //service is active send media with broadcast receiver
+            Intent broadcastIntent = new Intent(BROADCAST_PLAY_PREVIOUS_MUSIC);
+            context.sendBroadcast(broadcastIntent);
+        }
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -260,8 +322,13 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         }
         //endregion
 
+        setMiniLayout();
+        setMainPlayerLayout();
+
         return view;
     }
+
+    //endregion
 
     private void openLyricsPanel() {
         //show lyrics in bottom sheet
@@ -360,8 +427,6 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
 
     }
 
-    //endregion
-
     private void cancelTimer() {
         // Else if timer Icon is set to ic_timer already then execute this
         // Cancel any previous set timer
@@ -451,8 +516,6 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         //layout setup ☺
         if (is_granted) {
             try {
-                setMiniLayout();
-                setMainPlayerLayout();
                 setPreviousData();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -511,69 +574,6 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     @Override
     public void onPause() {
         super.onPause();
-    }
-
-
-    public void pausePlayAudio() {
-        if (!service_bound) {
-            Intent playerIntent = new Intent(getContext(), MediaPlayerService.class);
-            context.startService(playerIntent);
-            context.bindService(playerIntent, service_connection, Context.BIND_IMPORTANT);
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    //service is active send media with broadcast receiver
-                    Intent broadcastIntent = new Intent(BROADCAST_PAUSE_PLAY_MUSIC);
-                    context.sendBroadcast(broadcastIntent);
-                }
-            }, 20);
-        } else {
-            //service is active send media with broadcast receiver
-            Intent broadcastIntent = new Intent(BROADCAST_PAUSE_PLAY_MUSIC);
-            context.sendBroadcast(broadcastIntent);
-        }
-
-    }
-
-    public void playNextAudio() {
-        if (!service_bound) {
-            Intent playerIntent = new Intent(getContext(), MediaPlayerService.class);
-            context.startService(playerIntent);
-            context.bindService(playerIntent, service_connection, Context.BIND_IMPORTANT);
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    //service is active send media with broadcast receiver
-                    Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEXT_MUSIC);
-                    context.sendBroadcast(broadcastIntent);
-                }
-            }, 20);
-        } else {
-            //service is active send media with broadcast receiver
-            Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEXT_MUSIC);
-            context.sendBroadcast(broadcastIntent);
-        }
-    }
-
-    public void playPreviousAudio() {
-        if (!service_bound) {
-            Intent playerIntent = new Intent(getContext(), MediaPlayerService.class);
-            context.startService(playerIntent);
-            context.bindService(playerIntent, service_connection, Context.BIND_IMPORTANT);
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    //service is active send media with broadcast receiver
-                    Intent broadcastIntent = new Intent(BROADCAST_PLAY_PREVIOUS_MUSIC);
-                    context.sendBroadcast(broadcastIntent);
-                }
-            }, 20);
-
-        } else {
-            //service is active send media with broadcast receiver
-            Intent broadcastIntent = new Intent(BROADCAST_PLAY_PREVIOUS_MUSIC);
-            context.sendBroadcast(broadcastIntent);
-        }
     }
 
     private void showToast(String option) {

@@ -11,7 +11,6 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -252,6 +251,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         IntentFilter filter = new IntentFilter(MainActivity.BROADCAST_PLAY_NEW_MUSIC);
         registerReceiver(playNewMusicReceiver, filter);
     }
+
 
     private void registerPausePlayMusic() {
         IntentFilter filter = new IntentFilter(MainActivity.BROADCAST_PAUSE_PLAY_MUSIC);
@@ -500,7 +500,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     }
 
     private void handleIncomingActions(Intent playbackAction) {
-        if (playbackAction == null || playbackAction.getAction() == null) return;
+        if (playbackAction == null || playbackAction.getAction() == null || media_player == null)
+            return;
         String actionString = playbackAction.getAction();
         if (actionString.equalsIgnoreCase(ACTION_PLAY)) {
             transportControls.play();
@@ -553,10 +554,13 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         super.onCreate();
         //manage incoming calls during playback
         callStateListener();
-
         //manage audio while output changes
         registerBecomingNoisyReceiver();
+
         //change audio on new click
+//        audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+//
+//        audioManager.registerMediaButtonEventReceiver(new ComponentName(getApplicationContext(),MediaButtonBroadcastReceiver.class));
         registerPlayNewMusic();
         registerPausePlayMusic();
         registerPlayNextMusic();
@@ -819,7 +823,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     }
 
     //region media session initiation
-    private void initiateMediaSession() throws RemoteException {
+    public void initiateMediaSession() throws RemoteException {
         if (mediaSessionManager != null) return; //manager already exists
         mediaSessionManager = (MediaSessionManager) getSystemService(Context.MEDIA_SESSION_SERVICE);
         mediaSession = new MediaSessionCompat(getApplicationContext(), "AudioPlayer");
@@ -829,6 +833,27 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
         updateMetaData();
         mediaSession.setCallback(new MediaSessionCompat.Callback() {
+            @Override
+            public boolean onMediaButtonEvent(Intent mediaButtonEvent) {
+                String intentAction = mediaButtonEvent.getAction();
+                if (Intent.ACTION_MEDIA_BUTTON.equals(intentAction)) {
+                    KeyEvent event = mediaButtonEvent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
+                    if (event != null) {
+                        int action = event.getAction();
+                        if (action == KeyEvent.ACTION_DOWN) {
+                            if (media_player != null) {
+                                if (media_player.isPlaying()) {
+                                    pauseMedia();
+                                } else {
+                                    resumeMedia();
+                                }
+                            }
+                        }
+                    }
+                }
+                return super.onMediaButtonEvent(mediaButtonEvent);
+            }
+
             @Override
             public void onPlay() {
                 super.onPlay();
@@ -946,16 +971,16 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         unregisterReceiver(pausePlayMusicReceiver);
         unregisterReceiver(nextMusicReceiver);
         unregisterReceiver(prevMusicReceiver);
+
     }
 
     private void removeNotification() {
         if (media_player != null) {
-            if (!media_player.isPlaying()) {
-                stopForeground(true);
-            }
             media_player.release();
+            mediaSession.release();
         }
         media_player = null;
+        stopForeground(true);
         stopSelf();
     }
 
