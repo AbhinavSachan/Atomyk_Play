@@ -6,11 +6,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.media.AudioManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.support.v4.view.MenuItemCompat;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -42,6 +40,10 @@ import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
+import com.turingtechnologies.materialscrollbar.AlphabetIndicator;
+import com.turingtechnologies.materialscrollbar.DragScrollBar;
+import com.turingtechnologies.materialscrollbar.Indicator;
+import com.turingtechnologies.materialscrollbar.TouchScrollBar;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private SearchResultsFragment searchResultsFragment; // This being here is very important for search method to work
     private AudioManager audioManager;
+    private TouchScrollBar scrollBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,10 +108,17 @@ public class MainActivity extends AppCompatActivity {
         toolbar.setTitle(R.string.app_name);
 
         dataList = new ArrayList<>();
+        scrollBar = findViewById(R.id.dragScrollBar);
 
         recyclerView.setNestedScrollingEnabled(false);
         recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+
+
+        LinearLayoutManager manager = new LinearLayoutManager(MainActivity.this, LinearLayoutManager.VERTICAL, false);
+        manager.setSmoothScrollbarEnabled(true);
+        recyclerView.setLayoutManager(manager);
+
+        scrollBar.setIndicator(new AlphabetIndicator(MainActivity.this),false);
 
         //Checking permissions before activity creation (method somewhere down in the script)
         checkPermission();
@@ -138,14 +148,19 @@ public class MainActivity extends AppCompatActivity {
                 bindService(playerIntent, service_connection, Context.BIND_IMPORTANT);
 
                 //this will start playing song as soon as it app starts if its connected to headset
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    if (audioManager.isWiredHeadsetOn()){
-                        playAudio();
-                    }
-                }
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//                    if (audioManager.isWiredHeadsetOn()){
+//                        playAudio();
+//                    }
+//                }
             }
         }
         super.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
     }
 
     @Override
@@ -256,6 +271,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onPanelExpanded(View panel) {
+                //this will hide the keyboard after clicking on player while searching
                 try {
                     InputMethodManager manager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
                     manager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
@@ -264,7 +280,6 @@ public class MainActivity extends AppCompatActivity {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-
 
                 View miniPlayer = PlayerFragment.mini_play_view;
                 View mainPlayer = findViewById(R.id.player_layout);

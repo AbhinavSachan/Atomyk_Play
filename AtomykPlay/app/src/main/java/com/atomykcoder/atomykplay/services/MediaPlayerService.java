@@ -225,6 +225,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             } else {
                 if (media_player.isPlaying()) {
                     pauseMedia();
+                        handler.removeCallbacks(runnable);
                 } else {
                     resumeMedia();
                     if (service_bound)
@@ -773,7 +774,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                         PlayerFragment.seekBarMain.setProgress(position);
                         String cur = convertDuration(String.valueOf(position));
                         PlayerFragment.curPosTv.setText(cur);
-                        handler.postDelayed(runnable, 100);
+                        handler.postDelayed(runnable, 10);
                     }
                 };
                 handler.postDelayed(runnable, 0);

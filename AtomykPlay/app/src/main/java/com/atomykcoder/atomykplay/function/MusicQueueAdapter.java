@@ -4,6 +4,7 @@ import static com.atomykcoder.atomykplay.function.FetchMusic.convertDuration;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -60,23 +61,23 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
                     //Store serializable music list to sharedPreference
                     storage.saveMusicIndex(position);
                     MainActivity mainActivity = (MainActivity) context;
-                    if (PlayerFragment.queueSheetfragment != null)
-                        if (PlayerFragment.queueSheetfragment.isShowing()) {
-                            PlayerFragment.queueSheetfragment.dismiss();
+                    if (PlayerFragment.queueSheetFragment != null)
+                        if (PlayerFragment.queueSheetFragment.isShowing()) {
+                            PlayerFragment.queueSheetFragment.dismiss();
                         }
                     mainActivity.playAudio();
                 } else {
                     Toast.makeText(context, "Audio file is unavailable", Toast.LENGTH_SHORT).show();
+                    notifyItemRemoved(position);
                 }
 
             }
         });
 
         //add bottom sheet functions in three dot click
-        holder.imageButton.setOnLongClickListener(new View.OnLongClickListener() {
+        holder.imageButton.setOnDragListener(new View.OnDragListener() {
             @Override
-            public boolean onLongClick(View v) {
-                Toast.makeText(context, "Clicked", Toast.LENGTH_SHORT).show();
+            public boolean onDrag(View v, DragEvent event) {
                 return false;
             }
         });

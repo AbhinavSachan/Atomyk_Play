@@ -19,11 +19,12 @@ import com.atomykcoder.atomykplay.MainActivity;
 import com.atomykcoder.atomykplay.R;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.turingtechnologies.materialscrollbar.INameableAdapter;
 
 import java.io.File;
 import java.util.ArrayList;
 
-public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.MusicViewAdapter> {
+public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.MusicViewAdapter> implements INameableAdapter {
     Context context;
     ArrayList<MusicDataCapsule> musicArrayList;
 
@@ -67,6 +68,7 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
                     mainActivity.playAudio();
                 }else {
                     Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show();
+                    notifyItemRemoved(position);
                 }
 
             }
@@ -89,6 +91,11 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
     @Override
     public int getItemCount() {
         return musicArrayList.size();
+    }
+
+    @Override
+    public Character getCharacterForElement(int element) {
+        return 's';
     }
 
 

@@ -20,7 +20,7 @@ android {
 
     }
 
-    task prepareKotlinBuildScriptModel{
+    task prepareKotlinBuildScriptModel {
 
     }
 
@@ -61,6 +61,7 @@ dependencies {
     implementation 'com.sothree.slidinguppanel:library:3.0.0'
 
     implementation 'com.google.code.gson:gson:2.8.6'
+    implementation 'com.github.turing-tech:MaterialScrollBar:13.+'
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
 
 }

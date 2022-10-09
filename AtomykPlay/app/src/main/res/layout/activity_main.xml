@@ -8,13 +8,13 @@
     android:layout_height="match_parent"
     android:background="@color/primary_bg"
     android:gravity="bottom"
+    app:layout_scrollInterpolator="@animator/nav_default_pop_enter_anim"
     app:umanoDragView="@+id/dragView"
     app:umanoFlingVelocity="1"
     app:umanoInitialState="collapsed"
     app:umanoOverlay="true"
     app:umanoPanelHeight="68dp"
     app:umanoParalaxOffset="100dp"
-    app:layout_scrollInterpolator="@animator/nav_default_pop_enter_anim"
     app:umanoShadowHeight="4dp"
     tools:context=".MainActivity">
 
@@ -39,9 +39,16 @@
             android:layout_height="match_parent"
             android:layout_below="@id/toolbar"
             android:clipToPadding="false"
-            android:paddingBottom="85dp">
+            android:paddingBottom="85dp" />
 
-        </androidx.recyclerview.widget.RecyclerView>
+        <com.turingtechnologies.materialscrollbar.TouchScrollBar
+            android:id="@+id/dragScrollBar"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/toolbar"
+            android:layout_alignParentEnd="true"
+            app:msb_lightOnTouch="true"
+            app:msb_recyclerView="@id/music_recycler" />
 
         <LinearLayout
             android:id="@+id/song_not_found_layout"

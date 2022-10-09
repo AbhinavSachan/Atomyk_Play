@@ -3,7 +3,6 @@ package com.atomykcoder.atomykplay.player;
 import static com.atomykcoder.atomykplay.MainActivity.BROADCAST_PAUSE_PLAY_MUSIC;
 import static com.atomykcoder.atomykplay.MainActivity.BROADCAST_PLAY_NEXT_MUSIC;
 import static com.atomykcoder.atomykplay.MainActivity.BROADCAST_PLAY_PREVIOUS_MUSIC;
-import static com.atomykcoder.atomykplay.MainActivity.is_granted;
 import static com.atomykcoder.atomykplay.MainActivity.media_player_service;
 import static com.atomykcoder.atomykplay.MainActivity.service_bound;
 import static com.atomykcoder.atomykplay.MainActivity.service_connection;
@@ -62,7 +61,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     public static SeekBar seekBarMain;
     public static ImageView playImg;
     public static TextView curPosTv, durationTv;
-    public static BottomSheetDialog queueSheetfragment;
+    public static BottomSheetDialog queueSheetFragment;
     private static Context context;
     //cover image view
     private static ImageView playerCoverImage;
@@ -70,7 +69,6 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     private static ImageView queImg, repeatImg, previousImg, nextImg, shuffleImg, favoriteImg, timerImg, optionImg;
     private static TextView playerSongNameTv, playerArtistNameTv, mimeTv, bitrateTv, timerTv;
     final private CountDownTimer[] countDownTimer = new CountDownTimer[1];
-    private int resumePosition = -1;
 
     //setting up mini player layout
     //calling it from service when player is prepared and also calling it in this fragment class
@@ -139,11 +137,6 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
                         .override(500, 500)
                         .into(playerCoverImage);
 
-                try {
-                    durationTv.setText(convertDuration(activeMusic.getsLength()));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
                 try {
                     playerSongNameTv.setText(activeMusic.getsName());
                     playerArtistNameTv.setText(activeMusic.getsArtist());
@@ -321,10 +314,6 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
             e.printStackTrace();
         }
         //endregion
-
-        setMiniLayout();
-        setMainPlayerLayout();
-
         return view;
     }
 
@@ -493,9 +482,9 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
 
     private void openQue() {
         //show now playing music list
-        queueSheetfragment = new BottomSheetDialog(context);
-        queueSheetfragment.setContentView(R.layout.bottom_sheet_fragment_queue_layout);
-        RecyclerView recyclerView = queueSheetfragment.findViewById(R.id.queue_music_recycler);
+        queueSheetFragment = new BottomSheetDialog(context);
+        queueSheetFragment.setContentView(R.layout.bottom_sheet_fragment_queue_layout);
+        RecyclerView recyclerView = queueSheetFragment.findViewById(R.id.queue_music_recycler);
         ArrayList<MusicDataCapsule> dataList;
         //Setting up adapter
 
@@ -507,31 +496,15 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
             MusicQueueAdapter adapter = new MusicQueueAdapter(getContext(), dataList);
             recyclerView.setAdapter(adapter);
         }
-        queueSheetfragment.show();
+        queueSheetFragment.show();
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        //layout setup ☺
-        if (is_granted) {
-            try {
-                setPreviousData();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        if (service_bound) {
-            media_player_service.setSeekBar();
-
-            if (media_player_service.media_player != null) {
-                if (media_player_service.media_player.isPlaying()) {
-                    media_player_service.setIcon(PlaybackStatus.PLAYING);
-                } else {
-                    media_player_service.setIcon(PlaybackStatus.PAUSED);
-                }
-            }
-        }
+        setPreviousData();
+        setMiniLayout();
+        setMainPlayerLayout();
 
         //setting all buttons state from storage on startup
         //for repeat button
@@ -561,6 +534,18 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         super.onResume();
         //On Start Favourite Code Moved Here
         //for favorite
+
+        //layout setup ☺
+        if (service_bound) {
+
+            if (media_player_service.media_player != null) {
+                if (media_player_service.media_player.isPlaying()) {
+                    media_player_service.setIcon(PlaybackStatus.PLAYING);
+                } else {
+                    media_player_service.setIcon(PlaybackStatus.PAUSED);
+                }
+            }
+        }
         MusicDataCapsule activeMusic = getMusic();
         if (activeMusic != null) {
             if (storageUtil.loadFavorite(activeMusic.getsName()).equals("no_favorite")) {
@@ -633,7 +618,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
 
     }
 
-    private void setPreviousData() {
+    public void setPreviousData() {
         MusicDataCapsule activeMusic = getMusic();
 
         if (activeMusic != null) {
@@ -641,7 +626,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
             mini_progress.setMax(Integer.parseInt(activeMusic.getsLength()));
             durationTv.setText(convertDuration(activeMusic.getsLength()));
 
-            resumePosition = new StorageUtil(getContext()).loadMusicLastPos();
+            int resumePosition = new StorageUtil(context).loadMusicLastPos();
             if (resumePosition != -1) {
                 seekBarMain.setProgress(resumePosition);
                 mini_progress.setProgress(resumePosition);
