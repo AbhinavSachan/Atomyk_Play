@@ -43,7 +43,6 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import com.turingtechnologies.materialscrollbar.AlphabetIndicator;
 import com.turingtechnologies.materialscrollbar.DragScrollBar;
 import com.turingtechnologies.materialscrollbar.Indicator;
-import com.turingtechnologies.materialscrollbar.TouchScrollBar;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -86,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private SearchResultsFragment searchResultsFragment; // This being here is very important for search method to work
     private AudioManager audioManager;
-    private TouchScrollBar scrollBar;
+    private DragScrollBar scrollBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

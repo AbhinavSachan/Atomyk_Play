@@ -74,6 +74,8 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
             }
         });
 
+
+
         //add bottom sheet functions in three dot click
         holder.imageButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -95,7 +97,7 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
 
     @Override
     public Character getCharacterForElement(int element) {
-        return 's';
+        return musicArrayList.get(element).getsName().charAt(0);
     }
 
 
