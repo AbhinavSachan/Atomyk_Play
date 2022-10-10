@@ -78,10 +78,10 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
         holder.imageButton.setOnDragListener(new View.OnDragListener() {
             @Override
             public boolean onDrag(View v, DragEvent event) {
+                
                 return false;
             }
         });
-
 
         holder.nameText.setText(currentItem.getsName());
         String index = String.valueOf(position + 1);

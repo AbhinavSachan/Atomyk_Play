@@ -147,7 +147,6 @@ public class StorageUtil {
     }
 
     public ArrayList<MusicDataCapsule> loadInitialMusicList() {
-
         sharedPreferences = context.getSharedPreferences(QUEUE_LIST_STORAGE, Context.MODE_PRIVATE);
         Gson gson = new Gson();
         String json = sharedPreferences.getString("initialList", null);
@@ -155,5 +154,4 @@ public class StorageUtil {
         }.getType();
         return gson.fromJson(json, type);
     }
-
 }

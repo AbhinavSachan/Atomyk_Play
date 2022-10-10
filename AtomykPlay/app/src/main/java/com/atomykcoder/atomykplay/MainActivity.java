@@ -4,12 +4,14 @@ import android.Manifest;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.view.MenuItemCompat;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -42,7 +44,6 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import com.turingtechnologies.materialscrollbar.AlphabetIndicator;
 import com.turingtechnologies.materialscrollbar.DragScrollBar;
-import com.turingtechnologies.materialscrollbar.Indicator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -117,15 +118,16 @@ public class MainActivity extends AppCompatActivity {
         manager.setSmoothScrollbarEnabled(true);
         recyclerView.setLayoutManager(manager);
 
-        scrollBar.setIndicator(new AlphabetIndicator(MainActivity.this),false);
+        scrollBar.setIndicator(new AlphabetIndicator(MainActivity.this), false);
 
         //Checking permissions before activity creation (method somewhere down in the script)
         checkPermission();
 
         sliding_up_panel_layout.setPanelSlideListener(onSlideChange());
         setFragmentInSlider();
-    }
 
+        
+    }
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {

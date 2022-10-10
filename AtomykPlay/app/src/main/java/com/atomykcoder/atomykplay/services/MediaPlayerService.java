@@ -225,7 +225,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             } else {
                 if (media_player.isPlaying()) {
                     pauseMedia();
-                        handler.removeCallbacks(runnable);
+                    handler.removeCallbacks(runnable);
                 } else {
                     resumeMedia();
                     if (service_bound)
@@ -842,12 +842,21 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                     if (event != null) {
                         int action = event.getAction();
                         if (action == KeyEvent.ACTION_DOWN) {
-                            if (media_player != null) {
-                                if (media_player.isPlaying()) {
-                                    pauseMedia();
-                                } else {
-                                    resumeMedia();
+                            if (event.getKeyCode() == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE) {
+                                if (media_player != null) {
+                                    if (media_player.isPlaying()) {
+                                        pauseMedia();
+                                    } else {
+                                        resumeMedia();
+                                    }
                                 }
+                                return true;
+                            } else if (event.getKeyCode() == KeyEvent.KEYCODE_MEDIA_NEXT) {
+                                onSkipToNext();
+                                return true;
+                            } else if (event.getKeyCode() == KeyEvent.KEYCODE_MEDIA_PREVIOUS) {
+                                onSkipToPrevious();
+                                return true;
                             }
                         }
                     }
