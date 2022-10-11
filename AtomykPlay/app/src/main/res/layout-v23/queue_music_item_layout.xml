@@ -137,6 +137,7 @@
             android:layout_height="match_parent"
             android:contentDescription="@string/empty"
             android:focusable="true"
+            android:clickable="true"
             android:padding="13dp"
             android:src="@drawable/ic_drag_handle"
             android:theme="@android:style/ThemeOverlay.Material.Dark"

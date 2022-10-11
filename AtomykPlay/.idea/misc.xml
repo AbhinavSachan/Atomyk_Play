@@ -12,6 +12,7 @@
         <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable-v31/round_select_effect.xml" value="0.164" />
         <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/border_shadow.xml" value="0.164" />
         <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/bottom_sheet_round_rad.xml" value="0.1525" />
+        <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/bs_corner.xml" value="0.163" />
         <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/card_round_background.xml" value="0.1525" />
         <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/custom_round_corner_for_music_list.xml" value="0.1525" />
         <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/drawable/custom_thumb.xml" value="0.164" />
@@ -55,7 +56,7 @@
         <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/layout-land/main_player_layout.xml" value="0.146875" />
         <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/layout-notnight/main_player_layout.xml" value="0.2611111111111111" />
         <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/layout-v23/fragment_mini_player.xml" value="0.23981481481481481" />
-        <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/layout-v23/main_player_layout.xml" value="0.2611111111111111" />
+        <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/layout-v23/main_player_layout.xml" value="0.136" />
         <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/layout-v23/music_item_layout.xml" value="0.23981481481481481" />
         <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/layout-v23/music_item_layout_for_queue.xml" value="0.26614583333333336" />
         <entry key="..\:/Giithub/Atomyk_Play/AtomykPlay/app/src/main/res/layout-v23/queue_music_item_layout.xml" value="0.26614583333333336" />

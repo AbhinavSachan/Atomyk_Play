@@ -14,6 +14,7 @@
     app:umanoInitialState="collapsed"
     app:umanoOverlay="true"
     app:umanoPanelHeight="68dp"
+    android:paddingBottom="44dp"
     app:umanoParalaxOffset="100dp"
     app:umanoShadowHeight="4dp"
     tools:context=".MainActivity">
@@ -26,10 +27,10 @@
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
+            android:layout_height="84dp"
             android:background="@color/primary_bg"
+            android:paddingTop="28dp"
             android:elevation="16dp"
-            android:fitsSystemWindows="true"
             android:theme="@style/ThemeOverlay.AppCompat.DayNight"
             app:popupTheme="@style/ThemeOverlay.AppCompat.DayNight" />
 

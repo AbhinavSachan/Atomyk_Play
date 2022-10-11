@@ -14,22 +14,11 @@
         <item name="android:navigationBarColor">?attr/colorPrimary</item>
         <item name="windowActionBarOverlay">true</item>
         <item name="windowActionBar">false</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+        <item name="android:windowTranslucentStatus">true</item>
         <!-- Customize your theme here. -->
 
     </style>
 
-    <style name="Theme.BottomSheetDialog" parent="Base.ThemeOverlay.MaterialComponents.Dialog">
-        <item name="android:windowIsFloating">false</item>
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:topLeftRadius">16dp</item>
-        <item name="android:topRightRadius">16dp</item>
-        <item name="android:windowAnimationStyle">@style/Animation.MaterialComponents.BottomSheetDialog</item>
-        <item name="bottomSheetStyle">@style/Widget.MaterialComponents.BottomSheet.Modal</item>
-        <item name="enableEdgeToEdge">true</item>
-        <item name="paddingBottomSystemWindowInsets">true</item>
-        <item name="paddingLeftSystemWindowInsets">true</item>
-        <item name="paddingRightSystemWindowInsets">true</item>
-        <item name="paddingTopSystemWindowInsets">true</item>
-    </style>
 
 </resources>

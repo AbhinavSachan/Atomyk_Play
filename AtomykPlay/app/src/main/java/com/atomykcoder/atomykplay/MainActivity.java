@@ -4,14 +4,12 @@ import android.Manifest;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.view.MenuItemCompat;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -34,7 +32,7 @@ import com.atomykcoder.atomykplay.function.MusicDataCapsule;
 import com.atomykcoder.atomykplay.function.MusicMainAdapter;
 import com.atomykcoder.atomykplay.function.SearchResultsFragment;
 import com.atomykcoder.atomykplay.function.StorageUtil;
-import com.atomykcoder.atomykplay.player.PlayerFragment;
+import com.atomykcoder.atomykplay.fragments.PlayerFragment;
 import com.atomykcoder.atomykplay.services.MediaPlayerService;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
@@ -86,7 +84,6 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private SearchResultsFragment searchResultsFragment; // This being here is very important for search method to work
     private AudioManager audioManager;
-    private DragScrollBar scrollBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
         toolbar.setTitle(R.string.app_name);
 
         dataList = new ArrayList<>();
-        scrollBar = findViewById(R.id.dragScrollBar);
+        DragScrollBar scrollBar = findViewById(R.id.dragScrollBar);
 
         recyclerView.setNestedScrollingEnabled(false);
         recyclerView.setHasFixedSize(true);
@@ -126,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
         sliding_up_panel_layout.setPanelSlideListener(onSlideChange());
         setFragmentInSlider();
 
-        
+
     }
 
     @Override
@@ -221,7 +218,6 @@ public class MainActivity extends AppCompatActivity {
         transaction.commit();
     }
 
-
     //Checks whether user granted permissions for external storage or not
     //if not then shows dialogue to grant permissions
     private void checkPermission() {
@@ -232,6 +228,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onPermissionsChecked(MultiplePermissionsReport multiplePermissionsReport) {
                         //Fetch Music List along with it's metadata and save it in "dataList"
+
                         FetchMusic.fetchMusic(dataList, MainActivity.this);
 
                         //Setting up adapter

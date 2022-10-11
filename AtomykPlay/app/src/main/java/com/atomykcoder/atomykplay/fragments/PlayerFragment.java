@@ -1,5 +1,6 @@
-package com.atomykcoder.atomykplay.player;
+package com.atomykcoder.atomykplay.fragments;
 
+import static android.content.ContentValues.TAG;
 import static com.atomykcoder.atomykplay.MainActivity.BROADCAST_PAUSE_PLAY_MUSIC;
 import static com.atomykcoder.atomykplay.MainActivity.BROADCAST_PLAY_NEXT_MUSIC;
 import static com.atomykcoder.atomykplay.MainActivity.BROADCAST_PLAY_PREVIOUS_MUSIC;
@@ -32,18 +33,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.fragment.app.FragmentManager;
 
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.function.MusicDataCapsule;
-import com.atomykcoder.atomykplay.function.MusicQueueAdapter;
 import com.atomykcoder.atomykplay.function.PlaybackStatus;
 import com.atomykcoder.atomykplay.function.StorageUtil;
 import com.atomykcoder.atomykplay.services.MediaPlayerService;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 import java.util.ArrayList;
@@ -61,7 +60,8 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     public static SeekBar seekBarMain;
     public static ImageView playImg;
     public static TextView curPosTv, durationTv;
-    public static BottomSheetDialog queueSheetFragment;
+    public static BottomSheetQueueLayoutFragment queueSheetFragment;
+    public static BottomSheetBehavior bottomSheetBehavior;
     private static Context context;
     //cover image view
     private static ImageView playerCoverImage;
@@ -123,6 +123,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
                 activeMusic = musicList.get(0);
             }
 
+
         if (activeMusic != null) {
             if (storageUtil.loadFavorite(activeMusic.getsName()).equals("no_favorite")) {
                 favoriteImg.setImageResource(R.drawable.ic_favorite_border);
@@ -141,6 +142,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
                     playerSongNameTv.setText(activeMusic.getsName());
                     playerArtistNameTv.setText(activeMusic.getsArtist());
                     mimeTv.setText(getMime(activeMusic.getsMimeType()).toUpperCase());
+                    durationTv.setText(convertDuration(activeMusic.getsLength()));
 
                     int bitrateInNum = Integer.parseInt(activeMusic.getsBitrate()) / 1000;
                     String finalBitrate = bitrateInNum + " KBPS";
@@ -482,21 +484,9 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
 
     private void openQue() {
         //show now playing music list
-        queueSheetFragment = new BottomSheetDialog(context);
-        queueSheetFragment.setContentView(R.layout.bottom_sheet_fragment_queue_layout);
-        RecyclerView recyclerView = queueSheetFragment.findViewById(R.id.queue_music_recycler);
-        ArrayList<MusicDataCapsule> dataList;
-        //Setting up adapter
-
-        if (recyclerView != null) {
-            dataList = new StorageUtil(getContext()).loadMusicList();
-            recyclerView.setNestedScrollingEnabled(false);
-            recyclerView.setHasFixedSize(true);
-            recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-            MusicQueueAdapter adapter = new MusicQueueAdapter(getContext(), dataList);
-            recyclerView.setAdapter(adapter);
-        }
-        queueSheetFragment.show();
+        FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
+        queueSheetFragment = new BottomSheetQueueLayoutFragment();
+        queueSheetFragment.show(fragmentManager, TAG);
     }
 
     @Override

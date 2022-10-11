@@ -1,25 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/container_rl_queue"
-    style="@style/Theme.BottomSheetDialog"
-    android:background="@color/primary_bg"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/primary_bg"
+    app:layout_behavior="android.support.design.widget.BottomSheetBehavior">
 
     <ImageView
         android:id="@+id/drag_up_img"
         android:layout_width="match_parent"
-        android:padding="4dp"
-        android:src="@drawable/ic_horizontal_rule"
-        android:elevation="6dp"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true" />
+        android:layout_alignParentTop="true"
+        android:elevation="6dp"
+        android:padding="4dp"
+        android:src="@drawable/ic_horizontal_rule" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/queue_music_recycler"
         android:layout_width="match_parent"
-        android:layout_below="@+id/drag_up_img"
         android:layout_height="match_parent"
+        android:layout_below="@+id/drag_up_img"
         android:clipToPadding="false"
         android:paddingBottom="85dp" />
 

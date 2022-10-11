@@ -8,12 +8,14 @@ import android.provider.MediaStore;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class FetchMusic {
 
     public static int filter = 20000;
 
-    public static void fetchMusic(ArrayList<MusicDataCapsule> dataList, Context context) {
+    public static ArrayList<MusicDataCapsule> fetchMusic(ArrayList<MusicDataCapsule> dataList, Context context) {
         String selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0";
         @SuppressLint("InlinedApi") String[] proj = {
                 MediaStore.Audio.Media.TITLE,
@@ -46,7 +48,7 @@ public class FetchMusic {
                             .replace("&#039;", "'")
                             .replace("%20", " ")
                             .replace("_", " ")
-                            .replace("&amp;", ",");
+                            .replace("&amp;", ",").trim();
                     ;
                     String sArtist = audioCursor.getString(1);
                     String sAlbumId = audioCursor.getString(2);
@@ -71,14 +73,21 @@ public class FetchMusic {
                     File file = new File(music.getsPath());
                     if (file.exists()) {
                         if (filter <= Integer.parseInt(music.getsLength())) {
-                            dataList.add(0,music);
+                            dataList.add(music);
                         }
                     }
 
                 } while (audioCursor.moveToNext());
                 audioCursor.close();
+                Collections.sort(dataList, new Comparator<MusicDataCapsule>() {
+                    @Override
+                    public int compare(MusicDataCapsule o1, MusicDataCapsule o2) {
+                        return o1.getsName().compareTo(o2.getsName());
+                    }
+                });
             }
         }
+        return dataList;
     }
 
     //converting duration from millis to readable time

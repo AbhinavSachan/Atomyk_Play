@@ -4,7 +4,7 @@ import static com.atomykcoder.atomykplay.ApplicationClass.CHANNEL_ID;
 import static com.atomykcoder.atomykplay.MainActivity.media_player_service;
 import static com.atomykcoder.atomykplay.MainActivity.service_bound;
 import static com.atomykcoder.atomykplay.function.FetchMusic.convertDuration;
-import static com.atomykcoder.atomykplay.player.PlayerFragment.getEmbeddedImage;
+import static com.atomykcoder.atomykplay.fragments.PlayerFragment.getEmbeddedImage;
 
 import android.annotation.SuppressLint;
 import android.app.Notification;
@@ -44,7 +44,7 @@ import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.function.MusicDataCapsule;
 import com.atomykcoder.atomykplay.function.PlaybackStatus;
 import com.atomykcoder.atomykplay.function.StorageUtil;
-import com.atomykcoder.atomykplay.player.PlayerFragment;
+import com.atomykcoder.atomykplay.fragments.PlayerFragment;
 
 import java.io.IOException;
 import java.util.ArrayList;

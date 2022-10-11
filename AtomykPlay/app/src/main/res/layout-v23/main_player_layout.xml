@@ -4,7 +4,8 @@
     android:id="@+id/player_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/primary_bg">
+    android:background="@color/primary_bg"
+    android:paddingTop="28dp">
 
     <RelativeLayout
         android:id="@+id/deltaRelative"
@@ -307,8 +308,8 @@
             android:textColor="@color/tertiary_bg"
             android:textSize="@dimen/d_12sp"
             android:textStyle="bold"
-            android:visibility="gone"
-            android:theme="@android:style/ThemeOverlay.Material.Dark" />
+            android:theme="@android:style/ThemeOverlay.Material.Dark"
+            android:visibility="gone" />
 
 
         <ImageView
