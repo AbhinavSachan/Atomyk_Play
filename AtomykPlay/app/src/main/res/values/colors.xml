@@ -6,6 +6,7 @@
     <color name="white">#FFFFFFFF</color>
     <color name="tertiary_bg">#303030</color>
     <color name="sub_text_grey">#494949</color>
+    <color name="sub_text_grey_light">#D6D6D6</color>
     <color name="secondary_bg">#FFD5FD</color>
     <color name="primary_bg">#FFC5F2</color>
     <color name="space_black">#2e3131</color>

@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.view.MenuItemCompat;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -27,12 +28,12 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.atomykcoder.atomykplay.fragments.PlayerFragment;
 import com.atomykcoder.atomykplay.function.FetchMusic;
 import com.atomykcoder.atomykplay.function.MusicDataCapsule;
 import com.atomykcoder.atomykplay.function.MusicMainAdapter;
 import com.atomykcoder.atomykplay.function.SearchResultsFragment;
 import com.atomykcoder.atomykplay.function.StorageUtil;
-import com.atomykcoder.atomykplay.fragments.PlayerFragment;
 import com.atomykcoder.atomykplay.services.MediaPlayerService;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
@@ -56,6 +57,8 @@ public class MainActivity extends AppCompatActivity {
 
     public static final String BROADCAST_PLAY_NEW_MUSIC = "com.atomykcoder.atomykplay.PlayNewMusic";
     public static final String BROADCAST_PAUSE_PLAY_MUSIC = "com.atomykcoder.atomykplay.PausePlayMusic";
+    public static final String MEDIA_BUTTON_RECEIVER = "com.atomykcoder.atomykplay.MEDIA_BUTTON_RECEIVER";
+    public static final String BROADCAST_STOP_MUSIC = "com.atomykcoder.atomykplay.StopMusic";
     public static final String BROADCAST_PLAY_NEXT_MUSIC = "com.atomykcoder.atomykplay.PlayNextMusic";
     public static final String BROADCAST_PLAY_PREVIOUS_MUSIC = "com.atomykcoder.atomykplay.PlayPreviousMusic";
     public static boolean service_bound = false;
@@ -90,16 +93,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         //initializations
         linearLayout = findViewById(R.id.song_not_found_layout);
         recyclerView = findViewById(R.id.music_recycler);
         sliding_up_panel_layout = findViewById(R.id.sliding_layout);
         Toolbar toolbar = findViewById(R.id.toolbar);
 
-
         searchResultsFragment = new SearchResultsFragment();
-        audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
 
         setSupportActionBar(toolbar);
         toolbar.setTitle(R.string.app_name);
@@ -120,9 +120,10 @@ public class MainActivity extends AppCompatActivity {
         //Checking permissions before activity creation (method somewhere down in the script)
         checkPermission();
 
+        audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+
         sliding_up_panel_layout.setPanelSlideListener(onSlideChange());
         setFragmentInSlider();
-
 
     }
 
@@ -145,12 +146,16 @@ public class MainActivity extends AppCompatActivity {
                 Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
                 bindService(playerIntent, service_connection, Context.BIND_IMPORTANT);
 
-                //this will start playing song as soon as it app starts if its connected to headset
+//                this will start playing song as soon as app starts if its connected to headset
+
 //                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//                    if (audioManager.isWiredHeadsetOn()){
+//                    if (audioManager.isBluetoothScoOn()){
+//                        playAudio();audioManager.startBluetoothSco();
+//                    }else if (audioManager.isWiredHeadsetOn()){
 //                        playAudio();
 //                    }
 //                }
+
             }
         }
         super.onStart();
@@ -184,8 +189,8 @@ public class MainActivity extends AppCompatActivity {
 
         if (!service_bound) {
             Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
-            startService(playerIntent);
             bindService(playerIntent, service_connection, Context.BIND_IMPORTANT);
+            startService(playerIntent);
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -230,6 +235,7 @@ public class MainActivity extends AppCompatActivity {
                         //Fetch Music List along with it's metadata and save it in "dataList"
 
                         FetchMusic.fetchMusic(dataList, MainActivity.this);
+                        new StorageUtil(MainActivity.this).saveInitialMusicList(dataList);
 
                         //Setting up adapter
                         linearLayout.setVisibility(View.GONE);

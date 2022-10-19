@@ -199,14 +199,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/control_ll"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="24dp">
+        android:layout_marginTop="24dp"
+        android:padding="10dp">
 
         <SeekBar
             android:id="@+id/player_seek_bar"
             android:layout_width="match_parent"
-            android:layout_height="16dp"
-            android:padding="6dp"
+            android:layout_height="33dp"
+            android:padding="15dp"
             android:progressDrawable="@drawable/seekbar_style"
             android:splitTrack="false"
             android:thumbTint="@color/tertiary_bg" />
@@ -216,8 +216,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/player_seek_bar"
+            android:layout_marginStart="12dp"
             android:layout_alignParentStart="true"
-            android:text="@string/empty"
+            android:text="@string/start_pos"
             android:textColor="@color/light_slate_gray_blue" />
 
         <TextView
@@ -225,8 +226,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/player_seek_bar"
+            android:layout_marginEnd="12dp"
             android:layout_alignParentEnd="true"
-            android:text="@string/empty"
+            android:text="@string/start_pos"
             android:textColor="@color/light_slate_gray_blue" />
 
 

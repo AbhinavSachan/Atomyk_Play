@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DefaultItemAnimator;
@@ -26,6 +27,7 @@ public class SearchResultsFragment extends Fragment {
     private ArrayList<MusicDataCapsule> originalMusicList;
     private MusicMainAdapter adapter;
     private RadioButton songButton, albumButton, artistButton, genreButton;
+    private TextView textView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -41,6 +43,7 @@ public class SearchResultsFragment extends Fragment {
         artistButton = view.findViewById(R.id.artist_button);
         genreButton = view.findViewById(R.id.genre_button);
         radioGroup = view.findViewById(R.id.radio_group);
+        textView = view.findViewById(R.id.searched_song_num);
 
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(view.getContext());
@@ -61,6 +64,7 @@ public class SearchResultsFragment extends Fragment {
     //Initializing And setting an adapter
     private void setAdapter() {
         adapter = new MusicMainAdapter(getContext(), originalMusicList);
+
         recycler_view.setAdapter(adapter);
     }
 
@@ -127,6 +131,8 @@ public class SearchResultsFragment extends Fragment {
                 }
                 break;
         }
+        String num = originalMusicList.size() + " Songs";
+        textView.setText(num);
     }
 
     //get radio get based on which radio button is selected

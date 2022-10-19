@@ -19,4 +19,5 @@
     <string name="genre">Genre</string>
     <string name="start_text">Start</string>
     <string name="sleep_timer_text">Sleep Timer</string>
+    <string name="song0">0 Songs</string>
 </resources>

@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -15,6 +16,7 @@ import com.atomykcoder.atomykplay.function.MusicQueueAdapter;
 import com.atomykcoder.atomykplay.function.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
 import com.atomykcoder.atomykplay.interfaces.SimpleTouchCallback;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 import java.util.ArrayList;
@@ -37,7 +39,6 @@ public class BottomSheetQueueLayoutFragment extends BottomSheetDialogFragment im
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         MusicQueueAdapter adapter = new MusicQueueAdapter(getActivity(), dataList, this);
         recyclerView.setAdapter(adapter);
-
 
         ItemTouchHelper.Callback callback = new SimpleTouchCallback(adapter);
         itemTouchHelper = new ItemTouchHelper(callback);

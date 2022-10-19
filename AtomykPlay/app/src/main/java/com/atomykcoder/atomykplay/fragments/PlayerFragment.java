@@ -8,6 +8,13 @@ import static com.atomykcoder.atomykplay.MainActivity.media_player_service;
 import static com.atomykcoder.atomykplay.MainActivity.service_bound;
 import static com.atomykcoder.atomykplay.MainActivity.service_connection;
 import static com.atomykcoder.atomykplay.function.FetchMusic.convertDuration;
+import static com.atomykcoder.atomykplay.function.StorageUtil.favorite;
+import static com.atomykcoder.atomykplay.function.StorageUtil.no_favorite;
+import static com.atomykcoder.atomykplay.function.StorageUtil.no_repeat;
+import static com.atomykcoder.atomykplay.function.StorageUtil.no_shuffle;
+import static com.atomykcoder.atomykplay.function.StorageUtil.repeat;
+import static com.atomykcoder.atomykplay.function.StorageUtil.repeat_one;
+import static com.atomykcoder.atomykplay.function.StorageUtil.shuffle;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
@@ -16,10 +23,10 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,7 +53,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 import java.util.ArrayList;
-import java.util.Map;
+import java.util.Collections;
 
 @SuppressLint("StaticFieldLeak")
 public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeListener {
@@ -61,12 +68,14 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     public static ImageView playImg;
     public static TextView curPosTv, durationTv;
     public static BottomSheetQueueLayoutFragment queueSheetFragment;
-    public static BottomSheetBehavior bottomSheetBehavior;
+    public static BottomSheetBehavior<View> bottomSheetBehavior;
     private static Context context;
     //cover image view
     private static ImageView playerCoverImage;
-    private static View lyricsOpenLayout;
-    private static ImageView queImg, repeatImg, previousImg, nextImg, shuffleImg, favoriteImg, timerImg, optionImg;
+    private static ImageView repeatImg;
+    private static ImageView shuffleImg;
+    private static ImageView favoriteImg;
+    private static ImageView timerImg;
     private static TextView playerSongNameTv, playerArtistNameTv, mimeTv, bitrateTv, timerTv;
     final private CountDownTimer[] countDownTimer = new CountDownTimer[1];
 
@@ -261,22 +270,22 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         player_layout = view.findViewById(R.id.player_layout);//○
         playerCoverImage = view.findViewById(R.id.player_cover_iv);//○
         seekBarMain = view.findViewById(R.id.player_seek_bar);//○
-        queImg = view.findViewById(R.id.player_que_iv);//○
+        ImageView queImg = view.findViewById(R.id.player_que_iv);//○
         repeatImg = view.findViewById(R.id.player_repeat_iv);//○
-        previousImg = view.findViewById(R.id.player_previous_iv);//○
+        ImageView previousImg = view.findViewById(R.id.player_previous_iv);//○
         playImg = view.findViewById(R.id.player_play_iv);//○
-        nextImg = view.findViewById(R.id.player_next_iv);//○
+        ImageView nextImg = view.findViewById(R.id.player_next_iv);//○
         shuffleImg = view.findViewById(R.id.player_shuffle_iv);//○
         favoriteImg = view.findViewById(R.id.player_favorite_iv);//○
         timerImg = view.findViewById(R.id.player_timer_iv);//○
-        optionImg = view.findViewById(R.id.player_option_iv);//○
+        ImageView optionImg = view.findViewById(R.id.player_option_iv);//○
         playerSongNameTv = view.findViewById(R.id.player_song_name_tv);//○
         playerArtistNameTv = view.findViewById(R.id.player_song_artist_name_tv);//○
         bitrateTv = view.findViewById(R.id.player_bitrate_tv);//○
         mimeTv = view.findViewById(R.id.player_mime_tv);//○
         durationTv = view.findViewById(R.id.player_duration_tv);//○
         curPosTv = view.findViewById(R.id.player_current_pos_tv);//○
-        lyricsOpenLayout = view.findViewById(R.id.player_lyrics_ll);
+        View lyricsOpenLayout = view.findViewById(R.id.player_lyrics_ll);
         timerTv = view.findViewById(R.id.countdown_tv);
 
 
@@ -306,16 +315,6 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         //StorageUtil initialization
         storageUtil = new StorageUtil(getContext());
 
-        //region Log Favourite Music
-        try {
-            Map<String, ?> allEntries = storageUtil.getFavouriteList();
-            for (Map.Entry<String, ?> entry : allEntries.entrySet()) {
-                Log.i("STORAGE", entry.getKey() + " :  " + entry.getValue().toString());
-            }
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-        }
-        //endregion
         return view;
     }
 
@@ -429,10 +428,10 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     private void addFavorite() {
         MusicDataCapsule activeMusic = getMusic();
         if (activeMusic != null) {
-            if (storageUtil.loadFavorite(activeMusic.getsName()).equals("no_favorite")) {
+            if (storageUtil.loadFavorite(activeMusic.getsName()).equals(no_favorite)) {
                 favoriteImg.setImageResource(R.drawable.ic_favorite);
                 storageUtil.saveFavorite(activeMusic.getsName());
-            } else if (storageUtil.loadFavorite(activeMusic.getsName()).equals("favorite")) {
+            } else if (storageUtil.loadFavorite(activeMusic.getsName()).equals(favorite)) {
                 favoriteImg.setImageResource(R.drawable.ic_favorite_border);
                 storageUtil.removeFavorite(activeMusic.getsName());
             }
@@ -457,30 +456,88 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
 
     private void shuffleList() {
         //shuffle list program
-        if (storageUtil.loadShuffle().equals("no_shuffle")) {
+        if (storageUtil.loadShuffle().equals(no_shuffle)) {
             shuffleImg.setImageResource(R.drawable.ic_shuffle);
-            storageUtil.saveShuffle("shuffle");
-
-
-        } else if (storageUtil.loadShuffle().equals("shuffle")) {
+            storageUtil.saveShuffle(shuffle);
+            shuffleListAndSave();
+        } else if (storageUtil.loadShuffle().equals(shuffle)) {
             shuffleImg.setImageResource(R.drawable.ic_shuffle_empty);
-            storageUtil.saveShuffle("no_shuffle");
+            storageUtil.saveShuffle(no_shuffle);
+            saveLastListAndPos();
         }
+    }
+
+    private void shuffleListAndSave() {
+        StorageUtil storageUtil = new StorageUtil(context);
+        ArrayList<MusicDataCapsule> musicList = storageUtil.loadMusicList();
+        MusicDataCapsule activeMusic;
+        int musicIndex;
+
+        musicIndex = storageUtil.loadMusicIndex();
+
+        if (musicList != null) {
+            if (musicIndex != -1 && musicIndex < musicList.size()) {
+                activeMusic = musicList.get(musicIndex);
+            } else {
+                activeMusic = musicList.get(0);
+            }
+            musicList.remove(activeMusic);
+            Collections.shuffle(musicList);
+            musicList.add(0, activeMusic);
+            storageUtil.saveMusicList(musicList);
+            storageUtil.saveMusicIndex(0);
+        }
+    }
+
+    private void saveLastListAndPos() {
+        StorageUtil storageUtil = new StorageUtil(context);
+        ArrayList<MusicDataCapsule> musicList = storageUtil.loadMusicList();
+        ArrayList<MusicDataCapsule> initialList = storageUtil.loadInitialMusicList();
+        MusicDataCapsule activeMusic;
+        int musicIndex;
+        int curIndex;
+
+        musicIndex = storageUtil.loadMusicIndex();
+
+        if (initialList != null) {
+            if (musicList != null) {
+                if (musicIndex != -1 && musicIndex < musicList.size()) {
+                    activeMusic = musicList.get(musicIndex);
+                } else {
+                    activeMusic = musicList.get(0);
+                }
+                curIndex = activeMusicIndexFinder(activeMusic, initialList);
+                storageUtil.saveMusicIndex(curIndex);
+            }
+            storageUtil.saveMusicList(initialList);
+        }
+    }
+
+    private int activeMusicIndexFinder(MusicDataCapsule activeMusic, ArrayList<MusicDataCapsule> list) {
+        int index;
+
+        for (index = 0; index <= list.size(); ++index) {
+            if (activeMusic.getsName().equals(list.get(index).getsName()) && activeMusic.getsLength().equals(list.get(index).getsLength())) {
+                return index;
+            }
+        }
+        return index;
     }
 
     private void repeatFun() {
         //function for music list and only one music repeat and save that state in sharedPreference
-        if (storageUtil.loadRepeatStatus().equals("no_repeat")) {
+        if (storageUtil.loadRepeatStatus().equals(no_repeat)) {
             repeatImg.setImageResource(R.drawable.ic_repeat);
-            storageUtil.saveRepeatStatus("repeat");
-        } else if (storageUtil.loadRepeatStatus().equals("repeat")) {
+            storageUtil.saveRepeatStatus(repeat);
+        } else if (storageUtil.loadRepeatStatus().equals(repeat)) {
             repeatImg.setImageResource(R.drawable.ic_repeat_one);
-            storageUtil.saveRepeatStatus("repeat_one");
-        } else if (storageUtil.loadRepeatStatus().equals("repeat_one")) {
+            storageUtil.saveRepeatStatus(repeat_one);
+        } else if (storageUtil.loadRepeatStatus().equals(repeat_one)) {
             repeatImg.setImageResource(R.drawable.ic_repeat_empty);
-            storageUtil.saveRepeatStatus("no_repeat");
+            storageUtil.saveRepeatStatus(no_repeat);
         }
     }
+
 
     private void openQue() {
         //show now playing music list
@@ -498,18 +555,18 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
 
         //setting all buttons state from storage on startup
         //for repeat button
-        if (storageUtil.loadRepeatStatus().equals("no_repeat")) {
+        if (storageUtil.loadRepeatStatus().equals(no_repeat)) {
             repeatImg.setImageResource(R.drawable.ic_repeat_empty);
-        } else if (storageUtil.loadRepeatStatus().equals("repeat")) {
+        } else if (storageUtil.loadRepeatStatus().equals(repeat)) {
             repeatImg.setImageResource(R.drawable.ic_repeat);
-        } else if (storageUtil.loadRepeatStatus().equals("repeat_one")) {
+        } else if (storageUtil.loadRepeatStatus().equals(repeat_one)) {
             repeatImg.setImageResource(R.drawable.ic_repeat_one);
         }
 
         //for shuffle button
-        if (storageUtil.loadShuffle().equals("no_shuffle")) {
+        if (storageUtil.loadShuffle().equals(no_shuffle)) {
             shuffleImg.setImageResource(R.drawable.ic_shuffle_empty);
-        } else if (storageUtil.loadShuffle().equals("shuffle")) {
+        } else if (storageUtil.loadShuffle().equals(shuffle)) {
             shuffleImg.setImageResource(R.drawable.ic_shuffle);
         }
     }
@@ -538,9 +595,9 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         }
         MusicDataCapsule activeMusic = getMusic();
         if (activeMusic != null) {
-            if (storageUtil.loadFavorite(activeMusic.getsName()).equals("no_favorite")) {
+            if (storageUtil.loadFavorite(activeMusic.getsName()).equals(no_favorite)) {
                 favoriteImg.setImageResource(R.drawable.ic_favorite_border);
-            } else if (storageUtil.loadFavorite(activeMusic.getsName()).equals("favorite")) {
+            } else if (storageUtil.loadFavorite(activeMusic.getsName()).equals(favorite)) {
                 favoriteImg.setImageResource(R.drawable.ic_favorite);
             }
         }
@@ -557,20 +614,8 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
 
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-        //this will change time and audio in realtime
-        if (service_bound) {
-            if (fromUser) {
-                if (media_player_service.media_player != null) {
-                    if (media_player_service.media_player.isPlaying()) {
-                        media_player_service.buildNotification(PlaybackStatus.PLAYING, 1f);
-                    } else {
-                        media_player_service.buildRemovableNotification(PlaybackStatus.PAUSED, 0f);
-
-                    }
-                }
-                curPosTv.setText(convertDuration(String.valueOf(progress)));
-
-            }
+        if (fromUser) {
+            curPosTv.setText(convertDuration(String.valueOf(progress)));
         }
     }
 
@@ -598,13 +643,16 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
             if (media_player_service.media_player != null) {
                 media_player_service.media_player.seekTo(seekBar.getProgress());
                 if (media_player_service.media_player.isPlaying()) {
-                    media_player_service.buildNotification(PlaybackStatus.PLAYING, 1f);
+                    media_player_service.buildPlayNotification(PlaybackStatus.PLAYING, 1f);
                 } else {
-                    media_player_service.buildRemovableNotification(PlaybackStatus.PAUSED, 0f);
+                    media_player_service.buildPausedNotification(PlaybackStatus.PAUSED, 0f);
                 }
             }
             media_player_service.setSeekBar();
+        } else {
+            mini_progress.setProgress(seekBar.getProgress());
         }
+
 
     }
 
@@ -619,7 +667,11 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
             int resumePosition = new StorageUtil(context).loadMusicLastPos();
             if (resumePosition != -1) {
                 seekBarMain.setProgress(resumePosition);
-                mini_progress.setProgress(resumePosition);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    mini_progress.setProgress(resumePosition, true);
+                } else {
+                    mini_progress.setProgress(resumePosition);
+                }
                 String cur = convertDuration(String.valueOf(resumePosition));
                 curPosTv.setText(cur);
             }

@@ -13,7 +13,7 @@
         android:id="@+id/radio_group"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="?attr/actionBarSize"
+        android:layout_marginTop="84dp"
         android:orientation="horizontal">
 
         <RadioButton
@@ -49,12 +49,22 @@
             android:textSize="16sp" />
     </RadioGroup>
 
+    <TextView
+        android:id="@+id/searched_song_num"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/radio_group"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="12dp"
+        android:padding="4dp"
+        android:textSize="@dimen/d_16sp"
+        android:text="@string/song0"
+        android:textColor="@color/sub_text_grey" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/search_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignTop="@id/radio_group"
-        android:layout_marginTop="50dp" />
+        android:layout_below="@id/searched_song_num" />
 
 </RelativeLayout>

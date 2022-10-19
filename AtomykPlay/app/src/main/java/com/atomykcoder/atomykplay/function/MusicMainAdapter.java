@@ -1,9 +1,12 @@
 package com.atomykcoder.atomykplay.function;
 
 import static com.atomykcoder.atomykplay.function.FetchMusic.convertDuration;
+import static com.atomykcoder.atomykplay.function.StorageUtil.no_shuffle;
+import static com.atomykcoder.atomykplay.function.StorageUtil.shuffle;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,6 +26,7 @@ import com.turingtechnologies.materialscrollbar.INameableAdapter;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.MusicViewAdapter> implements INameableAdapter {
     Context context;
@@ -59,10 +63,28 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
                 if (file.exists()) {
                     //check is service active
                     StorageUtil storage = new StorageUtil(context);
-                    //Store serializable music list to sharedPreference
-                    storage.saveInitialMusicList(musicArrayList);
-                    storage.saveMusicList(musicArrayList);
-                    storage.saveMusicIndex(position);
+                    if (storage.loadShuffle().equals(shuffle)){
+                        ArrayList<MusicDataCapsule> initialList = storage.loadInitialMusicList();
+                        MusicDataCapsule activeMusic;
+
+
+
+                        if (initialList != null) {
+                            if (position != -1 && position < initialList.size()) {
+                                activeMusic = initialList.get(position);
+                            } else {
+                                activeMusic = initialList.get(0);
+                            }
+                            musicArrayList.remove(activeMusic);
+                            Collections.shuffle(musicArrayList);
+                            musicArrayList.add(0,activeMusic);
+                            storage.saveMusicList(musicArrayList);
+                        }
+                    }else if (storage.loadShuffle().equals(no_shuffle)){
+                        //Store serializable music list to sharedPreference
+                        storage.saveMusicList(musicArrayList);
+                        storage.saveMusicIndex(position);
+                    }
 
                     MainActivity mainActivity = (MainActivity) context;
                     mainActivity.playAudio();
