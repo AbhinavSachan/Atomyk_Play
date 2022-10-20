@@ -27,6 +27,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -83,6 +84,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     //calling it from service when player is prepared and also calling it in this fragment class
     //to set it on app start ☺
     private StorageUtil storageUtil;
+    private ArrayList<MusicDataCapsule> initialList;
 
     public static void setMiniLayout() {
 
@@ -256,6 +258,10 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
             e.printStackTrace();
         }
 
+        //StorageUtil initialization
+        storageUtil = new StorageUtil(getContext());
+
+        initialList = storageUtil.loadInitialMusicList();
 
         //Mini player items initializations
         mini_play_view = view.findViewById(R.id.mini_player_layout);//○
@@ -311,9 +317,6 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         optionImg.setOnClickListener(v -> optionMenu());
 
         seekBarMain.setOnSeekBarChangeListener(this);
-
-        //StorageUtil initialization
-        storageUtil = new StorageUtil(getContext());
 
         return view;
     }
@@ -492,23 +495,23 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     private void saveLastListAndPos() {
         StorageUtil storageUtil = new StorageUtil(context);
         ArrayList<MusicDataCapsule> musicList = storageUtil.loadMusicList();
-        ArrayList<MusicDataCapsule> initialList = storageUtil.loadInitialMusicList();
         MusicDataCapsule activeMusic;
         int musicIndex;
         int curIndex;
 
         musicIndex = storageUtil.loadMusicIndex();
-
-        if (initialList != null) {
-            if (musicList != null) {
-                if (musicIndex != -1 && musicIndex < musicList.size()) {
-                    activeMusic = musicList.get(musicIndex);
-                } else {
-                    activeMusic = musicList.get(0);
-                }
-                curIndex = activeMusicIndexFinder(activeMusic, initialList);
+        if (musicList != null) {
+            if (musicIndex != -1 && musicIndex < musicList.size()) {
+                activeMusic = musicList.get(musicIndex);
+            } else {
+                activeMusic = musicList.get(0);
+            }
+            curIndex = activeMusicIndexFinder(activeMusic, initialList);
+            if (curIndex != -1) {
                 storageUtil.saveMusicIndex(curIndex);
             }
+        }
+        if (initialList != null) {
             storageUtil.saveMusicList(initialList);
         }
     }
@@ -516,12 +519,13 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     private int activeMusicIndexFinder(MusicDataCapsule activeMusic, ArrayList<MusicDataCapsule> list) {
         int index;
 
-        for (index = 0; index <= list.size(); ++index) {
-            if (activeMusic.getsName().equals(list.get(index).getsName()) && activeMusic.getsLength().equals(list.get(index).getsLength())) {
+        for (index = 0; index < list.size(); ++index) {
+            if (list.get(index).getsName().equals(activeMusic.getsName()) && list.get(index).getsLength().equals(activeMusic.getsLength())) {
+                Log.d("Position", String.valueOf(index));
                 return index;
             }
         }
-        return index;
+        return -1;
     }
 
     private void repeatFun() {

@@ -1087,7 +1087,9 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     @Override
     public void onDestroy() {
         super.onDestroy();
-        new StorageUtil(getApplicationContext()).saveMusicLastPos(media_player.getCurrentPosition());
+        if (media_player != null) {
+            new StorageUtil(getApplicationContext()).saveMusicLastPos(media_player.getCurrentPosition());
+        }
         removeNotification();
         //disable phone state listener ♣
         if (phoneStateListener != null) {

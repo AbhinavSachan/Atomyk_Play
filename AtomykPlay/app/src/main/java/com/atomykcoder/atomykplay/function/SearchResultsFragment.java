@@ -64,7 +64,6 @@ public class SearchResultsFragment extends Fragment {
     //Initializing And setting an adapter
     private void setAdapter() {
         adapter = new MusicMainAdapter(getContext(), originalMusicList);
-
         recycler_view.setAdapter(adapter);
     }
 

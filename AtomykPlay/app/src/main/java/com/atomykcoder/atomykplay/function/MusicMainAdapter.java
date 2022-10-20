@@ -64,21 +64,19 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
                     //check is service active
                     StorageUtil storage = new StorageUtil(context);
                     if (storage.loadShuffle().equals(shuffle)){
-                        ArrayList<MusicDataCapsule> initialList = storage.loadInitialMusicList();
                         MusicDataCapsule activeMusic;
+                        ArrayList<MusicDataCapsule> shuffleList = new ArrayList<>(musicArrayList);
 
-
-
-                        if (initialList != null) {
-                            if (position != -1 && position < initialList.size()) {
-                                activeMusic = initialList.get(position);
+                        if (musicArrayList != null) {
+                            if (position != -1 && position < musicArrayList.size()) {
+                                activeMusic = musicArrayList.get(position);
                             } else {
-                                activeMusic = initialList.get(0);
+                                activeMusic = musicArrayList.get(0);
                             }
-                            musicArrayList.remove(activeMusic);
-                            Collections.shuffle(musicArrayList);
-                            musicArrayList.add(0,activeMusic);
-                            storage.saveMusicList(musicArrayList);
+                            shuffleList.remove(activeMusic);
+                            Collections.shuffle(shuffleList);
+                            shuffleList.add(0,activeMusic);
+                            storage.saveMusicList(shuffleList);
                         }
                     }else if (storage.loadShuffle().equals(no_shuffle)){
                         //Store serializable music list to sharedPreference
