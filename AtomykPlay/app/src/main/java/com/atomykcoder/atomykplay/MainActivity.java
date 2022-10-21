@@ -235,6 +235,7 @@ public class MainActivity extends AppCompatActivity {
                         //Fetch Music List along with it's metadata and save it in "dataList"
 
                         FetchMusic.fetchMusic(dataList, MainActivity.this);
+                        //saving this in storage for diff util
                         new StorageUtil(MainActivity.this).saveInitialMusicList(dataList);
 
                         //Setting up adapter

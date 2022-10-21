@@ -84,7 +84,6 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     //calling it from service when player is prepared and also calling it in this fragment class
     //to set it on app start ☺
     private StorageUtil storageUtil;
-    private ArrayList<MusicDataCapsule> initialList;
 
     public static void setMiniLayout() {
 
@@ -260,8 +259,6 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
 
         //StorageUtil initialization
         storageUtil = new StorageUtil(getContext());
-
-        initialList = storageUtil.loadInitialMusicList();
 
         //Mini player items initializations
         mini_play_view = view.findViewById(R.id.mini_player_layout);//○
@@ -442,7 +439,6 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     }
 
     private MusicDataCapsule getMusic() {
-        StorageUtil storageUtil = new StorageUtil(context);
         ArrayList<MusicDataCapsule> musicList = storageUtil.loadMusicList();
         MusicDataCapsule activeMusic = null;
         int musicIndex;
@@ -466,54 +462,38 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         } else if (storageUtil.loadShuffle().equals(shuffle)) {
             shuffleImg.setImageResource(R.drawable.ic_shuffle_empty);
             storageUtil.saveShuffle(no_shuffle);
-            saveLastListAndPos();
+            restoreLastListAndPos();
         }
     }
 
     private void shuffleListAndSave() {
-        StorageUtil storageUtil = new StorageUtil(context);
         ArrayList<MusicDataCapsule> musicList = storageUtil.loadMusicList();
-        MusicDataCapsule activeMusic;
-        int musicIndex;
+        MusicDataCapsule activeMusic = getMusic();
+        storageUtil.saveTempMusicList(musicList);
 
-        musicIndex = storageUtil.loadMusicIndex();
-
-        if (musicList != null) {
-            if (musicIndex != -1 && musicIndex < musicList.size()) {
-                activeMusic = musicList.get(musicIndex);
-            } else {
-                activeMusic = musicList.get(0);
-            }
-            musicList.remove(activeMusic);
-            Collections.shuffle(musicList);
-            musicList.add(0, activeMusic);
-            storageUtil.saveMusicList(musicList);
-            storageUtil.saveMusicIndex(0);
-        }
+        //removing current item from list
+        musicList.remove(activeMusic);
+        //shuffling list
+        Collections.shuffle(musicList);
+        //adding the removed item in shuffled list on 0th index
+        musicList.add(0, activeMusic);
+        //saving list
+        storageUtil.saveMusicList(musicList);
+        //saving index
+        storageUtil.saveMusicIndex(0);
     }
 
-    private void saveLastListAndPos() {
-        StorageUtil storageUtil = new StorageUtil(context);
-        ArrayList<MusicDataCapsule> musicList = storageUtil.loadMusicList();
-        MusicDataCapsule activeMusic;
-        int musicIndex;
+
+    private void restoreLastListAndPos() {
+        ArrayList<MusicDataCapsule> tempList = storageUtil.loadTempMusicList();
+        MusicDataCapsule activeMusic = getMusic();
         int curIndex;
 
-        musicIndex = storageUtil.loadMusicIndex();
-        if (musicList != null) {
-            if (musicIndex != -1 && musicIndex < musicList.size()) {
-                activeMusic = musicList.get(musicIndex);
-            } else {
-                activeMusic = musicList.get(0);
-            }
-            curIndex = activeMusicIndexFinder(activeMusic, initialList);
-            if (curIndex != -1) {
-                storageUtil.saveMusicIndex(curIndex);
-            }
+        curIndex = activeMusicIndexFinder(activeMusic, tempList);
+        if (curIndex != -1) {
+            storageUtil.saveMusicIndex(curIndex);
         }
-        if (initialList != null) {
-            storageUtil.saveMusicList(initialList);
-        }
+        storageUtil.saveMusicList(tempList);
     }
 
     private int activeMusicIndexFinder(MusicDataCapsule activeMusic, ArrayList<MusicDataCapsule> list) {

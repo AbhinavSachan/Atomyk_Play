@@ -63,9 +63,12 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
                 if (file.exists()) {
                     //check is service active
                     StorageUtil storage = new StorageUtil(context);
+                    //if shuffle button is already on it will shuffle it from start
                     if (storage.loadShuffle().equals(shuffle)){
                         MusicDataCapsule activeMusic;
                         ArrayList<MusicDataCapsule> shuffleList = new ArrayList<>(musicArrayList);
+                        //saving list in temp for restore function in player fragment
+                        storage.saveTempMusicList(musicArrayList);
 
                         if (musicArrayList != null) {
                             if (position != -1 && position < musicArrayList.size()) {
@@ -73,10 +76,15 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
                             } else {
                                 activeMusic = musicArrayList.get(0);
                             }
+                            //removing current item from list
                             shuffleList.remove(activeMusic);
+                            //shuffling list
                             Collections.shuffle(shuffleList);
-                            shuffleList.add(0,activeMusic);
+                            //adding the removed item in shuffled list on 0th index
+                            shuffleList.add(0, activeMusic);
+                            //saving list
                             storage.saveMusicList(shuffleList);
+                            storage.saveMusicIndex(0);
                         }
                     }else if (storage.loadShuffle().equals(no_shuffle)){
                         //Store serializable music list to sharedPreference
@@ -84,6 +92,7 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
                         storage.saveMusicIndex(position);
                     }
 
+                    //sending broadcast to start the music from main activity
                     MainActivity mainActivity = (MainActivity) context;
                     mainActivity.playAudio();
                 }else {

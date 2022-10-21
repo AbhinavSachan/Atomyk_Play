@@ -850,7 +850,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             requestAudioFocus();
         }
         if (audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) == 0f) {
-            Toast.makeText(this, "Volume is OFF", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Please turn the volume UP", Toast.LENGTH_SHORT).show();
         }
         if (!phone_ringing) {
             if (media_player != null) {

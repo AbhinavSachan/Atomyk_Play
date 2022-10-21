@@ -53,11 +53,30 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
     //removing item on swipe
     @Override
     public void onItemDismiss(int position) {
+        StorageUtil storageUtil = new StorageUtil(context.getApplicationContext());
+        ArrayList<MusicDataCapsule> tempList = storageUtil.loadTempMusicList();
+        MusicDataCapsule activeMusic = null;
+        int savedIndex;
+        savedIndex = storageUtil.loadMusicIndex();
+        if (tempList != null)
+            if (position != -1 && position < tempList.size()) {
+                activeMusic = tempList.get(position);
+            } else {
+                activeMusic = tempList.get(0);
+            }
+        //if any item has been removed this will save new list on tem list
+        if (tempList != null) {
+            tempList.remove(activeMusic);
+            storageUtil.saveTempMusicList(tempList);
+        }
         musicArrayList.remove(position);
         notifyItemRemoved(position);
-        if (position == new StorageUtil(context.getApplicationContext()).loadMusicIndex()) {
+        
+        if (position == savedIndex) {
             MainActivity mainActivity = (MainActivity) context;
             mainActivity.playAudio();
+        }else if (position < savedIndex){
+            storageUtil.saveMusicIndex(savedIndex-1);
         }
         new StorageUtil(context.getApplicationContext()).saveMusicList(musicArrayList);
         notifyItemRangeChanged(position, musicArrayList.size());
