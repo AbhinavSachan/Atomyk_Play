@@ -6,8 +6,9 @@
     android:orientation="vertical"
     tools:context=".fragments.PlayerFragment">
 
-    <include layout="@layout/main_player_layout" />
+<include layout="@layout/main_player_layout" />
 
     <include layout="@layout/fragment_mini_player" />
+
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

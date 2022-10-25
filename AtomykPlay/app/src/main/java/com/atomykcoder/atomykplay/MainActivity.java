@@ -10,7 +10,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.view.MenuItemCompat;
-import android.util.Log;
+import android.telephony.PhoneStateListener;
+import android.telephony.TelephonyManager;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -19,6 +20,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.SearchView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -35,6 +37,7 @@ import com.atomykcoder.atomykplay.function.MusicMainAdapter;
 import com.atomykcoder.atomykplay.function.SearchResultsFragment;
 import com.atomykcoder.atomykplay.function.StorageUtil;
 import com.atomykcoder.atomykplay.services.MediaPlayerService;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
@@ -81,12 +84,15 @@ public class MainActivity extends AppCompatActivity {
         }
     };
     public SlidingUpPanelLayout sliding_up_panel_layout;
+    public boolean phone_ringing = false;
     private ArrayList<MusicDataCapsule> dataList;
     private MusicMainAdapter adapter;
     private LinearLayout linearLayout;
     private RecyclerView recyclerView;
     private SearchResultsFragment searchResultsFragment; // This being here is very important for search method to work
     private AudioManager audioManager;
+    private TelephonyManager telephonyManager;
+    private PhoneStateListener phoneStateListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,12 +125,12 @@ public class MainActivity extends AppCompatActivity {
 
         //Checking permissions before activity creation (method somewhere down in the script)
         checkPermission();
+        callStateListener();
 
         audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
 
         sliding_up_panel_layout.setPanelSlideListener(onSlideChange());
         setFragmentInSlider();
-
     }
 
     @Override
@@ -179,6 +185,10 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
+        if (phoneStateListener != null) {
+            telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE);
+        }
+
     }
 
     public void playAudio() {
@@ -187,22 +197,26 @@ public class MainActivity extends AppCompatActivity {
         //we can't start service on startup of app it will lead to pausing all other sound playing on device
         new StorageUtil(this).clearMusicLastPos();
 
-        if (!service_bound) {
-            Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
-            bindService(playerIntent, service_connection, Context.BIND_IMPORTANT);
-            startService(playerIntent);
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    //service is active send media with broadcast receiver
-                    Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEW_MUSIC);
-                    sendBroadcast(broadcastIntent);
-                }
-            }, 20);
+        if (!phone_ringing) {
+            if (!service_bound) {
+                Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
+                bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
+                startService(playerIntent);
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        //service is active send media with broadcast receiver
+                        Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEW_MUSIC);
+                        sendBroadcast(broadcastIntent);
+                    }
+                }, 20);
+            } else {
+                //service is active send media with broadcast receiver
+                Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEW_MUSIC);
+                sendBroadcast(broadcastIntent);
+            }
         } else {
-            //service is active send media with broadcast receiver
-            Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEW_MUSIC);
-            sendBroadcast(broadcastIntent);
+            Toast.makeText(this, "Can't play while on call", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -221,6 +235,28 @@ public class MainActivity extends AppCompatActivity {
         transaction.replace(R.id.sec_container, searchResultsFragment);
         transaction.addToBackStack(searchResultsFragment.toString());
         transaction.commit();
+    }
+
+    private void callStateListener() {
+        telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        phoneStateListener = new PhoneStateListener() {
+            @Override
+            public void onCallStateChanged(int state, String phoneNumber) {
+                super.onCallStateChanged(state, phoneNumber);
+                switch (state) {
+                    case TelephonyManager.CALL_STATE_OFFHOOK:
+                    case TelephonyManager.CALL_STATE_RINGING: {
+                        phone_ringing = true;
+                    }
+                    break;
+                    case TelephonyManager.CALL_STATE_IDLE: {
+                        phone_ringing = false;
+                    }
+                    break;
+                }
+            }
+        };
+        telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
     }
 
     //Checks whether user granted permissions for external storage or not
@@ -261,6 +297,7 @@ public class MainActivity extends AppCompatActivity {
             public void onPanelSlide(View panel, float slideOffset) {
                 View miniPlayer = PlayerFragment.mini_play_view;
                 View mainPlayer = findViewById(R.id.player_layout);
+                miniPlayer.setVisibility(View.VISIBLE);
                 miniPlayer.setAlpha(1 - slideOffset * 4);
                 mainPlayer.setAlpha(0 + slideOffset * 2);
             }
@@ -269,7 +306,8 @@ public class MainActivity extends AppCompatActivity {
             public void onPanelCollapsed(View panel) {
                 View miniPlayer = PlayerFragment.mini_play_view;
                 View mainPlayer = findViewById(R.id.player_layout);
-                miniPlayer.setVisibility(View.VISIBLE);
+                sliding_up_panel_layout.setTouchEnabled(true);
+
                 miniPlayer.setAlpha(1);
                 mainPlayer.setAlpha(0);
             }
@@ -288,7 +326,7 @@ public class MainActivity extends AppCompatActivity {
 
                 View miniPlayer = PlayerFragment.mini_play_view;
                 View mainPlayer = findViewById(R.id.player_layout);
-
+                sliding_up_panel_layout.setTouchEnabled(false);
                 miniPlayer.setVisibility(View.INVISIBLE);
                 miniPlayer.setAlpha(0);
                 mainPlayer.setAlpha(1);
@@ -310,8 +348,14 @@ public class MainActivity extends AppCompatActivity {
     public void onBackPressed() {
         if (sliding_up_panel_layout.getPanelState() == SlidingUpPanelLayout.PanelState.COLLAPSED) {
             super.onBackPressed();
+
         } else {
-            sliding_up_panel_layout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+            if (PlayerFragment.bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+                PlayerFragment.bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                PlayerFragment.bottomSheet.setAlpha(0);
+            } else {
+                sliding_up_panel_layout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+            }
         }
     }
 

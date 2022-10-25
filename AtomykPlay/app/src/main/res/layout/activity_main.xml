@@ -9,7 +9,6 @@
     android:background="@color/primary_bg"
     android:gravity="bottom"
     app:layout_scrollInterpolator="@animator/nav_default_pop_enter_anim"
-    app:umanoDragView="@+id/dragView"
     app:umanoFlingVelocity="1"
     app:umanoInitialState="collapsed"
     app:umanoOverlay="true"

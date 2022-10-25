@@ -46,8 +46,7 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
         Collections.swap(musicArrayList, fromPos, toPos);
         notifyItemMoved(fromPos, toPos);
         notifyItemRangeChanged(fromPos, 1);
-        notifyItemChanged(toPos, 1000f);
-        new StorageUtil(context.getApplicationContext()).saveMusicList(musicArrayList);
+        notifyItemChanged(toPos, 1);
     }
 
     //removing item on swipe
@@ -126,7 +125,9 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
                 if (MotionEventCompat.getActionMasked(event) == MotionEvent.ACTION_DOWN) {
                     onDragStartListener.onDragStart(holder);
                 }
-
+                if (MotionEventCompat.getActionMasked(event) == MotionEvent.ACTION_UP) {
+                    new StorageUtil(context.getApplicationContext()).saveMusicList(musicArrayList);
+                }
                 return false;
             }
         });

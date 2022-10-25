@@ -36,13 +36,16 @@ public class SimpleTouchCallback extends ItemTouchHelper.Callback {
         return makeMovementFlags(dragFlag, swipeFlag);
     }
 
+    @Override
+    public void onMoved(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, int fromPos, @NonNull RecyclerView.ViewHolder target, int toPos, int x, int y) {
+        adapter.onItemMove(fromPos,toPos);
+        super.onMoved(recyclerView, viewHolder, fromPos, target, toPos, x, y);
+    }
+
     //this will be called when we start dragging something
     @Override
     public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder source, @NonNull RecyclerView.ViewHolder target) {
-        if (source.getItemViewType() != target.getItemViewType()) {
-            return false;
-        }
-        adapter.onItemMove(source.getAdapterPosition(), target.getAdapterPosition());
+
         return true;
     }
 

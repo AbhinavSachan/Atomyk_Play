@@ -13,6 +13,7 @@ import static com.atomykcoder.atomykplay.function.FetchMusic.convertDuration;
 
 import android.annotation.SuppressLint;
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -435,7 +436,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                         .setContentIntent(PendingIntent.getActivity(this, 0, new Intent(getApplicationContext(), MainActivity.class), PendingIntent.FLAG_IMMUTABLE))
                         .setSilent(true)
                         .setOngoing(false)
-                        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                        .setPriority(NotificationCompat.PRIORITY_LOW)
                         .build();
             } else {
                 notificationBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
@@ -460,7 +461,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                         .setContentIntent(PendingIntent.getActivity(this, 0, new Intent(getApplicationContext(), MainActivity.class), PendingIntent.FLAG_IMMUTABLE))
                         .setSilent(true)
                         .setOngoing(false)
-                        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                        .setPriority(NotificationCompat.PRIORITY_LOW)
                         .build();
             }
 
@@ -474,8 +475,12 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                         .setActions(PlaybackStateCompat.ACTION_SEEK_TO).build());
             }
         }
+
+
         if (notificationBuilder != null) {
-            startForeground(NOTIFICATION_ID, notificationBuilder);
+            NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            manager.notify(NOTIFICATION_ID, notificationBuilder);
+
         }
     }
 
@@ -529,13 +534,10 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                     Intent playerIntent = new Intent(getApplicationContext(), MediaPlayerService.class);
                     startService(playerIntent);
                     bindService(playerIntent, service_connection, Context.BIND_IMPORTANT);
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            //service is active send media with broadcast receiver
-                            Intent broadcastIntent = new Intent(BROADCAST_PAUSE_PLAY_MUSIC);
-                            sendBroadcast(broadcastIntent);
-                        }
+                    new Handler().postDelayed(() -> {
+                        //service is active send media with broadcast receiver
+                        Intent broadcastIntent = new Intent(BROADCAST_PAUSE_PLAY_MUSIC);
+                        sendBroadcast(broadcastIntent);
                     }, 20);
                 } else {
                     //service is active send media with broadcast receiver
@@ -551,13 +553,10 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                     Intent playerIntent = new Intent(getApplicationContext(), MediaPlayerService.class);
                     startService(playerIntent);
                     bindService(playerIntent, service_connection, Context.BIND_IMPORTANT);
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            //service is active send media with broadcast receiver
-                            Intent broadcastIntent = new Intent(BROADCAST_PAUSE_PLAY_MUSIC);
-                            sendBroadcast(broadcastIntent);
-                        }
+                    new Handler().postDelayed(() -> {
+                        //service is active send media with broadcast receiver
+                        Intent broadcastIntent = new Intent(BROADCAST_PAUSE_PLAY_MUSIC);
+                        sendBroadcast(broadcastIntent);
                     }, 20);
                 } else {
                     //service is active send media with broadcast receiver
@@ -573,13 +572,10 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                     Intent playerIntent = new Intent(getApplicationContext(), MediaPlayerService.class);
                     startService(playerIntent);
                     bindService(playerIntent, service_connection, Context.BIND_IMPORTANT);
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            //service is active send media with broadcast receiver
-                            Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEXT_MUSIC);
-                            sendBroadcast(broadcastIntent);
-                        }
+                    new Handler().postDelayed(() -> {
+                        //service is active send media with broadcast receiver
+                        Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEXT_MUSIC);
+                        sendBroadcast(broadcastIntent);
                     }, 20);
                 } else {
                     //service is active send media with broadcast receiver
@@ -595,13 +591,10 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                     Intent playerIntent = new Intent(getApplicationContext(), MediaPlayerService.class);
                     startService(playerIntent);
                     bindService(playerIntent, service_connection, Context.BIND_IMPORTANT);
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            //service is active send media with broadcast receiver
-                            Intent broadcastIntent = new Intent(BROADCAST_PLAY_PREVIOUS_MUSIC);
-                            sendBroadcast(broadcastIntent);
-                        }
+                    new Handler().postDelayed(() -> {
+                        //service is active send media with broadcast receiver
+                        Intent broadcastIntent = new Intent(BROADCAST_PLAY_PREVIOUS_MUSIC);
+                        sendBroadcast(broadcastIntent);
                     }, 20);
                 } else {
                     //service is active send media with broadcast receiver
@@ -617,13 +610,10 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                     Intent playerIntent = new Intent(getApplicationContext(), MediaPlayerService.class);
                     startService(playerIntent);
                     bindService(playerIntent, service_connection, Context.BIND_IMPORTANT);
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            //service is active send media with broadcast receiver
-                            Intent broadcastIntent = new Intent(BROADCAST_STOP_MUSIC);
-                            sendBroadcast(broadcastIntent);
-                        }
+                    new Handler().postDelayed(() -> {
+                        //service is active send media with broadcast receiver
+                        Intent broadcastIntent = new Intent(BROADCAST_STOP_MUSIC);
+                        sendBroadcast(broadcastIntent);
                     }, 20);
                 } else {
                     //service is active send media with broadcast receiver
@@ -647,12 +637,18 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                     case TelephonyManager.CALL_STATE_OFFHOOK: {
                         if (media_player != null) {
                             pauseMedia();
+                            if (handler != null) {
+                                handler.removeCallbacks(runnable);
+                            }
                             phone_ringing = true;
                         }
                     }
                     case TelephonyManager.CALL_STATE_RINGING: {
                         if (media_player != null) {
                             pauseMedia();
+                            if (handler != null) {
+                                handler.removeCallbacks(runnable);
+                            }
                             phone_ringing = true;
                         }
                     }
@@ -661,6 +657,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                         if (media_player != null) {
                             phone_ringing = false;
                             resumeMedia();
+                            setSeekBar();
                         }
                     }
                     break;
@@ -810,6 +807,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                     setIcon(PlaybackStatus.PLAYING);
                     buildPlayNotification(PlaybackStatus.PLAYING, 1f);
                 }
+        } else {
+            Toast.makeText(getApplicationContext(), "Can't play while on call", Toast.LENGTH_SHORT).show();
         }
 
     }
@@ -836,13 +835,14 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     }
 
     public void pauseMedia() {
-        if (media_player != null)
+        if (media_player != null) {
             if (media_player.isPlaying()) {
                 new StorageUtil(getApplicationContext()).saveMusicLastPos(media_player.getCurrentPosition());
                 media_player.pause();
                 setIcon(PlaybackStatus.PAUSED);
                 buildPausedNotification(PlaybackStatus.PAUSED, 0f);
             }
+        }
     }
 
     public void resumeMedia() {
@@ -865,6 +865,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             } else {
                 initiateMediaPlayer();
             }
+        } else {
+            Toast.makeText(getApplicationContext(), "Can't play while on call", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -1087,6 +1089,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     @Override
     public void onDestroy() {
         super.onDestroy();
+
         if (media_player != null) {
             new StorageUtil(getApplicationContext()).saveMusicLastPos(media_player.getCurrentPosition());
         }
@@ -1102,7 +1105,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         unregisterReceiver(nextMusicReceiver);
         unregisterReceiver(prevMusicReceiver);
         unregisterReceiver(stopMusicReceiver);
-
     }
 
     private void removeNotification() {

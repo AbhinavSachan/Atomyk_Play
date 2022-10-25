@@ -77,7 +77,7 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
                                 activeMusic = musicArrayList.get(0);
                             }
                             //removing current item from list
-                            shuffleList.remove(activeMusic);
+                            shuffleList.remove(position);
                             //shuffling list
                             Collections.shuffle(shuffleList);
                             //adding the removed item in shuffled list on 0th index

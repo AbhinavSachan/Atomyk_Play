@@ -1,381 +1,417 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/player_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/primary_bg"
-    android:paddingTop="28dp">
+    android:background="@color/primary_bg">
 
     <RelativeLayout
-        android:id="@+id/deltaRelative"
+        android:id="@+id/player_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:clipToPadding="false"
-        android:gravity="center_horizontal"
-        android:padding="30dp">
+        android:layout_height="match_parent"
+        android:paddingTop="28dp">
 
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="250dp"
-            android:layout_height="260dp"
-            app:cardBackgroundColor="@color/secondary_bg"
-            app:cardCornerRadius="25dp"
-            app:cardElevation="12dp">
+        <RelativeLayout
+            android:id="@+id/deltaRelative"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clipToPadding="false"
+            android:gravity="center_horizontal"
+            android:padding="30dp">
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="250dp"
+                android:layout_height="260dp"
+                app:cardBackgroundColor="@color/secondary_bg"
+                app:cardCornerRadius="25dp"
+                app:cardElevation="12dp">
+
+                <ImageView
+                    android:id="@+id/player_cover_iv"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="@string/imageView"
+                    android:scaleType="centerCrop"
+                    android:theme="@android:style/ThemeOverlay.Material.Dark" />
+
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="300dp"
+                android:layout_height="260dp"
+                android:alpha=".9"
+                app:cardBackgroundColor="@color/soft_black"
+                app:cardCornerRadius="250dp"
+                app:cardElevation="8dp" />
+
+        </RelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLayoutNameAndList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/deltaRelative"
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal"
+            android:weightSum="16">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="13.5"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/player_song_name_tv"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="marquee"
+                    android:marqueeRepeatLimit="marquee_forever"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:singleLine="true"
+                    android:text="@string/song_name_e"
+                    android:textColor="@color/tertiary_bg"
+                    android:textSize="@dimen/d_24sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/player_song_artist_name_tv"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="marquee"
+                    android:marqueeRepeatLimit="marquee_forever"
+                    android:paddingStart="18dp"
+                    android:paddingEnd="18dp"
+                    android:singleLine="true"
+                    android:text="@string/song_artist_e"
+                    android:textColor="@color/tertiary_bg"
+                    android:textSize="@dimen/d_16sp"
+                    android:textStyle="normal" />
+
+            </LinearLayout>
 
             <ImageView
-                android:id="@+id/player_cover_iv"
-                android:layout_width="match_parent"
+                android:id="@+id/player_que_iv"
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
+                android:layout_weight="2.5"
+                android:clickable="true"
                 android:contentDescription="@string/imageView"
-                android:scaleType="centerCrop"
+                android:elevation="10dp"
+                android:focusable="true"
+                android:foreground="@drawable/round_select_effect_small"
+                android:padding="10dp"
+                android:src="@drawable/ic_music_list"
+                android:theme="@android:style/ThemeOverlay.Material.Dark" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/control_ll"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/linearLayoutNameAndList"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="48dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/player_repeat_iv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginEnd="24dp"
+                android:clickable="true"
+                android:contentDescription="@string/imageView"
+                android:elevation="10dp"
+                android:focusable="true"
+                android:foreground="@drawable/round_select_effect_small"
+                android:padding="10dp"
+                android:src="@drawable/ic_repeat_empty"
                 android:theme="@android:style/ThemeOverlay.Material.Dark" />
 
 
-        </com.google.android.material.card.MaterialCardView>
+            <ImageView
+                android:id="@+id/player_previous_iv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:clickable="true"
+                android:contentDescription="@string/imageView"
+                android:elevation="10dp"
+                android:focusable="true"
+                android:foreground="@drawable/round_select_effect"
+                android:padding="10dp"
+                android:src="@drawable/ic_previous_main"
+                android:theme="@android:style/ThemeOverlay.Material.Dark" />
 
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="300dp"
-            android:layout_height="260dp"
-            android:alpha=".9"
-            app:cardBackgroundColor="@color/soft_black"
-            app:cardCornerRadius="250dp"
-            app:cardElevation="8dp" />
+            <ImageView
+                android:id="@+id/player_play_iv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="@drawable/round_corner"
+                android:clickable="true"
+                android:contentDescription="@string/imageView"
+                android:cropToPadding="false"
+                android:elevation="4dp"
+                android:focusable="true"
+                android:foreground="@drawable/round_select_effect_for_play_btn"
+                android:padding="10dp"
+                android:src="@drawable/ic_play_main"
+                android:theme="@android:style/ThemeOverlay.Material.Dark" />
 
-    </RelativeLayout>
+            <ImageView
+                android:id="@+id/player_next_iv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:clickable="true"
+                android:contentDescription="@string/imageView"
+                android:elevation="10dp"
+                android:focusable="true"
+                android:foreground="@drawable/round_select_effect"
+                android:padding="10dp"
+                android:src="@drawable/ic_next_main"
+                android:theme="@android:style/ThemeOverlay.Material.Dark" />
 
-    <LinearLayout
-        android:id="@+id/linearLayoutNameAndList"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/deltaRelative"
-        android:layout_marginTop="16dp"
-        android:orientation="horizontal"
-        android:weightSum="16">
+
+            <ImageView
+                android:id="@+id/player_shuffle_iv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginStart="24dp"
+                android:clickable="true"
+                android:contentDescription="@string/imageView"
+                android:elevation="10dp"
+                android:focusable="true"
+                android:foreground="@drawable/round_select_effect_small"
+                android:padding="10dp"
+                android:src="@drawable/ic_shuffle_empty"
+                android:theme="@android:style/ThemeOverlay.Material.Dark" />
+
+
+        </LinearLayout>
+
+
+        <RelativeLayout
+            android:id="@+id/seekbar_relative_l"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/control_ll"
+            android:layout_marginTop="@dimen/d_16sp"
+            android:padding="10dp">
+
+            <SeekBar
+                android:id="@+id/player_seek_bar"
+                android:layout_width="match_parent"
+                android:layout_height="33dp"
+                android:padding="15dp"
+                android:progressDrawable="@drawable/seekbar_style"
+                android:splitTrack="false"
+                android:thumbTint="@color/tertiary_bg" />
+
+            <TextView
+                android:id="@+id/player_current_pos_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/player_seek_bar"
+                android:layout_alignParentStart="true"
+                android:layout_marginStart="12dp"
+                android:text="@string/start_pos"
+                android:textColor="@color/light_slate_gray_blue" />
+
+            <TextView
+                android:id="@+id/player_duration_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/player_seek_bar"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="12dp"
+                android:text="@string/start_pos"
+                android:textColor="@color/light_slate_gray_blue" />
+
+
+        </RelativeLayout>
 
         <LinearLayout
-            android:layout_width="0dp"
+            android:id="@+id/linear_bit_layout"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="13.5"
+            android:layout_below="@id/seekbar_relative_l"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/player_mime_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/extension"
+                android:textColor="@color/light_slate_gray_blue" />
+
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="3dp"
+                android:text="@string/big_dot"
+                android:textColor="@color/light_slate_gray_blue" />
+
+
+            <TextView
+                android:id="@+id/player_bitrate_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/bitrate"
+                android:textColor="@color/light_slate_gray_blue" />
+
+
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/player_favorite_iv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginHorizontal="10dp"
+            android:layout_marginBottom="16dp"
+            android:clickable="true"
+            android:contentDescription="@string/imageView"
+            android:elevation="10dp"
+            android:focusable="true"
+            android:foreground="@drawable/round_select_effect_small"
+            android:padding="10dp"
+            android:src="@drawable/ic_favorite_border"
+            android:theme="@android:style/ThemeOverlay.Material.Dark" />
+
+        <RelativeLayout
+            android:id="@+id/timer_relative_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginHorizontal="10dp"
+            android:layout_marginBottom="16dp">
+
+            <!--    this TextView is for countdown timer-->
+
+            <TextView
+                android:id="@+id/countdown_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="@drawable/round_select_effect_small"
+                android:padding="10dp"
+                android:text="@string/start_pos"
+                android:textColor="@color/tertiary_bg"
+                android:textSize="@dimen/d_12sp"
+                android:textStyle="bold"
+                android:theme="@android:style/ThemeOverlay.Material.Dark"
+                android:visibility="gone" />
+
+
+            <ImageView
+                android:id="@+id/player_timer_iv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:contentDescription="@string/imageView"
+                android:elevation="10dp"
+                android:focusable="true"
+                android:foreground="@drawable/round_select_effect_small"
+                android:padding="10dp"
+                android:src="@drawable/ic_timer_add"
+                android:theme="@android:style/ThemeOverlay.Material.Dark" />
+
+        </RelativeLayout>
+
+
+        <ImageView
+            android:id="@+id/player_option_iv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_gravity="center"
+            android:layout_margin="10dp"
+            android:clickable="true"
+            android:contentDescription="@string/imageView"
+            android:elevation="10dp"
+            android:focusable="true"
+            android:foreground="@drawable/round_select_effect_small"
+            android:padding="12dp"
+            android:src="@drawable/ic_more_horizontal"
+            android:theme="@android:style/ThemeOverlay.Material.Dark" />
+
+        <LinearLayout
+            android:id="@+id/player_lyrics_ll"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:clickable="true"
+            android:contentDescription="@string/empty"
+            android:elevation="10dp"
+            android:focusable="true"
             android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/player_song_name_tv"
-                android:layout_width="match_parent"
+            <ImageView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:ellipsize="marquee"
-                android:marqueeRepeatLimit="marquee_forever"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:singleLine="true"
-                android:text="@string/song_name_e"
-                android:textColor="@color/tertiary_bg"
-                android:textSize="@dimen/d_24sp"
-                android:textStyle="bold" />
+                android:layout_gravity="center"
+                android:contentDescription="@string/imageView"
+                android:src="@drawable/ic_drag_up" />
 
             <TextView
-                android:id="@+id/player_song_artist_name_tv"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:ellipsize="marquee"
-                android:marqueeRepeatLimit="marquee_forever"
                 android:paddingStart="18dp"
                 android:paddingEnd="18dp"
-                android:singleLine="true"
-                android:text="@string/song_artist_e"
-                android:textColor="@color/tertiary_bg"
+                android:paddingBottom="18dp"
+                android:text="@string/lyrics"
+                android:textColor="@color/space_black"
                 android:textSize="@dimen/d_16sp"
                 android:textStyle="normal" />
 
         </LinearLayout>
 
-        <ImageView
-            android:id="@+id/player_que_iv"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="2.5"
-            android:clickable="true"
-            android:contentDescription="@string/imageView"
-            android:elevation="10dp"
-            android:focusable="true"
-            android:foreground="@drawable/round_select_effect_small"
-            android:padding="10dp"
-            android:src="@drawable/ic_music_list"
-            android:theme="@android:style/ThemeOverlay.Material.Dark" />
-
-    </LinearLayout>
+    </RelativeLayout>
 
     <LinearLayout
-        android:id="@+id/control_ll"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/linearLayoutNameAndList"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="48dp"
-        android:gravity="center"
-        android:orientation="horizontal">
-
-        <ImageView
-            android:id="@+id/player_repeat_iv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginEnd="24dp"
-            android:clickable="true"
-            android:contentDescription="@string/imageView"
-            android:elevation="10dp"
-            android:focusable="true"
-            android:foreground="@drawable/round_select_effect_small"
-            android:padding="10dp"
-            android:src="@drawable/ic_repeat_empty"
-            android:theme="@android:style/ThemeOverlay.Material.Dark" />
-
-
-        <ImageView
-            android:id="@+id/player_previous_iv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:clickable="true"
-            android:contentDescription="@string/imageView"
-            android:elevation="10dp"
-            android:focusable="true"
-            android:foreground="@drawable/round_select_effect"
-            android:padding="10dp"
-            android:src="@drawable/ic_previous_main"
-            android:theme="@android:style/ThemeOverlay.Material.Dark" />
-
-        <ImageView
-            android:id="@+id/player_play_iv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:background="@drawable/round_corner"
-            android:clickable="true"
-            android:contentDescription="@string/imageView"
-            android:cropToPadding="false"
-            android:elevation="4dp"
-            android:focusable="true"
-            android:foreground="@drawable/round_select_effect_for_play_btn"
-            android:padding="10dp"
-            android:src="@drawable/ic_play_main"
-            android:theme="@android:style/ThemeOverlay.Material.Dark" />
-
-        <ImageView
-            android:id="@+id/player_next_iv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:clickable="true"
-            android:contentDescription="@string/imageView"
-            android:elevation="10dp"
-            android:focusable="true"
-            android:foreground="@drawable/round_select_effect"
-            android:padding="10dp"
-            android:src="@drawable/ic_next_main"
-            android:theme="@android:style/ThemeOverlay.Material.Dark" />
-
-
-        <ImageView
-            android:id="@+id/player_shuffle_iv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginStart="24dp"
-            android:clickable="true"
-            android:contentDescription="@string/imageView"
-            android:elevation="10dp"
-            android:focusable="true"
-            android:foreground="@drawable/round_select_effect_small"
-            android:padding="10dp"
-            android:src="@drawable/ic_shuffle_empty"
-            android:theme="@android:style/ThemeOverlay.Material.Dark" />
-
-
-    </LinearLayout>
-
-
-    <RelativeLayout
-        android:id="@+id/seekbar_relative_l"
+        android:id="@+id/bottom_sheet"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/control_ll"
-        android:layout_marginTop="@dimen/d_16sp"
-        android:padding="10dp">
+        android:layout_height="match_parent"
+        android:background="@color/primary_bg"
+        android:orientation="vertical"
+        android:alpha="0"
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
-        <SeekBar
-            android:id="@+id/player_seek_bar"
+        <ImageView
+            android:id="@+id/drag_up_img"
             android:layout_width="match_parent"
-            android:layout_height="33dp"
-            android:padding="15dp"
-            android:progressDrawable="@drawable/seekbar_style"
-            android:splitTrack="false"
-            android:thumbTint="@color/tertiary_bg" />
-
-        <TextView
-            android:id="@+id/player_current_pos_tv"
-            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/player_seek_bar"
-            android:layout_marginStart="12dp"
-            android:layout_alignParentStart="true"
-            android:text="@string/start_pos"
-            android:textColor="@color/light_slate_gray_blue" />
+            android:elevation="4dp"
+            android:src="@drawable/ic_horizontal_rule" />
 
-        <TextView
-            android:id="@+id/player_duration_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/player_seek_bar"
-            android:layout_marginEnd="12dp"
-            android:layout_alignParentEnd="true"
-            android:text="@string/start_pos"
-            android:textColor="@color/light_slate_gray_blue" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_margin="@dimen/d_12sp"
+            android:background="@drawable/border_for_search_num" />
 
-
-    </RelativeLayout>
-
-    <LinearLayout
-        android:id="@+id/linear_bit_layout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/seekbar_relative_l"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="16dp"
-        android:orientation="horizontal">
-
-        <TextView
-            android:id="@+id/player_mime_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/extension"
-            android:textColor="@color/light_slate_gray_blue" />
-
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="3dp"
-            android:text="@string/big_dot"
-            android:textColor="@color/light_slate_gray_blue" />
-
-
-        <TextView
-            android:id="@+id/player_bitrate_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/bitrate"
-            android:textColor="@color/light_slate_gray_blue" />
-
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/queue_music_recycler"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
     </LinearLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
 
-    <ImageView
-        android:id="@+id/player_favorite_iv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginHorizontal="10dp"
-        android:layout_marginBottom="16dp"
-        android:clickable="true"
-        android:contentDescription="@string/imageView"
-        android:elevation="10dp"
-        android:focusable="true"
-        android:foreground="@drawable/round_select_effect_small"
-        android:padding="10dp"
-        android:src="@drawable/ic_favorite_border"
-        android:theme="@android:style/ThemeOverlay.Material.Dark" />
-
-    <RelativeLayout
-        android:id="@+id/timer_relative_layout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginHorizontal="10dp"
-        android:layout_marginBottom="16dp">
-
-        <!--    this TextView is for countdown timer-->
-
-        <TextView
-            android:id="@+id/countdown_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="@drawable/round_select_effect_small"
-            android:padding="10dp"
-            android:text="@string/start_pos"
-            android:textColor="@color/tertiary_bg"
-            android:textSize="@dimen/d_12sp"
-            android:textStyle="bold"
-            android:theme="@android:style/ThemeOverlay.Material.Dark"
-            android:visibility="gone" />
-
-
-        <ImageView
-            android:id="@+id/player_timer_iv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:clickable="true"
-            android:contentDescription="@string/imageView"
-            android:elevation="10dp"
-            android:focusable="true"
-            android:foreground="@drawable/round_select_effect_small"
-            android:padding="10dp"
-            android:src="@drawable/ic_timer_add"
-            android:theme="@android:style/ThemeOverlay.Material.Dark" />
-
-    </RelativeLayout>
-
-
-    <ImageView
-        android:id="@+id/player_option_iv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_gravity="center"
-        android:layout_margin="10dp"
-        android:clickable="true"
-        android:contentDescription="@string/imageView"
-        android:elevation="10dp"
-        android:focusable="true"
-        android:foreground="@drawable/round_select_effect_small"
-        android:padding="12dp"
-        android:src="@drawable/ic_more_horizontal"
-        android:theme="@android:style/ThemeOverlay.Material.Dark" />
-
-    <LinearLayout
-        android:id="@+id/player_lyrics_ll"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:clickable="true"
-        android:contentDescription="@string/empty"
-        android:elevation="10dp"
-        android:focusable="true"
-        android:orientation="vertical">
-
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:contentDescription="@string/imageView"
-            android:src="@drawable/ic_drag_up" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingStart="18dp"
-            android:paddingEnd="18dp"
-            android:paddingBottom="18dp"
-            android:text="@string/lyrics"
-            android:textColor="@color/space_black"
-            android:textSize="@dimen/d_16sp"
-            android:textStyle="normal" />
-
-    </LinearLayout>
-
-</RelativeLayout>

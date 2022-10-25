@@ -1,6 +1,5 @@
 package com.atomykcoder.atomykplay.fragments;
 
-import static android.content.ContentValues.TAG;
 import static com.atomykcoder.atomykplay.MainActivity.BROADCAST_PAUSE_PLAY_MUSIC;
 import static com.atomykcoder.atomykplay.MainActivity.BROADCAST_PLAY_NEXT_MUSIC;
 import static com.atomykcoder.atomykplay.MainActivity.BROADCAST_PLAY_PREVIOUS_MUSIC;
@@ -15,6 +14,7 @@ import static com.atomykcoder.atomykplay.function.StorageUtil.no_shuffle;
 import static com.atomykcoder.atomykplay.function.StorageUtil.repeat;
 import static com.atomykcoder.atomykplay.function.StorageUtil.repeat_one;
 import static com.atomykcoder.atomykplay.function.StorageUtil.shuffle;
+import static com.atomykcoder.atomykplay.services.MediaPlayerService.phone_ringing;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
@@ -40,13 +40,19 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.function.MusicDataCapsule;
+import com.atomykcoder.atomykplay.function.MusicQueueAdapter;
 import com.atomykcoder.atomykplay.function.PlaybackStatus;
 import com.atomykcoder.atomykplay.function.StorageUtil;
+import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
+import com.atomykcoder.atomykplay.interfaces.SimpleTouchCallback;
 import com.atomykcoder.atomykplay.services.MediaPlayerService;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
@@ -57,7 +63,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 @SuppressLint("StaticFieldLeak")
-public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeListener {
+public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeListener, OnDragStartListener {
 
     public static RelativeLayout mini_play_view;
     public static View player_layout;
@@ -68,8 +74,8 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     public static SeekBar seekBarMain;
     public static ImageView playImg;
     public static TextView curPosTv, durationTv;
-    public static BottomSheetQueueLayoutFragment queueSheetFragment;
     public static BottomSheetBehavior<View> bottomSheetBehavior;
+    public static View bottomSheet;
     private static Context context;
     //cover image view
     private static ImageView playerCoverImage;
@@ -79,11 +85,13 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     private static ImageView timerImg;
     private static TextView playerSongNameTv, playerArtistNameTv, mimeTv, bitrateTv, timerTv;
     final private CountDownTimer[] countDownTimer = new CountDownTimer[1];
-
     //setting up mini player layout
     //calling it from service when player is prepared and also calling it in this fragment class
     //to set it on app start ☺
     private StorageUtil storageUtil;
+    private ItemTouchHelper itemTouchHelper;
+    private MusicQueueAdapter adapter;
+    private RecyclerView recyclerView;
 
     public static void setMiniLayout() {
 
@@ -185,64 +193,76 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     }
 
     public static void pausePlayAudio() {
-        if (!service_bound) {
-            Intent playerIntent = new Intent(context, MediaPlayerService.class);
-            context.startService(playerIntent);
-            context.bindService(playerIntent, service_connection, Context.BIND_IMPORTANT);
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    //service is active send media with broadcast receiver
-                    Intent broadcastIntent = new Intent(BROADCAST_PAUSE_PLAY_MUSIC);
-                    context.sendBroadcast(broadcastIntent);
-                }
-            }, 20);
+        if (!phone_ringing) {
+            if (!service_bound) {
+                Intent playerIntent = new Intent(context, MediaPlayerService.class);
+                context.startService(playerIntent);
+                context.bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        //service is active send media with broadcast receiver
+                        Intent broadcastIntent = new Intent(BROADCAST_PAUSE_PLAY_MUSIC);
+                        context.sendBroadcast(broadcastIntent);
+                    }
+                }, 20);
+            } else {
+                //service is active send media with broadcast receiver
+                Intent broadcastIntent = new Intent(BROADCAST_PAUSE_PLAY_MUSIC);
+                context.sendBroadcast(broadcastIntent);
+            }
         } else {
-            //service is active send media with broadcast receiver
-            Intent broadcastIntent = new Intent(BROADCAST_PAUSE_PLAY_MUSIC);
-            context.sendBroadcast(broadcastIntent);
+            Toast.makeText(context, "Can't play while on call", Toast.LENGTH_SHORT).show();
         }
 
     }
 
     public static void playNextAudio() {
-        if (!service_bound) {
-            Intent playerIntent = new Intent(context, MediaPlayerService.class);
-            context.startService(playerIntent);
-            context.bindService(playerIntent, service_connection, Context.BIND_IMPORTANT);
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    //service is active send media with broadcast receiver
-                    Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEXT_MUSIC);
-                    context.sendBroadcast(broadcastIntent);
-                }
-            }, 20);
+        if (!phone_ringing) {
+            if (!service_bound) {
+                Intent playerIntent = new Intent(context, MediaPlayerService.class);
+                context.startService(playerIntent);
+                context.bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        //service is active send media with broadcast receiver
+                        Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEXT_MUSIC);
+                        context.sendBroadcast(broadcastIntent);
+                    }
+                }, 20);
+            } else {
+                //service is active send media with broadcast receiver
+                Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEXT_MUSIC);
+                context.sendBroadcast(broadcastIntent);
+            }
         } else {
-            //service is active send media with broadcast receiver
-            Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEXT_MUSIC);
-            context.sendBroadcast(broadcastIntent);
+            Toast.makeText(context, "Can't play while on call", Toast.LENGTH_SHORT).show();
         }
     }
 
     public static void playPreviousAudio() {
-        if (!service_bound) {
-            Intent playerIntent = new Intent(context, MediaPlayerService.class);
-            context.startService(playerIntent);
-            context.bindService(playerIntent, service_connection, Context.BIND_IMPORTANT);
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    //service is active send media with broadcast receiver
-                    Intent broadcastIntent = new Intent(BROADCAST_PLAY_PREVIOUS_MUSIC);
-                    context.sendBroadcast(broadcastIntent);
-                }
-            }, 20);
+        if (!phone_ringing) {
+            if (!service_bound) {
+                Intent playerIntent = new Intent(context, MediaPlayerService.class);
+                context.startService(playerIntent);
+                context.bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        //service is active send media with broadcast receiver
+                        Intent broadcastIntent = new Intent(BROADCAST_PLAY_PREVIOUS_MUSIC);
+                        context.sendBroadcast(broadcastIntent);
+                    }
+                }, 20);
 
+            } else {
+                //service is active send media with broadcast receiver
+                Intent broadcastIntent = new Intent(BROADCAST_PLAY_PREVIOUS_MUSIC);
+                context.sendBroadcast(broadcastIntent);
+            }
         } else {
-            //service is active send media with broadcast receiver
-            Intent broadcastIntent = new Intent(BROADCAST_PLAY_PREVIOUS_MUSIC);
-            context.sendBroadcast(broadcastIntent);
+            Toast.makeText(context, "Can't play while on call", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -313,9 +333,49 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         //top right option button
         optionImg.setOnClickListener(v -> optionMenu());
 
+        recyclerView = view.findViewById(R.id.queue_music_recycler);
+        bottomSheet = view.findViewById(R.id.bottom_sheet);
+
         seekBarMain.setOnSeekBarChangeListener(this);
 
+        setupBottomSheet();
+
         return view;
+    }
+
+    private void setupBottomSheet() {
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        setAdapter();
+
+        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        bottomSheet.setAlpha(0);
+        bottomSheetBehavior.setPeekHeight(0);
+
+
+        bottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+
+            }
+
+            @Override
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+                bottomSheet.setAlpha(0 + slideOffset);
+            }
+        });
+    }
+
+    private void setAdapter() {
+        ArrayList<MusicDataCapsule> dataList;
+        dataList = new StorageUtil(getContext()).loadMusicList();
+        adapter = new MusicQueueAdapter(getActivity(), dataList, this);
+        recyclerView.setAdapter(adapter);
+
+        ItemTouchHelper.Callback callback = new SimpleTouchCallback(adapter);
+        itemTouchHelper = new ItemTouchHelper(callback);
+        itemTouchHelper.attachToRecyclerView(recyclerView);
+
     }
 
     //endregion
@@ -466,13 +526,16 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private void shuffleListAndSave() {
         ArrayList<MusicDataCapsule> musicList = storageUtil.loadMusicList();
         MusicDataCapsule activeMusic = getMusic();
         storageUtil.saveTempMusicList(musicList);
+        int musicIndex;
+        musicIndex = storageUtil.loadMusicIndex();
 
         //removing current item from list
-        musicList.remove(activeMusic);
+        musicList.remove(musicIndex);
         //shuffling list
         Collections.shuffle(musicList);
         //adding the removed item in shuffled list on 0th index
@@ -481,9 +544,11 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         storageUtil.saveMusicList(musicList);
         //saving index
         storageUtil.saveMusicIndex(0);
+        setAdapter();
     }
 
 
+    @SuppressLint("NotifyDataSetChanged")
     private void restoreLastListAndPos() {
         ArrayList<MusicDataCapsule> tempList = storageUtil.loadTempMusicList();
         MusicDataCapsule activeMusic = getMusic();
@@ -494,6 +559,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
             storageUtil.saveMusicIndex(curIndex);
         }
         storageUtil.saveMusicList(tempList);
+        setAdapter();
     }
 
     private int activeMusicIndexFinder(MusicDataCapsule activeMusic, ArrayList<MusicDataCapsule> list) {
@@ -524,10 +590,8 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
 
 
     private void openQue() {
-        //show now playing music list
-        FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
-        queueSheetFragment = new BottomSheetQueueLayoutFragment();
-        queueSheetFragment.show(fragmentManager, TAG);
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+        bottomSheet.setAlpha(1);
     }
 
     @Override
@@ -554,6 +618,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
             shuffleImg.setImageResource(R.drawable.ic_shuffle);
         }
     }
+
 
     @Override
     public void onDestroy() {
@@ -665,4 +730,8 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
 
     }
 
+    @Override
+    public void onDragStart(RecyclerView.ViewHolder viewHolder) {
+        itemTouchHelper.startDrag(viewHolder);
+    }
 }
