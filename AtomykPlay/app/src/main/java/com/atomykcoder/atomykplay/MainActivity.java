@@ -298,8 +298,8 @@ public class MainActivity extends AppCompatActivity {
                 View miniPlayer = PlayerFragment.mini_play_view;
                 View mainPlayer = findViewById(R.id.player_layout);
                 miniPlayer.setVisibility(View.VISIBLE);
-                miniPlayer.setAlpha(1 - slideOffset * 4);
-                mainPlayer.setAlpha(0 + slideOffset * 2);
+                miniPlayer.setAlpha(1 - slideOffset * 15);
+                mainPlayer.setAlpha(0 + slideOffset * 3);
             }
 
             @Override

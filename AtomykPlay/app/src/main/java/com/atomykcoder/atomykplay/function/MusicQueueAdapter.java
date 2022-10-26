@@ -43,10 +43,26 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
     //when item starts to move it will change positions of every item in real time
     @Override
     public void onItemMove(int fromPos, int toPos) {
+        StorageUtil storageUtil = new StorageUtil(context.getApplicationContext());
+        int savedIndex;
+        savedIndex = storageUtil.loadMusicIndex();
+
+
         Collections.swap(musicArrayList, fromPos, toPos);
         notifyItemMoved(fromPos, toPos);
         notifyItemRangeChanged(fromPos, 1);
         notifyItemChanged(toPos, 1);
+
+        storageUtil.saveMusicList(musicArrayList);
+        //FIX THIS POSITION ISSUE ☻
+
+//        if (fromPos == savedIndex) {
+//            storageUtil.saveMusicIndex(toPos);
+//        } else if (fromPos < savedIndex && fromPos < toPos) {
+//            storageUtil.saveMusicIndex(fromPos - 1);
+//        } else if (fromPos > savedIndex && fromPos > toPos) {
+//            storageUtil.saveMusicIndex(fromPos + 1);
+//        }
     }
 
     //removing item on swipe
@@ -68,14 +84,16 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
             tempList.remove(activeMusic);
             storageUtil.saveTempMusicList(tempList);
         }
-        musicArrayList.remove(position);
-        notifyItemRemoved(position);
-        
+        if (position != -1 && position < musicArrayList.size()) {
+            musicArrayList.remove(position);
+            notifyItemRemoved(position);
+        }
+
         if (position == savedIndex) {
             MainActivity mainActivity = (MainActivity) context;
             mainActivity.playAudio();
-        }else if (position < savedIndex){
-            storageUtil.saveMusicIndex(savedIndex-1);
+        } else if (position < savedIndex) {
+            storageUtil.saveMusicIndex(savedIndex - 1);
         }
         new StorageUtil(context.getApplicationContext()).saveMusicList(musicArrayList);
         notifyItemRangeChanged(position, musicArrayList.size());
@@ -124,9 +142,6 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
             public boolean onTouch(View v, MotionEvent event) {
                 if (MotionEventCompat.getActionMasked(event) == MotionEvent.ACTION_DOWN) {
                     onDragStartListener.onDragStart(holder);
-                }
-                if (MotionEventCompat.getActionMasked(event) == MotionEvent.ACTION_UP) {
-                    new StorageUtil(context.getApplicationContext()).saveMusicList(musicArrayList);
                 }
                 return false;
             }

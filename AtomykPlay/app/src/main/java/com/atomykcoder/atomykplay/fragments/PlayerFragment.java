@@ -311,6 +311,8 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         View lyricsOpenLayout = view.findViewById(R.id.player_lyrics_ll);
         timerTv = view.findViewById(R.id.countdown_tv);
 
+        playerSongNameTv.setSelected(true);
+        mini_name_text.setSelected(true);
 
         //click listeners on mini player
         //and sending broadcast on click
@@ -348,10 +350,9 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         setAdapter();
 
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
-        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
         bottomSheet.setAlpha(0);
         bottomSheetBehavior.setPeekHeight(0);
-
 
         bottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
@@ -361,7 +362,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
 
             @Override
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-                bottomSheet.setAlpha(0 + slideOffset);
+                bottomSheet.setAlpha(0 + slideOffset * 4);
             }
         });
     }

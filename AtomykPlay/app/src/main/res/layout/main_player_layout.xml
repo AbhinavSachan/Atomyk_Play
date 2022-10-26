@@ -379,6 +379,7 @@
         android:layout_height="match_parent"
         android:background="@color/primary_bg"
         android:orientation="vertical"
+        android:alpha="0"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
         <ImageView
