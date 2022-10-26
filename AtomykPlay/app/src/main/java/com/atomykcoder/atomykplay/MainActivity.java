@@ -9,7 +9,6 @@ import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.support.v4.view.MenuItemCompat;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.view.Menu;
@@ -25,6 +24,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.MenuItemCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -43,7 +43,6 @@ import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
-import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import com.turingtechnologies.materialscrollbar.AlphabetIndicator;
 import com.turingtechnologies.materialscrollbar.DragScrollBar;
 
@@ -83,8 +82,9 @@ public class MainActivity extends AppCompatActivity {
             media_player_service = null;
         }
     };
-    public SlidingUpPanelLayout sliding_up_panel_layout;
+    public View bottom_sheet;
     public boolean phone_ringing = false;
+    public BottomSheetBehavior<View> bottomSheetBehavior;
     private ArrayList<MusicDataCapsule> dataList;
     private MusicMainAdapter adapter;
     private LinearLayout linearLayout;
@@ -102,7 +102,8 @@ public class MainActivity extends AppCompatActivity {
         //initializations
         linearLayout = findViewById(R.id.song_not_found_layout);
         recyclerView = findViewById(R.id.music_recycler);
-        sliding_up_panel_layout = findViewById(R.id.sliding_layout);
+        bottom_sheet = findViewById(R.id.main_container);
+        bottomSheetBehavior = BottomSheetBehavior.from(bottom_sheet);
         Toolbar toolbar = findViewById(R.id.toolbar);
 
         searchResultsFragment = new SearchResultsFragment();
@@ -126,11 +127,15 @@ public class MainActivity extends AppCompatActivity {
         //Checking permissions before activity creation (method somewhere down in the script)
         checkPermission();
         callStateListener();
+        setFragmentInSlider();
 
         audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
 
-        sliding_up_panel_layout.setPanelSlideListener(onSlideChange());
-        setFragmentInSlider();
+        bottom_sheet.setClickable(true);
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        bottomSheetBehavior.setPeekHeight(136);
+        bottomSheetBehavior.addBottomSheetCallback(onSlideChange());
+
     }
 
     @Override
@@ -209,7 +214,7 @@ public class MainActivity extends AppCompatActivity {
                         Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEW_MUSIC);
                         sendBroadcast(broadcastIntent);
                     }
-                }, 20);
+                }, 0);
             } else {
                 //service is active send media with broadcast receiver
                 Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEW_MUSIC);
@@ -291,62 +296,48 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private SlidingUpPanelLayout.PanelSlideListener onSlideChange() {
-        return new SlidingUpPanelLayout.PanelSlideListener() {
+    private BottomSheetBehavior.BottomSheetCallback onSlideChange() {
+        return new BottomSheetBehavior.BottomSheetCallback() {
             @Override
-            public void onPanelSlide(View panel, float slideOffset) {
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
+                    View miniPlayer = PlayerFragment.mini_play_view;
+                    View mainPlayer = findViewById(R.id.player_layout);
+                    miniPlayer.setAlpha(1);
+                    mainPlayer.setAlpha(0);
+                } else if (newState == BottomSheetBehavior.STATE_EXPANDED) {
+                    //this will hide the keyboard after clicking on player while searching
+                    try {
+                        InputMethodManager manager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+                        manager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+                        FragmentManager manager1 = getSupportFragmentManager();
+                        manager1.popBackStack();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                    View miniPlayer = PlayerFragment.mini_play_view;
+                    View mainPlayer = findViewById(R.id.player_layout);
+                    miniPlayer.setVisibility(View.INVISIBLE);
+                    miniPlayer.setAlpha(0);
+                    mainPlayer.setAlpha(1);
+                }
+            }
+
+            @Override
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
                 View miniPlayer = PlayerFragment.mini_play_view;
                 View mainPlayer = findViewById(R.id.player_layout);
                 miniPlayer.setVisibility(View.VISIBLE);
                 miniPlayer.setAlpha(1 - slideOffset * 15);
                 mainPlayer.setAlpha(0 + slideOffset * 3);
             }
-
-            @Override
-            public void onPanelCollapsed(View panel) {
-                View miniPlayer = PlayerFragment.mini_play_view;
-                View mainPlayer = findViewById(R.id.player_layout);
-                sliding_up_panel_layout.setTouchEnabled(true);
-
-                miniPlayer.setAlpha(1);
-                mainPlayer.setAlpha(0);
-            }
-
-            @Override
-            public void onPanelExpanded(View panel) {
-                //this will hide the keyboard after clicking on player while searching
-                try {
-                    InputMethodManager manager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-                    manager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
-                    FragmentManager manager1 = getSupportFragmentManager();
-                    manager1.popBackStack();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-                View miniPlayer = PlayerFragment.mini_play_view;
-                View mainPlayer = findViewById(R.id.player_layout);
-                sliding_up_panel_layout.setTouchEnabled(false);
-                miniPlayer.setVisibility(View.INVISIBLE);
-                miniPlayer.setAlpha(0);
-                mainPlayer.setAlpha(1);
-            }
-
-            @Override
-            public void onPanelAnchored(View panel) {
-
-            }
-
-            @Override
-            public void onPanelHidden(View panel) {
-
-            }
         };
     }
 
     @Override
     public void onBackPressed() {
-        if (sliding_up_panel_layout.getPanelState() == SlidingUpPanelLayout.PanelState.COLLAPSED) {
+        if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
             super.onBackPressed();
 
         } else {
@@ -354,7 +345,7 @@ public class MainActivity extends AppCompatActivity {
                 PlayerFragment.bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
                 PlayerFragment.bottomSheet.setAlpha(0);
             } else {
-                sliding_up_panel_layout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
             }
         }
     }

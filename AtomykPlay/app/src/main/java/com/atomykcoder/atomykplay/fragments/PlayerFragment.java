@@ -46,6 +46,7 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.atomykcoder.atomykplay.MainActivity;
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.function.MusicDataCapsule;
 import com.atomykcoder.atomykplay.function.MusicQueueAdapter;
@@ -205,7 +206,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
                         Intent broadcastIntent = new Intent(BROADCAST_PAUSE_PLAY_MUSIC);
                         context.sendBroadcast(broadcastIntent);
                     }
-                }, 20);
+                }, 0);
             } else {
                 //service is active send media with broadcast receiver
                 Intent broadcastIntent = new Intent(BROADCAST_PAUSE_PLAY_MUSIC);
@@ -230,7 +231,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
                         Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEXT_MUSIC);
                         context.sendBroadcast(broadcastIntent);
                     }
-                }, 20);
+                }, 0);
             } else {
                 //service is active send media with broadcast receiver
                 Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEXT_MUSIC);
@@ -254,7 +255,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
                         Intent broadcastIntent = new Intent(BROADCAST_PLAY_PREVIOUS_MUSIC);
                         context.sendBroadcast(broadcastIntent);
                     }
-                }, 20);
+                }, 0);
 
             } else {
                 //service is active send media with broadcast receiver
@@ -337,8 +338,25 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
 
         recyclerView = view.findViewById(R.id.queue_music_recycler);
         bottomSheet = view.findViewById(R.id.bottom_sheet);
+        View view1 = view.findViewById(R.id.view_active_element);
+        ImageView imageView = view.findViewById(R.id.drag_up_img);
+
+        bottomSheet.setClickable(true);
+        seekBarMain.setClickable(true);
+        view1.setClickable(true);
+        imageView.setClickable(true);
 
         seekBarMain.setOnSeekBarChangeListener(this);
+
+        mini_play_view.setOnClickListener(v -> {
+            MainActivity mainActivity = (MainActivity) context;
+            BottomSheetBehavior<View> sheet = mainActivity.bottomSheetBehavior;
+            if (sheet.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
+                sheet.setState(BottomSheetBehavior.STATE_EXPANDED);
+            } else {
+                sheet.setState(BottomSheetBehavior.STATE_COLLAPSED);
+            }
+        });
 
         setupBottomSheet();
 
@@ -650,6 +668,10 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
             } else if (storageUtil.loadFavorite(activeMusic.getsName()).equals(favorite)) {
                 favoriteImg.setImageResource(R.drawable.ic_favorite);
             }
+        }
+        if (((MainActivity)context).bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED){
+            mini_play_view.setAlpha(0);
+            mini_play_view.setVisibility(View.INVISIBLE);
         }
     }
 

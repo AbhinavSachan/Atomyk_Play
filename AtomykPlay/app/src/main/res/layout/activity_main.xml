@@ -1,20 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<com.sothree.slidinguppanel.SlidingUpPanelLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/sliding_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/primary_bg"
-    android:gravity="bottom"
-    app:layout_scrollInterpolator="@animator/nav_default_pop_enter_anim"
-    app:umanoFlingVelocity="1"
-    app:umanoInitialState="collapsed"
-    app:umanoOverlay="true"
-    app:umanoPanelHeight="68dp"
-    app:umanoParalaxOffset="100dp"
-    app:umanoShadowHeight="4dp"
     tools:context=".MainActivity">
 
     <RelativeLayout
@@ -83,8 +74,9 @@
     <FrameLayout
         android:id="@+id/main_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"/>
 
 
-</com.sothree.slidinguppanel.SlidingUpPanelLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
 
