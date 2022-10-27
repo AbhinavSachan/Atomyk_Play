@@ -30,6 +30,7 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.atomykcoder.atomykplay.fragments.CustomBottomSheet;
 import com.atomykcoder.atomykplay.fragments.PlayerFragment;
 import com.atomykcoder.atomykplay.function.FetchMusic;
 import com.atomykcoder.atomykplay.function.MusicDataCapsule;
@@ -84,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
     };
     public View bottom_sheet;
     public boolean phone_ringing = false;
-    public BottomSheetBehavior<View> bottomSheetBehavior;
+    public CustomBottomSheet<View> bottomSheetBehavior;
     private ArrayList<MusicDataCapsule> dataList;
     private MusicMainAdapter adapter;
     private LinearLayout linearLayout;
@@ -103,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
         linearLayout = findViewById(R.id.song_not_found_layout);
         recyclerView = findViewById(R.id.music_recycler);
         bottom_sheet = findViewById(R.id.main_container);
-        bottomSheetBehavior = BottomSheetBehavior.from(bottom_sheet);
+        bottomSheetBehavior = (CustomBottomSheet<View>) BottomSheetBehavior.from(bottom_sheet);
         Toolbar toolbar = findViewById(R.id.toolbar);
 
         searchResultsFragment = new SearchResultsFragment();
@@ -344,7 +345,7 @@ public class MainActivity extends AppCompatActivity {
 
         } else {
             if (PlayerFragment.queueSheetBehaviour.getState() == BottomSheetBehavior.STATE_EXPANDED) {
-                PlayerFragment.queueSheetBehaviour.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                PlayerFragment.queueSheetBehaviour.setState(BottomSheetBehavior.STATE_HIDDEN);
                 PlayerFragment.queueBottomSheet.setAlpha(0);
             } else {
                 bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
