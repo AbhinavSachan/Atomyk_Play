@@ -156,7 +156,8 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
 
     @Override
     public int getItemCount() {
-        return musicArrayList.size();
+        if(musicArrayList != null) return  musicArrayList.size();
+        else return -1;
     }
 
     public static class MusicViewAdapter extends RecyclerView.ViewHolder implements ItemTouchHelperViewfinder {

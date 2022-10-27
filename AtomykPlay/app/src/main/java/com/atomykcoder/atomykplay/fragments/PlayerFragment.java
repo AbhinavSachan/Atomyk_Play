@@ -51,6 +51,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.MainActivity;
 import com.atomykcoder.atomykplay.R;
+import com.atomykcoder.atomykplay.function.FetchLyrics;
 import com.atomykcoder.atomykplay.function.MusicDataCapsule;
 import com.atomykcoder.atomykplay.function.MusicQueueAdapter;
 import com.atomykcoder.atomykplay.function.PlaybackStatus;
@@ -402,11 +403,20 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     private void openLyricsPanel() {
         //show lyrics in bottom sheet
         showToast("lyrics");
+        try {
+            FetchLyrics fetchLyrics = new FetchLyrics();
+            fetchLyrics.execute("Perfect");
+            String lyrics = fetchLyrics.get();
+            System.out.println("Lyrics Start here \n" + lyrics + "\nlyrics ends here");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void optionMenu() {
         //add a bottom sheet to show music options like set to ringtone ,audio details ,add to playlist etc.
         showToast("option");
+
     }
 
     //region Timer setup
