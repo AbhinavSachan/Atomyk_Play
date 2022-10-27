@@ -134,9 +134,50 @@ public class MainActivity extends AppCompatActivity {
         bottom_sheet.setClickable(true);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         bottomSheetBehavior.setPeekHeight(136);
-        bottomSheetBehavior.addBottomSheetCallback(onSlideChange());
+        bottomSheetBehavior.addBottomSheetCallback(callback);
 
     }
+
+    public BottomSheetBehavior.BottomSheetCallback callback = new BottomSheetBehavior.BottomSheetCallback() {
+        @Override
+        public void onStateChanged(@NonNull View bottomSheet, int newState) {
+            if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
+                View miniPlayer = PlayerFragment.mini_play_view;
+                View mainPlayer = findViewById(R.id.player_layout);
+                mainPlayer.setVisibility(View.INVISIBLE);
+                miniPlayer.setVisibility(View.VISIBLE);
+                miniPlayer.setAlpha(1);
+                mainPlayer.setAlpha(0);
+            } else if (newState == BottomSheetBehavior.STATE_EXPANDED) {
+                //this will hide the keyboard after clicking on player while searching
+                try {
+                    InputMethodManager manager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+                    manager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+                    FragmentManager manager1 = getSupportFragmentManager();
+                    manager1.popBackStack();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                View miniPlayer = PlayerFragment.mini_play_view;
+                View mainPlayer = findViewById(R.id.player_layout);
+                miniPlayer.setVisibility(View.INVISIBLE);
+                mainPlayer.setVisibility(View.VISIBLE);
+                miniPlayer.setAlpha(0);
+                mainPlayer.setAlpha(1);
+            }
+        }
+
+        @Override
+        public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+            View miniPlayer = PlayerFragment.mini_play_view;
+            View mainPlayer = findViewById(R.id.player_layout);
+            miniPlayer.setVisibility(View.VISIBLE);
+            mainPlayer.setVisibility(View.VISIBLE);
+            miniPlayer.setAlpha(1 - slideOffset * 15);
+            mainPlayer.setAlpha(0 + slideOffset * 3);
+        }
+    };
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
@@ -296,54 +337,15 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private BottomSheetBehavior.BottomSheetCallback onSlideChange() {
-        return new BottomSheetBehavior.BottomSheetCallback() {
-            @Override
-            public void onStateChanged(@NonNull View bottomSheet, int newState) {
-                if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
-                    View miniPlayer = PlayerFragment.mini_play_view;
-                    View mainPlayer = findViewById(R.id.player_layout);
-                    miniPlayer.setAlpha(1);
-                    mainPlayer.setAlpha(0);
-                } else if (newState == BottomSheetBehavior.STATE_EXPANDED) {
-                    //this will hide the keyboard after clicking on player while searching
-                    try {
-                        InputMethodManager manager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-                        manager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
-                        FragmentManager manager1 = getSupportFragmentManager();
-                        manager1.popBackStack();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-
-                    View miniPlayer = PlayerFragment.mini_play_view;
-                    View mainPlayer = findViewById(R.id.player_layout);
-                    miniPlayer.setVisibility(View.INVISIBLE);
-                    miniPlayer.setAlpha(0);
-                    mainPlayer.setAlpha(1);
-                }
-            }
-
-            @Override
-            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-                View miniPlayer = PlayerFragment.mini_play_view;
-                View mainPlayer = findViewById(R.id.player_layout);
-                miniPlayer.setVisibility(View.VISIBLE);
-                miniPlayer.setAlpha(1 - slideOffset * 15);
-                mainPlayer.setAlpha(0 + slideOffset * 3);
-            }
-        };
-    }
-
     @Override
     public void onBackPressed() {
         if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
             super.onBackPressed();
 
         } else {
-            if (PlayerFragment.bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
-                PlayerFragment.bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-                PlayerFragment.bottomSheet.setAlpha(0);
+            if (PlayerFragment.queueSheetBehaviour.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+                PlayerFragment.queueSheetBehaviour.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                PlayerFragment.queueBottomSheet.setAlpha(0);
             } else {
                 bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
             }

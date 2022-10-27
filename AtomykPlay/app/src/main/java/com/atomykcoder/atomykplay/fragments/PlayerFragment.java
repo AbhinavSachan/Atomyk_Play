@@ -29,6 +29,7 @@ import android.os.CountDownTimer;
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -42,6 +43,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -75,8 +78,8 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     public static SeekBar seekBarMain;
     public static ImageView playImg;
     public static TextView curPosTv, durationTv;
-    public static BottomSheetBehavior<View> bottomSheetBehavior;
-    public static View bottomSheet;
+    public static BottomSheetBehavior<View> queueSheetBehaviour;
+    public static View queueBottomSheet;
     private static Context context;
     //cover image view
     private static ImageView playerCoverImage;
@@ -91,7 +94,6 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     //to set it on app start ☺
     private StorageUtil storageUtil;
     private ItemTouchHelper itemTouchHelper;
-    private MusicQueueAdapter adapter;
     private RecyclerView recyclerView;
 
     public static void setMiniLayout() {
@@ -337,14 +339,10 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         optionImg.setOnClickListener(v -> optionMenu());
 
         recyclerView = view.findViewById(R.id.queue_music_recycler);
-        bottomSheet = view.findViewById(R.id.bottom_sheet);
-        View view1 = view.findViewById(R.id.view_active_element);
-        ImageView imageView = view.findViewById(R.id.drag_up_img);
+        queueBottomSheet = view.findViewById(R.id.bottom_sheet);
 
-        bottomSheet.setClickable(true);
+        queueBottomSheet.setClickable(true);
         seekBarMain.setClickable(true);
-        view1.setClickable(true);
-        imageView.setClickable(true);
 
         seekBarMain.setOnSeekBarChangeListener(this);
 
@@ -358,24 +356,25 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
             }
         });
 
-        setupBottomSheet();
+        setupQueueBottomSheet();
 
         return view;
     }
 
-    private void setupBottomSheet() {
+    private void setupQueueBottomSheet() {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         setAdapter();
 
-        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
-        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-        bottomSheet.setAlpha(0);
-        bottomSheetBehavior.setPeekHeight(0);
-
-        bottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+        queueSheetBehaviour = BottomSheetBehavior.from(queueBottomSheet);
+        queueSheetBehaviour.setState(BottomSheetBehavior.STATE_HIDDEN);
+        queueBottomSheet.setAlpha(0);
+        queueSheetBehaviour.setPeekHeight(0);
+        queueSheetBehaviour.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                if (newState == BottomSheetBehavior.STATE_EXPANDED||newState==BottomSheetBehavior.STATE_DRAGGING){
 
+                }
             }
 
             @Override
@@ -383,12 +382,13 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
                 bottomSheet.setAlpha(0 + slideOffset * 4);
             }
         });
+
     }
 
     private void setAdapter() {
         ArrayList<MusicDataCapsule> dataList;
         dataList = new StorageUtil(getContext()).loadMusicList();
-        adapter = new MusicQueueAdapter(getActivity(), dataList, this);
+        MusicQueueAdapter adapter = new MusicQueueAdapter(getActivity(), dataList, this);
         recyclerView.setAdapter(adapter);
 
         ItemTouchHelper.Callback callback = new SimpleTouchCallback(adapter);
@@ -609,8 +609,8 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
 
 
     private void openQue() {
-        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-        bottomSheet.setAlpha(1);
+        queueSheetBehaviour.setState(BottomSheetBehavior.STATE_EXPANDED);
+        queueBottomSheet.setAlpha(1);
     }
 
     @Override
@@ -669,9 +669,12 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
                 favoriteImg.setImageResource(R.drawable.ic_favorite);
             }
         }
-        if (((MainActivity)context).bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED){
+        if (((MainActivity) context).bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
             mini_play_view.setAlpha(0);
             mini_play_view.setVisibility(View.INVISIBLE);
+        }else if (((MainActivity) context).bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
+            player_layout.setAlpha(0);
+            player_layout.setVisibility(View.INVISIBLE);
         }
     }
 
