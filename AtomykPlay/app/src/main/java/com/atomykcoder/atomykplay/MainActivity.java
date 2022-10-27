@@ -24,6 +24,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.view.MenuItemCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -31,6 +32,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.fragments.PlayerFragment;
+import com.atomykcoder.atomykplay.function.FetchLyrics;
 import com.atomykcoder.atomykplay.function.FetchMusic;
 import com.atomykcoder.atomykplay.function.MusicDataCapsule;
 import com.atomykcoder.atomykplay.function.MusicMainAdapter;
@@ -93,6 +95,7 @@ public class MainActivity extends AppCompatActivity {
     private AudioManager audioManager;
     private TelephonyManager telephonyManager;
     private PhoneStateListener phoneStateListener;
+    private CoordinatorLayout main_layout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,6 +108,9 @@ public class MainActivity extends AppCompatActivity {
         bottom_sheet = findViewById(R.id.main_container);
         bottomSheetBehavior = BottomSheetBehavior.from(bottom_sheet);
         Toolbar toolbar = findViewById(R.id.toolbar);
+        main_layout = findViewById(R.id.main_layout);
+
+        main_layout.setNestedScrollingEnabled(true);
 
         searchResultsFragment = new SearchResultsFragment();
 
@@ -132,9 +138,14 @@ public class MainActivity extends AppCompatActivity {
         audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
 
         bottom_sheet.setClickable(true);
+//        bottom_sheet.setNestedScrollingEnabled(true);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         bottomSheetBehavior.setPeekHeight(136);
         bottomSheetBehavior.addBottomSheetCallback(callback);
+
+
+        // Fetch Google lol
+
 
     }
 
