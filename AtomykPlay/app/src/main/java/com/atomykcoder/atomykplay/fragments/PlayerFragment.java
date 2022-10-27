@@ -29,7 +29,6 @@ import android.os.CountDownTimer;
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -43,8 +42,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -79,7 +76,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     public static SeekBar seekBarMain;
     public static ImageView playImg;
     public static TextView curPosTv, durationTv;
-    public static BottomSheetBehavior<View> queueSheetBehaviour;
+    public static CustomBottomSheet<View> queueSheetBehaviour;
     public static View queueBottomSheet;
     private static Context context;
     //cover image view
@@ -342,6 +339,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         recyclerView = view.findViewById(R.id.queue_music_recycler);
         queueBottomSheet = view.findViewById(R.id.bottom_sheet);
 
+
         queueBottomSheet.setClickable(true);
         seekBarMain.setClickable(true);
 
@@ -366,15 +364,19 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         setAdapter();
 
-        queueSheetBehaviour = BottomSheetBehavior.from(queueBottomSheet);
+        queueSheetBehaviour = (CustomBottomSheet<View>) BottomSheetBehavior.from(queueBottomSheet);
         queueSheetBehaviour.setState(BottomSheetBehavior.STATE_HIDDEN);
         queueBottomSheet.setAlpha(0);
         queueSheetBehaviour.setPeekHeight(0);
+        queueSheetBehaviour.setHideable(true);
+        queueSheetBehaviour.setSkipCollapsed(true);
         queueSheetBehaviour.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
-                if (newState == BottomSheetBehavior.STATE_EXPANDED||newState==BottomSheetBehavior.STATE_DRAGGING){
-
+                if (newState == BottomSheetBehavior.STATE_EXPANDED || newState == BottomSheetBehavior.STATE_DRAGGING){
+                    ((MainActivity)context).bottomSheetBehavior.isEnableCollapse(true);
+                }else {
+                    ((MainActivity)context).bottomSheetBehavior.isEnableCollapse(false);
                 }
             }
 
@@ -682,7 +684,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         if (((MainActivity) context).bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
             mini_play_view.setAlpha(0);
             mini_play_view.setVisibility(View.INVISIBLE);
-        }else if (((MainActivity) context).bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
+        } else if (((MainActivity) context).bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
             player_layout.setAlpha(0);
             player_layout.setVisibility(View.INVISIBLE);
         }

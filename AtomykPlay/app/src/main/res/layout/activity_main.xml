@@ -76,7 +76,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:elevation="30dp"
-        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"/>
+        app:layout_behavior=".fragments.CustomBottomSheet"/>
 
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -26,8 +26,8 @@
             android:foreground="@drawable/round_select_effect_small"
             android:padding="12dp"
             android:src="@drawable/ic_more_horizontal"
-            app:layout_constraintBottom_toTopOf="@+id/deltaRelative"
             android:theme="@android:style/ThemeOverlay.Material.Dark"
+            app:layout_constraintBottom_toTopOf="@+id/deltaRelative"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -36,9 +36,9 @@
             android:id="@+id/deltaRelative"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
             android:clipToPadding="false"
             android:gravity="center_horizontal"
-            android:layout_marginTop="30dp"
             android:padding="15dp"
             app:layout_constraintTop_toTopOf="parent">
 
@@ -116,8 +116,8 @@
                 android:contentDescription="@string/imageView"
                 android:elevation="10dp"
                 android:focusable="true"
-                android:padding="10dp"
                 android:foreground="@drawable/round_select_effect_small"
+                android:padding="10dp"
                 android:src="@drawable/ic_music_list"
                 android:theme="@android:style/ThemeOverlay.Material.Dark" />
 
@@ -161,8 +161,8 @@
                 android:contentDescription="@string/imageView"
                 android:elevation="10dp"
                 android:focusable="true"
-                android:padding="10dp"
                 android:foreground="@drawable/round_select_effect_small"
+                android:padding="10dp"
                 android:src="@drawable/ic_previous_main"
                 android:theme="@android:style/ThemeOverlay.Material.Dark" />
 
@@ -178,9 +178,9 @@
                 android:cropToPadding="false"
                 android:elevation="4dp"
                 android:focusable="true"
+                android:foreground="@drawable/round_select_effect_small"
                 android:padding="10dp"
                 android:src="@drawable/ic_play_main"
-                android:foreground="@drawable/round_select_effect_small"
                 android:theme="@android:style/ThemeOverlay.Material.Dark" />
 
             <ImageView
@@ -208,8 +208,8 @@
                 android:contentDescription="@string/imageView"
                 android:elevation="10dp"
                 android:focusable="true"
-                android:padding="10dp"
                 android:foreground="@drawable/round_select_effect_small"
+                android:padding="10dp"
                 android:src="@drawable/ic_shuffle_empty"
                 android:theme="@android:style/ThemeOverlay.Material.Dark" />
 
@@ -296,107 +296,103 @@
 
         </LinearLayout>
 
+        <ImageView
+            android:id="@+id/player_favorite_iv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginHorizontal="10dp"
+            android:clickable="true"
+            android:contentDescription="@string/imageView"
+            android:elevation="10dp"
+            android:focusable="true"
+            android:foreground="@drawable/round_select_effect_small"
+            android:padding="10dp"
+            android:src="@drawable/ic_favorite_border"
+            android:layout_marginTop="24dp"
+            android:theme="@android:style/ThemeOverlay.Material.Dark"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/linear_bit_layout" />
 
         <RelativeLayout
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_below="@+id/linear_bit_layout"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:id="@+id/timer_relative_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginHorizontal="10dp"
+            android:layout_marginTop="24dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/linear_bit_layout">
+
+            <TextView
+                android:id="@+id/countdown_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="@drawable/round_select_effect_small"
+                android:padding="10dp"
+                android:text="@string/start_pos"
+                android:textColor="@color/tertiary_bg"
+                android:textSize="@dimen/d_12sp"
+                android:textStyle="bold"
+                android:theme="@android:style/ThemeOverlay.Material.Dark"
+                android:visibility="gone" />
+
+
+            <ImageView
+                android:id="@+id/player_timer_iv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:contentDescription="@string/imageView"
+                android:elevation="10dp"
+                android:focusable="true"
+                android:foreground="@drawable/round_select_effect_small"
+                android:padding="10dp"
+                android:src="@drawable/ic_timer_add"
+                android:theme="@android:style/ThemeOverlay.Material.Dark" />
+
+        </RelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/player_lyrics_ll"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="24dp"
+            android:clickable="true"
+            android:contentDescription="@string/empty"
+            android:elevation="10dp"
+            android:focusable="true"
+            android:orientation="vertical"
             app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginBottom="16dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/linear_bit_layout">
 
             <ImageView
-                android:id="@+id/player_favorite_iv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentBottom="true"
-                android:layout_marginHorizontal="10dp"
-                android:layout_marginBottom="8dp"
-                android:clickable="true"
+                android:layout_gravity="center"
                 android:contentDescription="@string/imageView"
-                android:elevation="10dp"
-                android:foreground="@drawable/round_select_effect_small"
-                android:focusable="true"
-                android:padding="10dp"
-                android:src="@drawable/ic_favorite_border"
-                android:theme="@android:style/ThemeOverlay.Material.Dark" />
+                android:src="@drawable/ic_drag_up" />
 
-            <RelativeLayout
-                android:id="@+id/timer_relative_layout"
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentBottom="true"
-                android:layout_marginHorizontal="10dp"
-                android:layout_marginBottom="8dp">
+                android:paddingStart="18dp"
+                android:paddingEnd="18dp"
+                android:paddingBottom="18dp"
+                android:text="@string/lyrics"
+                android:textColor="@color/space_black"
+                android:textSize="@dimen/d_16sp"
+                android:textStyle="normal" />
 
-                <TextView
-                    android:id="@+id/countdown_tv"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:padding="10dp"
-                    android:text="@string/start_pos"
-                    android:textColor="@color/tertiary_bg"
-                    android:textSize="@dimen/d_12sp"
-                    android:textStyle="bold"
-                    android:foreground="@drawable/round_select_effect_small"
-                    android:theme="@android:style/ThemeOverlay.Material.Dark"
-                    android:visibility="gone" />
-
-
-                <ImageView
-                    android:id="@+id/player_timer_iv"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:clickable="true"
-                    android:contentDescription="@string/imageView"
-                    android:elevation="10dp"
-                    android:foreground="@drawable/round_select_effect_small"
-                    android:focusable="true"
-                    android:padding="10dp"
-                    android:src="@drawable/ic_timer_add"
-                    android:theme="@android:style/ThemeOverlay.Material.Dark" />
-
-            </RelativeLayout>
-
-            <LinearLayout
-                android:id="@+id/player_lyrics_ll"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_centerHorizontal="true"
-                android:clickable="true"
-                android:contentDescription="@string/empty"
-                android:elevation="10dp"
-                android:focusable="true"
-                android:orientation="vertical">
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:contentDescription="@string/imageView"
-                    android:src="@drawable/ic_drag_up" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingStart="18dp"
-                    android:paddingEnd="18dp"
-                    android:paddingBottom="18dp"
-                    android:text="@string/lyrics"
-                    android:textColor="@color/space_black"
-                    android:textSize="@dimen/d_16sp"
-                    android:textStyle="normal" />
-
-            </LinearLayout>
-        </RelativeLayout>
+        </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -408,7 +404,7 @@
         android:background="@color/primary_bg"
         android:elevation="16dp"
         android:orientation="vertical"
-        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+        app:layout_behavior=".fragments.CustomBottomSheet">
 
         <ImageView
             android:id="@+id/drag_up_img"
