@@ -23,10 +23,12 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -42,6 +44,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -61,9 +65,17 @@ import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+<<<<<<< Updated upstream
 import java.util.Locale;
+=======
+>>>>>>> Stashed changes
 import java.util.concurrent.ExecutionException;
 
 @SuppressLint("StaticFieldLeak")
@@ -311,7 +323,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         mimeTv = view.findViewById(R.id.player_mime_tv);//○
         durationTv = view.findViewById(R.id.player_duration_tv);//○
         curPosTv = view.findViewById(R.id.player_current_pos_tv);//○
-        View lyricsOpenLayout = view.findViewById(R.id.player_lyrics_ll);
+        ImageView lyricsOpenLayout = view.findViewById(R.id.player_lyrics_ll);
         timerTv = view.findViewById(R.id.countdown_tv);
 
         playerSongNameTv.setSelected(true);
@@ -367,19 +379,13 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         setAdapter();
 
         queueSheetBehaviour = (CustomBottomSheet<View>) BottomSheetBehavior.from(queueBottomSheet);
-        queueSheetBehaviour.setState(BottomSheetBehavior.STATE_HIDDEN);
-        queueBottomSheet.setAlpha(0);
-        queueSheetBehaviour.setPeekHeight(0);
         queueSheetBehaviour.setHideable(true);
         queueSheetBehaviour.setSkipCollapsed(true);
+        queueSheetBehaviour.setState(BottomSheetBehavior.STATE_HIDDEN);
         queueSheetBehaviour.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
-                if (newState == BottomSheetBehavior.STATE_EXPANDED || newState == BottomSheetBehavior.STATE_DRAGGING){
-                    ((MainActivity)context).bottomSheetBehavior.isEnableCollapse(true);
-                }else {
-                    ((MainActivity)context).bottomSheetBehavior.isEnableCollapse(false);
-                }
+                ((MainActivity)context).bottomSheetBehavior.isEnableCollapse(newState == BottomSheetBehavior.STATE_EXPANDED || newState == BottomSheetBehavior.STATE_DRAGGING);
             }
 
             @Override
@@ -402,10 +408,21 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
 
     }
 
-    //endregion
-
     private void openLyricsPanel() {
+        MainActivity mainActivity = (MainActivity)context;
+        mainActivity.bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        AddLyricsFragment addLyricsFragment = new AddLyricsFragment();
+        FragmentManager manager = requireActivity().getSupportFragmentManager();
+        FragmentTransaction transaction = manager.beginTransaction();
+        transaction.replace(R.id.sec_container, addLyricsFragment);
+        transaction.addToBackStack(addLyricsFragment.toString());
+        transaction.commit();
+    }
+
+
+    private void fetchLyrics() {
         //show lyrics in bottom sheet
+<<<<<<< Updated upstream
         showToast("lyrics");
         FetchLyrics fetchLyrics = new FetchLyrics();
 
@@ -418,8 +435,21 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
             String subtitles = fetchLyrics.get();
             Log.i("SONG", subtitles);
         } catch(Exception e) {
+=======
+        showToast("fetching");
+
+        try {
+            FetchLyrics fetchLyrics = new FetchLyrics();
+            //songLength format 02:39.36
+            fetchLyrics.execute("SongName + Artist + SongLength");
+
+        } catch (Exception e) {
+>>>>>>> Stashed changes
             e.printStackTrace();
         }
+    }
+    public static void setLyrics(String lyrics) {
+
     }
 
     private String evalSongName(String song, String artist) {
@@ -723,7 +753,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         super.onPause();
     }
 
-    private void showToast(String option) {
+    public static void showToast(String option) {
         Toast.makeText(context, option, Toast.LENGTH_SHORT).show();
     }
 

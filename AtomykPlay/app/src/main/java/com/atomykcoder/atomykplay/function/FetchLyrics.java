@@ -1,6 +1,20 @@
 package com.atomykcoder.atomykplay.function;
 
 import android.os.AsyncTask;
+<<<<<<< Updated upstream
+=======
+import android.util.Log;
+import android.widget.Toast;
+
+
+import com.atomykcoder.atomykplay.MainActivity;
+import com.atomykcoder.atomykplay.fragments.AddLyricsFragment;
+import com.atomykcoder.atomykplay.fragments.PlayerFragment;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+>>>>>>> Stashed changes
 
 import org.jmusixmatch.MusixMatch;
 import org.jmusixmatch.MusixMatchException;
@@ -50,6 +64,7 @@ protected String doInBackground(String... strings) {
         Element lyrics = null;
         Element link = null;
         try{
+<<<<<<< Updated upstream
 final Document document = Jsoup.connect("https://www.megalobiz.com/search/all?qry=" + strings[0]).get();
         for (Element div : document.select("div.pro_part.mid")) {
         link = div.select("a").first();
@@ -60,9 +75,26 @@ final Document lyricsDocument = Jsoup.connect("https://www.megalobiz.com" + href
         for (Element div : lyricsDocument.select("div.lyrics_details.entity_more_info")) {
         lyrics = div.select("span").first();
         }
+=======
+            final Document document = Jsoup.connect("https://www.megalobiz.com/search/all?qry=" + strings[0]).get();
+            for (Element div : document.select("div.pro_part.mid")) {
+                link = div.select("a").first();
+                break;
+            }
+            final Document lyricsDocument;
+            if (link != null) {
+                final String href = link.attr("href");
+                lyricsDocument = Jsoup.connect("https://www.megalobiz.com" + href).get();
+
+                for (Element div : lyricsDocument.select("div.lyrics_details.entity_more_info")) {
+                    lyrics = div.select("span").first();
+                }
+            }
+>>>>>>> Stashed changes
         } catch (IOException e) {
         e.printStackTrace();
         }
+<<<<<<< Updated upstream
         if(lyrics != null)
         return lyrics.text();
         else
@@ -71,3 +103,19 @@ final Document lyricsDocument = Jsoup.connect("https://www.megalobiz.com" + href
 
  */
 //endregion
+=======
+        if (lyrics != null) {
+            return lyrics.text();
+        }else{
+            return "";
+        }
+    }
+
+    @Override
+    protected void onPostExecute(String lyrics) {
+        if (!lyrics.equals("")) {
+
+        }else PlayerFragment.showToast("No Lyrics Found");
+    }
+};
+>>>>>>> Stashed changes

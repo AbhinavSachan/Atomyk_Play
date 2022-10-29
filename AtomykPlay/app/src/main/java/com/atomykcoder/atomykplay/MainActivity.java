@@ -357,7 +357,6 @@ public class MainActivity extends AppCompatActivity {
         } else {
             if (PlayerFragment.queueSheetBehaviour.getState() == BottomSheetBehavior.STATE_EXPANDED) {
                 PlayerFragment.queueSheetBehaviour.setState(BottomSheetBehavior.STATE_HIDDEN);
-                PlayerFragment.queueBottomSheet.setAlpha(0);
             } else {
                 bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
             }
