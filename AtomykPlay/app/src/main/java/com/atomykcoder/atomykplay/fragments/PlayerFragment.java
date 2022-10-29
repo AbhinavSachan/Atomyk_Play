@@ -23,12 +23,10 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -65,18 +63,8 @@ import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-<<<<<<< Updated upstream
-import java.util.Locale;
-=======
->>>>>>> Stashed changes
-import java.util.concurrent.ExecutionException;
 
 @SuppressLint("StaticFieldLeak")
 public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeListener, OnDragStartListener {
@@ -281,6 +269,14 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         }
     }
 
+    public static void showToast(String option) {
+        Toast.makeText(context, option, Toast.LENGTH_SHORT).show();
+    }
+
+    public static void setLyrics(String lyrics) {
+
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -346,7 +342,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         favoriteImg.setOnClickListener(v -> addFavorite());
         timerImg.setOnClickListener(v -> setTimer());
         timerTv.setOnClickListener(v -> cancelTimer());
-        lyricsOpenLayout.setOnClickListener(v -> openLyricsPanel());
+        lyricsOpenLayout.setOnClickListener(v -> fetchLyrics());
         //top right option button
         optionImg.setOnClickListener(v -> optionMenu());
 
@@ -385,7 +381,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         queueSheetBehaviour.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
-                ((MainActivity)context).bottomSheetBehavior.isEnableCollapse(newState == BottomSheetBehavior.STATE_EXPANDED || newState == BottomSheetBehavior.STATE_DRAGGING);
+                ((MainActivity) context).bottomSheetBehavior.isEnableCollapse(newState == BottomSheetBehavior.STATE_EXPANDED || newState == BottomSheetBehavior.STATE_DRAGGING);
             }
 
             @Override
@@ -409,7 +405,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     }
 
     private void openLyricsPanel() {
-        MainActivity mainActivity = (MainActivity)context;
+        MainActivity mainActivity = (MainActivity) context;
         mainActivity.bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         AddLyricsFragment addLyricsFragment = new AddLyricsFragment();
         FragmentManager manager = requireActivity().getSupportFragmentManager();
@@ -419,56 +415,44 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         transaction.commit();
     }
 
-
     private void fetchLyrics() {
         //show lyrics in bottom sheet
-<<<<<<< Updated upstream
         showToast("lyrics");
         FetchLyrics fetchLyrics = new FetchLyrics();
 
         String trackName = playerSongNameTv.getText().toString();
         String artistName = playerArtistNameTv.getText().toString();
-        trackName = evalSongName(trackName, artistName);
-        Log.i("SONG", "Track name: " + trackName);
+//        trackName = evalSongName(trackName, artistName);
+//        Log.i("SONG", "Track name: " + trackName);
         try {
-            fetchLyrics.execute(trackName, artistName);
-            String subtitles = fetchLyrics.get();
-            Log.i("SONG", subtitles);
-        } catch(Exception e) {
-=======
-        showToast("fetching");
-
-        try {
-            FetchLyrics fetchLyrics = new FetchLyrics();
-            //songLength format 02:39.36
-            fetchLyrics.execute("SongName + Artist + SongLength");
-
+            fetchLyrics.execute("Sandro cavazza Love to lose");
+            String lyrics = fetchLyrics.get();
+            Log.i("SONG", lyrics);
         } catch (Exception e) {
->>>>>>> Stashed changes
             e.printStackTrace();
         }
-    }
-    public static void setLyrics(String lyrics) {
-
     }
 
     private String evalSongName(String song, String artist) {
         song = song.toLowerCase();
         artist = artist.toLowerCase();
-        if(song.contains("[")) {
+        if (song.contains("[")) {
             song = song.substring(0, song.indexOf("["));
         }
-        if(song.contains("(")) {
+        if (song.contains("(")) {
             song = song.substring(0, song.indexOf("("));
         }
-        if(song.contains("{")) {
+        if (song.contains("{")) {
             song = song.substring(0, song.indexOf("{"));
         }
-        if(song.contains(artist)){
+        if (song.contains(artist)) {
             song = song.replace(artist, "");
         }
-        if(song.contains("-")){
+        if (song.contains("-")) {
             song = song.replace("-", "");
+        }
+        if (song.contains("_")) {
+            song = song.replace("_", " ");
         }
         return song;
     }
@@ -636,7 +620,6 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         setAdapter();
     }
 
-
     @SuppressLint("NotifyDataSetChanged")
     private void restoreLastListAndPos() {
         ArrayList<MusicDataCapsule> tempList = storageUtil.loadTempMusicList();
@@ -677,7 +660,6 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         }
     }
 
-
     private void openQue() {
         queueSheetBehaviour.setState(BottomSheetBehavior.STATE_EXPANDED);
         queueBottomSheet.setAlpha(1);
@@ -707,7 +689,6 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
             shuffleImg.setImageResource(R.drawable.ic_shuffle);
         }
     }
-
 
     @Override
     public void onDestroy() {
@@ -751,10 +732,6 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     @Override
     public void onPause() {
         super.onPause();
-    }
-
-    public static void showToast(String option) {
-        Toast.makeText(context, option, Toast.LENGTH_SHORT).show();
     }
 
     @Override
