@@ -1,7 +1,9 @@
 package com.atomykcoder.atomykplay.function;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
+import com.atomykcoder.atomykplay.fragments.AddLyricsFragment;
 import com.atomykcoder.atomykplay.fragments.PlayerFragment;
 
 import org.jsoup.Jsoup;
@@ -36,13 +38,13 @@ public class FetchLyrics extends AsyncTask<String, Void, String> {
         if (lyrics != null)
             return lyrics.text();
         else
-            return "Song not found";
+            return "";
     }
 
     @Override
     protected void onPostExecute(String lyrics) {
         if (!lyrics.equals("")) {
-
+            AddLyricsFragment.setLyrics(lyrics);
         } else PlayerFragment.showToast("No Lyrics Found");
     }
 };

@@ -22,4 +22,6 @@
     <string name="song0">0 Songs</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="save">Save</string>
+    <string name="find">Find</string>
 </resources>

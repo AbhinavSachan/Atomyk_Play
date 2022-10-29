@@ -273,10 +273,6 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         Toast.makeText(context, option, Toast.LENGTH_SHORT).show();
     }
 
-    public static void setLyrics(String lyrics) {
-
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -342,7 +338,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         favoriteImg.setOnClickListener(v -> addFavorite());
         timerImg.setOnClickListener(v -> setTimer());
         timerTv.setOnClickListener(v -> cancelTimer());
-        lyricsOpenLayout.setOnClickListener(v -> fetchLyrics());
+        lyricsOpenLayout.setOnClickListener(v -> openLyricsPanel());
         //top right option button
         optionImg.setOnClickListener(v -> optionMenu());
 
@@ -407,54 +403,13 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     private void openLyricsPanel() {
         MainActivity mainActivity = (MainActivity) context;
         mainActivity.bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+
         AddLyricsFragment addLyricsFragment = new AddLyricsFragment();
         FragmentManager manager = requireActivity().getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
         transaction.replace(R.id.sec_container, addLyricsFragment);
         transaction.addToBackStack(addLyricsFragment.toString());
         transaction.commit();
-    }
-
-    private void fetchLyrics() {
-        //show lyrics in bottom sheet
-        showToast("lyrics");
-        FetchLyrics fetchLyrics = new FetchLyrics();
-
-        String trackName = playerSongNameTv.getText().toString();
-        String artistName = playerArtistNameTv.getText().toString();
-//        trackName = evalSongName(trackName, artistName);
-//        Log.i("SONG", "Track name: " + trackName);
-        try {
-            fetchLyrics.execute("Sandro cavazza Love to lose");
-            String lyrics = fetchLyrics.get();
-            Log.i("SONG", lyrics);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private String evalSongName(String song, String artist) {
-        song = song.toLowerCase();
-        artist = artist.toLowerCase();
-        if (song.contains("[")) {
-            song = song.substring(0, song.indexOf("["));
-        }
-        if (song.contains("(")) {
-            song = song.substring(0, song.indexOf("("));
-        }
-        if (song.contains("{")) {
-            song = song.substring(0, song.indexOf("{"));
-        }
-        if (song.contains(artist)) {
-            song = song.replace(artist, "");
-        }
-        if (song.contains("-")) {
-            song = song.replace("-", "");
-        }
-        if (song.contains("_")) {
-            song = song.replace("_", " ");
-        }
-        return song;
     }
 
     private void optionMenu() {
