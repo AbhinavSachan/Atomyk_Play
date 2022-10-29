@@ -63,6 +63,8 @@ import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Locale;
+import java.util.concurrent.ExecutionException;
 
 @SuppressLint("StaticFieldLeak")
 public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeListener, OnDragStartListener {
@@ -405,14 +407,40 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     private void openLyricsPanel() {
         //show lyrics in bottom sheet
         showToast("lyrics");
+        FetchLyrics fetchLyrics = new FetchLyrics();
+
+        String trackName = playerSongNameTv.getText().toString();
+        String artistName = playerArtistNameTv.getText().toString();
+        trackName = evalSongName(trackName, artistName);
+        Log.i("SONG", "Track name: " + trackName);
         try {
-            FetchLyrics fetchLyrics = new FetchLyrics();
-            fetchLyrics.execute("Perfect");
-            String lyrics = fetchLyrics.get();
-            System.out.println("Lyrics Start here \n" + lyrics + "\nlyrics ends here");
-        } catch (Exception e) {
+            fetchLyrics.execute(trackName, artistName);
+            String subtitles = fetchLyrics.get();
+            Log.i("SONG", subtitles);
+        } catch(Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private String evalSongName(String song, String artist) {
+        song = song.toLowerCase();
+        artist = artist.toLowerCase();
+        if(song.contains("[")) {
+            song = song.substring(0, song.indexOf("["));
+        }
+        if(song.contains("(")) {
+            song = song.substring(0, song.indexOf("("));
+        }
+        if(song.contains("{")) {
+            song = song.substring(0, song.indexOf("{"));
+        }
+        if(song.contains(artist)){
+            song = song.replace(artist, "");
+        }
+        if(song.contains("-")){
+            song = song.replace("-", "");
+        }
+        return song;
     }
 
     private void optionMenu() {
