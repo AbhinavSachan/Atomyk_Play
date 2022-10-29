@@ -33,7 +33,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.fragments.CustomBottomSheet;
 import com.atomykcoder.atomykplay.fragments.PlayerFragment;
-import com.atomykcoder.atomykplay.function.FetchLyrics;
 import com.atomykcoder.atomykplay.function.FetchMusic;
 import com.atomykcoder.atomykplay.function.MusicDataCapsule;
 import com.atomykcoder.atomykplay.function.MusicMainAdapter;
@@ -106,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
         //initializations
         linearLayout = findViewById(R.id.song_not_found_layout);
         recyclerView = findViewById(R.id.music_recycler);
-        bottom_sheet = findViewById(R.id.main_container);
+        bottom_sheet = findViewById(R.id.player_main_container);
         bottomSheetBehavior = (CustomBottomSheet<View>) BottomSheetBehavior.from(bottom_sheet);
         Toolbar toolbar = findViewById(R.id.toolbar);
         main_layout = findViewById(R.id.main_layout);
@@ -282,7 +281,7 @@ public class MainActivity extends AppCompatActivity {
         PlayerFragment fragment = new PlayerFragment();
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
-        transaction.replace(R.id.main_container, fragment);
+        transaction.replace(R.id.player_main_container, fragment);
         transaction.commit();
     }
 

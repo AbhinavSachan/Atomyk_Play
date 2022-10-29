@@ -31,6 +31,7 @@
             android:clipToPadding="false"
             android:paddingBottom="70dp" />
 
+
         <com.turingtechnologies.materialscrollbar.DragScrollBar
             android:id="@+id/dragScrollBar"
             android:layout_width="wrap_content"
@@ -72,7 +73,7 @@
     </RelativeLayout>
 
     <FrameLayout
-        android:id="@+id/main_container"
+        android:id="@+id/player_main_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:elevation="30dp"
