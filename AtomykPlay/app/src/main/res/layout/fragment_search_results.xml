@@ -22,6 +22,7 @@
             android:layout_height="wrap_content"
             android:paddingHorizontal="8dp"
             android:text="@string/song"
+            android:textColor="@color/text_color"
             android:textSize="16sp" />
 
         <RadioButton
@@ -30,6 +31,7 @@
             android:layout_height="wrap_content"
             android:paddingHorizontal="8dp"
             android:text="@string/album"
+            android:textColor="@color/text_color"
             android:textSize="16sp" />
 
         <RadioButton
@@ -38,6 +40,7 @@
             android:layout_height="wrap_content"
             android:paddingHorizontal="8dp"
             android:text="@string/artist"
+            android:textColor="@color/text_color"
             android:textSize="16sp" />
 
         <RadioButton
@@ -46,6 +49,7 @@
             android:layout_height="wrap_content"
             android:paddingHorizontal="8dp"
             android:text="@string/genre"
+            android:textColor="@color/text_color"
             android:textSize="16sp" />
     </RadioGroup>
 
@@ -57,9 +61,10 @@
         android:layout_alignParentEnd="true"
         android:layout_margin="12dp"
         android:padding="4dp"
-        android:textSize="@dimen/d_16sp"
         android:text="@string/song0"
-        android:textColor="@color/sub_text_grey" />
+        android:textStyle="bold"
+        android:textColor="@color/sub_text_grey"
+        android:textSize="@dimen/d_16sp" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/search_recycler_view"

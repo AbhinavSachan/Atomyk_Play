@@ -58,7 +58,7 @@
                 android:marqueeRepeatLimit="marquee_forever"
                 android:singleLine="true"
                 android:text="@string/song_name_e"
-                android:textColor="@color/tertiary_bg"
+                android:textColor="@color/text_color"
                 android:textSize="@dimen/d_16sp"
                 android:textStyle="bold" />
 
@@ -78,7 +78,7 @@
                     android:padding="2dp"
                     android:singleLine="true"
                     android:text="@string/song_artist_e"
-                    android:textColor="@color/tertiary_bg"
+                    android:textColor="@color/text_color"
                     android:textSize="@dimen/d_14sp" />
 
                 <TextView
@@ -90,7 +90,7 @@
                     android:gravity="end"
                     android:padding="2dp"
                     android:text="@string/song_dur_e"
-                    android:textColor="@color/tertiary_bg"
+                    android:textColor="@color/text_color"
                     android:textSize="@dimen/d_14sp" />
 
             </LinearLayout>

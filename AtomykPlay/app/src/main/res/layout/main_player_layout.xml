@@ -86,7 +86,7 @@
                     android:paddingEnd="16dp"
                     android:singleLine="true"
                     android:text="@string/song_name_e"
-                    android:textColor="@color/tertiary_bg"
+                    android:textColor="@color/text_color"
                     android:textSize="@dimen/d_24sp"
                     android:textStyle="bold" />
 
@@ -100,7 +100,7 @@
                     android:paddingEnd="18dp"
                     android:singleLine="true"
                     android:text="@string/song_artist_e"
-                    android:textColor="@color/tertiary_bg"
+                    android:textColor="@color/text_color"
                     android:textSize="@dimen/d_16sp"
                     android:textStyle="normal" />
 
@@ -330,7 +330,7 @@
                 android:focusable="true"
                 android:padding="10dp"
                 android:text="@string/start_pos"
-                android:textColor="@color/tertiary_bg"
+                android:textColor="@color/text_color"
                 android:textSize="@dimen/d_12sp"
                 android:textStyle="bold"
                 android:theme="@android:style/ThemeOverlay.Material.Dark"

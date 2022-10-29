@@ -110,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         main_layout = findViewById(R.id.main_layout);
 
-        main_layout.setNestedScrollingEnabled(true);
+        main_layout.setNestedScrollingEnabled(false);
 
         searchResultsFragment = new SearchResultsFragment();
 

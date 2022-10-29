@@ -87,7 +87,7 @@
                     android:paddingEnd="16dp"
                     android:singleLine="true"
                     android:text="@string/song_name_e"
-                    android:textColor="@color/tertiary_bg"
+                    android:textColor="@color/text_color"
                     android:textSize="@dimen/d_24sp"
                     android:textStyle="bold" />
 
@@ -101,7 +101,7 @@
                     android:paddingEnd="18dp"
                     android:singleLine="true"
                     android:text="@string/song_artist_e"
-                    android:textColor="@color/tertiary_bg"
+                    android:textColor="@color/text_color"
                     android:textSize="@dimen/d_16sp"
                     android:textStyle="normal" />
 
@@ -233,7 +233,7 @@
                 android:padding="15dp"
                 android:progressDrawable="@drawable/seekbar_style"
                 android:splitTrack="false"
-                android:thumbTint="@color/tertiary_bg" />
+                android:thumbTint="@color/icons_bg" />
 
             <TextView
                 android:id="@+id/player_current_pos_tv"
@@ -338,7 +338,7 @@
                 android:foreground="@drawable/round_select_effect_small"
                 android:padding="10dp"
                 android:text="@string/start_pos"
-                android:textColor="@color/tertiary_bg"
+                android:textColor="@color/text_color"
                 android:textSize="@dimen/d_12sp"
                 android:textStyle="bold"
                 android:theme="@android:style/ThemeOverlay.Material.Dark"
