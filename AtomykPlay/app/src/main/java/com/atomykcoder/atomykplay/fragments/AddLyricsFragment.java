@@ -3,6 +3,9 @@ package com.atomykcoder.atomykplay.fragments;
 import static com.atomykcoder.atomykplay.fragments.PlayerFragment.showToast;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,23 +21,19 @@ import com.atomykcoder.atomykplay.function.MusicDataCapsule;
 import com.atomykcoder.atomykplay.function.StorageUtil;
 
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class AddLyricsFragment extends Fragment {
 
-    private static String songName;
-    private static EditText lyricsEditText;
-    private static ProgressBar progressBar;
-    //    private static String fetchedLyrics;
+    private String songName;
+    private EditText editTextLyrics;
+    private ProgressBar progressBar;
     private String artistName;
     private EditText nameEditText, artistEditText;
     private Button saveBtn, btnFind;
 
-    public static void setLyrics(String lyrics) {
-        if (lyrics.contains(songName)) {
-            progressBar.setVisibility(View.GONE);
-            lyricsEditText.setText(lyrics);
-        }
-    }
+
 private StorageUtil storageUtil;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -44,7 +43,7 @@ private StorageUtil storageUtil;
 
         nameEditText = view.findViewById(R.id.edit_song_name);
         artistEditText = view.findViewById(R.id.edit_artist_name);
-        lyricsEditText = view.findViewById(R.id.edit_lyrics);
+        editTextLyrics = view.findViewById(R.id.edit_lyrics);
         saveBtn = view.findViewById(R.id.btn_save);
         btnFind = view.findViewById(R.id.btn_find);
         progressBar = view.findViewById(R.id.progress_lyrics);
@@ -53,13 +52,9 @@ private StorageUtil storageUtil;
         nameEditText.setText(getMusic().getsName());
         artistEditText.setText(getMusic().getsArtist());
 
-        saveBtn.setOnClickListener(v -> {
-            showToast("saved☻");
-        });
+        saveBtn.setOnClickListener(v -> showToast("saved☻"));
 
-        btnFind.setOnClickListener(v -> {
-            invalidateEntry();
-        });
+        btnFind.setOnClickListener(v -> invalidateEntry());
 
         return view;
     }
@@ -88,7 +83,7 @@ private StorageUtil storageUtil;
         } else if (songName.equals("")) {
             nameEditText.setError("Required");
         } else {
-            progressBar.setVisibility(View.VISIBLE);
+
             fetchLyrics();
         }
 
@@ -103,7 +98,24 @@ private StorageUtil storageUtil;
         FetchLyrics fetchLyrics = new FetchLyrics();
 
         try {
-            fetchLyrics.execute(artistName + " " + songName);
+            ExecutorService service = Executors.newSingleThreadExecutor();
+            Handler handler = new Handler(Looper.getMainLooper());
+            fetchLyrics.onPreExecute(progressBar);
+            service.execute(new Runnable() {
+                @Override
+                public void run() {
+                    String lyrics = fetchLyrics.fetch(artistName + " " + songName);
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            fetchLyrics.onPostExecute(progressBar);
+                            Log.i("SONG", lyrics);
+                            editTextLyrics.setText(lyrics);
+                        }
+                    });
+                }
+            });
+
         } catch (Exception e) {
             e.printStackTrace();
         }

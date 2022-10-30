@@ -1,7 +1,7 @@
 package com.atomykcoder.atomykplay.function;
 
-import android.os.AsyncTask;
-import android.util.Log;
+import android.view.View;
+import android.widget.ProgressBar;
 
 import com.atomykcoder.atomykplay.fragments.AddLyricsFragment;
 import com.atomykcoder.atomykplay.fragments.PlayerFragment;
@@ -12,15 +12,18 @@ import org.jsoup.nodes.Element;
 
 import java.io.IOException;
 
-public class FetchLyrics extends AsyncTask<String, Void, String> {
+public class FetchLyrics {
 
+    public void onPreExecute(ProgressBar progressBar) {
+        // pre-execute code goes here
+        progressBar.setVisibility(View.VISIBLE);
+    }
 
-    @Override
-    protected String doInBackground(String... strings) {
+    public String fetch (String query) {
         Element lyrics = null;
         Element link = null;
         try {
-            final Document document = Jsoup.connect("https://www.megalobiz.com/search/all?qry=" + strings[0]).get();
+            final Document document = Jsoup.connect("https://www.megalobiz.com/search/all?qry=" + query).get();
             for (Element div : document.select("div.pro_part.mid")) {
                 link = div.select("a").first();
                 break;
@@ -41,21 +44,10 @@ public class FetchLyrics extends AsyncTask<String, Void, String> {
             return "";
     }
 
-    @Override
-    protected void onPostExecute(String lyrics) {
-        if (!lyrics.equals("")) {
-            AddLyricsFragment.setLyrics(lyrics);
-        } else PlayerFragment.showToast("No Lyrics Found");
+    public void onPostExecute(ProgressBar progressBar) {
+        progressBar.setVisibility(View.GONE);
     }
-};
+}
 
 
-//region WebScrape Code later use
-
-// takes 3 - 10 seconds to fetch lyrics and return result
-// can be executed once the songs start playing it's async so user won't notice anyway
-// executes when user clicks on lyrics button (currently only logs the lyrics in console)
-
-
-//endregion
 
