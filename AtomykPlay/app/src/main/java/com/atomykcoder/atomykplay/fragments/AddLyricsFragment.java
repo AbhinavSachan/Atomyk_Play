@@ -23,6 +23,7 @@ import com.atomykcoder.atomykplay.function.StorageUtil;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.regex.Pattern;
 
 public class AddLyricsFragment extends Fragment {
 
@@ -110,7 +111,8 @@ private StorageUtil storageUtil;
                         public void run() {
                             fetchLyrics.onPostExecute(progressBar);
                             Log.i("SONG", lyrics);
-                            editTextLyrics.setText(lyrics);
+                                String strippedLyrics = StripLyrics(lyrics);
+                            editTextLyrics.setText(strippedLyrics);
                         }
                     });
                 }
@@ -119,6 +121,15 @@ private StorageUtil storageUtil;
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private String StripLyrics(String lyrics) {
+//        String result = lyrics.replaceAll("", "");
+        Pattern p = Pattern.compile("\\[(.*?)\\]");
+        String result = lyrics.replaceAll(p.pattern(), "\n");
+        result = result.trim();
+        Log.i("STRIP", result);
+        return result;
     }
 
 
