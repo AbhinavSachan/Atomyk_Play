@@ -33,49 +33,38 @@ import java.util.regex.Pattern;
 
 public class AddLyricsFragment extends Fragment {
 
-    private String songName;
-    private EditText editTextLyrics;
-    private ProgressBar progressBar;
+    private  String songName;
+    private  EditText editTextLyrics;
+    private  ProgressBar progressBar;
     private String artistName;
     private EditText nameEditText, artistEditText;
-<<<<<<< Updated upstream
     public final Map<String, String> timestamps= new HashMap<>();
     public final ArrayList<String> lyrics = new ArrayList<>();
 
     private StorageUtil storageUtil;
-=======
     private Button saveBtn, btnFind;
-    private StorageUtil storageUtil;
+    private Dialog dialog;
     private Button btnCancel, btnOk;
 
-    public static void setLyrics(String lyrics) {
+    public void setLyrics(String lyrics) {
         if (!lyrics.equals("") && lyrics.contains(songName)) {
             progressBar.setVisibility(View.GONE);
-            lyricsEditText.setText(lyrics);
+            editTextLyrics.setText(lyrics);
         }else {
             progressBar.setVisibility(View.GONE);
             showToast("Lyrics not found");
         }
     }
 
->>>>>>> Stashed changes
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_add_lyrics, container, false);
 
-<<<<<<< Updated upstream
-        nameEditText = view.findViewById(R.id.edit_song_name);
-        artistEditText = view.findViewById(R.id.edit_artist_name);
         editTextLyrics = view.findViewById(R.id.edit_lyrics);
-        Button saveBtn = view.findViewById(R.id.btn_save);
-        Button btnFind = view.findViewById(R.id.btn_find);
-=======
-        lyricsEditText = view.findViewById(R.id.edit_lyrics);
         saveBtn = view.findViewById(R.id.btn_save);
         btnFind = view.findViewById(R.id.btn_find);
->>>>>>> Stashed changes
         progressBar = view.findViewById(R.id.progress_lyrics);
         storageUtil = new StorageUtil(getContext());
 
@@ -85,16 +74,13 @@ public class AddLyricsFragment extends Fragment {
         saveBtn.setOnClickListener(v -> showToast("saved☻"));
         btnFind.setOnClickListener(v -> invalidateEntry());
 
-<<<<<<< Updated upstream
-=======
         btnFind.setOnClickListener(v -> {
             setDialogBox();
         });
->>>>>>> Stashed changes
 
         return view;
     }
-private Dialog dialog;
+
     private void setDialogBox() {
         dialog = new Dialog(getContext());
 
@@ -153,11 +139,9 @@ private Dialog dialog;
         } else if (songName.equals("")) {
             nameEditText.setError("Required");
         } else {
-<<<<<<< Updated upstream
-=======
+
             dialog.cancel();
             progressBar.setVisibility(View.VISIBLE);
->>>>>>> Stashed changes
             fetchLyrics();
         }
 
@@ -167,13 +151,10 @@ private Dialog dialog;
         //show lyrics in bottom sheet
         artistName = artistEditText.getText().toString().toLowerCase().trim();
         songName = nameEditText.getText().toString().toLowerCase().trim();
-<<<<<<< Updated upstream
         showToast("lyrics");
         timestamps.clear();
-=======
 
         showToast("fetching");
->>>>>>> Stashed changes
         FetchLyrics fetchLyrics = new FetchLyrics();
         try {
             ExecutorService service = Executors.newSingleThreadExecutor();

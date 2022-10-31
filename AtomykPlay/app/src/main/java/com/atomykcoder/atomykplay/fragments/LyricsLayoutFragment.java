@@ -50,7 +50,7 @@ public class LyricsLayoutFragment extends Fragment {
 
         button.setOnClickListener(v -> {
             MainActivity mainActivity = (MainActivity) getContext();
-            mainActivity.bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+            mainActivity.mainPlayerSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
 
             AddLyricsFragment addLyricsFragment = new AddLyricsFragment();
             FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();

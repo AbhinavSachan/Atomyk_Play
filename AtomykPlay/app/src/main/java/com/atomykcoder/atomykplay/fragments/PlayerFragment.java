@@ -86,8 +86,6 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     private StorageUtil storageUtil;
     private ItemTouchHelper itemTouchHelper;
     private RecyclerView recyclerView;
-<<<<<<< Updated upstream
-    private View relativeLayout;
     private LyricsLayoutFragment lyricsLayoutFragment;
 
     public static void setMiniLayout() {
@@ -122,9 +120,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         }
 
     }
-=======
     private MainActivity mainActivity;
->>>>>>> Stashed changes
 
     public static void setMainPlayerLayout() {
 
@@ -216,8 +212,6 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
 
     public static int getCurrentPos() {
         return seekBarMain.getProgress();
-
-
     }
 
     @Override
@@ -351,11 +345,6 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     }
 
     private void openLyricsPanel() {
-<<<<<<< Updated upstream
-=======
-        mainActivity.mainPlayerSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
->>>>>>> Stashed changes
-
         cardView.setVisibility(View.GONE);
         FragmentManager manager = requireActivity().getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();

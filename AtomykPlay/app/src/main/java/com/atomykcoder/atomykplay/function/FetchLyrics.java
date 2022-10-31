@@ -2,6 +2,9 @@ package com.atomykcoder.atomykplay.function;
 
 import android.view.View;
 import android.widget.ProgressBar;
+
+import com.atomykcoder.atomykplay.fragments.AddLyricsFragment;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -40,14 +43,8 @@ public class FetchLyrics {
             return "";
     }
 
-<<<<<<< Updated upstream
     public void onPostExecute(ProgressBar progressBar) {
         progressBar.setVisibility(View.GONE);
-=======
-    @Override
-    protected void onPostExecute(String lyrics) {
-        AddLyricsFragment.setLyrics(lyrics);
->>>>>>> Stashed changes
     }
 }
 

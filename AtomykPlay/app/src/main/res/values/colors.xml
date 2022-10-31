@@ -21,11 +21,8 @@
     <color name="seekbar_shadow_start">#44000000</color>
     <color name="red">#CF2121</color>
     <color name="for_empty_images">#DDB0DDAB</color>
-<<<<<<< Updated upstream
     <color name="blue">#1C8DCA</color>
-=======
     <color name="hint_color">#494949</color>
->>>>>>> Stashed changes
 
 
 </resources>
