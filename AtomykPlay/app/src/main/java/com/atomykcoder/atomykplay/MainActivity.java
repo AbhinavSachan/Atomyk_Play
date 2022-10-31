@@ -84,71 +84,9 @@ public class MainActivity extends AppCompatActivity {
             media_player_service = null;
         }
     };
-    public View bottom_sheet;
+    public View player_bottom_sheet;
     public boolean phone_ringing = false;
-    public CustomBottomSheet<View> bottomSheetBehavior;
-    private ArrayList<MusicDataCapsule> dataList;
-    private MusicMainAdapter adapter;
-    private LinearLayout linearLayout;
-    private RecyclerView recyclerView;
-    private SearchResultsFragment searchResultsFragment; // This being here is very important for search method to work
-    private AudioManager audioManager;
-    private TelephonyManager telephonyManager;
-    private PhoneStateListener phoneStateListener;
-    private CoordinatorLayout main_layout;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        //initializations
-        linearLayout = findViewById(R.id.song_not_found_layout);
-        recyclerView = findViewById(R.id.music_recycler);
-        bottom_sheet = findViewById(R.id.player_main_container);
-        bottomSheetBehavior = (CustomBottomSheet<View>) BottomSheetBehavior.from(bottom_sheet);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        main_layout = findViewById(R.id.main_layout);
-
-        main_layout.setNestedScrollingEnabled(false);
-
-        searchResultsFragment = new SearchResultsFragment();
-
-        setSupportActionBar(toolbar);
-        toolbar.setTitle(R.string.app_name);
-
-        dataList = new ArrayList<>();
-        DragScrollBar scrollBar = findViewById(R.id.dragScrollBar);
-
-        recyclerView.setNestedScrollingEnabled(false);
-        recyclerView.setHasFixedSize(true);
-
-
-        LinearLayoutManager manager = new LinearLayoutManager(MainActivity.this, LinearLayoutManager.VERTICAL, false);
-        manager.setSmoothScrollbarEnabled(true);
-        recyclerView.setLayoutManager(manager);
-
-        scrollBar.setIndicator(new AlphabetIndicator(MainActivity.this), false);
-
-        //Checking permissions before activity creation (method somewhere down in the script)
-        checkPermission();
-        callStateListener();
-        setFragmentInSlider();
-
-        audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
-
-        bottom_sheet.setClickable(true);
-//        bottom_sheet.setNestedScrollingEnabled(true);
-        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-        bottomSheetBehavior.setPeekHeight(136);
-        bottomSheetBehavior.addBottomSheetCallback(callback);
-
-
-        // Fetch Google lol
-
-
-    }
-
+    public CustomBottomSheet<View> mainPlayerSheetBehavior;
     public BottomSheetBehavior.BottomSheetCallback callback = new BottomSheetBehavior.BottomSheetCallback() {
         @Override
         public void onStateChanged(@NonNull View bottomSheet, int newState) {
@@ -189,6 +127,70 @@ public class MainActivity extends AppCompatActivity {
             mainPlayer.setAlpha(0 + slideOffset * 3);
         }
     };
+    private ArrayList<MusicDataCapsule> dataList;
+    private MusicMainAdapter adapter;
+    private LinearLayout linearLayout;
+    private RecyclerView recyclerView;
+    private PlayerFragment playerFragment;
+    private SearchResultsFragment searchResultsFragment; // This being here is very important for search method to work
+    private AudioManager audioManager;
+    private TelephonyManager telephonyManager;
+    private PhoneStateListener phoneStateListener;
+    private Context context;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        //initializations
+        context = MainActivity.this;
+        linearLayout = findViewById(R.id.song_not_found_layout);
+        recyclerView = findViewById(R.id.music_recycler);
+        player_bottom_sheet = findViewById(R.id.player_main_container);
+        mainPlayerSheetBehavior = (CustomBottomSheet<View>) BottomSheetBehavior.from(player_bottom_sheet);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        CoordinatorLayout main_layout = findViewById(R.id.main_layout);
+
+        main_layout.setNestedScrollingEnabled(false);
+
+        searchResultsFragment = new SearchResultsFragment();
+        playerFragment = new PlayerFragment();
+
+        setSupportActionBar(toolbar);
+        toolbar.setTitle(R.string.app_name);
+
+        dataList = new ArrayList<>();
+        DragScrollBar scrollBar = findViewById(R.id.dragScrollBar);
+
+        recyclerView.setNestedScrollingEnabled(false);
+        recyclerView.setHasFixedSize(true);
+
+
+        LinearLayoutManager manager = new LinearLayoutManager(MainActivity.this, LinearLayoutManager.VERTICAL, false);
+        manager.setSmoothScrollbarEnabled(true);
+        recyclerView.setLayoutManager(manager);
+
+        scrollBar.setIndicator(new AlphabetIndicator(MainActivity.this), false);
+
+        //Checking permissions before activity creation (method somewhere down in the script)
+        checkPermission();
+        callStateListener();
+        setFragmentInSlider();
+
+        audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+
+        player_bottom_sheet.setClickable(true);
+//        bottom_sheet.setNestedScrollingEnabled(true);
+        mainPlayerSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        mainPlayerSheetBehavior.setPeekHeight(136);
+        mainPlayerSheetBehavior.addBottomSheetCallback(callback);
+
+
+        // Fetch Google lol
+
+
+    }
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
@@ -248,6 +250,16 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void startService() {
+        if (!phone_ringing) {
+            Intent playerIntent = new Intent(context, MediaPlayerService.class);
+            context.bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
+            context.startService(playerIntent);
+        } else {
+            Toast.makeText(this, "Can't play while on call.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     public void playAudio() {
         //starting the service when permissions are granted
         //starting service if its not started yet otherwise it will send broadcast msg to service
@@ -256,9 +268,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (!phone_ringing) {
             if (!service_bound) {
-                Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
-                bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
-                startService(playerIntent);
+                startService();
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -277,11 +287,80 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void pausePlayAudio() {
+        if (!service_bound) {
+            startService();
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    //service is active send media with broadcast receiver
+                    Intent broadcastIntent = new Intent(BROADCAST_PAUSE_PLAY_MUSIC);
+                    context.sendBroadcast(broadcastIntent);
+                }
+            }, 0);
+        } else {
+            //service is active send media with broadcast receiver
+            Intent broadcastIntent = new Intent(BROADCAST_PAUSE_PLAY_MUSIC);
+            context.sendBroadcast(broadcastIntent);
+        }
+    }
+
+    public void playNextAudio() {
+        if (!service_bound) {
+            startService();
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    //service is active send media with broadcast receiver
+                    Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEXT_MUSIC);
+                    context.sendBroadcast(broadcastIntent);
+                }
+            }, 0);
+        } else {
+            //service is active send media with broadcast receiver
+            Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEXT_MUSIC);
+            context.sendBroadcast(broadcastIntent);
+        }
+    }
+
+    public void playPreviousAudio() {
+        if (!service_bound) {
+            startService();
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    //service is active send media with broadcast receiver
+                    Intent broadcastIntent = new Intent(BROADCAST_PLAY_PREVIOUS_MUSIC);
+                    context.sendBroadcast(broadcastIntent);
+                }
+            }, 0);
+
+        } else {
+            //service is active send media with broadcast receiver
+            Intent broadcastIntent = new Intent(BROADCAST_PLAY_PREVIOUS_MUSIC);
+            context.sendBroadcast(broadcastIntent);
+        }
+    }
+
+//    public void stopMusic() {
+//        if (!service_bound) {
+//            startService();
+//            new Handler().postDelayed(() -> {
+//                //service is active send media with broadcast receiver
+//                Intent broadcastIntent = new Intent(BROADCAST_STOP_MUSIC);
+//                sendBroadcast(broadcastIntent);
+//            }, 20);
+//        } else {
+//            //service is active send media with broadcast receiver
+//            Intent broadcastIntent = new Intent(BROADCAST_STOP_MUSIC);
+//            sendBroadcast(broadcastIntent);
+//        }
+//    }
+
     private void setFragmentInSlider() {
-        PlayerFragment fragment = new PlayerFragment();
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
-        transaction.replace(R.id.player_main_container, fragment);
+        transaction.replace(R.id.player_main_container, playerFragment);
         transaction.commit();
     }
 
@@ -350,14 +429,14 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
+        if (mainPlayerSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
             super.onBackPressed();
 
         } else {
             if (PlayerFragment.queueSheetBehaviour.getState() == BottomSheetBehavior.STATE_EXPANDED) {
                 PlayerFragment.queueSheetBehaviour.setState(BottomSheetBehavior.STATE_HIDDEN);
             } else {
-                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                mainPlayerSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
             }
         }
     }

@@ -5,4 +5,5 @@
     <dimen name="d_24sp">24sp</dimen>
     <dimen name="d_28sp">28sp</dimen>
     <dimen name="d_12sp">12sp</dimen>
+    <dimen name="d_20sp">20sp</dimen>
 </resources>

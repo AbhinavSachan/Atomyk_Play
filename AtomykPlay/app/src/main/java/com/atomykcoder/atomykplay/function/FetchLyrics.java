@@ -40,8 +40,14 @@ public class FetchLyrics {
             return "";
     }
 
+<<<<<<< Updated upstream
     public void onPostExecute(ProgressBar progressBar) {
         progressBar.setVisibility(View.GONE);
+=======
+    @Override
+    protected void onPostExecute(String lyrics) {
+        AddLyricsFragment.setLyrics(lyrics);
+>>>>>>> Stashed changes
     }
 }
 

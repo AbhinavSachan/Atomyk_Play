@@ -6,74 +6,100 @@
     android:layout_height="match_parent"
     android:background="@color/primary_bg"
     android:clickable="true"
-    tools:context=".fragments.AddLyricsFragment"
-    android:focusable="true">
+    android:focusable="true"
+    android:paddingHorizontal="16dp"
+    android:paddingTop="100dp"
+    android:paddingBottom="16dp"
+    tools:context=".fragments.AddLyricsFragment">
 
-
-    <EditText
-        android:id="@+id/edit_lyrics"
+    <ScrollView
+        android:id="@+id/scrollView3"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="10dp"
-        android:layout_marginStart="9dp"
-        android:layout_marginEnd="9dp"
-        android:gravity="top"
-        android:hint="@string/lyrics"
-        android:lines="15"
-        android:textAlignment="gravity"
+        android:layout_height="0dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+<<<<<<< Updated upstream
         app:layout_constraintTop_toBottomOf="@+id/edit_artist_name"
         android:focusable="false"
         />
+=======
+        app:layout_constraintTop_toTopOf="parent">
+>>>>>>> Stashed changes
 
-    <EditText
-        android:id="@+id/edit_artist_name"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:layout_marginStart="9dp"
-        android:layout_marginEnd="9dp"
-        android:hint="@string/song_artist_e"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/edit_song_name" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-    <EditText
-        android:id="@+id/edit_song_name"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="10dp"
-        android:layout_marginStart="9dp"
-        android:layout_marginEnd="9dp"
-        android:layout_marginTop="84dp"
-        android:hint="@string/song_name_e"
-        app:layout_constraintBottom_toTopOf="@+id/edit_artist_name"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+            <TextView
+                android:id="@+id/song_name_tv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="2dp"
+                android:text="@string/song_name_e"
+                android:textColor="@color/text_color"
+                android:textSize="@dimen/d_24sp"
+                android:textStyle="bold" />
 
-    <Button
-        android:id="@+id/btn_save"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
-        android:backgroundTint="@color/tertiary_bg"
-        android:text="@string/save"
-        app:layout_constraintEnd_toStartOf="@+id/btn_find"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/edit_lyrics" />
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/edit_lyrics_layout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="2dp"
+                app:boxBackgroundColor="@color/secondary_bg"
+                app:placeholderTextColor="@color/hint_color"
+                app:boxCornerRadiusBottomEnd="8dp"
+                app:boxCornerRadiusBottomStart="8dp"
+                app:boxCornerRadiusTopEnd="8dp"
+                app:boxCornerRadiusTopStart="8dp">
 
-    <Button
-        android:id="@+id/btn_find"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
-        android:backgroundTint="@color/tertiary_bg"
-        android:text="@string/find"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/btn_save"
-        app:layout_constraintTop_toBottomOf="@+id/edit_lyrics" />
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/edit_lyrics"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="top"
+                    android:lines="15"
+                    android:hint="@string/your_lyrics"
+                    android:imeOptions="normal"
+                    android:textAlignment="gravity"
+                    android:textColor="@color/text_color"
+                    android:textColorHint="@color/sub_text_grey" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="2dp"
+                android:gravity="center"
+                android:weightSum="2">
+
+                <Button
+                    android:id="@+id/btn_save"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_weight="1"
+                    android:backgroundTint="@color/tertiary_bg"
+                    android:text="@string/save"
+                    android:textColor="@color/text_color_light" />
+
+                <Button
+                    android:id="@+id/btn_find"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_weight="1"
+                    android:backgroundTint="@color/tertiary_bg"
+                    android:text="@string/find"
+                    android:textColor="@color/text_color_light" />
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
 
     <ProgressBar
         android:id="@+id/progress_lyrics"

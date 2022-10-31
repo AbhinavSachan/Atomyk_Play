@@ -5,6 +5,7 @@
     <color name="primary_bg">#1B1919</color>
     <color name="icons_bg">#E8E8E8</color>
     <color name="text_color">#E8E8E8</color>
+    <color name="text_color_light">#303030</color>
     <color name="space_black">#D3E1E1</color>
     <color name="sub_text_grey">#D8CBCB</color>
     <color name="sub_text_grey_light">#474747</color>

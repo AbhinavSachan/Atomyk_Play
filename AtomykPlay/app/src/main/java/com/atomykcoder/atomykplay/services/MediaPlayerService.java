@@ -106,8 +106,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         @Override
         public void onReceive(Context context, Intent intent) {
             //get the new media index from SP
-
-            //load data from SharedPref
+//load data from SharedPref
             StorageUtil storage = new StorageUtil(getApplicationContext());
             musicList = storage.loadMusicList();
             musicIndex = storage.loadMusicIndex();
@@ -118,7 +117,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 } else {
                     stopSelf();
                 }
-
 
             if (mediaSessionManager == null) {
                 try {
@@ -131,14 +129,14 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
             stopMedia();
             initiateMediaPlayer();
-            updateMetaData();
         }
     };
     private final BroadcastReceiver nextMusicReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             //get the new media index from SP
-            //load data from SharedPref
+
+//load data from SharedPref
             StorageUtil storage = new StorageUtil(getApplicationContext());
             musicList = storage.loadMusicList();
             musicIndex = storage.loadMusicIndex();
@@ -157,52 +155,15 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                     stopSelf();
                 }
             }
-
             skipToNext();
-            updateMetaData();
 
         }
     };
     private final BroadcastReceiver prevMusicReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            try {
-                //load data from SharedPref
-                StorageUtil storage = new StorageUtil(getApplicationContext());
-                musicList = storage.loadMusicList();
-                musicIndex = storage.loadMusicIndex();
-
-                if (musicList != null)
-                    if (musicIndex != -1 && musicIndex < musicList.size()) {
-                        activeMusic = musicList.get(musicIndex);
-                    } else {
-                        stopSelf();
-                    }
-
-            } catch (NullPointerException e) {
-                stopSelf();
-            }
-
-            if (mediaSessionManager == null) {
-                try {
-                    initiateMediaSession();
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                    stopSelf();
-                }
-            }
-
-            skipToPrevious();
-            updateMetaData();
-
-        }
-    };
-    private final BroadcastReceiver pausePlayMusicReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
+//load data from SharedPref
             StorageUtil storage = new StorageUtil(getApplicationContext());
-
-            //load data from SharedPref
             musicList = storage.loadMusicList();
             musicIndex = storage.loadMusicIndex();
 
@@ -213,9 +174,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                     stopSelf();
                 }
 
-
             if (mediaSessionManager == null) {
-
                 try {
                     initiateMediaSession();
                 } catch (RemoteException e) {
@@ -223,6 +182,25 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                     stopSelf();
                 }
             }
+            skipToPrevious();
+
+        }
+    };
+    private final BroadcastReceiver pausePlayMusicReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+//load data from SharedPref
+            StorageUtil storage = new StorageUtil(getApplicationContext());
+            musicList = storage.loadMusicList();
+            musicIndex = storage.loadMusicIndex();
+
+            if (musicList != null)
+                if (musicIndex != -1 && musicIndex < musicList.size()) {
+                    activeMusic = musicList.get(musicIndex);
+                } else {
+                    stopSelf();
+                }
 
             if (media_player == null) {
                 if (media_player_service == null) {
@@ -318,66 +296,38 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             play_pauseAction = playbackAction(0);
 
         }
-        Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.dj);
+        Bitmap largeIcon;
+        largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.dj);
 
         Notification notificationBuilder = null;
 
         //building notification for player
         if (musicList != null)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                notificationBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                        .setShowWhen(false).setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
-                                .setMediaSession(mediaSession.getSessionToken())
-                                .setShowActionsInCompactView(0, 1, 2))
-                        .setColor(getResources().getColor(R.color.primary_bg, getTheme()))
-                        .setColorized(true)
-                        .setLargeIcon(largeIcon)
-                        .setSmallIcon(R.drawable.ic_headset)
-                        //set content
-                        .setContentText(activeMusic.getsArtist())
-                        .setContentTitle(activeMusic.getsName())
-                        .setContentInfo(activeMusic.getsAlbum())
-                        .setDeleteIntent(playbackAction(4))
-                        .setChannelId(CHANNEL_ID)
-                        //set control
-                        .addAction(R.drawable.ic_previous_for_noti, "Previous", playbackAction(3))
-                        .addAction(notificationAction, "Pause", play_pauseAction)
-                        .addAction(R.drawable.ic_next_for_noti, "next", playbackAction(2))
-                        .addAction(R.drawable.ic_close, "stop", playbackAction(4))
-                        .setContentIntent(PendingIntent.getActivity(this, 0, new Intent(getApplicationContext(), MainActivity.class), PendingIntent.FLAG_IMMUTABLE))
-                        .setSilent(true)
-                        .setOngoing(true)
-                        .setPriority(NotificationCompat.PRIORITY_LOW)
-                        .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_DEFAULT)
-                        .build();
-            } else {
-                notificationBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                        .setShowWhen(false).setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
-                                .setMediaSession(mediaSession.getSessionToken())
-                                .setShowActionsInCompactView(0, 1, 2))
-                        .setColor(getResources().getColor(R.color.primary_bg))
-                        .setColorized(true)
-                        .setLargeIcon(largeIcon)
-                        .setSmallIcon(R.drawable.ic_headset)
-                        //set content
-                        .setContentText(activeMusic.getsArtist())
-                        .setContentTitle(activeMusic.getsName())
-                        .setContentInfo(activeMusic.getsAlbum())
-                        .setDeleteIntent(playbackAction(4))
-                        .setChannelId(CHANNEL_ID)
-                        //set control
-                        .addAction(R.drawable.ic_previous_for_noti, "Previous", playbackAction(3))
-                        .addAction(notificationAction, "Pause", play_pauseAction)
-                        .addAction(R.drawable.ic_next_for_noti, "next", playbackAction(2))
-                        .addAction(R.drawable.ic_close, "stop", playbackAction(4))
-                        .setContentIntent(PendingIntent.getActivity(this, 0, new Intent(getApplicationContext(), MainActivity.class), PendingIntent.FLAG_IMMUTABLE))
-                        .setSilent(true)
-                        .setOngoing(true)
-                        .setPriority(NotificationCompat.PRIORITY_LOW)
-                        .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_DEFAULT)
-                        .build();
-
-            }
+            notificationBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                    .setShowWhen(false).setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
+                            .setMediaSession(mediaSession.getSessionToken())
+                            .setShowActionsInCompactView(0, 1, 2))
+                    .setColor(getResources().getColor(R.color.primary_bg, getTheme()))
+                    .setColorized(true)
+                    .setLargeIcon(largeIcon)
+                    .setSmallIcon(R.drawable.ic_headset)
+                    //set content
+                    .setContentText(activeMusic.getsArtist())
+                    .setContentTitle(activeMusic.getsName())
+                    .setContentInfo(activeMusic.getsAlbum())
+                    .setDeleteIntent(playbackAction(4))
+                    .setChannelId(CHANNEL_ID)
+                    //set control
+                    .addAction(R.drawable.ic_previous_for_noti, "Previous", playbackAction(3))
+                    .addAction(notificationAction, "Pause", play_pauseAction)
+                    .addAction(R.drawable.ic_next_for_noti, "next", playbackAction(2))
+                    .addAction(R.drawable.ic_close, "stop", playbackAction(4))
+                    .setContentIntent(PendingIntent.getActivity(this, 0, new Intent(getApplicationContext(), MainActivity.class), PendingIntent.FLAG_IMMUTABLE))
+                    .setSilent(true)
+                    .setOngoing(true)
+                    .setPriority(NotificationCompat.PRIORITY_LOW)
+                    .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_DEFAULT)
+                    .build();
 
         if (media_player != null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -407,63 +357,37 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             play_pauseAction = playbackAction(0);
 
         }
-        Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.dj);
+        Bitmap largeIcon;
+        largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.dj);
 
         Notification notificationBuilder = null;
 
         //building notification for player
         if (musicList != null)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                notificationBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                        .setShowWhen(false).setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
-                                .setMediaSession(mediaSession.getSessionToken())
-                                .setShowActionsInCompactView(0, 1, 2))
-                        .setColor(getResources().getColor(R.color.primary_bg, getTheme()))
-                        .setColorized(true)
-                        .setLargeIcon(largeIcon)
-                        .setSmallIcon(R.drawable.ic_headset)
-                        //set content
-                        .setContentText(activeMusic.getsArtist())
-                        .setContentTitle(activeMusic.getsName())
-                        .setContentInfo(activeMusic.getsAlbum())
-                        .setDeleteIntent(playbackAction(4))
-                        .setChannelId(CHANNEL_ID)
-                        //set control
-                        .addAction(R.drawable.ic_previous_for_noti, "Previous", playbackAction(3))
-                        .addAction(notificationAction, "Pause", play_pauseAction)
-                        .addAction(R.drawable.ic_next_for_noti, "next", playbackAction(2))
-                        .addAction(R.drawable.ic_close, "stop", playbackAction(4))
-                        .setContentIntent(PendingIntent.getActivity(this, 0, new Intent(getApplicationContext(), MainActivity.class), PendingIntent.FLAG_IMMUTABLE))
-                        .setSilent(true)
-                        .setOngoing(false)
-                        .setPriority(NotificationCompat.PRIORITY_LOW)
-                        .build();
-            } else {
-                notificationBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                        .setShowWhen(false).setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
-                                .setMediaSession(mediaSession.getSessionToken())
-                                .setShowActionsInCompactView(0, 1, 2))
-                        .setColor(getResources().getColor(R.color.primary_bg))
-                        .setColorized(true)
-                        .setLargeIcon(largeIcon)
-                        .setSmallIcon(R.drawable.ic_headset)
-                        //set content
-                        .setContentText(activeMusic.getsArtist())
-                        .setContentTitle(activeMusic.getsName())
-                        .setContentInfo(activeMusic.getsAlbum())
-                        .setDeleteIntent(playbackAction(4))
-                        .setChannelId(CHANNEL_ID)
-                        //set control
-                        .addAction(R.drawable.ic_previous_for_noti, "Previous", playbackAction(3))
-                        .addAction(notificationAction, "Pause", play_pauseAction)
-                        .addAction(R.drawable.ic_next_for_noti, "next", playbackAction(2))
-                        .addAction(R.drawable.ic_close, "stop", playbackAction(4))
-                        .setContentIntent(PendingIntent.getActivity(this, 0, new Intent(getApplicationContext(), MainActivity.class), PendingIntent.FLAG_IMMUTABLE))
-                        .setSilent(true)
-                        .setOngoing(false)
-                        .setPriority(NotificationCompat.PRIORITY_LOW)
-                        .build();
-            }
+            notificationBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                    .setShowWhen(false).setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
+                            .setMediaSession(mediaSession.getSessionToken())
+                            .setShowActionsInCompactView(0, 1, 2))
+                    .setColor(getResources().getColor(R.color.primary_bg, getTheme()))
+                    .setColorized(true)
+                    .setLargeIcon(largeIcon)
+                    .setSmallIcon(R.drawable.ic_headset)
+                    //set content
+                    .setContentText(activeMusic.getsArtist())
+                    .setContentTitle(activeMusic.getsName())
+                    .setContentInfo(activeMusic.getsAlbum())
+                    .setDeleteIntent(playbackAction(4))
+                    .setChannelId(CHANNEL_ID)
+                    //set control
+                    .addAction(R.drawable.ic_previous_for_noti, "Previous", playbackAction(3))
+                    .addAction(notificationAction, "Pause", play_pauseAction)
+                    .addAction(R.drawable.ic_next_for_noti, "next", playbackAction(2))
+                    .addAction(R.drawable.ic_close, "stop", playbackAction(4))
+                    .setContentIntent(PendingIntent.getActivity(this, 0, new Intent(getApplicationContext(), MainActivity.class), PendingIntent.FLAG_IMMUTABLE))
+                    .setSilent(true)
+                    .setOngoing(false)
+                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                    .build();
 
         if (media_player != null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -476,11 +400,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             }
         }
 
-
         if (notificationBuilder != null) {
-            NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-            manager.notify(NOTIFICATION_ID, notificationBuilder);
-
+            ((NotificationManager)getSystemService(NOTIFICATION_SERVICE)).notify(NOTIFICATION_ID,notificationBuilder);
         }
     }
 
@@ -533,7 +454,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 if (!service_bound) {
                     Intent playerIntent = new Intent(getApplicationContext(), MediaPlayerService.class);
                     startService(playerIntent);
-                    bindService(playerIntent, service_connection, Context.BIND_IMPORTANT);
+                    bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
                     new Handler().postDelayed(() -> {
                         //service is active send media with broadcast receiver
                         Intent broadcastIntent = new Intent(BROADCAST_PAUSE_PLAY_MUSIC);
@@ -552,7 +473,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 if (!service_bound) {
                     Intent playerIntent = new Intent(getApplicationContext(), MediaPlayerService.class);
                     startService(playerIntent);
-                    bindService(playerIntent, service_connection, Context.BIND_IMPORTANT);
+                    bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
                     new Handler().postDelayed(() -> {
                         //service is active send media with broadcast receiver
                         Intent broadcastIntent = new Intent(BROADCAST_PAUSE_PLAY_MUSIC);
@@ -571,7 +492,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 if (!service_bound) {
                     Intent playerIntent = new Intent(getApplicationContext(), MediaPlayerService.class);
                     startService(playerIntent);
-                    bindService(playerIntent, service_connection, Context.BIND_IMPORTANT);
+                    bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
                     new Handler().postDelayed(() -> {
                         //service is active send media with broadcast receiver
                         Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEXT_MUSIC);
@@ -590,7 +511,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 if (!service_bound) {
                     Intent playerIntent = new Intent(getApplicationContext(), MediaPlayerService.class);
                     startService(playerIntent);
-                    bindService(playerIntent, service_connection, Context.BIND_IMPORTANT);
+                    bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
                     new Handler().postDelayed(() -> {
                         //service is active send media with broadcast receiver
                         Intent broadcastIntent = new Intent(BROADCAST_PLAY_PREVIOUS_MUSIC);
@@ -609,7 +530,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 if (!service_bound) {
                     Intent playerIntent = new Intent(getApplicationContext(), MediaPlayerService.class);
                     startService(playerIntent);
-                    bindService(playerIntent, service_connection, Context.BIND_IMPORTANT);
+                    bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
                     new Handler().postDelayed(() -> {
                         //service is active send media with broadcast receiver
                         Intent broadcastIntent = new Intent(BROADCAST_STOP_MUSIC);
@@ -697,8 +618,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     public void onPrepared(MediaPlayer mp) {
         resumeMedia();
         if (service_bound) {
-            PlayerFragment.setMiniLayout();
             PlayerFragment.setMainPlayerLayout();
+            updateMetaData();
             setSeekBar();
         }
     }
@@ -788,11 +709,12 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         try {
             if (activeMusic != null) {
                 media_player.setDataSource(activeMusic.getsPath());
-                media_player.prepareAsync();
+                media_player.prepare();
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+
 
     }
 
@@ -837,6 +759,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     public void pauseMedia() {
         if (media_player != null) {
             if (media_player.isPlaying()) {
+                handler.removeCallbacks(runnable);
+
                 new StorageUtil(getApplicationContext()).saveMusicLastPos(media_player.getCurrentPosition());
                 media_player.pause();
                 setIcon(PlaybackStatus.PAUSED);
@@ -969,8 +893,11 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                                 if (media_player != null) {
                                     if (media_player.isPlaying()) {
                                         pauseMedia();
+                                        handler.removeCallbacks(runnable);
                                     } else {
                                         resumeMedia();
+                                        setSeekBar();
+
                                     }
                                 }
                                 return true;
@@ -1003,14 +930,13 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             public void onSkipToNext() {
                 super.onSkipToNext();
                 skipToNext();
-                updateMetaData();
+
             }
 
             @Override
             public void onSkipToPrevious() {
                 super.onSkipToPrevious();
                 skipToPrevious();
-                updateMetaData();
             }
 
             @Override
@@ -1079,9 +1005,9 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
         //Handle Intent action from MediaSession.TransportControls
         handleIncomingActions(intent);
+
         return START_STICKY;
     }
 

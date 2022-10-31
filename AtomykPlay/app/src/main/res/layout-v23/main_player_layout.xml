@@ -27,15 +27,15 @@
             android:padding="12dp"
             android:src="@drawable/ic_more_horizontal"
             android:theme="@android:style/ThemeOverlay.Material.Dark"
-            app:layout_constraintBottom_toTopOf="@+id/deltaRelative"
+            app:layout_constraintBottom_toTopOf="@+id/coverRelativeLayout"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
 
         <RelativeLayout
-            android:id="@+id/deltaRelative"
+            android:id="@+id/coverRelativeLayout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="350dp"
             android:layout_marginTop="30dp"
             android:clipToPadding="false"
             android:gravity="center_horizontal"
@@ -45,6 +45,7 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="320dp"
                 android:layout_height="320dp"
+                android:id="@+id/card_view_for_cover"
                 app:cardBackgroundColor="@color/secondary_bg"
                 app:cardCornerRadius="25dp"
                 app:cardElevation="8dp">
@@ -65,11 +66,11 @@
             android:id="@+id/linearLayoutNameAndList"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/deltaRelative"
+            android:layout_below="@+id/coverRelativeLayout"
             android:layout_marginTop="4dp"
             android:orientation="horizontal"
             android:weightSum="16"
-            app:layout_constraintTop_toBottomOf="@+id/deltaRelative">
+            app:layout_constraintTop_toBottomOf="@+id/coverRelativeLayout">
 
             <LinearLayout
                 android:layout_width="0dp"

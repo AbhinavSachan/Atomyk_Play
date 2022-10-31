@@ -1,11 +1,7 @@
 package com.atomykcoder.atomykplay.fragments;
 
-import static com.atomykcoder.atomykplay.MainActivity.BROADCAST_PAUSE_PLAY_MUSIC;
-import static com.atomykcoder.atomykplay.MainActivity.BROADCAST_PLAY_NEXT_MUSIC;
-import static com.atomykcoder.atomykplay.MainActivity.BROADCAST_PLAY_PREVIOUS_MUSIC;
 import static com.atomykcoder.atomykplay.MainActivity.media_player_service;
 import static com.atomykcoder.atomykplay.MainActivity.service_bound;
-import static com.atomykcoder.atomykplay.MainActivity.service_connection;
 import static com.atomykcoder.atomykplay.function.FetchMusic.convertDuration;
 import static com.atomykcoder.atomykplay.function.StorageUtil.favorite;
 import static com.atomykcoder.atomykplay.function.StorageUtil.no_favorite;
@@ -14,19 +10,16 @@ import static com.atomykcoder.atomykplay.function.StorageUtil.no_shuffle;
 import static com.atomykcoder.atomykplay.function.StorageUtil.repeat;
 import static com.atomykcoder.atomykplay.function.StorageUtil.repeat_one;
 import static com.atomykcoder.atomykplay.function.StorageUtil.shuffle;
-import static com.atomykcoder.atomykplay.services.MediaPlayerService.phone_ringing;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,13 +28,12 @@ import android.view.Window;
 import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -51,14 +43,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.MainActivity;
 import com.atomykcoder.atomykplay.R;
-import com.atomykcoder.atomykplay.function.FetchLyrics;
 import com.atomykcoder.atomykplay.function.MusicDataCapsule;
 import com.atomykcoder.atomykplay.function.MusicQueueAdapter;
 import com.atomykcoder.atomykplay.function.PlaybackStatus;
 import com.atomykcoder.atomykplay.function.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
 import com.atomykcoder.atomykplay.interfaces.SimpleTouchCallback;
-import com.atomykcoder.atomykplay.services.MediaPlayerService;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
@@ -70,8 +60,7 @@ import java.util.Collections;
 @SuppressLint("StaticFieldLeak")
 public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeListener, OnDragStartListener {
 
-    public static RelativeLayout mini_play_view;
-    public static View player_layout;
+    public static View mini_play_view;
     public static ImageView mini_cover, mini_pause, mini_next;
     public static LinearProgressIndicator mini_progress;
     public static TextView mini_name_text, mini_artist_text;
@@ -80,22 +69,26 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     public static ImageView playImg;
     public static TextView curPosTv, durationTv;
     public static CustomBottomSheet<View> queueSheetBehaviour;
-    public static View queueBottomSheet;
     private static Context context;
     //cover image view
     private static ImageView playerCoverImage;
-    private static ImageView repeatImg;
-    private static ImageView shuffleImg;
     private static ImageView favoriteImg;
-    private static ImageView timerImg;
     private static TextView playerSongNameTv, playerArtistNameTv, mimeTv, bitrateTv, timerTv;
     final private CountDownTimer[] countDownTimer = new CountDownTimer[1];
+    public View player_layout;
+    public View queueBottomSheet;
+    private ImageView repeatImg;
+    private ImageView shuffleImg;
+    private ImageView timerImg;
     //setting up mini player layout
     //calling it from service when player is prepared and also calling it in this fragment class
     //to set it on app start ☺
     private StorageUtil storageUtil;
     private ItemTouchHelper itemTouchHelper;
     private RecyclerView recyclerView;
+<<<<<<< Updated upstream
+    private View relativeLayout;
+    private LyricsLayoutFragment lyricsLayoutFragment;
 
     public static void setMiniLayout() {
 
@@ -129,6 +122,9 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         }
 
     }
+=======
+    private MainActivity mainActivity;
+>>>>>>> Stashed changes
 
     public static void setMainPlayerLayout() {
 
@@ -154,6 +150,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
             }
         }
 
+        //main layout setup
         try {
             if (activeMusic != null) {
                 Glide.with(context).load(getEmbeddedImage(activeMusic.getsPath())).apply(new RequestOptions().placeholder(R.drawable.ic_music_thumbnail))
@@ -169,6 +166,23 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
                     int bitrateInNum = Integer.parseInt(activeMusic.getsBitrate()) / 1000;
                     String finalBitrate = bitrateInNum + " KBPS";
                     bitrateTv.setText(finalBitrate);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        //mini layout setup
+        try {
+            if (activeMusic != null) {
+                Glide.with(context).load(getEmbeddedImage(activeMusic.getsPath())).apply(new RequestOptions().placeholder(R.drawable.ic_music))
+                        .override(75, 75)
+                        .into(mini_cover);
+                try {
+                    mini_name_text.setText(activeMusic.getsName());
+                    mini_artist_text.setText(activeMusic.getsArtist());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -196,82 +210,14 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         }
     }
 
-    public static void pausePlayAudio() {
-        if (!phone_ringing) {
-            if (!service_bound) {
-                Intent playerIntent = new Intent(context, MediaPlayerService.class);
-                context.startService(playerIntent);
-                context.bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        //service is active send media with broadcast receiver
-                        Intent broadcastIntent = new Intent(BROADCAST_PAUSE_PLAY_MUSIC);
-                        context.sendBroadcast(broadcastIntent);
-                    }
-                }, 0);
-            } else {
-                //service is active send media with broadcast receiver
-                Intent broadcastIntent = new Intent(BROADCAST_PAUSE_PLAY_MUSIC);
-                context.sendBroadcast(broadcastIntent);
-            }
-        } else {
-            Toast.makeText(context, "Can't play while on call", Toast.LENGTH_SHORT).show();
-        }
-
+    public static void showToast(String text) {
+        Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
     }
 
-    public static void playNextAudio() {
-        if (!phone_ringing) {
-            if (!service_bound) {
-                Intent playerIntent = new Intent(context, MediaPlayerService.class);
-                context.startService(playerIntent);
-                context.bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        //service is active send media with broadcast receiver
-                        Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEXT_MUSIC);
-                        context.sendBroadcast(broadcastIntent);
-                    }
-                }, 0);
-            } else {
-                //service is active send media with broadcast receiver
-                Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEXT_MUSIC);
-                context.sendBroadcast(broadcastIntent);
-            }
-        } else {
-            Toast.makeText(context, "Can't play while on call", Toast.LENGTH_SHORT).show();
-        }
-    }
+    public static int getCurrentPos() {
+        return seekBarMain.getProgress();
 
-    public static void playPreviousAudio() {
-        if (!phone_ringing) {
-            if (!service_bound) {
-                Intent playerIntent = new Intent(context, MediaPlayerService.class);
-                context.startService(playerIntent);
-                context.bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        //service is active send media with broadcast receiver
-                        Intent broadcastIntent = new Intent(BROADCAST_PLAY_PREVIOUS_MUSIC);
-                        context.sendBroadcast(broadcastIntent);
-                    }
-                }, 0);
 
-            } else {
-                //service is active send media with broadcast receiver
-                Intent broadcastIntent = new Intent(BROADCAST_PLAY_PREVIOUS_MUSIC);
-                context.sendBroadcast(broadcastIntent);
-            }
-        } else {
-            Toast.makeText(context, "Can't play while on call", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    public static void showToast(String option) {
-        Toast.makeText(context, option, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -287,6 +233,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
 
         //StorageUtil initialization
         storageUtil = new StorageUtil(getContext());
+        mainActivity = (MainActivity) context;
 
         //Mini player items initializations
         mini_play_view = view.findViewById(R.id.mini_player_layout);//○
@@ -319,20 +266,23 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         ImageView lyricsOpenLayout = view.findViewById(R.id.player_lyrics_ll);
         timerTv = view.findViewById(R.id.countdown_tv);
 
+        cardView = view.findViewById(R.id.card_view_for_cover);
+
         playerSongNameTv.setSelected(true);
         mini_name_text.setSelected(true);
 
+        lyricsLayoutFragment = new LyricsLayoutFragment();
         //click listeners on mini player
         //and sending broadcast on click
 
         //play pause
-        mini_pause.setOnClickListener(v -> pausePlayAudio());
+        mini_pause.setOnClickListener(v -> mainActivity.pausePlayAudio());
         //next on mini player
-        mini_next.setOnClickListener(v -> playNextAudio());
+        mini_next.setOnClickListener(v -> mainActivity.playNextAudio());
         //main player events
-        previousImg.setOnClickListener(v -> playPreviousAudio());
-        nextImg.setOnClickListener(v -> playNextAudio());
-        playImg.setOnClickListener(v -> pausePlayAudio());
+        previousImg.setOnClickListener(v -> mainActivity.playPreviousAudio());
+        nextImg.setOnClickListener(v -> mainActivity.playNextAudio());
+        playImg.setOnClickListener(v -> mainActivity.pausePlayAudio());
         queImg.setOnClickListener(v -> openQue());
         repeatImg.setOnClickListener(v -> repeatFun());
         shuffleImg.setOnClickListener(v -> shuffleList());
@@ -353,8 +303,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         seekBarMain.setOnSeekBarChangeListener(this);
 
         mini_play_view.setOnClickListener(v -> {
-            MainActivity mainActivity = (MainActivity) context;
-            BottomSheetBehavior<View> sheet = mainActivity.bottomSheetBehavior;
+            BottomSheetBehavior<View> sheet = mainActivity.mainPlayerSheetBehavior;
             if (sheet.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
                 sheet.setState(BottomSheetBehavior.STATE_EXPANDED);
             } else {
@@ -378,7 +327,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         queueSheetBehaviour.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
-                ((MainActivity) context).bottomSheetBehavior.isEnableCollapse(newState == BottomSheetBehavior.STATE_EXPANDED || newState == BottomSheetBehavior.STATE_DRAGGING);
+                ((MainActivity) context).mainPlayerSheetBehavior.isEnableCollapse(newState == BottomSheetBehavior.STATE_EXPANDED || newState == BottomSheetBehavior.STATE_DRAGGING);
             }
 
             @Override
@@ -402,17 +351,21 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     }
 
     private void openLyricsPanel() {
-        MainActivity mainActivity = (MainActivity) context;
-        mainActivity.bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+<<<<<<< Updated upstream
+=======
+        mainActivity.mainPlayerSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+>>>>>>> Stashed changes
 
-        AddLyricsFragment addLyricsFragment = new AddLyricsFragment();
+        cardView.setVisibility(View.GONE);
         FragmentManager manager = requireActivity().getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
-        transaction.replace(R.id.sec_container, addLyricsFragment);
-        transaction.addToBackStack(addLyricsFragment.toString());
+        transaction.replace(R.id.coverRelativeLayout, lyricsLayoutFragment);
+        transaction.addToBackStack(lyricsLayoutFragment.toString());
         transaction.commit();
+
     }
 
+    private CardView cardView;
     private void optionMenu() {
         //add a bottom sheet to show music options like set to ringtone ,audio details ,add to playlist etc.
         showToast("option");
@@ -625,8 +578,6 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     public void onStart() {
         super.onStart();
         setPreviousData();
-        setMiniLayout();
-        setMainPlayerLayout();
 
         //setting all buttons state from storage on startup
         //for repeat button
@@ -676,10 +627,10 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
                 favoriteImg.setImageResource(R.drawable.ic_favorite);
             }
         }
-        if (((MainActivity) context).bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+        if (mainActivity.mainPlayerSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
             mini_play_view.setAlpha(0);
             mini_play_view.setVisibility(View.INVISIBLE);
-        } else if (((MainActivity) context).bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
+        } else if (mainActivity.mainPlayerSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
             player_layout.setAlpha(0);
             player_layout.setVisibility(View.INVISIBLE);
         }
@@ -737,6 +688,8 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     public void setPreviousData() {
         MusicDataCapsule activeMusic = getMusic();
 
+        setMainPlayerLayout();
+
         if (activeMusic != null) {
             seekBarMain.setMax(Integer.parseInt(activeMusic.getsLength()));
             mini_progress.setMax(Integer.parseInt(activeMusic.getsLength()));
@@ -762,24 +715,5 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     @Override
     public void onDragStart(RecyclerView.ViewHolder viewHolder) {
         itemTouchHelper.startDrag(viewHolder);
-    }
-
-    public static int getCurrentPos() {
-        int progress = seekBarMain.getProgress();
-        return progress;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     }
 }

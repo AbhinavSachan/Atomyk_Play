@@ -11,6 +11,7 @@
     <string name="bitrate">FREQ</string>
     <string name="big_dot">•</string>
     <string name="lyrics">Lyrics</string>
+    <string name="your_lyrics">Paste Here Your Lyrics …</string>
     <string name="imageView">"Music cover image"</string>
     <string name="start_pos">00:00</string>
     <string name="song">Song</string>
@@ -24,4 +25,11 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="save">Save</string>
     <string name="find">Find</string>
+<<<<<<< Updated upstream
+    <string name="no_lyrics_found">No Lyrics Found</string>
+    <string name="add_lyrics">Add Lyrics</string>
+=======
+    <string name="cancel">Cancel</string>
+    <string name="ok">Ok</string>
+>>>>>>> Stashed changes
 </resources>
