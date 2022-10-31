@@ -2,10 +2,6 @@ package com.atomykcoder.atomykplay.function;
 
 import android.view.View;
 import android.widget.ProgressBar;
-
-import com.atomykcoder.atomykplay.fragments.AddLyricsFragment;
-import com.atomykcoder.atomykplay.fragments.PlayerFragment;
-
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;

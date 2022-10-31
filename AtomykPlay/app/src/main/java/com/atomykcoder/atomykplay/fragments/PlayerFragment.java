@@ -35,6 +35,7 @@ import android.view.Window;
 import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -761,5 +762,24 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     @Override
     public void onDragStart(RecyclerView.ViewHolder viewHolder) {
         itemTouchHelper.startDrag(viewHolder);
+    }
+
+    public static int getCurrentPos() {
+        int progress = seekBarMain.getProgress();
+        return progress;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     }
 }

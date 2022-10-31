@@ -14,15 +14,17 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 
 import androidx.fragment.app.Fragment;
-
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.function.FetchLyrics;
+import com.atomykcoder.atomykplay.function.FetchMusic;
 import com.atomykcoder.atomykplay.function.MusicDataCapsule;
 import com.atomykcoder.atomykplay.function.StorageUtil;
-
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class AddLyricsFragment extends Fragment {
@@ -32,10 +34,9 @@ public class AddLyricsFragment extends Fragment {
     private ProgressBar progressBar;
     private String artistName;
     private EditText nameEditText, artistEditText;
-    private Button saveBtn, btnFind;
+    private final Map<String, String> timestamps= new HashMap<>();
 
-
-private StorageUtil storageUtil;
+    private StorageUtil storageUtil;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -45,8 +46,8 @@ private StorageUtil storageUtil;
         nameEditText = view.findViewById(R.id.edit_song_name);
         artistEditText = view.findViewById(R.id.edit_artist_name);
         editTextLyrics = view.findViewById(R.id.edit_lyrics);
-        saveBtn = view.findViewById(R.id.btn_save);
-        btnFind = view.findViewById(R.id.btn_find);
+        Button saveBtn = view.findViewById(R.id.btn_save);
+        Button btnFind = view.findViewById(R.id.btn_find);
         progressBar = view.findViewById(R.id.progress_lyrics);
         storageUtil = new StorageUtil(getContext());
 
@@ -56,8 +57,16 @@ private StorageUtil storageUtil;
         saveBtn.setOnClickListener(v -> showToast("saved☻"));
 
         btnFind.setOnClickListener(v -> invalidateEntry());
-
+        invalidateEntry();
         return view;
+    }
+
+    private void updateLyrics() {
+        int progress = PlayerFragment.getCurrentPos();
+        String time = "[" + FetchMusic.convertDuration(String.valueOf(progress)) + "]";
+        if (timestamps.containsKey(time)) {
+            Log.i("KEY", timestamps.get(time));
+        }
     }
 
     private MusicDataCapsule getMusic() {
@@ -84,7 +93,6 @@ private StorageUtil storageUtil;
         } else if (songName.equals("")) {
             nameEditText.setError("Required");
         } else {
-
             fetchLyrics();
         }
 
@@ -94,66 +102,47 @@ private StorageUtil storageUtil;
         //show lyrics in bottom sheet
         artistName = artistEditText.getText().toString().toLowerCase().trim();
         songName = nameEditText.getText().toString().toLowerCase().trim();
-
         showToast("lyrics");
+        timestamps.clear();
         FetchLyrics fetchLyrics = new FetchLyrics();
-
         try {
             ExecutorService service = Executors.newSingleThreadExecutor();
             Handler handler = new Handler(Looper.getMainLooper());
             fetchLyrics.onPreExecute(progressBar);
-            service.execute(new Runnable() {
-                @Override
-                public void run() {
-                    String lyrics = fetchLyrics.fetch(artistName + " " + songName);
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            fetchLyrics.onPostExecute(progressBar);
-                            Log.i("SONG", lyrics);
-                                String strippedLyrics = StripLyrics(lyrics);
-                            editTextLyrics.setText(strippedLyrics);
-                        }
-                    });
-                }
+            service.execute(() -> {
+                String lyrics = fetchLyrics.fetch(artistName + " " + songName);
+                handler.post(() -> {
+                    fetchLyrics.onPostExecute(progressBar);
+                    String strippedLyrics = stripLyrics(lyrics);
+                    storeLyrics(lyrics, strippedLyrics);
+                    editTextLyrics.setText(strippedLyrics);
+                    for(Map.Entry<String, String> entry : timestamps.entrySet()) {
+                        Log.i("SONG", "KEY: " + entry.getKey() + "  Value : " + entry.getValue());
+                    }
+                });
             });
-
+            service.shutdown();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private String StripLyrics(String lyrics) {
-//        String result = lyrics.replaceAll("", "");
-        Pattern p = Pattern.compile("\\[(.*?)\\]");
-        String result = lyrics.replaceAll(p.pattern(), "\n");
-        result = result.trim();
-        Log.i("STRIP", result);
-        return result;
+    private void storeLyrics(String lyrics, String strippedLyrics) {
+        Pattern p = Pattern.compile("\\[\\d\\d:\\d\\d");
+        Matcher m = p.matcher(lyrics);
+        String[] lines = strippedLyrics.split("\n");
+        int index = 0;
+        while(m.find() && index < lines.length) {
+            String key = m.group() + "]";
+            timestamps.put(key, lines[index]);
+            index++;
+        }
     }
 
-
-//    private String evalSongName(String song, String artist) {
-//        song = song.toLowerCase();
-//        artist = artist.toLowerCase();
-//        if (song.contains("[")) {
-//            song = song.substring(0, song.indexOf("["));
-//        }
-//        if (song.contains("(")) {
-//            song = song.substring(0, song.indexOf("("));
-//        }
-//        if (song.contains("{")) {
-//            song = song.substring(0, song.indexOf("{"));
-//        }
-//        if (song.contains(artist)) {
-//            song = song.replace(artist, "");
-//        }
-//        if (song.contains("-")) {
-//            song = song.replace("-", "");
-//        }
-//        if (song.contains("_")) {
-//            song = song.replace("_", " ");
-//        }
-//        return song;
-//    }
+    private String stripLyrics(String lyrics) {
+        Pattern p = Pattern.compile("\\[(.*?)]");
+        String result = lyrics.replaceAll(p.pattern(), "\n");
+        result = result.trim();
+        return result;
+    }
 }
