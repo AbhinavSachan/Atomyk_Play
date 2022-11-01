@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:background="@color/secondary_bg">
 
     <TextView
@@ -9,10 +9,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:padding="0dp"
-        android:text="Maybe you are the one for me, fu*k you and your mom and your sister and your job"
+        android:paddingHorizontal="30dp"
+        android:paddingVertical="40dp"
+        android:text="@string/empty"
         android:textColor="@color/sub_text_grey"
-        android:textSize="@dimen/d_24sp"
+        android:textSize="@dimen/d_28sp"
         android:textStyle="bold" />
 
 </RelativeLayout>

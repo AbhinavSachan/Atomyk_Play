@@ -44,6 +44,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.atomykcoder.atomykplay.MainActivity;
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.function.MusicDataCapsule;
+import com.atomykcoder.atomykplay.function.MusicLyricsAdapter;
 import com.atomykcoder.atomykplay.function.MusicQueueAdapter;
 import com.atomykcoder.atomykplay.function.PlaybackStatus;
 import com.atomykcoder.atomykplay.function.StorageUtil;
@@ -86,7 +87,10 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     private StorageUtil storageUtil;
     private ItemTouchHelper itemTouchHelper;
     private RecyclerView recyclerView;
-    private LyricsLayoutFragment lyricsLayoutFragment;
+    private View lyricsRelativeLayout;
+    private MainActivity mainActivity;
+    private CardView coverCardView;
+    private ImageView lyricsImg;
 
     public static void setMiniLayout() {
 
@@ -120,7 +124,6 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         }
 
     }
-    private MainActivity mainActivity;
 
     public static void setMainPlayerLayout() {
 
@@ -257,15 +260,15 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         mimeTv = view.findViewById(R.id.player_mime_tv);//○
         durationTv = view.findViewById(R.id.player_duration_tv);//○
         curPosTv = view.findViewById(R.id.player_current_pos_tv);//○
-        ImageView lyricsOpenLayout = view.findViewById(R.id.player_lyrics_ll);
+        lyricsImg = view.findViewById(R.id.player_lyrics_ll);
         timerTv = view.findViewById(R.id.countdown_tv);
 
-        cardView = view.findViewById(R.id.card_view_for_cover);
+        coverCardView = view.findViewById(R.id.card_view_for_cover);
+        lyricsRelativeLayout = view.findViewById(R.id.lyrics_relative_layout);
 
         playerSongNameTv.setSelected(true);
         mini_name_text.setSelected(true);
 
-        lyricsLayoutFragment = new LyricsLayoutFragment();
         //click listeners on mini player
         //and sending broadcast on click
 
@@ -283,12 +286,32 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         favoriteImg.setOnClickListener(v -> addFavorite());
         timerImg.setOnClickListener(v -> setTimer());
         timerTv.setOnClickListener(v -> cancelTimer());
-        lyricsOpenLayout.setOnClickListener(v -> openLyricsPanel());
+        lyricsImg.setOnClickListener(v -> openLyricsPanel());
         //top right option button
         optionImg.setOnClickListener(v -> optionMenu());
 
         recyclerView = view.findViewById(R.id.queue_music_recycler);
         queueBottomSheet = view.findViewById(R.id.bottom_sheet);
+
+        //lyrics layout related initializations
+        TextView button = view.findViewById(R.id.btn_add_lyrics);
+        lyricsRecyclerView = view.findViewById(R.id.lyrics_recycler_view);
+        noLyricsLayout = view.findViewById(R.id.no_lyrics_layout);
+
+        lyricsArrayList.add(0,"Maybe you are the one for me,");
+        lyricsArrayList.add(1,"fu*k you and your mom and");
+        lyricsArrayList.add(2,"your sister and your job");
+
+        LinearLayoutManager manager = new LinearLayoutManager(getContext());
+        manager.setSmoothScrollbarEnabled(true);
+        lyricsRecyclerView.setLayoutManager(manager);
+
+        MusicLyricsAdapter adapter = new MusicLyricsAdapter(getContext(), lyricsArrayList);
+        lyricsRecyclerView.setAdapter(adapter);
+
+        button.setOnClickListener(v -> {
+            setLyricsLayout();
+        });
 
 
         queueBottomSheet.setClickable(true);
@@ -310,6 +333,21 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         return view;
     }
 
+    private void setLyricsLayout() {
+        mainActivity.mainPlayerSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+
+        AddLyricsFragment addLyricsFragment = new AddLyricsFragment();
+        FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.replace(R.id.sec_container, addLyricsFragment);
+        transaction.addToBackStack(addLyricsFragment.toString());
+        transaction.commit();
+    }
+
+    private RecyclerView lyricsRecyclerView;
+    private View noLyricsLayout;
+    private ArrayList<String> lyricsArrayList = new ArrayList<>();
+
     private void setupQueueBottomSheet() {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         setAdapter();
@@ -326,7 +364,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
 
             @Override
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-                bottomSheet.setAlpha(0 + slideOffset * 4);
+                bottomSheet.setAlpha(0 + slideOffset * 2);
             }
         });
 
@@ -345,20 +383,27 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     }
 
     private void openLyricsPanel() {
-        cardView.setVisibility(View.GONE);
-        FragmentManager manager = requireActivity().getSupportFragmentManager();
-        FragmentTransaction transaction = manager.beginTransaction();
-        transaction.replace(R.id.coverRelativeLayout, lyricsLayoutFragment);
-        transaction.addToBackStack(lyricsLayoutFragment.toString());
-        transaction.commit();
+        if (coverCardView.getVisibility() == View.VISIBLE){
+            lyricsImg.setImageResource(R.drawable.ic_baseline_subtitles_off);
+            coverCardView.setVisibility(View.GONE);
+            if (lyricsArrayList.isEmpty()){
+                noLyricsLayout.setVisibility(View.VISIBLE);
+            }else {
+                noLyricsLayout.setVisibility(View.GONE);
+            }
+            lyricsRelativeLayout.setVisibility(View.VISIBLE);
+        }else if (coverCardView.getVisibility() == View.GONE){
+            lyricsImg.setImageResource(R.drawable.ic_baseline_subtitles_24);
+            coverCardView.setVisibility(View.VISIBLE);
+            noLyricsLayout.setVisibility(View.GONE);
+            lyricsRelativeLayout.setVisibility(View.GONE);
+        }
 
     }
 
-    private CardView cardView;
     private void optionMenu() {
         //add a bottom sheet to show music options like set to ringtone ,audio details ,add to playlist etc.
         showToast("option");
-
     }
 
     //region Timer setup
