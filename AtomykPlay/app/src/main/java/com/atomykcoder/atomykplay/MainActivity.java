@@ -497,6 +497,16 @@ public class MainActivity extends AppCompatActivity {
         });
     }
     //endregion
-
+    public static int convertToMillis(String duration) {
+        int out;
+        String _duration = duration.replace("[", "").replace("]", "");
+        String[] numbers = _duration.split(":");
+        int first = Integer.parseInt(numbers[0]);
+        int second = Integer.parseInt(numbers[1]);
+        first = first * (60 * 1000);
+        second = second * 1000;
+        out = first + second;
+        return out;
+    }
 
 }

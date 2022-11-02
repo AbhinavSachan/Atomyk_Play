@@ -1,5 +1,6 @@
 package com.atomykcoder.atomykplay.fragments;
 
+import static com.atomykcoder.atomykplay.MainActivity.convertToMillis;
 import static com.atomykcoder.atomykplay.MainActivity.media_player_service;
 import static com.atomykcoder.atomykplay.MainActivity.service_bound;
 import static com.atomykcoder.atomykplay.function.FetchMusic.convertDuration;
@@ -20,6 +21,8 @@ import android.media.MediaMetadataRetriever;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -57,6 +60,9 @@ import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @SuppressLint("StaticFieldLeak")
 public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeListener, OnDragStartListener {
@@ -75,6 +81,9 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     private static ImageView playerCoverImage;
     private static ImageView favoriteImg;
     private static TextView playerSongNameTv, playerArtistNameTv, mimeTv, bitrateTv, timerTv;
+    private static RecyclerView lyricsRecyclerView;
+    private static View noLyricsLayout;
+    private static ArrayList<String> lyricsArrayList = new ArrayList<>();
     final private CountDownTimer[] countDownTimer = new CountDownTimer[1];
     public View player_layout;
     public View queueBottomSheet;
@@ -92,37 +101,8 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     private CardView coverCardView;
     private ImageView lyricsImg;
 
-    public static void setMiniLayout() {
-
-        StorageUtil storageUtil = new StorageUtil(context);
-        ArrayList<MusicDataCapsule> musicList = storageUtil.loadMusicList();
-        MusicDataCapsule activeMusic = null;
-        int musicIndex;
-        musicIndex = storageUtil.loadMusicIndex();
-
-        if (musicList != null)
-            if (musicIndex != -1 && musicIndex < musicList.size()) {
-                activeMusic = musicList.get(musicIndex);
-            } else {
-                activeMusic = musicList.get(0);
-            }
-
-        try {
-            if (activeMusic != null) {
-                Glide.with(context).load(getEmbeddedImage(activeMusic.getsPath())).apply(new RequestOptions().placeholder(R.drawable.ic_music))
-                        .override(75, 75)
-                        .into(mini_cover);
-                try {
-                    mini_name_text.setText(activeMusic.getsName());
-                    mini_artist_text.setText(activeMusic.getsArtist());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
+    private static boolean getPlayerState() {
+        return media_player_service.media_player.isPlaying();
     }
 
     public static void setMainPlayerLayout() {
@@ -190,6 +170,42 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
             e.printStackTrace();
         }
 
+        if (activeMusic != null) {
+            LinkedHashMap<String, String> lrcMap = storageUtil.loadLyrics(activeMusic.getsName());
+            if (lrcMap != null) {
+                noLyricsLayout.setVisibility(View.GONE);
+                lyricsRecyclerView.setVisibility(View.VISIBLE);
+                lyricsArrayList.addAll(lrcMap.values());
+                setLyricsAdapter();
+                ExecutorService service = Executors.newSingleThreadExecutor();
+                Handler handler = new Handler(Looper.getMainLooper());
+
+                service.execute(() -> {
+                    // background code
+                    if(media_player_service != null)
+                        while(getPlayerState()) {
+                            String currPos = syncLyrics(lrcMap);
+                            int millis = convertToMillis(currPos);
+                            int musicPlayerPos = getCurrentPos();
+                            try {
+                                Thread.sleep(Math.abs(millis - musicPlayerPos));
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    //post execution code
+                    handler.post(() -> {
+
+                    });
+                });
+
+            } else {
+                lyricsRecyclerView.setVisibility(View.GONE);
+                noLyricsLayout.setVisibility(View.VISIBLE);
+                lyricsArrayList.clear();
+            }
+        }
+
     }
 
     //give the mime type value and it will return extension
@@ -214,7 +230,16 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     }
 
     public static int getCurrentPos() {
-        return seekBarMain.getProgress();
+        return media_player_service.media_player.getCurrentPosition();
+    }
+
+    public static void setLyricsAdapter() {
+        LinearLayoutManager manager = new LinearLayoutManager(context);
+        manager.setSmoothScrollbarEnabled(true);
+        lyricsRecyclerView.setLayoutManager(manager);
+
+        MusicLyricsAdapter lyricsAdapter = new MusicLyricsAdapter(context, lyricsArrayList);
+        lyricsRecyclerView.setAdapter(lyricsAdapter);
     }
 
     @Override
@@ -298,16 +323,6 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         lyricsRecyclerView = view.findViewById(R.id.lyrics_recycler_view);
         noLyricsLayout = view.findViewById(R.id.no_lyrics_layout);
 
-        lyricsArrayList.add(0,"Maybe you are the one for me,");
-        lyricsArrayList.add(1,"fu*k you and your mom and");
-        lyricsArrayList.add(2,"your sister and your job");
-
-        LinearLayoutManager manager = new LinearLayoutManager(getContext());
-        manager.setSmoothScrollbarEnabled(true);
-        lyricsRecyclerView.setLayoutManager(manager);
-
-        MusicLyricsAdapter adapter = new MusicLyricsAdapter(getContext(), lyricsArrayList);
-        lyricsRecyclerView.setAdapter(adapter);
 
         button.setOnClickListener(v -> {
             setLyricsLayout();
@@ -344,10 +359,6 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         transaction.commit();
     }
 
-    private RecyclerView lyricsRecyclerView;
-    private View noLyricsLayout;
-    private ArrayList<String> lyricsArrayList = new ArrayList<>();
-
     private void setupQueueBottomSheet() {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         setAdapter();
@@ -382,23 +393,38 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
 
     }
 
-    private void openLyricsPanel() {
-        if (coverCardView.getVisibility() == View.VISIBLE){
+    private void openLyricsPanel() {;
+        if (coverCardView.getVisibility() == View.VISIBLE) {
             lyricsImg.setImageResource(R.drawable.ic_baseline_subtitles_off);
             coverCardView.setVisibility(View.GONE);
-            if (lyricsArrayList.isEmpty()){
-                noLyricsLayout.setVisibility(View.VISIBLE);
-            }else {
-                noLyricsLayout.setVisibility(View.GONE);
-            }
             lyricsRelativeLayout.setVisibility(View.VISIBLE);
-        }else if (coverCardView.getVisibility() == View.GONE){
+
+        } else if (coverCardView.getVisibility() == View.GONE) {
             lyricsImg.setImageResource(R.drawable.ic_baseline_subtitles_24);
             coverCardView.setVisibility(View.VISIBLE);
             noLyricsLayout.setVisibility(View.GONE);
             lyricsRelativeLayout.setVisibility(View.GONE);
+
         }
 
+    }
+
+    private static String syncLyrics(LinkedHashMap<String, String> _lrcMap) {
+        // we need to sync lyrics
+        // take music position
+        // match if it exist in hashmap
+        // if it exist then give the assigned lyrics value
+        // get lyrics array list item position and scroll to that item
+        int currentPos = 0;
+        if (media_player_service != null) {
+            currentPos = media_player_service.media_player.getCurrentPosition();
+        }
+//        Log.i("lyrics", "" + currentPos);
+        String curMusicPos = convertDuration(String.valueOf(currentPos));
+        if(_lrcMap.containsKey("[" + curMusicPos + "]")) {
+            Log.i("lyrics", _lrcMap.get("[" + curMusicPos + "]"));
+        }
+        return curMusicPos;
     }
 
     private void optionMenu() {

@@ -61,6 +61,9 @@
                     android:hint="@string/your_lyrics"
                     android:imeOptions="normal"
                     android:lines="15"
+                    android:text="@string/empty"
+                    android:includeFontPadding="true"
+                    android:paddingTop="30dp"
                     android:textAlignment="gravity"
                     android:textColor="@color/text_color"
                     android:textColorHint="@color/sub_text_grey" />

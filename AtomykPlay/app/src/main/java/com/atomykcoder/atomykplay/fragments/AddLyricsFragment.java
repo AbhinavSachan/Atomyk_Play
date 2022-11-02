@@ -25,6 +25,7 @@ import com.atomykcoder.atomykplay.function.StorageUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -38,23 +39,12 @@ public class AddLyricsFragment extends Fragment {
     private  ProgressBar progressBar;
     private String artistName;
     private EditText nameEditText, artistEditText;
-    public final Map<String, String> timestamps= new HashMap<>();
-    public final ArrayList<String> lyrics = new ArrayList<>();
+    private final LinkedHashMap<String, String> lrcMap = new LinkedHashMap<>();
 
     private StorageUtil storageUtil;
     private Button saveBtn, btnFind;
     private Dialog dialog;
     private Button btnCancel, btnOk;
-
-    public void setLyrics(String lyrics) {
-        if (!lyrics.equals("") && lyrics.contains(songName)) {
-            progressBar.setVisibility(View.GONE);
-            editTextLyrics.setText(lyrics);
-        }else {
-            progressBar.setVisibility(View.GONE);
-            showToast("Lyrics not found");
-        }
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -71,14 +61,22 @@ public class AddLyricsFragment extends Fragment {
         TextView nameText = view.findViewById(R.id.song_name_tv);
         nameText.setText(getMusic().getsName());
 
-        saveBtn.setOnClickListener(v -> showToast("saved☻"));
-        btnFind.setOnClickListener(v -> invalidateEntry());
-
+        saveBtn.setOnClickListener(v -> saveMusic());
         btnFind.setOnClickListener(v -> {
             setDialogBox();
         });
 
         return view;
+    }
+
+    private void saveMusic() {
+        if(lrcMap.isEmpty()) {
+            showToast("Fetch Lyrics");
+        } else {
+            // take the extracted lyrics and pass them to
+        }
+        showToast("saved☻");
+
     }
 
     private void setDialogBox() {
@@ -99,7 +97,8 @@ public class AddLyricsFragment extends Fragment {
 
 
         btnOk.setOnClickListener(v -> {
-            invalidateEntry();
+            if(isValidInput())
+                fetchLyrics();
         });
         btnCancel.setOnClickListener(v->{
             dialog.cancel();
@@ -110,11 +109,115 @@ public class AddLyricsFragment extends Fragment {
     private void updateLyrics() {
         int progress = PlayerFragment.getCurrentPos();
         String time = "[" + FetchMusic.convertDuration(String.valueOf(progress)) + "]";
-        if (timestamps.containsKey(time)) {
-            Log.i("KEY", timestamps.get(time));
+        if (lrcMap.containsKey(time)) {
+            Log.i("KEY", lrcMap.get(time));
+        }
+    }
+    private boolean isValidInput() {
+        artistName = artistEditText.getText().toString().toLowerCase().trim();
+        songName = nameEditText.getText().toString().toLowerCase().trim();
+
+        if (artistName.equals("")) {
+            artistEditText.setError("Required");
+            return false;
+        } else if (songName.equals("")) {
+            nameEditText.setError("Required");
+            return false;
+        } else {
+            dialog.cancel();
+            return true;
+        }
+
+    }
+
+    private void fetchLyrics() {
+        //show lyrics in bottom sheet
+        artistName = artistEditText.getText().toString().toLowerCase().trim();
+        songName = nameEditText.getText().toString().toLowerCase().trim();
+
+        //clear hashmap prior to retrieving data
+        lrcMap.clear();
+
+        showToast("fetching");
+
+        FetchLyrics fetchLyrics = new FetchLyrics();
+        try {
+            ExecutorService service = Executors.newSingleThreadExecutor();
+            Handler handler = new Handler(Looper.getMainLooper());
+
+            // pre-execute some code here
+            fetchLyrics.onPreExecute(progressBar);
+
+            // do in background code here
+            service.execute(() -> {
+                String _unfilteredLyrics = fetchLyrics.fetch(artistName + " " + songName);
+
+                // post-execute code here
+                handler.post(() -> {
+                    fetchLyrics.onPostExecute(progressBar);
+
+                    String _filteredLyrics = splitLyricsByNewLine(_unfilteredLyrics);
+                    editTextLyrics.setText(_filteredLyrics);
+                    lrcMap.putAll(getLrcMap(_filteredLyrics));
+                    storageUtil.saveLyrics(getMusic().getsName(), lrcMap);
+
+
+                });
+            });
+
+            // stopping the background thread (crucial)
+            service.shutdown();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
+
+    /**
+     *This function takes unfiltered lrc data and returns a linked hashmap with timestamp as
+     * keys and their assigned lyrics as values.
+     * @param lyrics unfiltered lrc data retrieved from megalobiz
+     * @return linked hashmap with timestamp as keys and their designated lyrics as values
+     */
+    private LinkedHashMap<String, String> getLrcMap(String lyrics) {
+        LinkedHashMap<String, String> _lrcMap = new LinkedHashMap<>();
+        Pattern _pattern = Pattern.compile("\\[\\d\\d:\\d\\d");
+        Matcher _timestamps = _pattern.matcher(lyrics);
+        String _filteredLyrics = filter(lyrics);
+        String[] lines = _filteredLyrics.split("\n");
+        int i = 0;
+        while(_timestamps.find() && i < lines.length) {
+            _lrcMap.put(_timestamps.group() + "]", lines[i]);
+            i++;
+        }
+        return _lrcMap;
+    }
+
+    private String splitLyricsByNewLine(String lyrics) {
+        Pattern p = Pattern.compile("\\[");
+        String result = lyrics.replaceAll(p.pattern(), "\n\\[");
+        result = result.trim();
+        return result;
+    }
+
+
+    /**
+     * filter() takes a string argument lyrics. It removes any un-needed information and returns
+     * filtered string lyrics which only contains characters a-z, A-z, 0-9
+     * @param lyrics that need to be filtered.
+     * @return filtered string lyrics.
+     */
+    private String filter(String lyrics) {
+        Pattern p = Pattern.compile("\\[(.*?)]");
+        String result = lyrics.replaceAll(p.pattern(), "");
+        result = result.trim();
+        return result;
+    }
+
+    /**
+     * retrieve current music loaded into player fragment
+     * @return active music
+     */
     private MusicDataCapsule getMusic() {
         ArrayList<MusicDataCapsule> musicList = storageUtil.loadMusicList();
         MusicDataCapsule activeMusic = null;
@@ -129,81 +232,4 @@ public class AddLyricsFragment extends Fragment {
             }
         return activeMusic;
     }
-
-    private void invalidateEntry() {
-        artistName = artistEditText.getText().toString().toLowerCase().trim();
-        songName = nameEditText.getText().toString().toLowerCase().trim();
-
-        if (artistName.equals("")) {
-            artistEditText.setError("Required");
-        } else if (songName.equals("")) {
-            nameEditText.setError("Required");
-        } else {
-
-            dialog.cancel();
-            progressBar.setVisibility(View.VISIBLE);
-            fetchLyrics();
-        }
-
-    }
-
-    private void fetchLyrics() {
-        //show lyrics in bottom sheet
-        artistName = artistEditText.getText().toString().toLowerCase().trim();
-        songName = nameEditText.getText().toString().toLowerCase().trim();
-        showToast("lyrics");
-        timestamps.clear();
-
-        showToast("fetching");
-        FetchLyrics fetchLyrics = new FetchLyrics();
-        try {
-            ExecutorService service = Executors.newSingleThreadExecutor();
-            Handler handler = new Handler(Looper.getMainLooper());
-            fetchLyrics.onPreExecute(progressBar);
-            service.execute(() -> {
-                String rawLyrics = fetchLyrics.fetch(artistName + " " + songName);
-                handler.post(() -> {
-                    fetchLyrics.onPostExecute(progressBar);
-                    String fixedLyrics = splitLyrics(rawLyrics);
-                    editTextLyrics.setText(fixedLyrics);
-                    storeLyrics(rawLyrics);
-                    for(Map.Entry<String, String> timestamp : timestamps.entrySet()) {
-                        Log.i("TIMESTAMP", "KEY : " + timestamp.getKey() + "  VALUE : " + timestamp.getValue());
-                    }
-//                    ArrayList<String> lyrics = new ArrayList<>();
-                });
-            });
-            service.shutdown();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void storeLyrics(String lyrics) {
-        Pattern p = Pattern.compile("\\[\\d\\d:\\d\\d");
-        Matcher m = p.matcher(lyrics);
-        String strippedLyrics = stripLyrics(lyrics);
-        String[] lines = strippedLyrics.split("\n");
-        int index = 0;
-        while(m.find() && index < lines.length) {
-            String key = m.group() + "]";
-            timestamps.put(key, lines[index]);
-            index++;
-        }
-    }
-
-    private String splitLyrics(String lyrics) {
-        Pattern p = Pattern.compile("\\[");
-        String result = lyrics.replaceAll(p.pattern(), "\n\\[");
-        result = result.trim();
-        return result;
-    }
-
-    private String stripLyrics(String lyrics) {
-        Pattern p = Pattern.compile("\\[(.*?)]");
-        String result = lyrics.replaceAll(p.pattern(), "\n");
-        result = result.trim();
-        return result;
-    }
-
 }

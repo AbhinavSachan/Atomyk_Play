@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/secondary_bg">
+    android:background="@color/primary_bg">
 
     <TextView
         android:id="@+id/lyrics_text"
@@ -12,7 +12,7 @@
         android:paddingHorizontal="30dp"
         android:paddingVertical="40dp"
         android:text="@string/empty"
-        android:textColor="@color/sub_text_grey"
+        android:textColor="@color/text_color"
         android:textSize="@dimen/d_28sp"
         android:textStyle="bold" />
 

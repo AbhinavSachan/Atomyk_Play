@@ -8,6 +8,7 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class StorageUtil {
@@ -16,6 +17,7 @@ public class StorageUtil {
     private final String REPEAT_STATUS_STORAGE = "com.atomykcoder.atomykplay.REPEAT_STATUS_STORAGE";
     private final String SHUFFLE_STORAGE = "com.atomykcoder.atomykplay.SHUFFLE_STORAGE";
     private final String FAVORITE_STORAGE = "com.atomykcoder.atomykplay.FAVORITE_STORAGE";
+    private final String LYRICS_STORAGE = "com.atomykcoder.atomykplay.LYRICS_STORAGE";
     private final Context context;
     private SharedPreferences sharedPreferences;
 
@@ -182,6 +184,23 @@ public class StorageUtil {
         Gson gson = new Gson();
         String json = sharedPreferences.getString(tempList, null);
         Type type = new TypeToken<ArrayList<MusicDataCapsule>>() {
+        }.getType();
+        return gson.fromJson(json, type);
+    }
+    public void saveLyrics(String songName, LinkedHashMap<String, String> _lrcMap) {
+        sharedPreferences = context.getSharedPreferences(LYRICS_STORAGE, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(_lrcMap);
+        editor.putString(songName, json);
+        editor.apply();
+    }
+
+    public LinkedHashMap<String, String> loadLyrics(String songName) {
+        sharedPreferences = context.getSharedPreferences(LYRICS_STORAGE, Context.MODE_PRIVATE);
+        Gson gson = new Gson();
+        String json = sharedPreferences.getString(songName, null);
+        Type type = new TypeToken<LinkedHashMap<String, String>>(){
         }.getType();
         return gson.fromJson(json, type);
     }

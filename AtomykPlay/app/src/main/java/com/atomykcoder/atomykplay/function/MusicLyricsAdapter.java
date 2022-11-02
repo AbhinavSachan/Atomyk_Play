@@ -14,8 +14,8 @@ import com.atomykcoder.atomykplay.R;
 import java.util.ArrayList;
 
 public class MusicLyricsAdapter extends RecyclerView.Adapter<MusicLyricsAdapter.LyricsViewAdapter> {
-    private Context context;
-    private ArrayList<String> arrayList;
+    private final Context context;
+    private final ArrayList<String> arrayList;
 
     public MusicLyricsAdapter(Context context, ArrayList<String> arrayList) {
         this.context = context;
@@ -33,6 +33,7 @@ public class MusicLyricsAdapter extends RecyclerView.Adapter<MusicLyricsAdapter.
     public void onBindViewHolder(@NonNull LyricsViewAdapter holder, int position) {
 
         holder.textView.setText(arrayList.get(position));
+
     }
 
     @Override
@@ -40,8 +41,8 @@ public class MusicLyricsAdapter extends RecyclerView.Adapter<MusicLyricsAdapter.
         return arrayList.size();
     }
 
-    public class LyricsViewAdapter extends RecyclerView.ViewHolder {
-        private TextView textView;
+    public static class LyricsViewAdapter extends RecyclerView.ViewHolder {
+        private final TextView textView;
         public LyricsViewAdapter(@NonNull View itemView) {
             super(itemView);
             textView = itemView.findViewById(R.id.lyrics_text);
