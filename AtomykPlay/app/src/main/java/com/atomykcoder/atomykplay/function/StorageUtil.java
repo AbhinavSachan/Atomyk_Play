@@ -187,7 +187,7 @@ public class StorageUtil {
         }.getType();
         return gson.fromJson(json, type);
     }
-    public void saveLyrics(String songName, LinkedHashMap<String, String> _lrcMap) {
+    public void saveLyrics(String songName,LRCMap _lrcMap) {
         sharedPreferences = context.getSharedPreferences(LYRICS_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         Gson gson = new Gson();
@@ -196,11 +196,11 @@ public class StorageUtil {
         editor.apply();
     }
 
-    public LinkedHashMap<String, String> loadLyrics(String songName) {
+    public LRCMap loadLyrics(String songName) {
         sharedPreferences = context.getSharedPreferences(LYRICS_STORAGE, Context.MODE_PRIVATE);
         Gson gson = new Gson();
         String json = sharedPreferences.getString(songName, null);
-        Type type = new TypeToken<LinkedHashMap<String, String>>(){
+        Type type = new TypeToken<LRCMap>(){
         }.getType();
         return gson.fromJson(json, type);
     }

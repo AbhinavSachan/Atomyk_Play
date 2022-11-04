@@ -46,6 +46,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.MainActivity;
 import com.atomykcoder.atomykplay.R;
+import com.atomykcoder.atomykplay.function.LRCMap;
 import com.atomykcoder.atomykplay.function.MusicDataCapsule;
 import com.atomykcoder.atomykplay.function.MusicLyricsAdapter;
 import com.atomykcoder.atomykplay.function.MusicQueueAdapter;
@@ -60,7 +61,7 @@ import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashMap;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -83,7 +84,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     private static TextView playerSongNameTv, playerArtistNameTv, mimeTv, bitrateTv, timerTv;
     private static RecyclerView lyricsRecyclerView;
     private static View noLyricsLayout;
-    private static ArrayList<String> lyricsArrayList = new ArrayList<>();
+    private final static ArrayList<String> lyricsArrayList = new ArrayList<>();
     final private CountDownTimer[] countDownTimer = new CountDownTimer[1];
     public View player_layout;
     public View queueBottomSheet;
@@ -100,6 +101,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     private MainActivity mainActivity;
     private CardView coverCardView;
     private ImageView lyricsImg;
+
 
     private static boolean getPlayerState() {
         return media_player_service.media_player.isPlaying();
@@ -171,34 +173,41 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         }
 
         if (activeMusic != null) {
-            LinkedHashMap<String, String> lrcMap = storageUtil.loadLyrics(activeMusic.getsName());
+            LRCMap lrcMap = storageUtil.loadLyrics(activeMusic.getsName());
             if (lrcMap != null) {
                 noLyricsLayout.setVisibility(View.GONE);
                 lyricsRecyclerView.setVisibility(View.VISIBLE);
-                lyricsArrayList.addAll(lrcMap.values());
+                lyricsArrayList.addAll(lrcMap.getLyrics());
                 setLyricsAdapter();
                 ExecutorService service = Executors.newSingleThreadExecutor();
                 Handler handler = new Handler(Looper.getMainLooper());
-
                 service.execute(() -> {
                     // background code
-                    if(media_player_service != null)
-                        while(getPlayerState()) {
-                            String currPos = syncLyrics(lrcMap);
-                            int millis = convertToMillis(currPos);
-                            int musicPlayerPos = getCurrentPos();
+                    if (media_player_service != null) {
+
+                        while (getPlayerState()) {
+                            String nextStamp = getNextStamp(lrcMap);
+                            int nextStampInMillis = 0;
+                            int currPosInMillis = 0;
+                            if (!nextStamp.equals("")) {
+                                nextStampInMillis = convertToMillis(nextStamp);
+                                currPosInMillis = getCurrentPos();
+                            }
                             try {
-                                Thread.sleep(Math.abs(millis - musicPlayerPos));
+                                Thread.sleep(Math.abs(nextStampInMillis - currPosInMillis));
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
+                            //post execution code
+                            handler.post(() -> {
+                                if (lrcMap.containsStamp(getCurrentStamp())) {
+                                    ScrollToPosition(lrcMap.getIndexAtStamp(getCurrentStamp()));
+                                }
+                            });
                         }
-                    //post execution code
-                    handler.post(() -> {
-
-                    });
+                    }
                 });
-
+                service.shutdown();
             } else {
                 lyricsRecyclerView.setVisibility(View.GONE);
                 noLyricsLayout.setVisibility(View.VISIBLE);
@@ -207,6 +216,34 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         }
 
     }
+
+    @Override
+    public void onStop() {
+        Log.i("stop", "stopping");
+        super.onStop();
+        Log.i("stop", "stopped");
+    }
+
+    public static String getCurrentStamp() {
+        int currPosInMillis = 0;
+        if(media_player_service != null)
+            currPosInMillis = media_player_service.media_player.getCurrentPosition();
+
+        return "[" + convertDuration(String.valueOf(currPosInMillis)) + "]";
+    }
+
+    public static String getNextStamp(LRCMap _lrcMap) {
+       String curStamp = getCurrentStamp();
+        int currIndex = _lrcMap.getIndexAtStamp(curStamp);
+        if(currIndex == -1) return "";
+        return currIndex == _lrcMap.size() - 1 ? _lrcMap.getStampAt(currIndex) : _lrcMap.getStampAt(currIndex + 1);
+
+    }
+
+    private static void ScrollToPosition(int position) {
+        lyricsRecyclerView.smoothScrollToPosition(position);
+    }
+
 
     //give the mime type value and it will return extension
     public static String getMime(String filePath) {
@@ -246,7 +283,6 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_player, container, false);
-
         try {
             context = getContext();
         } catch (NullPointerException e) {
@@ -324,9 +360,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         noLyricsLayout = view.findViewById(R.id.no_lyrics_layout);
 
 
-        button.setOnClickListener(v -> {
-            setLyricsLayout();
-        });
+        button.setOnClickListener(v -> setLyricsLayout());
 
 
         queueBottomSheet.setClickable(true);
@@ -393,7 +427,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
 
     }
 
-    private void openLyricsPanel() {;
+    private void openLyricsPanel() {
         if (coverCardView.getVisibility() == View.VISIBLE) {
             lyricsImg.setImageResource(R.drawable.ic_baseline_subtitles_off);
             coverCardView.setVisibility(View.GONE);
@@ -407,24 +441,6 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
 
         }
 
-    }
-
-    private static String syncLyrics(LinkedHashMap<String, String> _lrcMap) {
-        // we need to sync lyrics
-        // take music position
-        // match if it exist in hashmap
-        // if it exist then give the assigned lyrics value
-        // get lyrics array list item position and scroll to that item
-        int currentPos = 0;
-        if (media_player_service != null) {
-            currentPos = media_player_service.media_player.getCurrentPosition();
-        }
-//        Log.i("lyrics", "" + currentPos);
-        String curMusicPos = convertDuration(String.valueOf(currentPos));
-        if(_lrcMap.containsKey("[" + curMusicPos + "]")) {
-            Log.i("lyrics", _lrcMap.get("[" + curMusicPos + "]"));
-        }
-        return curMusicPos;
     }
 
     private void optionMenu() {
@@ -469,49 +485,46 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         });
 
         //Dialogue Box Confirm Button Listener
-        timerConfirmButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                timerDialogue.dismiss();
-                timerTv.setVisibility(View.VISIBLE);
-                timerImg.setVisibility(View.GONE);
+        timerConfirmButton.setOnClickListener(view -> {
+            timerDialogue.dismiss();
+            timerTv.setVisibility(View.VISIBLE);
+            timerImg.setVisibility(View.GONE);
 
-                //Sets The already Initialized countDownTimer to a new countDownTimer with given parameters
-                countDownTimer[0] = new CountDownTimer((timerSeekBar.getProgress() * 5L + 5) * 1000L * 60, 1000) {
+            //Sets The already Initialized countDownTimer to a new countDownTimer with given parameters
+            countDownTimer[0] = new CountDownTimer((timerSeekBar.getProgress() * 5L + 5) * 1000L * 60, 1000) {
 
-                    //Variables For storing seconds and minutes
-                    int seconds;
-                    int minutes;
+                //Variables For storing seconds and minutes
+                int seconds;
+                int minutes;
 
-                    //Every Second Do Something
-                    //Update TextView Code Goes Here
-                    @Override
-                    public void onTick(long l) {
+                //Every Second Do Something
+                //Update TextView Code Goes Here
+                @Override
+                public void onTick(long l) {
 
-                        //Storing Seconds and Minutes on Every Tick
-                        seconds = (int) (l / 1000) % 60;
-                        minutes = (int) ((l / (1000 * 60)) % 60);
+                    //Storing Seconds and Minutes on Every Tick
+                    seconds = (int) (l / 1000) % 60;
+                    minutes = (int) ((l / (1000 * 60)) % 60);
 
-                        // Replace This with TextView.setText(View);
-                        String finalCDTimer = minutes + ":" + seconds;
-                        timerTv.setText(finalCDTimer);
-                    }
+                    // Replace This with TextView.setText(View);
+                    String finalCDTimer = minutes + ":" + seconds;
+                    timerTv.setText(finalCDTimer);
+                }
 
 
-                    //Code After timer is Finished Goes Here
-                    @Override
-                    public void onFinish() {
+                //Code After timer is Finished Goes Here
+                @Override
+                public void onFinish() {
 
-                        //Replace This pausePlayAudio() with just a pause Method.
-                        //Replaced it
-                        media_player_service.pauseMedia();
-                        timerTv.setVisibility(View.GONE);
-                        timerImg.setVisibility(View.VISIBLE);
-                    }
-                };
-                // Start timer
-                countDownTimer[0].start();
-            }
+                    //Replace This pausePlayAudio() with just a pause Method.
+                    //Replaced it
+                    media_player_service.pauseMedia();
+                    timerTv.setVisibility(View.GONE);
+                    timerImg.setVisibility(View.VISIBLE);
+                }
+            };
+            // Start timer
+            countDownTimer[0].start();
         });
         //Show Timer Dialogue Box
         timerDialogue.show();

@@ -20,12 +20,14 @@ import androidx.fragment.app.Fragment;
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.function.FetchLyrics;
 import com.atomykcoder.atomykplay.function.FetchMusic;
+import com.atomykcoder.atomykplay.function.LRCMap;
 import com.atomykcoder.atomykplay.function.MusicDataCapsule;
 import com.atomykcoder.atomykplay.function.StorageUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -39,7 +41,7 @@ public class AddLyricsFragment extends Fragment {
     private  ProgressBar progressBar;
     private String artistName;
     private EditText nameEditText, artistEditText;
-    private final LinkedHashMap<String, String> lrcMap = new LinkedHashMap<>();
+    private final LRCMap lrcMap = new LRCMap();
 
     private StorageUtil storageUtil;
     private Button saveBtn, btnFind;
@@ -106,13 +108,6 @@ public class AddLyricsFragment extends Fragment {
         dialog.show();
     }
 
-    private void updateLyrics() {
-        int progress = PlayerFragment.getCurrentPos();
-        String time = "[" + FetchMusic.convertDuration(String.valueOf(progress)) + "]";
-        if (lrcMap.containsKey(time)) {
-            Log.i("KEY", lrcMap.get(time));
-        }
-    }
     private boolean isValidInput() {
         artistName = artistEditText.getText().toString().toLowerCase().trim();
         songName = nameEditText.getText().toString().toLowerCase().trim();
@@ -158,9 +153,8 @@ public class AddLyricsFragment extends Fragment {
 
                     String _filteredLyrics = splitLyricsByNewLine(_unfilteredLyrics);
                     editTextLyrics.setText(_filteredLyrics);
-                    lrcMap.putAll(getLrcMap(_filteredLyrics));
+                    lrcMap.addAll(getLrcMap(_filteredLyrics));
                     storageUtil.saveLyrics(getMusic().getsName(), lrcMap);
-
 
                 });
             });
@@ -179,15 +173,15 @@ public class AddLyricsFragment extends Fragment {
      * @param lyrics unfiltered lrc data retrieved from megalobiz
      * @return linked hashmap with timestamp as keys and their designated lyrics as values
      */
-    private LinkedHashMap<String, String> getLrcMap(String lyrics) {
-        LinkedHashMap<String, String> _lrcMap = new LinkedHashMap<>();
+    private LRCMap getLrcMap(String lyrics) {
+        LRCMap _lrcMap = new LRCMap();
         Pattern _pattern = Pattern.compile("\\[\\d\\d:\\d\\d");
         Matcher _timestamps = _pattern.matcher(lyrics);
         String _filteredLyrics = filter(lyrics);
         String[] lines = _filteredLyrics.split("\n");
         int i = 0;
         while(_timestamps.find() && i < lines.length) {
-            _lrcMap.put(_timestamps.group() + "]", lines[i]);
+            _lrcMap.add(_timestamps.group() + "]", lines[i]);
             i++;
         }
         return _lrcMap;
