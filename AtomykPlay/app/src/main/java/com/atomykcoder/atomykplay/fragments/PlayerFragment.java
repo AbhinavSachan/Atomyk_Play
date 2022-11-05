@@ -61,11 +61,7 @@ import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Objects;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
-@SuppressLint("StaticFieldLeak")
 public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeListener, OnDragStartListener {
 
     public static View mini_play_view;
@@ -85,6 +81,8 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     private static RecyclerView lyricsRecyclerView;
     private static View noLyricsLayout;
     private final static ArrayList<String> lyricsArrayList = new ArrayList<>();
+    public static Runnable runnable;
+    private static LRCMap lrcMap;
     final private CountDownTimer[] countDownTimer = new CountDownTimer[1];
     public View player_layout;
     public View queueBottomSheet;
@@ -101,10 +99,13 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     private MainActivity mainActivity;
     private CardView coverCardView;
     private ImageView lyricsImg;
+    public static Handler handler;
 
 
     private static boolean getPlayerState() {
-        return media_player_service.media_player.isPlaying();
+        if (media_player_service.media_player != null)
+            return media_player_service.media_player.isPlaying();
+        else return false;
     }
 
     public static void setMainPlayerLayout() {
@@ -121,8 +122,6 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
             } else {
                 activeMusic = musicList.get(0);
             }
-
-
         if (activeMusic != null) {
             if (storageUtil.loadFavorite(activeMusic.getsName()).equals("no_favorite")) {
                 favoriteImg.setImageResource(R.drawable.ic_favorite_border);
@@ -137,7 +136,6 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
                 Glide.with(context).load(getEmbeddedImage(activeMusic.getsPath())).apply(new RequestOptions().placeholder(R.drawable.ic_music_thumbnail))
                         .override(500, 500)
                         .into(playerCoverImage);
-
                 try {
                     playerSongNameTv.setText(activeMusic.getsName());
                     playerArtistNameTv.setText(activeMusic.getsArtist());
@@ -171,50 +169,69 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         } catch (Exception e) {
             e.printStackTrace();
         }
+        runnableSyncLyrics();
+    }
+
+    public static void runnableSyncLyrics() {
+        StorageUtil storageUtil = new StorageUtil(context);
+        ArrayList<MusicDataCapsule> musicList = storageUtil.loadMusicList();
+        MusicDataCapsule activeMusic = null;
+        int musicIndex;
+        musicIndex = storageUtil.loadMusicIndex();
+
+        if (musicList != null)
+            if (musicIndex != -1 && musicIndex < musicList.size()) {
+                activeMusic = musicList.get(musicIndex);
+            } else {
+                activeMusic = musicList.get(0);
+            }
 
         if (activeMusic != null) {
-            LRCMap lrcMap = storageUtil.loadLyrics(activeMusic.getsName());
+            lrcMap = storageUtil.loadLyrics(activeMusic.getsName());
             if (lrcMap != null) {
                 noLyricsLayout.setVisibility(View.GONE);
                 lyricsRecyclerView.setVisibility(View.VISIBLE);
+                lyricsArrayList.clear();
                 lyricsArrayList.addAll(lrcMap.getLyrics());
                 setLyricsAdapter();
-                ExecutorService service = Executors.newSingleThreadExecutor();
-                Handler handler = new Handler(Looper.getMainLooper());
-                service.execute(() -> {
-                    // background code
-                    if (media_player_service != null) {
-
-                        while (getPlayerState()) {
-                            String nextStamp = getNextStamp(lrcMap);
-                            int nextStampInMillis = 0;
-                            int currPosInMillis = 0;
-                            if (!nextStamp.equals("")) {
-                                nextStampInMillis = convertToMillis(nextStamp);
-                                currPosInMillis = getCurrentPos();
-                            }
-                            try {
-                                Thread.sleep(Math.abs(nextStampInMillis - currPosInMillis));
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                            //post execution code
-                            handler.post(() -> {
-                                if (lrcMap.containsStamp(getCurrentStamp())) {
-                                    ScrollToPosition(lrcMap.getIndexAtStamp(getCurrentStamp()));
-                                }
-                            });
-                        }
-                    }
-                });
-                service.shutdown();
+                handler = new Handler(Looper.getMainLooper());
+                prepareRunnable();
             } else {
                 lyricsRecyclerView.setVisibility(View.GONE);
                 noLyricsLayout.setVisibility(View.VISIBLE);
-                lyricsArrayList.clear();
             }
         }
 
+    }
+
+    public static void prepareRunnable() {
+        if (handler != null) {
+            runnable = new Runnable() {
+                @Override
+                public void run() {
+
+                    Log.i("lyrics", "started");
+                    int nextStampInMillis = 0;
+                    int currPosInMillis = 0;
+                    if (media_player_service != null) {
+                        if (!getPlayerState()) return;
+
+                        String nextStamp = getNextStamp(lrcMap);
+                        if (!nextStamp.equals("")) {
+                            nextStampInMillis = convertToMillis(nextStamp);
+                            currPosInMillis = getCurrentPos();
+                        }
+                    }
+                    if (lrcMap.containsStamp(getCurrentStamp())) {
+                        ScrollToPosition(lrcMap.getIndexAtStamp(getCurrentStamp()));
+                    }
+                    handler.postDelayed(runnable, nextStampInMillis - currPosInMillis);
+
+                }
+            };
+            Log.i("lyrics", "stopped");
+            handler.postDelayed(runnable, 0);
+        }
     }
 
     @Override
@@ -226,16 +243,19 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
 
     public static String getCurrentStamp() {
         int currPosInMillis = 0;
-        if(media_player_service != null)
+        if (media_player_service != null)
             currPosInMillis = media_player_service.media_player.getCurrentPosition();
 
         return "[" + convertDuration(String.valueOf(currPosInMillis)) + "]";
     }
 
     public static String getNextStamp(LRCMap _lrcMap) {
-       String curStamp = getCurrentStamp();
-        int currIndex = _lrcMap.getIndexAtStamp(curStamp);
-        if(currIndex == -1) return "";
+        String curStamp = getCurrentStamp();
+        int currIndex = -1;
+        if (_lrcMap != null) {
+            currIndex = _lrcMap.getIndexAtStamp(curStamp);
+        }
+        if (currIndex == -1) return "";
         return currIndex == _lrcMap.size() - 1 ? _lrcMap.getStampAt(currIndex) : _lrcMap.getStampAt(currIndex + 1);
 
     }
@@ -348,6 +368,10 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         timerImg.setOnClickListener(v -> setTimer());
         timerTv.setOnClickListener(v -> cancelTimer());
         lyricsImg.setOnClickListener(v -> openLyricsPanel());
+        lyricsImg.setOnLongClickListener(view1 -> {
+            setLyricsLayout();
+            return false;
+        });
         //top right option button
         optionImg.setOnClickListener(v -> optionMenu());
 
@@ -436,9 +460,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         } else if (coverCardView.getVisibility() == View.GONE) {
             lyricsImg.setImageResource(R.drawable.ic_baseline_subtitles_24);
             coverCardView.setVisibility(View.VISIBLE);
-            noLyricsLayout.setVisibility(View.GONE);
             lyricsRelativeLayout.setVisibility(View.GONE);
-
         }
 
     }

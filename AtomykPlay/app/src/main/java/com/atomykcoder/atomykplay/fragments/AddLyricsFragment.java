@@ -75,10 +75,14 @@ public class AddLyricsFragment extends Fragment {
         if(lrcMap.isEmpty()) {
             showToast("Fetch Lyrics");
         } else {
-            // take the extracted lyrics and pass them to
+            if (storageUtil.loadLyrics(getMusic().getsName())== null)
+                storageUtil.saveLyrics(getMusic().getsName(), lrcMap);
+            else{
+                storageUtil.removeLyrics(getMusic().getsName());
+                storageUtil.saveLyrics(getMusic().getsName(), lrcMap);
+            }
+            showToast("saved☻");
         }
-        showToast("saved☻");
-
     }
 
     private void setDialogBox() {
@@ -154,7 +158,6 @@ public class AddLyricsFragment extends Fragment {
                     String _filteredLyrics = splitLyricsByNewLine(_unfilteredLyrics);
                     editTextLyrics.setText(_filteredLyrics);
                     lrcMap.addAll(getLrcMap(_filteredLyrics));
-                    storageUtil.saveLyrics(getMusic().getsName(), lrcMap);
 
                 });
             });

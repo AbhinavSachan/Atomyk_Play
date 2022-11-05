@@ -254,7 +254,7 @@ public class MainActivity extends AppCompatActivity {
         if (!phone_ringing) {
             Intent playerIntent = new Intent(context, MediaPlayerService.class);
             context.bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
-            context.startService(playerIntent);
+            startService(playerIntent);
         } else {
             Toast.makeText(this, "Can't play while on call.", Toast.LENGTH_SHORT).show();
         }

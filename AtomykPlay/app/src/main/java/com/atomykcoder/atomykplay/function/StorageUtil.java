@@ -204,4 +204,11 @@ public class StorageUtil {
         }.getType();
         return gson.fromJson(json, type);
     }
+
+    public void removeLyrics (String songName) {
+        sharedPreferences = context.getSharedPreferences(LYRICS_STORAGE, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.remove(songName);
+        editor.apply();
+    }
 }

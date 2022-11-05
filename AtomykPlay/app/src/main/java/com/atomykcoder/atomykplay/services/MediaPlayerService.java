@@ -48,6 +48,7 @@ import androidx.core.app.NotificationCompat;
 import com.atomykcoder.atomykplay.MainActivity;
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.fragments.PlayerFragment;
+import com.atomykcoder.atomykplay.function.LRCMap;
 import com.atomykcoder.atomykplay.function.MusicDataCapsule;
 import com.atomykcoder.atomykplay.function.PlaybackStatus;
 import com.atomykcoder.atomykplay.function.StorageUtil;
@@ -217,10 +218,18 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 if (media_player.isPlaying()) {
                     pauseMedia();
                     handler.removeCallbacks(runnable);
+                    if (PlayerFragment.handler != null) {
+                        PlayerFragment.handler.removeCallbacks(PlayerFragment.runnable);
+                    }
                 } else {
                     resumeMedia();
-                    if (service_bound)
+                    if (service_bound){
                         setSeekBar();
+                        LRCMap lrcMap = storage.loadLyrics(activeMusic.getsName());
+                        if (lrcMap != null) {
+                            PlayerFragment.prepareRunnable();
+                        }
+                    }
                 }
             }
         }
@@ -743,6 +752,9 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             media_player.stop();
         }
         media_player = null;
+        if (PlayerFragment.handler != null) {
+            PlayerFragment.handler.removeCallbacks(PlayerFragment.runnable);
+        }
     }
 
     public void stoppedByNotification() {
