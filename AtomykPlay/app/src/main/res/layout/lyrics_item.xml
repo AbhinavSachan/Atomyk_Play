@@ -9,11 +9,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:paddingHorizontal="30dp"
+        android:paddingHorizontal="25dp"
         android:paddingVertical="40dp"
         android:text="@string/empty"
-        android:textColor="@color/text_color"
-        android:textSize="@dimen/d_28sp"
+        android:textColor="@color/lyrics_text_color"
+        android:textSize="@dimen/d_24sp"
         android:textStyle="bold" />
 
 </RelativeLayout>

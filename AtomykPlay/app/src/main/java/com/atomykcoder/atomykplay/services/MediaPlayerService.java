@@ -223,7 +223,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                     }
                 } else {
                     resumeMedia();
-                    if (service_bound){
+                    if (service_bound) {
                         setSeekBar();
                         LRCMap lrcMap = storage.loadLyrics(activeMusic.getsName());
                         if (lrcMap != null) {
@@ -410,7 +410,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         }
 
         if (notificationBuilder != null) {
-            ((NotificationManager)getSystemService(NOTIFICATION_SERVICE)).notify(NOTIFICATION_ID,notificationBuilder);
+            ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).notify(NOTIFICATION_ID, notificationBuilder);
         }
     }
 
@@ -879,6 +879,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
             stopMedia();
             initiateMediaPlayer();
+
         }
     }
 
@@ -1026,6 +1027,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
     @Override
     public void onDestroy() {
+        removeAudioFocus();
         super.onDestroy();
 
         if (media_player != null) {
@@ -1050,7 +1052,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             media_player.release();
         }
         media_player = null;
-        removeAudioFocus();
         stopForeground(true);
         stopSelf();
     }

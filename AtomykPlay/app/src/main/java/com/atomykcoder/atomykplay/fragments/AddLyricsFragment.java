@@ -6,7 +6,6 @@ import android.app.Dialog;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,18 +16,14 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
+
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.function.FetchLyrics;
-import com.atomykcoder.atomykplay.function.FetchMusic;
 import com.atomykcoder.atomykplay.function.LRCMap;
 import com.atomykcoder.atomykplay.function.MusicDataCapsule;
 import com.atomykcoder.atomykplay.function.StorageUtil;
+
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
@@ -36,13 +31,12 @@ import java.util.regex.Pattern;
 
 public class AddLyricsFragment extends Fragment {
 
-    private  String songName;
-    private  EditText editTextLyrics;
-    private  ProgressBar progressBar;
+    private final LRCMap lrcMap = new LRCMap();
+    private String songName;
+    private EditText editTextLyrics;
+    private ProgressBar progressBar;
     private String artistName;
     private EditText nameEditText, artistEditText;
-    private final LRCMap lrcMap = new LRCMap();
-
     private StorageUtil storageUtil;
     private Button saveBtn, btnFind;
     private Dialog dialog;
@@ -72,16 +66,16 @@ public class AddLyricsFragment extends Fragment {
     }
 
     private void saveMusic() {
-        if(lrcMap.isEmpty()) {
-            showToast("Fetch Lyrics");
+        if (lrcMap.isEmpty()) {
+            showToast("Nothing to save");
         } else {
-            if (storageUtil.loadLyrics(getMusic().getsName())== null)
+            if (storageUtil.loadLyrics(getMusic().getsName()) == null)
                 storageUtil.saveLyrics(getMusic().getsName(), lrcMap);
-            else{
+            else {
                 storageUtil.removeLyrics(getMusic().getsName());
                 storageUtil.saveLyrics(getMusic().getsName(), lrcMap);
             }
-            showToast("saved☻");
+            showToast("Saved");
         }
     }
 
@@ -103,10 +97,10 @@ public class AddLyricsFragment extends Fragment {
 
 
         btnOk.setOnClickListener(v -> {
-            if(isValidInput())
+            if (isValidInput())
                 fetchLyrics();
         });
-        btnCancel.setOnClickListener(v->{
+        btnCancel.setOnClickListener(v -> {
             dialog.cancel();
         });
         dialog.show();
@@ -171,8 +165,9 @@ public class AddLyricsFragment extends Fragment {
 
 
     /**
-     *This function takes unfiltered lrc data and returns a linked hashmap with timestamp as
+     * This function takes unfiltered lrc data and returns a linked hashmap with timestamp as
      * keys and their assigned lyrics as values.
+     *
      * @param lyrics unfiltered lrc data retrieved from megalobiz
      * @return linked hashmap with timestamp as keys and their designated lyrics as values
      */
@@ -183,7 +178,7 @@ public class AddLyricsFragment extends Fragment {
         String _filteredLyrics = filter(lyrics);
         String[] lines = _filteredLyrics.split("\n");
         int i = 0;
-        while(_timestamps.find() && i < lines.length) {
+        while (_timestamps.find() && i < lines.length) {
             _lrcMap.add(_timestamps.group() + "]", lines[i]);
             i++;
         }
@@ -201,6 +196,7 @@ public class AddLyricsFragment extends Fragment {
     /**
      * filter() takes a string argument lyrics. It removes any un-needed information and returns
      * filtered string lyrics which only contains characters a-z, A-z, 0-9
+     *
      * @param lyrics that need to be filtered.
      * @return filtered string lyrics.
      */
@@ -213,6 +209,7 @@ public class AddLyricsFragment extends Fragment {
 
     /**
      * retrieve current music loaded into player fragment
+     *
      * @return active music
      */
     private MusicDataCapsule getMusic() {

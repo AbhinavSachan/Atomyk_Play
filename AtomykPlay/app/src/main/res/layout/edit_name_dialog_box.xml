@@ -85,7 +85,7 @@
             android:layout_weight="1"
             android:backgroundTint="@color/tertiary_bg"
             android:text="@string/cancel"
-            android:textColor="@color/text_color_light" />
+            android:textColor="@color/play_icons_bg" />
 
         <Button
             android:id="@+id/btn_ok"
@@ -95,7 +95,7 @@
             android:layout_weight="1"
             android:backgroundTint="@color/tertiary_bg"
             android:text="@string/ok"
-            android:textColor="@color/text_color_light" />
+            android:textColor="@color/play_icons_bg" />
     </LinearLayout>
 
 </LinearLayout>

@@ -127,16 +127,29 @@ public class MainActivity extends AppCompatActivity {
             mainPlayer.setAlpha(0 + slideOffset * 3);
         }
     };
+    public PlayerFragment playerFragment;
+    public SearchResultsFragment searchResultsFragment; // This being here is very important for search method to work
+    public Context mainActivityContext;
     private ArrayList<MusicDataCapsule> dataList;
     private MusicMainAdapter adapter;
     private LinearLayout linearLayout;
     private RecyclerView recyclerView;
-    private PlayerFragment playerFragment;
-    private SearchResultsFragment searchResultsFragment; // This being here is very important for search method to work
     private AudioManager audioManager;
     private TelephonyManager telephonyManager;
     private PhoneStateListener phoneStateListener;
-    private Context context;
+
+    //endregion
+    public static int convertToMillis(String duration) {
+        int out;
+        String _duration = duration.replace("[", "").replace("]", "");
+        String[] numbers = _duration.split(":");
+        int first = Integer.parseInt(numbers[0]);
+        int second = Integer.parseInt(numbers[1]);
+        first = first * (60 * 1000);
+        second = second * 1000;
+        out = first + second;
+        return out;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -144,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         //initializations
-        context = MainActivity.this;
+        mainActivityContext = MainActivity.this;
         linearLayout = findViewById(R.id.song_not_found_layout);
         recyclerView = findViewById(R.id.music_recycler);
         player_bottom_sheet = findViewById(R.id.player_main_container);
@@ -215,7 +228,7 @@ public class MainActivity extends AppCompatActivity {
 
 //                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 //                    if (audioManager.isBluetoothScoOn()){
-//                        playAudio();audioManager.startBluetoothSco();
+//                        playAudio();
 //                    }else if (audioManager.isWiredHeadsetOn()){
 //                        playAudio();
 //                    }
@@ -252,8 +265,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void startService() {
         if (!phone_ringing) {
-            Intent playerIntent = new Intent(context, MediaPlayerService.class);
-            context.bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
+            Intent playerIntent = new Intent(mainActivityContext, MediaPlayerService.class);
+            mainActivityContext.bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
             startService(playerIntent);
         } else {
             Toast.makeText(this, "Can't play while on call.", Toast.LENGTH_SHORT).show();
@@ -295,13 +308,13 @@ public class MainActivity extends AppCompatActivity {
                 public void run() {
                     //service is active send media with broadcast receiver
                     Intent broadcastIntent = new Intent(BROADCAST_PAUSE_PLAY_MUSIC);
-                    context.sendBroadcast(broadcastIntent);
+                    mainActivityContext.sendBroadcast(broadcastIntent);
                 }
             }, 0);
         } else {
             //service is active send media with broadcast receiver
             Intent broadcastIntent = new Intent(BROADCAST_PAUSE_PLAY_MUSIC);
-            context.sendBroadcast(broadcastIntent);
+            mainActivityContext.sendBroadcast(broadcastIntent);
         }
     }
 
@@ -313,32 +326,13 @@ public class MainActivity extends AppCompatActivity {
                 public void run() {
                     //service is active send media with broadcast receiver
                     Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEXT_MUSIC);
-                    context.sendBroadcast(broadcastIntent);
+                    mainActivityContext.sendBroadcast(broadcastIntent);
                 }
             }, 0);
         } else {
             //service is active send media with broadcast receiver
             Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEXT_MUSIC);
-            context.sendBroadcast(broadcastIntent);
-        }
-    }
-
-    public void playPreviousAudio() {
-        if (!service_bound) {
-            startService();
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    //service is active send media with broadcast receiver
-                    Intent broadcastIntent = new Intent(BROADCAST_PLAY_PREVIOUS_MUSIC);
-                    context.sendBroadcast(broadcastIntent);
-                }
-            }, 0);
-
-        } else {
-            //service is active send media with broadcast receiver
-            Intent broadcastIntent = new Intent(BROADCAST_PLAY_PREVIOUS_MUSIC);
-            context.sendBroadcast(broadcastIntent);
+            mainActivityContext.sendBroadcast(broadcastIntent);
         }
     }
 
@@ -356,6 +350,25 @@ public class MainActivity extends AppCompatActivity {
 //            sendBroadcast(broadcastIntent);
 //        }
 //    }
+
+    public void playPreviousAudio() {
+        if (!service_bound) {
+            startService();
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    //service is active send media with broadcast receiver
+                    Intent broadcastIntent = new Intent(BROADCAST_PLAY_PREVIOUS_MUSIC);
+                    mainActivityContext.sendBroadcast(broadcastIntent);
+                }
+            }, 0);
+
+        } else {
+            //service is active send media with broadcast receiver
+            Intent broadcastIntent = new Intent(BROADCAST_PLAY_PREVIOUS_MUSIC);
+            mainActivityContext.sendBroadcast(broadcastIntent);
+        }
+    }
 
     private void setFragmentInSlider() {
         FragmentManager manager = getSupportFragmentManager();
@@ -495,18 +508,6 @@ public class MainActivity extends AppCompatActivity {
                 searchResultsFragment.search(query, dataList);
             }
         });
-    }
-    //endregion
-    public static int convertToMillis(String duration) {
-        int out;
-        String _duration = duration.replace("[", "").replace("]", "");
-        String[] numbers = _duration.split(":");
-        int first = Integer.parseInt(numbers[0]);
-        int second = Integer.parseInt(numbers[1]);
-        first = first * (60 * 1000);
-        second = second * 1000;
-        out = first + second;
-        return out;
     }
 
 }

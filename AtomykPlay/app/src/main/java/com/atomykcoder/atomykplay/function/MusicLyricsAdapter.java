@@ -31,7 +31,6 @@ public class MusicLyricsAdapter extends RecyclerView.Adapter<MusicLyricsAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull LyricsViewAdapter holder, int position) {
-
         holder.textView.setText(arrayList.get(position));
 
     }

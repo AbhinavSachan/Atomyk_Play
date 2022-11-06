@@ -209,8 +209,6 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
             runnable = new Runnable() {
                 @Override
                 public void run() {
-
-                    Log.i("lyrics", "started");
                     int nextStampInMillis = 0;
                     int currPosInMillis = 0;
                     if (media_player_service != null) {
@@ -229,16 +227,13 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
 
                 }
             };
-            Log.i("lyrics", "stopped");
             handler.postDelayed(runnable, 0);
         }
     }
 
     @Override
     public void onStop() {
-        Log.i("stop", "stopping");
         super.onStop();
-        Log.i("stop", "stopped");
     }
 
     public static String getCurrentStamp() {
@@ -290,7 +285,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         return media_player_service.media_player.getCurrentPosition();
     }
 
-    public static void setLyricsAdapter() {
+    private static void setLyricsAdapter() {
         LinearLayoutManager manager = new LinearLayoutManager(context);
         manager.setSmoothScrollbarEnabled(true);
         lyricsRecyclerView.setLayoutManager(manager);
