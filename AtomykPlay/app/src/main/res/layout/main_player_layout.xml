@@ -71,8 +71,20 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_centerInParent="true"
-                    android:paddingVertical="180dp"
-                    android:clipToPadding="false" />
+                    android:clipToPadding="false"
+                    android:paddingVertical="130dp" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="180dp"
+                    android:layout_alignParentTop="true"
+                    android:background="@drawable/fade_edge_start" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="180dp"
+                    android:layout_alignParentBottom="true"
+                    android:background="@drawable/fade_edges_end" />
 
                 <LinearLayout
                     android:id="@+id/no_lyrics_layout"
@@ -177,7 +189,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/linearLayoutNameAndList"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="48dp"
+            android:layout_marginTop="40dp"
             android:gravity="center"
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
@@ -212,21 +224,33 @@
                 android:src="@drawable/ic_previous_main"
                 android:theme="@android:style/ThemeOverlay.Material.Dark" />
 
-            <ImageView
-                android:id="@+id/player_play_iv"
+            <RelativeLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginHorizontal="8dp"
-                android:background="@drawable/round_corner"
-                android:clickable="true"
-                android:contentDescription="@string/imageView"
-                android:cropToPadding="false"
-                android:elevation="4dp"
-                android:focusable="true"
                 android:padding="10dp"
-                android:src="@drawable/ic_play_main"
-                android:theme="@android:style/ThemeOverlay.Material.Dark" />
+                android:clipToPadding="false"
+                android:layout_height="wrap_content">
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/player_play_cv"
+                    android:layout_width="65dp"
+                    android:layout_height="65dp"
+                    app:cardBackgroundColor="@color/tertiary_bg"
+                    android:focusable="true"
+                    app:cardElevation="8dp"
+                    android:clickable="true"
+                    android:theme="@android:style/ThemeOverlay.Material.Dark"
+                    app:cardCornerRadius="50dp">
+                    <ImageView
+                        android:id="@+id/player_play_iv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:contentDescription="@string/imageView"
+                        android:src="@drawable/ic_play_main"
+                        />
+                </com.google.android.material.card.MaterialCardView>
+
+            </RelativeLayout>
+
 
             <ImageView
                 android:id="@+id/player_next_iv"

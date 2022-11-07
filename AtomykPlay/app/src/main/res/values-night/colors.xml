@@ -14,9 +14,10 @@
     <color name="light_slate_gray_blue">#A1A1A1</color>
     <color name="click_effect_color">#7CF3C2EC</color>
     <color name="click_effect_color_inverse">#9A231F1F</color>
-    <color name="seekbar_shadow_center">#33FFFFFF</color>
-    <color name="seekbar_shadow_start">#11FFFFFF</color>
+    <color name="seekbar_shadow_center">#79435263</color>
+    <color name="seekbar_shadow_start">#6D475265</color>
     <color name="for_empty_images">#C9AFB3AE</color>
-    <color name="lyrics_text_color">#5E5E5E</color>
+    <color name="lyrics_text_color">#C5C5C5</color>
+    <color name="heart_bg">#DC2525</color>
 
 </resources>

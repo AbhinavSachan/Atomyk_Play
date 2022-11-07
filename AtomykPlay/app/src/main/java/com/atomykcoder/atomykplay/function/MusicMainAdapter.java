@@ -6,6 +6,8 @@ import static com.atomykcoder.atomykplay.function.StorageUtil.shuffle;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,6 +29,8 @@ import com.turingtechnologies.materialscrollbar.INameableAdapter;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.MusicViewAdapter> implements INameableAdapter {
     Context context;
@@ -70,21 +74,31 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
                         //saving list in temp for restore function in player fragment
                         storage.saveTempMusicList(musicArrayList);
 
+                        ShuffleQueueList shuffleQueueList = new ShuffleQueueList();
+                        ExecutorService service = Executors.newSingleThreadExecutor();
+
+
                         if (musicArrayList != null) {
                             if (position != -1 && position < musicArrayList.size()) {
                                 activeMusic = musicArrayList.get(position);
                             } else {
                                 activeMusic = musicArrayList.get(0);
                             }
-                            //removing current item from list
-                            shuffleList.remove(position);
-                            //shuffling list
-                            Collections.shuffle(shuffleList);
-                            //adding the removed item in shuffled list on 0th index
-                            shuffleList.add(0, activeMusic);
-                            //saving list
-                            storage.saveMusicList(shuffleList);
-                            storage.saveMusicIndex(0);
+//                            //removing current item from list
+//                            shuffleList.remove(position);
+//                            //shuffling list
+//                            Collections.shuffle(shuffleList);
+//                            //adding the removed item in shuffled list on 0th index
+//                            shuffleList.add(0, activeMusic);
+//                            //saving list
+//                            storage.saveMusicList(shuffleList);
+//                            storage.saveMusicIndex(0);
+
+                            service.execute(() -> {
+                                shuffleQueueList.shuffle(shuffleList,activeMusic,position,storage);
+                                // post-execute code here
+                            });
+
                         }
                     }else if (storage.loadShuffle().equals(no_shuffle)){
                         //Store serializable music list to sharedPreference

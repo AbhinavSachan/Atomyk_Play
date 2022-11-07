@@ -15,6 +15,7 @@ import static com.atomykcoder.atomykplay.function.StorageUtil.shuffle;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
@@ -23,6 +24,7 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.PowerManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -46,11 +48,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.MainActivity;
 import com.atomykcoder.atomykplay.R;
+import com.atomykcoder.atomykplay.function.CenterSmoothScrollScript;
 import com.atomykcoder.atomykplay.function.LRCMap;
 import com.atomykcoder.atomykplay.function.MusicDataCapsule;
 import com.atomykcoder.atomykplay.function.MusicLyricsAdapter;
 import com.atomykcoder.atomykplay.function.MusicQueueAdapter;
 import com.atomykcoder.atomykplay.function.PlaybackStatus;
+import com.atomykcoder.atomykplay.function.ShuffleQueueList;
 import com.atomykcoder.atomykplay.function.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
 import com.atomykcoder.atomykplay.interfaces.SimpleTouchCallback;
@@ -61,9 +65,12 @@ import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeListener, OnDragStartListener {
 
+    private final static ArrayList<String> lyricsArrayList = new ArrayList<>();
     public static View mini_play_view;
     public static ImageView mini_cover, mini_pause, mini_next;
     public static LinearProgressIndicator mini_progress;
@@ -73,6 +80,8 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     public static ImageView playImg;
     public static TextView curPosTv, durationTv;
     public static CustomBottomSheet<View> queueSheetBehaviour;
+    public static Runnable runnable;
+    public static Handler handler;
     private static Context context;
     //cover image view
     private static ImageView playerCoverImage;
@@ -80,9 +89,9 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     private static TextView playerSongNameTv, playerArtistNameTv, mimeTv, bitrateTv, timerTv;
     private static RecyclerView lyricsRecyclerView;
     private static View noLyricsLayout;
-    private final static ArrayList<String> lyricsArrayList = new ArrayList<>();
-    public static Runnable runnable;
     private static LRCMap lrcMap;
+    private static RecyclerView.LayoutManager lm;
+    private static RecyclerView.SmoothScroller smoothScroller;
     final private CountDownTimer[] countDownTimer = new CountDownTimer[1];
     public View player_layout;
     public View queueBottomSheet;
@@ -99,8 +108,6 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     private MainActivity mainActivity;
     private CardView coverCardView;
     private ImageView lyricsImg;
-    public static Handler handler;
-
 
     private static boolean getPlayerState() {
         if (media_player_service.media_player != null)
@@ -222,6 +229,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
                     }
                     if (lrcMap.containsStamp(getCurrentStamp())) {
                         ScrollToPosition(lrcMap.getIndexAtStamp(getCurrentStamp()));
+
                     }
                     handler.postDelayed(runnable, nextStampInMillis - currPosInMillis);
 
@@ -229,11 +237,6 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
             };
             handler.postDelayed(runnable, 0);
         }
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
     }
 
     public static String getCurrentStamp() {
@@ -256,9 +259,9 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     }
 
     private static void ScrollToPosition(int position) {
-        lyricsRecyclerView.smoothScrollToPosition(position);
+        smoothScroller.setTargetPosition(position);
+        lm.startSmoothScroll(smoothScroller);
     }
-
 
     //give the mime type value and it will return extension
     public static String getMime(String filePath) {
@@ -286,12 +289,20 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     }
 
     private static void setLyricsAdapter() {
-        LinearLayoutManager manager = new LinearLayoutManager(context);
-        manager.setSmoothScrollbarEnabled(true);
-        lyricsRecyclerView.setLayoutManager(manager);
+        lm = new LinearLayoutManager(context);// or whatever layout manager you need
+
+        smoothScroller = new CenterSmoothScrollScript.CenterSmoothScroller(lyricsRecyclerView.getContext());
+
+        lyricsRecyclerView.setLayoutManager(lm);
 
         MusicLyricsAdapter lyricsAdapter = new MusicLyricsAdapter(context, lyricsArrayList);
         lyricsRecyclerView.setAdapter(lyricsAdapter);
+
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
     }
 
     @Override
@@ -355,7 +366,8 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         //main player events
         previousImg.setOnClickListener(v -> mainActivity.playPreviousAudio());
         nextImg.setOnClickListener(v -> mainActivity.playNextAudio());
-        playImg.setOnClickListener(v -> mainActivity.pausePlayAudio());
+        CardView playCv = view.findViewById(R.id.player_play_cv);
+        playCv.setOnClickListener(v -> mainActivity.pausePlayAudio());
         queImg.setOnClickListener(v -> openQue());
         repeatImg.setOnClickListener(v -> repeatFun());
         shuffleImg.setOnClickListener(v -> shuffleList());
@@ -606,30 +618,45 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         int musicIndex;
         musicIndex = storageUtil.loadMusicIndex();
 
-        //removing current item from list
-        musicList.remove(musicIndex);
-        //shuffling list
-        Collections.shuffle(musicList);
-        //adding the removed item in shuffled list on 0th index
-        musicList.add(0, activeMusic);
-        //saving list
-        storageUtil.saveMusicList(musicList);
-        //saving index
-        storageUtil.saveMusicIndex(0);
-        setAdapter();
+        ShuffleQueueList shuffleQueueList = new ShuffleQueueList();
+        ExecutorService service = Executors.newSingleThreadExecutor();
+        Handler handler = new Handler(Looper.getMainLooper());
+
+        // do in background code here
+        service.execute(() -> {
+            shuffleQueueList.shuffle(musicList,activeMusic,musicIndex,storageUtil);
+            // post-execute code here
+            handler.post(this::setAdapter);
+        });
+
+        // stopping the background thread (crucial)
+        service.shutdown();
+
     }
 
     @SuppressLint("NotifyDataSetChanged")
     private void restoreLastListAndPos() {
         ArrayList<MusicDataCapsule> tempList = storageUtil.loadTempMusicList();
         MusicDataCapsule activeMusic = getMusic();
-        int curIndex;
+        final int[] curIndex = new int[1];
 
-        curIndex = activeMusicIndexFinder(activeMusic, tempList);
-        if (curIndex != -1) {
-            storageUtil.saveMusicIndex(curIndex);
-        }
-        storageUtil.saveMusicList(tempList);
+        ExecutorService service = Executors.newSingleThreadExecutor();
+        Handler handler = new Handler(Looper.getMainLooper());
+
+        // do in background code here
+        service.execute(() -> {
+            curIndex[0] = activeMusicIndexFinder(activeMusic, tempList);
+            if (curIndex[0] != -1) {
+                storageUtil.saveMusicIndex(curIndex[0]);
+            }
+            storageUtil.saveMusicList(tempList);
+            // post-execute code here
+            handler.post(this::setAdapter);
+        });
+
+        // stopping the background thread (crucial)
+        service.shutdown();
+
         setAdapter();
     }
 

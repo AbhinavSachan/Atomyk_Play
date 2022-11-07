@@ -14,6 +14,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 
@@ -22,6 +23,8 @@ import com.atomykcoder.atomykplay.function.FetchLyrics;
 import com.atomykcoder.atomykplay.function.LRCMap;
 import com.atomykcoder.atomykplay.function.MusicDataCapsule;
 import com.atomykcoder.atomykplay.function.StorageUtil;
+import com.google.android.material.snackbar.BaseTransientBottomBar;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
@@ -131,7 +134,7 @@ public class AddLyricsFragment extends Fragment {
         //clear hashmap prior to retrieving data
         lrcMap.clear();
 
-        showToast("fetching");
+        showToast("Searching...");
 
         FetchLyrics fetchLyrics = new FetchLyrics();
         try {
@@ -143,16 +146,19 @@ public class AddLyricsFragment extends Fragment {
 
             // do in background code here
             service.execute(() -> {
-                String _unfilteredLyrics = fetchLyrics.fetch(artistName + " " + songName);
+                String unfilteredLyrics = fetchLyrics.fetch(artistName + " " + songName);
 
                 // post-execute code here
                 handler.post(() -> {
                     fetchLyrics.onPostExecute(progressBar);
 
-                    String _filteredLyrics = splitLyricsByNewLine(_unfilteredLyrics);
-                    editTextLyrics.setText(_filteredLyrics);
-                    lrcMap.addAll(getLrcMap(_filteredLyrics));
-
+                    if (unfilteredLyrics.equals("")) {
+                        Toast.makeText(getContext(),"Lyrics Not Found", Toast.LENGTH_SHORT).show();
+                    }else {
+                        String filteredLyrics = splitLyricsByNewLine(unfilteredLyrics);
+                        editTextLyrics.setText(filteredLyrics);
+                        lrcMap.addAll(getLrcMap(filteredLyrics));
+                    }
                 });
             });
 
