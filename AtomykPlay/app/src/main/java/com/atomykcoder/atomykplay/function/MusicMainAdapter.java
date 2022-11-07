@@ -84,18 +84,16 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
                             } else {
                                 activeMusic = musicArrayList.get(0);
                             }
-//                            //removing current item from list
-//                            shuffleList.remove(position);
-//                            //shuffling list
-//                            Collections.shuffle(shuffleList);
-//                            //adding the removed item in shuffled list on 0th index
-//                            shuffleList.add(0, activeMusic);
-//                            //saving list
-//                            storage.saveMusicList(shuffleList);
-//                            storage.saveMusicIndex(0);
-
                             service.execute(() -> {
-                                shuffleQueueList.shuffle(shuffleList,activeMusic,position,storage);
+                                //removing current item from list
+                                shuffleList.remove(position);
+                                //shuffling list
+                                Collections.shuffle(shuffleList);
+                                //adding the removed item in shuffled list on 0th index
+                                shuffleList.add(0, activeMusic);
+                                //saving list
+                                storage.saveMusicList(shuffleList);
+                                storage.saveMusicIndex(0);
                                 // post-execute code here
                             });
 
