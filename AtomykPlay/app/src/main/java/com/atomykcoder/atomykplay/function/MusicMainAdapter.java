@@ -8,7 +8,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -67,15 +66,14 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
                 if (file.exists()) {
                     //check is service active
                     StorageUtil storage = new StorageUtil(context);
+                    //sending broadcast to start the music from main activity
+                    MainActivity mainActivity = (MainActivity) context;
                     //if shuffle button is already on it will shuffle it from start
-                    if (storage.loadShuffle().equals(shuffle)){
+                    if (storage.loadShuffle().equals(shuffle)) {
                         MusicDataCapsule activeMusic;
                         ArrayList<MusicDataCapsule> shuffleList = new ArrayList<>(musicArrayList);
                         //saving list in temp for restore function in player fragment
                         storage.saveTempMusicList(musicArrayList);
-
-                        ShuffleQueueList shuffleQueueList = new ShuffleQueueList();
-                        ExecutorService service = Executors.newSingleThreadExecutor();
 
 
                         if (musicArrayList != null) {
@@ -84,6 +82,9 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
                             } else {
                                 activeMusic = musicArrayList.get(0);
                             }
+
+                            ExecutorService service = Executors.newSingleThreadExecutor();
+                            Handler handler = new Handler(Looper.getMainLooper());
                             service.execute(() -> {
                                 //removing current item from list
                                 shuffleList.remove(position);
@@ -95,26 +96,27 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
                                 storage.saveMusicList(shuffleList);
                                 storage.saveMusicIndex(0);
                                 // post-execute code here
+                                handler.post(()->{
+                                    mainActivity.playAudio();
+                                    mainActivity.playerFragment.setAdapterInQueue();
+                                });
                             });
+                            service.shutdown();
 
                         }
-                    }else if (storage.loadShuffle().equals(no_shuffle)){
+                    } else if (storage.loadShuffle().equals(no_shuffle)) {
                         //Store serializable music list to sharedPreference
                         storage.saveMusicList(musicArrayList);
                         storage.saveMusicIndex(position);
+                        mainActivity.playAudio();
                     }
-
-                    //sending broadcast to start the music from main activity
-                    MainActivity mainActivity = (MainActivity) context;
-                    mainActivity.playAudio();
-                }else {
+                } else {
                     Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show();
                     notifyItemRemoved(position);
                 }
 
             }
         });
-
 
 
         //add bottom sheet functions in three dot click

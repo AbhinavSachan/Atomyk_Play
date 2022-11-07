@@ -15,7 +15,6 @@ import static com.atomykcoder.atomykplay.function.StorageUtil.shuffle;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
@@ -24,7 +23,6 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.PowerManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -54,7 +52,6 @@ import com.atomykcoder.atomykplay.function.MusicDataCapsule;
 import com.atomykcoder.atomykplay.function.MusicLyricsAdapter;
 import com.atomykcoder.atomykplay.function.MusicQueueAdapter;
 import com.atomykcoder.atomykplay.function.PlaybackStatus;
-import com.atomykcoder.atomykplay.function.ShuffleQueueList;
 import com.atomykcoder.atomykplay.function.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
 import com.atomykcoder.atomykplay.interfaces.SimpleTouchCallback;
@@ -229,7 +226,6 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
                     }
                     if (lrcMap.containsStamp(getCurrentStamp())) {
                         ScrollToPosition(lrcMap.getIndexAtStamp(getCurrentStamp()));
-
                     }
                     handler.postDelayed(runnable, nextStampInMillis - currPosInMillis);
 
@@ -426,7 +422,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
 
     private void setupQueueBottomSheet() {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        setAdapter();
+        setAdapterInQueue();
 
         queueSheetBehaviour = (CustomBottomSheet<View>) BottomSheetBehavior.from(queueBottomSheet);
         queueSheetBehaviour.setHideable(true);
@@ -446,7 +442,10 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
 
     }
 
-    private void setAdapter() {
+    /**
+     * Setting adapter in queue list
+     */
+    public void setAdapterInQueue() {
         ArrayList<MusicDataCapsule> dataList;
         dataList = new StorageUtil(getContext()).loadMusicList();
         MusicQueueAdapter adapter = new MusicQueueAdapter(getActivity(), dataList, this);
@@ -455,9 +454,11 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         ItemTouchHelper.Callback callback = new SimpleTouchCallback(adapter);
         itemTouchHelper = new ItemTouchHelper(callback);
         itemTouchHelper.attachToRecyclerView(recyclerView);
-
     }
 
+    /**
+     * it sets visibility of cover image and lyrics recyclerView
+     */
     private void openLyricsPanel() {
         if (coverCardView.getVisibility() == View.VISIBLE) {
             lyricsImg.setImageResource(R.drawable.ic_baseline_subtitles_off);
@@ -618,17 +619,24 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         int musicIndex;
         musicIndex = storageUtil.loadMusicIndex();
 
-        ShuffleQueueList shuffleQueueList = new ShuffleQueueList();
         ExecutorService service = Executors.newSingleThreadExecutor();
         Handler handler = new Handler(Looper.getMainLooper());
 
         // do in background code here
         service.execute(() -> {
-            shuffleQueueList.shuffle(musicList,activeMusic,musicIndex,storageUtil);
+            //removing current item from list
+            musicList.remove(musicIndex);
+            //shuffling list
+            Collections.shuffle(musicList);
+            //adding the removed item in shuffled list on 0th index
+            musicList.add(0, activeMusic);
+            //saving list
+            storageUtil.saveMusicList(musicList);
+            //saving index
+            storageUtil.saveMusicIndex(0);
             // post-execute code here
-            handler.post(this::setAdapter);
+            handler.post(this::setAdapterInQueue);
         });
-
         // stopping the background thread (crucial)
         service.shutdown();
 
@@ -651,13 +659,12 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
             }
             storageUtil.saveMusicList(tempList);
             // post-execute code here
-            handler.post(this::setAdapter);
+            handler.post(this::setAdapterInQueue);
         });
 
         // stopping the background thread (crucial)
         service.shutdown();
 
-        setAdapter();
     }
 
     private int activeMusicIndexFinder(MusicDataCapsule activeMusic, ArrayList<MusicDataCapsule> list) {

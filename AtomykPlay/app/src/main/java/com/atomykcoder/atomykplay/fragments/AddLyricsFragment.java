@@ -1,5 +1,6 @@
 package com.atomykcoder.atomykplay.fragments;
 
+import static com.atomykcoder.atomykplay.fragments.PlayerFragment.runnableSyncLyrics;
 import static com.atomykcoder.atomykplay.fragments.PlayerFragment.showToast;
 
 import android.app.Dialog;
@@ -23,8 +24,6 @@ import com.atomykcoder.atomykplay.function.FetchLyrics;
 import com.atomykcoder.atomykplay.function.LRCMap;
 import com.atomykcoder.atomykplay.function.MusicDataCapsule;
 import com.atomykcoder.atomykplay.function.StorageUtil;
-import com.google.android.material.snackbar.BaseTransientBottomBar;
-import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
@@ -70,7 +69,7 @@ public class AddLyricsFragment extends Fragment {
 
     private void saveMusic() {
         if (lrcMap.isEmpty()) {
-            showToast("Nothing to save");
+            showToast("Can't Save");
         } else {
             if (storageUtil.loadLyrics(getMusic().getsName()) == null)
                 storageUtil.saveLyrics(getMusic().getsName(), lrcMap);
@@ -79,6 +78,7 @@ public class AddLyricsFragment extends Fragment {
                 storageUtil.saveLyrics(getMusic().getsName(), lrcMap);
             }
             showToast("Saved");
+            runnableSyncLyrics();
         }
     }
 
@@ -153,8 +153,8 @@ public class AddLyricsFragment extends Fragment {
                     fetchLyrics.onPostExecute(progressBar);
 
                     if (unfilteredLyrics.equals("")) {
-                        Toast.makeText(getContext(),"Lyrics Not Found", Toast.LENGTH_SHORT).show();
-                    }else {
+                        Toast.makeText(getContext(), "Lyrics Not Found", Toast.LENGTH_SHORT).show();
+                    } else {
                         String filteredLyrics = splitLyricsByNewLine(unfilteredLyrics);
                         editTextLyrics.setText(filteredLyrics);
                         lrcMap.addAll(getLrcMap(filteredLyrics));

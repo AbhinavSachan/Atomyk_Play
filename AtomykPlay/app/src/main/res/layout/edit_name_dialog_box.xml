@@ -27,6 +27,9 @@
         app:boxCornerRadiusBottomEnd="8dp"
         app:boxCornerRadiusBottomStart="8dp"
         app:boxCornerRadiusTopEnd="8dp"
+        app:hintTextColor="@color/hint_color"
+        app:boxStrokeColor="@color/hint_color"
+        app:placeholderTextColor="@color/hint_color"
         app:boxCornerRadiusTopStart="8dp">
 
         <com.google.android.material.textfield.TextInputEditText
@@ -52,6 +55,9 @@
         app:boxBackgroundColor="@color/secondary_bg"
         app:boxCornerRadiusBottomEnd="8dp"
         app:boxCornerRadiusBottomStart="8dp"
+        app:hintTextColor="@color/hint_color"
+        app:boxStrokeColor="@color/hint_color"
+        app:placeholderTextColor="@color/hint_color"
         app:boxCornerRadiusTopEnd="8dp"
         app:boxCornerRadiusTopStart="8dp">
 
