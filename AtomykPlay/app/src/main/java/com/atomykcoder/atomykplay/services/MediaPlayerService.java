@@ -55,6 +55,9 @@ import com.atomykcoder.atomykplay.function.StorageUtil;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MediaPlayerService extends Service implements MediaPlayer.OnCompletionListener,
         MediaPlayer.OnBufferingUpdateListener, MediaPlayer.OnErrorListener,
@@ -349,6 +352,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             }
         }
         if (notificationBuilder != null) {
+            ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).notify(NOTIFICATION_ID, notificationBuilder);
             startForeground(NOTIFICATION_ID, notificationBuilder);
         }
     }
@@ -625,12 +629,21 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
     @Override
     public void onPrepared(MediaPlayer mp) {
-        resumeMedia();
-        if (service_bound) {
-            PlayerFragment.setMainPlayerLayout();
-            updateMetaData();
-            setSeekBar();
-        }
+        ExecutorService service = Executors.newSingleThreadExecutor();
+        Handler handler = new Handler(Looper.getMainLooper());
+        service.execute(() -> {
+            resumeMedia();
+            // post-execute code here
+            handler.post(()->{
+                if (service_bound) {
+                    PlayerFragment.setMainPlayerLayout();
+                    updateMetaData();
+                    setSeekBar();
+                }
+            });
+        });
+        service.shutdown();
+
     }
 
     @Override
@@ -751,7 +764,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         if (media_player.isPlaying()) {
             media_player.stop();
         }
-        media_player = null;
         if (PlayerFragment.handler != null) {
             PlayerFragment.handler.removeCallbacks(PlayerFragment.runnable);
         }
@@ -801,6 +813,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             } else {
                 initiateMediaPlayer();
             }
+
         } else {
             Toast.makeText(getApplicationContext(), "Can't play while on call", Toast.LENGTH_SHORT).show();
         }

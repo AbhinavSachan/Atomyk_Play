@@ -69,17 +69,30 @@ public class AddLyricsFragment extends Fragment {
 
     private void saveMusic() {
         if (lrcMap.isEmpty()) {
-            showToast("Can't Save");
-        } else {
-            if (storageUtil.loadLyrics(getMusic().getsName()) == null)
-                storageUtil.saveLyrics(getMusic().getsName(), lrcMap);
-            else {
-                storageUtil.removeLyrics(getMusic().getsName());
-                storageUtil.saveLyrics(getMusic().getsName(), lrcMap);
+            if (!editTextLyrics.getText().toString().trim().equals("")) {
+
+                String unfilteredLyrics = editTextLyrics.getText().toString();
+
+                lrcMap.addAll(getLrcMap(unfilteredLyrics));
+                showLyrics();
+            } else {
+                showToast("Can't Save");
             }
-            showToast("Saved");
-            runnableSyncLyrics();
+        } else {
+            showLyrics();
         }
+
+    }
+
+    private void showLyrics() {
+        if (storageUtil.loadLyrics(getMusic().getsName()) == null)
+            storageUtil.saveLyrics(getMusic().getsName(), lrcMap);
+        else {
+            storageUtil.removeLyrics(getMusic().getsName());
+            storageUtil.saveLyrics(getMusic().getsName(), lrcMap);
+        }
+        showToast("Saved");
+        runnableSyncLyrics();
     }
 
     private void setDialogBox() {
