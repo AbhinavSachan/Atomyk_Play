@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="68dp"
     android:background="@color/primary_bg"
-    tools:context=".fragments.PlayerFragment">
+    tools:context=".fragments.BottomSheetPlayerFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraint_layout"

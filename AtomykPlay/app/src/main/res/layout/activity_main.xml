@@ -1,84 +1,123 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main_layout"
     android:layout_width="match_parent"
+    android:id="@+id/drawer_layout"
     android:layout_height="match_parent"
-    android:background="@color/primary_bg"
     tools:context=".MainActivity">
 
-    <RelativeLayout
-        android:id="@+id/sec_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="84dp"
-            android:background="@color/primary_bg"
-            android:paddingTop="30dp"
-            android:elevation="16dp"
-            android:theme="@style/ThemeOverlay.AppCompat.DayNight"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.DayNight" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/music_recycler"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_below="@id/toolbar"
-            android:clipToPadding="false"
-            android:paddingBottom="70dp" />
-
-
-        <com.turingtechnologies.materialscrollbar.DragScrollBar
-            android:id="@+id/dragScrollBar"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_below="@+id/toolbar"
-            android:layout_alignParentEnd="true"
-            android:layout_marginBottom="68dp"
-            app:msb_handleOffColor="@color/sub_text_grey"
-            app:msb_handleColor="@color/tertiary_bg"
-            app:msb_barColor="@color/primary_bg"
-            app:msb_lightOnTouch="true"
-            app:msb_recyclerView="@id/music_recycler"/>
-
-        <LinearLayout
-            android:id="@+id/song_not_found_layout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:orientation="vertical">
-
-            <ImageView
-                android:layout_width="250dp"
-                android:layout_height="250dp"
-                android:contentDescription="@string/empty"
-                android:padding="2dp"
-                android:src="@drawable/no_song_image" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:text="@string/nothing_to_show"
-                android:textColor="@color/secondary_bg"
-                android:textSize="@dimen/d_28sp"
-                android:textStyle="bold" />
-
-        </LinearLayout>
-
-    </RelativeLayout>
-
-    <FrameLayout
-        android:id="@+id/player_main_container"
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/main_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:elevation="30dp"
-        app:layout_behavior=".fragments.CustomBottomSheet"/>
+        android:background="@color/primary_bg">
+
+        <RelativeLayout
+            android:id="@+id/sec_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="84dp"
+                android:background="@color/primary_bg"
+                android:elevation="16dp"
+                android:paddingTop="30dp"
+                android:theme="@style/ThemeOverlay.AppCompat.DayNight"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.DayNight" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/music_recycler"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@id/toolbar"
+                android:clipToPadding="false"
+                android:paddingBottom="70dp" />
 
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+            <com.turingtechnologies.materialscrollbar.DragScrollBar
+                android:id="@+id/dragScrollBar"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_below="@+id/toolbar"
+                android:layout_alignParentEnd="true"
+                android:layout_marginBottom="68dp"
+                app:msb_barColor="@color/primary_bg"
+                app:msb_handleColor="@color/tertiary_bg"
+                app:msb_handleOffColor="@color/sub_text_grey"
+                app:msb_lightOnTouch="true"
+                app:msb_recyclerView="@id/music_recycler" />
 
+            <LinearLayout
+                android:id="@+id/song_not_found_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:visibility="gone"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="250dp"
+                    android:layout_height="250dp"
+                    android:contentDescription="@string/empty"
+                    android:padding="2dp"
+                    android:src="@drawable/no_song_image" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/nothing_to_show"
+                    android:textColor="@color/secondary_bg"
+                    android:textSize="@dimen/d_28sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+            <ProgressBar
+                android:id="@+id/progress_bar_main_activity"
+                android:layout_width="wrap_content"
+                android:layout_centerInParent="true"
+                android:visibility="gone"
+                android:interpolator="@android:anim/accelerate_decelerate_interpolator"
+                android:indeterminateTint="@color/text_color"
+                android:layout_height="wrap_content"/>
+
+        </RelativeLayout>
+
+        <View
+            app:layout_anchor="@id/player_main_container"
+            android:background="@drawable/fade_edges_end"
+            android:layout_width="match_parent"
+            android:layout_height="20dp"/>
+
+        <View
+            android:id="@+id/shadow_main"
+            android:background="@color/translucent_black"
+            android:layout_width="match_parent"
+            android:alpha="0"
+            android:layout_height="match_parent"/>
+
+        <FrameLayout
+            android:id="@+id/player_main_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:elevation="30dp"
+            app:layout_behavior=".fragments.CustomBottomSheet" />
+
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/navigation_drawer"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:backgroundTint="@color/secondary_bg"
+        android:fitsSystemWindows="true"
+        app:headerLayout="@layout/nav_header"
+        app:itemTextAppearance="?android:attr/textAppearanceSmall"
+        app:menu="@menu/navigation_menu" />
+
+</androidx.drawerlayout.widget.DrawerLayout>

@@ -487,4 +487,12 @@
 
     </LinearLayout>
 
+    <View
+        android:id="@+id/shadow_player"
+        android:background="@color/translucent_black"
+        android:layout_width="match_parent"
+        android:alpha="0"
+        android:layout_height="match_parent"/>
+
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

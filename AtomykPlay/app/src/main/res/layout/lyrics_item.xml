@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:paddingHorizontal="25dp"
-        android:paddingVertical="40dp"
+        android:paddingVertical="20dp"
         android:text="@string/empty"
         android:textColor="@color/lyrics_text_color"
         android:textSize="@dimen/d_24sp"

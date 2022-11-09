@@ -1,36 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    style="@style/Theme.MaterialComponents.Dialog"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/primary_bg"
-    style="@style/Theme.MaterialComponents.Dialog"
     android:orientation="vertical"
-    android:padding="10dp">
+    android:paddingHorizontal="10dp"
+    android:paddingBottom="10dp">
 
     <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="6dp"
+        android:padding="4dp"
         android:text="@string/search_lyrics"
         android:textColor="@color/text_color"
-        android:textStyle="bold"
-        android:layout_marginVertical="10dp"
-        android:textSize="@dimen/d_28sp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:textSize="@dimen/d_24sp"
+        android:textStyle="bold" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/edit_name_layout"
         style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginVertical="4dp"
+        android:layout_marginVertical="6dp"
         app:boxBackgroundColor="@color/secondary_bg"
         app:boxCornerRadiusBottomEnd="8dp"
         app:boxCornerRadiusBottomStart="8dp"
         app:boxCornerRadiusTopEnd="8dp"
+        app:boxCornerRadiusTopStart="8dp"
+        app:boxStrokeWidth="0dp"
         app:hintTextColor="@color/hint_color"
-        app:boxStrokeColor="@color/hint_color"
-        app:placeholderTextColor="@color/hint_color"
-        app:boxCornerRadiusTopStart="8dp">
+        app:placeholderTextColor="@color/hint_color">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/edit_song_name"
@@ -38,10 +41,11 @@
             android:layout_height="match_parent"
             android:hint="@string/song_name_e"
             android:imeOptions="actionNext"
-            android:paddingTop="25dp"
             android:inputType="text"
             android:maxLength="120"
+            android:focusable="true"
             android:maxLines="1"
+            android:paddingTop="25dp"
             android:textColor="@color/text_color"
             android:textColorHint="@color/hint_color" />
     </com.google.android.material.textfield.TextInputLayout>
@@ -51,26 +55,26 @@
         style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginVertical="4dp"
+        android:layout_marginVertical="6dp"
         app:boxBackgroundColor="@color/secondary_bg"
         app:boxCornerRadiusBottomEnd="8dp"
         app:boxCornerRadiusBottomStart="8dp"
-        app:hintTextColor="@color/hint_color"
-        app:boxStrokeColor="@color/hint_color"
-        app:placeholderTextColor="@color/hint_color"
         app:boxCornerRadiusTopEnd="8dp"
-        app:boxCornerRadiusTopStart="8dp">
+        app:boxCornerRadiusTopStart="8dp"
+        app:boxStrokeWidth="0dp"
+        app:hintTextColor="@color/hint_color"
+        app:placeholderTextColor="@color/hint_color">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/edit_artist_name"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:hint="@string/song_artist_e"
-            android:imeOptions="actionNext"
+            android:imeOptions="actionDone"
             android:inputType="text"
             android:maxLength="75"
-            android:paddingTop="25dp"
             android:maxLines="1"
+            android:paddingTop="25dp"
             android:textColor="@color/text_color"
             android:textColorHint="@color/hint_color" />
     </com.google.android.material.textfield.TextInputLayout>
@@ -79,29 +83,31 @@
         android:id="@+id/btn_ll"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginVertical="4dp"
+        android:layout_marginVertical="6dp"
         android:gravity="center"
-        android:weightSum="2">
+        android:weightSum="4">
 
         <Button
             android:id="@+id/btn_cancel"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="16dp"
-            android:layout_weight="1"
+            android:layout_marginHorizontal="8dp"
+            android:layout_weight="2"
             android:backgroundTint="@color/tertiary_bg"
             android:text="@string/cancel"
-            android:textColor="@color/play_icons_bg" />
+            android:textColor="@color/play_icons_bg"
+            style="?android:attr/buttonBarButtonStyle" />
 
         <Button
             android:id="@+id/btn_ok"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="16dp"
-            android:layout_weight="1"
+            android:layout_weight="2"
+            android:layout_marginHorizontal="8dp"
             android:backgroundTint="@color/tertiary_bg"
             android:text="@string/ok"
-            android:textColor="@color/play_icons_bg" />
+            android:textColor="@color/play_icons_bg"
+            style="?android:attr/buttonBarButtonStyle" />
     </LinearLayout>
 
 </LinearLayout>

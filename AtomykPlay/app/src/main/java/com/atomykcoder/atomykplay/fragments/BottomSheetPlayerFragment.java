@@ -65,7 +65,7 @@ import java.util.Collections;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeListener, OnDragStartListener {
+public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeListener, OnDragStartListener {
 
     private final static ArrayList<String> lyricsArrayList = new ArrayList<>();
     public static View mini_play_view;
@@ -89,6 +89,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     private static LRCMap lrcMap;
     private static RecyclerView.LayoutManager lm;
     private static RecyclerView.SmoothScroller smoothScroller;
+    private static String songName, artistName, mimeType, duration, bitrate, albumUri;
     final private CountDownTimer[] countDownTimer = new CountDownTimer[1];
     public View player_layout;
     public View queueBottomSheet;
@@ -105,6 +106,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     private MainActivity mainActivity;
     private CardView coverCardView;
     private ImageView lyricsImg;
+    private View shadowPlayer;
 
     private static boolean getPlayerState() {
         if (media_player_service.media_player != null)
@@ -120,6 +122,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         int musicIndex;
         musicIndex = storageUtil.loadMusicIndex();
 
+
         if (musicList != null)
             if (musicIndex != -1 && musicIndex < musicList.size()) {
                 activeMusic = musicList.get(musicIndex);
@@ -127,9 +130,17 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
                 activeMusic = musicList.get(0);
             }
         if (activeMusic != null) {
-            if (storageUtil.loadFavorite(activeMusic.getsName()).equals("no_favorite")) {
+            songName = activeMusic.getsName();
+            artistName = activeMusic.getsArtist();
+            mimeType = activeMusic.getsMimeType().toUpperCase();
+            duration = activeMusic.getsLength();
+            bitrate = activeMusic.getsBitrate();
+            albumUri = activeMusic.getsAlbumUri();
+        }
+        if (activeMusic != null) {
+            if (storageUtil.loadFavorite(songName).equals("no_favorite")) {
                 favoriteImg.setImageResource(R.drawable.ic_favorite_border);
-            } else if (storageUtil.loadFavorite(activeMusic.getsName()).equals("favorite")) {
+            } else if (storageUtil.loadFavorite(songName).equals("favorite")) {
                 favoriteImg.setImageResource(R.drawable.ic_favorite);
             }
         }
@@ -137,38 +148,27 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         //main layout setup
         try {
             if (activeMusic != null) {
-                Glide.with(context).load(getEmbeddedImage(activeMusic.getsPath())).apply(new RequestOptions().placeholder(R.drawable.ic_music_thumbnail))
-                        .override(500, 500)
-                        .into(playerCoverImage);
-                try {
-                    playerSongNameTv.setText(activeMusic.getsName());
-                    playerArtistNameTv.setText(activeMusic.getsArtist());
-                    mimeTv.setText(getMime(activeMusic.getsMimeType()).toUpperCase());
-                    durationTv.setText(convertDuration(activeMusic.getsLength()));
 
-                    int bitrateInNum = Integer.parseInt(activeMusic.getsBitrate()) / 1000;
+                try {
+                    playerSongNameTv.setText(songName);
+                    playerArtistNameTv.setText(artistName);
+                    mimeTv.setText(getMime(mimeType));
+                    durationTv.setText(convertDuration(duration));
+                    mini_name_text.setText(songName);
+                    mini_artist_text.setText(artistName);
+
+                    int bitrateInNum = Integer.parseInt(bitrate) / 1000;
                     String finalBitrate = bitrateInNum + " KBPS";
                     bitrateTv.setText(finalBitrate);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        //mini layout setup
-        try {
-            if (activeMusic != null) {
-                Glide.with(context).load(getEmbeddedImage(activeMusic.getsPath())).apply(new RequestOptions().placeholder(R.drawable.ic_music))
+                Glide.with(context).load(albumUri).apply(new RequestOptions().placeholder(R.drawable.ic_music_thumbnail))
+                        .override(500, 500)
+                        .into(playerCoverImage);
+                Glide.with(context).load(albumUri).apply(new RequestOptions().placeholder(R.drawable.ic_music))
                         .override(75, 75)
                         .into(mini_cover);
-                try {
-                    mini_name_text.setText(activeMusic.getsName());
-                    mini_artist_text.setText(activeMusic.getsArtist());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -346,6 +346,8 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         lyricsImg = view.findViewById(R.id.player_lyrics_ll);
         timerTv = view.findViewById(R.id.countdown_tv);
 
+        shadowPlayer = view.findViewById(R.id.shadow_player);
+
         coverCardView = view.findViewById(R.id.card_view_for_cover);
         lyricsRelativeLayout = view.findViewById(R.id.lyrics_relative_layout);
 
@@ -432,11 +434,17 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
                 ((MainActivity) context).mainPlayerSheetBehavior.isEnableCollapse(newState == BottomSheetBehavior.STATE_EXPANDED || newState == BottomSheetBehavior.STATE_DRAGGING);
+                if (queueSheetBehaviour.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+                    shadowPlayer.setAlpha(1);
+                } else if (queueSheetBehaviour.getState() == BottomSheetBehavior.STATE_HIDDEN) {
+                    shadowPlayer.setAlpha(0);
+                }
             }
 
             @Override
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {
                 bottomSheet.setAlpha(0 + slideOffset * 2);
+                shadowPlayer.setAlpha(0 + slideOffset * 2);
             }
         });
 
@@ -447,7 +455,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
      */
     public void setAdapterInQueue() {
         ArrayList<MusicDataCapsule> dataList;
-        dataList = new StorageUtil(getContext()).loadMusicList();
+        dataList = storageUtil.loadMusicList();
         MusicQueueAdapter adapter = new MusicQueueAdapter(getActivity(), dataList, this);
         recyclerView.setAdapter(adapter);
 
@@ -464,11 +472,12 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
             lyricsImg.setImageResource(R.drawable.ic_baseline_subtitles_off);
             coverCardView.setVisibility(View.GONE);
             lyricsRelativeLayout.setVisibility(View.VISIBLE);
-
+            lyricsRelativeLayout.setKeepScreenOn(true);
         } else if (coverCardView.getVisibility() == View.GONE) {
             lyricsImg.setImageResource(R.drawable.ic_baseline_subtitles_24);
             coverCardView.setVisibility(View.VISIBLE);
             lyricsRelativeLayout.setVisibility(View.GONE);
+            lyricsRelativeLayout.setKeepScreenOn(false);
         }
 
     }
@@ -481,7 +490,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
     //region Timer setup
     private void setTimer() {
         //Create a dialogue Box
-        final Dialog timerDialogue = new Dialog(PlayerFragment.context);
+        final Dialog timerDialogue = new Dialog(BottomSheetPlayerFragment.context);
         timerDialogue.requestWindowFeature(Window.FEATURE_NO_TITLE);
         timerDialogue.setCancelable(true);
         timerDialogue.setContentView(R.layout.timer_dialogue);
@@ -618,7 +627,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         storageUtil.saveTempMusicList(musicList);
         int musicIndex;
         musicIndex = storageUtil.loadMusicIndex();
-
+        shuffleImg.setClickable(false);
         ExecutorService service = Executors.newSingleThreadExecutor();
         Handler handler = new Handler(Looper.getMainLooper());
 
@@ -635,10 +644,14 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
             //saving index
             storageUtil.saveMusicIndex(0);
             // post-execute code here
-            handler.post(this::setAdapterInQueue);
+            handler.post(() -> {
+                setAdapterInQueue();
+                shuffleImg.setClickable(true);
+                // stopping the background thread (crucial)
+                service.shutdown();
+            });
         });
-        // stopping the background thread (crucial)
-        service.shutdown();
+
 
     }
 
@@ -648,6 +661,7 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
         MusicDataCapsule activeMusic = getMusic();
         final int[] curIndex = new int[1];
 
+        shuffleImg.setClickable(false);
         ExecutorService service = Executors.newSingleThreadExecutor();
         Handler handler = new Handler(Looper.getMainLooper());
 
@@ -659,15 +673,15 @@ public class PlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeL
             }
             storageUtil.saveMusicList(tempList);
             // post-execute code here
-            handler.post(this::setAdapterInQueue);
+            handler.post(() -> {
+                setAdapterInQueue();
+                shuffleImg.setClickable(true);
+                service.shutdown();
+            });
         });
-
-        // stopping the background thread (crucial)
-        service.shutdown();
-
     }
 
-    private int activeMusicIndexFinder(MusicDataCapsule activeMusic, ArrayList<MusicDataCapsule> list) {
+    private int activeMusicIndexFinder(MusicDataCapsule activeMusic, @NonNull ArrayList<MusicDataCapsule> list) {
         int index;
 
         for (index = 0; index < list.size(); ++index) {

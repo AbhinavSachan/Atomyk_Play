@@ -9,6 +9,7 @@ import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.view.Menu;
@@ -17,22 +18,24 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.LinearLayout;
-import android.widget.RadioGroup;
+import android.widget.ProgressBar;
 import android.widget.SearchView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.view.MenuItemCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.atomykcoder.atomykplay.fragments.BottomSheetPlayerFragment;
 import com.atomykcoder.atomykplay.fragments.CustomBottomSheet;
-import com.atomykcoder.atomykplay.fragments.PlayerFragment;
 import com.atomykcoder.atomykplay.function.FetchMusic;
 import com.atomykcoder.atomykplay.function.MusicDataCapsule;
 import com.atomykcoder.atomykplay.function.MusicMainAdapter;
@@ -40,6 +43,7 @@ import com.atomykcoder.atomykplay.function.SearchResultsFragment;
 import com.atomykcoder.atomykplay.function.StorageUtil;
 import com.atomykcoder.atomykplay.services.MediaPlayerService;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.navigation.NavigationView;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
@@ -50,6 +54,8 @@ import com.turingtechnologies.materialscrollbar.DragScrollBar;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -61,7 +67,6 @@ public class MainActivity extends AppCompatActivity {
 
     public static final String BROADCAST_PLAY_NEW_MUSIC = "com.atomykcoder.atomykplay.PlayNewMusic";
     public static final String BROADCAST_PAUSE_PLAY_MUSIC = "com.atomykcoder.atomykplay.PausePlayMusic";
-    public static final String MEDIA_BUTTON_RECEIVER = "com.atomykcoder.atomykplay.MEDIA_BUTTON_RECEIVER";
     public static final String BROADCAST_STOP_MUSIC = "com.atomykcoder.atomykplay.StopMusic";
     public static final String BROADCAST_PLAY_NEXT_MUSIC = "com.atomykcoder.atomykplay.PlayNextMusic";
     public static final String BROADCAST_PLAY_PREVIOUS_MUSIC = "com.atomykcoder.atomykplay.PlayPreviousMusic";
@@ -87,15 +92,20 @@ public class MainActivity extends AppCompatActivity {
     public View player_bottom_sheet;
     public boolean phone_ringing = false;
     public CustomBottomSheet<View> mainPlayerSheetBehavior;
+    public BottomSheetPlayerFragment bottomSheetPlayerFragment;
+    public SearchResultsFragment searchResultsFragment; // This being here is very important for search method to work
+    public Context mainActivityContext;
+    private View shadowMain;
     public BottomSheetBehavior.BottomSheetCallback callback = new BottomSheetBehavior.BottomSheetCallback() {
         @Override
         public void onStateChanged(@NonNull View bottomSheet, int newState) {
             if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
-                View miniPlayer = PlayerFragment.mini_play_view;
+                View miniPlayer = BottomSheetPlayerFragment.mini_play_view;
                 View mainPlayer = findViewById(R.id.player_layout);
                 mainPlayer.setVisibility(View.INVISIBLE);
                 miniPlayer.setVisibility(View.VISIBLE);
                 miniPlayer.setAlpha(1);
+                shadowMain.setAlpha(0);
                 mainPlayer.setAlpha(0);
             } else if (newState == BottomSheetBehavior.STATE_EXPANDED) {
                 //this will hide the keyboard after clicking on player while searching
@@ -108,28 +118,27 @@ public class MainActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
 
-                View miniPlayer = PlayerFragment.mini_play_view;
+                View miniPlayer = BottomSheetPlayerFragment.mini_play_view;
                 View mainPlayer = findViewById(R.id.player_layout);
                 miniPlayer.setVisibility(View.INVISIBLE);
                 mainPlayer.setVisibility(View.VISIBLE);
                 miniPlayer.setAlpha(0);
                 mainPlayer.setAlpha(1);
+                shadowMain.setAlpha(1);
             }
         }
 
         @Override
         public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-            View miniPlayer = PlayerFragment.mini_play_view;
+            View miniPlayer = BottomSheetPlayerFragment.mini_play_view;
             View mainPlayer = findViewById(R.id.player_layout);
             miniPlayer.setVisibility(View.VISIBLE);
             mainPlayer.setVisibility(View.VISIBLE);
             miniPlayer.setAlpha(1 - slideOffset * 15);
             mainPlayer.setAlpha(0 + slideOffset * 3);
+            shadowMain.setAlpha(0 + slideOffset);
         }
     };
-    public PlayerFragment playerFragment;
-    public SearchResultsFragment searchResultsFragment; // This being here is very important for search method to work
-    public Context mainActivityContext;
     private ArrayList<MusicDataCapsule> dataList;
     private MusicMainAdapter adapter;
     private LinearLayout linearLayout;
@@ -137,6 +146,8 @@ public class MainActivity extends AppCompatActivity {
     private AudioManager audioManager;
     private TelephonyManager telephonyManager;
     private PhoneStateListener phoneStateListener;
+    private DrawerLayout drawer;
+    private ProgressBar progressBar;
 
     //endregion
     public static int convertToMillis(String duration) {
@@ -154,6 +165,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+//        SharedPreferences sharedPreferencesSet = getSharedPreferences(getString(R.string.set_sp),Context.MODE_PRIVATE);
+//        boolean switch1 = sharedPreferencesSet.getBoolean(SWITCH1, false);
+//        if (switch1) {
+//            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+//        } else {
+//            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+//        }
         setContentView(R.layout.activity_main);
 
         //initializations
@@ -161,17 +179,28 @@ public class MainActivity extends AppCompatActivity {
         linearLayout = findViewById(R.id.song_not_found_layout);
         recyclerView = findViewById(R.id.music_recycler);
         player_bottom_sheet = findViewById(R.id.player_main_container);
+        progressBar = findViewById(R.id.progress_bar_main_activity);
+        shadowMain = findViewById(R.id.shadow_main);
         mainPlayerSheetBehavior = (CustomBottomSheet<View>) BottomSheetBehavior.from(player_bottom_sheet);
         Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        toolbar.setTitle(R.string.app_name);
         CoordinatorLayout main_layout = findViewById(R.id.main_layout);
+
+        NavigationView navigationView = findViewById(R.id.navigation_drawer);
+        drawer = findViewById(R.id.drawer_layout);
+
+        View headerView = navigationView.getHeaderView(0);
+
+
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.drawer_toggle_open, R.string.drawer_toggle_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
 
         main_layout.setNestedScrollingEnabled(false);
 
         searchResultsFragment = new SearchResultsFragment();
-        playerFragment = new PlayerFragment();
-
-        setSupportActionBar(toolbar);
-        toolbar.setTitle(R.string.app_name);
+        bottomSheetPlayerFragment = new BottomSheetPlayerFragment();
 
         dataList = new ArrayList<>();
         DragScrollBar scrollBar = findViewById(R.id.dragScrollBar);
@@ -282,13 +311,10 @@ public class MainActivity extends AppCompatActivity {
         if (!phone_ringing) {
             if (!service_bound) {
                 startService();
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        //service is active send media with broadcast receiver
-                        Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEW_MUSIC);
-                        sendBroadcast(broadcastIntent);
-                    }
+                new Handler().postDelayed(() -> {
+                    //service is active send media with broadcast receiver
+                    Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEW_MUSIC);
+                    sendBroadcast(broadcastIntent);
                 }, 0);
             } else {
                 //service is active send media with broadcast receiver
@@ -303,13 +329,10 @@ public class MainActivity extends AppCompatActivity {
     public void pausePlayAudio() {
         if (!service_bound) {
             startService();
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    //service is active send media with broadcast receiver
-                    Intent broadcastIntent = new Intent(BROADCAST_PAUSE_PLAY_MUSIC);
-                    mainActivityContext.sendBroadcast(broadcastIntent);
-                }
+            new Handler().postDelayed(() -> {
+                //service is active send media with broadcast receiver
+                Intent broadcastIntent = new Intent(BROADCAST_PAUSE_PLAY_MUSIC);
+                mainActivityContext.sendBroadcast(broadcastIntent);
             }, 0);
         } else {
             //service is active send media with broadcast receiver
@@ -321,13 +344,10 @@ public class MainActivity extends AppCompatActivity {
     public void playNextAudio() {
         if (!service_bound) {
             startService();
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    //service is active send media with broadcast receiver
-                    Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEXT_MUSIC);
-                    mainActivityContext.sendBroadcast(broadcastIntent);
-                }
+            new Handler().postDelayed(() -> {
+                //service is active send media with broadcast receiver
+                Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEXT_MUSIC);
+                mainActivityContext.sendBroadcast(broadcastIntent);
             }, 0);
         } else {
             //service is active send media with broadcast receiver
@@ -336,31 +356,13 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-//    public void stopMusic() {
-//        if (!service_bound) {
-//            startService();
-//            new Handler().postDelayed(() -> {
-//                //service is active send media with broadcast receiver
-//                Intent broadcastIntent = new Intent(BROADCAST_STOP_MUSIC);
-//                sendBroadcast(broadcastIntent);
-//            }, 20);
-//        } else {
-//            //service is active send media with broadcast receiver
-//            Intent broadcastIntent = new Intent(BROADCAST_STOP_MUSIC);
-//            sendBroadcast(broadcastIntent);
-//        }
-//    }
-
     public void playPreviousAudio() {
         if (!service_bound) {
             startService();
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    //service is active send media with broadcast receiver
-                    Intent broadcastIntent = new Intent(BROADCAST_PLAY_PREVIOUS_MUSIC);
-                    mainActivityContext.sendBroadcast(broadcastIntent);
-                }
+            new Handler().postDelayed(() -> {
+                //service is active send media with broadcast receiver
+                Intent broadcastIntent = new Intent(BROADCAST_PLAY_PREVIOUS_MUSIC);
+                mainActivityContext.sendBroadcast(broadcastIntent);
             }, 0);
 
         } else {
@@ -373,7 +375,7 @@ public class MainActivity extends AppCompatActivity {
     private void setFragmentInSlider() {
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
-        transaction.replace(R.id.player_main_container, playerFragment);
+        transaction.replace(R.id.player_main_container, bottomSheetPlayerFragment);
         transaction.commit();
     }
 
@@ -419,14 +421,30 @@ public class MainActivity extends AppCompatActivity {
                     public void onPermissionsChecked(MultiplePermissionsReport multiplePermissionsReport) {
                         //Fetch Music List along with it's metadata and save it in "dataList"
 
-                        FetchMusic.fetchMusic(dataList, MainActivity.this);
-                        //saving this in storage for diff util
-                        new StorageUtil(MainActivity.this).saveInitialMusicList(dataList);
+                        ExecutorService service = Executors.newSingleThreadExecutor();
+                        Handler handler = new Handler(Looper.getMainLooper());
+                        progressBar.setVisibility(View.VISIBLE);
+                        // do in background code here
+                        service.execute(() -> {
 
-                        //Setting up adapter
-                        linearLayout.setVisibility(View.GONE);
-                        adapter = new MusicMainAdapter(MainActivity.this, dataList);
-                        recyclerView.setAdapter(adapter);
+                            FetchMusic.fetchMusic(dataList, MainActivity.this);
+                            // post-execute code here
+                            handler.post(() -> {
+                                //saving this in storage for diff util
+                                new StorageUtil(MainActivity.this).saveInitialMusicList(dataList);
+
+                                //Setting up adapter
+                                if (dataList.isEmpty()) {
+                                    linearLayout.setVisibility(View.VISIBLE);
+                                } else {
+                                    linearLayout.setVisibility(View.GONE);
+                                }
+                                progressBar.setVisibility(View.GONE);
+                                adapter = new MusicMainAdapter(MainActivity.this, dataList);
+                                recyclerView.setAdapter(adapter);
+                                service.shutdown();
+                            });
+                        });
 
                         is_granted = true;
                     }
@@ -446,8 +464,8 @@ public class MainActivity extends AppCompatActivity {
             super.onBackPressed();
 
         } else {
-            if (PlayerFragment.queueSheetBehaviour.getState() == BottomSheetBehavior.STATE_EXPANDED) {
-                PlayerFragment.queueSheetBehaviour.setState(BottomSheetBehavior.STATE_HIDDEN);
+            if (BottomSheetPlayerFragment.queueSheetBehaviour.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+                BottomSheetPlayerFragment.queueSheetBehaviour.setState(BottomSheetBehavior.STATE_HIDDEN);
             } else {
                 mainPlayerSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
             }
@@ -466,12 +484,7 @@ public class MainActivity extends AppCompatActivity {
         MenuItem searchViewItem = menu.findItem(R.id.app_bar_search);
         SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchViewItem);
 
-        searchView.setOnSearchClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                setSearchFragment();
-            }
-        });
+        searchView.setOnSearchClickListener(view -> setSearchFragment());
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -486,13 +499,10 @@ public class MainActivity extends AppCompatActivity {
             }
 
         });
-        searchView.setOnCloseListener(new SearchView.OnCloseListener() {
-            @Override
-            public boolean onClose() {
-                FragmentManager manager = getSupportFragmentManager();
-                manager.popBackStack();
-                return false;
-            }
+        searchView.setOnCloseListener(() -> {
+            FragmentManager manager = getSupportFragmentManager();
+            manager.popBackStack();
+            return false;
         });
         return super.onCreateOptionsMenu(menu);
     }
@@ -501,12 +511,9 @@ public class MainActivity extends AppCompatActivity {
     private void SearchWithFilters(String query) {
 
         //Check if any radio button is pressed
-        searchResultsFragment.radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup radioGroup, int i) {
-                //search if any radio button is pressed
-                searchResultsFragment.search(query, dataList);
-            }
+        searchResultsFragment.radioGroup.setOnCheckedChangeListener((radioGroup, i) -> {
+            //search if any radio button is pressed
+            searchResultsFragment.search(query, dataList);
         });
     }
 

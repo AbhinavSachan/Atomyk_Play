@@ -98,7 +98,7 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
                                 // post-execute code here
                                 handler.post(()->{
                                     mainActivity.playAudio();
-                                    mainActivity.playerFragment.setAdapterInQueue();
+                                    mainActivity.bottomSheetPlayerFragment.setAdapterInQueue();
                                 });
                             });
                             service.shutdown();

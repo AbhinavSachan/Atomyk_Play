@@ -7,8 +7,7 @@
     android:background="@color/primary_bg"
     android:clickable="true"
     android:focusable="true"
-    android:paddingHorizontal="16dp"
-    android:paddingTop="100dp"
+    android:paddingTop="90dp"
     android:paddingBottom="16dp"
     tools:context=".fragments.AddLyricsFragment">
 
@@ -16,8 +15,6 @@
         android:id="@+id/scrollView3"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
         android:focusable="false"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -28,13 +25,17 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp">
 
             <TextView
                 android:id="@+id/song_name_tv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginVertical="2dp"
+                android:layout_marginTop="2dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="4dp"
                 android:text="@string/song_name_e"
                 android:textColor="@color/text_color"
                 android:textSize="@dimen/d_24sp"
@@ -42,17 +43,19 @@
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/edit_lyrics_layout"
-                style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginVertical="2dp"
+                android:fadingEdge="vertical"
+                android:fadingEdgeLength="20dp"
+                android:fitsSystemWindows="true"
                 app:boxBackgroundColor="@color/secondary_bg"
                 app:boxCornerRadiusBottomEnd="8dp"
                 app:boxCornerRadiusBottomStart="8dp"
                 app:boxCornerRadiusTopEnd="8dp"
-                app:hintTextColor="@color/hint_color"
-                app:boxStrokeColor="@color/hint_color"
                 app:boxCornerRadiusTopStart="8dp"
+                app:boxStrokeWidth="0dp"
+                app:hintTextColor="@color/hint_color"
                 app:placeholderTextColor="@color/hint_color">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -62,54 +65,56 @@
                     android:gravity="top"
                     android:hint="@string/your_lyrics"
                     android:imeOptions="normal"
-                    android:lines="15"
                     android:includeFontPadding="true"
+                    android:lines="15"
                     android:paddingTop="30dp"
                     android:textAlignment="gravity"
                     android:textColor="@color/text_color"
                     android:textColorHint="@color/hint_color" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="8dp"
+                    android:gravity="center"
+                    android:weightSum="2">
+
+                    <Button
+                        android:id="@+id/btn_save"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="16dp"
+                        android:layout_weight="1"
+                        android:backgroundTint="@color/tertiary_bg"
+                        android:text="@string/save"
+                        android:textColor="@color/play_icons_bg" />
+
+                    <Button
+                        android:id="@+id/btn_find"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="16dp"
+                        android:layout_weight="1"
+                        android:backgroundTint="@color/tertiary_bg"
+                        android:text="@string/find"
+                        android:textColor="@color/play_icons_bg"
+                        android:visibility="visible" />
+
+                    <ProgressBar
+                        android:id="@+id/progress_lyrics"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:layout_gravity="center"
+                        android:layout_marginHorizontal="16dp"
+                        android:layout_weight="1"
+                        android:indeterminateTint="@color/text_color"
+                        android:padding="6dp"
+                        android:visibility="gone" />
+                </LinearLayout>
             </com.google.android.material.textfield.TextInputLayout>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginVertical="2dp"
-                android:gravity="center"
-                android:weightSum="2">
-
-                <Button
-                    android:id="@+id/btn_save"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="16dp"
-                    android:layout_weight="1"
-                    android:backgroundTint="@color/tertiary_bg"
-                    android:text="@string/save"
-                    android:textColor="@color/play_icons_bg" />
-
-                <Button
-                    android:id="@+id/btn_find"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="16dp"
-                    android:layout_weight="1"
-                    android:backgroundTint="@color/tertiary_bg"
-                    android:text="@string/find"
-                    android:textColor="@color/play_icons_bg" />
-            </LinearLayout>
         </LinearLayout>
     </ScrollView>
 
-    <ProgressBar
-        android:id="@+id/progress_lyrics"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/round_corner"
-        android:padding="4dp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

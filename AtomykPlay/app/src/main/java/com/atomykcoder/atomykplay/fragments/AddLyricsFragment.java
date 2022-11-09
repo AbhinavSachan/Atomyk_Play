@@ -1,7 +1,7 @@
 package com.atomykcoder.atomykplay.fragments;
 
-import static com.atomykcoder.atomykplay.fragments.PlayerFragment.runnableSyncLyrics;
-import static com.atomykcoder.atomykplay.fragments.PlayerFragment.showToast;
+import static com.atomykcoder.atomykplay.fragments.BottomSheetPlayerFragment.runnableSyncLyrics;
+import static com.atomykcoder.atomykplay.fragments.BottomSheetPlayerFragment.showToast;
 
 import android.app.Dialog;
 import android.os.Bundle;
@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -50,6 +51,7 @@ public class AddLyricsFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_add_lyrics, container, false);
 
+
         editTextLyrics = view.findViewById(R.id.edit_lyrics);
         saveBtn = view.findViewById(R.id.btn_save);
         btnFind = view.findViewById(R.id.btn_find);
@@ -64,13 +66,13 @@ public class AddLyricsFragment extends Fragment {
             setDialogBox();
         });
 
+
         return view;
     }
 
     private void saveMusic() {
         if (lrcMap.isEmpty()) {
             if (!editTextLyrics.getText().toString().trim().equals("")) {
-
                 String unfilteredLyrics = editTextLyrics.getText().toString();
 
                 lrcMap.addAll(getLrcMap(unfilteredLyrics));
@@ -99,7 +101,7 @@ public class AddLyricsFragment extends Fragment {
         dialog = new Dialog(getContext());
 
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setCancelable(true);
+        dialog.setCancelable(false);
         dialog.setContentView(R.layout.edit_name_dialog_box);
 
         //Initialize Dialogue Box UI Items
@@ -111,10 +113,11 @@ public class AddLyricsFragment extends Fragment {
         nameEditText.setText(getMusic().getsName());
         artistEditText.setText(getMusic().getsArtist());
 
-
         btnOk.setOnClickListener(v -> {
-            if (isValidInput())
+            if (isValidInput()) {
+                btnFind.setVisibility(View.GONE);
                 fetchLyrics();
+            }
         });
         btnCancel.setOnClickListener(v -> {
             dialog.cancel();
@@ -164,13 +167,17 @@ public class AddLyricsFragment extends Fragment {
                 // post-execute code here
                 handler.post(() -> {
                     fetchLyrics.onPostExecute(progressBar);
+                    btnFind.setVisibility(View.VISIBLE);
 
                     if (unfilteredLyrics.equals("")) {
-                        Toast.makeText(getContext(), "Lyrics Not Found", Toast.LENGTH_SHORT).show();
+                        showToast("Lyrics Not Found");
                     } else {
                         String filteredLyrics = splitLyricsByNewLine(unfilteredLyrics);
-                        editTextLyrics.setText(filteredLyrics);
-                        lrcMap.addAll(getLrcMap(filteredLyrics));
+                        try {
+                            editTextLyrics.setText(filteredLyrics);
+                            lrcMap.addAll(getLrcMap(filteredLyrics));
+                        } catch (Exception ignored) {
+                        }
                     }
                 });
             });
