@@ -413,7 +413,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                         .setActions(PlaybackStateCompat.ACTION_SEEK_TO).build());
             }
         }
-
         if (notificationBuilder != null) {
             ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).notify(NOTIFICATION_ID, notificationBuilder);
         }
@@ -1056,7 +1055,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             media_player.release();
         }
         media_player = null;
-        stopForeground(true);
         stopSelf();
     }
 

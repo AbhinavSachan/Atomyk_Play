@@ -84,7 +84,39 @@
                 android:indeterminateTint="@color/text_color"
                 android:layout_height="wrap_content"/>
 
+<<<<<<< Updated upstream
         </RelativeLayout>
+=======
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:id="@+id/found_lyrics_fragments"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:clickable="true"
+            android:elevation="30dp"
+            app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
+            android:focusable="true">
+
+            <TextView
+                android:id="@+id/found_lyrics_text_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:text="Found Lyrics"
+                android:textSize="@dimen/d_20sp" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/found_lyrics_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingBottom="70dp"
+                android:clipToPadding="false"/>
+        </LinearLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+>>>>>>> Stashed changes
 
         <View
             app:layout_anchor="@id/player_main_container"

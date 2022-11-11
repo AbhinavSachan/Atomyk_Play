@@ -410,11 +410,11 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
         return view;
     }
-
+public AddLyricsFragment addLyricsFragment;
     private void setLyricsLayout() {
         mainActivity.mainPlayerSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
 
-        AddLyricsFragment addLyricsFragment = new AddLyricsFragment();
+         addLyricsFragment = new AddLyricsFragment();
         FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.replace(R.id.sec_container, addLyricsFragment);

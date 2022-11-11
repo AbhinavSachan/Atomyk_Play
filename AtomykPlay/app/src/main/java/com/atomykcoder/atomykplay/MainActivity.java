@@ -37,6 +37,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.atomykcoder.atomykplay.fragments.BottomSheetPlayerFragment;
 import com.atomykcoder.atomykplay.fragments.CustomBottomSheet;
 import com.atomykcoder.atomykplay.function.FetchMusic;
+import com.atomykcoder.atomykplay.function.FoundLyricsAdapter;
 import com.atomykcoder.atomykplay.function.MusicDataCapsule;
 import com.atomykcoder.atomykplay.function.MusicMainAdapter;
 import com.atomykcoder.atomykplay.function.SearchResultsFragment;
@@ -161,6 +162,8 @@ public class MainActivity extends AppCompatActivity {
         out = first + second;
         return out;
     }
+    private View lyricsListView;
+    public BottomSheetBehavior<View> lyricsListBehavior;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -186,6 +189,7 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         toolbar.setTitle(R.string.app_name);
         CoordinatorLayout main_layout = findViewById(R.id.main_layout);
+<<<<<<< Updated upstream
 
         NavigationView navigationView = findViewById(R.id.navigation_drawer);
         drawer = findViewById(R.id.drawer_layout);
@@ -197,6 +201,13 @@ public class MainActivity extends AppCompatActivity {
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
+=======
+        lyricsListView = findViewById(R.id.found_lyrics_fragments);
+        lyricsListBehavior =BottomSheetBehavior.from(lyricsListView);
+        lyricsListBehavior.setHideable(true);
+        lyricsListBehavior.setSkipCollapsed(true);
+        lyricsListBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+>>>>>>> Stashed changes
         main_layout.setNestedScrollingEnabled(false);
 
         searchResultsFragment = new SearchResultsFragment();
@@ -232,6 +243,21 @@ public class MainActivity extends AppCompatActivity {
         // Fetch Google lol
 
 
+    }
+
+    public void setLyricListAdapter(Bundle bundle){
+        ArrayList<String> titles;
+        ArrayList<String> durations;
+        ArrayList<String> urls;
+
+        titles = bundle.getStringArrayList("titles");
+        durations = bundle.getStringArrayList("durations");
+        urls = bundle.getStringArrayList("urls");
+        RecyclerView recyclerView = findViewById(R.id.found_lyrics_recycler_view);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(layoutManager);
+        FoundLyricsAdapter adapter = new FoundLyricsAdapter(titles, durations, urls,this);
+        recyclerView.setAdapter(adapter);
     }
 
     @Override

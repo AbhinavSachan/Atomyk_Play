@@ -20,11 +20,13 @@ import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 
+import com.atomykcoder.atomykplay.MainActivity;
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.function.FetchLyrics;
 import com.atomykcoder.atomykplay.function.LRCMap;
 import com.atomykcoder.atomykplay.function.MusicDataCapsule;
 import com.atomykcoder.atomykplay.function.StorageUtil;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
@@ -43,6 +45,7 @@ public class AddLyricsFragment extends Fragment {
     private StorageUtil storageUtil;
     private Button saveBtn, btnFind;
     private Dialog dialog;
+
     private Button btnCancel, btnOk;
 
     @Override
@@ -69,6 +72,7 @@ public class AddLyricsFragment extends Fragment {
 
         return view;
     }
+
 
     private void saveMusic() {
         if (lrcMap.isEmpty()) {
@@ -162,13 +166,46 @@ public class AddLyricsFragment extends Fragment {
 
             // do in background code here
             service.execute(() -> {
-                String unfilteredLyrics = fetchLyrics.fetch(artistName + " " + songName);
+                Bundle lyricsItems = fetchLyrics.fetchList(artistName + " " + songName);
+                handler.post(() -> {
+                    openBottomSheet(lyricsItems);
+                    fetchLyrics.onPostExecute(progressBar);
+<<<<<<< Updated upstream
+                    btnFind.setVisibility(View.VISIBLE);
+=======
+                });
+            });
 
-                // post-execute code here
+            // stopping the background thread (crucial)
+            service.shutdown();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    private void openBottomSheet(Bundle lyricsItems) {
+
+        MainActivity mainActivity = (MainActivity) getContext();
+        if (mainActivity != null) {
+            mainActivity.lyricsListBehavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
+            mainActivity.setLyricListAdapter(lyricsItems);
+        }
+    }
+>>>>>>> Stashed changes
+
+    public void loadSelectedLyrics(String href) {
+        FetchLyrics fetchLyrics = new FetchLyrics();
+        try {
+            ExecutorService service = Executors.newSingleThreadExecutor();
+            Handler handler = new Handler(Looper.getMainLooper());
+
+            // pre-execute some code here
+            fetchLyrics.onPreExecute(progressBar);
+
+            // do in background code here
+            service.execute(() -> {
+                String unfilteredLyrics = fetchLyrics.fetchItem(href);
                 handler.post(() -> {
                     fetchLyrics.onPostExecute(progressBar);
-                    btnFind.setVisibility(View.VISIBLE);
-
                     if (unfilteredLyrics.equals("")) {
                         showToast("Lyrics Not Found");
                     } else {
@@ -181,14 +218,12 @@ public class AddLyricsFragment extends Fragment {
                     }
                 });
             });
-
             // stopping the background thread (crucial)
             service.shutdown();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
 
     /**
      * This function takes unfiltered lrc data and returns a linked hashmap with timestamp as
