@@ -96,6 +96,7 @@ public class MainActivity extends AppCompatActivity {
     public BottomSheetPlayerFragment bottomSheetPlayerFragment;
     public SearchResultsFragment searchResultsFragment; // This being here is very important for search method to work
     public Context mainActivityContext;
+    public BottomSheetBehavior<View> lyricsListBehavior;
     private View shadowMain;
     public BottomSheetBehavior.BottomSheetCallback callback = new BottomSheetBehavior.BottomSheetCallback() {
         @Override
@@ -149,6 +150,7 @@ public class MainActivity extends AppCompatActivity {
     private PhoneStateListener phoneStateListener;
     private DrawerLayout drawer;
     private ProgressBar progressBar;
+    private View lyricsListView;
 
     //endregion
     public static int convertToMillis(String duration) {
@@ -162,8 +164,6 @@ public class MainActivity extends AppCompatActivity {
         out = first + second;
         return out;
     }
-    private View lyricsListView;
-    public BottomSheetBehavior<View> lyricsListBehavior;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -189,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         toolbar.setTitle(R.string.app_name);
         CoordinatorLayout main_layout = findViewById(R.id.main_layout);
-<<<<<<< Updated upstream
+
 
         NavigationView navigationView = findViewById(R.id.navigation_drawer);
         drawer = findViewById(R.id.drawer_layout);
@@ -201,13 +201,11 @@ public class MainActivity extends AppCompatActivity {
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-=======
         lyricsListView = findViewById(R.id.found_lyrics_fragments);
-        lyricsListBehavior =BottomSheetBehavior.from(lyricsListView);
+        lyricsListBehavior = BottomSheetBehavior.from(lyricsListView);
         lyricsListBehavior.setHideable(true);
         lyricsListBehavior.setSkipCollapsed(true);
         lyricsListBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
->>>>>>> Stashed changes
         main_layout.setNestedScrollingEnabled(false);
 
         searchResultsFragment = new SearchResultsFragment();
@@ -245,7 +243,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void setLyricListAdapter(Bundle bundle){
+    public void setLyricListAdapter(Bundle bundle) {
         ArrayList<String> titles;
         ArrayList<String> durations;
         ArrayList<String> urls;
@@ -256,7 +254,7 @@ public class MainActivity extends AppCompatActivity {
         RecyclerView recyclerView = findViewById(R.id.found_lyrics_recycler_view);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
-        FoundLyricsAdapter adapter = new FoundLyricsAdapter(titles, durations, urls,this);
+        FoundLyricsAdapter adapter = new FoundLyricsAdapter(titles, durations, urls, this);
         recyclerView.setAdapter(adapter);
     }
 

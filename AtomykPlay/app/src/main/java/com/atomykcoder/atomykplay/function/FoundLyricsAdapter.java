@@ -48,7 +48,7 @@ public class FoundLyricsAdapter extends RecyclerView.Adapter<FoundLyricsViewHold
             @Override
             public void onClick(View view) {
                 MainActivity mainActivity = (MainActivity) context;
-                mainActivity.playerFragment.addLyricsFragment.loadSelectedLyrics(urls.get(holder.getBindingAdapterPosition()));
+                mainActivity.bottomSheetPlayerFragment.addLyricsFragment.loadSelectedLyrics(urls.get(holder.getBindingAdapterPosition()));
             }
         });
     }

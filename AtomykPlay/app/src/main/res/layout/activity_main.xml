@@ -84,9 +84,7 @@
                 android:indeterminateTint="@color/text_color"
                 android:layout_height="wrap_content"/>
 
-<<<<<<< Updated upstream
         </RelativeLayout>
-=======
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">

@@ -170,9 +170,7 @@ public class AddLyricsFragment extends Fragment {
                 handler.post(() -> {
                     openBottomSheet(lyricsItems);
                     fetchLyrics.onPostExecute(progressBar);
-<<<<<<< Updated upstream
                     btnFind.setVisibility(View.VISIBLE);
-=======
                 });
             });
 
@@ -190,7 +188,6 @@ public class AddLyricsFragment extends Fragment {
             mainActivity.setLyricListAdapter(lyricsItems);
         }
     }
->>>>>>> Stashed changes
 
     public void loadSelectedLyrics(String href) {
         FetchLyrics fetchLyrics = new FetchLyrics();
