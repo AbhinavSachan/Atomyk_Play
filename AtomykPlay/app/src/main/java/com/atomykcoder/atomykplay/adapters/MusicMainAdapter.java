@@ -1,4 +1,4 @@
-package com.atomykcoder.atomykplay.function;
+package com.atomykcoder.atomykplay.adapters;
 
 import static com.atomykcoder.atomykplay.function.FetchMusic.convertDuration;
 import static com.atomykcoder.atomykplay.function.StorageUtil.no_shuffle;
@@ -19,8 +19,10 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.atomykcoder.atomykplay.MainActivity;
+import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.R;
+import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
+import com.atomykcoder.atomykplay.function.StorageUtil;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.turingtechnologies.materialscrollbar.INameableAdapter;
@@ -68,13 +70,13 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
                     StorageUtil storage = new StorageUtil(context);
                     //sending broadcast to start the music from main activity
                     MainActivity mainActivity = (MainActivity) context;
+                    storage.saveMusicList(musicArrayList);
                     //if shuffle button is already on it will shuffle it from start
                     if (storage.loadShuffle().equals(shuffle)) {
                         MusicDataCapsule activeMusic;
                         ArrayList<MusicDataCapsule> shuffleList = new ArrayList<>(musicArrayList);
                         //saving list in temp for restore function in player fragment
                         storage.saveTempMusicList(musicArrayList);
-
 
                         if (musicArrayList != null) {
                             if (position != -1 && position < musicArrayList.size()) {
@@ -109,6 +111,7 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
                         storage.saveMusicList(musicArrayList);
                         storage.saveMusicIndex(position);
                         mainActivity.playAudio();
+                        mainActivity.bottomSheetPlayerFragment.setAdapterInQueue();
                     }
                 } else {
                     Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show();

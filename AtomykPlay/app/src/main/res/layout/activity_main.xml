@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:id="@+id/drawer_layout"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".activities.MainActivity">
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/main_layout"
@@ -47,8 +47,7 @@
                 app:msb_barColor="@color/primary_bg"
                 app:msb_handleColor="@color/tertiary_bg"
                 app:msb_handleOffColor="@color/sub_text_grey"
-                app:msb_lightOnTouch="true"
-                app:msb_recyclerView="@id/music_recycler" />
+                app:msb_lightOnTouch="true" />
 
             <LinearLayout
                 android:id="@+id/song_not_found_layout"
@@ -85,41 +84,45 @@
                 android:layout_height="wrap_content"/>
 
         </RelativeLayout>
-    <androidx.coordinatorlayout.widget.CoordinatorLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+
+        <View
+            android:id="@+id/shadow_lyrics_found"
+            android:background="@color/translucent_black"
+            android:layout_width="match_parent"
+            android:alpha="0"
+            android:layout_height="match_parent"/>
+
         <LinearLayout
             android:id="@+id/found_lyrics_fragments"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:clickable="true"
+            android:background="@color/primary_bg"
             android:elevation="30dp"
             app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
             android:focusable="true">
 
-            <TextView
-                android:id="@+id/found_lyrics_text_view"
-                android:layout_width="wrap_content"
+
+            <ImageView
+                android:id="@+id/drag_up_img"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:text="Found Lyrics"
-                android:textSize="@dimen/d_20sp" />
+                android:elevation="4dp"
+                android:src="@drawable/ic_horizontal_rule" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/found_lyrics_recycler_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:paddingBottom="70dp"
+                android:paddingBottom="100dp"
                 android:clipToPadding="false"/>
         </LinearLayout>
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
-
         <View
             app:layout_anchor="@id/player_main_container"
-            android:background="@drawable/fade_edges_end"
+            android:background="@drawable/player_shadow"
             android:layout_width="match_parent"
-            android:layout_height="20dp"/>
+            android:layout_height="10dp"/>
 
         <View
             android:id="@+id/shadow_main"
@@ -128,12 +131,13 @@
             android:alpha="0"
             android:layout_height="match_parent"/>
 
+
         <FrameLayout
             android:id="@+id/player_main_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:elevation="30dp"
-            app:layout_behavior=".fragments.CustomBottomSheet" />
+            app:layout_behavior=".customScripts.CustomBottomSheet" />
 
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>

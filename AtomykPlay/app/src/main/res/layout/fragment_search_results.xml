@@ -6,7 +6,7 @@
     android:background="@color/primary_bg"
     android:clickable="true"
     android:focusable="true"
-    tools:context=".function.SearchResultsFragment">
+    tools:context=".fragments.SearchResultsFragment">
 
 
     <RadioGroup

@@ -19,12 +19,12 @@ import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
 
-import com.atomykcoder.atomykplay.MainActivity;
+import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.function.FetchLyrics;
 import com.atomykcoder.atomykplay.function.LRCMap;
 import com.atomykcoder.atomykplay.function.LyricsHelper;
-import com.atomykcoder.atomykplay.function.MusicDataCapsule;
+import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import com.atomykcoder.atomykplay.function.StorageUtil;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
@@ -127,10 +127,7 @@ public class AddLyricsFragment extends Fragment {
         artistName = artistEditText.getText().toString().toLowerCase().trim();
         songName = nameEditText.getText().toString().toLowerCase().trim();
 
-        if (artistName.equals("")) {
-            artistEditText.setError("Required");
-            return false;
-        } else if (songName.equals("")) {
+         if (songName.equals("")) {
             nameEditText.setError("Required");
             return false;
         } else {
@@ -147,8 +144,6 @@ public class AddLyricsFragment extends Fragment {
 
         //clear hashmap prior to retrieving data
         lrcMap.clear();
-
-        showToast("Searching...");
 
         FetchLyrics fetchLyrics = new FetchLyrics();
         try {
@@ -174,6 +169,7 @@ public class AddLyricsFragment extends Fragment {
             e.printStackTrace();
         }
     }
+
     private void openBottomSheet(Bundle lyricsItems) {
         MainActivity mainActivity = (MainActivity) getContext();
         if (mainActivity != null) {
@@ -197,7 +193,7 @@ public class AddLyricsFragment extends Fragment {
                 handler.post(() -> {
                     fetchLyrics.onPostExecute(progressBar);
                     if (unfilteredLyrics.equals("")) {
-                        showToast("Lyrics Not Found");
+                        showToast("No Lyrics Found");
                     } else {
                         String filteredLyrics = LyricsHelper.splitLyricsByNewLine(unfilteredLyrics);
                         try {
@@ -214,7 +210,6 @@ public class AddLyricsFragment extends Fragment {
             e.printStackTrace();
         }
     }
-
 
 
     /**

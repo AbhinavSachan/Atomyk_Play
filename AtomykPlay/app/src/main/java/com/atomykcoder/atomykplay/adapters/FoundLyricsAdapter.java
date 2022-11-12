@@ -1,9 +1,6 @@
-package com.atomykcoder.atomykplay.function;
-
-import static java.security.AccessController.getContext;
+package com.atomykcoder.atomykplay.adapters;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,20 +9,19 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.atomykcoder.atomykplay.MainActivity;
+import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.R;
-import com.atomykcoder.atomykplay.fragments.AddLyricsFragment;
 
 import java.util.ArrayList;
 
 
-public class FoundLyricsAdapter extends RecyclerView.Adapter<FoundLyricsViewHolder> {
-    private ArrayList<String> titles;
-    private ArrayList<String> durations;
-    private ArrayList<String> urls;
-    private Context context;
+public class FoundLyricsAdapter extends RecyclerView.Adapter<FoundLyricsAdapter.FoundLyricsViewHolder> {
+    private final ArrayList<String> titles;
+    private final ArrayList<String> durations;
+    private final ArrayList<String> urls;
+    private final Context context;
 
-    public FoundLyricsAdapter(ArrayList<String> _titles, ArrayList<String> _durations, ArrayList<String> _urls ,Context _context){
+    public FoundLyricsAdapter(ArrayList<String> _titles, ArrayList<String> _durations, ArrayList<String> _urls, Context _context) {
         titles = _titles;
         durations = _durations;
         urls = _urls;
@@ -57,15 +53,16 @@ public class FoundLyricsAdapter extends RecyclerView.Adapter<FoundLyricsViewHold
     public int getItemCount() {
         return titles.size();
     }
-}
 
- class FoundLyricsViewHolder extends RecyclerView.ViewHolder {
-    public TextView song_title;
-    public TextView song_duration;
+    public static class FoundLyricsViewHolder extends RecyclerView.ViewHolder {
+        public TextView song_title;
+        public TextView song_duration;
 
-    public FoundLyricsViewHolder(@NonNull View itemView) {
-        super(itemView);
-        song_title = itemView.findViewById(R.id.found_song_title);
-        song_duration = itemView.findViewById(R.id.found_song_duration);
+        public FoundLyricsViewHolder(@NonNull View itemView) {
+            super(itemView);
+            song_title = itemView.findViewById(R.id.found_song_title);
+            song_duration = itemView.findViewById(R.id.found_song_lyrics_sample);
+        }
     }
 }
+

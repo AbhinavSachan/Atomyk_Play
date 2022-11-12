@@ -1,4 +1,4 @@
-package com.atomykcoder.atomykplay.function;
+package com.atomykcoder.atomykplay.viewModals;
 
 public class MusicDataCapsule {
     String sName;

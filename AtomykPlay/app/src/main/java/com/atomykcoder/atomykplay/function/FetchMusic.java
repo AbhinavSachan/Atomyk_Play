@@ -4,19 +4,21 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.MediaStore;
+
+import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.concurrent.TimeUnit;
 
 public class FetchMusic {
 
     public static int filter = 20000;
 
-    public static ArrayList<MusicDataCapsule> fetchMusic(ArrayList<MusicDataCapsule> dataList, Context context) {
+    public static void fetchMusic(ArrayList<MusicDataCapsule> dataList, Context context) {
         String selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0";
         @SuppressLint("InlinedApi") String[] proj = {
                 MediaStore.Audio.Media.TITLE,
@@ -45,12 +47,11 @@ public class FetchMusic {
             if (audioCursor.moveToFirst()) {
                 do {
                     String sTitle = audioCursor.getString(0)
-                            .replace("y2mate.com - ", "")
+                            .replace("y2mate.com -", "")
                             .replace("&#039;", "'")
                             .replace("%20", " ")
                             .replace("_", " ")
                             .replace("&amp;", ",").trim();
-                    ;
                     String sArtist = audioCursor.getString(1);
                     String sAlbumId = audioCursor.getString(2);
                     //converting duration in readable format
@@ -61,7 +62,7 @@ public class FetchMusic {
                     String sSize = audioCursor.getString(7);
                     String sBitrate = "";
                     String sGenre = "";
-                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                         sBitrate = audioCursor.getString(8);
                         sGenre = audioCursor.getString(9);
                     }
@@ -80,15 +81,11 @@ public class FetchMusic {
 
                 } while (audioCursor.moveToNext());
                 audioCursor.close();
-                Collections.sort(dataList, new Comparator<MusicDataCapsule>() {
-                    @Override
-                    public int compare(MusicDataCapsule o1, MusicDataCapsule o2) {
-                        return o1.getsName().compareTo(o2.getsName());
-                    }
-                });
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    Collections.sort(dataList, Comparator.comparing(MusicDataCapsule::getsName));
+                }
             }
         }
-        return dataList;
     }
 
     //converting duration from millis to readable time

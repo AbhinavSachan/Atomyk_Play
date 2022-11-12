@@ -1,4 +1,4 @@
-package com.atomykcoder.atomykplay.function;
+package com.atomykcoder.atomykplay.fragments;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
@@ -15,19 +15,29 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.R;
+import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
+import com.atomykcoder.atomykplay.adapters.MusicMainAdapter;
 
 import java.util.ArrayList;
 
 //Search Layout Fragment for Performing Searches and Presenting Results
 public class SearchResultsFragment extends Fragment {
 
-    @SuppressLint("StaticFieldLeak")
-    public RecyclerView recycler_view;
-    public RadioGroup radioGroup;
+    private RecyclerView recycler_view;
+    private RadioGroup radioGroup;
     private ArrayList<MusicDataCapsule> originalMusicList;
     private MusicMainAdapter adapter;
     private RadioButton songButton, albumButton, artistButton, genreButton;
     private TextView textView;
+
+    public void SearchWithFilters(String query,ArrayList<MusicDataCapsule> dataList) {
+
+        //Check if any radio button is pressed
+        radioGroup.setOnCheckedChangeListener((radioGroup, i) -> {
+            //search if any radio button is pressed
+            search(query, dataList);
+        });
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

@@ -1,4 +1,4 @@
-package com.atomykcoder.atomykplay.function;
+package com.atomykcoder.atomykplay.enums;
 
 public enum PlaybackStatus {
     PLAYING,

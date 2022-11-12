@@ -1,4 +1,4 @@
-package com.atomykcoder.atomykplay;
+package com.atomykcoder.atomykplay.activities;
 
 import android.Manifest;
 import android.content.ComponentName;
@@ -34,13 +34,14 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.fragments.BottomSheetPlayerFragment;
-import com.atomykcoder.atomykplay.fragments.CustomBottomSheet;
+import com.atomykcoder.atomykplay.fragments.SearchResultsFragment;
+import com.atomykcoder.atomykplay.customScripts.CustomBottomSheet;
 import com.atomykcoder.atomykplay.function.FetchMusic;
-import com.atomykcoder.atomykplay.function.FoundLyricsAdapter;
-import com.atomykcoder.atomykplay.function.MusicDataCapsule;
-import com.atomykcoder.atomykplay.function.MusicMainAdapter;
-import com.atomykcoder.atomykplay.function.SearchResultsFragment;
+import com.atomykcoder.atomykplay.adapters.FoundLyricsAdapter;
+import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
+import com.atomykcoder.atomykplay.adapters.MusicMainAdapter;
 import com.atomykcoder.atomykplay.function.StorageUtil;
 import com.atomykcoder.atomykplay.services.MediaPlayerService;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
@@ -90,19 +91,19 @@ public class MainActivity extends AppCompatActivity {
             media_player_service = null;
         }
     };
+    public static boolean phone_ringing = false;
+    public static boolean is_playing = false;
     public View player_bottom_sheet;
-    public boolean phone_ringing = false;
     public CustomBottomSheet<View> mainPlayerSheetBehavior;
     public BottomSheetPlayerFragment bottomSheetPlayerFragment;
-    public SearchResultsFragment searchResultsFragment; // This being here is very important for search method to work
-    public Context mainActivityContext;
     public BottomSheetBehavior<View> lyricsListBehavior;
+    private SearchResultsFragment searchResultsFragment; // This being here is very important for search method to work
     private View shadowMain;
     public BottomSheetBehavior.BottomSheetCallback callback = new BottomSheetBehavior.BottomSheetCallback() {
         @Override
         public void onStateChanged(@NonNull View bottomSheet, int newState) {
             if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
-                View miniPlayer = BottomSheetPlayerFragment.mini_play_view;
+                View miniPlayer = bottomSheetPlayerFragment.mini_play_view;
                 View mainPlayer = findViewById(R.id.player_layout);
                 mainPlayer.setVisibility(View.INVISIBLE);
                 miniPlayer.setVisibility(View.VISIBLE);
@@ -120,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
 
-                View miniPlayer = BottomSheetPlayerFragment.mini_play_view;
+                View miniPlayer = bottomSheetPlayerFragment.mini_play_view;
                 View mainPlayer = findViewById(R.id.player_layout);
                 miniPlayer.setVisibility(View.INVISIBLE);
                 mainPlayer.setVisibility(View.VISIBLE);
@@ -132,13 +133,31 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-            View miniPlayer = BottomSheetPlayerFragment.mini_play_view;
+            View miniPlayer = bottomSheetPlayerFragment.mini_play_view;
             View mainPlayer = findViewById(R.id.player_layout);
             miniPlayer.setVisibility(View.VISIBLE);
             mainPlayer.setVisibility(View.VISIBLE);
             miniPlayer.setAlpha(1 - slideOffset * 15);
             mainPlayer.setAlpha(0 + slideOffset * 3);
             shadowMain.setAlpha(0 + slideOffset);
+        }
+    };
+    private View shadowLyrFound;
+    private final BottomSheetBehavior.BottomSheetCallback lrcFoundCallback = new BottomSheetBehavior.BottomSheetCallback() {
+        @Override
+        public void onStateChanged(@NonNull View bottomSheet, int newState) {
+            if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
+                shadowLyrFound.setAlpha(0f);
+            } else if (newState == BottomSheetBehavior.STATE_HALF_EXPANDED) {
+                shadowLyrFound.setAlpha(0.5f);
+            } else if (newState == BottomSheetBehavior.STATE_EXPANDED) {
+                shadowLyrFound.setAlpha(1f);
+            }
+        }
+
+        @Override
+        public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+            shadowLyrFound.setAlpha(0.5f + slideOffset);
         }
     };
     private ArrayList<MusicDataCapsule> dataList;
@@ -151,6 +170,7 @@ public class MainActivity extends AppCompatActivity {
     private DrawerLayout drawer;
     private ProgressBar progressBar;
     private View lyricsListView;
+    private FragmentManager manager;
 
     //endregion
     public static int convertToMillis(String duration) {
@@ -178,18 +198,19 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         //initializations
-        mainActivityContext = MainActivity.this;
         linearLayout = findViewById(R.id.song_not_found_layout);
         recyclerView = findViewById(R.id.music_recycler);
         player_bottom_sheet = findViewById(R.id.player_main_container);
         progressBar = findViewById(R.id.progress_bar_main_activity);
         shadowMain = findViewById(R.id.shadow_main);
+        shadowLyrFound = findViewById(R.id.shadow_lyrics_found);
         mainPlayerSheetBehavior = (CustomBottomSheet<View>) BottomSheetBehavior.from(player_bottom_sheet);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setTitle(R.string.app_name);
         CoordinatorLayout main_layout = findViewById(R.id.main_layout);
 
+        MediaPlayerService.ui_visible = true;
 
         NavigationView navigationView = findViewById(R.id.navigation_drawer);
         drawer = findViewById(R.id.drawer_layout);
@@ -208,7 +229,7 @@ public class MainActivity extends AppCompatActivity {
         lyricsListBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
         main_layout.setNestedScrollingEnabled(false);
 
-        searchResultsFragment = new SearchResultsFragment();
+
         bottomSheetPlayerFragment = new BottomSheetPlayerFragment();
 
         dataList = new ArrayList<>();
@@ -218,15 +239,14 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setHasFixedSize(true);
 
 
-        LinearLayoutManager manager = new LinearLayoutManager(MainActivity.this, LinearLayoutManager.VERTICAL, false);
-        manager.setSmoothScrollbarEnabled(true);
-        recyclerView.setLayoutManager(manager);
-
+        scrollBar.setRecyclerView(recyclerView);
         scrollBar.setIndicator(new AlphabetIndicator(MainActivity.this), false);
 
         //Checking permissions before activity creation (method somewhere down in the script)
         checkPermission();
-        callStateListener();
+        if (is_granted) {
+            callStateListener();
+        }
         setFragmentInSlider();
 
         audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
@@ -236,10 +256,7 @@ public class MainActivity extends AppCompatActivity {
         mainPlayerSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         mainPlayerSheetBehavior.setPeekHeight(136);
         mainPlayerSheetBehavior.addBottomSheetCallback(callback);
-
-
-        // Fetch Google lol
-
+        lyricsListBehavior.addBottomSheetCallback(lrcFoundCallback);
 
     }
 
@@ -251,6 +268,7 @@ public class MainActivity extends AppCompatActivity {
         titles = bundle.getStringArrayList("titles");
         sampleLyrics = bundle.getStringArrayList("sampleLyrics");
         urls = bundle.getStringArrayList("urls");
+
         RecyclerView recyclerView = findViewById(R.id.found_lyrics_recycler_view);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
@@ -274,9 +292,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         if (is_granted) {
             if (!service_bound) {
-                Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
-                bindService(playerIntent, service_connection, Context.BIND_IMPORTANT);
-
+                startService();
 //                this will start playing song as soon as app starts if its connected to headset
 
 //                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -293,23 +309,51 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        if (service_bound) {
+            if (is_playing) {
+                media_player_service.setSeekBar();
+                BottomSheetPlayerFragment.prepareRunnable();
+            }
+        }
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    protected void onPause() {
+        super.onPause();
         if (service_bound) {
-            //if media player is not playing it will stop the service
-            if (media_player_service.media_player != null) {
-                if (!media_player_service.media_player.isPlaying()) {
-                    unbindService(service_connection);
-                    stopService(new Intent(this, MediaPlayerService.class));
-                    service_bound = false;
+            if (media_player_service.handler != null) {
+                media_player_service.handler.removeCallbacks(media_player_service.runnable);
+                if (BottomSheetPlayerFragment.lyricsHandler != null) {
+                    BottomSheetPlayerFragment.lyricsHandler.removeCallbacks(BottomSheetPlayerFragment.lyricsRunnable);
                 }
             }
         }
+    }
+
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        finish();
+        if (service_bound) {
+            //if media player is not playing it will stop the service
+            if (media_player_service.media_player != null) {
+                if (!is_playing) {
+                    unbindService(service_connection);
+                    stopService(new Intent(MainActivity.this, MediaPlayerService.class));
+                    service_bound = false;
+                    is_playing = false;
+                }
+            }
+        }
+        MediaPlayerService.ui_visible = false;
         if (phoneStateListener != null) {
             telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE);
         }
@@ -318,9 +362,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void startService() {
         if (!phone_ringing) {
-            Intent playerIntent = new Intent(mainActivityContext, MediaPlayerService.class);
-            mainActivityContext.bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
+            Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
             startService(playerIntent);
+            bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
         } else {
             Toast.makeText(this, "Can't play while on call.", Toast.LENGTH_SHORT).show();
         }
@@ -356,12 +400,12 @@ public class MainActivity extends AppCompatActivity {
             new Handler().postDelayed(() -> {
                 //service is active send media with broadcast receiver
                 Intent broadcastIntent = new Intent(BROADCAST_PAUSE_PLAY_MUSIC);
-                mainActivityContext.sendBroadcast(broadcastIntent);
+                sendBroadcast(broadcastIntent);
             }, 0);
         } else {
             //service is active send media with broadcast receiver
             Intent broadcastIntent = new Intent(BROADCAST_PAUSE_PLAY_MUSIC);
-            mainActivityContext.sendBroadcast(broadcastIntent);
+            sendBroadcast(broadcastIntent);
         }
     }
 
@@ -371,12 +415,12 @@ public class MainActivity extends AppCompatActivity {
             new Handler().postDelayed(() -> {
                 //service is active send media with broadcast receiver
                 Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEXT_MUSIC);
-                mainActivityContext.sendBroadcast(broadcastIntent);
+                sendBroadcast(broadcastIntent);
             }, 0);
         } else {
             //service is active send media with broadcast receiver
             Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEXT_MUSIC);
-            mainActivityContext.sendBroadcast(broadcastIntent);
+            sendBroadcast(broadcastIntent);
         }
     }
 
@@ -386,13 +430,13 @@ public class MainActivity extends AppCompatActivity {
             new Handler().postDelayed(() -> {
                 //service is active send media with broadcast receiver
                 Intent broadcastIntent = new Intent(BROADCAST_PLAY_PREVIOUS_MUSIC);
-                mainActivityContext.sendBroadcast(broadcastIntent);
+                sendBroadcast(broadcastIntent);
             }, 0);
 
         } else {
             //service is active send media with broadcast receiver
             Intent broadcastIntent = new Intent(BROADCAST_PLAY_PREVIOUS_MUSIC);
-            mainActivityContext.sendBroadcast(broadcastIntent);
+            sendBroadcast(broadcastIntent);
         }
     }
 
@@ -405,7 +449,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void setSearchFragment() {
 
-        FragmentManager manager = getSupportFragmentManager();
+        manager = getSupportFragmentManager();
+        searchResultsFragment = new SearchResultsFragment();
         FragmentTransaction transaction = manager.beginTransaction();
         transaction.replace(R.id.sec_container, searchResultsFragment);
         transaction.addToBackStack(searchResultsFragment.toString());
@@ -448,6 +493,10 @@ public class MainActivity extends AppCompatActivity {
                         ExecutorService service = Executors.newSingleThreadExecutor();
                         Handler handler = new Handler(Looper.getMainLooper());
                         progressBar.setVisibility(View.VISIBLE);
+                        LinearLayoutManager manager = new LinearLayoutManager(MainActivity.this, LinearLayoutManager.VERTICAL, false);
+                        manager.setSmoothScrollbarEnabled(true);
+
+
                         // do in background code here
                         service.execute(() -> {
 
@@ -466,9 +515,11 @@ public class MainActivity extends AppCompatActivity {
                                 progressBar.setVisibility(View.GONE);
                                 adapter = new MusicMainAdapter(MainActivity.this, dataList);
                                 recyclerView.setAdapter(adapter);
-                                service.shutdown();
+                                recyclerView.setLayoutManager(manager);
+
                             });
                         });
+                        service.shutdown();
 
                         is_granted = true;
                     }
@@ -517,14 +568,13 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextChange(String query) {
-                SearchWithFilters(query);
+                searchResultsFragment.SearchWithFilters(query, dataList);
                 searchResultsFragment.search(query, dataList);
                 return false;
             }
 
         });
         searchView.setOnCloseListener(() -> {
-            FragmentManager manager = getSupportFragmentManager();
             manager.popBackStack();
             return false;
         });
@@ -532,13 +582,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //runs Search Method if any radio button is pressed
-    private void SearchWithFilters(String query) {
 
-        //Check if any radio button is pressed
-        searchResultsFragment.radioGroup.setOnCheckedChangeListener((radioGroup, i) -> {
-            //search if any radio button is pressed
-            searchResultsFragment.search(query, dataList);
-        });
-    }
 
 }
