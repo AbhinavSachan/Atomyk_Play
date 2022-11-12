@@ -10,13 +10,12 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.concurrent.TimeUnit;
 
 public class FetchMusic {
 
     public static int filter = 20000;
 
-    public static ArrayList<MusicDataCapsule> fetchMusic(ArrayList<MusicDataCapsule> dataList, Context context) {
+    public static void fetchMusic(ArrayList<MusicDataCapsule> dataList, Context context) {
         String selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0";
         @SuppressLint("InlinedApi") String[] proj = {
                 MediaStore.Audio.Media.TITLE,
@@ -45,7 +44,7 @@ public class FetchMusic {
             if (audioCursor.moveToFirst()) {
                 do {
                     String sTitle = audioCursor.getString(0)
-                            .replace("y2mate.com - ", "")
+                            .replace("y2mate.com -", "")
                             .replace("&#039;", "'")
                             .replace("%20", " ")
                             .replace("_", " ")
@@ -88,7 +87,6 @@ public class FetchMusic {
                 });
             }
         }
-        return dataList;
     }
 
     //converting duration from millis to readable time

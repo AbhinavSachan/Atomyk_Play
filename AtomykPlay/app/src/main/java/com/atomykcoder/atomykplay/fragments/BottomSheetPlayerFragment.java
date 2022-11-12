@@ -15,9 +15,6 @@ import static com.atomykcoder.atomykplay.function.StorageUtil.shuffle;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.media.MediaMetadataRetriever;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -68,31 +65,32 @@ import java.util.concurrent.Executors;
 public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeListener, OnDragStartListener {
 
     private final static ArrayList<String> lyricsArrayList = new ArrayList<>();
-    public static View mini_play_view;
-    public static ImageView mini_cover, mini_pause, mini_next;
     public static LinearProgressIndicator mini_progress;
+    public static ImageView mini_cover, mini_pause, mini_next;
     public static TextView mini_name_text, mini_artist_text;
     //main player seekbar
     public static SeekBar seekBarMain;
     public static ImageView playImg;
-    public static TextView curPosTv, durationTv;
+    public static TextView curPosTv;
     public static CustomBottomSheet<View> queueSheetBehaviour;
-    public static Runnable runnable;
-    public static Handler handler;
+    public static Runnable lyricsRunnable;
+    public static Handler lyricsHandler;
     private static Context context;
-    //cover image view
+    private static TextView durationTv;
     private static ImageView playerCoverImage;
     private static ImageView favoriteImg;
     private static TextView playerSongNameTv, playerArtistNameTv, mimeTv, bitrateTv, timerTv;
-    private static RecyclerView lyricsRecyclerView;
     private static View noLyricsLayout;
+    //cover image view
+    private static RecyclerView lyricsRecyclerView;
     private static LRCMap lrcMap;
     private static RecyclerView.LayoutManager lm;
-    private static RecyclerView.SmoothScroller smoothScroller;
     private static String songName, artistName, mimeType, duration, bitrate, albumUri;
     final private CountDownTimer[] countDownTimer = new CountDownTimer[1];
-    public View player_layout;
-    public View queueBottomSheet;
+    public View mini_play_view;
+    public AddLyricsFragment addLyricsFragment;
+    private View player_layout;
+    private View queueBottomSheet;
     private ImageView repeatImg;
     private ImageView shuffleImg;
     private ImageView timerImg;
@@ -198,7 +196,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
                 lyricsArrayList.clear();
                 lyricsArrayList.addAll(lrcMap.getLyrics());
                 setLyricsAdapter();
-                handler = new Handler(Looper.getMainLooper());
+                lyricsHandler = new Handler(Looper.getMainLooper());
                 prepareRunnable();
             } else {
                 lyricsRecyclerView.setVisibility(View.GONE);
@@ -209,8 +207,8 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     }
 
     public static void prepareRunnable() {
-        if (handler != null) {
-            runnable = new Runnable() {
+        if (lyricsHandler != null) {
+            lyricsRunnable = new Runnable() {
                 @Override
                 public void run() {
                     int nextStampInMillis = 0;
@@ -227,11 +225,11 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
                     if (lrcMap.containsStamp(getCurrentStamp())) {
                         ScrollToPosition(lrcMap.getIndexAtStamp(getCurrentStamp()));
                     }
-                    handler.postDelayed(runnable, nextStampInMillis - currPosInMillis);
+                    lyricsHandler.postDelayed(lyricsRunnable, nextStampInMillis - currPosInMillis);
 
                 }
             };
-            handler.postDelayed(runnable, 0);
+            lyricsHandler.postDelayed(lyricsRunnable, 0);
         }
     }
 
@@ -255,6 +253,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     }
 
     private static void ScrollToPosition(int position) {
+        RecyclerView.SmoothScroller smoothScroller = new CenterSmoothScrollScript.CenterSmoothScroller(context);
         smoothScroller.setTargetPosition(position);
         lm.startSmoothScroll(smoothScroller);
     }
@@ -263,17 +262,6 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     public static String getMime(String filePath) {
         MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
         return mimeTypeMap.getExtensionFromMimeType(filePath);
-    }
-
-    public static Bitmap getEmbeddedImage(String songPath) {
-        MediaMetadataRetriever metadataRetriever = new MediaMetadataRetriever();
-        metadataRetriever.setDataSource(songPath);
-        byte[] data = metadataRetriever.getEmbeddedPicture();
-        if (data != null) {
-            return BitmapFactory.decodeByteArray(data, 0, data.length);
-        } else {
-            return null;
-        }
     }
 
     public static void showToast(String text) {
@@ -286,8 +274,6 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
     private static void setLyricsAdapter() {
         lm = new LinearLayoutManager(context);// or whatever layout manager you need
-
-        smoothScroller = new CenterSmoothScrollScript.CenterSmoothScroller(lyricsRecyclerView.getContext());
 
         lyricsRecyclerView.setLayoutManager(lm);
 
@@ -313,7 +299,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
         //StorageUtil initialization
         storageUtil = new StorageUtil(getContext());
-        mainActivity = (MainActivity) context;
+        mainActivity = (MainActivity) getContext();
 
         //Mini player items initializations
         mini_play_view = view.findViewById(R.id.mini_player_layout);//○
@@ -410,11 +396,11 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
         return view;
     }
-public AddLyricsFragment addLyricsFragment;
+
     private void setLyricsLayout() {
         mainActivity.mainPlayerSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
 
-         addLyricsFragment = new AddLyricsFragment();
+        addLyricsFragment = new AddLyricsFragment();
         FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.replace(R.id.sec_container, addLyricsFragment);
@@ -648,9 +634,9 @@ public AddLyricsFragment addLyricsFragment;
                 setAdapterInQueue();
                 shuffleImg.setClickable(true);
                 // stopping the background thread (crucial)
-                service.shutdown();
             });
         });
+        service.shutdown();
 
 
     }
@@ -676,9 +662,9 @@ public AddLyricsFragment addLyricsFragment;
             handler.post(() -> {
                 setAdapterInQueue();
                 shuffleImg.setClickable(true);
-                service.shutdown();
             });
         });
+        service.shutdown();
     }
 
     private int activeMusicIndexFinder(MusicDataCapsule activeMusic, @NonNull ArrayList<MusicDataCapsule> list) {
@@ -738,6 +724,28 @@ public AddLyricsFragment addLyricsFragment;
     @Override
     public void onDestroy() {
         super.onDestroy();
+        mainActivity = null;
+        mini_cover = null;
+        mini_pause = null;
+        mini_next = null;
+        mini_name_text = null;
+        mini_artist_text = null;
+        seekBarMain = null;
+        playImg = null;
+        curPosTv = null;
+        context = null;
+        durationTv = null;
+        playerCoverImage = null;
+        favoriteImg = null;
+        playerSongNameTv = null;
+        playerArtistNameTv = null;
+        mimeTv = null;
+        mini_progress = null;
+        bitrateTv = null;
+        timerTv = null;
+        noLyricsLayout = null;
+        lyricsRecyclerView = null;
+        queueSheetBehaviour = null;
     }
 
     @Override
@@ -833,7 +841,7 @@ public AddLyricsFragment addLyricsFragment;
             mini_progress.setMax(Integer.parseInt(activeMusic.getsLength()));
             durationTv.setText(convertDuration(activeMusic.getsLength()));
 
-            int resumePosition = new StorageUtil(context).loadMusicLastPos();
+            int resumePosition = storageUtil.loadMusicLastPos();
             if (resumePosition != -1) {
                 seekBarMain.setProgress(resumePosition);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {

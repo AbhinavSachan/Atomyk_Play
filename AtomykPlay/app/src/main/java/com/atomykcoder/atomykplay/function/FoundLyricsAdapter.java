@@ -1,9 +1,6 @@
 package com.atomykcoder.atomykplay.function;
 
-import static java.security.AccessController.getContext;
-
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,12 +11,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.MainActivity;
 import com.atomykcoder.atomykplay.R;
-import com.atomykcoder.atomykplay.fragments.AddLyricsFragment;
 
 import java.util.ArrayList;
 
 
-public class FoundLyricsAdapter extends RecyclerView.Adapter<FoundLyricsViewHolder> {
+public class FoundLyricsAdapter extends RecyclerView.Adapter<FoundLyricsAdapter.FoundLyricsViewHolder> {
     private ArrayList<String> titles;
     private ArrayList<String> durations;
     private ArrayList<String> urls;
@@ -57,15 +53,16 @@ public class FoundLyricsAdapter extends RecyclerView.Adapter<FoundLyricsViewHold
     public int getItemCount() {
         return titles.size();
     }
-}
 
- class FoundLyricsViewHolder extends RecyclerView.ViewHolder {
-    public TextView song_title;
-    public TextView song_duration;
+    public static class FoundLyricsViewHolder extends RecyclerView.ViewHolder {
+        public TextView song_title;
+        public TextView song_duration;
 
-    public FoundLyricsViewHolder(@NonNull View itemView) {
-        super(itemView);
-        song_title = itemView.findViewById(R.id.found_song_title);
-        song_duration = itemView.findViewById(R.id.found_song_duration);
+        public FoundLyricsViewHolder(@NonNull View itemView) {
+            super(itemView);
+            song_title = itemView.findViewById(R.id.found_song_title);
+            song_duration = itemView.findViewById(R.id.found_song_lyrics_sample);
+        }
     }
 }
+
