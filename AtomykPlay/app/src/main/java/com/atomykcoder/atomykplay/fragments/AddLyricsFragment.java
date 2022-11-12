@@ -7,6 +7,7 @@ import android.app.Dialog;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -159,7 +160,7 @@ public class AddLyricsFragment extends Fragment {
 
             // do in background code here
             service.execute(() -> {
-                Bundle lyricsItems = fetchLyrics.fetchList(artistName + " " + songName);
+                Bundle lyricsItems = fetchLyrics.fetchList(songName + " " + artistName);
                 handler.post(() -> {
                     openBottomSheet(lyricsItems);
                     fetchLyrics.onPostExecute(progressBar);
@@ -174,7 +175,6 @@ public class AddLyricsFragment extends Fragment {
         }
     }
     private void openBottomSheet(Bundle lyricsItems) {
-
         MainActivity mainActivity = (MainActivity) getContext();
         if (mainActivity != null) {
             mainActivity.lyricsListBehavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
@@ -193,7 +193,7 @@ public class AddLyricsFragment extends Fragment {
 
             // do in background code here
             service.execute(() -> {
-                String unfilteredLyrics = fetchLyrics.fetchItem(href);
+                String unfilteredLyrics = fetchLyrics.fetchTimeStamps(href);
                 handler.post(() -> {
                     fetchLyrics.onPostExecute(progressBar);
                     if (unfilteredLyrics.equals("")) {

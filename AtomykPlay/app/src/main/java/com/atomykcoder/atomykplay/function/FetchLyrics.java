@@ -8,51 +8,81 @@ import android.widget.ProgressBar;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class FetchLyrics {
 
+    /**
+     * Toggles Progressbar to View.VISIBLE
+     * @param progressBar
+     */
     public void onPreExecute(ProgressBar progressBar) {
         // pre-execute code goes here
         progressBar.setVisibility(View.VISIBLE);
     }
 
+    /**
+     * Fetches List of All Songs that match the given query
+     * @param query query that needed to be searched (a song name + artist name)
+     * @return returns a bundle with song titles, samplelyrics and urls
+     */
     public Bundle fetchList (String query) {
         Bundle bundle = new Bundle();
-        Element link;
+        Element titleLink;
+        Element lyricsLink;
         String lyrics;
-        final ArrayList<String> titles = new ArrayList<>();
-        final ArrayList<String> sampleLyrics = new ArrayList<>();
-        final ArrayList<String> urls = new ArrayList<>();
+         ArrayList<String> titles = new ArrayList<>();
+         ArrayList<String> sampleLyrics = new ArrayList<>();
+         ArrayList<String> urls = new ArrayList<>();
         try {
             final Document document = Jsoup.connect("https://www.megalobiz.com/search/all?qry=" + query).get();
-            for (Element div : document.select("div.pro_part.mid")) {
-                link = div.select("a").first();
-                if (link != null) {
-                    titles.add(link.text());
-                    urls.add(link.attr("href"));
+            Elements titleElements = document.select("div.pro_part.mid");
+            Elements lyricsElements = document.select("div.details.mid");
+
+            // Retrieve 10 Items from the list
+            for ( int i = 0; i < 20; i++ ) {
+                //get Title and urls
+                if(titleElements != null && !titleElements.isEmpty()) {
+                    titleLink = titleElements.get(i).select("a").first();
+                    if (titleLink != null) {
+                        titles.add(titleLink.text());
+                        urls.add(titleLink.attr("href"));
+                    }
                 }
-            }
-            for (Element div : document.select("div.details.mid")) {
-                link = div.select("div").get(2);
-                link = link.select("span").first();
-                lyrics = LyricsHelper.splitLyricsByNewLine(link.text());
-                sampleLyrics.add(lyrics);
+                //get sample Lyrics
+                if(lyricsElements != null && !lyricsElements.isEmpty()) {
+                    lyricsLink = lyricsElements.get(i).select("div").get(2);
+                    lyricsLink = lyricsLink.select("span").first();
+                    if (lyricsLink != null) {
+                        lyrics = LyricsHelper.splitLyricsByNewLine(lyricsLink.text());
+                        sampleLyrics.add(lyrics);
+                    }
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+        // put all the data in a bundle nicely wrapped
         bundle.putStringArrayList("titles", titles);
         bundle.putStringArrayList("sampleLyrics", sampleLyrics);
         bundle.putStringArrayList("urls", urls);
+
+        //and return the bundle
         return bundle;
     }
 
-    public String fetchItem (String href) {
+    /**
+     * Fetches the song associated with given weblink
+     * @param href weblink associated with a song
+     * @return returns the Time Stamps of the song
+     */
+    public String fetchTimeStamps (String href) {
         Element lyrics = null;
         try {
             final Document lyricsDocument = Jsoup.connect("https://www.megalobiz.com" + href).get();
@@ -68,6 +98,10 @@ public class FetchLyrics {
             return "";
     }
 
+    /**
+     * Toggles Progressbar to View.GONE
+     * @param progressBar
+     */
     public void onPostExecute(ProgressBar progressBar) {
         progressBar.setVisibility(View.GONE);
     }
