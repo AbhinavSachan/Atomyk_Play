@@ -119,11 +119,6 @@
                 android:paddingBottom="100dp"
                 android:clipToPadding="false"/>
         </LinearLayout>
-<<<<<<< Updated upstream
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
-=======
->>>>>>> Stashed changes
-
         <View
             app:layout_anchor="@id/player_main_container"
             android:background="@drawable/player_shadow"
