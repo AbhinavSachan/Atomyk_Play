@@ -1,8 +1,8 @@
 package com.atomykcoder.atomykplay.fragments;
 
-import static com.atomykcoder.atomykplay.MainActivity.convertToMillis;
-import static com.atomykcoder.atomykplay.MainActivity.media_player_service;
-import static com.atomykcoder.atomykplay.MainActivity.service_bound;
+import static com.atomykcoder.atomykplay.activities.MainActivity.convertToMillis;
+import static com.atomykcoder.atomykplay.activities.MainActivity.media_player_service;
+import static com.atomykcoder.atomykplay.activities.MainActivity.service_bound;
 import static com.atomykcoder.atomykplay.function.FetchMusic.convertDuration;
 import static com.atomykcoder.atomykplay.function.StorageUtil.favorite;
 import static com.atomykcoder.atomykplay.function.StorageUtil.no_favorite;
@@ -41,18 +41,20 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.atomykcoder.atomykplay.MainActivity;
+import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.R;
-import com.atomykcoder.atomykplay.function.CenterSmoothScrollScript;
+import com.atomykcoder.atomykplay.enums.PlaybackStatus;
+import com.atomykcoder.atomykplay.customScripts.CenterSmoothScrollScript;
+import com.atomykcoder.atomykplay.customScripts.CustomBottomSheet;
 import com.atomykcoder.atomykplay.function.LRCMap;
-import com.atomykcoder.atomykplay.function.MusicDataCapsule;
-import com.atomykcoder.atomykplay.function.MusicLyricsAdapter;
-import com.atomykcoder.atomykplay.function.MusicQueueAdapter;
-import com.atomykcoder.atomykplay.function.PlaybackStatus;
+import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
+import com.atomykcoder.atomykplay.adapters.MusicLyricsAdapter;
+import com.atomykcoder.atomykplay.adapters.MusicQueueAdapter;
 import com.atomykcoder.atomykplay.function.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
 import com.atomykcoder.atomykplay.interfaces.SimpleTouchCallback;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
@@ -86,7 +88,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     private static LRCMap lrcMap;
     private static RecyclerView.LayoutManager lm;
     private static String songName, artistName, mimeType, duration, bitrate, albumUri;
-    final private CountDownTimer[] countDownTimer = new CountDownTimer[1];
+    private final CountDownTimer[] countDownTimer = new CountDownTimer[1];
     public View mini_play_view;
     public AddLyricsFragment addLyricsFragment;
     private View player_layout;
@@ -114,64 +116,65 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
     public static void setMainPlayerLayout() {
 
-        StorageUtil storageUtil = new StorageUtil(context);
-        ArrayList<MusicDataCapsule> musicList = storageUtil.loadMusicList();
-        MusicDataCapsule activeMusic = null;
-        int musicIndex;
-        musicIndex = storageUtil.loadMusicIndex();
+            StorageUtil storageUtil = new StorageUtil(context);
+            ArrayList<MusicDataCapsule> musicList = storageUtil.loadMusicList();
+            MusicDataCapsule activeMusic = null;
+            int musicIndex;
+            musicIndex = storageUtil.loadMusicIndex();
 
 
-        if (musicList != null)
-            if (musicIndex != -1 && musicIndex < musicList.size()) {
-                activeMusic = musicList.get(musicIndex);
-            } else {
-                activeMusic = musicList.get(0);
-            }
-        if (activeMusic != null) {
-            songName = activeMusic.getsName();
-            artistName = activeMusic.getsArtist();
-            mimeType = activeMusic.getsMimeType().toUpperCase();
-            duration = activeMusic.getsLength();
-            bitrate = activeMusic.getsBitrate();
-            albumUri = activeMusic.getsAlbumUri();
-        }
-        if (activeMusic != null) {
-            if (storageUtil.loadFavorite(songName).equals("no_favorite")) {
-                favoriteImg.setImageResource(R.drawable.ic_favorite_border);
-            } else if (storageUtil.loadFavorite(songName).equals("favorite")) {
-                favoriteImg.setImageResource(R.drawable.ic_favorite);
-            }
-        }
-
-        //main layout setup
-        try {
-            if (activeMusic != null) {
-
-                try {
-                    playerSongNameTv.setText(songName);
-                    playerArtistNameTv.setText(artistName);
-                    mimeTv.setText(getMime(mimeType));
-                    durationTv.setText(convertDuration(duration));
-                    mini_name_text.setText(songName);
-                    mini_artist_text.setText(artistName);
-
-                    int bitrateInNum = Integer.parseInt(bitrate) / 1000;
-                    String finalBitrate = bitrateInNum + " KBPS";
-                    bitrateTv.setText(finalBitrate);
-                } catch (Exception e) {
-                    e.printStackTrace();
+            if (musicList != null)
+                if (musicIndex != -1 && musicIndex < musicList.size()) {
+                    activeMusic = musicList.get(musicIndex);
+                } else {
+                    activeMusic = musicList.get(0);
                 }
-                Glide.with(context).load(albumUri).apply(new RequestOptions().placeholder(R.drawable.ic_music_thumbnail))
-                        .override(500, 500)
-                        .into(playerCoverImage);
-                Glide.with(context).load(albumUri).apply(new RequestOptions().placeholder(R.drawable.ic_music))
-                        .override(75, 75)
-                        .into(mini_cover);
+            if (activeMusic != null) {
+                songName = activeMusic.getsName();
+                artistName = activeMusic.getsArtist();
+                mimeType = activeMusic.getsMimeType().toUpperCase();
+                duration = activeMusic.getsLength();
+                bitrate = activeMusic.getsBitrate();
+                albumUri = activeMusic.getsAlbumUri();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        runnableSyncLyrics();
+            if (activeMusic != null) {
+                if (storageUtil.loadFavorite(songName).equals("no_favorite")) {
+                    favoriteImg.setImageResource(R.drawable.ic_favorite_border);
+                } else if (storageUtil.loadFavorite(songName).equals("favorite")) {
+                    favoriteImg.setImageResource(R.drawable.ic_favorite);
+                }
+            }
+
+            //main layout setup
+            try {
+                if (activeMusic != null) {
+
+                    try {
+                        playerSongNameTv.setText(songName);
+                        playerArtistNameTv.setText(artistName);
+                        mimeTv.setText(getMime(mimeType));
+                        durationTv.setText(convertDuration(duration));
+                        mini_name_text.setText(songName);
+                        mini_artist_text.setText(artistName);
+
+                        int bitrateInNum = Integer.parseInt(bitrate) / 1000;
+                        String finalBitrate = bitrateInNum + " KBPS";
+                        bitrateTv.setText(finalBitrate);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    Glide.with(context).load(albumUri).apply(new RequestOptions().placeholder(R.drawable.ic_music_thumbnail))
+                            .override(800, 800).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                            .into(playerCoverImage);
+                    Glide.with(context).load(albumUri).apply(new RequestOptions().placeholder(R.drawable.ic_music))
+                            .override(75, 75).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                            .into(mini_cover);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            runnableSyncLyrics();
+
     }
 
     public static void runnableSyncLyrics() {
@@ -208,26 +211,23 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
     public static void prepareRunnable() {
         if (lyricsHandler != null) {
-            lyricsRunnable = new Runnable() {
-                @Override
-                public void run() {
-                    int nextStampInMillis = 0;
-                    int currPosInMillis = 0;
-                    if (media_player_service != null) {
-                        if (!getPlayerState()) return;
+            lyricsRunnable = () -> {
+                int nextStampInMillis = 0;
+                int currPosInMillis = 0;
+                if (media_player_service != null) {
+                    if (!getPlayerState()) return;
 
-                        String nextStamp = getNextStamp(lrcMap);
-                        if (!nextStamp.equals("")) {
-                            nextStampInMillis = convertToMillis(nextStamp);
-                            currPosInMillis = getCurrentPos();
-                        }
+                    String nextStamp = getNextStamp(lrcMap);
+                    if (!nextStamp.equals("")) {
+                        nextStampInMillis = convertToMillis(nextStamp);
+                        currPosInMillis = getCurrentPos();
                     }
-                    if (lrcMap.containsStamp(getCurrentStamp())) {
-                        ScrollToPosition(lrcMap.getIndexAtStamp(getCurrentStamp()));
-                    }
-                    lyricsHandler.postDelayed(lyricsRunnable, nextStampInMillis - currPosInMillis);
-
                 }
+                if (lrcMap.containsStamp(getCurrentStamp())) {
+                    ScrollToPosition(lrcMap.getIndexAtStamp(getCurrentStamp()));
+                }
+                lyricsHandler.postDelayed(lyricsRunnable, nextStampInMillis - currPosInMillis);
+
             };
             lyricsHandler.postDelayed(lyricsRunnable, 0);
         }

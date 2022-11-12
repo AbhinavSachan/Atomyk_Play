@@ -77,13 +77,13 @@
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="180dp"
+                    android:layout_height="175dp"
                     android:layout_alignParentTop="true"
                     android:background="@drawable/fade_edge_start" />
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="180dp"
+                    android:layout_height="175dp"
                     android:layout_alignParentBottom="true"
                     android:background="@drawable/fade_edges_end" />
 
@@ -464,7 +464,7 @@
         android:background="@color/primary_bg"
         android:elevation="16dp"
         android:orientation="vertical"
-        app:layout_behavior=".fragments.CustomBottomSheet">
+        app:layout_behavior=".customScripts.CustomBottomSheet">
 
         <ImageView
             android:id="@+id/drag_up_img"

@@ -1,4 +1,4 @@
-package com.atomykcoder.atomykplay.function;
+package com.atomykcoder.atomykplay.customScripts;
 
 import android.content.Context;
 import android.util.AttributeSet;

@@ -1,13 +1,12 @@
 package com.atomykcoder.atomykplay.services;
 
 import static com.atomykcoder.atomykplay.ApplicationClass.CHANNEL_ID;
-import static com.atomykcoder.atomykplay.MainActivity.BROADCAST_PAUSE_PLAY_MUSIC;
-import static com.atomykcoder.atomykplay.MainActivity.BROADCAST_PLAY_NEXT_MUSIC;
-import static com.atomykcoder.atomykplay.MainActivity.BROADCAST_PLAY_PREVIOUS_MUSIC;
-import static com.atomykcoder.atomykplay.MainActivity.BROADCAST_STOP_MUSIC;
-import static com.atomykcoder.atomykplay.MainActivity.media_player_service;
-import static com.atomykcoder.atomykplay.MainActivity.service_bound;
-import static com.atomykcoder.atomykplay.MainActivity.service_connection;
+import static com.atomykcoder.atomykplay.activities.MainActivity.BROADCAST_PAUSE_PLAY_MUSIC;
+import static com.atomykcoder.atomykplay.activities.MainActivity.BROADCAST_PLAY_NEXT_MUSIC;
+import static com.atomykcoder.atomykplay.activities.MainActivity.BROADCAST_PLAY_PREVIOUS_MUSIC;
+import static com.atomykcoder.atomykplay.activities.MainActivity.BROADCAST_STOP_MUSIC;
+import static com.atomykcoder.atomykplay.activities.MainActivity.media_player_service;
+import static com.atomykcoder.atomykplay.activities.MainActivity.service_bound;
 import static com.atomykcoder.atomykplay.function.FetchMusic.convertDuration;
 
 import android.annotation.SuppressLint;
@@ -44,12 +43,12 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
-import com.atomykcoder.atomykplay.MainActivity;
+import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.R;
+import com.atomykcoder.atomykplay.enums.PlaybackStatus;
 import com.atomykcoder.atomykplay.fragments.BottomSheetPlayerFragment;
 import com.atomykcoder.atomykplay.function.LRCMap;
-import com.atomykcoder.atomykplay.function.MusicDataCapsule;
-import com.atomykcoder.atomykplay.function.PlaybackStatus;
+import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import com.atomykcoder.atomykplay.function.StorageUtil;
 
 import java.io.IOException;
@@ -67,7 +66,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
     //audio player notification ID
     public static final int NOTIFICATION_ID = 414141;
-    public static boolean phone_ringing = false;
+    public static boolean ui_visible = false;
     //binder
     private final IBinder iBinder = new LocalBinder();
     public MediaPlayer media_player;
@@ -99,9 +98,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     private final BroadcastReceiver stopMusicReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            pauseMedia();
-            Intent playerIntent = new Intent(getApplicationContext(), MediaPlayerService.class);
-            stopService(playerIntent);
+            stoppedByNotification();
+            stopSelf();
         }
     };
     private final BroadcastReceiver nextMusicReceiver = new BroadcastReceiver() {
@@ -237,13 +235,14 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         ImageView miniImage = BottomSheetPlayerFragment.mini_pause;
         ImageView mainImage = BottomSheetPlayerFragment.playImg;
         if (musicList != null)
-            if (playbackStatus == PlaybackStatus.PLAYING) {
-                miniImage.setImageResource(R.drawable.ic_pause_mini);
-                mainImage.setImageResource(R.drawable.ic_pause_main);
-            } else if (playbackStatus == PlaybackStatus.PAUSED) {
-                miniImage.setImageResource(R.drawable.ic_play_mini);
-                mainImage.setImageResource(R.drawable.ic_play_main);
-            }
+            if (miniImage != null && mainImage != null)
+                if (playbackStatus == PlaybackStatus.PLAYING) {
+                    miniImage.setImageResource(R.drawable.ic_pause_mini);
+                    mainImage.setImageResource(R.drawable.ic_pause_main);
+                } else if (playbackStatus == PlaybackStatus.PAUSED) {
+                    miniImage.setImageResource(R.drawable.ic_play_mini);
+                    mainImage.setImageResource(R.drawable.ic_play_main);
+                }
     }
 
     private void registerPlayNewMusic() {
@@ -353,7 +352,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             }
         }
         if (notificationBuilder != null) {
-            ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).notify(NOTIFICATION_ID, notificationBuilder);
             startForeground(NOTIFICATION_ID, notificationBuilder);
         }
     }
@@ -468,7 +466,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             if (media_player == null) {
                 if (!service_bound) {
                     startService(playerIntent);
-                    bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
                     new Handler().postDelayed(() -> {
                         //service is active send media with broadcast receiver
                         Intent broadcastIntent = new Intent(BROADCAST_PAUSE_PLAY_MUSIC);
@@ -486,7 +483,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             if (media_player == null) {
                 if (!service_bound) {
                     startService(playerIntent);
-                    bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
                     new Handler().postDelayed(() -> {
                         //service is active send media with broadcast receiver
                         Intent broadcastIntent = new Intent(BROADCAST_PAUSE_PLAY_MUSIC);
@@ -504,7 +500,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             if (media_player == null) {
                 if (!service_bound) {
                     startService(playerIntent);
-                    bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
                     new Handler().postDelayed(() -> {
                         //service is active send media with broadcast receiver
                         Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEXT_MUSIC);
@@ -522,7 +517,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             if (media_player == null) {
                 if (!service_bound) {
                     startService(playerIntent);
-                    bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
                     new Handler().postDelayed(() -> {
                         //service is active send media with broadcast receiver
                         Intent broadcastIntent = new Intent(BROADCAST_PLAY_PREVIOUS_MUSIC);
@@ -540,7 +534,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             if (media_player == null) {
                 if (!service_bound) {
                     startService(playerIntent);
-                    bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
                     new Handler().postDelayed(() -> {
                         //service is active send media with broadcast receiver
                         Intent broadcastIntent = new Intent(BROADCAST_STOP_MUSIC);
@@ -569,33 +562,33 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                         if (media_player != null) {
                             if (media_player.isPlaying()) {
                                 pauseMedia();
-                                was_playing =true;
+                                was_playing = true;
                             }
                             if (handler != null) {
                                 handler.removeCallbacks(runnable);
                             }
-                            phone_ringing = true;
+                            MainActivity.phone_ringing = true;
                         }
                     }
                     case TelephonyManager.CALL_STATE_RINGING: {
                         if (media_player != null) {
                             if (media_player.isPlaying()) {
                                 pauseMedia();
-                                was_playing =true;
+                                was_playing = true;
                             }
                             if (handler != null) {
                                 handler.removeCallbacks(runnable);
                             }
-                            phone_ringing = true;
+                            MainActivity.phone_ringing = true;
                         }
                     }
                     break;
                     case TelephonyManager.CALL_STATE_IDLE: {
                         if (media_player != null) {
-                            phone_ringing = false;
+                            MainActivity.phone_ringing = false;
                             if (was_playing) {
                                 resumeMedia();
-                                was_playing =false;
+                                was_playing = false;
                             }
                             setSeekBar();
                         }
@@ -638,8 +631,10 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         resumeMedia();
         if (service_bound) {
             updateMetaData();
-            BottomSheetPlayerFragment.setMainPlayerLayout();
-            setSeekBar();
+            if (ui_visible) {
+                BottomSheetPlayerFragment.setMainPlayerLayout();
+                setSeekBar();
+            }
         }
     }
 
@@ -740,7 +735,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         if (!requestAudioFocus()) {
             requestAudioFocus();
         }
-        if (!phone_ringing) {
+        if (!MainActivity.phone_ringing) {
             if (media_player != null)
                 if (!media_player.isPlaying()) {
                     media_player.start();
@@ -763,10 +758,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             media_player.stop();
             MainActivity.is_playing = false;
         }
-        if (BottomSheetPlayerFragment.lyricsHandler != null) {
-            BottomSheetPlayerFragment.lyricsHandler.removeCallbacks(BottomSheetPlayerFragment.lyricsRunnable);
-        }
-        stopForeground(false);
+
     }
 
     public void stoppedByNotification() {
@@ -776,8 +768,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 buildPausedNotification(PlaybackStatus.PAUSED, 0f);
                 media_player.pause();
                 MainActivity.is_playing = false;
+                setIcon(PlaybackStatus.PAUSED);
             }
-        setIcon(PlaybackStatus.PAUSED);
         stopForeground(true);
     }
 
@@ -804,7 +796,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         if (audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) == 0f) {
             Toast.makeText(this, "Please turn the volume UP", Toast.LENGTH_SHORT).show();
         }
-        if (!phone_ringing) {
+        if (!MainActivity.phone_ringing) {
             if (media_player != null) {
                 if (!media_player.isPlaying()) {
                     int position = storage.loadMusicLastPos();
@@ -1077,6 +1069,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             media_player.release();
         }
         media_player = null;
+        stopForeground(true);
         stopSelf();
     }
 

@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:id="@+id/drawer_layout"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".activities.MainActivity">
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/main_layout"
@@ -47,8 +47,7 @@
                 app:msb_barColor="@color/primary_bg"
                 app:msb_handleColor="@color/tertiary_bg"
                 app:msb_handleOffColor="@color/sub_text_grey"
-                app:msb_lightOnTouch="true"
-                app:msb_recyclerView="@id/music_recycler" />
+                app:msb_lightOnTouch="true" />
 
             <LinearLayout
                 android:id="@+id/song_not_found_layout"
@@ -123,7 +122,7 @@
             app:layout_anchor="@id/player_main_container"
             android:background="@drawable/player_shadow"
             android:layout_width="match_parent"
-            android:layout_height="20dp"/>
+            android:layout_height="10dp"/>
 
         <View
             android:id="@+id/shadow_main"
@@ -138,7 +137,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:elevation="30dp"
-            app:layout_behavior=".fragments.CustomBottomSheet" />
+            app:layout_behavior=".customScripts.CustomBottomSheet" />
 
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>

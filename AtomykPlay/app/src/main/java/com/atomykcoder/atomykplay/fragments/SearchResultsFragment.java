@@ -15,8 +15,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.R;
-import com.atomykcoder.atomykplay.function.MusicDataCapsule;
-import com.atomykcoder.atomykplay.function.MusicMainAdapter;
+import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
+import com.atomykcoder.atomykplay.adapters.MusicMainAdapter;
 
 import java.util.ArrayList;
 

@@ -1,4 +1,4 @@
-package com.atomykcoder.atomykplay.function;
+package com.atomykcoder.atomykplay.adapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -9,19 +9,19 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.atomykcoder.atomykplay.MainActivity;
+import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.R;
 
 import java.util.ArrayList;
 
 
 public class FoundLyricsAdapter extends RecyclerView.Adapter<FoundLyricsAdapter.FoundLyricsViewHolder> {
-    private ArrayList<String> titles;
-    private ArrayList<String> durations;
-    private ArrayList<String> urls;
-    private Context context;
+    private final ArrayList<String> titles;
+    private final ArrayList<String> durations;
+    private final ArrayList<String> urls;
+    private final Context context;
 
-    public FoundLyricsAdapter(ArrayList<String> _titles, ArrayList<String> _durations, ArrayList<String> _urls ,Context _context){
+    public FoundLyricsAdapter(ArrayList<String> _titles, ArrayList<String> _durations, ArrayList<String> _urls, Context _context) {
         titles = _titles;
         durations = _durations;
         urls = _urls;

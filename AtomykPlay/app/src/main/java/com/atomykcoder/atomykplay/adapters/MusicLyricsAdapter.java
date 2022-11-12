@@ -1,4 +1,4 @@
-package com.atomykcoder.atomykplay.function;
+package com.atomykcoder.atomykplay.adapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;

@@ -1,4 +1,4 @@
-package com.atomykcoder.atomykplay;
+package com.atomykcoder.atomykplay.activities;
 
 import android.Manifest;
 import android.content.ComponentName;
@@ -34,13 +34,14 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.fragments.BottomSheetPlayerFragment;
-import com.atomykcoder.atomykplay.fragments.CustomBottomSheet;
 import com.atomykcoder.atomykplay.fragments.SearchResultsFragment;
+import com.atomykcoder.atomykplay.customScripts.CustomBottomSheet;
 import com.atomykcoder.atomykplay.function.FetchMusic;
-import com.atomykcoder.atomykplay.function.FoundLyricsAdapter;
-import com.atomykcoder.atomykplay.function.MusicDataCapsule;
-import com.atomykcoder.atomykplay.function.MusicMainAdapter;
+import com.atomykcoder.atomykplay.adapters.FoundLyricsAdapter;
+import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
+import com.atomykcoder.atomykplay.adapters.MusicMainAdapter;
 import com.atomykcoder.atomykplay.function.StorageUtil;
 import com.atomykcoder.atomykplay.services.MediaPlayerService;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
@@ -90,8 +91,9 @@ public class MainActivity extends AppCompatActivity {
             media_player_service = null;
         }
     };
+    public static boolean phone_ringing = false;
+    public static boolean is_playing = false;
     public View player_bottom_sheet;
-    public boolean phone_ringing = false;
     public CustomBottomSheet<View> mainPlayerSheetBehavior;
     public BottomSheetPlayerFragment bottomSheetPlayerFragment;
     public BottomSheetBehavior<View> lyricsListBehavior;
@@ -169,7 +171,6 @@ public class MainActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private View lyricsListView;
     private FragmentManager manager;
-    public static boolean is_playing = false;
 
     //endregion
     public static int convertToMillis(String duration) {
@@ -209,6 +210,7 @@ public class MainActivity extends AppCompatActivity {
         toolbar.setTitle(R.string.app_name);
         CoordinatorLayout main_layout = findViewById(R.id.main_layout);
 
+        MediaPlayerService.ui_visible = true;
 
         NavigationView navigationView = findViewById(R.id.navigation_drawer);
         drawer = findViewById(R.id.drawer_layout);
@@ -237,10 +239,7 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setHasFixedSize(true);
 
 
-        LinearLayoutManager manager = new LinearLayoutManager(MainActivity.this, LinearLayoutManager.VERTICAL, false);
-        manager.setSmoothScrollbarEnabled(true);
-        recyclerView.setLayoutManager(manager);
-
+        scrollBar.setRecyclerView(recyclerView);
         scrollBar.setIndicator(new AlphabetIndicator(MainActivity.this), false);
 
         //Checking permissions before activity creation (method somewhere down in the script)
@@ -293,9 +292,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         if (is_granted) {
             if (!service_bound) {
-                Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
-                bindService(playerIntent, service_connection, Context.BIND_IMPORTANT);
-
+                startService();
 //                this will start playing song as soon as app starts if its connected to headset
 
 //                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -331,9 +328,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         if (service_bound) {
-            if (media_player_service.handler!=null){
+            if (media_player_service.handler != null) {
                 media_player_service.handler.removeCallbacks(media_player_service.runnable);
-                if (BottomSheetPlayerFragment.lyricsHandler!=null){
+                if (BottomSheetPlayerFragment.lyricsHandler != null) {
                     BottomSheetPlayerFragment.lyricsHandler.removeCallbacks(BottomSheetPlayerFragment.lyricsRunnable);
                 }
             }
@@ -344,6 +341,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        finish();
         if (service_bound) {
             //if media player is not playing it will stop the service
             if (media_player_service.media_player != null) {
@@ -355,6 +353,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
+        MediaPlayerService.ui_visible = false;
         if (phoneStateListener != null) {
             telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE);
         }
@@ -364,8 +363,8 @@ public class MainActivity extends AppCompatActivity {
     private void startService() {
         if (!phone_ringing) {
             Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
-            bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
             startService(playerIntent);
+            bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
         } else {
             Toast.makeText(this, "Can't play while on call.", Toast.LENGTH_SHORT).show();
         }
@@ -494,6 +493,10 @@ public class MainActivity extends AppCompatActivity {
                         ExecutorService service = Executors.newSingleThreadExecutor();
                         Handler handler = new Handler(Looper.getMainLooper());
                         progressBar.setVisibility(View.VISIBLE);
+                        LinearLayoutManager manager = new LinearLayoutManager(MainActivity.this, LinearLayoutManager.VERTICAL, false);
+                        manager.setSmoothScrollbarEnabled(true);
+
+
                         // do in background code here
                         service.execute(() -> {
 
@@ -512,6 +515,7 @@ public class MainActivity extends AppCompatActivity {
                                 progressBar.setVisibility(View.GONE);
                                 adapter = new MusicMainAdapter(MainActivity.this, dataList);
                                 recyclerView.setAdapter(adapter);
+                                recyclerView.setLayoutManager(manager);
 
                             });
                         });

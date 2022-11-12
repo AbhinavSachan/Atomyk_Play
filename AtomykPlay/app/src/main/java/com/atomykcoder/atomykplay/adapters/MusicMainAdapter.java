@@ -1,4 +1,4 @@
-package com.atomykcoder.atomykplay.function;
+package com.atomykcoder.atomykplay.adapters;
 
 import static com.atomykcoder.atomykplay.function.FetchMusic.convertDuration;
 import static com.atomykcoder.atomykplay.function.StorageUtil.no_shuffle;
@@ -19,8 +19,10 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.atomykcoder.atomykplay.MainActivity;
+import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.R;
+import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
+import com.atomykcoder.atomykplay.function.StorageUtil;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.turingtechnologies.materialscrollbar.INameableAdapter;
