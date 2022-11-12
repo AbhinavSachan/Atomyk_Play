@@ -23,27 +23,31 @@ public class FetchLyrics {
 
     public Bundle fetchList (String query) {
         Bundle bundle = new Bundle();
-        final ArrayList<String> titles = new ArrayList<>();
-        final ArrayList<String> durations = new ArrayList<>();
-        final ArrayList<String> urls = new ArrayList<>();
         Element link;
+        String lyrics;
+        final ArrayList<String> titles = new ArrayList<>();
+        final ArrayList<String> sampleLyrics = new ArrayList<>();
+        final ArrayList<String> urls = new ArrayList<>();
         try {
             final Document document = Jsoup.connect("https://www.megalobiz.com/search/all?qry=" + query).get();
-            int i = 0;
             for (Element div : document.select("div.pro_part.mid")) {
                 link = div.select("a").first();
                 if (link != null) {
                     titles.add(link.text());
                     urls.add(link.attr("href"));
-                    durations.add(getLength(link.text()));
                 }
-                i++;
+            }
+            for (Element div : document.select("div.details.mid")) {
+                link = div.select("div").get(2);
+                link = link.select("span").first();
+                lyrics = LyricsHelper.splitLyricsByNewLine(link.text());
+                sampleLyrics.add(lyrics);
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
         bundle.putStringArrayList("titles", titles);
-        bundle.putStringArrayList("durations", durations);
+        bundle.putStringArrayList("sampleLyrics", sampleLyrics);
         bundle.putStringArrayList("urls", urls);
         return bundle;
     }
@@ -68,17 +72,19 @@ public class FetchLyrics {
         progressBar.setVisibility(View.GONE);
     }
 
-    private String getLength(String songName) {
-        String o = "[00:00.00]";
-        Log.i("match", songName);
-        Pattern _pattern = Pattern.compile("\\[\\d\\d:\\d\\d.\\d\\d\\]");
-        Matcher _matcher = _pattern.matcher(songName);
-        if(_matcher.find()) {
-            o = songName.substring(_matcher.start(), _matcher.end());
-        }
-        Log.i("match", "Match : " +  o);
-        return o;
-    }
+    //region get duration method maybe for use later...
+//    private String getLength(String songName) {
+//        String o = "[00:00.00]";
+//        Log.i("match", songName);
+//        Pattern _pattern = Pattern.compile("\\[\\d\\d:\\d\\d.\\d\\d\\]");
+//        Matcher _matcher = _pattern.matcher(songName);
+//        if(_matcher.find()) {
+//            o = songName.substring(_matcher.start(), _matcher.end());
+//        }
+//        Log.i("match", "Match : " +  o);
+//        return o;
+//    }
+    //endregion.......
 }
 
 

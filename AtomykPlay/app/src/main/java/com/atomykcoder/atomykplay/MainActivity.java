@@ -245,16 +245,16 @@ public class MainActivity extends AppCompatActivity {
 
     public void setLyricListAdapter(Bundle bundle) {
         ArrayList<String> titles;
-        ArrayList<String> durations;
+        ArrayList<String> sampleLyrics;
         ArrayList<String> urls;
 
         titles = bundle.getStringArrayList("titles");
-        durations = bundle.getStringArrayList("durations");
+        sampleLyrics = bundle.getStringArrayList("sampleLyrics");
         urls = bundle.getStringArrayList("urls");
         RecyclerView recyclerView = findViewById(R.id.found_lyrics_recycler_view);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
-        FoundLyricsAdapter adapter = new FoundLyricsAdapter(titles, durations, urls, this);
+        FoundLyricsAdapter adapter = new FoundLyricsAdapter(titles, sampleLyrics, urls, this);
         recyclerView.setAdapter(adapter);
     }
 

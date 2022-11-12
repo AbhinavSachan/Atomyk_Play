@@ -114,7 +114,6 @@
                 android:clipToPadding="false"/>
         </LinearLayout>
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
->>>>>>> Stashed changes
 
         <View
             app:layout_anchor="@id/player_main_container"
