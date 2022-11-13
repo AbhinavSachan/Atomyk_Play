@@ -200,7 +200,7 @@ public class MainActivity extends AppCompatActivity {
         //initializations
         mainPlayerManager = getSupportFragmentManager();
         searchFragmentManager = getSupportFragmentManager();
-        
+
         linearLayout = findViewById(R.id.song_not_found_layout);
         recyclerView = findViewById(R.id.music_recycler);
         player_bottom_sheet = findViewById(R.id.player_main_container);
@@ -292,10 +292,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         if (is_granted) {
-            if (!service_bound) {
-                bindService();
-                Log.d("bound", "STARTED");
-//                this will start playing song as soon as app starts if its connected to headset
+            bindService();
+            Log.d("bound", "STARTED");
+            //                this will start playing song as soon as app starts if its connected to headset
 
 //                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 //                    if (audioManager.isBluetoothScoOn()){
@@ -304,8 +303,6 @@ public class MainActivity extends AppCompatActivity {
 //                        playAudio();
 //                    }
 //                }
-
-            }
         }
         super.onStart();
     }
