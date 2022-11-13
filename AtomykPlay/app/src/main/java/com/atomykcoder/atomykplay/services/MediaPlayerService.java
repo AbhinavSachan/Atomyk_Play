@@ -336,7 +336,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                     .addAction(R.drawable.ic_close, "stop", playbackAction(4))
                     .setContentIntent(PendingIntent.getActivity(this, 0, new Intent(getApplicationContext(), MainActivity.class), PendingIntent.FLAG_IMMUTABLE))
                     .setSilent(true)
-                    .setOngoing(true)
                     .setPriority(NotificationCompat.PRIORITY_LOW)
                     .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_DEFAULT)
                     .build();
@@ -358,6 +357,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
     @SuppressLint("inlinedApi")
     public void buildPausedNotification(PlaybackStatus playbackStatus, float playbackSpeed) {
+        stopForeground(false);
         int notificationAction = R.drawable.ic_pause_for_noti;//needs to be initialized
         PendingIntent play_pauseAction = null;
 
@@ -397,7 +397,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                     .addAction(R.drawable.ic_close, "stop", playbackAction(4))
                     .setContentIntent(PendingIntent.getActivity(this, 0, new Intent(getApplicationContext(), MainActivity.class), PendingIntent.FLAG_IMMUTABLE))
                     .setSilent(true)
-                    .setOngoing(false)
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                     .build();
 
@@ -784,7 +783,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 MainActivity.is_playing = false;
                 setIcon(PlaybackStatus.PAUSED);
                 buildPausedNotification(PlaybackStatus.PAUSED, 0f);
-                stopForeground(false);
+
             }
         }
     }
