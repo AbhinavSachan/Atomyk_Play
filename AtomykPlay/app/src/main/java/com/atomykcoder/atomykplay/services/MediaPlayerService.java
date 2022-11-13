@@ -1049,6 +1049,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         if (media_player != null) {
             storage.saveMusicLastPos(media_player.getCurrentPosition());
         }
+        stopForeground(true);
         removeNotification();
         //disable phone state listener ♣
         if (phoneStateListener != null) {
@@ -1068,7 +1069,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             media_player.release();
         }
         media_player = null;
-        stopForeground(true);
         stopSelf();
     }
 

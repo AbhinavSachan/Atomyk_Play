@@ -12,6 +12,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -35,15 +36,15 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.R;
+import com.atomykcoder.atomykplay.adapters.FoundLyricsAdapter;
+import com.atomykcoder.atomykplay.adapters.MusicMainAdapter;
+import com.atomykcoder.atomykplay.customScripts.CustomBottomSheet;
 import com.atomykcoder.atomykplay.fragments.BottomSheetPlayerFragment;
 import com.atomykcoder.atomykplay.fragments.SearchResultsFragment;
-import com.atomykcoder.atomykplay.customScripts.CustomBottomSheet;
 import com.atomykcoder.atomykplay.function.FetchMusic;
-import com.atomykcoder.atomykplay.adapters.FoundLyricsAdapter;
-import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
-import com.atomykcoder.atomykplay.adapters.MusicMainAdapter;
 import com.atomykcoder.atomykplay.function.StorageUtil;
 import com.atomykcoder.atomykplay.services.MediaPlayerService;
+import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.navigation.NavigationView;
 import com.karumi.dexter.Dexter;
@@ -82,7 +83,6 @@ public class MainActivity extends AppCompatActivity {
             MediaPlayerService.LocalBinder binder = (MediaPlayerService.LocalBinder) service;
             media_player_service = binder.getService();
             service_bound = true;
-
         }
 
         @Override
@@ -99,49 +99,6 @@ public class MainActivity extends AppCompatActivity {
     public BottomSheetBehavior<View> lyricsListBehavior;
     private SearchResultsFragment searchResultsFragment; // This being here is very important for search method to work
     private View shadowMain;
-    public BottomSheetBehavior.BottomSheetCallback callback = new BottomSheetBehavior.BottomSheetCallback() {
-        @Override
-        public void onStateChanged(@NonNull View bottomSheet, int newState) {
-            if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
-                View miniPlayer = bottomSheetPlayerFragment.mini_play_view;
-                View mainPlayer = findViewById(R.id.player_layout);
-                mainPlayer.setVisibility(View.INVISIBLE);
-                miniPlayer.setVisibility(View.VISIBLE);
-                miniPlayer.setAlpha(1);
-                shadowMain.setAlpha(0);
-                mainPlayer.setAlpha(0);
-            } else if (newState == BottomSheetBehavior.STATE_EXPANDED) {
-                //this will hide the keyboard after clicking on player while searching
-                try {
-                    InputMethodManager manager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-                    manager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
-                    FragmentManager manager1 = getSupportFragmentManager();
-                    manager1.popBackStack();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-                View miniPlayer = bottomSheetPlayerFragment.mini_play_view;
-                View mainPlayer = findViewById(R.id.player_layout);
-                miniPlayer.setVisibility(View.INVISIBLE);
-                mainPlayer.setVisibility(View.VISIBLE);
-                miniPlayer.setAlpha(0);
-                mainPlayer.setAlpha(1);
-                shadowMain.setAlpha(1);
-            }
-        }
-
-        @Override
-        public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-            View miniPlayer = bottomSheetPlayerFragment.mini_play_view;
-            View mainPlayer = findViewById(R.id.player_layout);
-            miniPlayer.setVisibility(View.VISIBLE);
-            mainPlayer.setVisibility(View.VISIBLE);
-            miniPlayer.setAlpha(1 - slideOffset * 15);
-            mainPlayer.setAlpha(0 + slideOffset * 3);
-            shadowMain.setAlpha(0 + slideOffset);
-        }
-    };
     private View shadowLyrFound;
     private final BottomSheetBehavior.BottomSheetCallback lrcFoundCallback = new BottomSheetBehavior.BottomSheetCallback() {
         @Override
@@ -170,7 +127,50 @@ public class MainActivity extends AppCompatActivity {
     private DrawerLayout drawer;
     private ProgressBar progressBar;
     private View lyricsListView;
-    private FragmentManager manager;
+    private FragmentManager searchFragmentManager;
+    public BottomSheetBehavior.BottomSheetCallback callback = new BottomSheetBehavior.BottomSheetCallback() {
+        @Override
+        public void onStateChanged(@NonNull View bottomSheet, int newState) {
+            if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
+                View miniPlayer = bottomSheetPlayerFragment.mini_play_view;
+                View mainPlayer = findViewById(R.id.player_layout);
+                mainPlayer.setVisibility(View.INVISIBLE);
+                miniPlayer.setVisibility(View.VISIBLE);
+                miniPlayer.setAlpha(1);
+                shadowMain.setAlpha(0);
+                mainPlayer.setAlpha(0);
+            } else if (newState == BottomSheetBehavior.STATE_EXPANDED) {
+                //this will hide the keyboard after clicking on player while searching
+                try {
+                    InputMethodManager manager1 = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+                    manager1.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+                    searchFragmentManager.popBackStack();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                View miniPlayer = bottomSheetPlayerFragment.mini_play_view;
+                View mainPlayer = findViewById(R.id.player_layout);
+                miniPlayer.setVisibility(View.INVISIBLE);
+                mainPlayer.setVisibility(View.VISIBLE);
+                miniPlayer.setAlpha(0);
+                mainPlayer.setAlpha(1);
+                shadowMain.setAlpha(1);
+            }
+        }
+
+        @Override
+        public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+            View miniPlayer = bottomSheetPlayerFragment.mini_play_view;
+            View mainPlayer = findViewById(R.id.player_layout);
+            miniPlayer.setVisibility(View.VISIBLE);
+            mainPlayer.setVisibility(View.VISIBLE);
+            miniPlayer.setAlpha(1 - slideOffset * 15);
+            mainPlayer.setAlpha(0 + slideOffset * 3);
+            shadowMain.setAlpha(0 + slideOffset);
+        }
+    };
+    private FragmentManager mainPlayerManager;
 
     //endregion
     public static int convertToMillis(String duration) {
@@ -198,6 +198,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         //initializations
+        mainPlayerManager = getSupportFragmentManager();
+        searchFragmentManager = getSupportFragmentManager();
+
         linearLayout = findViewById(R.id.song_not_found_layout);
         recyclerView = findViewById(R.id.music_recycler);
         player_bottom_sheet = findViewById(R.id.player_main_container);
@@ -229,8 +232,6 @@ public class MainActivity extends AppCompatActivity {
         lyricsListBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
         main_layout.setNestedScrollingEnabled(false);
 
-
-        bottomSheetPlayerFragment = new BottomSheetPlayerFragment();
 
         dataList = new ArrayList<>();
         DragScrollBar scrollBar = findViewById(R.id.dragScrollBar);
@@ -291,9 +292,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         if (is_granted) {
-            if (!service_bound) {
-                startService();
-//                this will start playing song as soon as app starts if its connected to headset
+            bindService();
+            Log.d("bound", "STARTED");
+            //                this will start playing song as soon as app starts if its connected to headset
 
 //                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 //                    if (audioManager.isBluetoothScoOn()){
@@ -302,8 +303,6 @@ public class MainActivity extends AppCompatActivity {
 //                        playAudio();
 //                    }
 //                }
-
-            }
         }
         super.onStart();
     }
@@ -321,12 +320,15 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onStop() {
+        if (service_bound) {
+            MainActivity.this.unbindService(service_connection);
+            Log.d("bound", "STOPPED");
+        }
         super.onStop();
     }
 
     @Override
     protected void onPause() {
-        super.onPause();
         if (service_bound) {
             if (media_player_service.handler != null) {
                 media_player_service.handler.removeCallbacks(media_player_service.runnable);
@@ -335,8 +337,8 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
+        super.onPause();
     }
-
 
     @Override
     protected void onDestroy() {
@@ -346,7 +348,7 @@ public class MainActivity extends AppCompatActivity {
             //if media player is not playing it will stop the service
             if (media_player_service.media_player != null) {
                 if (!is_playing) {
-                    unbindService(service_connection);
+                    MainActivity.this.unbindService(service_connection);
                     stopService(new Intent(MainActivity.this, MediaPlayerService.class));
                     service_bound = false;
                     is_playing = false;
@@ -360,11 +362,11 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void startService() {
+    private void bindService() {
         if (!phone_ringing) {
             Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
+            MainActivity.this.bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
             startService(playerIntent);
-            bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
         } else {
             Toast.makeText(this, "Can't play while on call.", Toast.LENGTH_SHORT).show();
         }
@@ -378,7 +380,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (!phone_ringing) {
             if (!service_bound) {
-                startService();
+                bindService();
                 new Handler().postDelayed(() -> {
                     //service is active send media with broadcast receiver
                     Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEW_MUSIC);
@@ -396,7 +398,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void pausePlayAudio() {
         if (!service_bound) {
-            startService();
+            bindService();
             new Handler().postDelayed(() -> {
                 //service is active send media with broadcast receiver
                 Intent broadcastIntent = new Intent(BROADCAST_PAUSE_PLAY_MUSIC);
@@ -411,7 +413,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void playNextAudio() {
         if (!service_bound) {
-            startService();
+            bindService();
             new Handler().postDelayed(() -> {
                 //service is active send media with broadcast receiver
                 Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEXT_MUSIC);
@@ -426,7 +428,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void playPreviousAudio() {
         if (!service_bound) {
-            startService();
+            bindService();
             new Handler().postDelayed(() -> {
                 //service is active send media with broadcast receiver
                 Intent broadcastIntent = new Intent(BROADCAST_PLAY_PREVIOUS_MUSIC);
@@ -441,17 +443,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setFragmentInSlider() {
-        FragmentManager manager = getSupportFragmentManager();
-        FragmentTransaction transaction = manager.beginTransaction();
+        bottomSheetPlayerFragment = new BottomSheetPlayerFragment();
+
+        FragmentTransaction transaction = mainPlayerManager.beginTransaction();
         transaction.replace(R.id.player_main_container, bottomSheetPlayerFragment);
         transaction.commit();
     }
 
     private void setSearchFragment() {
-
-        manager = getSupportFragmentManager();
         searchResultsFragment = new SearchResultsFragment();
-        FragmentTransaction transaction = manager.beginTransaction();
+
+        FragmentTransaction transaction = searchFragmentManager.beginTransaction();
         transaction.replace(R.id.sec_container, searchResultsFragment);
         transaction.addToBackStack(searchResultsFragment.toString());
         transaction.commit();
@@ -575,7 +577,7 @@ public class MainActivity extends AppCompatActivity {
 
         });
         searchView.setOnCloseListener(() -> {
-            manager.popBackStack();
+            searchFragmentManager.popBackStack();
             return false;
         });
         return super.onCreateOptionsMenu(menu);
