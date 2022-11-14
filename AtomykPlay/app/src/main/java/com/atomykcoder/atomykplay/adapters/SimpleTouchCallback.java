@@ -1,4 +1,4 @@
-package com.atomykcoder.atomykplay.interfaces;
+package com.atomykcoder.atomykplay.adapters;
 
 import android.graphics.Canvas;
 
@@ -6,6 +6,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.atomykcoder.atomykplay.interfaces.ItemTouchHelperAdapter;
+import com.atomykcoder.atomykplay.interfaces.ItemTouchHelperViewfinder;
 
 import java.util.List;
 

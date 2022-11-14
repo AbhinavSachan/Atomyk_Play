@@ -1,4 +1,4 @@
-package com.atomykcoder.atomykplay;
+package com.atomykcoder.atomykplay.classes;
 
 import android.app.Application;
 import android.app.NotificationChannel;

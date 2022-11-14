@@ -50,8 +50,9 @@ import com.atomykcoder.atomykplay.customScripts.CustomBottomSheet;
 import com.atomykcoder.atomykplay.enums.PlaybackStatus;
 import com.atomykcoder.atomykplay.function.LRCMap;
 import com.atomykcoder.atomykplay.function.StorageUtil;
+import com.atomykcoder.atomykplay.interfaces.INotifyChangeLayout;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
-import com.atomykcoder.atomykplay.interfaces.SimpleTouchCallback;
+import com.atomykcoder.atomykplay.adapters.SimpleTouchCallback;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -64,7 +65,7 @@ import java.util.Collections;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeListener, OnDragStartListener {
+public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeListener, OnDragStartListener, INotifyChangeLayout {
 
     private final static ArrayList<String> lyricsArrayList = new ArrayList<>();
     public static LinearProgressIndicator mini_progress;
@@ -84,7 +85,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     private static TextView playerSongNameTv, playerArtistNameTv, mimeTv, bitrateTv, timerTv;
     private static View noLyricsLayout;
     //cover image view
-    private static RecyclerView lyricsRecyclerView;
+    private RecyclerView lyricsRecyclerView;
     private static LRCMap lrcMap;
     private static RecyclerView.LayoutManager lm;
     private static String songName, artistName, mimeType, duration, bitrate, albumUri;
@@ -174,11 +175,11 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         } catch (Exception e) {
             e.printStackTrace();
         }
-        runnableSyncLyrics();
+//        runnableSyncLyrics();
 
     }
 
-    public static void runnableSyncLyrics() {
+    public void runnableSyncLyrics() {
         StorageUtil storageUtil = new StorageUtil(context);
         ArrayList<MusicDataCapsule> musicList = storageUtil.loadMusicList();
         MusicDataCapsule activeMusic = null;
@@ -224,8 +225,10 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
                         currPosInMillis = getCurrentPos();
                     }
                 }
-                if (lrcMap.containsStamp(getCurrentStamp())) {
-                    ScrollToPosition(lrcMap.getIndexAtStamp(getCurrentStamp()));
+                if(lrcMap != null) {
+                    if (lrcMap.containsStamp(getCurrentStamp())) {
+                        ScrollToPosition(lrcMap.getIndexAtStamp(getCurrentStamp()));
+                    }
                 }
                 lyricsHandler.postDelayed(lyricsRunnable, nextStampInMillis - currPosInMillis);
 
@@ -273,7 +276,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         return media_player_service.media_player.getCurrentPosition();
     }
 
-    private static void setLyricsAdapter() {
+    private void setLyricsAdapter() {
         lm = new LinearLayoutManager(context);// or whatever layout manager you need
 
         lyricsRecyclerView.setLayoutManager(lm);
@@ -819,9 +822,9 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
             if (media_player_service.media_player != null) {
                 media_player_service.media_player.seekTo(seekBar.getProgress());
                 if (media_player_service.media_player.isPlaying()) {
-                    media_player_service.buildPlayNotification(PlaybackStatus.PLAYING, 1f);
+                    media_player_service.buildNotification(PlaybackStatus.PLAYING, 1f);
                 } else {
-                    media_player_service.buildPausedNotification(PlaybackStatus.PAUSED, 0f);
+                    media_player_service.buildNotification(PlaybackStatus.PAUSED, 0f);
                 }
             }
             media_player_service.setSeekBar();
@@ -863,4 +866,11 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     public void onDragStart(RecyclerView.ViewHolder viewHolder) {
         itemTouchHelper.startDrag(viewHolder);
     }
+
+    @Override
+    public void execute() {
+        setMainPlayerLayout();
+        Log.i("info", "Interface worked");
+    }
+
 }

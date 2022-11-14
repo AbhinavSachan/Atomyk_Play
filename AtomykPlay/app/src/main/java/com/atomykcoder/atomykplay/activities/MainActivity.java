@@ -6,10 +6,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.media.AudioManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.Parcelable;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -97,9 +99,10 @@ public class MainActivity extends AppCompatActivity {
     public CustomBottomSheet<View> mainPlayerSheetBehavior;
     public BottomSheetPlayerFragment bottomSheetPlayerFragment;
     public BottomSheetBehavior<View> lyricsListBehavior;
-    private SearchResultsFragment searchResultsFragment; // This being here is very important for search method to work
+    private final SearchResultsFragment searchResultsFragment = new SearchResultsFragment();
     private View shadowMain;
     private View shadowLyrFound;
+
     private final BottomSheetBehavior.BottomSheetCallback lrcFoundCallback = new BottomSheetBehavior.BottomSheetCallback() {
         @Override
         public void onStateChanged(@NonNull View bottomSheet, int newState) {
@@ -296,13 +299,13 @@ public class MainActivity extends AppCompatActivity {
             Log.d("bound", "STARTED");
             //                this will start playing song as soon as app starts if its connected to headset
 
-//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//                    if (audioManager.isBluetoothScoOn()){
-//                        playAudio();
-//                    }else if (audioManager.isWiredHeadsetOn()){
-//                        playAudio();
-//                    }
-//                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    if (audioManager.isBluetoothScoOn()){
+                        playAudio();
+                    }else if (audioManager.isWiredHeadsetOn()){
+                        playAudio();
+                    }
+                }
         }
         super.onStart();
     }
@@ -451,8 +454,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setSearchFragment() {
-        searchResultsFragment = new SearchResultsFragment();
-
         FragmentTransaction transaction = searchFragmentManager.beginTransaction();
         transaction.replace(R.id.sec_container, searchResultsFragment);
         transaction.addToBackStack(searchResultsFragment.toString());

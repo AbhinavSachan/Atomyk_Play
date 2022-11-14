@@ -51,7 +51,7 @@ public class FetchLyrics {
                 if(titleElements != null && !titleElements.isEmpty()) {
                     titleLink = titleElements.get(i).select("a").first();
                     if (titleLink != null) {
-                        titles.add(titleLink.text());
+                            titles.add(titleLink.text());
                         urls.add(titleLink.attr("href"));
                     }
                 }

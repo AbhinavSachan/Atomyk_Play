@@ -1,6 +1,5 @@
 package com.atomykcoder.atomykplay.fragments;
 
-import static com.atomykcoder.atomykplay.fragments.BottomSheetPlayerFragment.runnableSyncLyrics;
 import static com.atomykcoder.atomykplay.fragments.BottomSheetPlayerFragment.showToast;
 
 import android.app.Dialog;
@@ -94,7 +93,10 @@ public class AddLyricsFragment extends Fragment {
             storageUtil.saveLyrics(getMusic().getsName(), lrcMap);
         }
         showToast("Saved");
-        runnableSyncLyrics();
+        MainActivity mainActivity = (MainActivity) getContext();
+        if (mainActivity != null) {
+            mainActivity.bottomSheetPlayerFragment.runnableSyncLyrics();
+        }
     }
 
     private void setDialogBox() {

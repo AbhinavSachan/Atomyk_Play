@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.R;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 import java.util.ArrayList;
 
@@ -40,12 +41,10 @@ public class FoundLyricsAdapter extends RecyclerView.Adapter<FoundLyricsAdapter.
         holder.song_title.setText(titles.get(position));
         holder.song_duration.setText(durations.get(position));
 
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                MainActivity mainActivity = (MainActivity) context;
-                mainActivity.bottomSheetPlayerFragment.addLyricsFragment.loadSelectedLyrics(urls.get(holder.getBindingAdapterPosition()));
-            }
+        holder.itemView.setOnClickListener(view -> {
+            MainActivity mainActivity = (MainActivity) context;
+            mainActivity.lyricsListBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+            mainActivity.bottomSheetPlayerFragment.addLyricsFragment.loadSelectedLyrics(urls.get(holder.getBindingAdapterPosition()));
         });
     }
 

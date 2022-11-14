@@ -52,6 +52,7 @@
                 app:boxCornerRadiusBottomStart="8dp"
                 app:boxCornerRadiusTopEnd="8dp"
                 app:boxCornerRadiusTopStart="8dp"
+                app:errorEnabled="false"
                 app:boxStrokeWidth="0dp"
                 app:hintTextColor="@color/hint_color"
                 app:placeholderTextColor="@color/hint_color">
@@ -68,7 +69,8 @@
                     android:paddingTop="30dp"
                     android:textAlignment="gravity"
                     android:textColor="@color/text_color"
-                    android:textColorHint="@color/hint_color" />
+                    android:textColorHint="@color/hint_color"
+                    />
 
                 <LinearLayout
                     android:layout_width="match_parent"

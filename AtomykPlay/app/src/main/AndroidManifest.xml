@@ -29,7 +29,7 @@
         </intent>
     </queries>
     <application
-        android:name=".ApplicationClass"
+        android:name=".classes.ApplicationClass"
         android:allowBackup="true"
         android:configChanges="locale|layoutDirection"
         android:dataExtractionRules="@xml/data_extraction_rules"
