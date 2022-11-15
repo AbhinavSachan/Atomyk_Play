@@ -101,7 +101,6 @@ public class MainActivity extends AppCompatActivity {
     public CustomBottomSheet<View> mainPlayerSheetBehavior;
     public BottomSheetPlayerFragment bottomSheetPlayerFragment;
     public BottomSheetBehavior<View> lyricsListBehavior;
-    private final SearchResultsFragment searchResultsFragment = new SearchResultsFragment();
     private SearchResultsFragment searchResultsFragment;
     private View shadowMain;
     private View shadowLyrFound;
@@ -175,6 +174,20 @@ public class MainActivity extends AppCompatActivity {
         }
     };
     private FragmentManager mainPlayerManager;
+    private StorageUtil storageUtil;
+
+    //endregion
+    public static int convertToMillis(String duration) {
+        int out;
+        String _duration = duration.replace("[", "").replace("]", "");
+        String[] numbers = _duration.split(":");
+        int first = Integer.parseInt(numbers[0]);
+        int second = Integer.parseInt(numbers[1]);
+        first = first * (60 * 1000);
+        second = second * 1000;
+        out = first + second;
+        return out;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -191,6 +204,7 @@ public class MainActivity extends AppCompatActivity {
         mainPlayerManager = getSupportFragmentManager();
         searchFragmentManager = getSupportFragmentManager();
         searchResultsFragment = new SearchResultsFragment();
+        storageUtil = new StorageUtil(MainActivity.this);
 
         linearLayout = findViewById(R.id.song_not_found_layout);
         recyclerView = findViewById(R.id.music_recycler);
@@ -375,7 +389,7 @@ public class MainActivity extends AppCompatActivity {
         //starting the service when permissions are granted
         //starting service if its not started yet otherwise it will send broadcast msg to service
         //we can't start service on startup of app it will lead to pausing all other sound playing on device
-        new StorageUtil(this).clearMusicLastPos();
+        storageUtil.clearMusicLastPos();
 
         if (!phone_ringing) {
             if (!service_bound) {
@@ -503,7 +517,7 @@ public class MainActivity extends AppCompatActivity {
                             // post-execute code here
                             handler.post(() -> {
                                 //saving this in storage for diff util
-                                new StorageUtil(MainActivity.this).saveInitialMusicList(dataList);
+                                storageUtil.saveInitialMusicList(dataList);
 
                                 //Setting up adapter
                                 if (dataList.isEmpty()) {

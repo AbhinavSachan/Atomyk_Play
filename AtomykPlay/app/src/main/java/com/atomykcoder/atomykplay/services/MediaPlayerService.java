@@ -11,6 +11,7 @@ import static com.atomykcoder.atomykplay.classes.ApplicationClass.CHANNEL_ID;
 
 import android.annotation.SuppressLint;
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -367,8 +368,13 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             }
         }
         if (notificationBuilder != null) {
-            startForeground(NOTIFICATION_ID, notificationBuilder);
-        }
+            if (PlaybackStatus.PLAYING == playbackStatus) {
+                startForeground(NOTIFICATION_ID, notificationBuilder);
+            } else if (PlaybackStatus.PAUSED == playbackStatus){
+                stopForeground(false);
+            NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            notificationManager.notify(NOTIFICATION_ID,notificationBuilder);
+        }}
     }
 
     private PendingIntent playbackAction(int actionNumber) {

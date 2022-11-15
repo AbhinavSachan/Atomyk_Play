@@ -164,9 +164,8 @@ public class SearchResultsFragment extends Fragment {
 
     //Cleaning up any search results left from last search
     //Refreshing list
-    @SuppressLint("NotifyDataSetChanged")
     private void cleanUp() {
         originalMusicList.clear();
-        adapter.notifyDataSetChanged();
+        adapter.notifyItemRangeChanged(0,originalMusicList.size());
     }
 }
