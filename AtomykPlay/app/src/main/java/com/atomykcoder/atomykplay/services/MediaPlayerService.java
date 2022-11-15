@@ -7,7 +7,7 @@ import static com.atomykcoder.atomykplay.activities.MainActivity.BROADCAST_PLAY_
 import static com.atomykcoder.atomykplay.activities.MainActivity.BROADCAST_STOP_MUSIC;
 import static com.atomykcoder.atomykplay.activities.MainActivity.media_player_service;
 import static com.atomykcoder.atomykplay.activities.MainActivity.service_bound;
-import static com.atomykcoder.atomykplay.function.FetchMusic.convertDuration;
+import static com.atomykcoder.atomykplay.function.MusicHelper.convertDuration;
 
 import android.annotation.SuppressLint;
 import android.app.Notification;

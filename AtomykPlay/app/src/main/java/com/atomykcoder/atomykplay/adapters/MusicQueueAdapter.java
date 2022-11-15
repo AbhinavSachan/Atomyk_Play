@@ -1,6 +1,6 @@
 package com.atomykcoder.atomykplay.adapters;
 
-import static com.atomykcoder.atomykplay.function.FetchMusic.convertDuration;
+import static com.atomykcoder.atomykplay.function.MusicHelper.convertDuration;
 
 import android.annotation.SuppressLint;
 import android.content.Context;

@@ -1,7 +1,6 @@
 package com.atomykcoder.atomykplay.function;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 
@@ -12,9 +11,6 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class FetchLyrics {
 
@@ -60,7 +56,7 @@ public class FetchLyrics {
                     lyricsLink = lyricsElements.get(i).select("div").get(2);
                     lyricsLink = lyricsLink.select("span").first();
                     if (lyricsLink != null) {
-                        lyrics = LyricsHelper.splitLyricsByNewLine(lyricsLink.text());
+                        lyrics = MusicHelper.splitLyricsByNewLine(lyricsLink.text());
                         sampleLyrics.add(lyrics);
                     }
                 }

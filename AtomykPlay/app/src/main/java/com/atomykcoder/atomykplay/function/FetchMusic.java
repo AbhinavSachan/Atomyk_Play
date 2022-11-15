@@ -88,21 +88,4 @@ public class FetchMusic {
         }
     }
 
-    //converting duration from millis to readable time
-    @SuppressLint("DefaultLocale")
-    public static String convertDuration(String duration) {
-        String out;
-        int dur = Integer.parseInt(duration);
-
-        int hours = (dur / 3600000);
-        int mns = (dur / 60000) % 60000;
-        int scs = dur % 60000 / 1000;
-
-        if (hours == 0) {
-            out = String.format("%02d:%02d", mns, scs);
-        } else {
-            out = String.format("%02d:%02d:%02d", hours, mns, scs);
-        }
-        return out;
-    }
 }

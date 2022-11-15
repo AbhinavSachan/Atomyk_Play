@@ -1,12 +1,15 @@
 package com.atomykcoder.atomykplay.function;
 
+import android.annotation.SuppressLint;
+
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 // Helper class for lyrics
 //Note: Helper classes are always static and it's alright
- public class LyricsHelper {
-    private LyricsHelper()
+ public class MusicHelper {
+    private MusicHelper()
     {
         // constructor required to avoid accidentally creating any instance of this class
     }
@@ -52,5 +55,23 @@ import java.util.regex.Pattern;
         String result = lyrics.replaceAll(p.pattern(), "");
         result = result.trim();
         return result;
+    }
+
+    //converting duration from millis to readable time
+    @SuppressLint("DefaultLocale")
+    public static String convertDuration(String duration) {
+        String out;
+        int dur = Integer.parseInt(duration);
+
+        int hours = (dur / 3600000);
+        int mns = (dur / 60000) % 60000;
+        int scs = dur % 60000 / 1000;
+
+        if (hours == 0) {
+            out = String.format("%02d:%02d", mns, scs);
+        } else {
+            out = String.format("%02d:%02d:%02d", hours, mns, scs);
+        }
+        return out;
     }
 }

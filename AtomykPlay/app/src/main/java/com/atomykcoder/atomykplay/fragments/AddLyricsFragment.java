@@ -1,11 +1,9 @@
 package com.atomykcoder.atomykplay.fragments;
 
 import android.app.Dialog;
-import android.media.metrics.Event;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,7 +21,7 @@ import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.events.LoadSelectedItemEvent;
 import com.atomykcoder.atomykplay.function.FetchLyrics;
 import com.atomykcoder.atomykplay.function.LRCMap;
-import com.atomykcoder.atomykplay.function.LyricsHelper;
+import com.atomykcoder.atomykplay.function.MusicHelper;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import com.atomykcoder.atomykplay.function.StorageUtil;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
@@ -37,7 +35,7 @@ import java.util.concurrent.Executors;
 
 public class AddLyricsFragment extends Fragment {
 
-    private LRCMap lrcMap = new LRCMap();
+    private final LRCMap lrcMap = new LRCMap();
     private String songName;
     private EditText editTextLyrics;
     private ProgressBar progressBar;
@@ -46,22 +44,6 @@ public class AddLyricsFragment extends Fragment {
     private StorageUtil storageUtil;
     private Button btnFind;
     private Dialog dialog;
-    private View view;
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        lrcMap = null;
-        view = null;
-        editTextLyrics = null;
-        progressBar = null;
-        artistName = null;
-        nameEditText = null;
-        artistEditText = null;
-        storageUtil = null;
-        btnFind = null;
-        dialog = null;
-    }
 
     @Override
     public void onDestroy() {
@@ -73,7 +55,7 @@ public class AddLyricsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-         view = inflater.inflate(R.layout.fragment_add_lyrics, container, false);
+        View view = inflater.inflate(R.layout.fragment_add_lyrics, container, false);
         EventBus.getDefault().register(this);
         editTextLyrics = view.findViewById(R.id.edit_lyrics);
         Button saveBtn = view.findViewById(R.id.btn_save);
@@ -97,7 +79,7 @@ public class AddLyricsFragment extends Fragment {
             if (!editTextLyrics.getText().toString().trim().equals("")) {
                 String unfilteredLyrics = editTextLyrics.getText().toString();
 
-                lrcMap.addAll(LyricsHelper.getLrcMap(unfilteredLyrics));
+                lrcMap.addAll(MusicHelper.getLrcMap(unfilteredLyrics));
                 showLyrics();
             } else {
                 showToast("Can't Save");
@@ -227,10 +209,10 @@ public class AddLyricsFragment extends Fragment {
                     if (unfilteredLyrics.equals("")) {
                         showToast("No Lyrics Found");
                     } else {
-                        String filteredLyrics = LyricsHelper.splitLyricsByNewLine(unfilteredLyrics);
+                        String filteredLyrics = MusicHelper.splitLyricsByNewLine(unfilteredLyrics);
                         try {
                             editTextLyrics.setText(filteredLyrics);
-                            lrcMap.addAll(LyricsHelper.getLrcMap(filteredLyrics));
+                            lrcMap.addAll(MusicHelper.getLrcMap(filteredLyrics));
                         } catch (Exception ignored) {
                         }
                     }

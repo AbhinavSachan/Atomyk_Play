@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.os.Parcelable;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -30,7 +29,6 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import androidx.core.view.MenuItemCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -131,9 +129,7 @@ public class MainActivity extends AppCompatActivity {
     private AudioManager audioManager;
     private TelephonyManager telephonyManager;
     private PhoneStateListener phoneStateListener;
-    private DrawerLayout drawer;
     private ProgressBar progressBar;
-    private View lyricsListView;
     private FragmentManager searchFragmentManager;
     public BottomSheetBehavior.BottomSheetCallback callback = new BottomSheetBehavior.BottomSheetCallback() {
         @Override
@@ -179,19 +175,6 @@ public class MainActivity extends AppCompatActivity {
     };
     private FragmentManager mainPlayerManager;
 
-    //endregion
-    public static int convertToMillis(String duration) {
-        int out;
-        String _duration = duration.replace("[", "").replace("]", "");
-        String[] numbers = _duration.split(":");
-        int first = Integer.parseInt(numbers[0]);
-        int second = Integer.parseInt(numbers[1]);
-        first = first * (60 * 1000);
-        second = second * 1000;
-        out = first + second;
-        return out;
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -224,7 +207,7 @@ public class MainActivity extends AppCompatActivity {
         MediaPlayerService.ui_visible = true;
 
         NavigationView navigationView = findViewById(R.id.navigation_drawer);
-        drawer = findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
 
         View headerView = navigationView.getHeaderView(0);
 
@@ -233,7 +216,7 @@ public class MainActivity extends AppCompatActivity {
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        lyricsListView = findViewById(R.id.found_lyrics_fragments);
+        View lyricsListView = findViewById(R.id.found_lyrics_fragments);
         lyricsListBehavior = BottomSheetBehavior.from(lyricsListView);
         lyricsListBehavior.setHideable(true);
         lyricsListBehavior.setSkipCollapsed(true);
@@ -565,7 +548,7 @@ public class MainActivity extends AppCompatActivity {
         inflater.inflate(R.menu.menu, menu);
 
         MenuItem searchViewItem = menu.findItem(R.id.app_bar_search);
-        SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchViewItem);
+        SearchView searchView = (SearchView) searchViewItem.getActionView();
 
         searchView.setOnSearchClickListener(view -> setSearchFragment());
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {

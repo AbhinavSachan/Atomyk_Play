@@ -1,9 +1,8 @@
 package com.atomykcoder.atomykplay.fragments;
 
-import static com.atomykcoder.atomykplay.activities.MainActivity.convertToMillis;
 import static com.atomykcoder.atomykplay.activities.MainActivity.media_player_service;
 import static com.atomykcoder.atomykplay.activities.MainActivity.service_bound;
-import static com.atomykcoder.atomykplay.function.FetchMusic.convertDuration;
+import static com.atomykcoder.atomykplay.function.MusicHelper.convertDuration;
 import static com.atomykcoder.atomykplay.function.StorageUtil.favorite;
 import static com.atomykcoder.atomykplay.function.StorageUtil.no_favorite;
 import static com.atomykcoder.atomykplay.function.StorageUtil.no_repeat;
@@ -860,6 +859,19 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     @Override
     public void onDragStart(RecyclerView.ViewHolder viewHolder) {
         itemTouchHelper.startDrag(viewHolder);
+    }
+
+    //endregion
+    public int convertToMillis(String duration) {
+        int out;
+        String _duration = duration.replace("[", "").replace("]", "");
+        String[] numbers = _duration.split(":");
+        int first = Integer.parseInt(numbers[0]);
+        int second = Integer.parseInt(numbers[1]);
+        first = first * (60 * 1000);
+        second = second * 1000;
+        out = first + second;
+        return out;
     }
 
 }
