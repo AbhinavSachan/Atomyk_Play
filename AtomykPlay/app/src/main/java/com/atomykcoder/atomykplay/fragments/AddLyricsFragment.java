@@ -1,7 +1,5 @@
 package com.atomykcoder.atomykplay.fragments;
 
-import static com.atomykcoder.atomykplay.fragments.BottomSheetPlayerFragment.showToast;
-
 import android.app.Dialog;
 import android.os.Bundle;
 import android.os.Handler;
@@ -15,6 +13,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 
@@ -84,6 +83,11 @@ public class AddLyricsFragment extends Fragment {
         }
 
     }
+
+    private void showToast(String text) {
+        Toast.makeText(getContext(), text, Toast.LENGTH_SHORT).show();
+    }
+
 
     private void showLyrics() {
         if (storageUtil.loadLyrics(getMusic().getsName()) == null)

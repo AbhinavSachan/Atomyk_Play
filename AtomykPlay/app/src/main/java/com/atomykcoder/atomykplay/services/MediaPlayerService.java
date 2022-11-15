@@ -21,6 +21,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.media.metrics.Event;
 import android.media.session.MediaSessionManager;
 import android.net.Uri;
 import android.os.Binder;
@@ -42,15 +43,17 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
-
 import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.R;
-import com.atomykcoder.atomykplay.classes.Sender;
 import com.atomykcoder.atomykplay.enums.PlaybackStatus;
+import com.atomykcoder.atomykplay.events.MainPlayerEvent;
+import com.atomykcoder.atomykplay.events.PrepareRunnableEvent;
 import com.atomykcoder.atomykplay.fragments.BottomSheetPlayerFragment;
 import com.atomykcoder.atomykplay.function.LRCMap;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import com.atomykcoder.atomykplay.function.StorageUtil;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -197,7 +200,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                         setSeekBar();
                         LRCMap lrcMap = storage.loadLyrics(activeMusic.getsName());
                         if (lrcMap != null) {
-                            BottomSheetPlayerFragment.prepareRunnable();
+                            EventBus.getDefault().post(new PrepareRunnableEvent("Play pause Music Receiver"));
                         }
                     }
                 }
@@ -576,15 +579,11 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
     @Override
     public void onPrepared(MediaPlayer mp) {
-        BottomSheetPlayerFragment bottomSheetPlayerFragment = new BottomSheetPlayerFragment();
-        Sender sender = new Sender();
-        sender.addListeners(bottomSheetPlayerFragment);
-        sender.execute();
         resumeMedia();
         if (service_bound) {
             updateMetaData();
             if (ui_visible) {
-//                BottomSheetPlayerFragment.setMainPlayerLayout();
+                 EventBus.getDefault().post(new MainPlayerEvent());
                 setSeekBar();
             }
         }
@@ -994,7 +993,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     public void onDestroy() {
         super.onDestroy();
         removeAudioFocus();
-
         if (media_player != null) {
             storage.saveMusicLastPos(media_player.getCurrentPosition());
         }

@@ -41,6 +41,7 @@ import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.adapters.FoundLyricsAdapter;
 import com.atomykcoder.atomykplay.adapters.MusicMainAdapter;
 import com.atomykcoder.atomykplay.customScripts.CustomBottomSheet;
+import com.atomykcoder.atomykplay.events.PrepareRunnableEvent;
 import com.atomykcoder.atomykplay.fragments.BottomSheetPlayerFragment;
 import com.atomykcoder.atomykplay.fragments.SearchResultsFragment;
 import com.atomykcoder.atomykplay.function.FetchMusic;
@@ -56,6 +57,8 @@ import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 import com.turingtechnologies.materialscrollbar.AlphabetIndicator;
 import com.turingtechnologies.materialscrollbar.DragScrollBar;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,6 +78,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String BROADCAST_STOP_MUSIC = "com.atomykcoder.atomykplay.StopMusic";
     public static final String BROADCAST_PLAY_NEXT_MUSIC = "com.atomykcoder.atomykplay.PlayNextMusic";
     public static final String BROADCAST_PLAY_PREVIOUS_MUSIC = "com.atomykcoder.atomykplay.PlayPreviousMusic";
+
     public static boolean service_bound = false;
     public static boolean is_granted = false;
     public static MediaPlayerService media_player_service;
@@ -316,7 +320,7 @@ public class MainActivity extends AppCompatActivity {
         if (service_bound) {
             if (is_playing) {
                 media_player_service.setSeekBar();
-                BottomSheetPlayerFragment.prepareRunnable();
+                EventBus.getDefault().post(new PrepareRunnableEvent("On Resume"));
             }
         }
     }
