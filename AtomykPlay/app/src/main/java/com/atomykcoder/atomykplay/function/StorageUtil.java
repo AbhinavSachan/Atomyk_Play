@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Map;
 
 public class StorageUtil {
+    private static final String THEME_STORAGE = "com.atomykcoder.atomykplay.THEME_STORAGE" ;
     private final String LIST_STORAGE = "com.atomykcoder.atomykplay.MUSIC_LIST_STORAGE";
     private final String POSITION_STORAGE = "com.atomykcoder.atomykplay.STORAGE_POSITION";
     private final String REPEAT_STATUS_STORAGE = "com.atomykcoder.atomykplay.REPEAT_STATUS_STORAGE";
@@ -34,6 +35,7 @@ public class StorageUtil {
     public static final String tempList = "tempList";
     public static final String repeat = "repeat";
     public static final String repeat_one = "repeat_one";
+    public static final String theme_name = "theme_name";
 
 
     //to save the list of audio
@@ -211,4 +213,16 @@ public class StorageUtil {
         editor.remove(songName);
         editor.apply();
     }
+    public void saveTheme(boolean darkTheme) {
+        sharedPreferences = context.getSharedPreferences(THEME_STORAGE, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean(theme_name,darkTheme);
+        editor.apply();
+    }
+
+    public boolean  loadTheme() {
+        sharedPreferences = context.getSharedPreferences(THEME_STORAGE, Context.MODE_PRIVATE);
+        return sharedPreferences.getBoolean(theme_name,false);
+    }
+
 }

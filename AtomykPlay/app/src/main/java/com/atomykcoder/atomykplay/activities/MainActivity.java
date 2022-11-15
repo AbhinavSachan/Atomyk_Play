@@ -1,10 +1,13 @@
 package com.atomykcoder.atomykplay.activities;
 
+import static com.atomykcoder.atomykplay.fragments.SettingsFragment.SWITCH1;
+
 import android.Manifest;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -28,6 +31,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.view.MenuItemCompat;
@@ -195,12 +199,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        SharedPreferences sharedPreferencesSet = getSharedPreferences(getString(R.string.set_sp),Context.MODE_PRIVATE);
-//        boolean switch1 = sharedPreferencesSet.getBoolean(SWITCH1, false);
+//        boolean switch1 = new StorageUtil(this).loadTheme();
 //        if (switch1) {
 //            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
 //        } else {
-//            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+//            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
 //        }
         setContentView(R.layout.activity_main);
 
@@ -266,6 +269,7 @@ public class MainActivity extends AppCompatActivity {
         mainPlayerSheetBehavior.addBottomSheetCallback(callback);
         lyricsListBehavior.addBottomSheetCallback(lrcFoundCallback);
 
+
     }
 
     public void setLyricListAdapter(Bundle bundle) {
@@ -310,6 +314,15 @@ public class MainActivity extends AppCompatActivity {
                         playAudio();
                     }
                 }
+//          this will start playing song as soon as app starts if its connected to headset
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//                    if (audioManager.isBluetoothScoOn()){
+//                        playAudio();
+//                    }else if (audioManager.isWiredHeadsetOn()){
+//                        playAudio();
+//                    }
+//                }
+
         }
         super.onStart();
     }
@@ -329,7 +342,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onStop() {
         if (service_bound) {
             MainActivity.this.unbindService(service_connection);
-            Log.d("bound", "STOPPED");
         }
         super.onStop();
     }
@@ -355,7 +367,6 @@ public class MainActivity extends AppCompatActivity {
             //if media player is not playing it will stop the service
             if (media_player_service.media_player != null) {
                 if (!is_playing) {
-                    MainActivity.this.unbindService(service_connection);
                     stopService(new Intent(MainActivity.this, MediaPlayerService.class));
                     service_bound = false;
                     is_playing = false;
@@ -565,7 +576,7 @@ public class MainActivity extends AppCompatActivity {
 
         MenuItem searchViewItem = menu.findItem(R.id.app_bar_search);
         SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchViewItem);
-
+        
         searchView.setOnSearchClickListener(view -> setSearchFragment());
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
