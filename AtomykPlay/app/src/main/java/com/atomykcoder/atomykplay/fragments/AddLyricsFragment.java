@@ -1,6 +1,7 @@
 package com.atomykcoder.atomykplay.fragments;
 
 import android.app.Dialog;
+import android.media.metrics.Event;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -19,6 +20,7 @@ import androidx.fragment.app.Fragment;
 
 import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.R;
+import com.atomykcoder.atomykplay.events.LoadSelectedItemEvent;
 import com.atomykcoder.atomykplay.function.FetchLyrics;
 import com.atomykcoder.atomykplay.function.LRCMap;
 import com.atomykcoder.atomykplay.function.LyricsHelper;
@@ -26,33 +28,55 @@ import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import com.atomykcoder.atomykplay.function.StorageUtil;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class AddLyricsFragment extends Fragment {
 
-    private final LRCMap lrcMap = new LRCMap();
+    private LRCMap lrcMap = new LRCMap();
     private String songName;
     private EditText editTextLyrics;
     private ProgressBar progressBar;
     private String artistName;
     private EditText nameEditText, artistEditText;
     private StorageUtil storageUtil;
-    private Button saveBtn, btnFind;
+    private Button btnFind;
     private Dialog dialog;
+    private View view;
 
-    private Button btnCancel, btnOk;
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        lrcMap = null;
+        view = null;
+        editTextLyrics = null;
+        progressBar = null;
+        artistName = null;
+        nameEditText = null;
+        artistEditText = null;
+        storageUtil = null;
+        btnFind = null;
+        dialog = null;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_add_lyrics, container, false);
-
-
+         view = inflater.inflate(R.layout.fragment_add_lyrics, container, false);
+        EventBus.getDefault().register(this);
         editTextLyrics = view.findViewById(R.id.edit_lyrics);
-        saveBtn = view.findViewById(R.id.btn_save);
+        Button saveBtn = view.findViewById(R.id.btn_save);
         btnFind = view.findViewById(R.id.btn_find);
         progressBar = view.findViewById(R.id.progress_lyrics);
         storageUtil = new StorageUtil(getContext());
@@ -113,8 +137,8 @@ public class AddLyricsFragment extends Fragment {
         //Initialize Dialogue Box UI Items
         nameEditText = dialog.findViewById(R.id.edit_song_name);
         artistEditText = dialog.findViewById(R.id.edit_artist_name);
-        btnCancel = dialog.findViewById(R.id.btn_cancel);
-        btnOk = dialog.findViewById(R.id.btn_ok);
+        Button btnCancel = dialog.findViewById(R.id.btn_cancel);
+        Button btnOk = dialog.findViewById(R.id.btn_ok);
 
         nameEditText.setText(getMusic().getsName());
         artistEditText.setText(getMusic().getsArtist());
@@ -184,7 +208,9 @@ public class AddLyricsFragment extends Fragment {
         }
     }
 
-    public void loadSelectedLyrics(String href) {
+    @Subscribe
+    public void loadSelectedLyrics(LoadSelectedItemEvent event) {
+        String href = event.href;
         FetchLyrics fetchLyrics = new FetchLyrics();
         try {
             ExecutorService service = Executors.newSingleThreadExecutor();

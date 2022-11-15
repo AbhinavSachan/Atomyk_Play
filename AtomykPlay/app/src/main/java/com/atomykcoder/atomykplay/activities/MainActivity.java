@@ -103,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
     public CustomBottomSheet<View> mainPlayerSheetBehavior;
     public BottomSheetPlayerFragment bottomSheetPlayerFragment;
     public BottomSheetBehavior<View> lyricsListBehavior;
-    private final SearchResultsFragment searchResultsFragment = new SearchResultsFragment();
+    private SearchResultsFragment searchResultsFragment;
     private View shadowMain;
     private View shadowLyrFound;
 
@@ -207,6 +207,7 @@ public class MainActivity extends AppCompatActivity {
         //initializations
         mainPlayerManager = getSupportFragmentManager();
         searchFragmentManager = getSupportFragmentManager();
+        searchResultsFragment = new SearchResultsFragment();
 
         linearLayout = findViewById(R.id.song_not_found_layout);
         recyclerView = findViewById(R.id.music_recycler);
@@ -303,13 +304,13 @@ public class MainActivity extends AppCompatActivity {
             Log.d("bound", "STARTED");
             //                this will start playing song as soon as app starts if its connected to headset
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    if (audioManager.isBluetoothScoOn()){
-                        playAudio();
-                    }else if (audioManager.isWiredHeadsetOn()){
-                        playAudio();
-                    }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (audioManager.isBluetoothScoOn()) {
+                    playAudio();
+                } else if (audioManager.isWiredHeadsetOn()) {
+                    playAudio();
                 }
+            }
         }
         super.onStart();
     }
