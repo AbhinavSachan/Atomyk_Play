@@ -18,6 +18,8 @@ import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import com.atomykcoder.atomykplay.adapters.MusicMainAdapter;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.ArrayList;
 
 //Search Layout Fragment for Performing Searches and Presenting Results

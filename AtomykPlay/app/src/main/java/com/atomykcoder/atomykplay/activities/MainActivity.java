@@ -1,20 +1,16 @@
 package com.atomykcoder.atomykplay.activities;
 
-import static com.atomykcoder.atomykplay.fragments.SettingsFragment.SWITCH1;
-
 import android.Manifest;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.os.Parcelable;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -31,7 +27,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.view.MenuItemCompat;
@@ -108,6 +103,7 @@ public class MainActivity extends AppCompatActivity {
     public BottomSheetPlayerFragment bottomSheetPlayerFragment;
     public BottomSheetBehavior<View> lyricsListBehavior;
     private final SearchResultsFragment searchResultsFragment = new SearchResultsFragment();
+    private SearchResultsFragment searchResultsFragment;
     private View shadowMain;
     private View shadowLyrFound;
 
@@ -210,6 +206,7 @@ public class MainActivity extends AppCompatActivity {
         //initializations
         mainPlayerManager = getSupportFragmentManager();
         searchFragmentManager = getSupportFragmentManager();
+        searchResultsFragment = new SearchResultsFragment();
 
         linearLayout = findViewById(R.id.song_not_found_layout);
         recyclerView = findViewById(R.id.music_recycler);
@@ -307,12 +304,11 @@ public class MainActivity extends AppCompatActivity {
             Log.d("bound", "STARTED");
             //                this will start playing song as soon as app starts if its connected to headset
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    if (audioManager.isBluetoothScoOn()){
-                        playAudio();
-                    }else if (audioManager.isWiredHeadsetOn()){
-                        playAudio();
-                    }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (audioManager.isBluetoothScoOn()) {
+                    playAudio();
+                } else if (audioManager.isWiredHeadsetOn()) {
+                    playAudio();
                 }
 //          this will start playing song as soon as app starts if its connected to headset
 //                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -323,6 +319,7 @@ public class MainActivity extends AppCompatActivity {
 //                    }
 //                }
 
+            }
         }
         super.onStart();
     }
@@ -576,7 +573,7 @@ public class MainActivity extends AppCompatActivity {
 
         MenuItem searchViewItem = menu.findItem(R.id.app_bar_search);
         SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchViewItem);
-        
+
         searchView.setOnSearchClickListener(view -> setSearchFragment());
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
