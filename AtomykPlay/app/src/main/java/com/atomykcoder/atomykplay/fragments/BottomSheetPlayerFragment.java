@@ -60,8 +60,8 @@ import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 
-import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -232,9 +232,11 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
                     }
                 }
                 if(lrcMap != null) {
+                if (lyricsRecyclerView.getVisibility() == View.VISIBLE) {
                     if (lrcMap.containsStamp(getCurrentStamp())) {
                         ScrollToPosition(lrcMap.getIndexAtStamp(getCurrentStamp()));
                     }
+                }
                 }
                 lyricsHandler.postDelayed(lyricsRunnable, nextStampInMillis - currPosInMillis);
 
@@ -712,7 +714,10 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     @Override
     public void onStart() {
         super.onStart();
-        setPreviousData();
+        try {
+            setPreviousData();
+        } catch (Exception ignored) {
+        }
 
         //setting all buttons state from storage on startup
         //for repeat button
@@ -747,6 +752,12 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     }
 
     @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
         //On Start Favourite Code Moved Here
@@ -763,6 +774,21 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
                 }
             }
         }
+        setButton();
+
+        if (mainActivity.mainPlayerSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+            mini_play_view.setAlpha(0);
+            mini_play_view.setVisibility(View.INVISIBLE);
+        } else if (mainActivity.mainPlayerSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
+            player_layout.setAlpha(0);
+            player_layout.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    /**
+     * just for startup
+     */
+    private void setButton() {
         MusicDataCapsule activeMusic = getMusic();
         if (activeMusic != null) {
             if (storageUtil.loadFavorite(activeMusic.getsName()).equals(no_favorite)) {
@@ -770,13 +796,6 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
             } else if (storageUtil.loadFavorite(activeMusic.getsName()).equals(favorite)) {
                 favoriteImg.setImageResource(R.drawable.ic_favorite);
             }
-        }
-        if (mainActivity.mainPlayerSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
-            mini_play_view.setAlpha(0);
-            mini_play_view.setVisibility(View.INVISIBLE);
-        } else if (mainActivity.mainPlayerSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
-            player_layout.setAlpha(0);
-            player_layout.setVisibility(View.INVISIBLE);
         }
     }
 

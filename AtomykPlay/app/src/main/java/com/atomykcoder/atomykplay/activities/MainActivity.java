@@ -101,6 +101,7 @@ public class MainActivity extends AppCompatActivity {
     public CustomBottomSheet<View> mainPlayerSheetBehavior;
     public BottomSheetPlayerFragment bottomSheetPlayerFragment;
     public BottomSheetBehavior<View> lyricsListBehavior;
+    private final SearchResultsFragment searchResultsFragment = new SearchResultsFragment();
     private SearchResultsFragment searchResultsFragment;
     private View shadowMain;
     private View shadowLyrFound;
@@ -178,12 +179,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        SharedPreferences sharedPreferencesSet = getSharedPreferences(getString(R.string.set_sp),Context.MODE_PRIVATE);
-//        boolean switch1 = sharedPreferencesSet.getBoolean(SWITCH1, false);
+//        boolean switch1 = new StorageUtil(this).loadTheme();
 //        if (switch1) {
 //            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
 //        } else {
-//            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+//            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
 //        }
         setContentView(R.layout.activity_main);
 
@@ -250,6 +250,7 @@ public class MainActivity extends AppCompatActivity {
         mainPlayerSheetBehavior.addBottomSheetCallback(callback);
         lyricsListBehavior.addBottomSheetCallback(lrcFoundCallback);
 
+
     }
 
     public void setLyricListAdapter(Bundle bundle) {
@@ -293,6 +294,15 @@ public class MainActivity extends AppCompatActivity {
                 } else if (audioManager.isWiredHeadsetOn()) {
                     playAudio();
                 }
+//          this will start playing song as soon as app starts if its connected to headset
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//                    if (audioManager.isBluetoothScoOn()){
+//                        playAudio();
+//                    }else if (audioManager.isWiredHeadsetOn()){
+//                        playAudio();
+//                    }
+//                }
+
             }
         }
         super.onStart();
@@ -313,7 +323,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onStop() {
         if (service_bound) {
             MainActivity.this.unbindService(service_connection);
-            Log.d("bound", "STOPPED");
         }
         super.onStop();
     }
@@ -339,7 +348,6 @@ public class MainActivity extends AppCompatActivity {
             //if media player is not playing it will stop the service
             if (media_player_service.media_player != null) {
                 if (!is_playing) {
-                    MainActivity.this.unbindService(service_connection);
                     stopService(new Intent(MainActivity.this, MediaPlayerService.class));
                     service_bound = false;
                     is_playing = false;

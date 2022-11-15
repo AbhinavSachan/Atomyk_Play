@@ -1,6 +1,5 @@
 package com.atomykcoder.atomykplay.services;
 
-import static com.atomykcoder.atomykplay.classes.ApplicationClass.CHANNEL_ID;
 import static com.atomykcoder.atomykplay.activities.MainActivity.BROADCAST_PAUSE_PLAY_MUSIC;
 import static com.atomykcoder.atomykplay.activities.MainActivity.BROADCAST_PLAY_NEXT_MUSIC;
 import static com.atomykcoder.atomykplay.activities.MainActivity.BROADCAST_PLAY_PREVIOUS_MUSIC;
@@ -8,6 +7,7 @@ import static com.atomykcoder.atomykplay.activities.MainActivity.BROADCAST_STOP_
 import static com.atomykcoder.atomykplay.activities.MainActivity.media_player_service;
 import static com.atomykcoder.atomykplay.activities.MainActivity.service_bound;
 import static com.atomykcoder.atomykplay.function.MusicHelper.convertDuration;
+import static com.atomykcoder.atomykplay.classes.ApplicationClass.CHANNEL_ID;
 
 import android.annotation.SuppressLint;
 import android.app.Notification;
@@ -21,7 +21,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
-import android.media.metrics.Event;
 import android.media.session.MediaSessionManager;
 import android.net.Uri;
 import android.os.Binder;
@@ -43,15 +42,16 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
-import com.atomykcoder.atomykplay.activities.MainActivity;
+
 import com.atomykcoder.atomykplay.R;
+import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.enums.PlaybackStatus;
 import com.atomykcoder.atomykplay.events.MainPlayerEvent;
 import com.atomykcoder.atomykplay.events.PrepareRunnableEvent;
 import com.atomykcoder.atomykplay.fragments.BottomSheetPlayerFragment;
 import com.atomykcoder.atomykplay.function.LRCMap;
-import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import com.atomykcoder.atomykplay.function.StorageUtil;
+import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -310,7 +310,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     }
 
     //playback speed is used in setting the speed of seekbar in notification 1f = 1s/s, 0f = stopped
-    @SuppressLint("InlinedApi")
+    @SuppressLint("NewApi")
     public void buildNotification(PlaybackStatus playbackStatus, float playbackSpeed) {
         int notificationAction = R.drawable.ic_pause_for_noti;//needs to be initialized
         PendingIntent play_pauseAction = null;
@@ -358,7 +358,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                             .setState(PlaybackStateCompat.STATE_PLAYING, media_player.getCurrentPosition(), playbackSpeed)
                             .setActions(PlaybackStateCompat.ACTION_SEEK_TO).build());
                 }
-            }else if (playbackStatus == PlaybackStatus.PAUSED) {
+            } else if (playbackStatus == PlaybackStatus.PAUSED) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     mediaSession.setPlaybackState(new PlaybackStateCompat.Builder()
                             .setState(PlaybackStateCompat.STATE_PAUSED, media_player.getCurrentPosition(), playbackSpeed)
@@ -583,7 +583,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         if (service_bound) {
             updateMetaData();
             if (ui_visible) {
-                 EventBus.getDefault().post(new MainPlayerEvent());
+                EventBus.getDefault().post(new MainPlayerEvent());
                 setSeekBar();
             }
         }
@@ -777,9 +777,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         handler = new Handler(Looper.getMainLooper());
 
         if (media_player != null) {
-            if (media_player.getCurrentPosition() >= media_player.getDuration()) {
-                return;
-            } else {
+            if (media_player.getCurrentPosition() <= media_player.getDuration()) {
                 runnable = () -> {
                     int position = 0;
                     if (media_player != null) {
@@ -985,6 +983,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         storage = new StorageUtil(getApplicationContext());
         musicList = storage.loadMusicList();
         musicIndex = storage.loadMusicIndex();
+
         return START_STICKY;
     }
 
@@ -992,12 +991,11 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     @Override
     public void onDestroy() {
         super.onDestroy();
+        stopForeground(true);
         removeAudioFocus();
         if (media_player != null) {
             storage.saveMusicLastPos(media_player.getCurrentPosition());
         }
-        stopForeground(true);
-        removeNotification();
         //disable phone state listener ♣
         if (phoneStateListener != null) {
             telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE);
@@ -1009,9 +1007,11 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         unregisterReceiver(nextMusicReceiver);
         unregisterReceiver(prevMusicReceiver);
         unregisterReceiver(stopMusicReceiver);
+
+        releasePlayer();
     }
 
-    private void removeNotification() {
+    private void releasePlayer() {
         if (media_player != null) {
             media_player.release();
         }
