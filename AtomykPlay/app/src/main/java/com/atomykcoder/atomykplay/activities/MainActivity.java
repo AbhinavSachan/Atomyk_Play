@@ -302,21 +302,12 @@ public class MainActivity extends AppCompatActivity {
             Log.d("bound", "STARTED");
             //                this will start playing song as soon as app starts if its connected to headset
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                if (audioManager.isBluetoothScoOn()) {
-                    playAudio();
-                } else if (audioManager.isWiredHeadsetOn()) {
-                    playAudio();
+            if(!is_playing) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    if (audioManager.isBluetoothScoOn() || audioManager.isWiredHeadsetOn()) {
+                        playAudio();
+                    }
                 }
-//          this will start playing song as soon as app starts if its connected to headset
-//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//                    if (audioManager.isBluetoothScoOn()){
-//                        playAudio();
-//                    }else if (audioManager.isWiredHeadsetOn()){
-//                        playAudio();
-//                    }
-//                }
-
             }
         }
         super.onStart();
