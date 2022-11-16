@@ -40,6 +40,7 @@ import com.atomykcoder.atomykplay.adapters.FoundLyricsAdapter;
 import com.atomykcoder.atomykplay.adapters.MusicMainAdapter;
 import com.atomykcoder.atomykplay.customScripts.CustomBottomSheet;
 import com.atomykcoder.atomykplay.events.PrepareRunnableEvent;
+import com.atomykcoder.atomykplay.events.SearchEvent;
 import com.atomykcoder.atomykplay.fragments.BottomSheetPlayerFragment;
 import com.atomykcoder.atomykplay.fragments.SearchResultsFragment;
 import com.atomykcoder.atomykplay.function.FetchMusic;
@@ -101,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
     public CustomBottomSheet<View> mainPlayerSheetBehavior;
     public BottomSheetPlayerFragment bottomSheetPlayerFragment;
     public BottomSheetBehavior<View> lyricsListBehavior;
-    private SearchResultsFragment searchResultsFragment;
+
     private View shadowMain;
     private View shadowLyrFound;
 
@@ -203,7 +204,6 @@ public class MainActivity extends AppCompatActivity {
         //initializations
         mainPlayerManager = getSupportFragmentManager();
         searchFragmentManager = getSupportFragmentManager();
-        searchResultsFragment = new SearchResultsFragment();
         storageUtil = new StorageUtil(MainActivity.this);
 
         linearLayout = findViewById(R.id.song_not_found_layout);
@@ -372,7 +372,6 @@ public class MainActivity extends AppCompatActivity {
         if (phoneStateListener != null) {
             telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE);
         }
-
     }
 
     private void bindService() {
@@ -464,6 +463,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setSearchFragment() {
+        SearchResultsFragment searchResultsFragment;
+        searchResultsFragment = new SearchResultsFragment();
         FragmentTransaction transaction = searchFragmentManager.beginTransaction();
         transaction.replace(R.id.sec_container, searchResultsFragment);
         transaction.addToBackStack(searchResultsFragment.toString());
@@ -581,16 +582,15 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextChange(String query) {
-                searchResultsFragment.SearchWithFilters(query, dataList);
-                searchResultsFragment.search(query, dataList);
+                EventBus.getDefault().post(new SearchEvent(query, dataList));
                 return false;
             }
 
         });
-        searchView.setOnCloseListener(() -> {
-            searchFragmentManager.popBackStack();
-            return false;
-        });
+//        searchView.setOnCloseListener(() -> {
+//            searchFragmentManager.popBackStack();
+//            return false;
+//        });
         return super.onCreateOptionsMenu(menu);
     }
 

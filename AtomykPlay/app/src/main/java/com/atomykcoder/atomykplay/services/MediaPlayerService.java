@@ -48,7 +48,8 @@ import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.enums.PlaybackStatus;
 import com.atomykcoder.atomykplay.events.MainPlayerEvent;
 import com.atomykcoder.atomykplay.events.PrepareRunnableEvent;
-import com.atomykcoder.atomykplay.events.UpdateMusicDataEvent;
+import com.atomykcoder.atomykplay.events.UpdateMusicImageEvent;
+import com.atomykcoder.atomykplay.events.UpdateMusicProgressEvent;
 import com.atomykcoder.atomykplay.fragments.BottomSheetPlayerFragment;
 import com.atomykcoder.atomykplay.function.LRCMap;
 import com.atomykcoder.atomykplay.function.StorageUtil;
@@ -239,17 +240,13 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     };
 
     public void setIcon(PlaybackStatus playbackStatus) {
-        ImageView miniImage = BottomSheetPlayerFragment.mini_pause;
-        ImageView mainImage = BottomSheetPlayerFragment.playImg;
-        if (musicList != null)
-            if (miniImage != null && mainImage != null)
-                if (playbackStatus == PlaybackStatus.PLAYING) {
-                    miniImage.setImageResource(R.drawable.ic_pause_mini);
-                    mainImage.setImageResource(R.drawable.ic_pause_main);
-                } else if (playbackStatus == PlaybackStatus.PAUSED) {
-                    miniImage.setImageResource(R.drawable.ic_play_mini);
-                    mainImage.setImageResource(R.drawable.ic_play_main);
-                }
+        if (musicList != null) {
+            if (playbackStatus == PlaybackStatus.PLAYING) {
+                EventBus.getDefault().post(new UpdateMusicImageEvent(false));
+            } else if (playbackStatus == PlaybackStatus.PAUSED) {
+                EventBus.getDefault().post(new UpdateMusicImageEvent(true));
+            }
+        }
     }
 
     private void registerPlayNewMusic() {
@@ -791,7 +788,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                         }
                     }
 
-                    EventBus.getDefault().post(new UpdateMusicDataEvent(position));
+                    EventBus.getDefault().post(new UpdateMusicProgressEvent(position));
                     handler.postDelayed(runnable, 10);
                 };
                 handler.postDelayed(runnable, 0);

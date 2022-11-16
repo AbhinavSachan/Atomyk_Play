@@ -1,6 +1,7 @@
 package com.atomykcoder.atomykplay.fragments;
 
 import android.annotation.SuppressLint;
+import android.media.metrics.Event;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,8 +16,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.R;
+import com.atomykcoder.atomykplay.events.SearchEvent;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import com.atomykcoder.atomykplay.adapters.MusicMainAdapter;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+
 import java.util.ArrayList;
 
 //Search Layout Fragment for Performing Searches and Presenting Results
@@ -29,7 +35,7 @@ public class SearchResultsFragment extends Fragment {
     private RadioButton songButton, albumButton, artistButton, genreButton;
     private TextView textView;
 
-    public void SearchWithFilters(String query,ArrayList<MusicDataCapsule> dataList) {
+    public void searchWithFilters(String query,ArrayList<MusicDataCapsule> dataList) {
 
         //Check if any radio button is pressed
         radioGroup.setOnCheckedChangeListener((radioGroup, i) -> {
@@ -39,10 +45,18 @@ public class SearchResultsFragment extends Fragment {
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_search_results, container, false);
+        if(!EventBus.getDefault().isRegistered(this))
+            EventBus.getDefault().register(this);
         recycler_view = view.findViewById(R.id.search_recycler_view);
         originalMusicList = new ArrayList<>();
 
@@ -80,6 +94,8 @@ public class SearchResultsFragment extends Fragment {
     private void addMusic(MusicDataCapsule song) {
         originalMusicList.add(song);
     }
+
+
 
     //Function that performs searches and if it finds a match we add that song to our arraylist
     //Function also do cleanup from previous search
@@ -141,6 +157,12 @@ public class SearchResultsFragment extends Fragment {
         }
         String num = originalMusicList.size() + " Songs";
         textView.setText(num);
+    }
+
+    @Subscribe
+    public void handleSearchEvent(SearchEvent event) {
+        search(event.query, event.dataList);
+        searchWithFilters(event.query, event.dataList);
     }
 
     //get radio get based on which radio button is selected

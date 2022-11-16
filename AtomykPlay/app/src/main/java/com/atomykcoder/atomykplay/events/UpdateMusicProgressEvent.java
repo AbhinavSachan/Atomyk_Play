@@ -1,8 +1,8 @@
 package com.atomykcoder.atomykplay.events;
 
-public class UpdateMusicDataEvent {
+public class UpdateMusicProgressEvent {
     public final int position;
-    public UpdateMusicDataEvent(int position) {
+    public UpdateMusicProgressEvent(int position) {
         this.position = position;
     }
 }

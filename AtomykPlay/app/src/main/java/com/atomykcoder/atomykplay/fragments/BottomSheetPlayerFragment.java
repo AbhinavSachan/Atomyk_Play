@@ -37,8 +37,6 @@ import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -53,7 +51,8 @@ import com.atomykcoder.atomykplay.customScripts.CustomBottomSheet;
 import com.atomykcoder.atomykplay.enums.PlaybackStatus;
 import com.atomykcoder.atomykplay.events.MainPlayerEvent;
 import com.atomykcoder.atomykplay.events.PrepareRunnableEvent;
-import com.atomykcoder.atomykplay.events.UpdateMusicDataEvent;
+import com.atomykcoder.atomykplay.events.UpdateMusicImageEvent;
+import com.atomykcoder.atomykplay.events.UpdateMusicProgressEvent;
 import com.atomykcoder.atomykplay.function.LRCMap;
 import com.atomykcoder.atomykplay.function.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
@@ -76,10 +75,10 @@ import java.util.concurrent.Executors;
 public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeListener, OnDragStartListener {
 
     public LinearProgressIndicator mini_progress;
-    public static ImageView mini_pause;
+    public ImageView mini_pause;
     //main player seekbar
     public SeekBar seekBarMain;
-    public static ImageView playImg;
+    public ImageView playImg;
     public TextView curPosTv;
     public static CustomBottomSheet<View> queueSheetBehaviour;
     public static Runnable lyricsRunnable;
@@ -251,11 +250,22 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     }
 
     @Subscribe
-    public void handleMusicDataUpdate(UpdateMusicDataEvent event) {
+    public void handleMusicProgressUpdate(UpdateMusicProgressEvent event) {
        mini_progress.setProgress(event.position);
        seekBarMain.setProgress(event.position);
        String cur = convertDuration(String.valueOf(event.position));
        curPosTv.setText(cur);
+    }
+
+    @Subscribe
+    public void handleMusicImageUpdate(UpdateMusicImageEvent event) {
+        if(event.shouldDisplayPlayImage){
+            mini_pause.setImageResource(R.drawable.ic_play_mini);
+            playImg.setImageResource(R.drawable.ic_play_main);
+        } else {
+            mini_pause.setImageResource(R.drawable.ic_pause_mini);
+            playImg.setImageResource(R.drawable.ic_pause_main);
+        }
     }
 
     public String getCurrentStamp() {
