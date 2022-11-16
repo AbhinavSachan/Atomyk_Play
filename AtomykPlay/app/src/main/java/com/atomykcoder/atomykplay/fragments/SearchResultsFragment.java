@@ -17,9 +17,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import com.atomykcoder.atomykplay.adapters.MusicMainAdapter;
-
-import org.greenrobot.eventbus.EventBus;
-
 import java.util.ArrayList;
 
 //Search Layout Fragment for Performing Searches and Presenting Results
@@ -164,8 +161,9 @@ public class SearchResultsFragment extends Fragment {
 
     //Cleaning up any search results left from last search
     //Refreshing list
+    @SuppressLint("NotifyDataSetChanged")
     private void cleanUp() {
         originalMusicList.clear();
-        adapter.notifyItemRangeChanged(0,originalMusicList.size());
+        adapter.notifyDataSetChanged();
     }
 }

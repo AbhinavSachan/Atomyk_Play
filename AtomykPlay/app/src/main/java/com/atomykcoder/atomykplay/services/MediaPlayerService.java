@@ -6,7 +6,6 @@ import static com.atomykcoder.atomykplay.activities.MainActivity.BROADCAST_PLAY_
 import static com.atomykcoder.atomykplay.activities.MainActivity.BROADCAST_STOP_MUSIC;
 import static com.atomykcoder.atomykplay.activities.MainActivity.media_player_service;
 import static com.atomykcoder.atomykplay.activities.MainActivity.service_bound;
-import static com.atomykcoder.atomykplay.function.MusicHelper.convertDuration;
 import static com.atomykcoder.atomykplay.classes.ApplicationClass.CHANNEL_ID;
 
 import android.annotation.SuppressLint;
@@ -49,6 +48,7 @@ import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.enums.PlaybackStatus;
 import com.atomykcoder.atomykplay.events.MainPlayerEvent;
 import com.atomykcoder.atomykplay.events.PrepareRunnableEvent;
+import com.atomykcoder.atomykplay.events.UpdateMusicDataEvent;
 import com.atomykcoder.atomykplay.fragments.BottomSheetPlayerFragment;
 import com.atomykcoder.atomykplay.function.LRCMap;
 import com.atomykcoder.atomykplay.function.StorageUtil;
@@ -201,7 +201,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                         setSeekBar();
                         LRCMap lrcMap = storage.loadLyrics(activeMusic.getsName());
                         if (lrcMap != null) {
-                            EventBus.getDefault().post(new PrepareRunnableEvent("Play pause Music Receiver"));
+                            EventBus.getDefault().post(new PrepareRunnableEvent());
+                            EventBus.getDefault().post(new PrepareRunnableEvent());
                         }
                     }
                 }
@@ -619,6 +620,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             skipToNext();
         } else if (storage.loadRepeatStatus().equals("repeat_one")) {
             playMedia();
+            EventBus.getDefault().post(new PrepareRunnableEvent());
         }
 
     }
@@ -776,12 +778,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
     //setting progress on player seekbar and mini progress bar
     public void setSeekBar() {
-        if (media_player != null) {
-            BottomSheetPlayerFragment.mini_progress.setMax(media_player.getDuration());
-            BottomSheetPlayerFragment.seekBarMain.setMax(media_player.getDuration());
-        }
         handler = new Handler(Looper.getMainLooper());
-
         if (media_player != null) {
             if (media_player.getCurrentPosition() <= media_player.getDuration()) {
                 runnable = () -> {
@@ -793,10 +790,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                             e.printStackTrace();
                         }
                     }
-                    BottomSheetPlayerFragment.mini_progress.setProgress(position);
-                    BottomSheetPlayerFragment.seekBarMain.setProgress(position);
-                    String cur = convertDuration(String.valueOf(position));
-                    BottomSheetPlayerFragment.curPosTv.setText(cur);
+
+                    EventBus.getDefault().post(new UpdateMusicDataEvent(position));
                     handler.postDelayed(runnable, 10);
                 };
                 handler.postDelayed(runnable, 0);

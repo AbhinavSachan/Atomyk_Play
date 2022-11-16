@@ -91,6 +91,18 @@
             android:layout_width="match_parent"
             android:alpha="0"
             android:layout_height="match_parent"/>
+        <View
+            app:layout_anchor="@id/player_main_container"
+            android:background="@drawable/player_shadow"
+            android:layout_width="match_parent"
+            android:layout_height="10dp"/>
+
+        <View
+            android:id="@+id/shadow_main"
+            android:background="@color/translucent_black"
+            android:layout_width="match_parent"
+            android:alpha="0"
+            android:layout_height="match_parent"/>
 
         <LinearLayout
             android:id="@+id/found_lyrics_fragments"
@@ -118,19 +130,6 @@
                 android:paddingBottom="100dp"
                 android:clipToPadding="false"/>
         </LinearLayout>
-        <View
-            app:layout_anchor="@id/player_main_container"
-            android:background="@drawable/player_shadow"
-            android:layout_width="match_parent"
-            android:layout_height="10dp"/>
-
-        <View
-            android:id="@+id/shadow_main"
-            android:background="@color/translucent_black"
-            android:layout_width="match_parent"
-            android:alpha="0"
-            android:layout_height="match_parent"/>
-
 
         <FrameLayout
             android:id="@+id/player_main_container"

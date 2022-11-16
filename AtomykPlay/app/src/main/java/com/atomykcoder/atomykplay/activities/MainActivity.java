@@ -328,7 +328,7 @@ public class MainActivity extends AppCompatActivity {
         if (service_bound) {
             if (is_playing) {
                 media_player_service.setSeekBar();
-                EventBus.getDefault().post(new PrepareRunnableEvent("On Resume"));
+                EventBus.getDefault().post(new PrepareRunnableEvent());
             }
         }
     }

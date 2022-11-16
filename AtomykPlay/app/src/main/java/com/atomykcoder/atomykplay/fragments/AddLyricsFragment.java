@@ -57,7 +57,8 @@ public class AddLyricsFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_add_lyrics, container, false);
 
-        EventBus.getDefault().register(this);
+        if(!EventBus.getDefault().isRegistered(this))
+            EventBus.getDefault().register(this);
         editTextLyrics = view.findViewById(R.id.edit_lyrics);
         Button saveBtn = view.findViewById(R.id.btn_save);
         btnFind = view.findViewById(R.id.btn_find);
@@ -81,12 +82,12 @@ public class AddLyricsFragment extends Fragment {
                 String unfilteredLyrics = editTextLyrics.getText().toString();
 
                 lrcMap.addAll(MusicHelper.getLrcMap(unfilteredLyrics));
-                showLyrics();
+                saveLyrics();
             } else {
                 showToast("Can't Save");
             }
         } else {
-            showLyrics();
+            saveLyrics();
         }
 
     }
@@ -96,7 +97,7 @@ public class AddLyricsFragment extends Fragment {
     }
 
 
-    private void showLyrics() {
+    private void saveLyrics() {
         if (storageUtil.loadLyrics(getMusic().getsName()) == null)
             storageUtil.saveLyrics(getMusic().getsName(), lrcMap);
         else {
@@ -191,6 +192,7 @@ public class AddLyricsFragment extends Fragment {
         }
     }
 
+    // Don't Remove This Event Bus is using this method (It might look unused still DON'T REMOVE
     @Subscribe
     public void loadSelectedLyrics(LoadSelectedItemEvent event) {
         String href = event.href;

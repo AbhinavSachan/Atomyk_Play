@@ -33,11 +33,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -52,6 +53,7 @@ import com.atomykcoder.atomykplay.customScripts.CustomBottomSheet;
 import com.atomykcoder.atomykplay.enums.PlaybackStatus;
 import com.atomykcoder.atomykplay.events.MainPlayerEvent;
 import com.atomykcoder.atomykplay.events.PrepareRunnableEvent;
+import com.atomykcoder.atomykplay.events.UpdateMusicDataEvent;
 import com.atomykcoder.atomykplay.function.LRCMap;
 import com.atomykcoder.atomykplay.function.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
@@ -73,12 +75,12 @@ import java.util.concurrent.Executors;
 
 public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeListener, OnDragStartListener {
 
-    public static LinearProgressIndicator mini_progress;
+    public LinearProgressIndicator mini_progress;
     public static ImageView mini_pause;
     //main player seekbar
-    public static SeekBar seekBarMain;
+    public SeekBar seekBarMain;
     public static ImageView playImg;
-    public static TextView curPosTv;
+    public TextView curPosTv;
     public static CustomBottomSheet<View> queueSheetBehaviour;
     public static Runnable lyricsRunnable;
     public static Handler lyricsHandler;
@@ -87,7 +89,6 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     public ImageView mini_cover, mini_next;
     public TextView mini_name_text, mini_artist_text;
     public View mini_play_view;
-    public AddLyricsFragment addLyricsFragment;
     private Context context;
     private TextView durationTv;
     private ImageView playerCoverImage;
@@ -123,7 +124,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         else return false;
     }
 
-
+    // Don't Remove This Event Bus is using this method (It might look unused still DON'T REMOVE
     @Subscribe
     public void setMainPlayerLayout(MainPlayerEvent event) {
         ArrayList<MusicDataCapsule> musicList = storageUtil.loadMusicList();
@@ -165,6 +166,8 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
                     durationTv.setText(convertDuration(duration));
                     mini_name_text.setText(songName);
                     mini_artist_text.setText(artistName);
+                    seekBarMain.setMax(Integer.parseInt(duration));
+                    mini_progress.setMax(Integer.parseInt(duration));
 
                     int bitrateInNum = Integer.parseInt(bitrate) / 1000;
                     String finalBitrate = bitrateInNum + " KBPS";
@@ -208,7 +211,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
                 lyricsArrayList.addAll(lrcMap.getLyrics());
                 setLyricsAdapter();
                 lyricsHandler = new Handler(Looper.getMainLooper());
-                EventBus.getDefault().post(new PrepareRunnableEvent("Runnable Sync Lyrics"));
+                EventBus.getDefault().post(new PrepareRunnableEvent());
             } else {
                 lyricsRecyclerView.setVisibility(View.GONE);
                 noLyricsLayout.setVisibility(View.VISIBLE);
@@ -217,9 +220,9 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
     }
 
+    // Don't Remove This Event Bus is using this method (It might look unused still DON'T REMOVE
     @Subscribe
     public void prepareRunnable(PrepareRunnableEvent event) {
-        Log.i("info", event.message);
         if (lyricsHandler != null) {
             lyricsRunnable = () -> {
                 int nextStampInMillis = 0;
@@ -245,6 +248,14 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
             };
             lyricsHandler.postDelayed(lyricsRunnable, 0);
         }
+    }
+
+    @Subscribe
+    public void handleMusicDataUpdate(UpdateMusicDataEvent event) {
+       mini_progress.setProgress(event.position);
+       seekBarMain.setProgress(event.position);
+       String cur = convertDuration(String.valueOf(event.position));
+       curPosTv.setText(cur);
     }
 
     public String getCurrentStamp() {
@@ -315,7 +326,6 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         storageUtil = new StorageUtil(getContext());
         mainActivity = (MainActivity) getContext();
         addLyricFragmentManager = requireActivity().getSupportFragmentManager();
-        addLyricsFragment = new AddLyricsFragment();
 
         //Mini player items initializations
         mini_play_view = view.findViewById(R.id.mini_player_layout);//○
@@ -407,13 +417,13 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
                 sheet.setState(BottomSheetBehavior.STATE_COLLAPSED);
             }
         });
-
         setupQueueBottomSheet();
         return view;
     }
 
 
     private void setLyricsLayout() {
+        AddLyricsFragment addLyricsFragment = new AddLyricsFragment();
         mainActivity.mainPlayerSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         FragmentTransaction transaction = addLyricFragmentManager.beginTransaction();
         transaction.replace(R.id.sec_container, addLyricsFragment, "fragment_add_lyrics");
@@ -740,11 +750,8 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     public void onDestroy() {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
-        mini_progress = null;
         mini_pause = null;
-        seekBarMain = null;
         playImg = null;
-        curPosTv = null;
         queueSheetBehaviour = null;
         lyricsRunnable = null;
         lyricsHandler = null;
