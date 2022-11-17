@@ -19,13 +19,17 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.R;
+import com.atomykcoder.atomykplay.events.OpenBottomPlayerOnPlayEvent;
+import com.atomykcoder.atomykplay.events.PlayAudioEvent;
+import com.atomykcoder.atomykplay.events.SetAdapterInQueueEvent;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import com.atomykcoder.atomykplay.function.StorageUtil;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.turingtechnologies.materialscrollbar.INameableAdapter;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -68,8 +72,6 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
                 if (file.exists()) {
                     //check is service active
                     StorageUtil storage = new StorageUtil(context);
-                    //sending broadcast to start the music from main activity
-                    MainActivity mainActivity = (MainActivity) context;
                     storage.saveMusicList(musicArrayList);
                     //if shuffle button is already on it will shuffle it from start
                     if (storage.loadShuffle().equals(shuffle)) {
@@ -99,8 +101,9 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
                                 storage.saveMusicIndex(0);
                                 // post-execute code here
                                 handler.post(()->{
-                                    mainActivity.playAudio();
-                                    mainActivity.bottomSheetPlayerFragment.setAdapterInQueue();
+                                    EventBus.getDefault().post(new PlayAudioEvent());
+                                    EventBus.getDefault().post(new SetAdapterInQueueEvent());
+                                    EventBus.getDefault().post(new OpenBottomPlayerOnPlayEvent());
                                 });
                             });
                             service.shutdown();
@@ -110,8 +113,9 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
                         //Store serializable music list to sharedPreference
                         storage.saveMusicList(musicArrayList);
                         storage.saveMusicIndex(position);
-                        mainActivity.playAudio();
-                        mainActivity.bottomSheetPlayerFragment.setAdapterInQueue();
+                        EventBus.getDefault().post(new PlayAudioEvent());
+                        EventBus.getDefault().post(new SetAdapterInQueueEvent());
+                        EventBus.getDefault().post(new OpenBottomPlayerOnPlayEvent());
                     }
                 } else {
                     Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show();

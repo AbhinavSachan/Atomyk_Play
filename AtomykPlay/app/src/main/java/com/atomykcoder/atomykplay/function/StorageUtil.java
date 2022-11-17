@@ -74,7 +74,7 @@ public class StorageUtil {
         return sharedPreferences.getInt(musicIndex, 0);
     }
 
-    public void clearAudioPlaylist() {
+    public void clearMusicList() {
         sharedPreferences = context.getSharedPreferences(LIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.remove(musicList);
@@ -172,6 +172,7 @@ public class StorageUtil {
         }.getType();
         return gson.fromJson(json, type);
     }
+
     public void saveTempMusicList(ArrayList<MusicDataCapsule> list) {
         sharedPreferences = context.getSharedPreferences(LIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -189,6 +190,13 @@ public class StorageUtil {
         }.getType();
         return gson.fromJson(json, type);
     }
+    public void clearTempMusicList() {
+        sharedPreferences = context.getSharedPreferences(LIST_STORAGE, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.remove(tempList);
+        editor.apply();
+    }
+
     public void saveLyrics(String songName,LRCMap _lrcMap) {
         sharedPreferences = context.getSharedPreferences(LYRICS_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();

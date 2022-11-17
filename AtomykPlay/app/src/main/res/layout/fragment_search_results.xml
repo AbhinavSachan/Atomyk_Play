@@ -58,7 +58,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/radio_group"
-        android:layout_alignParentEnd="true"
+        android:layout_centerInParent="true"
         android:layout_margin="12dp"
         android:padding="4dp"
         android:text="@string/song0"
@@ -70,6 +70,8 @@
         android:id="@+id/search_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingBottom="70dp"
         android:layout_below="@id/searched_song_num" />
 
 </RelativeLayout>

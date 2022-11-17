@@ -7,12 +7,11 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.events.LoadSelectedItemEvent;
+import com.atomykcoder.atomykplay.events.SetLyricSheetStateEvent;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 import org.greenrobot.eventbus.EventBus;
@@ -46,11 +45,9 @@ public class FoundLyricsAdapter extends RecyclerView.Adapter<FoundLyricsAdapter.
         holder.song_duration.setText(durations.get(position));
 
         holder.itemView.setOnClickListener(view -> {
-            MainActivity mainActivity = (MainActivity) context;
-            mainActivity.lyricsListBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+            EventBus.getDefault().post(new SetLyricSheetStateEvent(BottomSheetBehavior.STATE_COLLAPSED));
             EventBus.getDefault().post(new LoadSelectedItemEvent(urls.get(holder.getBindingAdapterPosition())));
         });
-        //                fragment.loadSelectedLyrics(urls.get(holder.getBindingAdapterPosition()));
 
     }
 

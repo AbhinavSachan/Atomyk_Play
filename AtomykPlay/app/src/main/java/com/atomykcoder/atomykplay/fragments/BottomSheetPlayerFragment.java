@@ -49,8 +49,10 @@ import com.atomykcoder.atomykplay.adapters.SimpleTouchCallback;
 import com.atomykcoder.atomykplay.customScripts.CenterSmoothScrollScript;
 import com.atomykcoder.atomykplay.customScripts.CustomBottomSheet;
 import com.atomykcoder.atomykplay.enums.PlaybackStatus;
-import com.atomykcoder.atomykplay.events.MainPlayerEvent;
+import com.atomykcoder.atomykplay.events.SetMainLayoutEvent;
 import com.atomykcoder.atomykplay.events.PrepareRunnableEvent;
+import com.atomykcoder.atomykplay.events.RunnableSyncLyricsEvent;
+import com.atomykcoder.atomykplay.events.SetAdapterInQueueEvent;
 import com.atomykcoder.atomykplay.events.UpdateMusicImageEvent;
 import com.atomykcoder.atomykplay.events.UpdateMusicProgressEvent;
 import com.atomykcoder.atomykplay.function.LRCMap;
@@ -74,17 +76,18 @@ import java.util.concurrent.Executors;
 
 public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeListener, OnDragStartListener {
 
+    public static CustomBottomSheet<View> queueSheetBehaviour;
+    public static Runnable lyricsRunnable;
+    public static Handler lyricsHandler;
+    private final ArrayList<String> lyricsArrayList = new ArrayList<>();
+    private final CountDownTimer[] countDownTimer = new CountDownTimer[1];
+    private final AddLyricsFragment addLyricsFragment = new AddLyricsFragment();
     public LinearProgressIndicator mini_progress;
     public ImageView mini_pause;
     //main player seekbar
     public SeekBar seekBarMain;
     public ImageView playImg;
     public TextView curPosTv;
-    public static CustomBottomSheet<View> queueSheetBehaviour;
-    public static Runnable lyricsRunnable;
-    public static Handler lyricsHandler;
-    private final ArrayList<String> lyricsArrayList = new ArrayList<>();
-    private final CountDownTimer[] countDownTimer = new CountDownTimer[1];
     public ImageView mini_cover, mini_next;
     public TextView mini_name_text, mini_artist_text;
     public View mini_play_view;
@@ -116,211 +119,6 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     private ImageView lyricsImg;
     private View shadowPlayer;
     private FragmentManager addLyricFragmentManager;
-
-    private boolean getPlayerState() {
-        if (media_player_service.media_player != null)
-            return media_player_service.media_player.isPlaying();
-        else return false;
-    }
-
-    // Don't Remove This Event Bus is using this method (It might look unused still DON'T REMOVE
-    @Subscribe
-    public void setMainPlayerLayout(MainPlayerEvent event) {
-        ArrayList<MusicDataCapsule> musicList = storageUtil.loadMusicList();
-        MusicDataCapsule activeMusic = null;
-        int musicIndex;
-        musicIndex = storageUtil.loadMusicIndex();
-
-
-        if (musicList != null)
-            if (musicIndex != -1 && musicIndex < musicList.size()) {
-                activeMusic = musicList.get(musicIndex);
-            } else {
-                activeMusic = musicList.get(0);
-            }
-        if (activeMusic != null) {
-            songName = activeMusic.getsName();
-            artistName = activeMusic.getsArtist();
-            mimeType = activeMusic.getsMimeType().toUpperCase();
-            duration = activeMusic.getsLength();
-            bitrate = activeMusic.getsBitrate();
-            albumUri = activeMusic.getsAlbumUri();
-        }
-        if (activeMusic != null) {
-            if (storageUtil.loadFavorite(songName).equals("no_favorite")) {
-                favoriteImg.setImageResource(R.drawable.ic_favorite_border);
-            } else if (storageUtil.loadFavorite(songName).equals("favorite")) {
-                favoriteImg.setImageResource(R.drawable.ic_favorite);
-            }
-        }
-
-        //main layout setup
-        try {
-            if (activeMusic != null) {
-
-                try {
-                    playerSongNameTv.setText(songName);
-                    playerArtistNameTv.setText(artistName);
-                    mimeTv.setText(getMime(mimeType));
-                    durationTv.setText(convertDuration(duration));
-                    mini_name_text.setText(songName);
-                    mini_artist_text.setText(artistName);
-                    seekBarMain.setMax(Integer.parseInt(duration));
-                    mini_progress.setMax(Integer.parseInt(duration));
-
-                    int bitrateInNum = Integer.parseInt(bitrate) / 1000;
-                    String finalBitrate = bitrateInNum + " KBPS";
-                    bitrateTv.setText(finalBitrate);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                RequestBuilder<Drawable> glide = Glide.with(context).load(albumUri);
-                glide.apply(new RequestOptions().placeholder(R.drawable.ic_music_thumbnail))
-                        .override(500, 500).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                        .into(playerCoverImage);
-                glide.apply(new RequestOptions().placeholder(R.drawable.ic_music))
-                        .override(75, 75).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                        .into(mini_cover);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        runnableSyncLyrics();
-    }
-
-    public void runnableSyncLyrics() {
-        ArrayList<MusicDataCapsule> musicList = storageUtil.loadMusicList();
-        MusicDataCapsule activeMusic = null;
-        int musicIndex;
-        musicIndex = storageUtil.loadMusicIndex();
-
-        if (musicList != null)
-            if (musicIndex != -1 && musicIndex < musicList.size()) {
-                activeMusic = musicList.get(musicIndex);
-            } else {
-                activeMusic = musicList.get(0);
-            }
-
-        if (activeMusic != null) {
-            lrcMap = storageUtil.loadLyrics(activeMusic.getsName());
-            if (lrcMap != null) {
-                noLyricsLayout.setVisibility(View.GONE);
-                lyricsRecyclerView.setVisibility(View.VISIBLE);
-                lyricsArrayList.clear();
-                lyricsArrayList.addAll(lrcMap.getLyrics());
-                setLyricsAdapter();
-                lyricsHandler = new Handler(Looper.getMainLooper());
-                EventBus.getDefault().post(new PrepareRunnableEvent());
-            } else {
-                lyricsRecyclerView.setVisibility(View.GONE);
-                noLyricsLayout.setVisibility(View.VISIBLE);
-            }
-        }
-
-    }
-
-    // Don't Remove This Event Bus is using this method (It might look unused still DON'T REMOVE
-    @Subscribe
-    public void prepareRunnable(PrepareRunnableEvent event) {
-        if (lyricsHandler != null) {
-            lyricsRunnable = () -> {
-                int nextStampInMillis = 0;
-                int currPosInMillis = 0;
-                if (media_player_service != null) {
-                    if (!getPlayerState()) return;
-
-                    String nextStamp = getNextStamp(lrcMap);
-                    if (!nextStamp.equals("")) {
-                        nextStampInMillis = convertToMillis(nextStamp);
-                        currPosInMillis = getCurrentPos();
-                    }
-                }
-                if (lrcMap != null) {
-                    if (lyricsRecyclerView.getVisibility() == View.VISIBLE) {
-                        if (lrcMap.containsStamp(getCurrentStamp())) {
-                            ScrollToPosition(lrcMap.getIndexAtStamp(getCurrentStamp()));
-                        }
-                    }
-                }
-                lyricsHandler.postDelayed(lyricsRunnable, nextStampInMillis - currPosInMillis);
-
-            };
-            lyricsHandler.postDelayed(lyricsRunnable, 0);
-        }
-    }
-
-    @Subscribe
-    public void handleMusicProgressUpdate(UpdateMusicProgressEvent event) {
-       mini_progress.setProgress(event.position);
-       seekBarMain.setProgress(event.position);
-       String cur = convertDuration(String.valueOf(event.position));
-       curPosTv.setText(cur);
-    }
-
-    @Subscribe
-    public void handleMusicImageUpdate(UpdateMusicImageEvent event) {
-        if(event.shouldDisplayPlayImage){
-            mini_pause.setImageResource(R.drawable.ic_play_mini);
-            playImg.setImageResource(R.drawable.ic_play_main);
-        } else {
-            mini_pause.setImageResource(R.drawable.ic_pause_mini);
-            playImg.setImageResource(R.drawable.ic_pause_main);
-        }
-    }
-
-    public String getCurrentStamp() {
-        int currPosInMillis = 0;
-        if (media_player_service != null)
-            currPosInMillis = media_player_service.media_player.getCurrentPosition();
-
-        return "[" + convertDuration(String.valueOf(currPosInMillis)) + "]";
-    }
-
-    public String getNextStamp(LRCMap _lrcMap) {
-        String curStamp = getCurrentStamp();
-        int currIndex = -1;
-        if (_lrcMap != null) {
-            currIndex = _lrcMap.getIndexAtStamp(curStamp);
-        }
-        if (currIndex == -1) return "";
-        return currIndex == _lrcMap.size() - 1 ? _lrcMap.getStampAt(currIndex) : _lrcMap.getStampAt(currIndex + 1);
-
-    }
-
-    private void ScrollToPosition(int position) {
-        RecyclerView.SmoothScroller smoothScroller = new CenterSmoothScrollScript.CenterSmoothScroller(context);
-        smoothScroller.setTargetPosition(position);
-        lm.startSmoothScroll(smoothScroller);
-    }
-
-    //give the mime type value and it will return extension
-    public String getMime(String filePath) {
-        MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
-        return mimeTypeMap.getExtensionFromMimeType(filePath);
-    }
-
-    public void showToast(String text) {
-        Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
-    }
-
-    public int getCurrentPos() {
-        return media_player_service.media_player.getCurrentPosition();
-    }
-
-    private void setLyricsAdapter() {
-        lm = new LinearLayoutManager(context);// or whatever layout manager you need
-
-        lyricsRecyclerView.setLayoutManager(lm);
-
-        MusicLyricsAdapter lyricsAdapter = new MusicLyricsAdapter(context, lyricsArrayList);
-        lyricsRecyclerView.setAdapter(lyricsAdapter);
-
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -431,9 +229,214 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         return view;
     }
 
+    private boolean getPlayerState() {
+        if (media_player_service.media_player != null)
+            return media_player_service.media_player.isPlaying();
+        else return false;
+    }
+
+    // Don't Remove This Event Bus is using this method (It might look unused still DON'T REMOVE
+    @Subscribe
+    public void setMainPlayerLayout(SetMainLayoutEvent event) {
+        ArrayList<MusicDataCapsule> musicList = storageUtil.loadMusicList();
+        MusicDataCapsule activeMusic = null;
+        int musicIndex;
+        musicIndex = storageUtil.loadMusicIndex();
+
+
+        if (musicList != null)
+            if (musicIndex != -1 && musicIndex < musicList.size()) {
+                activeMusic = musicList.get(musicIndex);
+            } else {
+                activeMusic = musicList.get(0);
+            }
+        if (activeMusic != null) {
+            songName = activeMusic.getsName();
+            artistName = activeMusic.getsArtist();
+            mimeType = activeMusic.getsMimeType().toUpperCase();
+            duration = activeMusic.getsLength();
+            bitrate = activeMusic.getsBitrate();
+            albumUri = activeMusic.getsAlbumUri();
+        }
+        if (activeMusic != null) {
+            if (storageUtil.loadFavorite(songName).equals("no_favorite")) {
+                favoriteImg.setImageResource(R.drawable.ic_favorite_border);
+            } else if (storageUtil.loadFavorite(songName).equals("favorite")) {
+                favoriteImg.setImageResource(R.drawable.ic_favorite);
+            }
+        }
+
+        //main layout setup
+        try {
+            if (activeMusic != null) {
+
+                try {
+                    playerSongNameTv.setText(songName);
+                    playerArtistNameTv.setText(artistName);
+                    mimeTv.setText(getMime(mimeType));
+                    durationTv.setText(convertDuration(duration));
+                    mini_name_text.setText(songName);
+                    mini_artist_text.setText(artistName);
+                    seekBarMain.setMax(Integer.parseInt(duration));
+                    mini_progress.setMax(Integer.parseInt(duration));
+
+                    int bitrateInNum = Integer.parseInt(bitrate) / 1000;
+                    String finalBitrate = bitrateInNum + " KBPS";
+                    bitrateTv.setText(finalBitrate);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                RequestBuilder<Drawable> glide = Glide.with(context).load(albumUri);
+                glide.apply(new RequestOptions().placeholder(R.drawable.ic_music_thumbnail))
+                        .override(500, 500).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                        .into(playerCoverImage);
+                glide.apply(new RequestOptions().placeholder(R.drawable.ic_music))
+                        .override(75, 75).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                        .into(mini_cover);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        EventBus.getDefault().post(new RunnableSyncLyricsEvent());
+    }
+
+    @Subscribe
+    public void runnableSyncLyrics(RunnableSyncLyricsEvent event) {
+        ArrayList<MusicDataCapsule> musicList = storageUtil.loadMusicList();
+        MusicDataCapsule activeMusic = null;
+        int musicIndex;
+        musicIndex = storageUtil.loadMusicIndex();
+
+        if (musicList != null)
+            if (musicIndex != -1 && musicIndex < musicList.size()) {
+                activeMusic = musicList.get(musicIndex);
+            } else {
+                activeMusic = musicList.get(0);
+            }
+
+        if (activeMusic != null) {
+            lrcMap = storageUtil.loadLyrics(activeMusic.getsName());
+            if (lrcMap != null) {
+                noLyricsLayout.setVisibility(View.GONE);
+                lyricsRecyclerView.setVisibility(View.VISIBLE);
+                lyricsArrayList.clear();
+                lyricsArrayList.addAll(lrcMap.getLyrics());
+                setLyricsAdapter();
+                lyricsHandler = new Handler(Looper.getMainLooper());
+                EventBus.getDefault().post(new PrepareRunnableEvent());
+            } else {
+                lyricsRecyclerView.setVisibility(View.GONE);
+                noLyricsLayout.setVisibility(View.VISIBLE);
+            }
+        }
+
+    }
+
+    // Don't Remove This Event Bus is using this method (It might look unused still DON'T REMOVE
+    @Subscribe
+    public void prepareRunnable(PrepareRunnableEvent event) {
+        if (lyricsHandler != null) {
+            lyricsRunnable = () -> {
+                int nextStampInMillis = 0;
+                int currPosInMillis = 0;
+                if (media_player_service != null) {
+                    if (!getPlayerState()) return;
+
+                    String nextStamp = getNextStamp(lrcMap);
+                    if (!nextStamp.equals("")) {
+                        nextStampInMillis = convertToMillis(nextStamp);
+                        currPosInMillis = getCurrentPos();
+                    }
+                }
+                if (lrcMap != null) {
+                    if (lyricsRecyclerView.getVisibility() == View.VISIBLE) {
+                        if (lrcMap.containsStamp(getCurrentStamp())) {
+                            ScrollToPosition(lrcMap.getIndexAtStamp(getCurrentStamp()));
+                        }
+                    }
+                }
+                lyricsHandler.postDelayed(lyricsRunnable, nextStampInMillis - currPosInMillis);
+
+            };
+            lyricsHandler.postDelayed(lyricsRunnable, 0);
+        }
+    }
+
+    @Subscribe
+    public void handleMusicProgressUpdate(UpdateMusicProgressEvent event) {
+        mini_progress.setProgress(event.position);
+        seekBarMain.setProgress(event.position);
+        String cur = convertDuration(String.valueOf(event.position));
+        curPosTv.setText(cur);
+    }
+
+    @Subscribe
+    public void handleMusicImageUpdate(UpdateMusicImageEvent event) {
+        if (event.shouldDisplayPlayImage) {
+            mini_pause.setImageResource(R.drawable.ic_play_mini);
+            playImg.setImageResource(R.drawable.ic_play_main);
+        } else {
+            mini_pause.setImageResource(R.drawable.ic_pause_mini);
+            playImg.setImageResource(R.drawable.ic_pause_main);
+        }
+    }
+
+    public String getCurrentStamp() {
+        int currPosInMillis = 0;
+        if (media_player_service != null)
+            currPosInMillis = media_player_service.media_player.getCurrentPosition();
+
+        return "[" + convertDuration(String.valueOf(currPosInMillis)) + "]";
+    }
+
+    public String getNextStamp(LRCMap _lrcMap) {
+        String curStamp = getCurrentStamp();
+        int currIndex = -1;
+        if (_lrcMap != null) {
+            currIndex = _lrcMap.getIndexAtStamp(curStamp);
+        }
+        if (currIndex == -1) return "";
+        return currIndex == _lrcMap.size() - 1 ? _lrcMap.getStampAt(currIndex) : _lrcMap.getStampAt(currIndex + 1);
+
+    }
+
+    private void ScrollToPosition(int position) {
+        RecyclerView.SmoothScroller smoothScroller = new CenterSmoothScrollScript.CenterSmoothScroller(context);
+        smoothScroller.setTargetPosition(position);
+        lm.startSmoothScroll(smoothScroller);
+    }
+
+    //give the mime type value and it will return extension
+    public String getMime(String filePath) {
+        MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
+        return mimeTypeMap.getExtensionFromMimeType(filePath);
+    }
+
+    public void showToast(String text) {
+        Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
+    }
+
+    public int getCurrentPos() {
+        return media_player_service.media_player.getCurrentPosition();
+    }
+
+    private void setLyricsAdapter() {
+        lm = new LinearLayoutManager(context);// or whatever layout manager you need
+
+        lyricsRecyclerView.setLayoutManager(lm);
+
+        MusicLyricsAdapter lyricsAdapter = new MusicLyricsAdapter(context, lyricsArrayList);
+        lyricsRecyclerView.setAdapter(lyricsAdapter);
+
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+    }
 
     private void setLyricsLayout() {
-        AddLyricsFragment addLyricsFragment = new AddLyricsFragment();
+
         mainActivity.mainPlayerSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         FragmentTransaction transaction = addLyricFragmentManager.beginTransaction();
         transaction.replace(R.id.sec_container, addLyricsFragment, "fragment_add_lyrics");
@@ -443,7 +446,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
     private void setupQueueBottomSheet() {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        setAdapterInQueue();
+        EventBus.getDefault().post(new SetAdapterInQueueEvent());
 
         queueSheetBehaviour = (CustomBottomSheet<View>) BottomSheetBehavior.from(queueBottomSheet);
         queueSheetBehaviour.setHideable(true);
@@ -472,7 +475,8 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     /**
      * Setting adapter in queue list
      */
-    public void setAdapterInQueue() {
+    @Subscribe
+    public void setAdapterInQueue(SetAdapterInQueueEvent event) {
         ArrayList<MusicDataCapsule> dataList;
         dataList = storageUtil.loadMusicList();
         MusicQueueAdapter adapter = new MusicQueueAdapter(getActivity(), dataList, this);
@@ -663,7 +667,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
             storageUtil.saveMusicIndex(0);
             // post-execute code here
             handler.post(() -> {
-                setAdapterInQueue();
+                EventBus.getDefault().post(new SetAdapterInQueueEvent());
                 shuffleImg.setClickable(true);
                 // stopping the background thread (crucial)
             });
@@ -692,7 +696,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
             storageUtil.saveMusicList(tempList);
             // post-execute code here
             handler.post(() -> {
-                setAdapterInQueue();
+                EventBus.getDefault().post(new SetAdapterInQueueEvent());
                 shuffleImg.setClickable(true);
             });
         });
@@ -760,11 +764,6 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     public void onDestroy() {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
-        mini_pause = null;
-        playImg = null;
-        queueSheetBehaviour = null;
-        lyricsRunnable = null;
-        lyricsHandler = null;
     }
 
     @Override
@@ -867,7 +866,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     public void setPreviousData() {
         MusicDataCapsule activeMusic = getMusic();
 
-        EventBus.getDefault().post(new MainPlayerEvent());
+        EventBus.getDefault().post(new SetMainLayoutEvent());
 
         if (activeMusic != null) {
             seekBarMain.setMax(Integer.parseInt(activeMusic.getsLength()));
@@ -898,11 +897,11 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         int out;
         String _duration = duration.replace("[", "").replace("]", "");
         String[] numbers = _duration.split(":");
-        int first = Integer.parseInt(numbers[0]);
+        int min = Integer.parseInt(numbers[0]);
         int second = Integer.parseInt(numbers[1]);
-        first = first * (60 * 1000);
+        min = min * (60 * 1000);
         second = second * 1000;
-        out = first + second;
+        out = min + second;
         return out;
     }
 

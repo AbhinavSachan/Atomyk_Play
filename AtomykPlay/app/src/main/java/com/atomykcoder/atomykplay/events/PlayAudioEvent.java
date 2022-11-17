@@ -1,5 +1,4 @@
 package com.atomykcoder.atomykplay.events;
 
-public class MainPlayerEvent {
-
+public class PlayAudioEvent {
 }

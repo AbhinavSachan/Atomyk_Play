@@ -35,4 +35,5 @@
     <string name="drawer_toggle_close">drawer_close</string>
     <string name="dark_mode_tv">Dark Mode</string>
     <string name="light_mode_tv">Light Mode</string>
+    <string name="home">Home</string>
 </resources>

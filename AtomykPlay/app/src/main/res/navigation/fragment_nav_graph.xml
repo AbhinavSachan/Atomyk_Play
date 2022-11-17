@@ -1,8 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/fragment_nav_graph">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/bottom_navigation"
+    app:startDestination="@+id/navigation_home">
 
-
+    <activity
+        android:id="@+id/navigation_home"
+        android:name="com.atomykcoder.atomykplay.activities.MainActivity"
+        android:label="@string/app_name"
+        tools:layout="@layout/activity_main" />
+    <fragment
+        android:id="@+id/navigation_setting"
+        android:name="com.atomykcoder.atomykplay.fragments.SettingsFragment"
+        android:label="@string/settings"
+        tools:layout="@layout/fragment_settings" />
+    <fragment
+        android:id="@+id/navigation_about"
+        android:name="com.atomykcoder.atomykplay.fragments.AboutFragment"
+        android:label="@string/about"
+        tools:layout="@layout/fragment_about" />
 
 </navigation>

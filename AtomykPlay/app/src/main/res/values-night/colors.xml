@@ -20,6 +20,7 @@
     <color name="lyrics_text_color">#C5C5C5</color>
     <color name="heart_bg">#DC2525</color>
     <color name="translucent_black">#EB030407</color>
-    <color name="player_shadow_black">#A105070B</color>
+    <color name="player_shadow_black">#5105070B</color>
+    <color name="center_player_shadow">#1D030505</color>
 
 </resources>

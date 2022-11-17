@@ -19,6 +19,7 @@ import androidx.fragment.app.Fragment;
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.events.LoadSelectedItemEvent;
+import com.atomykcoder.atomykplay.events.RunnableSyncLyricsEvent;
 import com.atomykcoder.atomykplay.function.FetchLyrics;
 import com.atomykcoder.atomykplay.function.LRCMap;
 import com.atomykcoder.atomykplay.function.MusicHelper;
@@ -44,6 +45,7 @@ public class AddLyricsFragment extends Fragment {
     private StorageUtil storageUtil;
     private Button btnFind;
     private Dialog dialog;
+    private String name;
 
     @Override
     public void onDestroy() {
@@ -65,8 +67,11 @@ public class AddLyricsFragment extends Fragment {
         progressBar = view.findViewById(R.id.progress_lyrics);
         storageUtil = new StorageUtil(getContext());
 
+        name = getMusic().getsName();
+
         TextView nameText = view.findViewById(R.id.song_name_tv);
-        nameText.setText(getMusic().getsName());
+        nameText.setText(name);
+
 
         saveBtn.setOnClickListener(v -> saveMusic());
         btnFind.setOnClickListener(v -> setDialogBox());
@@ -98,17 +103,14 @@ public class AddLyricsFragment extends Fragment {
 
 
     private void saveLyrics() {
-        if (storageUtil.loadLyrics(getMusic().getsName()) == null)
-            storageUtil.saveLyrics(getMusic().getsName(), lrcMap);
+        if (storageUtil.loadLyrics(name) == null)
+            storageUtil.saveLyrics(name, lrcMap);
         else {
-            storageUtil.removeLyrics(getMusic().getsName());
-            storageUtil.saveLyrics(getMusic().getsName(), lrcMap);
+            storageUtil.removeLyrics(name);
+            storageUtil.saveLyrics(name, lrcMap);
         }
         showToast("Saved");
-        MainActivity mainActivity = (MainActivity) getContext();
-        if (mainActivity != null) {
-            mainActivity.bottomSheetPlayerFragment.runnableSyncLyrics();
-        }
+        EventBus.getDefault().post(new RunnableSyncLyricsEvent());
     }
 
     private void setDialogBox() {

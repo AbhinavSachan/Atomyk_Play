@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.R;
+import com.atomykcoder.atomykplay.events.PlayAudioEvent;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import com.atomykcoder.atomykplay.function.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.ItemTouchHelperAdapter;
@@ -26,6 +27,8 @@ import com.atomykcoder.atomykplay.interfaces.ItemTouchHelperViewfinder;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -91,8 +94,7 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
         }
 
         if (position == savedIndex) {
-            MainActivity mainActivity = (MainActivity) context;
-            mainActivity.playAudio();
+            EventBus.getDefault().post(new PlayAudioEvent());
         } else if (position < savedIndex) {
             storageUtil.saveMusicIndex(savedIndex - 1);
         }
@@ -127,8 +129,7 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
                     StorageUtil storage = new StorageUtil(context);
                     //Store serializable music list to sharedPreference
                     storage.saveMusicIndex(position);
-                    MainActivity mainActivity = (MainActivity) context;
-                    mainActivity.playAudio();
+                    EventBus.getDefault().post(new PlayAudioEvent());
                 } else {
                     Toast.makeText(context, "Audio file is unavailable", Toast.LENGTH_SHORT).show();
                     notifyItemRemoved(position);

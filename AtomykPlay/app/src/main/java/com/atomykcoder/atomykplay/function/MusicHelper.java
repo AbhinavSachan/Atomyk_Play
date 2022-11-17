@@ -64,7 +64,7 @@ import java.util.regex.Pattern;
         int dur = Integer.parseInt(duration);
 
         int hours = (dur / 3600000);
-        int mns = (dur / 60000) % 60000;
+        int mns = (dur / 60000)%60;
         int scs = dur % 60000 / 1000;
 
         if (hours == 0) {
