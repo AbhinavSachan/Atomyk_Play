@@ -19,7 +19,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.R;
-import com.atomykcoder.atomykplay.events.PlayAudioEvent;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import com.atomykcoder.atomykplay.function.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.ItemTouchHelperAdapter;
@@ -27,8 +26,6 @@ import com.atomykcoder.atomykplay.interfaces.ItemTouchHelperViewfinder;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
-
-import org.greenrobot.eventbus.EventBus;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -38,19 +35,21 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
     Context context;
     ArrayList<MusicDataCapsule> musicArrayList;
     OnDragStartListener onDragStartListener;
+    MainActivity mainActivity;
 
     public MusicQueueAdapter(Context context, ArrayList<MusicDataCapsule> musicArrayList, OnDragStartListener onDragStartListener) {
         this.context = context;
         this.musicArrayList = musicArrayList;
         this.onDragStartListener = onDragStartListener;
+        mainActivity = (MainActivity) context;
     }
 
     //when item starts to move it will change positions of every item in real time
     @Override
     public void onItemMove(int fromPos, int toPos) {
         StorageUtil storageUtil = new StorageUtil(context.getApplicationContext());
-        int savedIndex;
-        savedIndex = storageUtil.loadMusicIndex();
+//        int savedIndex;
+//        savedIndex = storageUtil.loadMusicIndex();
 
 
         Collections.swap(musicArrayList, fromPos, toPos);
@@ -94,7 +93,7 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
         }
 
         if (position == savedIndex) {
-            EventBus.getDefault().post(new PlayAudioEvent());
+            mainActivity.playAudio();
         } else if (position < savedIndex) {
             storageUtil.saveMusicIndex(savedIndex - 1);
         }
@@ -117,36 +116,31 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
         try {
             Glide.with(context).load(currentItem.getsAlbumUri()).apply(new RequestOptions().placeholder(R.drawable.ic_no_album)
                     .override(75, 75)).into(holder.imageView);
-        } catch (Exception ignored) {
-        }
-//playing song
-        holder.cardView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                File file = new File(currentItem.getsPath());
-                if (file.exists()) {
-                    //check is service active
-                    StorageUtil storage = new StorageUtil(context);
-                    //Store serializable music list to sharedPreference
-                    storage.saveMusicIndex(position);
-                    EventBus.getDefault().post(new PlayAudioEvent());
-                } else {
-                    Toast.makeText(context, "Audio file is unavailable", Toast.LENGTH_SHORT).show();
-                    notifyItemRemoved(position);
-                }
+        } catch (Exception ignored) {}
 
+        //playing song
+        holder.cardView.setOnClickListener(v -> {
+            File file = new File(currentItem.getsPath());
+            if (file.exists()) {
+                //check is service active
+                StorageUtil storage = new StorageUtil(context);
+                //Store serializable music list to sharedPreference
+                storage.saveMusicIndex(position);
+                mainActivity.playAudio();
+            } else {
+                Toast.makeText(context, "Audio file is unavailable", Toast.LENGTH_SHORT).show();
+                notifyItemRemoved(position);
             }
+
         });
 
         //add bottom sheet functions in three dot click
-        holder.imageButton.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (MotionEventCompat.getActionMasked(event) == MotionEvent.ACTION_DOWN) {
-                    onDragStartListener.onDragStart(holder);
-                }
-                return false;
+        holder.imageButton.setOnTouchListener((v, event) -> {
+            //noinspection deprecation
+            if (MotionEventCompat.getActionMasked(event) == MotionEvent.ACTION_DOWN) {
+                onDragStartListener.onDragStart(holder);
             }
+            return false;
         });
 
         holder.nameText.setText(currentItem.getsName());
@@ -180,11 +174,9 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
         }
 
         @Override
-        public void onItemSelected() {
-        }
+        public void onItemSelected() {}
 
         @Override
-        public void onItemClear() {
-        }
+        public void onItemClear() {}
     }
 }

@@ -10,26 +10,23 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.R;
-import com.atomykcoder.atomykplay.events.LoadSelectedItemEvent;
-import com.atomykcoder.atomykplay.events.SetLyricSheetStateEvent;
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
-
-import org.greenrobot.eventbus.EventBus;
+import com.atomykcoder.atomykplay.activities.MainActivity;
+import com.atomykcoder.atomykplay.fragments.AddLyricsFragment;
 
 import java.util.ArrayList;
 
 
 public class FoundLyricsAdapter extends RecyclerView.Adapter<FoundLyricsAdapter.FoundLyricsViewHolder> {
     private final ArrayList<String> titles;
-    private final ArrayList<String> durations;
+    private final ArrayList<String> sampleLyrics;
     private final ArrayList<String> urls;
-    private final Context context;
+    private final MainActivity mainActivity;
 
-    public FoundLyricsAdapter(ArrayList<String> _titles, ArrayList<String> _durations, ArrayList<String> _urls, Context _context) {
+    public FoundLyricsAdapter(ArrayList<String> _titles, ArrayList<String> _sampleLyrics, ArrayList<String> _urls, Context _context) {
         titles = _titles;
-        durations = _durations;
+        sampleLyrics = _sampleLyrics;
         urls = _urls;
-        context = _context;
+        mainActivity = (MainActivity) _context;
     }
 
     @NonNull
@@ -42,11 +39,14 @@ public class FoundLyricsAdapter extends RecyclerView.Adapter<FoundLyricsAdapter.
     @Override
     public void onBindViewHolder(@NonNull FoundLyricsViewHolder holder, int position) {
         holder.song_title.setText(titles.get(position));
-        holder.song_duration.setText(durations.get(position));
+        holder.song_sampleLyrics.setText(sampleLyrics.get(position));
 
         holder.itemView.setOnClickListener(view -> {
-            EventBus.getDefault().post(new SetLyricSheetStateEvent(BottomSheetBehavior.STATE_COLLAPSED));
-            EventBus.getDefault().post(new LoadSelectedItemEvent(urls.get(holder.getBindingAdapterPosition())));
+            mainActivity.setBottomSheetState();
+            AddLyricsFragment fragment = (AddLyricsFragment) mainActivity.getSupportFragmentManager().findFragmentByTag("AddLyricsFragment");
+            if (fragment != null) {
+                fragment.loadSelectedLyrics(urls.get(holder.getBindingAdapterPosition()));
+            }
         });
 
     }
@@ -58,12 +58,12 @@ public class FoundLyricsAdapter extends RecyclerView.Adapter<FoundLyricsAdapter.
 
     public static class FoundLyricsViewHolder extends RecyclerView.ViewHolder {
         public TextView song_title;
-        public TextView song_duration;
+        public TextView song_sampleLyrics;
 
         public FoundLyricsViewHolder(@NonNull View itemView) {
             super(itemView);
             song_title = itemView.findViewById(R.id.found_song_title);
-            song_duration = itemView.findViewById(R.id.found_song_lyrics_sample);
+            song_sampleLyrics = itemView.findViewById(R.id.found_song_lyrics_sample);
         }
     }
 }

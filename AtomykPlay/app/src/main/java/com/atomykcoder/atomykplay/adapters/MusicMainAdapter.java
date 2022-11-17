@@ -20,16 +20,12 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.R;
-import com.atomykcoder.atomykplay.events.OpenBottomPlayerOnPlayEvent;
-import com.atomykcoder.atomykplay.events.PlayAudioEvent;
-import com.atomykcoder.atomykplay.events.SetAdapterInQueueEvent;
+import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import com.atomykcoder.atomykplay.function.StorageUtil;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.turingtechnologies.materialscrollbar.INameableAdapter;
-
-import org.greenrobot.eventbus.EventBus;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -40,11 +36,13 @@ import java.util.concurrent.Executors;
 public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.MusicViewAdapter> implements INameableAdapter {
     Context context;
     ArrayList<MusicDataCapsule> musicArrayList;
+    MainActivity mainActivity;
 
 
     public MusicMainAdapter(Context context, ArrayList<MusicDataCapsule> musicArrayList) {
         this.context = context;
         this.musicArrayList = musicArrayList;
+        mainActivity = (MainActivity) context;
     }
 
     @NonNull
@@ -65,74 +63,66 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
         } catch (Exception ignored) {
         }
 //playing song
-        holder.cardView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                File file = new File(currentItem.getsPath());
-                if (file.exists()) {
-                    //check is service active
-                    StorageUtil storage = new StorageUtil(context);
-                    storage.saveMusicList(musicArrayList);
-                    //if shuffle button is already on it will shuffle it from start
-                    if (storage.loadShuffle().equals(shuffle)) {
-                        MusicDataCapsule activeMusic;
-                        ArrayList<MusicDataCapsule> shuffleList = new ArrayList<>(musicArrayList);
-                        //saving list in temp for restore function in player fragment
-                        storage.saveTempMusicList(musicArrayList);
+        holder.cardView.setOnClickListener(v -> {
+            File file = new File(currentItem.getsPath());
+            if (file.exists()) {
+                //check is service active
+                StorageUtil storage = new StorageUtil(context);
+                storage.saveMusicList(musicArrayList);
+                //if shuffle button is already on it will shuffle it from start
+                if (storage.loadShuffle().equals(shuffle)) {
+                    MusicDataCapsule activeMusic;
+                    ArrayList<MusicDataCapsule> shuffleList = new ArrayList<>(musicArrayList);
+                    //saving list in temp for restore function in player fragment
+                    storage.saveTempMusicList(musicArrayList);
 
-                        if (musicArrayList != null) {
-                            if (position != -1 && position < musicArrayList.size()) {
-                                activeMusic = musicArrayList.get(position);
-                            } else {
-                                activeMusic = musicArrayList.get(0);
-                            }
-
-                            ExecutorService service = Executors.newSingleThreadExecutor();
-                            Handler handler = new Handler(Looper.getMainLooper());
-                            service.execute(() -> {
-                                //removing current item from list
-                                shuffleList.remove(position);
-                                //shuffling list
-                                Collections.shuffle(shuffleList);
-                                //adding the removed item in shuffled list on 0th index
-                                shuffleList.add(0, activeMusic);
-                                //saving list
-                                storage.saveMusicList(shuffleList);
-                                storage.saveMusicIndex(0);
-                                // post-execute code here
-                                handler.post(()->{
-                                    EventBus.getDefault().post(new PlayAudioEvent());
-                                    EventBus.getDefault().post(new SetAdapterInQueueEvent());
-                                    EventBus.getDefault().post(new OpenBottomPlayerOnPlayEvent());
-                                });
-                            });
-                            service.shutdown();
-
+                    if (musicArrayList != null) {
+                        if (position != -1 && position < musicArrayList.size()) {
+                            activeMusic = musicArrayList.get(position);
+                        } else {
+                            activeMusic = musicArrayList.get(0);
                         }
-                    } else if (storage.loadShuffle().equals(no_shuffle)) {
-                        //Store serializable music list to sharedPreference
-                        storage.saveMusicList(musicArrayList);
-                        storage.saveMusicIndex(position);
-                        EventBus.getDefault().post(new PlayAudioEvent());
-                        EventBus.getDefault().post(new SetAdapterInQueueEvent());
-                        EventBus.getDefault().post(new OpenBottomPlayerOnPlayEvent());
-                    }
-                } else {
-                    Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show();
-                    notifyItemRemoved(position);
-                }
 
+                        ExecutorService service = Executors.newSingleThreadExecutor();
+                        Handler handler = new Handler(Looper.getMainLooper());
+                        service.execute(() -> {
+                            //removing current item from list
+                            shuffleList.remove(position);
+                            //shuffling list
+                            Collections.shuffle(shuffleList);
+                            //adding the removed item in shuffled list on 0th index
+                            shuffleList.add(0, activeMusic);
+                            //saving list
+                            storage.saveMusicList(shuffleList);
+                            storage.saveMusicIndex(0);
+                            // post-execute code here
+                            handler.post(()->{
+                                mainActivity.playAudio();
+                                mainActivity.bottomSheetPlayerFragment.setAdapterInQueue();
+                                mainActivity.openBottomPlayer();
+                            });
+                        });
+                        service.shutdown();
+
+                    }
+                } else if (storage.loadShuffle().equals(no_shuffle)) {
+                    //Store serializable music list to sharedPreference
+                    storage.saveMusicList(musicArrayList);
+                    storage.saveMusicIndex(position);
+                    mainActivity.playAudio();
+                    mainActivity.bottomSheetPlayerFragment.setAdapterInQueue();
+                    mainActivity.openBottomPlayer();
+                }
+            } else {
+                Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show();
+                notifyItemRemoved(position);
             }
+
         });
 
 
         //add bottom sheet functions in three dot click
-        holder.imageButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(context, "Clicked", Toast.LENGTH_SHORT).show();
-            }
-        });
+        holder.imageButton.setOnClickListener(v -> Toast.makeText(context, "Clicked", Toast.LENGTH_SHORT).show());
 
 
         holder.nameText.setText(currentItem.getsName());

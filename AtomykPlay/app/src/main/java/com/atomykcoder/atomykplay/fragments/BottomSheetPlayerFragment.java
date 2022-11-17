@@ -49,10 +49,10 @@ import com.atomykcoder.atomykplay.adapters.SimpleTouchCallback;
 import com.atomykcoder.atomykplay.customScripts.CenterSmoothScrollScript;
 import com.atomykcoder.atomykplay.customScripts.CustomBottomSheet;
 import com.atomykcoder.atomykplay.enums.PlaybackStatus;
+import com.atomykcoder.atomykplay.events.RemoveLyricsHandlerEvent;
 import com.atomykcoder.atomykplay.events.SetMainLayoutEvent;
 import com.atomykcoder.atomykplay.events.PrepareRunnableEvent;
 import com.atomykcoder.atomykplay.events.RunnableSyncLyricsEvent;
-import com.atomykcoder.atomykplay.events.SetAdapterInQueueEvent;
 import com.atomykcoder.atomykplay.events.UpdateMusicImageEvent;
 import com.atomykcoder.atomykplay.events.UpdateMusicProgressEvent;
 import com.atomykcoder.atomykplay.function.LRCMap;
@@ -77,11 +77,10 @@ import java.util.concurrent.Executors;
 public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeListener, OnDragStartListener {
 
     public static CustomBottomSheet<View> queueSheetBehaviour;
-    public static Runnable lyricsRunnable;
-    public static Handler lyricsHandler;
+    public Runnable lyricsRunnable;
+    public Handler lyricsHandler;
     private final ArrayList<String> lyricsArrayList = new ArrayList<>();
     private final CountDownTimer[] countDownTimer = new CountDownTimer[1];
-    private final AddLyricsFragment addLyricsFragment = new AddLyricsFragment();
     public LinearProgressIndicator mini_progress;
     public ImageView mini_pause;
     //main player seekbar
@@ -118,7 +117,6 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     private CardView coverCardView;
     private ImageView lyricsImg;
     private View shadowPlayer;
-    private FragmentManager addLyricFragmentManager;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -133,7 +131,6 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         //StorageUtil initialization
         storageUtil = new StorageUtil(getContext());
         mainActivity = (MainActivity) getContext();
-        addLyricFragmentManager = requireActivity().getSupportFragmentManager();
 
         //Mini player items initializations
         mini_play_view = view.findViewById(R.id.mini_player_layout);//○
@@ -233,6 +230,13 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         if (media_player_service.media_player != null)
             return media_player_service.media_player.isPlaying();
         else return false;
+    }
+
+    @Subscribe
+    public void RemoveLyricsHandler(RemoveLyricsHandlerEvent event) {
+        if (lyricsHandler != null) {
+            lyricsHandler.removeCallbacks(lyricsRunnable);
+        }
     }
 
     // Don't Remove This Event Bus is using this method (It might look unused still DON'T REMOVE
@@ -436,17 +440,23 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     }
 
     private void setLyricsLayout() {
-
+        FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
+        Fragment fragment = fragmentManager.findFragmentByTag("AddLyricsFragment");
+        if(fragment != null){
+            boolean value = fragmentManager.popBackStackImmediate();
+            Log.i("info", String.valueOf(value));
+        }
+        AddLyricsFragment addLyricsFragment = new AddLyricsFragment();
         mainActivity.mainPlayerSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-        FragmentTransaction transaction = addLyricFragmentManager.beginTransaction();
-        transaction.replace(R.id.sec_container, addLyricsFragment, "fragment_add_lyrics");
-        transaction.addToBackStack(addLyricsFragment.toString());
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.replace(R.id.sec_container, addLyricsFragment, "AddLyricsFragment");
+        transaction.addToBackStack(null);
         transaction.commit();
     }
 
     private void setupQueueBottomSheet() {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        EventBus.getDefault().post(new SetAdapterInQueueEvent());
+        setAdapterInQueue();
 
         queueSheetBehaviour = (CustomBottomSheet<View>) BottomSheetBehavior.from(queueBottomSheet);
         queueSheetBehaviour.setHideable(true);
@@ -475,8 +485,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     /**
      * Setting adapter in queue list
      */
-    @Subscribe
-    public void setAdapterInQueue(SetAdapterInQueueEvent event) {
+    public void setAdapterInQueue() {
         ArrayList<MusicDataCapsule> dataList;
         dataList = storageUtil.loadMusicList();
         MusicQueueAdapter adapter = new MusicQueueAdapter(getActivity(), dataList, this);
@@ -667,7 +676,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
             storageUtil.saveMusicIndex(0);
             // post-execute code here
             handler.post(() -> {
-                EventBus.getDefault().post(new SetAdapterInQueueEvent());
+                setAdapterInQueue();
                 shuffleImg.setClickable(true);
                 // stopping the background thread (crucial)
             });
@@ -696,7 +705,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
             storageUtil.saveMusicList(tempList);
             // post-execute code here
             handler.post(() -> {
-                EventBus.getDefault().post(new SetAdapterInQueueEvent());
+                setAdapterInQueue();
                 shuffleImg.setClickable(true);
             });
         });

@@ -45,11 +45,11 @@ import androidx.core.app.NotificationCompat;
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.enums.PlaybackStatus;
+import com.atomykcoder.atomykplay.events.RemoveLyricsHandlerEvent;
 import com.atomykcoder.atomykplay.events.SetMainLayoutEvent;
 import com.atomykcoder.atomykplay.events.PrepareRunnableEvent;
 import com.atomykcoder.atomykplay.events.UpdateMusicImageEvent;
 import com.atomykcoder.atomykplay.events.UpdateMusicProgressEvent;
-import com.atomykcoder.atomykplay.fragments.BottomSheetPlayerFragment;
 import com.atomykcoder.atomykplay.function.LRCMap;
 import com.atomykcoder.atomykplay.function.StorageUtil;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
@@ -191,9 +191,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 if (media_player.isPlaying()) {
                     pauseMedia();
                     handler.removeCallbacks(runnable);
-                    if (BottomSheetPlayerFragment.lyricsHandler != null) {
-                        BottomSheetPlayerFragment.lyricsHandler.removeCallbacks(BottomSheetPlayerFragment.lyricsRunnable);
-                    }
+                    EventBus.getDefault().post(new RemoveLyricsHandlerEvent());
                 } else {
                     resumeMedia();
                     if (service_bound) {
@@ -522,6 +520,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
     }
 
+    @SuppressWarnings("deprecation")
     private void callStateListener() {
         telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         phoneStateListener = new PhoneStateListener() {

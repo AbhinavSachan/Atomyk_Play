@@ -38,11 +38,10 @@ import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.adapters.FoundLyricsAdapter;
 import com.atomykcoder.atomykplay.adapters.MusicMainAdapter;
 import com.atomykcoder.atomykplay.customScripts.CustomBottomSheet;
-import com.atomykcoder.atomykplay.events.OpenBottomPlayerOnPlayEvent;
-import com.atomykcoder.atomykplay.events.PlayAudioEvent;
+import com.atomykcoder.atomykplay.events.OpenBottomSheetEvent;
 import com.atomykcoder.atomykplay.events.PrepareRunnableEvent;
+import com.atomykcoder.atomykplay.events.RemoveLyricsHandlerEvent;
 import com.atomykcoder.atomykplay.events.SearchEvent;
-import com.atomykcoder.atomykplay.events.SetLyricSheetStateEvent;
 import com.atomykcoder.atomykplay.fragments.BottomSheetPlayerFragment;
 import com.atomykcoder.atomykplay.fragments.SearchResultsFragment;
 import com.atomykcoder.atomykplay.function.FetchMusic;
@@ -135,6 +134,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private ProgressBar progressBar;
     private StorageUtil storageUtil;
     private DrawerLayout drawer;
+    FragmentManager searchFragmentManager;
     public BottomSheetBehavior.BottomSheetCallback callback = new BottomSheetBehavior.BottomSheetCallback() {
         @Override
         public void onStateChanged(@NonNull View bottomSheet, int newState) {
@@ -180,19 +180,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        boolean switch1 = new StorageUtil(this).loadTheme();
-//        if (switch1) {
-//            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-//        } else {
-//            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-//        }
+        if(!EventBus.getDefault().isRegistered(this))
+            EventBus.getDefault().register(this);
+  /*  noinspection
+      boolean switch1 = new StorageUtil(this).loadTheme();
+       if (switch1) {
+           AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+      } else {
+           AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+       }
+ */
         setContentView(R.layout.activity_main);
 
         //initializations
         storageUtil = new StorageUtil(MainActivity.this);
-        if (!EventBus.getDefault().isRegistered(this)) {
-            EventBus.getDefault().register(this);
-        }
+        searchFragmentManager = getSupportFragmentManager();
 
         linearLayout = findViewById(R.id.song_not_found_layout);
         recyclerView = findViewById(R.id.music_recycler);
@@ -209,19 +211,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         MediaPlayerService.ui_visible = true;
 
-        NavigationView navigationView = findViewById(R.id.navigation_drawer);
+//        NavigationView navigationView = findViewById(R.id.navigation_drawer);
         drawer = findViewById(R.id.drawer_layout);
 
-        View headerView = navigationView.getHeaderView(0);
+//        View headerView = navigationView.getHeaderView(0);
 
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.drawer_toggle_open, R.string.drawer_toggle_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-//        NavController navController = Navigation.findNavController(this, R.id.sec_container);
-//        NavigationUI.setupWithNavController(navigationView, navController);
-//        navigationView.setNavigationItemSelectedListener(this);
+/*      noinspection
+        NavController navController = Navigation.findNavController(this, R.id.sec_container);
+        NavigationUI.setupWithNavController(navigationView, navController);
+        navigationView.setNavigationItemSelectedListener(this);
+*/
 
 
         View lyricsListView = findViewById(R.id.found_lyrics_fragments);
@@ -281,8 +285,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return activeMusic;
     }
 
-    @Subscribe
-    public void openBottomPlayer(OpenBottomPlayerOnPlayEvent event) {
+    public void openBottomPlayer() {
         if (mainPlayerSheetBehavior.getState() == BottomSheetBehavior.STATE_HIDDEN) {
             mainPlayerSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         }
@@ -331,9 +334,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         service_bound = savedInstanceState.getBoolean("serviceState");
     }
 
-    @Subscribe
-    public void setBottomSheetState(SetLyricSheetStateEvent event) {
-        lyricsListBehavior.setState(event.state);
+    public void setBottomSheetState() {
+        lyricsListBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
     }
 
     @Override
@@ -348,6 +350,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (is_granted) {
             if (!is_playing) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    //noinspection deprecation
                     if (audioManager.isBluetoothScoOn() || audioManager.isWiredHeadsetOn()) {
                         pausePlayAudio();
                     }
@@ -380,9 +383,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (service_bound) {
             if (media_player_service.handler != null) {
                 media_player_service.handler.removeCallbacks(media_player_service.runnable);
-                if (BottomSheetPlayerFragment.lyricsHandler != null) {
-                    BottomSheetPlayerFragment.lyricsHandler.removeCallbacks(BottomSheetPlayerFragment.lyricsRunnable);
-                }
+               EventBus.getDefault().post(new RemoveLyricsHandlerEvent());
             }
         }
         super.onPause();
@@ -393,6 +394,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onDestroy();
         finish();
         EventBus.getDefault().unregister(this);
+        setSupportActionBar(null);
         if (service_bound) {
             //if media player is not playing it will stop the service
             if (media_player_service.media_player != null) {
@@ -407,6 +409,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (phoneStateListener != null) {
             telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE);
         }
+        searchFragmentManager = null;
     }
 
     /**
@@ -425,8 +428,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     /**
      * play from start
      */
-    @Subscribe
-    public void playAudio(PlayAudioEvent event) {
+    public void playAudio() {
         //starting the service when permissions are granted
         //starting service if its not started yet otherwise it will send broadcast msg to service
         //we can't start service on startup of app it will lead to pausing all other sound playing on device
@@ -518,15 +520,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void setSearchFragment() {
         SearchResultsFragment searchResultsFragment = new SearchResultsFragment();
-        FragmentManager searchFragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = searchFragmentManager.beginTransaction();
-        transaction.replace(R.id.sec_container, searchResultsFragment);
-        transaction.addToBackStack(searchResultsFragment.toString());
+        transaction.replace(R.id.sec_container, searchResultsFragment, "SearchResultsFragment");
+        transaction.addToBackStack(null);
         transaction.commit();
     }
 
+
     private void callStateListener() {
         telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        //noinspection deprecation
         phoneStateListener = new PhoneStateListener() {
             @Override
             public void onCallStateChanged(int state, String phoneNumber) {
@@ -617,6 +620,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 mainPlayerSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
             }
         }
+
     }
 
     //region Searchbar Functionality Code here
@@ -645,17 +649,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
 
         });
-//        searchView.setOnCloseListener(() -> {
-//            searchFragmentManager.popBackStack();
-//            return false;
-//        });
+
+        searchView.setOnCloseListener(() -> {
+            searchFragmentManager.popBackStackImmediate();
+            return false;
+        });
         return super.onCreateOptionsMenu(menu);
     }
-    //runs Search Method if any radio button is pressed
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         return false;
+    }
+
+    @Subscribe
+    public void openBottomSheet(OpenBottomSheetEvent event) {
+        lyricsListBehavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
+        setLyricListAdapter(event.bundle);
     }
 
 

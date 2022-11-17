@@ -1,7 +1,6 @@
 package com.atomykcoder.atomykplay.fragments;
 
 import android.annotation.SuppressLint;
-import android.media.metrics.Event;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.R;
+
 import com.atomykcoder.atomykplay.events.SearchEvent;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import com.atomykcoder.atomykplay.adapters.MusicMainAdapter;
@@ -55,8 +55,10 @@ public class SearchResultsFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_search_results, container, false);
+
         if(!EventBus.getDefault().isRegistered(this))
             EventBus.getDefault().register(this);
+
         recycler_view = view.findViewById(R.id.search_recycler_view);
         originalMusicList = new ArrayList<>();
 
@@ -158,6 +160,7 @@ public class SearchResultsFragment extends Fragment {
         String num = originalMusicList.size() + " Songs";
         textView.setText(num);
     }
+
 
     @Subscribe
     public void handleSearchEvent(SearchEvent event) {

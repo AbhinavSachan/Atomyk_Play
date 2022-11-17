@@ -17,18 +17,15 @@ import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 
 import com.atomykcoder.atomykplay.R;
-import com.atomykcoder.atomykplay.activities.MainActivity;
-import com.atomykcoder.atomykplay.events.LoadSelectedItemEvent;
+import com.atomykcoder.atomykplay.events.OpenBottomSheetEvent;
 import com.atomykcoder.atomykplay.events.RunnableSyncLyricsEvent;
 import com.atomykcoder.atomykplay.function.FetchLyrics;
 import com.atomykcoder.atomykplay.function.LRCMap;
 import com.atomykcoder.atomykplay.function.MusicHelper;
 import com.atomykcoder.atomykplay.function.StorageUtil;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
@@ -46,28 +43,30 @@ public class AddLyricsFragment extends Fragment {
     private Button btnFind;
     private Dialog dialog;
     private String name;
+    private View view;
+    private final ExecutorService service = Executors.newSingleThreadExecutor();
+    private final Handler handler = new Handler(Looper.getMainLooper());
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-        EventBus.getDefault().unregister(this);
+    public void onDestroyView() {
+        super.onDestroyView();
+        view = null;
+        btnFind = null;
+        editTextLyrics = null;
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_add_lyrics, container, false);
-
-        if(!EventBus.getDefault().isRegistered(this))
-            EventBus.getDefault().register(this);
+        view = inflater.inflate(R.layout.fragment_add_lyrics, container, false);
         editTextLyrics = view.findViewById(R.id.edit_lyrics);
         Button saveBtn = view.findViewById(R.id.btn_save);
         btnFind = view.findViewById(R.id.btn_find);
         progressBar = view.findViewById(R.id.progress_lyrics);
         storageUtil = new StorageUtil(getContext());
 
-        name = getMusic().getsName();
+        name = getMusic().getsName() != null ? getMusic().getsName() : "";
 
         TextView nameText = view.findViewById(R.id.song_name_tv);
         nameText.setText(name);
@@ -163,9 +162,6 @@ public class AddLyricsFragment extends Fragment {
 
         FetchLyrics fetchLyrics = new FetchLyrics();
         try {
-            ExecutorService service = Executors.newSingleThreadExecutor();
-            Handler handler = new Handler(Looper.getMainLooper());
-
             // pre-execute some code here
             fetchLyrics.onPreExecute(progressBar);
 
@@ -173,9 +169,11 @@ public class AddLyricsFragment extends Fragment {
             service.execute(() -> {
                 Bundle lyricsItems = fetchLyrics.fetchList(songName + " " + artistName);
                 handler.post(() -> {
-                    openBottomSheet(lyricsItems);
-                    fetchLyrics.onPostExecute(progressBar);
-                    btnFind.setVisibility(View.VISIBLE);
+                    if(view != null) {
+                        EventBus.getDefault().post(new OpenBottomSheetEvent(lyricsItems));
+                        fetchLyrics.onPostExecute(progressBar);
+                        btnFind.setVisibility(View.VISIBLE);
+                    }
                 });
             });
 
@@ -186,18 +184,9 @@ public class AddLyricsFragment extends Fragment {
         }
     }
 
-    private void openBottomSheet(Bundle lyricsItems) {
-        MainActivity mainActivity = (MainActivity) getContext();
-        if (mainActivity != null) {
-            mainActivity.lyricsListBehavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
-            mainActivity.setLyricListAdapter(lyricsItems);
-        }
-    }
 
-    // Don't Remove This Event Bus is using this method (It might look unused still DON'T REMOVE
-    @Subscribe
-    public void loadSelectedLyrics(LoadSelectedItemEvent event) {
-        String href = event.href;
+
+    public void loadSelectedLyrics(String href) {
         FetchLyrics fetchLyrics = new FetchLyrics();
         try {
             ExecutorService service = Executors.newSingleThreadExecutor();
@@ -215,11 +204,8 @@ public class AddLyricsFragment extends Fragment {
                         showToast("No Lyrics Found");
                     } else {
                         String filteredLyrics = MusicHelper.splitLyricsByNewLine(unfilteredLyrics);
-                        try {
-                            editTextLyrics.setText(filteredLyrics);
-                            lrcMap.addAll(MusicHelper.getLrcMap(filteredLyrics));
-                        } catch (Exception ignored) {
-                        }
+                        editTextLyrics.setText(filteredLyrics);
+                        lrcMap.addAll(MusicHelper.getLrcMap(filteredLyrics));
                     }
                 });
             });
