@@ -16,7 +16,7 @@ public class FetchLyrics {
 
     /**
      * Toggles Progressbar to View.VISIBLE
-     * @param progressBar
+     *
      */
     public void onPreExecute(ProgressBar progressBar) {
         // pre-execute code goes here
@@ -26,7 +26,7 @@ public class FetchLyrics {
     /**
      * Fetches List of All Songs that match the given query
      * @param query query that needed to be searched (a song name + artist name)
-     * @return returns a bundle with song titles, samplelyrics and urls
+     * @return returns a bundle with song titles, sample lyrics and urls
      */
     public Bundle fetchList (String query) {
         Bundle bundle = new Bundle();
@@ -96,7 +96,7 @@ public class FetchLyrics {
 
     /**
      * Toggles Progressbar to View.GONE
-     * @param progressBar
+     *
      */
     public void onPostExecute(ProgressBar progressBar) {
         progressBar.setVisibility(View.GONE);

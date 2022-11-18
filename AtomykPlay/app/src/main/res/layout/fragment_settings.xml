@@ -5,6 +5,7 @@
     android:layout_height="match_parent"
     android:background="@color/primary_bg"
     android:orientation="vertical"
+    android:paddingTop="90dp"
     tools:context=".fragments.SettingsFragment">
 
     <LinearLayout

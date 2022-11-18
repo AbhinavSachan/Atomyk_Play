@@ -25,11 +25,11 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -43,8 +43,10 @@ import com.atomykcoder.atomykplay.events.OpenBottomSheetEvent;
 import com.atomykcoder.atomykplay.events.PrepareRunnableEvent;
 import com.atomykcoder.atomykplay.events.RemoveLyricsHandlerEvent;
 import com.atomykcoder.atomykplay.events.SearchEvent;
+import com.atomykcoder.atomykplay.fragments.AboutFragment;
 import com.atomykcoder.atomykplay.fragments.BottomSheetPlayerFragment;
 import com.atomykcoder.atomykplay.fragments.SearchResultsFragment;
+import com.atomykcoder.atomykplay.fragments.SettingsFragment;
 import com.atomykcoder.atomykplay.function.FetchMusic;
 import com.atomykcoder.atomykplay.function.StorageUtil;
 import com.atomykcoder.atomykplay.services.MediaPlayerService;
@@ -183,14 +185,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
         if(!EventBus.getDefault().isRegistered(this))
             EventBus.getDefault().register(this);
-  /*  noinspection
       boolean switch1 = new StorageUtil(this).loadTheme();
        if (switch1) {
            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
       } else {
            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
        }
- */
         setContentView(R.layout.activity_main);
 
         //initializations
@@ -212,22 +212,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         MediaPlayerService.ui_visible = true;
 
-//        NavigationView navigationView = findViewById(R.id.navigation_drawer);
+        NavigationView navigationView = findViewById(R.id.navigation_drawer);
         drawer = findViewById(R.id.drawer_layout);
 
 //        View headerView = navigationView.getHeaderView(0);
 
+        navigationView.setNavigationItemSelectedListener(this);
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.drawer_toggle_open, R.string.drawer_toggle_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
-
-/*      noinspection
-        NavController navController = Navigation.findNavController(this, R.id.sec_container);
-        NavigationUI.setupWithNavController(navigationView, navController);
-        navigationView.setNavigationItemSelectedListener(this);
-*/
-
 
         View lyricsListView = findViewById(R.id.found_lyrics_fragments);
         lyricsListBehavior = BottomSheetBehavior.from(lyricsListView);
@@ -668,6 +662,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        switch (item.getItemId()){
+            case R.id.navigation_setting:{
+                transaction.replace(R.id.sec_container, new SettingsFragment()).addToBackStack(null).commit();
+                break;
+            }case R.id.navigation_about:{
+                transaction.replace(R.id.sec_container, new AboutFragment()).addToBackStack(null).commit();
+                break;
+            }case R.id.navigation_donate:{
+                Toast.makeText(MainActivity.this, "donate $100 right now or else", Toast.LENGTH_SHORT).show();
+                break;
+            }
+        }
         return false;
     }
 
