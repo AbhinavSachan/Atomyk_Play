@@ -29,6 +29,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -606,21 +607,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void onBackPressed() {
-        if (mainPlayerSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
+        if (mainPlayerSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED ||
+                mainPlayerSheetBehavior.getState() == BottomSheetBehavior.STATE_HIDDEN) {
             if (drawer.isDrawerOpen(GravityCompat.START)) {
                 drawer.closeDrawer(GravityCompat.START);
             } else {
-                super.onBackPressed();
+                if (lyricsListBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED ||
+                        lyricsListBehavior.getState() == BottomSheetBehavior.STATE_HALF_EXPANDED ||
+                        lyricsListBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+                    lyricsListBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+                } else {
+                    super.onBackPressed();
+                }
             }
 
         } else {
-            if (BottomSheetPlayerFragment.queueSheetBehaviour.getState() == BottomSheetBehavior.STATE_EXPANDED) {
-                BottomSheetPlayerFragment.queueSheetBehaviour.setState(BottomSheetBehavior.STATE_HIDDEN);
+            if (bottomSheetPlayerFragment.queueSheetBehaviour.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+                bottomSheetPlayerFragment.queueSheetBehaviour.setState(BottomSheetBehavior.STATE_HIDDEN);
             } else {
-                mainPlayerSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                if (mainPlayerSheetBehavior.getState()!=BottomSheetBehavior.STATE_HIDDEN) {
+                    mainPlayerSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                }
             }
         }
-
     }
 
     //region Searchbar Functionality Code here

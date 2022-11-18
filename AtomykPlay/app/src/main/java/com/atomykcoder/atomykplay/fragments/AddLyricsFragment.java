@@ -42,10 +42,8 @@ public class AddLyricsFragment extends Fragment {
     private StorageUtil storageUtil;
     private Button btnFind;
     private Dialog dialog;
-    private String name;
+    private String name,artist;
     private View view;
-    private final ExecutorService service = Executors.newSingleThreadExecutor();
-    private final Handler handler = new Handler(Looper.getMainLooper());
 
     @Override
     public void onDestroyView() {
@@ -67,6 +65,7 @@ public class AddLyricsFragment extends Fragment {
         storageUtil = new StorageUtil(getContext());
 
         name = getMusic().getsName() != null ? getMusic().getsName() : "";
+        artist= getMusic().getsArtist() != null ? getMusic().getsArtist() : "";
 
         TextView nameText = view.findViewById(R.id.song_name_tv);
         nameText.setText(name);
@@ -125,8 +124,8 @@ public class AddLyricsFragment extends Fragment {
         Button btnCancel = dialog.findViewById(R.id.btn_cancel);
         Button btnOk = dialog.findViewById(R.id.btn_ok);
 
-        nameEditText.setText(getMusic().getsName());
-        artistEditText.setText(getMusic().getsArtist());
+        nameEditText.setText(name);
+        artistEditText.setText(artist);
 
         btnOk.setOnClickListener(v -> {
             if (isValidInput()) {
@@ -159,6 +158,9 @@ public class AddLyricsFragment extends Fragment {
 
         //clear hashmap prior to retrieving data
         lrcMap.clear();
+
+        ExecutorService service = Executors.newSingleThreadExecutor();
+        Handler handler = new Handler(Looper.getMainLooper());
 
         FetchLyrics fetchLyrics = new FetchLyrics();
         try {

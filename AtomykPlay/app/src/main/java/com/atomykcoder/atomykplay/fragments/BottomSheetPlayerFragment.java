@@ -76,7 +76,7 @@ import java.util.concurrent.Executors;
 
 public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeListener, OnDragStartListener {
 
-    public static CustomBottomSheet<View> queueSheetBehaviour;
+    public CustomBottomSheet<View> queueSheetBehaviour;
     public Runnable lyricsRunnable;
     public Handler lyricsHandler;
     private final ArrayList<String> lyricsArrayList = new ArrayList<>();
