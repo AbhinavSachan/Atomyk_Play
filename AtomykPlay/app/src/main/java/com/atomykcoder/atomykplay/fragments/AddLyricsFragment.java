@@ -70,7 +70,6 @@ public class AddLyricsFragment extends Fragment {
         TextView nameText = view.findViewById(R.id.song_name_tv);
         nameText.setText(name);
 
-
         saveBtn.setOnClickListener(v -> saveMusic());
         btnFind.setOnClickListener(v -> setDialogBox());
 
@@ -169,10 +168,20 @@ public class AddLyricsFragment extends Fragment {
 
             // do in background code here
             service.execute(() -> {
-                Bundle lyricsItems = fetchLyrics.fetchList(songName + " " + artistName);
+                Bundle lyricsItems = null;
+                try {
+                    lyricsItems = fetchLyrics.fetchList(songName + " " + artistName);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                Bundle finalLyricsItems = lyricsItems;
                 handler.post(() -> {
                     if (view != null) {
-                        ((MainActivity) requireContext()).openBottomSheet(lyricsItems);
+                        if (finalLyricsItems != null) {
+                            ((MainActivity) requireContext()).openBottomSheet(finalLyricsItems);
+                        }else {
+                            Toast.makeText(requireContext(), "No Lyrics Found", Toast.LENGTH_SHORT).show();
+                        }
                         fetchLyrics.onPostExecute(progressBar);
                         btnFind.setVisibility(View.VISIBLE);
                     }
@@ -195,19 +204,18 @@ public class AddLyricsFragment extends Fragment {
 
             // pre-execute some code here
             fetchLyrics.onPreExecute(progressBar);
+            btnFind.setVisibility(View.INVISIBLE);
 
             // do in background code here
             service.execute(() -> {
                 String unfilteredLyrics = fetchLyrics.fetchTimeStamps(href);
                 handler.post(() -> {
                     fetchLyrics.onPostExecute(progressBar);
-                    if (unfilteredLyrics.equals("")) {
-                        showToast("No Lyrics Found");
-                    } else {
-                        String filteredLyrics = MusicHelper.splitLyricsByNewLine(unfilteredLyrics);
-                        editTextLyrics.setText(filteredLyrics);
-                        lrcMap.addAll(MusicHelper.getLrcMap(filteredLyrics));
-                    }
+                    btnFind.setVisibility(View.VISIBLE);
+
+                    String filteredLyrics = MusicHelper.splitLyricsByNewLine(unfilteredLyrics);
+                    editTextLyrics.setText(filteredLyrics);
+                    lrcMap.addAll(MusicHelper.getLrcMap(filteredLyrics));
                 });
             });
             // stopping the background thread (crucial)

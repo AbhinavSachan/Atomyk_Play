@@ -4,6 +4,7 @@ import static com.atomykcoder.atomykplay.activities.MainActivity.media_player_se
 import static com.atomykcoder.atomykplay.activities.MainActivity.service_bound;
 import static com.atomykcoder.atomykplay.function.MusicHelper.convertDuration;
 import static com.atomykcoder.atomykplay.function.StorageUtil.favorite;
+import static com.atomykcoder.atomykplay.function.StorageUtil.musicList;
 import static com.atomykcoder.atomykplay.function.StorageUtil.no_favorite;
 import static com.atomykcoder.atomykplay.function.StorageUtil.no_repeat;
 import static com.atomykcoder.atomykplay.function.StorageUtil.no_shuffle;
@@ -14,7 +15,6 @@ import static com.atomykcoder.atomykplay.function.StorageUtil.shuffle;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -50,20 +50,16 @@ import com.atomykcoder.atomykplay.classes.GlideBuilt;
 import com.atomykcoder.atomykplay.customScripts.CenterSmoothScrollScript;
 import com.atomykcoder.atomykplay.customScripts.CustomBottomSheet;
 import com.atomykcoder.atomykplay.enums.PlaybackStatus;
-import com.atomykcoder.atomykplay.events.RemoveLyricsHandlerEvent;
-import com.atomykcoder.atomykplay.events.SetMainLayoutEvent;
 import com.atomykcoder.atomykplay.events.PrepareRunnableEvent;
+import com.atomykcoder.atomykplay.events.RemoveLyricsHandlerEvent;
 import com.atomykcoder.atomykplay.events.RunnableSyncLyricsEvent;
+import com.atomykcoder.atomykplay.events.SetMainLayoutEvent;
 import com.atomykcoder.atomykplay.events.UpdateMusicImageEvent;
 import com.atomykcoder.atomykplay.events.UpdateMusicProgressEvent;
 import com.atomykcoder.atomykplay.function.LRCMap;
 import com.atomykcoder.atomykplay.function.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.RequestBuilder;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 
@@ -77,11 +73,11 @@ import java.util.concurrent.Executors;
 
 public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeListener, OnDragStartListener {
 
+    private final ArrayList<String> lyricsArrayList = new ArrayList<>();
+    private final CountDownTimer[] countDownTimer = new CountDownTimer[1];
     public CustomBottomSheet<View> queueSheetBehaviour;
     public Runnable lyricsRunnable;
     public Handler lyricsHandler;
-    private final ArrayList<String> lyricsArrayList = new ArrayList<>();
-    private final CountDownTimer[] countDownTimer = new CountDownTimer[1];
     public LinearProgressIndicator mini_progress;
     public ImageView mini_pause;
     //main player seekbar
@@ -291,15 +287,34 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                GlideBuilt.glide(requireContext(),albumUri,R.drawable.ic_music,playerCoverImage,500);
-                GlideBuilt.glide(requireContext(),albumUri,R.drawable.ic_music,mini_cover,75);
+                GlideBuilt.glide(requireContext(), albumUri, R.drawable.ic_music, playerCoverImage, 500);
+                GlideBuilt.glide(requireContext(), albumUri, R.drawable.ic_music, mini_cover, 75);
 
-                ((MainActivity)context).setDataInNavigation(songName,artistName,albumUri);
+                ((MainActivity) context).setDataInNavigation(songName, artistName, albumUri);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
         EventBus.getDefault().post(new RunnableSyncLyricsEvent());
+    }
+
+    @SuppressLint("SetTextI18n")
+    public void resetMainPlayerLayout() {
+        playerSongNameTv.setText("Song");
+        playerArtistNameTv.setText("Artist");
+        mimeTv.setText("MP3");
+        bitrateTv.setText("0 KBPS");
+        curPosTv.setText("00:00");
+        durationTv.setText("-00:00");
+        mini_name_text.setText("Song Name");
+        mini_artist_text.setText("Artist Name");
+        seekBarMain.setMax(0);
+        mini_progress.setMax(0);
+        seekBarMain.setProgress(0);
+        mini_progress.setProgress(0);
+        GlideBuilt.glide(requireContext(), null, R.drawable.ic_music, playerCoverImage, 500);
+        GlideBuilt.glide(requireContext(), null, R.drawable.ic_music, mini_cover, 75);
+
     }
 
     @Subscribe
@@ -440,7 +455,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     private void setLyricsLayout() {
         FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
         Fragment fragment = fragmentManager.findFragmentByTag("AddLyricsFragment");
-        if(fragment != null){
+        if (fragment != null) {
             fragmentManager.popBackStackImmediate();
         }
         AddLyricsFragment addLyricsFragment = new AddLyricsFragment();
@@ -655,30 +670,34 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         storageUtil.saveTempMusicList(musicList);
         int musicIndex;
         musicIndex = storageUtil.loadMusicIndex();
-        shuffleImg.setClickable(false);
-        ExecutorService service = Executors.newSingleThreadExecutor();
-        Handler handler = new Handler(Looper.getMainLooper());
 
         // do in background code here
-        service.execute(() -> {
-            //removing current item from list
-            musicList.remove(musicIndex);
-            //shuffling list
-            Collections.shuffle(musicList);
-            //adding the removed item in shuffled list on 0th index
-            musicList.add(0, activeMusic);
-            //saving list
-            storageUtil.saveMusicList(musicList);
-            //saving index
-            storageUtil.saveMusicIndex(0);
-            // post-execute code here
-            handler.post(() -> {
-                setAdapterInQueue();
-                shuffleImg.setClickable(true);
-                // stopping the background thread (crucial)
+        if (musicList!=null) {
+            shuffleImg.setClickable(false);
+
+            ExecutorService service = Executors.newSingleThreadExecutor();
+            Handler handler = new Handler(Looper.getMainLooper());
+
+            service.execute(() -> {
+                //removing current item from list
+                musicList.remove(musicIndex);
+                //shuffling list
+                Collections.shuffle(musicList);
+                //adding the removed item in shuffled list on 0th index
+                musicList.add(0, activeMusic);
+                //saving list
+                storageUtil.saveMusicList(musicList);
+                //saving index
+                storageUtil.saveMusicIndex(0);
+                // post-execute code here
+                handler.post(() -> {
+                    setAdapterInQueue();
+                    shuffleImg.setClickable(true);
+                    // stopping the background thread (crucial)
+                });
             });
-        });
-        service.shutdown();
+            service.shutdown();
+        }
 
 
     }
@@ -689,24 +708,27 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         MusicDataCapsule activeMusic = getMusic();
         final int[] curIndex = new int[1];
 
-        shuffleImg.setClickable(false);
-        ExecutorService service = Executors.newSingleThreadExecutor();
-        Handler handler = new Handler(Looper.getMainLooper());
+        if (tempList != null) {
+            shuffleImg.setClickable(false);
 
-        // do in background code here
-        service.execute(() -> {
-            curIndex[0] = activeMusicIndexFinder(activeMusic, tempList);
-            if (curIndex[0] != -1) {
-                storageUtil.saveMusicIndex(curIndex[0]);
-            }
-            storageUtil.saveMusicList(tempList);
-            // post-execute code here
-            handler.post(() -> {
-                setAdapterInQueue();
-                shuffleImg.setClickable(true);
+            ExecutorService service = Executors.newSingleThreadExecutor();
+            Handler handler = new Handler(Looper.getMainLooper());
+
+            // do in background code here
+            service.execute(() -> {
+                curIndex[0] = activeMusicIndexFinder(activeMusic, tempList);
+                if (curIndex[0] != -1) {
+                    storageUtil.saveMusicIndex(curIndex[0]);
+                }
+                storageUtil.saveMusicList(tempList);
+                // post-execute code here
+                handler.post(() -> {
+                    setAdapterInQueue();
+                    shuffleImg.setClickable(true);
+                });
             });
-        });
-        service.shutdown();
+            service.shutdown();
+        }
     }
 
     private int activeMusicIndexFinder(MusicDataCapsule activeMusic, @NonNull ArrayList<MusicDataCapsule> list) {

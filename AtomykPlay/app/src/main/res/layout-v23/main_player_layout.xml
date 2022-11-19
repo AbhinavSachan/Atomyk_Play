@@ -55,6 +55,7 @@
                     android:layout_height="match_parent"
                     android:contentDescription="@string/imageView"
                     android:scaleType="centerCrop"
+                    android:src="@drawable/ic_music"
                     android:theme="@android:style/ThemeOverlay.Material.Dark" />
 
 

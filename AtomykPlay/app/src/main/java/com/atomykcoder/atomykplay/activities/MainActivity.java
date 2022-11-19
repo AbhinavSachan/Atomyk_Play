@@ -55,10 +55,6 @@ import com.atomykcoder.atomykplay.function.FetchMusic;
 import com.atomykcoder.atomykplay.function.StorageUtil;
 import com.atomykcoder.atomykplay.services.MediaPlayerService;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.RequestBuilder;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.navigation.NavigationView;
 import com.karumi.dexter.Dexter;
@@ -142,6 +138,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private ProgressBar progressBar;
     private StorageUtil storageUtil;
     private DrawerLayout drawer;
+    private NavigationView navigationView;
+    private ImageView navCover;
+    private TextView navSongName, navArtistName;
     public BottomSheetBehavior.BottomSheetCallback callback = new BottomSheetBehavior.BottomSheetCallback() {
         @Override
         public void onStateChanged(@NonNull View bottomSheet, int newState) {
@@ -168,6 +167,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 storageUtil.clearAudioIndex();
                 storageUtil.clearMusicList();
                 storageUtil.clearTempMusicList();
+                resetDataInNavigation();
+                bottomSheetPlayerFragment.resetMainPlayerLayout();
                 stopMusic();
             }
         }
@@ -183,10 +184,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             shadowMain.setAlpha(0 + slideOffset);
         }
     };
-    private NavigationView navigationView;
-    private ImageView navCover;
-    private TextView navSongName, navArtistName;
-    private View navDetailLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -224,14 +221,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawer = findViewById(R.id.drawer_layout);
 
         View headerView = navigationView.getHeaderView(0);
-        navDetailLayout = headerView.findViewById(R.id.nav_details_layout);
+        View navDetailLayout = headerView.findViewById(R.id.nav_details_layout);
         navCover = headerView.findViewById(R.id.nav_cover_img);
         navSongName = headerView.findViewById(R.id.nav_song_name);
         navArtistName = headerView.findViewById(R.id.nav_song_artist);
 
         navDetailLayout.setOnClickListener(v -> {
             drawer.closeDrawer(GravityCompat.START);
-            mainPlayerSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+            if (getMusic() != null) {
+                mainPlayerSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+            }
         });
 
         navigationView.setNavigationItemSelectedListener(this);
@@ -285,10 +284,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     }
 
+    @SuppressLint("SetTextI18n")
+    public void resetDataInNavigation() {
+        navSongName.setText("Song Name");
+        navArtistName.setText("Artist Name");
+        GlideBuilt.glide(this, null, R.drawable.placeholder_nav, navCover, 400);
+    }
+
     public void setDataInNavigation(String song_name, String artist_name, String album_uri) {
         navSongName.setText(song_name);
         navArtistName.setText(artist_name);
-        GlideBuilt.glide(this,album_uri,R.drawable.ic_music,navCover,400);
+        GlideBuilt.glide(this, album_uri, R.drawable.ic_music, navCover, 400);
     }
 
     private MusicDataCapsule getMusic() {

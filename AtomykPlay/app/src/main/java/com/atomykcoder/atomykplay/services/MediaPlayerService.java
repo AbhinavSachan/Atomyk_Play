@@ -279,18 +279,26 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     private void updateMetaData() {
         musicList = storage.loadMusicList();
         musicIndex = storage.loadMusicIndex();
-        String songName = activeMusic.getsName();
-        String artistName = activeMusic.getsArtist();
-        String album = activeMusic.getsAlbum();
+        String songName = null;
+        String artistName = null;
+        String album = null;
+        String albumUri = null;
+        if (activeMusic != null) {
+            songName = activeMusic.getsName();
+            artistName = activeMusic.getsArtist();
+            album = activeMusic.getsAlbum();
 
-        String albumUri = activeMusic.getsAlbumUri();
+            albumUri = activeMusic.getsAlbumUri();
+        }
         InputStream input;
         Bitmap artwork = null;
         try {
-            input = getApplicationContext().getContentResolver().openInputStream(Uri.parse(albumUri));
-            artwork = BitmapFactory.decodeStream(input);
-            if (input != null) {
-                input.close();
+            if (albumUri!= null) {
+                input = getApplicationContext().getContentResolver().openInputStream(Uri.parse(albumUri));
+                artwork = BitmapFactory.decodeStream(input);
+                if (input != null) {
+                    input.close();
+                }
             }
 
         } catch (IOException e) {
@@ -621,6 +629,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         }
 
         if (storage.loadRepeatStatus().equals("no_repeat")) {
+            if (musicList !=null)
             if (musicIndex == musicList.size() - 1) {
                 stopMedia();
                 stopSelf();
@@ -746,7 +755,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             if (media_player.isPlaying()) {
                 storage.saveMusicLastPos(media_player.getCurrentPosition());
                 buildNotification(PlaybackStatus.PAUSED, 0f);
-                media_player.pause();
+                media_player.stop();
                 MainActivity.is_playing = false;
                 setIcon(PlaybackStatus.PAUSED);
             }
