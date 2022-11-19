@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<item android:id="@+id/add_to_favourites"
+    android:title="Add To Favourite"
+    />
+    <item android:id="@+id/set_as_ringtone"
+        android:title="Set As Ringtone"
+        />
+    <item android:id="@+id/delete_song"
+        android:title="Delete"
+        />
+</menu>

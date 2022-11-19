@@ -9,9 +9,11 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -117,7 +119,21 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
 
 
         //add bottom sheet functions in three dot click
-        holder.imageButton.setOnClickListener(v -> Toast.makeText(context, "Clicked", Toast.LENGTH_SHORT).show());
+        holder.imageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                PopupMenu popupMenu = new PopupMenu(context, holder.imageButton);
+                popupMenu.getMenuInflater().inflate(R.menu.option_menu, popupMenu.getMenu());
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem menuItem) {
+                        Toast.makeText(context, "Clicked", Toast.LENGTH_SHORT).show();
+                        return false;
+                    }
+                });
+                popupMenu.show();
+            }
+        });
 
 
         holder.nameText.setText(currentItem.getsName());
