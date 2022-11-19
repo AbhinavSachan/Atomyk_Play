@@ -46,6 +46,7 @@ import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.adapters.MusicLyricsAdapter;
 import com.atomykcoder.atomykplay.adapters.MusicQueueAdapter;
 import com.atomykcoder.atomykplay.adapters.SimpleTouchCallback;
+import com.atomykcoder.atomykplay.classes.GlideBuilt;
 import com.atomykcoder.atomykplay.customScripts.CenterSmoothScrollScript;
 import com.atomykcoder.atomykplay.customScripts.CustomBottomSheet;
 import com.atomykcoder.atomykplay.enums.PlaybackStatus;
@@ -290,13 +291,10 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                RequestBuilder<Drawable> glide = Glide.with(context).load(albumUri);
-                glide.apply(new RequestOptions().placeholder(R.drawable.ic_music_thumbnail))
-                        .override(500, 500).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                        .into(playerCoverImage);
-                glide.apply(new RequestOptions().placeholder(R.drawable.ic_music))
-                        .override(75, 75).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                        .into(mini_cover);
+                GlideBuilt.glide(requireContext(),albumUri,R.drawable.ic_music,playerCoverImage,500);
+                GlideBuilt.glide(requireContext(),albumUri,R.drawable.ic_music,mini_cover,75);
+
+                ((MainActivity)context).setDataInNavigation(songName,artistName,albumUri);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -443,8 +441,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
         Fragment fragment = fragmentManager.findFragmentByTag("AddLyricsFragment");
         if(fragment != null){
-            boolean value = fragmentManager.popBackStackImmediate();
-            Log.i("info", String.valueOf(value));
+            fragmentManager.popBackStackImmediate();
         }
         AddLyricsFragment addLyricsFragment = new AddLyricsFragment();
         mainActivity.mainPlayerSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);

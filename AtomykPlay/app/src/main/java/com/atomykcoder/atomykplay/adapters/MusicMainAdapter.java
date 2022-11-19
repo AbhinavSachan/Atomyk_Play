@@ -21,10 +21,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.activities.MainActivity;
-import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
+import com.atomykcoder.atomykplay.classes.GlideBuilt;
 import com.atomykcoder.atomykplay.function.StorageUtil;
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.RequestOptions;
+import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import com.turingtechnologies.materialscrollbar.INameableAdapter;
 
 import java.io.File;
@@ -57,12 +56,8 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
     public void onBindViewHolder(@NonNull MusicViewAdapter holder, @SuppressLint("RecyclerView") int position) {
         MusicDataCapsule currentItem = musicArrayList.get(position);
 
-        try {
-            Glide.with(context).load(currentItem.getsAlbumUri()).apply(new RequestOptions().placeholder(R.drawable.ic_no_album)
-                    .override(75, 75)).into(holder.imageView);
-        } catch (Exception ignored) {
-        }
-//playing song
+        GlideBuilt.glide(context, currentItem.getsAlbumUri(), R.drawable.ic_music, holder.imageView, 75);
+        //playing song
         holder.cardView.setOnClickListener(v -> {
             File file = new File(currentItem.getsPath());
             if (file.exists()) {
@@ -96,7 +91,7 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
                             storage.saveMusicList(shuffleList);
                             storage.saveMusicIndex(0);
                             // post-execute code here
-                            handler.post(()->{
+                            handler.post(() -> {
                                 mainActivity.playAudio();
                                 mainActivity.bottomSheetPlayerFragment.setAdapterInQueue();
                                 mainActivity.openBottomPlayer();

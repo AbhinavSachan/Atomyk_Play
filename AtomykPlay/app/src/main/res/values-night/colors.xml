@@ -3,6 +3,7 @@
     <color name="tertiary_bg">#35345E</color>
     <color name="nav_s_item_bg">#A03C3B5E</color>
     <color name="secondary_bg">#0E0F12</color>
+    <color name="nav_center_shadow">#640E0F12</color>
     <color name="primary_bg">#181A1E</color>
     <color name="icons_bg">#CACACA</color>
     <color name="play_icons_bg">#DCDCDC</color>

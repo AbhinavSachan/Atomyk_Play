@@ -18,9 +18,11 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -40,8 +42,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.adapters.FoundLyricsAdapter;
 import com.atomykcoder.atomykplay.adapters.MusicMainAdapter;
+import com.atomykcoder.atomykplay.classes.GlideBuilt;
 import com.atomykcoder.atomykplay.customScripts.CustomBottomSheet;
-import com.atomykcoder.atomykplay.events.OpenBottomSheetEvent;
 import com.atomykcoder.atomykplay.events.PrepareRunnableEvent;
 import com.atomykcoder.atomykplay.events.RemoveLyricsHandlerEvent;
 import com.atomykcoder.atomykplay.events.SearchEvent;
@@ -53,6 +55,10 @@ import com.atomykcoder.atomykplay.function.FetchMusic;
 import com.atomykcoder.atomykplay.function.StorageUtil;
 import com.atomykcoder.atomykplay.services.MediaPlayerService;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestBuilder;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.navigation.NavigationView;
 import com.karumi.dexter.Dexter;
@@ -64,7 +70,6 @@ import com.turingtechnologies.materialscrollbar.AlphabetIndicator;
 import com.turingtechnologies.materialscrollbar.DragScrollBar;
 
 import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -117,8 +122,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         public void onStateChanged(@NonNull View bottomSheet, int newState) {
             if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
                 shadowLyrFound.setAlpha(0.2f);
-            } else if (newState == BottomSheetBehavior.STATE_HALF_EXPANDED) {
-                shadowLyrFound.setAlpha(0.5f);
             } else if (newState == BottomSheetBehavior.STATE_EXPANDED) {
                 shadowLyrFound.setAlpha(1f);
             }
@@ -126,7 +129,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         @Override
         public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-            shadowLyrFound.setAlpha(shadowLyrFound.getAlpha() + slideOffset);
+            shadowLyrFound.setAlpha(0.2f + slideOffset);
         }
     };
     private ArrayList<MusicDataCapsule> dataList;
@@ -180,12 +183,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             shadowMain.setAlpha(0 + slideOffset);
         }
     };
+    private NavigationView navigationView;
+    private ImageView navCover;
+    private TextView navSongName, navArtistName;
+    private View navDetailLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (!EventBus.getDefault().isRegistered(this))
-            EventBus.getDefault().register(this);
+
         boolean switch1 = new StorageUtil(this).loadTheme();
         if (switch1) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
@@ -217,7 +223,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         navigationView = findViewById(R.id.navigation_drawer);
         drawer = findViewById(R.id.drawer_layout);
 
-//        View headerView = navigationView.getHeaderView(0);
+        View headerView = navigationView.getHeaderView(0);
+        navDetailLayout = headerView.findViewById(R.id.nav_details_layout);
+        navCover = headerView.findViewById(R.id.nav_cover_img);
+        navSongName = headerView.findViewById(R.id.nav_song_name);
+        navArtistName = headerView.findViewById(R.id.nav_song_artist);
+
+        navDetailLayout.setOnClickListener(v -> {
+            drawer.closeDrawer(GravityCompat.START);
+            mainPlayerSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+        });
 
         navigationView.setNavigationItemSelectedListener(this);
 
@@ -263,11 +278,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         lyricsListBehavior.addBottomSheetCallback(lrcFoundCallback);
 //      this will start playing song as soon as app starts if its connected to headset
         startSong();
-        if (savedInstanceState ==null){
+        if (savedInstanceState == null) {
             navigationView.setCheckedItem(R.id.navigation_home);
 
         }
 
+    }
+
+    public void setDataInNavigation(String song_name, String artist_name, String album_uri) {
+        navSongName.setText(song_name);
+        navArtistName.setText(artist_name);
+        GlideBuilt.glide(this,album_uri,R.drawable.ic_music,navCover,400);
     }
 
     private MusicDataCapsule getMusic() {
@@ -392,7 +413,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        EventBus.getDefault().unregister(this);
         setSupportActionBar(null);
         if (service_bound) {
             //if media player is not playing it will stop the service
@@ -518,13 +538,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void setSearchFragment() {
+
         SearchResultsFragment searchResultsFragment = new SearchResultsFragment();
         FragmentTransaction transaction = searchFragmentManager.beginTransaction();
         transaction.replace(R.id.sec_container, searchResultsFragment, "SearchResultsFragment");
         transaction.addToBackStack(null);
         transaction.commit();
     }
-
 
     private void callStateListener() {
         telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
@@ -602,7 +622,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }).check();
 
     }
-private NavigationView navigationView;
+
     @Override
     public void onBackPressed() {
         FragmentManager fragmentManager = getSupportFragmentManager();
@@ -649,7 +669,7 @@ private NavigationView navigationView;
         MenuItem searchViewItem = menu.findItem(R.id.app_bar_search);
         SearchView searchView = (SearchView) searchViewItem.getActionView();
 
-        searchView.setOnSearchClickListener(view -> setSearchFragment());
+        searchView.setOnSearchClickListener(v -> setSearchFragment());
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -708,10 +728,9 @@ private NavigationView navigationView;
         return true;
     }
 
-    @Subscribe
-    public void openBottomSheet(OpenBottomSheetEvent event) {
-        lyricsListBehavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
-        setLyricListAdapter(event.bundle);
+    public void openBottomSheet(Bundle bundle) {
+        setLyricListAdapter(bundle);
+        lyricsListBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
     }
 
 

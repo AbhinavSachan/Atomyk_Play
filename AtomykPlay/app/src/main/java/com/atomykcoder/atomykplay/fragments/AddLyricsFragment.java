@@ -17,7 +17,7 @@ import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 
 import com.atomykcoder.atomykplay.R;
-import com.atomykcoder.atomykplay.events.OpenBottomSheetEvent;
+import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.events.RunnableSyncLyricsEvent;
 import com.atomykcoder.atomykplay.function.FetchLyrics;
 import com.atomykcoder.atomykplay.function.LRCMap;
@@ -42,7 +42,7 @@ public class AddLyricsFragment extends Fragment {
     private StorageUtil storageUtil;
     private Button btnFind;
     private Dialog dialog;
-    private String name,artist;
+    private String name, artist;
     private View view;
 
     @Override
@@ -65,7 +65,7 @@ public class AddLyricsFragment extends Fragment {
         storageUtil = new StorageUtil(getContext());
 
         name = getMusic().getsName() != null ? getMusic().getsName() : "";
-        artist= getMusic().getsArtist() != null ? getMusic().getsArtist() : "";
+        artist = getMusic().getsArtist() != null ? getMusic().getsArtist() : "";
 
         TextView nameText = view.findViewById(R.id.song_name_tv);
         nameText.setText(name);
@@ -171,8 +171,8 @@ public class AddLyricsFragment extends Fragment {
             service.execute(() -> {
                 Bundle lyricsItems = fetchLyrics.fetchList(songName + " " + artistName);
                 handler.post(() -> {
-                    if(view != null) {
-                        EventBus.getDefault().post(new OpenBottomSheetEvent(lyricsItems));
+                    if (view != null) {
+                        ((MainActivity) requireContext()).openBottomSheet(lyricsItems);
                         fetchLyrics.onPostExecute(progressBar);
                         btnFind.setVisibility(View.VISIBLE);
                     }
@@ -185,7 +185,6 @@ public class AddLyricsFragment extends Fragment {
             e.printStackTrace();
         }
     }
-
 
 
     public void loadSelectedLyrics(String href) {
