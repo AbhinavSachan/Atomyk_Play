@@ -45,9 +45,9 @@ import androidx.core.app.NotificationCompat;
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.enums.PlaybackStatus;
+import com.atomykcoder.atomykplay.events.PrepareRunnableEvent;
 import com.atomykcoder.atomykplay.events.RemoveLyricsHandlerEvent;
 import com.atomykcoder.atomykplay.events.SetMainLayoutEvent;
-import com.atomykcoder.atomykplay.events.PrepareRunnableEvent;
 import com.atomykcoder.atomykplay.events.UpdateMusicImageEvent;
 import com.atomykcoder.atomykplay.events.UpdateMusicProgressEvent;
 import com.atomykcoder.atomykplay.function.LRCMap;
@@ -234,6 +234,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             initiateMediaPlayer();
         }
     };
+
     /**
      * this function updates play icon according to media playback status
      */
@@ -311,8 +312,9 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
     /**
      * This function skips music to next index
+     *
      * @param playbackStatus is music playing or not
-     * @param playbackSpeed to set the speed of seekbar in notification 1f for 1s/s and 0f to stopped
+     * @param playbackSpeed  to set the speed of seekbar in notification 1f for 1s/s and 0f to stopped
      */
     @SuppressLint("NewApi")
     public void buildNotification(PlaybackStatus playbackStatus, float playbackSpeed) {
@@ -373,12 +375,13 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         if (notificationBuilder != null) {
             if (PlaybackStatus.PLAYING == playbackStatus) {
                 startForeground(NOTIFICATION_ID, notificationBuilder);
-            } else if (PlaybackStatus.PAUSED == playbackStatus){
+            } else if (PlaybackStatus.PAUSED == playbackStatus) {
                 stopForeground(false);
-            NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-            notificationManager.notify(NOTIFICATION_ID,notificationBuilder);
+                NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                notificationManager.notify(NOTIFICATION_ID, notificationBuilder);
 
-        }}
+            }
+        }
     }
 
     private PendingIntent playbackAction(int actionNumber) {
@@ -1034,7 +1037,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             storage.saveMusicLastPos(media_player.getCurrentPosition());
         }
         //disable phone state listener ♣
-        if (phoneStateListener != null) {
+        if (phoneStateListener != null && telephonyManager != null) {
             telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE);
         }
 
@@ -1069,7 +1072,9 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
      * this function removes focus from our app
      */
     private void removeAudioFocus() {
-        audioManager.abandonAudioFocus(this);
+        if (audioManager != null) {
+            audioManager.abandonAudioFocus(this);
+        }
     }
 
     public class LocalBinder extends Binder {

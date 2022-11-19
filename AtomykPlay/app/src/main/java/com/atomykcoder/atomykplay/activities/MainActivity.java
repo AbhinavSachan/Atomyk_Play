@@ -1,6 +1,7 @@
 package com.atomykcoder.atomykplay.activities;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -30,6 +31,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -107,7 +109,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public CustomBottomSheet<View> mainPlayerSheetBehavior;
     public BottomSheetPlayerFragment bottomSheetPlayerFragment;
     public BottomSheetBehavior<View> lyricsListBehavior;
-
+    FragmentManager searchFragmentManager;
     private View shadowMain;
     private View shadowLyrFound;
     private final BottomSheetBehavior.BottomSheetCallback lrcFoundCallback = new BottomSheetBehavior.BottomSheetCallback() {
@@ -137,7 +139,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private ProgressBar progressBar;
     private StorageUtil storageUtil;
     private DrawerLayout drawer;
-    FragmentManager searchFragmentManager;
     public BottomSheetBehavior.BottomSheetCallback callback = new BottomSheetBehavior.BottomSheetCallback() {
         @Override
         public void onStateChanged(@NonNull View bottomSheet, int newState) {
@@ -183,19 +184,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if(!EventBus.getDefault().isRegistered(this))
+        if (!EventBus.getDefault().isRegistered(this))
             EventBus.getDefault().register(this);
-      boolean switch1 = new StorageUtil(this).loadTheme();
-       if (switch1) {
-           AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-      } else {
-           AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-       }
+        boolean switch1 = new StorageUtil(this).loadTheme();
+        if (switch1) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        }
         setContentView(R.layout.activity_main);
 
         //initializations
         storageUtil = new StorageUtil(MainActivity.this);
         searchFragmentManager = getSupportFragmentManager();
+        dataList = new ArrayList<>();
 
         linearLayout = findViewById(R.id.song_not_found_layout);
         recyclerView = findViewById(R.id.music_recycler);
@@ -212,7 +214,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         MediaPlayerService.ui_visible = true;
 
-        NavigationView navigationView = findViewById(R.id.navigation_drawer);
+        navigationView = findViewById(R.id.navigation_drawer);
         drawer = findViewById(R.id.drawer_layout);
 
 //        View headerView = navigationView.getHeaderView(0);
@@ -231,7 +233,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         main_layout.setNestedScrollingEnabled(false);
 
 
-        dataList = new ArrayList<>();
         DragScrollBar scrollBar = findViewById(R.id.dragScrollBar);
 
         recyclerView.setNestedScrollingEnabled(false);
@@ -262,6 +263,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         lyricsListBehavior.addBottomSheetCallback(lrcFoundCallback);
 //      this will start playing song as soon as app starts if its connected to headset
         startSong();
+        if (savedInstanceState ==null){
+            navigationView.setCheckedItem(R.id.navigation_home);
+
+        }
 
     }
 
@@ -302,7 +307,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         recyclerView.setAdapter(adapter);
     }
 
-    private void stopMusic(){
+    private void stopMusic() {
         if (!service_bound) {
             bindService();
             new Handler().postDelayed(() -> {
@@ -378,7 +383,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (service_bound) {
             if (media_player_service.handler != null) {
                 media_player_service.handler.removeCallbacks(media_player_service.runnable);
-               EventBus.getDefault().post(new RemoveLyricsHandlerEvent());
+                EventBus.getDefault().post(new RemoveLyricsHandlerEvent());
             }
         }
         super.onPause();
@@ -387,7 +392,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        finish();
         EventBus.getDefault().unregister(this);
         setSupportActionBar(null);
         if (service_bound) {
@@ -401,7 +405,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         }
         MediaPlayerService.ui_visible = false;
-        if (phoneStateListener != null) {
+        if (phoneStateListener != null && telephonyManager != null) {
             telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE);
         }
         searchFragmentManager = null;
@@ -598,9 +602,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }).check();
 
     }
-
+private NavigationView navigationView;
     @Override
     public void onBackPressed() {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        Fragment fragment1 = fragmentManager.findFragmentByTag("AboutFragment");
+        Fragment fragment2 = fragmentManager.findFragmentByTag("SettingsFragment");
+
         if (mainPlayerSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED ||
                 mainPlayerSheetBehavior.getState() == BottomSheetBehavior.STATE_HIDDEN) {
             if (drawer.isDrawerOpen(GravityCompat.START)) {
@@ -611,6 +619,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         lyricsListBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
                     lyricsListBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
                 } else {
+                    if (fragment1 != null || fragment2 != null) {
+                        navigationView.setCheckedItem(R.id.navigation_home);
+                    }
                     super.onBackPressed();
                 }
             }
@@ -619,7 +630,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if (bottomSheetPlayerFragment.queueSheetBehaviour.getState() == BottomSheetBehavior.STATE_EXPANDED) {
                 bottomSheetPlayerFragment.queueSheetBehaviour.setState(BottomSheetBehavior.STATE_HIDDEN);
             } else {
-                if (mainPlayerSheetBehavior.getState()!=BottomSheetBehavior.STATE_HIDDEN) {
+                if (mainPlayerSheetBehavior.getState() != BottomSheetBehavior.STATE_HIDDEN) {
                     mainPlayerSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
                 }
             }
@@ -660,23 +671,41 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return super.onCreateOptionsMenu(menu);
     }
 
+    @SuppressLint("NonConstantResourceId")
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         FragmentManager fragmentManager = getSupportFragmentManager();
+        Fragment fragment1 = fragmentManager.findFragmentByTag("AboutFragment");
+        Fragment fragment2 = fragmentManager.findFragmentByTag("SettingsFragment");
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        switch (item.getItemId()){
-            case R.id.navigation_setting:{
-                transaction.replace(R.id.sec_container, new SettingsFragment()).addToBackStack(null).commit();
+        switch (item.getItemId()) {
+            case R.id.navigation_home: {
+                if (fragment1 != null || fragment2 != null) {
+                    fragmentManager.popBackStackImmediate();
+                }
                 break;
-            }case R.id.navigation_about:{
-                transaction.replace(R.id.sec_container, new AboutFragment()).addToBackStack(null).commit();
+            }
+            case R.id.navigation_setting: {
+                if (fragment1 != null || fragment2 != null) {
+                    fragmentManager.popBackStackImmediate();
+                }
+                transaction.replace(R.id.sec_container, new SettingsFragment(), "SettingsFragment").addToBackStack(null).commit();
                 break;
-            }case R.id.navigation_donate:{
-                Toast.makeText(MainActivity.this, "donate $100 right now or else", Toast.LENGTH_SHORT).show();
+            }
+            case R.id.navigation_about: {
+                if (fragment1 != null || fragment2 != null) {
+                    fragmentManager.popBackStackImmediate();
+                }
+                transaction.replace(R.id.sec_container, new AboutFragment(), "AboutFragment").addToBackStack(null).commit();
+                break;
+            }
+            case R.id.navigation_donate: {
+                Toast.makeText(MainActivity.this, "donate $100 right now or else I will collect it in hell", Toast.LENGTH_SHORT).show();
                 break;
             }
         }
-        return false;
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
     }
 
     @Subscribe

@@ -5,6 +5,7 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="tertiary_bg">#2D76CF</color>
+    <color name="nav_s_item_bg">#A03C7DCC</color>
     <color name="icons_bg">#393939</color>
     <color name="text_color">#393939</color>
     <color name="text_color_light">#E8E8E8</color>
@@ -12,9 +13,11 @@
     <color name="primary_bg">#E8E8E8</color>
     <color name="play_icons_bg">#DCDCDC</color>
     <color name="sub_text_grey">#505050</color>
+    <color name="cover_image_grey">#555555</color>
     <color name="sub_text_grey_light">#D6D6D6</color>
     <color name="space_black">#2e3131</color>
     <color name="soft_black">#252525</color>
+    <color name="cover_black">#191919</color>
     <color name="light_slate_gray_blue">#333333</color>
     <color name="click_effect_color">#9A231F1F</color>
     <color name="click_effect_color_inverse">#7CF3C2EC</color>

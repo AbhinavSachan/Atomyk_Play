@@ -152,7 +152,9 @@
         android:backgroundTint="@color/secondary_bg"
         android:fitsSystemWindows="true"
         app:headerLayout="@layout/nav_header"
-        app:itemTextAppearance="?android:attr/textAppearanceSmall"
+        app:itemIconTint="@color/icons_bg"
+        app:itemTextColor="@color/text_color"
+        app:itemRippleColor="@color/tertiary_bg"
         app:menu="@menu/navigation_menu" />
 
 </androidx.drawerlayout.widget.DrawerLayout>
