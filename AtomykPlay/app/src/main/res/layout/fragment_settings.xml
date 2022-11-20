@@ -11,6 +11,7 @@
         android:background="@color/primary_bg"
         android:orientation="vertical"
         android:paddingTop="90dp"
+        android:paddingBottom="90dp"
         tools:context=".fragments.SettingsFragment">
 
         <LinearLayout
