@@ -1,7 +1,10 @@
 package com.atomykcoder.atomykplay.function;
 
 import android.annotation.SuppressLint;
+import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -22,16 +25,34 @@ import java.util.regex.Pattern;
      * @return linked hashmap with timestamp as keys and their designated lyrics as values
      */
     public static LRCMap getLrcMap(String lyrics) {
+        //required variables
         LRCMap _lrcMap = new LRCMap();
-        Pattern _pattern = Pattern.compile("\\[\\d\\d:\\d\\d");
-        Matcher _timestamps = _pattern.matcher(lyrics);
-        String _filteredLyrics = filter(lyrics);
-        String[] lines = _filteredLyrics.split("\n");
-        int i = 0;
-        while (_timestamps.find() && i < lines.length) {
-            _lrcMap.add(_timestamps.group() + "]", lines[i]);
-            i++;
+        Pattern _pattern = Pattern.compile("\\[\\d\\d:\\d\\d\\.\\d\\d]\\w.*");
+        ArrayList<String> _lyricsWithTimestamps = new ArrayList<>();
+        ArrayList<String> _timestamps = new ArrayList<>();
+        ArrayList<String> _lyrics = new ArrayList<>();
+
+        //Separate Lyrics with timestamps from rest of the garbage
+        Matcher _matcher = _pattern.matcher(lyrics);
+        while (_matcher.find()) {
+            //store lyrics with timestamps in seperate array
+            _lyricsWithTimestamps.add(_matcher.group().trim());
         }
+
+        //Separate timestamps and lyrics in their respective arrays
+        Pattern _p = Pattern.compile("\\[\\d\\d:\\d\\d");
+        Matcher _m;
+        for(String lyric : _lyricsWithTimestamps) {
+            _m = _p.matcher(lyric);
+            if(_m.find()) {
+                _timestamps.add(_m.group() + "]");
+                _lyrics.add(filter(lyric));
+            }
+        }
+        //store both timestamps and lyrics into lrc map object
+        _lrcMap.addAll(_timestamps, _lyrics);
+
+        //return lrc map object
         return _lrcMap;
     }
 

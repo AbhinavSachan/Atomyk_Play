@@ -81,9 +81,8 @@ public class AddLyricsFragment extends Fragment {
     private void saveMusic() {
         if (lrcMap.isEmpty()) {
             if (!editTextLyrics.getText().toString().trim().equals("")) {
-                String unfilteredLyrics = editTextLyrics.getText().toString();
-
-                lrcMap.addAll(MusicHelper.getLrcMap(unfilteredLyrics));
+                String lyricsSplitByNewLine = editTextLyrics.getText().toString();
+                lrcMap.addAll(MusicHelper.getLrcMap(lyricsSplitByNewLine));
                 saveLyrics();
             } else {
                 showToast("Can't Save");
