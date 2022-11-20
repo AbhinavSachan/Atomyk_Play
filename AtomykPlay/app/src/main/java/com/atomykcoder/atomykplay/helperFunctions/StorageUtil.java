@@ -1,4 +1,4 @@
-package com.atomykcoder.atomykplay.function;
+package com.atomykcoder.atomykplay.helperFunctions;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -36,6 +36,9 @@ public class StorageUtil {
     public static final String repeat = "repeat";
     public static final String repeat_one = "repeat_one";
     public static final String theme_name = "theme_name";
+    public static final String system_follow = "system_follow";
+    public static final String dark = "dark";
+    public static final String no_dark = "no_dark";
 
 
     //to save the list of audio
@@ -154,7 +157,7 @@ public class StorageUtil {
         editor.putString(shuffle, name);
         editor.apply();
     }
-
+/*
     public void saveInitialMusicList(ArrayList<MusicDataCapsule> list) {
         sharedPreferences = context.getSharedPreferences(LIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -172,6 +175,7 @@ public class StorageUtil {
         }.getType();
         return gson.fromJson(json, type);
     }
+*/
 
     public void saveTempMusicList(ArrayList<MusicDataCapsule> list) {
         sharedPreferences = context.getSharedPreferences(LIST_STORAGE, Context.MODE_PRIVATE);
@@ -221,16 +225,16 @@ public class StorageUtil {
         editor.remove(songName);
         editor.apply();
     }
-    public void saveTheme(boolean darkTheme) {
+    public void saveTheme(String theme) {
         sharedPreferences = context.getSharedPreferences(THEME_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean(theme_name,darkTheme);
+        editor.putString(theme_name,theme);
         editor.apply();
     }
 
-    public boolean  loadTheme() {
+    public String  loadTheme() {
         sharedPreferences = context.getSharedPreferences(THEME_STORAGE, Context.MODE_PRIVATE);
-        return sharedPreferences.getBoolean(theme_name,false);
+        return sharedPreferences.getString(theme_name,system_follow);
     }
 
 }

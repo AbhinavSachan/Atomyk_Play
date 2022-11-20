@@ -4,7 +4,6 @@ import static com.atomykcoder.atomykplay.activities.MainActivity.BROADCAST_PAUSE
 import static com.atomykcoder.atomykplay.activities.MainActivity.BROADCAST_PLAY_NEXT_MUSIC;
 import static com.atomykcoder.atomykplay.activities.MainActivity.BROADCAST_PLAY_PREVIOUS_MUSIC;
 import static com.atomykcoder.atomykplay.activities.MainActivity.BROADCAST_STOP_MUSIC;
-import static com.atomykcoder.atomykplay.activities.MainActivity.media_player_service;
 import static com.atomykcoder.atomykplay.activities.MainActivity.service_bound;
 import static com.atomykcoder.atomykplay.classes.ApplicationClass.CHANNEL_ID;
 
@@ -50,8 +49,8 @@ import com.atomykcoder.atomykplay.events.RemoveLyricsHandlerEvent;
 import com.atomykcoder.atomykplay.events.SetMainLayoutEvent;
 import com.atomykcoder.atomykplay.events.UpdateMusicImageEvent;
 import com.atomykcoder.atomykplay.events.UpdateMusicProgressEvent;
-import com.atomykcoder.atomykplay.function.LRCMap;
-import com.atomykcoder.atomykplay.function.StorageUtil;
+import com.atomykcoder.atomykplay.helperFunctions.LRCMap;
+import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 
 import org.greenrobot.eventbus.EventBus;
@@ -64,6 +63,12 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         MediaPlayer.OnBufferingUpdateListener, MediaPlayer.OnErrorListener,
         MediaPlayer.OnInfoListener, MediaPlayer.OnPreparedListener, MediaPlayer.OnSeekCompleteListener, AudioManager.OnAudioFocusChangeListener {
 
+    //♥♥☻☻
+    //all public variables are in this format "public_variable"
+    //all public and private static final string variables are in this format "PUBLIC_PRIVATE_STATIC_FINAL_STRING"
+    //all private variables are in this format "privateVariable"
+    //♥♥☻☻
+
     public static final String ACTION_PLAY = "com.atomykcoder.atomykplay.ACTION_PLAY";
     public static final String ACTION_PAUSE = "com.atomykcoder.atomykplay.ACTION_PAUSE";
     public static final String ACTION_PREVIOUS = "com.atomykcoder.atomykplay.ACTION_PREVIOUS";
@@ -72,13 +77,14 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
     //audio player notification ID
     public static final int NOTIFICATION_ID = 414141;
+    public static boolean is_playing = false;
     public static boolean ui_visible = false;
     //binder
     private final IBinder iBinder = new LocalBinder();
     public MediaPlayer media_player;
     public Runnable runnable;
     public Handler handler;
-    public boolean was_playing = false;
+    private boolean was_playing = false;
     //media session
     private MediaSessionManager mediaSessionManager;
     private MediaSessionCompat mediaSession;
@@ -177,7 +183,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 }
 
             if (media_player == null) {
-                if (media_player_service == null) {
+                if (!service_bound) {
                     Intent playerIntent = new Intent(getApplicationContext(), MediaPlayerService.class);
                     startService(playerIntent);
                 }
@@ -198,7 +204,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                         setSeekBar();
                         LRCMap lrcMap = storage.loadLyrics(activeMusic.getsName());
                         if (lrcMap != null) {
-                            EventBus.getDefault().post(new PrepareRunnableEvent());
                             EventBus.getDefault().post(new PrepareRunnableEvent());
                         }
                     }
@@ -293,7 +298,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         InputStream input;
         Bitmap artwork = null;
         try {
-            if (albumUri!= null) {
+            if (albumUri != null) {
                 input = getApplicationContext().getContentResolver().openInputStream(Uri.parse(albumUri));
                 artwork = BitmapFactory.decodeStream(input);
                 if (input != null) {
@@ -629,13 +634,13 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         }
 
         if (storage.loadRepeatStatus().equals("no_repeat")) {
-            if (musicList !=null)
-            if (musicIndex == musicList.size() - 1) {
-                stopMedia();
-                stopSelf();
-            } else {
-                skipToNext();
-            }
+            if (musicList != null)
+                if (musicIndex == musicList.size() - 1) {
+                    stopMedia();
+                    stopSelf();
+                } else {
+                    skipToNext();
+                }
         } else if (storage.loadRepeatStatus().equals("repeat")) {
             skipToNext();
         } else if (storage.loadRepeatStatus().equals("repeat_one")) {
@@ -723,7 +728,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 if (!media_player.isPlaying()) {
                     media_player.start();
 
-                    MainActivity.is_playing = true;
+                    is_playing = true;
                     setIcon(PlaybackStatus.PLAYING);
                     buildNotification(PlaybackStatus.PLAYING, 1f);
                 }
@@ -742,7 +747,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         }
         if (media_player.isPlaying()) {
             media_player.stop();
-            MainActivity.is_playing = false;
+            is_playing = false;
         }
 
     }
@@ -756,7 +761,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 storage.saveMusicLastPos(media_player.getCurrentPosition());
                 buildNotification(PlaybackStatus.PAUSED, 0f);
                 media_player.stop();
-                MainActivity.is_playing = false;
+                is_playing = false;
                 setIcon(PlaybackStatus.PAUSED);
             }
         stopForeground(true);
@@ -775,7 +780,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 storage.saveMusicLastPos(media_player.getCurrentPosition());
                 media_player.pause();
 
-                MainActivity.is_playing = false;
+                is_playing = false;
                 setIcon(PlaybackStatus.PAUSED);
                 buildNotification(PlaybackStatus.PAUSED, 0f);
 
@@ -798,7 +803,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 if (!media_player.isPlaying()) {
                     int position = storage.loadMusicLastPos();
 
-                    MainActivity.is_playing = true;
+                    is_playing = true;
                     media_player.seekTo(position);
                     media_player.start();
                     storage.clearMusicLastPos();

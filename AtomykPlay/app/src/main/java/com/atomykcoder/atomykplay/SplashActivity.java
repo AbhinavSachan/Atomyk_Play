@@ -1,17 +1,19 @@
 package com.atomykcoder.atomykplay;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.AppCompatDelegate;
+import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.dark;
+import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.no_dark;
+import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.system_follow;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
-import android.preference.PreferenceManager;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 
 import com.atomykcoder.atomykplay.activities.MainActivity;
-import com.atomykcoder.atomykplay.function.StorageUtil;
+import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 
 @SuppressLint("CustomSplashScreen")
 public class SplashActivity extends AppCompatActivity {
@@ -19,11 +21,17 @@ public class SplashActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        boolean switch1 = new StorageUtil(this).loadTheme();
-        if (switch1) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-        } else {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        String switch1 = new StorageUtil(this).loadTheme();
+        switch (switch1) {
+            case system_follow:
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+                break;
+            case no_dark:
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                break;
+            case dark:
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                break;
         }
         setContentView(R.layout.activity_splash);
 

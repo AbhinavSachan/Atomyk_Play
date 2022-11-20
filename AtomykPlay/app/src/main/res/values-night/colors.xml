@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="tertiary_bg">#35345E</color>
-    <color name="nav_s_item_bg">#A03C3B5E</color>
+    <color name="tertiary_bg">#2D76CF</color>
     <color name="secondary_bg">#0E0F12</color>
     <color name="nav_center_shadow">#640E0F12</color>
     <color name="primary_bg">#181A1E</color>
     <color name="icons_bg">#CACACA</color>
     <color name="play_icons_bg">#DCDCDC</color>
-    <color name="text_color">#CACACA</color>
+    <color name="text_color">#E3E3E3</color>
     <color name="text_color_light">#303030</color>
     <color name="space_black">#D3E1E1</color>
-    <color name="sub_text_grey">#D8CBCB</color>
+    <color name="sub_text_grey">#BFB4B4</color>
     <color name="cover_image_grey">#555555</color>
     <color name="sub_text_grey_light">#474747</color>
     <color name="soft_black">#BDBDBD</color>
@@ -24,7 +23,11 @@
     <color name="lyrics_text_color">#C5C5C5</color>
     <color name="heart_bg">#DC2525</color>
     <color name="translucent_black">#EB030407</color>
-    <color name="player_shadow_black">#5105070B</color>
-    <color name="center_player_shadow">#1D030505</color>
+    <color name="player_shadow_black">#36040507</color>
+    <color name="center_player_shadow">#140F1313</color>
+    <color name="thumb_light">#2D76CF</color>
+    <color name="thumb_dark">#F5DADADA</color>
+    <color name="switch_track_on">#922D76CF</color>
+    <color name="switch_track_off">#8FE3D8D8</color>
 
 </resources>

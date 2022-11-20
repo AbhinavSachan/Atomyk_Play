@@ -1,35 +1,31 @@
 package com.atomykcoder.atomykplay.fragments;
 
-import android.app.ProgressDialog;
-import android.content.Context;
-import android.content.SharedPreferences;
+import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.dark;
+import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.no_dark;
+import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.system_follow;
+
+import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.CompoundButton;
-import android.widget.TextView;
-
 import com.atomykcoder.atomykplay.R;
-import com.atomykcoder.atomykplay.function.StorageUtil;
-import com.google.android.material.switchmaterial.SwitchMaterial;
-
-import java.util.ArrayList;
+import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 
 
 public class SettingsFragment extends Fragment {
 
-    public static final String SWITCH1 = "SWITCH";
-    private TextView textView;
-    private SwitchMaterial switchMaterial;
+    private RadioGroup radioGroup;
+    private RadioButton light_theme, dark_theme, default_theme;
 
-    private boolean SwitchOnOff;
-    private ProgressDialog pd;
-    private ArrayList<String> arrBatchName;
+
+    private String theme;
     private StorageUtil storageUtil;
 
 
@@ -37,35 +33,52 @@ public class SettingsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view =  inflater.inflate(R.layout.fragment_settings, container, false);
+        View view = inflater.inflate(R.layout.fragment_settings, container, false);
 
-        pd = new ProgressDialog(requireContext());
-        arrBatchName = new ArrayList<>();
-
-        textView = view.findViewById(R.id.text_change_mode);
-        switchMaterial = view.findViewById(R.id.switch_theme);
+        radioGroup = view.findViewById(R.id.radio_group_theme);
+        light_theme = view.findViewById(R.id.light_button);
+        dark_theme = view.findViewById(R.id.dark_button);
+        default_theme = view.findViewById(R.id.default_button);
         storageUtil = new StorageUtil(requireContext());
 
-        SwitchOnOff = storageUtil.loadTheme();
+        theme = storageUtil.loadTheme();
 
-        switchMaterial.setChecked(SwitchOnOff);
+        switch (theme) {
+            case system_follow:
+                default_theme.setChecked(true);
+                break;
+            case no_dark:
+                light_theme.setChecked(true);
+                break;
+            case dark:
+                dark_theme.setChecked(true);
+                break;
+        }
 
-        switchMaterial.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        //Check if any radio button is pressed
+        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @SuppressLint("NonConstantResourceId")
             @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-                    textView.setText(getString(R.string.light_mode_tv));
-                } else {
-                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-                    textView.setText(getString(R.string.dark_mode_tv));
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                switch (checkedId) {
+                    case R.id.default_button:
+                        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+                        theme = system_follow;
+                        break;
+                    case R.id.light_button:
+                        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                        theme = no_dark;
+                        break;
+                    case R.id.dark_button:
+                        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                        theme = dark;
+                        break;
+
                 }
-                storageUtil.saveTheme(isChecked);
+                storageUtil.saveTheme(theme);
             }
         });
 
-
         return view;
     }
-
 }

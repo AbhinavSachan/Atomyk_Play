@@ -1,8 +1,8 @@
 package com.atomykcoder.atomykplay.adapters;
 
-import static com.atomykcoder.atomykplay.function.MusicHelper.convertDuration;
-import static com.atomykcoder.atomykplay.function.StorageUtil.no_shuffle;
-import static com.atomykcoder.atomykplay.function.StorageUtil.shuffle;
+import static com.atomykcoder.atomykplay.helperFunctions.MusicHelper.convertDuration;
+import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.no_shuffle;
+import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.shuffle;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -24,7 +24,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.classes.GlideBuilt;
-import com.atomykcoder.atomykplay.function.StorageUtil;
+import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import com.turingtechnologies.materialscrollbar.INameableAdapter;
 

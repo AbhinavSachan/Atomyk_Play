@@ -1,5 +1,10 @@
 package com.atomykcoder.atomykplay.activities;
 
+import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.dark;
+import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.no_dark;
+import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.system_follow;
+import static com.atomykcoder.atomykplay.services.MediaPlayerService.is_playing;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
@@ -51,8 +56,8 @@ import com.atomykcoder.atomykplay.fragments.AboutFragment;
 import com.atomykcoder.atomykplay.fragments.BottomSheetPlayerFragment;
 import com.atomykcoder.atomykplay.fragments.SearchResultsFragment;
 import com.atomykcoder.atomykplay.fragments.SettingsFragment;
-import com.atomykcoder.atomykplay.function.FetchMusic;
-import com.atomykcoder.atomykplay.function.StorageUtil;
+import com.atomykcoder.atomykplay.helperFunctions.FetchMusic;
+import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.services.MediaPlayerService;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
@@ -74,22 +79,19 @@ import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
-    //♥♥☻☻
-    //all public variables are in this format "public_variable"
-    //all public and private static final string variables are in this format "PUBLIC_PRIVATE_STATIC_FINAL_STRING"
-    //all private variables are in this format "privateVariable"
-    //♥♥☻☻
-
     public static final String BROADCAST_PLAY_NEW_MUSIC = "com.atomykcoder.atomykplay.PlayNewMusic";
     public static final String BROADCAST_PAUSE_PLAY_MUSIC = "com.atomykcoder.atomykplay.PausePlayMusic";
     public static final String BROADCAST_STOP_MUSIC = "com.atomykcoder.atomykplay.StopMusic";
     public static final String BROADCAST_PLAY_NEXT_MUSIC = "com.atomykcoder.atomykplay.PlayNextMusic";
     public static final String BROADCAST_PLAY_PREVIOUS_MUSIC = "com.atomykcoder.atomykplay.PlayPreviousMusic";
 
+
     public static boolean service_bound = false;
     public static boolean is_granted = false;
+    public static boolean phone_ringing = false;
+
     public static MediaPlayerService media_player_service;
-    public static ServiceConnection service_connection = new ServiceConnection() {
+    public ServiceConnection service_connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
 
@@ -104,8 +106,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             media_player_service = null;
         }
     };
-    public static boolean phone_ringing = false;
-    public static boolean is_playing = false;
     public View player_bottom_sheet;
     public CustomBottomSheet<View> mainPlayerSheetBehavior;
     public BottomSheetPlayerFragment bottomSheetPlayerFragment;
@@ -146,7 +146,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         public void onStateChanged(@NonNull View bottomSheet, int newState) {
             if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
                 View miniPlayer = bottomSheetPlayerFragment.mini_play_view;
-                View mainPlayer = findViewById(R.id.player_layout);
+                View mainPlayer = bottomSheetPlayerFragment.player_layout;
                 mainPlayer.setVisibility(View.INVISIBLE);
                 miniPlayer.setVisibility(View.VISIBLE);
                 drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
@@ -155,7 +155,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 mainPlayer.setAlpha(0);
             } else if (newState == BottomSheetBehavior.STATE_EXPANDED) {
                 View miniPlayer = bottomSheetPlayerFragment.mini_play_view;
-                View mainPlayer = findViewById(R.id.player_layout);
+                View mainPlayer = bottomSheetPlayerFragment.player_layout;
                 miniPlayer.setVisibility(View.INVISIBLE);
                 mainPlayer.setVisibility(View.VISIBLE);
                 drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
@@ -176,7 +176,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         @Override
         public void onSlide(@NonNull View bottomSheet, float slideOffset) {
             View miniPlayer = bottomSheetPlayerFragment.mini_play_view;
-            View mainPlayer = findViewById(R.id.player_layout);
+            View mainPlayer = bottomSheetPlayerFragment.player_layout;
             miniPlayer.setVisibility(View.VISIBLE);
             mainPlayer.setVisibility(View.VISIBLE);
             miniPlayer.setAlpha(1 - slideOffset * 15);
@@ -188,12 +188,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        boolean switch1 = new StorageUtil(this).loadTheme();
-        if (switch1) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-        } else {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        String switch1 = new StorageUtil(this).loadTheme();
+        switch (switch1) {
+            case system_follow:
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+                break;
+            case no_dark:
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                break;
+            case dark:
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                break;
         }
         setContentView(R.layout.activity_main);
 
@@ -246,7 +251,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         lyricsListBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
         main_layout.setNestedScrollingEnabled(false);
 
-
         DragScrollBar scrollBar = findViewById(R.id.dragScrollBar);
 
         recyclerView.setNestedScrollingEnabled(false);
@@ -287,7 +291,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @SuppressLint("SetTextI18n")
     public void resetDataInNavigation() {
         navSongName.setText("Song Name");
-        navArtistName.setText("Artist Name");
+        navArtistName.setText("Artist");
         GlideBuilt.glide(this, null, R.drawable.placeholder_nav, navCover, 400);
     }
 
@@ -600,7 +604,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             // post-execute code here
                             handler.post(() -> {
                                 //saving this in storage for diff util
-                                storageUtil.saveInitialMusicList(dataList);
+                                //storageUtil.saveInitialMusicList(dataList);
 
                                 //Setting up adapter
                                 if (dataList.isEmpty()) {

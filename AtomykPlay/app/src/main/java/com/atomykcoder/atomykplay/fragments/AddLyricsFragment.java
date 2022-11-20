@@ -19,10 +19,10 @@ import androidx.fragment.app.Fragment;
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.events.RunnableSyncLyricsEvent;
-import com.atomykcoder.atomykplay.function.FetchLyrics;
-import com.atomykcoder.atomykplay.function.LRCMap;
-import com.atomykcoder.atomykplay.function.MusicHelper;
-import com.atomykcoder.atomykplay.function.StorageUtil;
+import com.atomykcoder.atomykplay.helperFunctions.FetchLyrics;
+import com.atomykcoder.atomykplay.helperFunctions.LRCMap;
+import com.atomykcoder.atomykplay.helperFunctions.MusicHelper;
+import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 
 import org.greenrobot.eventbus.EventBus;

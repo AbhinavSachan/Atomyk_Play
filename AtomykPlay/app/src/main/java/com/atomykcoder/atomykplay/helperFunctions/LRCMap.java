@@ -1,4 +1,4 @@
-package com.atomykcoder.atomykplay.function;
+package com.atomykcoder.atomykplay.helperFunctions;
 
 import java.util.ArrayList;
 

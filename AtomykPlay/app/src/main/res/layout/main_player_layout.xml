@@ -23,6 +23,7 @@
             android:contentDescription="@string/imageView"
             android:elevation="10dp"
             android:focusable="true"
+            android:visibility="visible"
             android:padding="12dp"
             android:src="@drawable/ic_more_horizontal"
             android:theme="@android:style/ThemeOverlay.Material.Dark"

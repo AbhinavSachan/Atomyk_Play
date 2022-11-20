@@ -1,19 +1,15 @@
-package com.atomykcoder.atomykplay.function;
+package com.atomykcoder.atomykplay.helperFunctions;
 
 import android.annotation.SuppressLint;
-import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 // Helper class for lyrics
 //Note: Helper classes are always static and it's alright
- public class MusicHelper {
-    private MusicHelper()
-    {
+public class MusicHelper {
+    private MusicHelper() {
         // constructor required to avoid accidentally creating any instance of this class
     }
 
@@ -42,9 +38,9 @@ import java.util.regex.Pattern;
         //Separate timestamps and lyrics in their respective arrays
         Pattern _p = Pattern.compile("\\[\\d\\d:\\d\\d");
         Matcher _m;
-        for(String lyric : _lyricsWithTimestamps) {
+        for (String lyric : _lyricsWithTimestamps) {
             _m = _p.matcher(lyric);
-            if(_m.find()) {
+            if (_m.find()) {
                 _timestamps.add(_m.group() + "]");
                 _lyrics.add(filter(lyric));
             }
@@ -85,7 +81,7 @@ import java.util.regex.Pattern;
         int dur = Integer.parseInt(duration);
 
         int hours = (dur / 3600000);
-        int mns = (dur / 60000)%60;
+        int mns = (dur / 60000) % 60;
         int scs = dur % 60000 / 1000;
 
         if (hours == 0) {

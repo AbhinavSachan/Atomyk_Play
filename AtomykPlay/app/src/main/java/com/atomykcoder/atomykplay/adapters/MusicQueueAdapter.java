@@ -1,6 +1,6 @@
 package com.atomykcoder.atomykplay.adapters;
 
-import static com.atomykcoder.atomykplay.function.MusicHelper.convertDuration;
+import static com.atomykcoder.atomykplay.helperFunctions.MusicHelper.convertDuration;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -21,12 +21,10 @@ import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.classes.GlideBuilt;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
-import com.atomykcoder.atomykplay.function.StorageUtil;
+import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.ItemTouchHelperAdapter;
 import com.atomykcoder.atomykplay.interfaces.ItemTouchHelperViewfinder;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.RequestOptions;
 
 import java.io.File;
 import java.util.ArrayList;

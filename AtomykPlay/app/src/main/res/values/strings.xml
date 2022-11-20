@@ -36,4 +36,20 @@
     <string name="dark_mode_tv">Dark Mode</string>
     <string name="light_mode_tv">Light Mode</string>
     <string name="home">Home</string>
+    <string name="default_mode_tv">Default Mode</string>
+    <string name="theme_amp_colors">Themes</string>
+    <string name="player_info">Player</string>
+    <string name="ShowArtistInMini">Show Artist</string>
+    <string name="ShowArtistInMiniDes">Show artist name in mini player</string>
+    <string name="show_song_info">Show Song Info</string>
+    <string name="info_des">Show file information such as file format, bitrate and frequency in the main player</string>
+    <string name="show_option_menu">Show Option Menu</string>
+    <string name="option_des">Show option menu in the main player</string>
+    <string name="audio">Audio</string>
+    <string name="auto_play">Auto Play</string>
+    <string name="autoplay_des">Start playing immediately when a wired headset is plugged in</string>
+    <string name="keep_shuffle_on">Keep Shuffle Mode</string>
+    <string name="shuffle_des">Shuffle mode won\'t turn off when playing new song from list</string>
+    <string name="lowerVol">Lower Volume</string>
+    <string name="vol_des">Lower the volume when a system sound is played or a notification is received</string>
 </resources>

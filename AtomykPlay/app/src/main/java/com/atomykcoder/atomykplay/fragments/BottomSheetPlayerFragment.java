@@ -2,15 +2,14 @@ package com.atomykcoder.atomykplay.fragments;
 
 import static com.atomykcoder.atomykplay.activities.MainActivity.media_player_service;
 import static com.atomykcoder.atomykplay.activities.MainActivity.service_bound;
-import static com.atomykcoder.atomykplay.function.MusicHelper.convertDuration;
-import static com.atomykcoder.atomykplay.function.StorageUtil.favorite;
-import static com.atomykcoder.atomykplay.function.StorageUtil.musicList;
-import static com.atomykcoder.atomykplay.function.StorageUtil.no_favorite;
-import static com.atomykcoder.atomykplay.function.StorageUtil.no_repeat;
-import static com.atomykcoder.atomykplay.function.StorageUtil.no_shuffle;
-import static com.atomykcoder.atomykplay.function.StorageUtil.repeat;
-import static com.atomykcoder.atomykplay.function.StorageUtil.repeat_one;
-import static com.atomykcoder.atomykplay.function.StorageUtil.shuffle;
+import static com.atomykcoder.atomykplay.helperFunctions.MusicHelper.convertDuration;
+import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.favorite;
+import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.no_favorite;
+import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.no_repeat;
+import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.no_shuffle;
+import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.repeat;
+import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.repeat_one;
+import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.shuffle;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
@@ -56,8 +55,8 @@ import com.atomykcoder.atomykplay.events.RunnableSyncLyricsEvent;
 import com.atomykcoder.atomykplay.events.SetMainLayoutEvent;
 import com.atomykcoder.atomykplay.events.UpdateMusicImageEvent;
 import com.atomykcoder.atomykplay.events.UpdateMusicProgressEvent;
-import com.atomykcoder.atomykplay.function.LRCMap;
-import com.atomykcoder.atomykplay.function.StorageUtil;
+import com.atomykcoder.atomykplay.helperFunctions.LRCMap;
+import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
@@ -87,6 +86,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     public ImageView mini_cover, mini_next;
     public TextView mini_name_text, mini_artist_text;
     public View mini_play_view;
+    public View player_layout;
     private Context context;
     private TextView durationTv;
     private ImageView playerCoverImage;
@@ -98,7 +98,6 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     private LRCMap lrcMap;
     private RecyclerView.LayoutManager lm;
     private String songName, artistName, mimeType, duration, bitrate, albumUri;
-    private View player_layout;
     private View queueBottomSheet;
     private ImageView repeatImg;
     private ImageView shuffleImg;
@@ -126,8 +125,8 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
             EventBus.getDefault().register(this);
 
         //StorageUtil initialization
-        storageUtil = new StorageUtil(getContext());
-        mainActivity = (MainActivity) getContext();
+        storageUtil = new StorageUtil(requireContext());
+        mainActivity = (MainActivity) requireContext();
 
         //Mini player items initializations
         mini_play_view = view.findViewById(R.id.mini_player_layout);//○
@@ -672,7 +671,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         musicIndex = storageUtil.loadMusicIndex();
 
         // do in background code here
-        if (musicList!=null) {
+        if (musicList != null) {
             shuffleImg.setClickable(false);
 
             ExecutorService service = Executors.newSingleThreadExecutor();
