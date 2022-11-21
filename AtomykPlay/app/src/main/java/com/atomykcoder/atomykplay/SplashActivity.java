@@ -21,7 +21,7 @@ public class SplashActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        String switch1 = new StorageUtil(this).loadTheme();
+        String switch1 = new StorageUtil.SettingsStorage(this).loadTheme();
         switch (switch1) {
             case system_follow:
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);

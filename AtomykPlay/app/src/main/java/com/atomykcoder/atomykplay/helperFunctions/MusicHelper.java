@@ -31,7 +31,7 @@ public class MusicHelper {
         //Separate Lyrics with timestamps from rest of the garbage
         Matcher _matcher = _pattern.matcher(lyrics);
         while (_matcher.find()) {
-            //store lyrics with timestamps in seperate array
+            //store lyrics with timestamps in separate array
             _lyricsWithTimestamps.add(_matcher.group().trim());
         }
 

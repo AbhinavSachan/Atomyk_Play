@@ -12,7 +12,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.media.AudioManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -189,7 +188,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        String switch1 = new StorageUtil(this).loadTheme();
+        String switch1 = new StorageUtil.SettingsStorage(this).loadTheme();
         switch (switch1) {
             case system_follow:
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
@@ -281,7 +280,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mainPlayerSheetBehavior.addBottomSheetCallback(callback);
         lyricsListBehavior.addBottomSheetCallback(lrcFoundCallback);
 //      this will start playing song as soon as app starts if its connected to headset
-        startSong();
+        if (new StorageUtil.SettingsStorage(this).loadAutoPlay()) {
+            startSong();
+        }
         if (savedInstanceState == null) {
             navigationView.setCheckedItem(R.id.navigation_home);
 
@@ -381,11 +382,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void startSong() {
         if (is_granted) {
             if (!is_playing) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    //noinspection deprecation
-                    if (audioManager.isBluetoothScoOn() || audioManager.isWiredHeadsetOn()) {
-                        pausePlayAudio();
-                    }
+                //noinspection deprecation
+                if (audioManager.isBluetoothScoOn() || audioManager.isWiredHeadsetOn()) {
+                    pausePlayAudio();
                 }
             }
         }
@@ -564,18 +563,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         startActivity(intent);
     }
 
-    public void openOptionMenu(
-                               ImageView imageButton,
-                               MusicDataCapsule currentItem) {
-
+    public void openOptionMenu(ImageView imageButton, MusicDataCapsule currentItem) {
         PopupMenu popupMenu = new PopupMenu(MainActivity.this, imageButton);
         popupMenu.getMenuInflater().inflate(R.menu.option_menu, popupMenu.getMenu());
 
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
-                if(menuItem == popupMenu.getMenu().findItem(R.id.set_as_ringtone))
-                {
+                if (menuItem == popupMenu.getMenu().findItem(R.id.set_as_ringtone)) {
                     Toast.makeText(MainActivity.this, "Opening Ringtone cutter", Toast.LENGTH_SHORT).show();
                     openRingtoneManagerActivity(currentItem);
                 } else {

@@ -55,8 +55,7 @@
                     android:layout_height="match_parent"
                     android:contentDescription="@string/imageView"
                     android:scaleType="centerCrop"
-                    android:src="@drawable/ic_music"
-                    android:theme="@android:style/ThemeOverlay.Material.Dark" />
+                    android:src="@drawable/ic_music" />
 
 
             </com.google.android.material.card.MaterialCardView>
@@ -328,7 +327,7 @@
         </RelativeLayout>
 
         <LinearLayout
-            android:id="@+id/linear_bit_layout"
+            android:id="@+id/linear_info_layout"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_below="@id/seekbar_relative_l"

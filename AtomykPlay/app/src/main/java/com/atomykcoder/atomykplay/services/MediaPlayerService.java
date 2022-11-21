@@ -239,6 +239,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             initiateMediaPlayer();
         }
     };
+    private StorageUtil.SettingsStorage settingsStorage;
 
     /**
      * this function updates play icon according to media playback status
@@ -435,7 +436,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         }
         return null;
     }
-
 
     /**
      * This function sets up notification actions
@@ -768,7 +768,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         stopSelf();
     }
 
-
     /**
      * This function pauses music
      */
@@ -818,7 +817,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             Toast.makeText(getApplicationContext(), "Can't play while on call", Toast.LENGTH_SHORT).show();
         }
     }
-
 
     /**
      * This function sends music position to main ui
@@ -1021,10 +1019,12 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                     pauseMedia();
                 break;
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
-                if (media_player != null)
-                    if (media_player.isPlaying()) {
-                        media_player.setVolume(0.3f, 0.3f);
-                    }
+                if (settingsStorage.loadLowerVol()) {
+                    if (media_player != null)
+                        if (media_player.isPlaying()) {
+                            media_player.setVolume(0.3f, 0.3f);
+                        }
+                }
                 break;
         }
     }
@@ -1035,6 +1035,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         handleIncomingActions(intent);
 
         storage = new StorageUtil(getApplicationContext());
+        settingsStorage = new StorageUtil.SettingsStorage(getApplicationContext());
         musicList = storage.loadMusicList();
         musicIndex = storage.loadMusicIndex();
 

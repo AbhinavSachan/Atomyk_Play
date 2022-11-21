@@ -88,6 +88,8 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     public TextView mini_name_text, mini_artist_text;
     public View mini_play_view;
     public View player_layout;
+    public ImageView optionImg;
+    public View info_layout;
     private Context context;
     private TextView durationTv;
     private ImageView playerCoverImage;
@@ -103,7 +105,6 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     private ImageView repeatImg;
     private ImageView shuffleImg;
     private ImageView timerImg;
-    private ImageView optionImg;
     //setting up mini player layout
     //calling it from service when player is prepared and also calling it in this fragment class
     //to set it on app start ☺
@@ -115,6 +116,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     private CardView coverCardView;
     private ImageView lyricsImg;
     private View shadowPlayer;
+    private StorageUtil.SettingsStorage settingsStorage;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -128,6 +130,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
         //StorageUtil initialization
         storageUtil = new StorageUtil(requireContext());
+        settingsStorage = new StorageUtil.SettingsStorage(requireContext());
         mainActivity = (MainActivity) requireContext();
 
         //Mini player items initializations
@@ -141,6 +144,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
         //Main player items initializations
         player_layout = view.findViewById(R.id.player_layout);//○
+        info_layout = view.findViewById(R.id.linear_info_layout);
         playerCoverImage = view.findViewById(R.id.player_cover_iv);//○
         seekBarMain = view.findViewById(R.id.player_seek_bar);//○
         ImageView queImg = view.findViewById(R.id.player_que_iv);//○
@@ -168,6 +172,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
         playerSongNameTv.setSelected(true);
         mini_name_text.setSelected(true);
+        setDefaults();
 
         //click listeners on mini player
         //and sending broadcast on click
@@ -224,6 +229,32 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         return view;
     }
 
+    /**
+     * This method sets elements according to settings values
+     */
+    private void setDefaults() {
+        if (settingsStorage.loadShowArtist()) {
+            mini_artist_text.setVisibility(View.VISIBLE);
+        } else {
+            mini_artist_text.setVisibility(View.GONE);
+        }
+        if (settingsStorage.loadShowInfo()) {
+            info_layout.setVisibility(View.VISIBLE);
+        } else {
+            info_layout.setVisibility(View.GONE);
+        }
+        if (settingsStorage.loadExtraCon()) {
+            mini_next.setVisibility(View.VISIBLE);
+        } else {
+            mini_next.setVisibility(View.GONE);
+        }
+        if (settingsStorage.loadOptionMenu()) {
+            optionImg.setVisibility(View.VISIBLE);
+        } else {
+            optionImg.setVisibility(View.GONE);
+        }
+    }
+
     private boolean getPlayerState() {
         if (media_player_service.media_player != null)
             return media_player_service.media_player.isPlaying();
@@ -265,6 +296,11 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
                 favoriteImg.setImageResource(R.drawable.ic_favorite_border);
             } else if (storageUtil.loadFavorite(songName).equals("favorite")) {
                 favoriteImg.setImageResource(R.drawable.ic_favorite);
+            }
+            if (storageUtil.loadShuffle().equals(no_shuffle)) {
+                shuffleImg.setImageResource(R.drawable.ic_shuffle_empty);
+            } else if (storageUtil.loadShuffle().equals(shuffle)) {
+                shuffleImg.setImageResource(R.drawable.ic_shuffle);
             }
         }
 
@@ -528,7 +564,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
     private void optionMenu() {
         //add a bottom sheet to show music options like set to ringtone ,audio details ,add to playlist etc.
-        if(getMusic() != null)
+        if (getMusic() != null)
             mainActivity.openOptionMenu(optionImg, getMusic());
     }
 

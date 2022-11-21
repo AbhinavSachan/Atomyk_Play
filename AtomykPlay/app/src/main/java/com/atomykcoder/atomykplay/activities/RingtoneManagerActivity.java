@@ -1,5 +1,4 @@
 package com.atomykcoder.atomykplay.activities;
-import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -7,17 +6,21 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
+
 import java.util.concurrent.TimeUnit;
 
 public class RingtoneManagerActivity extends AppCompatActivity {
 
+    MusicDataCapsule music;
     private TextView song_name_tv, artist_name_tv, duration_tv;
     private EditText from_editText, to_editText;
     private Button cut_bt;
-    MusicDataCapsule music;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,10 +53,11 @@ public class RingtoneManagerActivity extends AppCompatActivity {
         int diff = (int) Math.abs(end - start);
         Log.i("info", "start: " + start + " end: " + end + " diff: " + diff);
 
-        if(!_from.isEmpty() && !_to.isEmpty()) {
 
-        }
-        else {
+        if (!_from.isEmpty() && !_to.isEmpty()) {
+
+
+        } else {
             Toast.makeText(this, "Fields Empty", Toast.LENGTH_SHORT).show();
         }
     }

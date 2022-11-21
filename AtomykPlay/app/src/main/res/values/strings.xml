@@ -47,9 +47,16 @@
     <string name="option_des">Show option menu in the main player</string>
     <string name="audio">Audio</string>
     <string name="auto_play">Auto Play</string>
-    <string name="autoplay_des">Start playing immediately when a wired headset is plugged in</string>
-    <string name="keep_shuffle_on">Keep Shuffle Mode</string>
+    <string name="autoplay_des">Start playing immediately when a wired or bluetooth device is plugged in</string>
+    <string name="keep_shuffle_on">Keep Shuffle On</string>
     <string name="shuffle_des">Shuffle mode won\'t turn off when playing new song from list</string>
     <string name="lowerVol">Lower Volume</string>
     <string name="vol_des">Lower the volume when a system sound is played or a notification is received</string>
+    <string name="filter">Filter</string>
+    <string name="blacklist">Blacklist</string>
+    <string name="blacklist_des">Blacklisted folders will not be scanned</string>
+    <string name="filter_by_dur">Filter By Duration</string>
+    <string name="fil_dur_des">Exclude songs with duration less than specified amount</string>
+    <string name="show_extra_con">Extra Controls</string>
+    <string name="ext_con_des">Add forward button in the mini player</string>
 </resources>

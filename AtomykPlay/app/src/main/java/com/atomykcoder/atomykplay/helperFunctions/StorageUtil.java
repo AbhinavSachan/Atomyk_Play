@@ -12,33 +12,33 @@ import java.util.ArrayList;
 import java.util.Map;
 
 public class StorageUtil {
-    private static final String THEME_STORAGE = "com.atomykcoder.atomykplay.THEME_STORAGE" ;
-    private final String LIST_STORAGE = "com.atomykcoder.atomykplay.MUSIC_LIST_STORAGE";
+    //values
+    public static final String no_repeat = "no_repeat";
+    public static final String repeat = "repeat";
+    public static final String repeat_one = "repeat_one";
+    public static final String no_favorite = "no_favorite";
+    public static final String favorite = "favorite";
+    public static final String shuffle = "shuffle";
+    public static final String no_shuffle = "no_shuffle";
+    public static final String system_follow = "system_follow";
+    public static final String dark = "dark";
+    public static final String no_dark = "no_dark";
+    //Storage Locations
+    private final String MUSIC_LIST_STORAGE = "com.atomykcoder.atomykplay.MUSIC_LIST_STORAGE";
     private final String POSITION_STORAGE = "com.atomykcoder.atomykplay.STORAGE_POSITION";
     private final String REPEAT_STATUS_STORAGE = "com.atomykcoder.atomykplay.REPEAT_STATUS_STORAGE";
     private final String SHUFFLE_STORAGE = "com.atomykcoder.atomykplay.SHUFFLE_STORAGE";
     private final String FAVORITE_STORAGE = "com.atomykcoder.atomykplay.FAVORITE_STORAGE";
     private final String LYRICS_STORAGE = "com.atomykcoder.atomykplay.LYRICS_STORAGE";
+    //Keys
+    private final String musicList = "musicList";
+    private final String musicIndex = "musicIndex";
+    private final String musicPosition = "musicPosition";
+    private final String repeatStatus = "repeatStatus";
+    private final String shuffleStatus = "shuffleStatus";
+    private final String tempList = "tempList";
     private final Context context;
     private SharedPreferences sharedPreferences;
-
-    public static final String musicList = "musicList";
-    public static final String musicIndex = "musicIndex";
-    public static final String musicPosition = "musicPosition";
-    public static final String repeatStatus = "repeatStatus";
-    public static final String no_repeat = "no_repeat";
-    public static final String no_favorite = "no_favorite";
-    public static final String favorite = "favorite";
-    public static final String shuffle = "shuffle";
-    public static final String no_shuffle = "no_shuffle";
-    public static final String initialList = "initialList";
-    public static final String tempList = "tempList";
-    public static final String repeat = "repeat";
-    public static final String repeat_one = "repeat_one";
-    public static final String theme_name = "theme_name";
-    public static final String system_follow = "system_follow";
-    public static final String dark = "dark";
-    public static final String no_dark = "no_dark";
 
 
     //to save the list of audio
@@ -47,7 +47,7 @@ public class StorageUtil {
     }
 
     public void saveMusicList(ArrayList<MusicDataCapsule> list) {
-        sharedPreferences = context.getSharedPreferences(LIST_STORAGE, Context.MODE_PRIVATE);
+        sharedPreferences = context.getSharedPreferences(MUSIC_LIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         Gson gson = new Gson();
         String json = gson.toJson(list);
@@ -57,7 +57,7 @@ public class StorageUtil {
 
     public ArrayList<MusicDataCapsule> loadMusicList() {
 
-        sharedPreferences = context.getSharedPreferences(LIST_STORAGE, Context.MODE_PRIVATE);
+        sharedPreferences = context.getSharedPreferences(MUSIC_LIST_STORAGE, Context.MODE_PRIVATE);
         Gson gson = new Gson();
         String json = sharedPreferences.getString(musicList, null);
         Type type = new TypeToken<ArrayList<MusicDataCapsule>>() {
@@ -66,26 +66,26 @@ public class StorageUtil {
     }
 
     public void saveMusicIndex(int index) {
-        sharedPreferences = context.getSharedPreferences(LIST_STORAGE, Context.MODE_PRIVATE);
+        sharedPreferences = context.getSharedPreferences(MUSIC_LIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putInt(musicIndex, index);
         editor.apply();
     }
 
     public int loadMusicIndex() {
-        sharedPreferences = context.getSharedPreferences(LIST_STORAGE, Context.MODE_PRIVATE);
+        sharedPreferences = context.getSharedPreferences(MUSIC_LIST_STORAGE, Context.MODE_PRIVATE);
         return sharedPreferences.getInt(musicIndex, 0);
     }
 
     public void clearMusicList() {
-        sharedPreferences = context.getSharedPreferences(LIST_STORAGE, Context.MODE_PRIVATE);
+        sharedPreferences = context.getSharedPreferences(MUSIC_LIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.remove(musicList);
         editor.apply();
     }
 
     public void clearAudioIndex() {
-        sharedPreferences = context.getSharedPreferences(LIST_STORAGE, Context.MODE_PRIVATE);
+        sharedPreferences = context.getSharedPreferences(MUSIC_LIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.remove(musicIndex);
         editor.apply();
@@ -148,37 +148,18 @@ public class StorageUtil {
 
     public String loadShuffle() {
         sharedPreferences = context.getSharedPreferences(SHUFFLE_STORAGE, Context.MODE_PRIVATE);
-        return sharedPreferences.getString(shuffle, no_shuffle);
+        return sharedPreferences.getString(shuffleStatus, no_shuffle);
     }
 
     public void saveShuffle(String name) {
         sharedPreferences = context.getSharedPreferences(SHUFFLE_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(shuffle, name);
+        editor.putString(shuffleStatus, name);
         editor.apply();
     }
-/*
-    public void saveInitialMusicList(ArrayList<MusicDataCapsule> list) {
-        sharedPreferences = context.getSharedPreferences(LIST_STORAGE, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        Gson gson = new Gson();
-        String json = gson.toJson(list);
-        editor.putString(initialList, json);
-        editor.apply();
-    }
-
-    public ArrayList<MusicDataCapsule> loadInitialMusicList() {
-        sharedPreferences = context.getSharedPreferences(LIST_STORAGE, Context.MODE_PRIVATE);
-        Gson gson = new Gson();
-        String json = sharedPreferences.getString(initialList, null);
-        Type type = new TypeToken<ArrayList<MusicDataCapsule>>() {
-        }.getType();
-        return gson.fromJson(json, type);
-    }
-*/
 
     public void saveTempMusicList(ArrayList<MusicDataCapsule> list) {
-        sharedPreferences = context.getSharedPreferences(LIST_STORAGE, Context.MODE_PRIVATE);
+        sharedPreferences = context.getSharedPreferences(MUSIC_LIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         Gson gson = new Gson();
         String json = gson.toJson(list);
@@ -187,21 +168,22 @@ public class StorageUtil {
     }
 
     public ArrayList<MusicDataCapsule> loadTempMusicList() {
-        sharedPreferences = context.getSharedPreferences(LIST_STORAGE, Context.MODE_PRIVATE);
+        sharedPreferences = context.getSharedPreferences(MUSIC_LIST_STORAGE, Context.MODE_PRIVATE);
         Gson gson = new Gson();
         String json = sharedPreferences.getString(tempList, null);
         Type type = new TypeToken<ArrayList<MusicDataCapsule>>() {
         }.getType();
         return gson.fromJson(json, type);
     }
+
     public void clearTempMusicList() {
-        sharedPreferences = context.getSharedPreferences(LIST_STORAGE, Context.MODE_PRIVATE);
+        sharedPreferences = context.getSharedPreferences(MUSIC_LIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.remove(tempList);
         editor.apply();
     }
 
-    public void saveLyrics(String songName,LRCMap _lrcMap) {
+    public void saveLyrics(String songName, LRCMap _lrcMap) {
         sharedPreferences = context.getSharedPreferences(LYRICS_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         Gson gson = new Gson();
@@ -214,27 +196,141 @@ public class StorageUtil {
         sharedPreferences = context.getSharedPreferences(LYRICS_STORAGE, Context.MODE_PRIVATE);
         Gson gson = new Gson();
         String json = sharedPreferences.getString(songName, null);
-        Type type = new TypeToken<LRCMap>(){
+        Type type = new TypeToken<LRCMap>() {
         }.getType();
         return gson.fromJson(json, type);
     }
 
-    public void removeLyrics (String songName) {
+    public void removeLyrics(String songName) {
         sharedPreferences = context.getSharedPreferences(LYRICS_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.remove(songName);
         editor.apply();
     }
-    public void saveTheme(String theme) {
-        sharedPreferences = context.getSharedPreferences(THEME_STORAGE, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(theme_name,theme);
-        editor.apply();
-    }
 
-    public String  loadTheme() {
-        sharedPreferences = context.getSharedPreferences(THEME_STORAGE, Context.MODE_PRIVATE);
-        return sharedPreferences.getString(theme_name,system_follow);
+    /**
+     * This class is only for settings page don't use it anywhere else
+     */
+    public static class SettingsStorage {
+
+        private final String SETTINGS_STORAGE = "com.atomykcoder.atomykplay.settings.SETTINGS_STORAGE";
+        private final Context context;
+        private SharedPreferences sharedPreferences;
+
+        public SettingsStorage(Context context) {
+            this.context = context;
+        }
+
+        public void saveTheme(String theme) {
+            sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString("theme_name", theme);
+            editor.apply();
+        }
+
+        public String loadTheme() {
+            sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
+            return sharedPreferences.getString("theme_name", system_follow);
+        }
+
+        public void showInfo(boolean show) {
+            sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean("show_info", show);
+            editor.apply();
+        }
+
+        public boolean loadShowInfo() {
+            sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
+            return sharedPreferences.getBoolean("show_info", true);
+        }
+
+        public void showArtist(boolean show) {
+            sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean("show_artist", show);
+            editor.apply();
+        }
+
+        public boolean loadShowArtist() {
+            sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
+            return sharedPreferences.getBoolean("show_artist", false);
+        }
+
+        public void showExtraCon(boolean show) {
+            sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean("show_extra", show);
+            editor.apply();
+        }
+
+        public boolean loadExtraCon() {
+            sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
+            return sharedPreferences.getBoolean("show_extra", false);
+        }
+
+        public void showOptionMenu(boolean show) {
+            sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean("show_opt_menu", show);
+            editor.apply();
+        }
+
+        public boolean loadOptionMenu() {
+            sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
+            return sharedPreferences.getBoolean("show_opt_menu", true);
+        }
+        public void autoPlay(boolean b) {
+            sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean("auto_play", b);
+            editor.apply();
+        }
+
+        public boolean loadAutoPlay() {
+            sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
+            return sharedPreferences.getBoolean("auto_play", false);
+        }
+
+        public void keepShuffle(boolean b) {
+            sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean("keep_shuffle", b);
+            editor.apply();
+        }
+
+        public boolean loadKeepShuffle() {
+            sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
+            return sharedPreferences.getBoolean("keep_shuffle", false);
+        }
+
+        public void lowerVol(boolean b) {
+            sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean("lower_vol", b);
+            editor.apply();
+        }
+
+        public boolean loadLowerVol() {
+            sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
+            return sharedPreferences.getBoolean("lower_vol", true);
+        }
+
+        /**
+         * @param dur it should be between 10 to 120 (120 is max duration you can filter)
+         */
+        public void filterDur(int dur) {
+            sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putInt("filter_dur", dur);
+            editor.apply();
+        }
+
+        public int loadFilterDur() {
+            sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
+            return sharedPreferences.getInt("filter_dur", 10);
+        }
+
     }
 
 }

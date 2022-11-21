@@ -6,15 +6,12 @@ import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.shuffle;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,7 +21,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.activities.MainActivity;
-import com.atomykcoder.atomykplay.activities.RingtoneManagerActivity;
 import com.atomykcoder.atomykplay.classes.GlideBuilt;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
@@ -67,13 +63,15 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
             if (file.exists()) {
                 //check is service active
                 StorageUtil storage = new StorageUtil(context);
+                StorageUtil.SettingsStorage settingsStorage = new StorageUtil.SettingsStorage(context);
                 storage.saveMusicList(musicArrayList);
                 //if shuffle button is already on it will shuffle it from start
-                if (storage.loadShuffle().equals(shuffle)) {
+                if (settingsStorage.loadKeepShuffle()) {
                     MusicDataCapsule activeMusic;
                     ArrayList<MusicDataCapsule> shuffleList = new ArrayList<>(musicArrayList);
                     //saving list in temp for restore function in player fragment
                     storage.saveTempMusicList(musicArrayList);
+                    storage.saveShuffle(shuffle);
 
                     if (musicArrayList != null) {
                         if (position != -1 && position < musicArrayList.size()) {
@@ -104,8 +102,9 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
                         service.shutdown();
 
                     }
-                } else if (storage.loadShuffle().equals(no_shuffle)) {
+                } else if (!settingsStorage.loadKeepShuffle()){
                     //Store serializable music list to sharedPreference
+                    storage.saveShuffle(no_shuffle);
                     storage.saveMusicList(musicArrayList);
                     storage.saveMusicIndex(position);
                     mainActivity.playAudio();
@@ -124,7 +123,7 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
         holder.imageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-               mainActivity.openOptionMenu(holder.imageButton, currentItem);
+                mainActivity.openOptionMenu(holder.imageButton, currentItem);
             }
         });
 

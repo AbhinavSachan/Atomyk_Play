@@ -16,11 +16,12 @@ import java.util.Comparator;
 
 public class FetchMusic {
 
-    public static int filter = 20000;
+    private static int filter;
 
     public static void fetchMusic(ArrayList<MusicDataCapsule> dataList, Context context) {
         String selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0";
-        @SuppressLint("InlinedApi") String[] proj = {
+        @SuppressLint("InlinedApi")
+        String[] proj = {
                 MediaStore.Audio.Media.TITLE,
                 MediaStore.Audio.Media.ARTIST,
                 MediaStore.Audio.Media.ALBUM_ID,
@@ -71,6 +72,7 @@ public class FetchMusic {
                     String sAlbumUri = Uri.withAppendedPath(uri, sAlbumId).toString();
 
                     MusicDataCapsule music;
+                    filter = new StorageUtil.SettingsStorage(context).loadFilterDur() * 1000;
                     music = new MusicDataCapsule(sTitle, sArtist, sAlbum, sAlbumUri, sLength, sPath, sBitrate, sMimeType, sSize, sGenre);
                     File file = new File(music.getsPath());
                     if (file.exists()) {
