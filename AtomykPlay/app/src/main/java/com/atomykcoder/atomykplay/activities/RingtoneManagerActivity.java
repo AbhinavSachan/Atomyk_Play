@@ -61,11 +61,12 @@ public class RingtoneManagerActivity extends AppCompatActivity {
 
 
         if(!_from.isEmpty() && !_to.isEmpty()) {
-            String path = music.getsPath().replace(music.getsName() + ".mp3", "");
+            String path = music.getsPath().replace( ".mp3", "");
             Log.i("info", "path: " + path);
 
-            String command = " -ss " + _from + " -i " + music.getsPath() + " -t " + diff +
-                    " -vn -c copy " + path + music.getsName() + "_atomykplay_ringtone.mp3";
+            String command = " -ss " + _from + " -y -i \"" + music.getsPath() + "\" -t " + diff +
+                    " -vn -c copy \"" + path + "_atomykplay.mp3\"";
+            Log.i("info", "command: " + command);
 
             FFmpegSession session = FFmpegKit.execute(command);
 
@@ -80,7 +81,7 @@ public class RingtoneManagerActivity extends AppCompatActivity {
                 Log.i("info", session.getReturnCode().toString());
                 if(ReturnCode.isSuccess(session.getReturnCode())) {
                     Log.i("info", "created the trimmed ringtone");
-                    Toast.makeText(this, "Successfully saved in " + path, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Successfully saved in " + path, Toast.LENGTH_LONG).show();
                 } else if(ReturnCode.isCancel(session.getReturnCode())){
                     Log.i("info", "canceled execution");
                     Toast.makeText(this, "Execution Cancelled ", Toast.LENGTH_SHORT).show();
