@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.R;
+import com.atomykcoder.atomykplay.activities.MainActivity;
 
 import java.util.ArrayList;
 
@@ -32,7 +33,12 @@ public class MusicLyricsAdapter extends RecyclerView.Adapter<MusicLyricsAdapter.
     @Override
     public void onBindViewHolder(@NonNull LyricsViewAdapter holder, int position) {
         holder.textView.setText(arrayList.get(position));
-
+        holder.textView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ((MainActivity)context).bottomSheetPlayerFragment.skipToPosition(holder.getAbsoluteAdapterPosition());
+            }
+        });
     }
 
     @Override

@@ -23,10 +23,9 @@
             android:contentDescription="@string/imageView"
             android:elevation="10dp"
             android:focusable="true"
-            android:visibility="visible"
+            android:foreground="@drawable/round_select_effect_small"
             android:padding="12dp"
             android:src="@drawable/ic_more_horizontal"
-            android:theme="@android:style/ThemeOverlay.Material.Dark"
             app:layout_constraintBottom_toTopOf="@+id/coverRelativeLayout"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -178,10 +177,9 @@
                 android:contentDescription="@string/imageView"
                 android:elevation="10dp"
                 android:focusable="true"
+                android:foreground="@drawable/round_select_effect_small"
                 android:padding="10dp"
-                android:src="@drawable/ic_music_list"
-                android:theme="@android:style/ThemeOverlay.Material.Dark" />
-
+                android:src="@drawable/ic_music_list" />
         </LinearLayout>
 
         <LinearLayout
@@ -207,10 +205,9 @@
                 android:contentDescription="@string/imageView"
                 android:elevation="10dp"
                 android:focusable="true"
+                android:foreground="@drawable/round_select_effect_small"
                 android:padding="10dp"
-                android:src="@drawable/ic_repeat_empty"
-                android:theme="@android:style/ThemeOverlay.Material.Dark" />
-
+                android:src="@drawable/ic_repeat_empty" />
 
             <ImageView
                 android:id="@+id/player_previous_iv"
@@ -221,37 +218,37 @@
                 android:contentDescription="@string/imageView"
                 android:elevation="10dp"
                 android:focusable="true"
+                android:foreground="@drawable/round_select_effect_small"
                 android:padding="10dp"
-                android:src="@drawable/ic_previous_main"
-                android:theme="@android:style/ThemeOverlay.Material.Dark" />
+                android:src="@drawable/ic_previous_main" />
 
             <RelativeLayout
                 android:layout_width="wrap_content"
-                android:padding="10dp"
+                android:layout_height="wrap_content"
                 android:clipToPadding="false"
-                android:layout_height="wrap_content">
+                android:padding="10dp">
+
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/player_play_cv"
                     android:layout_width="65dp"
                     android:layout_height="65dp"
-                    app:cardBackgroundColor="@color/tertiary_bg"
-                    android:focusable="true"
-                    app:cardElevation="8dp"
                     android:clickable="true"
-                    android:theme="@android:style/ThemeOverlay.Material.Dark"
-                    app:cardCornerRadius="50dp">
+                    android:focusable="true"
+                    android:foreground="@drawable/round_select_effect_for_play_btn"
+                    app:cardBackgroundColor="@color/tertiary_bg"
+                    app:cardCornerRadius="50dp"
+                    app:cardElevation="8dp">
+
                     <ImageView
                         android:id="@+id/player_play_iv"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:contentDescription="@string/imageView"
-                        android:src="@drawable/ic_play_main"
-                        />
+                        android:src="@drawable/ic_play_main" />
                 </com.google.android.material.card.MaterialCardView>
 
             </RelativeLayout>
-
 
             <ImageView
                 android:id="@+id/player_next_iv"
@@ -262,10 +259,9 @@
                 android:contentDescription="@string/imageView"
                 android:elevation="10dp"
                 android:focusable="true"
+                android:foreground="@drawable/round_select_effect_small"
                 android:padding="10dp"
-                android:src="@drawable/ic_next_main"
-                android:theme="@android:style/ThemeOverlay.Material.Dark" />
-
+                android:src="@drawable/ic_next_main" />
 
             <ImageView
                 android:id="@+id/player_shuffle_iv"
@@ -277,10 +273,9 @@
                 android:contentDescription="@string/imageView"
                 android:elevation="10dp"
                 android:focusable="true"
+                android:foreground="@drawable/round_select_effect_small"
                 android:padding="10dp"
-                android:src="@drawable/ic_shuffle_empty"
-                android:theme="@android:style/ThemeOverlay.Material.Dark" />
-
+                android:src="@drawable/ic_shuffle_empty" />
 
         </LinearLayout>
 
@@ -364,7 +359,6 @@
 
         </LinearLayout>
 
-
         <ImageView
             android:id="@+id/player_favorite_iv"
             android:layout_width="wrap_content"
@@ -378,6 +372,7 @@
             android:contentDescription="@string/imageView"
             android:elevation="10dp"
             android:focusable="true"
+            android:foreground="@drawable/round_select_effect_small"
             android:padding="10dp"
             android:src="@drawable/ic_favorite_border"
             android:theme="@android:style/ThemeOverlay.Material.Dark"
@@ -403,12 +398,12 @@
                 android:layout_centerInParent="true"
                 android:clickable="true"
                 android:focusable="true"
+                android:foreground="@drawable/round_select_effect_small"
                 android:padding="10dp"
                 android:text="@string/start_pos"
                 android:textColor="@color/text_color"
                 android:textSize="@dimen/d_12sp"
                 android:textStyle="bold"
-                android:theme="@android:style/ThemeOverlay.Material.Dark"
                 android:visibility="gone" />
 
 
@@ -420,10 +415,9 @@
                 android:contentDescription="@string/imageView"
                 android:elevation="10dp"
                 android:focusable="true"
+                android:foreground="@drawable/round_select_effect_small"
                 android:padding="10dp"
-                android:src="@drawable/ic_timer_add"
-                android:theme="@android:style/ThemeOverlay.Material.Dark" />
-
+                android:src="@drawable/ic_timer_add" />
         </RelativeLayout>
 
         <ImageView
@@ -439,9 +433,9 @@
             android:contentDescription="@string/imageView"
             android:elevation="10dp"
             android:focusable="true"
+            android:foreground="@drawable/round_select_effect_small"
             android:padding="10dp"
             android:src="@drawable/ic_baseline_subtitles_24"
-            android:theme="@android:style/ThemeOverlay.Material.Dark"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
@@ -478,11 +472,13 @@
             android:layout_height="wrap_content" />
 
     </LinearLayout>
+
     <View
         android:id="@+id/shadow_player"
-        android:background="@color/translucent_black"
         android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:alpha="0"
-        android:layout_height="match_parent"/>
+        android:background="@color/translucent_black" />
+
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -7,7 +7,7 @@
     android:background="@color/secondary_bg"
     android:clickable="true"
     android:focusable="true"
-    android:theme="@android:style/ThemeOverlay.Material.Dark">
+    android:foreground="?android:attr/selectableItemBackground">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -18,6 +18,7 @@
         android:paddingBottom="6dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
+
 
         <RelativeLayout
             android:id="@+id/materialCardView_queue"
@@ -33,9 +34,9 @@
                 android:id="@+id/materialCardView_for_cons"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
+                android:layout_centerInParent="true"
                 app:cardBackgroundColor="@color/secondary_bg"
                 app:cardCornerRadius="6dp"
-                android:layout_centerInParent="true"
                 app:cardElevation="3dp">
 
                 <ImageView
@@ -50,21 +51,21 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="21dp"
                 android:layout_height="21dp"
-                app:cardBackgroundColor="@color/primary_bg"
-                app:cardCornerRadius="36dp"
                 android:layout_alignParentBottom="true"
                 android:layout_centerHorizontal="true"
+                app:cardBackgroundColor="@color/primary_bg"
+                app:cardCornerRadius="36dp"
                 app:cardElevation="4dp">
 
                 <TextView
                     android:id="@+id/song_index_num_queue"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:maxLines="1"
                     android:gravity="center"
-                    android:textSize="11sp"
+                    android:maxLines="1"
+                    android:scaleType="centerCrop"
                     android:textColor="@color/text_color"
-                    android:scaleType="centerCrop" />
+                    android:textSize="11sp" />
 
             </com.google.android.material.card.MaterialCardView>
 
@@ -133,12 +134,12 @@
             android:id="@+id/more_option_i_btn_queue"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:clickable="true"
             android:contentDescription="@string/empty"
             android:focusable="true"
-            android:clickable="true"
+            android:foreground="@drawable/round_select_effect_small"
             android:padding="13dp"
             android:src="@drawable/ic_drag_handle"
-            android:theme="@android:style/ThemeOverlay.Material.Dark"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

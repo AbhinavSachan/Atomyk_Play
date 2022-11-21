@@ -6,7 +6,8 @@
     android:layout_height="70dp"
     android:background="@color/secondary_bg"
     android:clickable="true"
-    android:focusable="true">
+    android:focusable="true"
+    android:foreground="?android:attr/selectableItemBackground">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -43,7 +44,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginStart="58dp"
-            android:layout_marginEnd="45dp"
+            android:layout_marginEnd="40dp"
             android:gravity="center"
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -103,9 +104,9 @@
             android:layout_height="match_parent"
             android:contentDescription="@string/empty"
             android:focusable="true"
+            android:foreground="@drawable/round_select_effect_small"
             android:padding="13dp"
             android:src="@drawable/ic_option"
-            android:theme="@android:style/ThemeOverlay.Material.Dark"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

@@ -41,8 +41,8 @@
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_marginStart="12dp"
             android:gravity="center_vertical"
+            android:layout_marginStart="12dp"
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/mini_image_ll"
@@ -92,9 +92,9 @@
                 android:background="@android:color/transparent"
                 android:contentDescription="@string/empty"
                 android:focusable="true"
+                android:foreground="@drawable/round_select_effect_small"
                 android:padding="10dp"
-                android:src="@drawable/ic_play_mini"
-                android:theme="@android:style/ThemeOverlay.Material.Dark" />
+                android:src="@drawable/ic_play_mini" />
 
             <ImageView
                 android:id="@+id/more_option_i_btn_next"
@@ -103,9 +103,9 @@
                 android:background="@android:color/transparent"
                 android:contentDescription="@string/empty"
                 android:focusable="true"
+                android:foreground="@drawable/round_select_effect_small"
                 android:padding="10dp"
-                android:src="@drawable/ic_next_mini"
-                android:theme="@android:style/ThemeOverlay.Material.Dark" />
+                android:src="@drawable/ic_next_mini" />
 
         </LinearLayout>
 
