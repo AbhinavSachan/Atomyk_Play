@@ -7,7 +7,7 @@ android {
 
     defaultConfig {
         applicationId "com.atomykcoder.atomykplay"
-        minSdk 21
+        minSdk 24
         targetSdk 32
         versionCode 1
         versionName "1.0"
@@ -43,6 +43,14 @@ dependencies {
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.10'
     //event bus implementations
     implementation 'org.greenrobot:eventbus:3.3.1'
+
+    //audio editing implementation
+    implementation 'com.arthenica:ffmpeg-kit-full:5.1'
+
+    //Parceling data
+    implementation 'org.parceler:parceler-api:1.1.12'
+    annotationProcessor 'org.parceler:parceler:1.1.12'
+
 
     //legacy implementations
     implementation 'androidx.appcompat:appcompat:1.5.1'

@@ -91,4 +91,18 @@ public class MusicHelper {
         }
         return out;
     }
+
+    //endregion
+    //converting readable duration to milliseconds
+    public static int convertToMillis(String duration) {
+        int out;
+        String _duration = duration.replace("[", "").replace("]", "");
+        String[] numbers = _duration.split(":");
+        int min = Integer.parseInt(numbers[0]);
+        int second = Integer.parseInt(numbers[1]);
+        min = min * (60 * 1000);
+        second = second * 1000;
+        out = min + second;
+        return out;
+    }
 }

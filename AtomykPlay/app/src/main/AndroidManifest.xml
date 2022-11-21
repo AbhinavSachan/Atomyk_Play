@@ -14,7 +14,7 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="29" />
+        android:maxSdkVersion="31" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.BROADCAST_STICKY" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
@@ -46,17 +46,29 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".activities.RingtoneManagerActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AtomykPlay"
+            tools:ignore="LockedOrientationActivity">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
             android:name=".SplashActivity"
+            android:exported="true"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.Splash"
-            android:exported="true"
             tools:ignore="LockedOrientationActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
@@ -68,7 +80,7 @@
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AtomykPlay"
             android:windowSoftInputMode="adjustPan"
-            tools:ignore="LockedOrientationActivity"/>
+            tools:ignore="LockedOrientationActivity" />
 
         <service
             android:name=".services.MediaPlayerService"

@@ -19,12 +19,14 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
 import android.widget.TextView;
@@ -71,6 +73,7 @@ import com.turingtechnologies.materialscrollbar.AlphabetIndicator;
 import com.turingtechnologies.materialscrollbar.DragScrollBar;
 
 import org.greenrobot.eventbus.EventBus;
+import org.parceler.Parcels;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -554,6 +557,38 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         transaction.replace(R.id.sec_container, searchResultsFragment, "SearchResultsFragment");
         transaction.addToBackStack(null);
         transaction.commit();
+    }
+
+    public void openRingtoneManagerActivity(MusicDataCapsule music) {
+        Intent intent = new Intent(MainActivity.this, RingtoneManagerActivity.class);
+
+        Bundle bundle = new Bundle();
+        bundle.putParcelable("music", Parcels.wrap(music));
+        intent.putExtras(bundle);
+        startActivity(intent);
+    }
+
+    public void openOptionMenu(
+                               ImageView imageButton,
+                               MusicDataCapsule currentItem) {
+
+        PopupMenu popupMenu = new PopupMenu(MainActivity.this, imageButton);
+        popupMenu.getMenuInflater().inflate(R.menu.option_menu, popupMenu.getMenu());
+
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                if(menuItem == popupMenu.getMenu().findItem(R.id.set_as_ringtone))
+                {
+                    Toast.makeText(MainActivity.this, "Opening Ringtone cutter", Toast.LENGTH_SHORT).show();
+                    openRingtoneManagerActivity(currentItem);
+                } else {
+                    Toast.makeText(MainActivity.this, "Clicked", Toast.LENGTH_SHORT).show();
+                }
+                return false;
+            }
+        });
+        popupMenu.show();
     }
 
     private void callStateListener() {

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.RingtoneManagerActivity"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        >
+    <TextView
+        android:id="@+id/ringtone_song_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Song Name"
+        android:textSize="@dimen/d_20sp"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="20dp"/>
+    <TextView
+        android:id="@+id/ringtone_artist_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Artist Name"
+        android:textSize="@dimen/d_20sp"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="20dp"/>
+    <TextView
+        android:id="@+id/ringtone_original_length"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="[0:40:20]"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="20dp"
+        />
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp">
+    <EditText
+        android:id="@+id/ringtone_from_edit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="00:00"
+        android:layout_marginLeft="30dp"
+        android:width="100dp"
+        />
+    <EditText
+        android:id="@+id/ringtone_to_edit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="150dp"
+        android:width="100dp"/>
+    </LinearLayout>
+    <Button
+        android:id="@+id/ringtone_cut_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Cut"
+        android:textColor="@color/teal_200"
+        android:backgroundTint="@color/primary_bg"
+        android:layout_marginLeft="130dp"
+        android:layout_marginTop="30dp"
+        />
+
+</LinearLayout>

@@ -1,5 +1,9 @@
 package com.atomykcoder.atomykplay.viewModals;
 
+import org.parceler.Parcel;
+import org.parceler.ParcelConstructor;
+
+@Parcel
 public class MusicDataCapsule {
     String sName;
     String sArtist;
@@ -12,6 +16,7 @@ public class MusicDataCapsule {
     String sSize;
     String sGenre;
 
+    @ParcelConstructor
     public MusicDataCapsule(String sName, String sArtist, String sAlbum, String sAlbumUri, String sLength, String sPath, String sBitrate, String sMimeType, String sSize, String sGenre) {
         this.sName = sName;
         this.sArtist = sArtist;
@@ -64,4 +69,5 @@ public class MusicDataCapsule {
     public String getsPath() {
         return sPath;
     }
+
 }

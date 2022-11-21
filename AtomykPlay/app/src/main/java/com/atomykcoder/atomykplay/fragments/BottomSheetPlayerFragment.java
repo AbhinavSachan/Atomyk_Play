@@ -56,6 +56,7 @@ import com.atomykcoder.atomykplay.events.SetMainLayoutEvent;
 import com.atomykcoder.atomykplay.events.UpdateMusicImageEvent;
 import com.atomykcoder.atomykplay.events.UpdateMusicProgressEvent;
 import com.atomykcoder.atomykplay.helperFunctions.LRCMap;
+import com.atomykcoder.atomykplay.helperFunctions.MusicHelper;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
@@ -102,6 +103,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     private ImageView repeatImg;
     private ImageView shuffleImg;
     private ImageView timerImg;
+    private ImageView optionImg;
     //setting up mini player layout
     //calling it from service when player is prepared and also calling it in this fragment class
     //to set it on app start ☺
@@ -149,7 +151,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         shuffleImg = view.findViewById(R.id.player_shuffle_iv);//○
         favoriteImg = view.findViewById(R.id.player_favorite_iv);//○
         timerImg = view.findViewById(R.id.player_timer_iv);//○
-        ImageView optionImg = view.findViewById(R.id.player_option_iv);//○
+        optionImg = view.findViewById(R.id.player_option_iv);//○
         playerSongNameTv = view.findViewById(R.id.player_song_name_tv);//○
         playerArtistNameTv = view.findViewById(R.id.player_song_artist_name_tv);//○
         bitrateTv = view.findViewById(R.id.player_bitrate_tv);//○
@@ -360,7 +362,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
                     String nextStamp = getNextStamp(lrcMap);
                     if (!nextStamp.equals("")) {
-                        nextStampInMillis = convertToMillis(nextStamp);
+                        nextStampInMillis = MusicHelper.convertToMillis(nextStamp);
                         currPosInMillis = getCurrentPos();
                     }
                 }
@@ -526,7 +528,8 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
     private void optionMenu() {
         //add a bottom sheet to show music options like set to ringtone ,audio details ,add to playlist etc.
-        showToast("option");
+        if(getMusic() != null)
+            mainActivity.openOptionMenu(optionImg, getMusic());
     }
 
     //region Timer setup
@@ -919,17 +922,5 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         itemTouchHelper.startDrag(viewHolder);
     }
 
-    //endregion
-    public int convertToMillis(String duration) {
-        int out;
-        String _duration = duration.replace("[", "").replace("]", "");
-        String[] numbers = _duration.split(":");
-        int min = Integer.parseInt(numbers[0]);
-        int second = Integer.parseInt(numbers[1]);
-        min = min * (60 * 1000);
-        second = second * 1000;
-        out = min + second;
-        return out;
-    }
 
 }

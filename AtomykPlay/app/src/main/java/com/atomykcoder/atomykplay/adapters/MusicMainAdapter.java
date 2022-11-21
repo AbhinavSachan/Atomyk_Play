@@ -6,6 +6,7 @@ import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.shuffle;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.LayoutInflater;
@@ -23,6 +24,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.activities.MainActivity;
+import com.atomykcoder.atomykplay.activities.RingtoneManagerActivity;
 import com.atomykcoder.atomykplay.classes.GlideBuilt;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
@@ -122,16 +124,7 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
         holder.imageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                PopupMenu popupMenu = new PopupMenu(context, holder.imageButton);
-                popupMenu.getMenuInflater().inflate(R.menu.option_menu, popupMenu.getMenu());
-                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem menuItem) {
-                        Toast.makeText(context, "Clicked", Toast.LENGTH_SHORT).show();
-                        return false;
-                    }
-                });
-                popupMenu.show();
+               mainActivity.openOptionMenu(holder.imageButton, currentItem);
             }
         });
 
