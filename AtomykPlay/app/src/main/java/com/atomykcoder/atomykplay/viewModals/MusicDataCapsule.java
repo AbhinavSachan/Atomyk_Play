@@ -1,10 +1,8 @@
 package com.atomykcoder.atomykplay.viewModals;
 
-import org.parceler.Parcel;
-import org.parceler.ParcelConstructor;
+import java.io.Serializable;
 
-@Parcel
-public class MusicDataCapsule {
+public class MusicDataCapsule implements Serializable {
     String sName;
     String sArtist;
     String sAlbum;
@@ -16,7 +14,6 @@ public class MusicDataCapsule {
     String sSize;
     String sGenre;
 
-    @ParcelConstructor
     public MusicDataCapsule(String sName, String sArtist, String sAlbum, String sAlbumUri, String sLength, String sPath, String sBitrate, String sMimeType, String sSize, String sGenre) {
         this.sName = sName;
         this.sArtist = sArtist;

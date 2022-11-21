@@ -19,7 +19,6 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -73,7 +72,6 @@ import com.turingtechnologies.materialscrollbar.AlphabetIndicator;
 import com.turingtechnologies.materialscrollbar.DragScrollBar;
 
 import org.greenrobot.eventbus.EventBus;
-import org.parceler.Parcels;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -559,12 +557,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         transaction.commit();
     }
 
-    public void openRingtoneManagerActivity(MusicDataCapsule music) {
+    private void openRingtoneManagerActivity(MusicDataCapsule music) {
         Intent intent = new Intent(MainActivity.this, RingtoneManagerActivity.class);
 
-        Bundle bundle = new Bundle();
-        bundle.putParcelable("music", Parcels.wrap(music));
-        intent.putExtras(bundle);
+        intent.putExtra("music", music);
         startActivity(intent);
     }
 
