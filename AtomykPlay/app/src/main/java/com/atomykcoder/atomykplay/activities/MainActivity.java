@@ -12,12 +12,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.media.AudioManager;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.provider.Settings;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -65,13 +69,17 @@ import com.google.android.material.navigation.NavigationView;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
+import com.karumi.dexter.listener.PermissionDeniedResponse;
+import com.karumi.dexter.listener.PermissionGrantedResponse;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
+import com.karumi.dexter.listener.single.PermissionListener;
 import com.turingtechnologies.materialscrollbar.AlphabetIndicator;
 import com.turingtechnologies.materialscrollbar.DragScrollBar;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -574,10 +582,34 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         transaction.commit();
     }
 
-    private void openRingtoneManagerActivity(MusicDataCapsule music) {
-        Intent intent = new Intent(MainActivity.this, RingtoneManagerActivity.class);
-        intent.putExtra("music", music);
-        startActivity(intent);
+    private void setRingtone(MusicDataCapsule music) {
+            Uri uri = Uri.fromFile(new File(music.getsPath()));
+            uri
+            Log.i("info", String.valueOf(uri));
+            RingtoneManager.setActualDefaultRingtoneUri(MainActivity.this,
+                    RingtoneManager.TYPE_RINGTONE, uri);
+            Uri uri2 = RingtoneManager.getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_RINGTONE);
+            Log.i("info", String.valueOf(uri2));
+    }
+
+    private void requestWriteSettingsPermission(MusicDataCapsule currentItem) {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+
+            boolean canWrite = Settings.System.canWrite(this);
+
+            if(canWrite)
+            {
+                setRingtone(currentItem);
+            }
+            else
+            {
+                Intent intent = new Intent();
+                intent.setAction(Settings.ACTION_MANAGE_WRITE_SETTINGS);
+                Uri uri = Uri.fromParts("package", getApplicationContext().getPackageName(), null);
+                intent.setData(uri);
+                startActivity(intent);
+            }
+        }
     }
 
     public void openOptionMenu(ImageView imageButton, MusicDataCapsule currentItem) {
@@ -585,9 +617,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         popupMenu.getMenuInflater().inflate(R.menu.option_menu, popupMenu.getMenu());
 
         popupMenu.setOnMenuItemClickListener(menuItem -> {
+
             if (menuItem == popupMenu.getMenu().findItem(R.id.set_as_ringtone)) {
-                Toast.makeText(MainActivity.this, "Opening Ringtone cutter", Toast.LENGTH_SHORT).show();
-                openRingtoneManagerActivity(currentItem);
+                requestWriteSettingsPermission(currentItem);
             } else {
                 Toast.makeText(MainActivity.this, "Clicked", Toast.LENGTH_SHORT).show();
             }
