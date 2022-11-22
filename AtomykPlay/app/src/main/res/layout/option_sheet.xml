@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/primary_bg"
     android:clickable="true"
-    android:elevation="15dp"
+    android:elevation="50dp"
     android:focusable="true"
     android:orientation="vertical"
     app:layout_behavior=".customScripts.CustomBottomSheet">

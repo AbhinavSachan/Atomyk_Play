@@ -11,6 +11,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Rect;
 import android.media.AudioManager;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -25,6 +26,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -94,6 +96,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public static boolean phone_ringing = false;
 
     public static MediaPlayerService media_player_service;
+    private final BottomSheetBehavior.BottomSheetCallback optionCallback = new BottomSheetBehavior.BottomSheetCallback() {
+        @Override
+        public void onStateChanged(@NonNull View bottomSheet, int newState) {
+            if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
+                shadowOptionSheet.setClickable(true);
+                shadowOptionSheet.setFocusable(true);
+                shadowOptionSheet.setAlpha(0.7f);
+            } else if (newState == BottomSheetBehavior.STATE_EXPANDED) {
+                shadowOptionSheet.setClickable(true);
+                shadowOptionSheet.setFocusable(true);
+                shadowOptionSheet.setAlpha(1f);
+            }else if (newState == BottomSheetBehavior.STATE_HIDDEN) {
+                shadowOptionSheet.setClickable(false);
+                shadowOptionSheet.setFocusable(false);
+            }
+        }
+
+        @Override
+        public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+            shadowOptionSheet.setAlpha(0.7f + slideOffset);
+        }
+    };
     public ServiceConnection service_connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -116,7 +140,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public CustomBottomSheet<View> optionSheetBehavior;
     FragmentManager searchFragmentManager;
     private View shadowMain;
-    private View shadowLyrFound;
+    private View shadowLyrFound, shadowOptionSheet;
     private final BottomSheetBehavior.BottomSheetCallback lrcFoundCallback = new BottomSheetBehavior.BottomSheetCallback() {
         @Override
         public void onStateChanged(@NonNull View bottomSheet, int newState) {
@@ -130,21 +154,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         @Override
         public void onSlide(@NonNull View bottomSheet, float slideOffset) {
             shadowLyrFound.setAlpha(0.2f + slideOffset);
-        }
-    };
-    private final BottomSheetBehavior.BottomSheetCallback optionCallback = new BottomSheetBehavior.BottomSheetCallback() {
-        @Override
-        public void onStateChanged(@NonNull View bottomSheet, int newState) {
-            if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
-                shadowLyrFound.setAlpha(0.7f);
-            } else if (newState == BottomSheetBehavior.STATE_EXPANDED) {
-                shadowLyrFound.setAlpha(1f);
-            }
-        }
-
-        @Override
-        public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-            shadowLyrFound.setAlpha(0.7f + slideOffset);
         }
     };
     private ArrayList<MusicDataCapsule> dataList;
@@ -207,8 +216,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private View addPlayNextBtn, addToQueueBtn, setAsRingBtn;
     private MusicDataCapsule activeItem;
-    private ImageView optionCover,addToFav;
+    private ImageView optionCover, addToFav;
     private TextView optionName, optionArtist;
+    private View optionSheet;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -238,6 +248,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         progressBar = findViewById(R.id.progress_bar_main_activity);
         shadowMain = findViewById(R.id.shadow_main);
         shadowLyrFound = findViewById(R.id.shadow_lyrics_found);
+        shadowOptionSheet = findViewById(R.id.option_sheet_shadow);
+        optionSheet = findViewById(R.id.option_bottom_sheet);
+
 
         mainPlayerSheetBehavior = (CustomBottomSheet<View>) BottomSheetBehavior.from(player_bottom_sheet);
 
@@ -327,7 +340,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             mainPlayerSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
         }
 
-        View optionSheet = findViewById(R.id.option_bottom_sheet);
         optionSheetBehavior = (CustomBottomSheet<View>) BottomSheetBehavior.from(optionSheet);
         optionSheetBehavior.setHideable(true);
         optionSheetBehavior.setPeekHeight(1100);
@@ -339,6 +351,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         lyricsListBehavior.setHideable(true);
         lyricsListBehavior.setPeekHeight(360);
         lyricsListBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        //this function will collapse the option bottom sheet if we click outside of sheet
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            if (optionSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
+                Rect outRect = new Rect();
+                optionSheet.getGlobalVisibleRect(outRect);
+                if (!outRect.contains((int) event.getRawX(), (int) event.getRawY())) {
+                    optionSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+                }
+            }
+        }
+        return super.dispatchTouchEvent(event);
     }
 
     @SuppressLint("SetTextI18n")
@@ -651,9 +678,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         }
     }
-
+private View optionEmptyCon;
     public void openOptionMenu(MusicDataCapsule currentItem) {
         activeItem = currentItem;
+
         optionSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         optionName.setText(currentItem.getsName());
         optionArtist.setText(currentItem.getsArtist());
