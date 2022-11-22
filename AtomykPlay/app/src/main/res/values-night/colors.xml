@@ -7,11 +7,8 @@
     <color name="icons_bg">#CACACA</color>
     <color name="play_icons_bg">#DCDCDC</color>
     <color name="text_color">#E3E3E3</color>
-    <color name="text_color_light">#303030</color>
-    <color name="space_black">#D3E1E1</color>
     <color name="sub_text_grey">#BFB4B4</color>
     <color name="cover_image_grey">#555555</color>
-    <color name="sub_text_grey_light">#474747</color>
     <color name="soft_black">#BDBDBD</color>
     <color name="cover_black">#191919</color>
     <color name="light_slate_gray_blue">#A1A1A1</color>
@@ -20,7 +17,6 @@
     <color name="seekbar_shadow_center">#79435263</color>
     <color name="seekbar_shadow_start">#6D475265</color>
     <color name="for_empty_images">#C9AFB3AE</color>
-    <color name="lyrics_text_color">#C5C5C5</color>
     <color name="heart_bg">#DC2525</color>
     <color name="translucent_black">#EB030407</color>
     <color name="player_shadow_black">#36040507</color>

@@ -67,11 +67,8 @@ import com.google.android.material.navigation.NavigationView;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
-import com.karumi.dexter.listener.PermissionDeniedResponse;
-import com.karumi.dexter.listener.PermissionGrantedResponse;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
-import com.karumi.dexter.listener.single.PermissionListener;
 import com.turingtechnologies.materialscrollbar.AlphabetIndicator;
 import com.turingtechnologies.materialscrollbar.DragScrollBar;
 
@@ -209,6 +206,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private boolean startPlaying;
 
     private View addPlayNextBtn, addToQueueBtn, setAsRingBtn;
+    private MusicDataCapsule activeItem;
+    private ImageView optionCover,addToFav;
+    private TextView optionName, optionArtist;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -307,10 +307,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         addPlayNextBtn = findViewById(R.id.add_play_next);
         addToQueueBtn = findViewById(R.id.add_to_queue);
         setAsRingBtn = findViewById(R.id.set_ringtone);
+        optionCover = findViewById(R.id.song_album_cover_option);
+        optionArtist = findViewById(R.id.song_artist_name_option);
+        optionName = findViewById(R.id.song_name_option);
+        addToFav = findViewById(R.id.add_to_favourites);
 
         addPlayNextBtn.setOnClickListener(v -> addToNextPlay());
         addToQueueBtn.setOnClickListener(v -> addToQueue());
         setAsRingBtn.setOnClickListener(v -> setAsRing());
+        addToFav.setOnClickListener(v -> showToast("yeah"));
     }
 
     private void setBottomSheets() {
@@ -622,12 +627,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void setRingtone(MusicDataCapsule music) {
-            Uri uri = Uri.fromFile(new File(music.getsPath()));
-            Log.i("info", String.valueOf(uri));
-            RingtoneManager.setActualDefaultRingtoneUri(MainActivity.this,
-                    RingtoneManager.TYPE_RINGTONE, uri);
-            Uri uri2 = RingtoneManager.getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_RINGTONE);
-            Log.i("info", String.valueOf(uri2));
+        Uri uri = Uri.fromFile(new File(music.getsPath()));
+        Log.i("info", String.valueOf(uri));
+        RingtoneManager.setActualDefaultRingtoneUri(MainActivity.this,
+                RingtoneManager.TYPE_RINGTONE, uri);
+        Uri uri2 = RingtoneManager.getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_RINGTONE);
+        Log.i("info", String.valueOf(uri2));
     }
 
     private void requestWriteSettingsPermission(MusicDataCapsule currentItem) {
@@ -635,12 +640,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             boolean canWrite = Settings.System.canWrite(this);
 
-            if(canWrite)
-            {
+            if (canWrite) {
                 setRingtone(currentItem);
-            }
-            else
-            {
+            } else {
                 Intent intent = new Intent();
                 intent.setAction(Settings.ACTION_MANAGE_WRITE_SETTINGS);
                 Uri uri = Uri.fromParts("package", getApplicationContext().getPackageName(), null);
@@ -651,7 +653,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     public void openOptionMenu(MusicDataCapsule currentItem) {
+        activeItem = currentItem;
         optionSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        optionName.setText(currentItem.getsName());
+        optionArtist.setText(currentItem.getsArtist());
+        GlideBuilt.glide(this, currentItem.getsAlbumUri(), R.drawable.ic_music, optionCover, 65);
     }
 
     private void addToNextPlay() {
@@ -660,12 +666,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void setAsRing() {
-        showToast("Set as ringtone");
+        requestWriteSettingsPermission(activeItem);
         closeOptionSheet();
     }
 
     private void addToQueue() {
-        showToast("Added to next");
+        showToast("Added to queue");
         closeOptionSheet();
     }
 

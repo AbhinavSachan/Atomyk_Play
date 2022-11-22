@@ -372,7 +372,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         seekBarMain.setProgress(0);
         mini_progress.setProgress(0);
         GlideBuilt.glide(requireContext(), null, R.drawable.ic_music, playerCoverImage, 500);
-        GlideBuilt.glide(requireContext(), null, R.drawable.ic_music, mini_cover, 75);
+        GlideBuilt.glide(requireContext(), null, R.drawable.ic_music, mini_cover, 65);
 
     }
 
