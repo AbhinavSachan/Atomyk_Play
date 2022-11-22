@@ -453,7 +453,6 @@
         app:layout_behavior=".customScripts.CustomBottomSheet">
 
         <ImageView
-            android:id="@+id/drag_up_img"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:elevation="4dp"

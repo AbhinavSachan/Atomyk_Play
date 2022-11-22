@@ -577,7 +577,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
             lyricsImg.setImageResource(R.drawable.ic_baseline_subtitles_off);
             coverCardView.setVisibility(View.GONE);
             lyricsRelativeLayout.setVisibility(View.VISIBLE);
-            lyricsRelativeLayout.setKeepScreenOn(true);
+            lyricsRelativeLayout.setKeepScreenOn(settingsStorage.loadKeepScreenOn());
         } else if (coverCardView.getVisibility() == View.GONE) {
             lyricsImg.setImageResource(R.drawable.ic_baseline_subtitles_24);
             coverCardView.setVisibility(View.VISIBLE);
@@ -589,7 +589,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     private void optionMenu() {
         //add a bottom sheet to show music options like set to ringtone ,audio details ,add to playlist etc.
         if (getMusic() != null)
-            mainActivity.openOptionMenu(optionImg, getMusic());
+            mainActivity.openOptionMenu(getMusic());
     }
 
     //region Timer setup

@@ -316,7 +316,6 @@ public class StorageUtil {
             return sharedPreferences.getBoolean("lower_vol", true);
         }
 
-
         public void setSelfStop(boolean b) {
             sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -327,6 +326,18 @@ public class StorageUtil {
         public boolean loadSelfStop() {
             sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
             return sharedPreferences.getBoolean("self_stop", true);
+        }
+
+        public void keepScreenOn(boolean b) {
+            sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean("keep_screen_on", b);
+            editor.apply();
+        }
+
+        public boolean loadKeepScreenOn() {
+            sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
+            return sharedPreferences.getBoolean("keep_screen_on", false);
         }
 
 

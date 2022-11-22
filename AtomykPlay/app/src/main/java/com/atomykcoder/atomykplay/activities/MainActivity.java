@@ -24,7 +24,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.PopupMenu;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
 import android.widget.TextView;
@@ -35,7 +34,6 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
@@ -110,6 +108,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public CustomBottomSheet<View> mainPlayerSheetBehavior;
     public BottomSheetPlayerFragment bottomSheetPlayerFragment;
     public BottomSheetBehavior<View> lyricsListBehavior;
+    public CustomBottomSheet<View> optionSheetBehavior;
     FragmentManager searchFragmentManager;
     private View shadowMain;
     private View shadowLyrFound;
@@ -126,6 +125,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         @Override
         public void onSlide(@NonNull View bottomSheet, float slideOffset) {
             shadowLyrFound.setAlpha(0.2f + slideOffset);
+        }
+    };
+    private final BottomSheetBehavior.BottomSheetCallback optionCallback = new BottomSheetBehavior.BottomSheetCallback() {
+        @Override
+        public void onStateChanged(@NonNull View bottomSheet, int newState) {
+            if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
+                shadowLyrFound.setAlpha(0.7f);
+            } else if (newState == BottomSheetBehavior.STATE_EXPANDED) {
+                shadowLyrFound.setAlpha(1f);
+            }
+        }
+
+        @Override
+        public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+            shadowLyrFound.setAlpha(0.7f + slideOffset);
         }
     };
     private ArrayList<MusicDataCapsule> dataList;
@@ -186,6 +200,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     };
     private boolean startPlaying;
 
+    private View addPlayNextBtn, addToQueueBtn, setAsRingBtn;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -214,12 +230,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         progressBar = findViewById(R.id.progress_bar_main_activity);
         shadowMain = findViewById(R.id.shadow_main);
         shadowLyrFound = findViewById(R.id.shadow_lyrics_found);
+
         mainPlayerSheetBehavior = (CustomBottomSheet<View>) BottomSheetBehavior.from(player_bottom_sheet);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setTitle(R.string.app_name);
-        CoordinatorLayout main_layout = findViewById(R.id.main_layout);
 
         MediaPlayerService.ui_visible = true;
 
@@ -245,13 +261,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        View lyricsListView = findViewById(R.id.found_lyrics_fragments);
-        lyricsListBehavior = BottomSheetBehavior.from(lyricsListView);
-        lyricsListBehavior.setHideable(true);
-        lyricsListBehavior.setPeekHeight(360);
-        lyricsListBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-        main_layout.setNestedScrollingEnabled(false);
-
         DragScrollBar scrollBar = findViewById(R.id.dragScrollBar);
 
         recyclerView.setNestedScrollingEnabled(false);
@@ -266,11 +275,37 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (is_granted) {
             callStateListener();
         }
+        setBottomSheets();
         setFragmentInSlider();
+
+        setUpOptionMenuButtons();
+
+        lyricsListBehavior.addBottomSheetCallback(lrcFoundCallback);
+        optionSheetBehavior.addBottomSheetCallback(optionCallback);
+        mainPlayerSheetBehavior.addBottomSheetCallback(callback);
 
         audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
 
         player_bottom_sheet.setClickable(true);
+
+
+        if (savedInstanceState == null) {
+            navigationView.setCheckedItem(R.id.navigation_home);
+        }
+
+    }
+
+    private void setUpOptionMenuButtons() {
+        addPlayNextBtn = findViewById(R.id.add_play_next);
+        addToQueueBtn = findViewById(R.id.add_to_queue);
+        setAsRingBtn = findViewById(R.id.set_ringtone);
+
+        addPlayNextBtn.setOnClickListener(v -> addToNextPlay());
+        addToQueueBtn.setOnClickListener(v -> addToQueue());
+        setAsRingBtn.setOnClickListener(v -> setAsRing());
+    }
+
+    private void setBottomSheets() {
         mainPlayerSheetBehavior.setHideable(true);
         mainPlayerSheetBehavior.setPeekHeight(136);
         if (getMusic() != null) {
@@ -278,13 +313,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else {
             mainPlayerSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
         }
-        mainPlayerSheetBehavior.addBottomSheetCallback(callback);
-        lyricsListBehavior.addBottomSheetCallback(lrcFoundCallback);
 
-        if (savedInstanceState == null) {
-            navigationView.setCheckedItem(R.id.navigation_home);
-        }
+        View optionSheet = findViewById(R.id.option_bottom_sheet);
+        optionSheetBehavior = (CustomBottomSheet<View>) BottomSheetBehavior.from(optionSheet);
+        optionSheetBehavior.setHideable(true);
+        optionSheetBehavior.setPeekHeight(1100);
+        optionSheetBehavior.setSkipCollapsed(true);
+        optionSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
 
+        View lyricsListView = findViewById(R.id.found_lyrics_fragments);
+        lyricsListBehavior = BottomSheetBehavior.from(lyricsListView);
+        lyricsListBehavior.setHideable(true);
+        lyricsListBehavior.setPeekHeight(360);
+        lyricsListBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
     }
 
     @SuppressLint("SetTextI18n")
@@ -543,7 +584,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     Intent broadcastIntent = new Intent(BROADCAST_PLAY_PREVIOUS_MUSIC);
                     sendBroadcast(broadcastIntent);
                 }, 0);
-
             } else {
                 //service is active send media with broadcast receiver
                 Intent broadcastIntent = new Intent(BROADCAST_PLAY_PREVIOUS_MUSIC);
@@ -566,7 +606,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void setSearchFragment() {
-
         SearchResultsFragment searchResultsFragment = new SearchResultsFragment();
         FragmentTransaction transaction = searchFragmentManager.beginTransaction();
         transaction.replace(R.id.sec_container, searchResultsFragment, "SearchResultsFragment");
@@ -580,20 +619,32 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         startActivity(intent);
     }
 
-    public void openOptionMenu(ImageView imageButton, MusicDataCapsule currentItem) {
-        PopupMenu popupMenu = new PopupMenu(MainActivity.this, imageButton);
-        popupMenu.getMenuInflater().inflate(R.menu.option_menu, popupMenu.getMenu());
+    public void openOptionMenu(MusicDataCapsule currentItem) {
+        optionSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+    }
 
-        popupMenu.setOnMenuItemClickListener(menuItem -> {
-            if (menuItem == popupMenu.getMenu().findItem(R.id.set_as_ringtone)) {
-                Toast.makeText(MainActivity.this, "Opening Ringtone cutter", Toast.LENGTH_SHORT).show();
-                openRingtoneManagerActivity(currentItem);
-            } else {
-                Toast.makeText(MainActivity.this, "Clicked", Toast.LENGTH_SHORT).show();
-            }
-            return false;
-        });
-        popupMenu.show();
+    private void addToNextPlay() {
+        showToast("Added to next");
+        closeOptionSheet();
+    }
+
+    private void setAsRing() {
+        showToast("Set as ringtone");
+        closeOptionSheet();
+    }
+
+    private void addToQueue() {
+        showToast("Added to next");
+        closeOptionSheet();
+    }
+
+    private void closeOptionSheet() {
+        optionSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+    }
+
+    private void showToast(String s) {
+        Toast.makeText(MainActivity.this, s, Toast.LENGTH_SHORT).show();
+
     }
 
     private void callStateListener() {

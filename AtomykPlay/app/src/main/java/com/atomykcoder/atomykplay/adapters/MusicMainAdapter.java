@@ -131,7 +131,7 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
         holder.imageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mainActivity.openOptionMenu(holder.imageButton, currentItem);
+                mainActivity.openOptionMenu(currentItem);
             }
         });
 

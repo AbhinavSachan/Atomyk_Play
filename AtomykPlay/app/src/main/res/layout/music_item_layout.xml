@@ -26,7 +26,7 @@
             android:layout_margin="3dp"
             app:cardBackgroundColor="@color/secondary_bg"
             app:cardCornerRadius="6dp"
-            app:cardElevation="2dp"
+            app:cardElevation="3dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
@@ -36,6 +36,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:contentDescription="@string/empty"
+                android:src="@drawable/ic_music"
                 android:scaleType="centerCrop" />
 
         </com.google.android.material.card.MaterialCardView>
