@@ -104,12 +104,20 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
                     }
                 } else if (!settingsStorage.loadKeepShuffle()){
                     //Store serializable music list to sharedPreference
-                    storage.saveShuffle(no_shuffle);
-                    storage.saveMusicList(musicArrayList);
-                    storage.saveMusicIndex(position);
-                    mainActivity.playAudio();
-                    mainActivity.bottomSheetPlayerFragment.setAdapterInQueue();
-                    mainActivity.openBottomPlayer();
+                    ExecutorService service = Executors.newSingleThreadExecutor();
+                    Handler handler = new Handler(Looper.getMainLooper());
+                    service.execute(() -> {
+                        storage.saveShuffle(no_shuffle);
+                        storage.saveMusicList(musicArrayList);
+                        storage.saveMusicIndex(position);
+                        // post-execute code here
+                        handler.post(() -> {
+                            mainActivity.playAudio();
+                            mainActivity.bottomSheetPlayerFragment.setAdapterInQueue();
+                            mainActivity.openBottomPlayer();
+                        });
+                    });
+                    service.shutdown();
                 }
             } else {
                 Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show();

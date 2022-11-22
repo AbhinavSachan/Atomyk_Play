@@ -316,6 +316,21 @@ public class StorageUtil {
             return sharedPreferences.getBoolean("lower_vol", true);
         }
 
+
+        public void setSelfStop(boolean b) {
+            sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean("self_stop", b);
+            editor.apply();
+        }
+
+        public boolean loadSelfStop() {
+            sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
+            return sharedPreferences.getBoolean("self_stop", true);
+        }
+
+
+
         /**
          * @param dur it should be between 10 to 120 (120 is max duration you can filter)
          */

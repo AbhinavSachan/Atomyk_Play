@@ -184,6 +184,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             shadowMain.setAlpha(0 + slideOffset);
         }
     };
+    private boolean startPlaying;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -279,13 +280,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         mainPlayerSheetBehavior.addBottomSheetCallback(callback);
         lyricsListBehavior.addBottomSheetCallback(lrcFoundCallback);
-//      this will start playing song as soon as app starts if its connected to headset
-        if (new StorageUtil.SettingsStorage(this).loadAutoPlay()) {
-            startSong();
-        }
+
         if (savedInstanceState == null) {
             navigationView.setCheckedItem(R.id.navigation_home);
-
         }
 
     }
@@ -375,19 +372,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onStart() {
         if (is_granted) {
             bindService();
+            //this will start playing song as soon as app starts if its connected to headset
+            if (startPlaying)
+                startSong();
         }
         super.onStart();
     }
 
     private void startSong() {
-        if (is_granted) {
-            if (!is_playing) {
-                //noinspection deprecation
-                if (audioManager.isBluetoothScoOn() || audioManager.isWiredHeadsetOn()) {
-                    pausePlayAudio();
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            if (is_granted) {
+                if (new StorageUtil.SettingsStorage(this).loadAutoPlay()) {
+                    if (service_bound) {
+                        if (!is_playing) {
+                            //noinspection deprecation
+                            if (audioManager.isBluetoothScoOn() || audioManager.isWiredHeadsetOn()) {
+                                pausePlayAudio();
+                            }
+
+                        }
+                    }
                 }
             }
-        }
+        }, 1500);
     }
 
     @Override
@@ -406,6 +413,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (service_bound) {
             MainActivity.this.unbindService(service_connection);
         }
+        startPlaying = false;
         super.onStop();
     }
 
@@ -458,9 +466,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
      * play from start
      */
     public void playAudio() {
-        //starting the service when permissions are granted
         //starting service if its not started yet otherwise it will send broadcast msg to service
-        //we can't start service on startup of app it will lead to pausing all other sound playing on device
         storageUtil.clearMusicLastPos();
 
         if (!phone_ringing) {
@@ -485,17 +491,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
      * play or pause
      */
     public void pausePlayAudio() {
-        if (!service_bound) {
-            bindService();
-            new Handler().postDelayed(() -> {
+        if (!phone_ringing) {
+            if (!service_bound) {
+                bindService();
+                new Handler().postDelayed(() -> {
+                    //service is active send media with broadcast receiver
+                    Intent broadcastIntent = new Intent(BROADCAST_PAUSE_PLAY_MUSIC);
+                    sendBroadcast(broadcastIntent);
+                }, 0);
+            } else {
                 //service is active send media with broadcast receiver
                 Intent broadcastIntent = new Intent(BROADCAST_PAUSE_PLAY_MUSIC);
                 sendBroadcast(broadcastIntent);
-            }, 0);
+            }
         } else {
-            //service is active send media with broadcast receiver
-            Intent broadcastIntent = new Intent(BROADCAST_PAUSE_PLAY_MUSIC);
-            sendBroadcast(broadcastIntent);
+            Toast.makeText(this, "Can't play while on call", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -503,17 +513,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
      * next music
      */
     public void playNextAudio() {
-        if (!service_bound) {
-            bindService();
-            new Handler().postDelayed(() -> {
+        if (!phone_ringing) {
+            if (!service_bound) {
+                bindService();
+                new Handler().postDelayed(() -> {
+                    //service is active send media with broadcast receiver
+                    Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEXT_MUSIC);
+                    sendBroadcast(broadcastIntent);
+                }, 0);
+            } else {
                 //service is active send media with broadcast receiver
                 Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEXT_MUSIC);
                 sendBroadcast(broadcastIntent);
-            }, 0);
+            }
         } else {
-            //service is active send media with broadcast receiver
-            Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEXT_MUSIC);
-            sendBroadcast(broadcastIntent);
+            Toast.makeText(this, "Can't play while on call", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -521,18 +535,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
      * previous music
      */
     public void playPreviousAudio() {
-        if (!service_bound) {
-            bindService();
-            new Handler().postDelayed(() -> {
+        if (!phone_ringing) {
+            if (!service_bound) {
+                bindService();
+                new Handler().postDelayed(() -> {
+                    //service is active send media with broadcast receiver
+                    Intent broadcastIntent = new Intent(BROADCAST_PLAY_PREVIOUS_MUSIC);
+                    sendBroadcast(broadcastIntent);
+                }, 0);
+
+            } else {
                 //service is active send media with broadcast receiver
                 Intent broadcastIntent = new Intent(BROADCAST_PLAY_PREVIOUS_MUSIC);
                 sendBroadcast(broadcastIntent);
-            }, 0);
-
+            }
         } else {
-            //service is active send media with broadcast receiver
-            Intent broadcastIntent = new Intent(BROADCAST_PLAY_PREVIOUS_MUSIC);
-            sendBroadcast(broadcastIntent);
+            Toast.makeText(this, "Can't play while on call", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -558,7 +576,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void openRingtoneManagerActivity(MusicDataCapsule music) {
         Intent intent = new Intent(MainActivity.this, RingtoneManagerActivity.class);
-
         intent.putExtra("music", music);
         startActivity(intent);
     }
@@ -567,17 +584,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         PopupMenu popupMenu = new PopupMenu(MainActivity.this, imageButton);
         popupMenu.getMenuInflater().inflate(R.menu.option_menu, popupMenu.getMenu());
 
-        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem menuItem) {
-                if (menuItem == popupMenu.getMenu().findItem(R.id.set_as_ringtone)) {
-                    Toast.makeText(MainActivity.this, "Opening Ringtone cutter", Toast.LENGTH_SHORT).show();
-                    openRingtoneManagerActivity(currentItem);
-                } else {
-                    Toast.makeText(MainActivity.this, "Clicked", Toast.LENGTH_SHORT).show();
-                }
-                return false;
+        popupMenu.setOnMenuItemClickListener(menuItem -> {
+            if (menuItem == popupMenu.getMenu().findItem(R.id.set_as_ringtone)) {
+                Toast.makeText(MainActivity.this, "Opening Ringtone cutter", Toast.LENGTH_SHORT).show();
+                openRingtoneManagerActivity(currentItem);
+            } else {
+                Toast.makeText(MainActivity.this, "Clicked", Toast.LENGTH_SHORT).show();
             }
+            return false;
         });
         popupMenu.show();
     }

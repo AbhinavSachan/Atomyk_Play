@@ -13,6 +13,7 @@
         android:gravity="center"
         android:paddingHorizontal="25dp"
         android:paddingVertical="20dp"
+        android:foreground="?android:selectableItemBackground"
         android:text="@string/empty"
         android:textColor="@color/text_color"
         android:textSize="@dimen/d_24sp"

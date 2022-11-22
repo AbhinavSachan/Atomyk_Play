@@ -5,12 +5,14 @@
         <shape android:shape="oval">
             <solid android:color="@color/thumb_dark"/>
             <size android:width="20dp" android:height="20dp"/>
+            <stroke android:color="@color/switch_track_off" android:width="8dp"/>
         </shape>
     </item>
     <item android:state_checked="true">
         <shape android:shape="oval">
             <solid android:color="@color/thumb_light"/>
             <size android:width="20dp" android:height="20dp"/>
+            <stroke android:color="@color/switch_track_on" android:width="8dp"/>
         </shape>
     </item>
 

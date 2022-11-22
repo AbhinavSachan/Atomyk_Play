@@ -99,7 +99,7 @@
             android:layout_height="match_parent"
             android:background="@color/primary_bg"
             android:clickable="true"
-            android:elevation="30dp"
+            android:elevation="15dp"
             android:focusable="true"
             android:orientation="vertical"
             app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
@@ -124,6 +124,7 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="24dp"
+            android:elevation="20dp"
             android:background="@drawable/player_shadow"
             app:layout_anchor="@id/player_main_container" />
 
@@ -131,6 +132,7 @@
             android:id="@+id/shadow_main"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:elevation="20dp"
             android:alpha="0"
             android:background="@color/translucent_black" />
 

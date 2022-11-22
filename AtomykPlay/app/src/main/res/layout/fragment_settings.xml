@@ -12,10 +12,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/primary_bg"
-        android:orientation="vertical"
-        android:paddingTop="90dp"
         android:clickable="true"
         android:focusable="true"
+        android:orientation="vertical"
+        android:paddingTop="90dp"
         android:paddingBottom="90dp">
 
         <LinearLayout
@@ -103,12 +103,12 @@
                 android:id="@+id/show_file_info_ll"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="4dp"
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground"
+                android:orientation="horizontal"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="4dp"
                 android:weightSum="6">
 
                 <LinearLayout
@@ -153,12 +153,12 @@
                 android:id="@+id/show_artist_ll"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="4dp"
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground"
+                android:orientation="horizontal"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="4dp"
                 android:weightSum="6">
 
                 <LinearLayout
@@ -203,12 +203,12 @@
                 android:id="@+id/show_option_ll"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingVertical="4dp"
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground"
+                android:orientation="horizontal"
                 android:paddingHorizontal="16dp"
+                android:paddingVertical="4dp"
                 android:weightSum="6">
 
                 <LinearLayout
@@ -239,11 +239,11 @@
                 </LinearLayout>
 
                 <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/show_option_swi"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_weight="1"
-                    android:id="@+id/show_option_swi"
                     android:gravity="center"
                     android:thumb="@drawable/custom_switch_thumb"
                     app:track="@drawable/custom_track_switch" />
@@ -253,12 +253,12 @@
                 android:id="@+id/show_extra_ll"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingVertical="4dp"
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground"
+                android:orientation="horizontal"
                 android:paddingHorizontal="16dp"
+                android:paddingVertical="4dp"
                 android:weightSum="6">
 
                 <LinearLayout
@@ -325,12 +325,12 @@
                 android:id="@+id/autoPlay_ll"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingVertical="4dp"
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground"
+                android:orientation="horizontal"
                 android:paddingHorizontal="16dp"
+                android:paddingVertical="4dp"
                 android:weightSum="6">
 
                 <LinearLayout
@@ -375,12 +375,12 @@
                 android:id="@+id/keep_shuffle_ll"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingVertical="4dp"
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground"
                 android:orientation="horizontal"
                 android:paddingHorizontal="16dp"
+                android:paddingVertical="4dp"
                 android:weightSum="6">
 
                 <LinearLayout
@@ -425,12 +425,12 @@
                 android:id="@+id/lower_vol_ll"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingVertical="4dp"
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground"
+                android:orientation="horizontal"
                 android:paddingHorizontal="16dp"
+                android:paddingVertical="4dp"
                 android:weightSum="6">
 
                 <LinearLayout
@@ -471,6 +471,56 @@
                     app:track="@drawable/custom_track_switch" />
             </LinearLayout>
 
+            <LinearLayout
+                android:id="@+id/self_stop_ll"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:orientation="horizontal"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="4dp"
+                android:weightSum="6">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="5"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif"
+                        android:paddingVertical="4dp"
+                        android:text="@string/self_break"
+                        android:textColor="@color/text_color"
+                        android:textSize="@dimen/d_18sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif"
+                        android:paddingStart="2dp"
+                        android:paddingEnd="16dp"
+                        android:text="@string/self_stop_des"
+                        android:textColor="@color/sub_text_grey"
+                        android:textSize="@dimen/d_15sp" />
+
+                </LinearLayout>
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/self_stop_swi"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:thumb="@drawable/custom_switch_thumb"
+                    app:track="@drawable/custom_track_switch" />
+            </LinearLayout>
+
         </LinearLayout>
 
         <LinearLayout
@@ -496,12 +546,12 @@
                 android:id="@+id/blacklist_ll"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingVertical="4dp"
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground"
-                android:paddingHorizontal="16dp">
+                android:orientation="vertical"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="4dp">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -528,12 +578,12 @@
                 android:id="@+id/filter_dur_ll"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingVertical="4dp"
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground"
-                android:paddingHorizontal="16dp">
+                android:orientation="vertical"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="4dp">
 
                 <TextView
                     android:layout_width="wrap_content"

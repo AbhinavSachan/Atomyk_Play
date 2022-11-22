@@ -91,6 +91,23 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     public View player_layout;
     public ImageView optionImg;
     public View info_layout;
+    private boolean userScrolling = false;
+    RecyclerView.OnScrollListener onScrollListener = new RecyclerView.OnScrollListener() {
+        @Override
+        public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+            if (newState == 0) {
+                userScrolling = false;
+            } else if (newState == 1 || newState == 2) {
+                userScrolling = true;
+            }
+            super.onScrollStateChanged(recyclerView, newState);
+        }
+
+        @Override
+        public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+            super.onScrolled(recyclerView, dx, dy);
+        }
+    };
     private Context context;
     private TextView durationTv;
     private ImageView playerCoverImage;
@@ -211,8 +228,9 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         TextView button = view.findViewById(R.id.btn_add_lyrics);
         lyricsRecyclerView = view.findViewById(R.id.lyrics_recycler_view);
         noLyricsLayout = view.findViewById(R.id.no_lyrics_layout);
-
-
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            lyricsRecyclerView.addOnScrollListener(onScrollListener);
+        }
         button.setOnClickListener(v -> setLyricsLayout());
 
 
@@ -408,9 +426,10 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
                 }
                 if (lrcMap != null) {
                     if (lyricsRecyclerView.getVisibility() == View.VISIBLE) {
-                        if (lrcMap.containsStamp(getCurrentStamp())) {
-                            scrollToPosition(lrcMap.getIndexAtStamp(getCurrentStamp()));
-                        }
+                        if (!userScrolling)
+                            if (lrcMap.containsStamp(getCurrentStamp())) {
+                                scrollToPosition(lrcMap.getIndexAtStamp(getCurrentStamp()));
+                            }
                     }
                 }
                 lyricsHandler.postDelayed(lyricsRunnable, nextStampInMillis - currPosInMillis);
@@ -835,6 +854,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     public void onDestroy() {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
+        lyricsRecyclerView.clearOnScrollListeners();
     }
 
     @Override
@@ -931,9 +951,15 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
             mini_progress.setProgress(seekBar.getProgress());
         }
     }
+
+    /**
+     * seekTo the position of line you clicked in lyrics
+     *
+     * @param pos clicked lyric time stamp position
+     */
     public void skipToPosition(int pos) {
         scrollToPosition(pos);
-        int position =convertToMillis(lrcMap.getStampAt(pos));
+        int position = convertToMillis(lrcMap.getStampAt(pos));
         if (lrcMap != null) {
             seekBarMain.setProgress(position);
             curPosTv.setText(convertDuration(String.valueOf(position)));

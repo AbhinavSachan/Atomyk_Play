@@ -26,12 +26,12 @@ public class SettingsFragment extends Fragment {
 
     private RadioGroup radioGroup;
     private RadioButton light_theme_btn, dark_theme_btn, default_theme_btn;
-    private SwitchCompat songInfoSwi, artistSwi, optionSwi, extraSwi, autoPlaySwi, keepShuffleSwi, lowerVolSwi;
-    private View songInfoLl, artistLl, optionLl, extraLl, autoPlayLl, keepShuffleLl, lowerVolLl, blackListLl, filterDurLl;
+    private SwitchCompat songInfoSwi, artistSwi, optionSwi, extraSwi, autoPlaySwi, keepShuffleSwi, lowerVolSwi,selfStopSwi;
+    private View songInfoLl, artistLl, optionLl, extraLl, autoPlayLl, keepShuffleLl, lowerVolLl, blackListLl, filterDurLl,selfStopLl;
 
 
     private String theme;
-    private boolean showInfo, showArtist, showOption, showExtra, autoPlay, keepShuffle, lowerVol;
+    private boolean showInfo, showArtist, showOption, showExtra, autoPlay, keepShuffle, lowerVol,selfStop;
     private StorageUtil.SettingsStorage settingsStorage;
     private MainActivity mainActivity;
 
@@ -54,6 +54,7 @@ public class SettingsFragment extends Fragment {
         autoPlay = settingsStorage.loadAutoPlay();
         keepShuffle = settingsStorage.loadKeepShuffle();
         lowerVol = settingsStorage.loadLowerVol();
+        selfStop = settingsStorage.loadSelfStop();
 
 
         //Player settings
@@ -73,6 +74,8 @@ public class SettingsFragment extends Fragment {
         keepShuffleLl = view.findViewById(R.id.keep_shuffle_ll);
         lowerVolSwi = view.findViewById(R.id.lower_vol_swi);
         lowerVolLl = view.findViewById(R.id.lower_vol_ll);
+        selfStopSwi = view.findViewById(R.id.self_stop_swi);
+        selfStopLl = view.findViewById(R.id.self_stop_ll);
 
         //filter settings
         blackListLl = view.findViewById(R.id.blacklist_ll);
@@ -94,6 +97,7 @@ public class SettingsFragment extends Fragment {
         autoPlayLl.setOnClickListener(v -> autoPlaySwi.setChecked(!autoPlaySwi.isChecked()));
         keepShuffleLl.setOnClickListener(v -> keepShuffleSwi.setChecked(!keepShuffleSwi.isChecked()));
         lowerVolLl.setOnClickListener(v -> lowerVolSwi.setChecked(!lowerVolSwi.isChecked()));
+        selfStopLl.setOnClickListener(v -> selfStopSwi.setChecked(!selfStopSwi.isChecked()));
         blackListLl.setOnClickListener(v -> showToast("coming soon!"));
         filterDurLl.setOnClickListener(v -> showToast("coming soon!"));
 
@@ -128,6 +132,10 @@ public class SettingsFragment extends Fragment {
         lowerVolSwi.setOnCheckedChangeListener((buttonView, isChecked) -> {
             lowerVolSwi.setChecked(isChecked);
             settingsStorage.lowerVol(isChecked);
+        });
+        selfStopSwi.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            selfStopSwi.setChecked(isChecked);
+            settingsStorage.setSelfStop(isChecked);
         });
 
         //Check if any radio button is pressed
@@ -175,6 +183,9 @@ public class SettingsFragment extends Fragment {
         }
     }
 
+    /**
+     * set switches when the activity start
+     */
     private void setButtonState() {
 
         songInfoSwi.setChecked(showInfo);
@@ -184,6 +195,7 @@ public class SettingsFragment extends Fragment {
         autoPlaySwi.setChecked(autoPlay);
         keepShuffleSwi.setChecked(keepShuffle);
         lowerVolSwi.setChecked(lowerVol);
+        selfStopSwi.setChecked(selfStop);
 
         switch (theme) {
             case system_follow:

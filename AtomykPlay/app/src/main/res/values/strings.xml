@@ -59,4 +59,6 @@
     <string name="fil_dur_des">Exclude songs with duration less than specified amount</string>
     <string name="show_extra_con">Extra Controls</string>
     <string name="ext_con_des">Add forward button in the mini player</string>
+    <string name="self_break">Self Break</string>
+    <string name="self_stop_des">Background service will stop after being idle for 5 minutes</string>
 </resources>
