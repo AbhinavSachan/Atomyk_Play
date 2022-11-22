@@ -471,30 +471,35 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     return PendingIntent.getService(this, actionNumber, playbackIntent, PendingIntent.FLAG_IMMUTABLE);
                 }
+                break;
             case 1:
                 //pause
                 playbackIntent.setAction(ACTION_PAUSE);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     return PendingIntent.getService(this, actionNumber, playbackIntent, PendingIntent.FLAG_IMMUTABLE);
                 }
+                break;
             case 2:
                 //next
                 playbackIntent.setAction(ACTION_NEXT);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     return PendingIntent.getService(this, actionNumber, playbackIntent, PendingIntent.FLAG_IMMUTABLE);
                 }
+                break;
             case 3:
                 //previous
                 playbackIntent.setAction(ACTION_PREVIOUS);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     return PendingIntent.getService(this, actionNumber, playbackIntent, PendingIntent.FLAG_IMMUTABLE);
                 }
+                break;
             case 4:
                 //stop
                 playbackIntent.setAction(ACTION_STOP);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     return PendingIntent.getService(this, actionNumber, playbackIntent, PendingIntent.FLAG_IMMUTABLE);
                 }
+                break;
             default:
                 break;
         }
@@ -1048,7 +1053,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 pauseMedia();
                 break;
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
-                Log.i("settings", settingsStorage.loadLowerVol() + "ducked");
+                Log.i("settings","ducked");
                 if (settingsStorage.loadLowerVol()) {
                     if (media_player != null)
                         if (media_player.isPlaying()) {

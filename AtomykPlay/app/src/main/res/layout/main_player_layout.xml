@@ -218,7 +218,7 @@
                 android:elevation="10dp"
                 android:focusable="true"
                 android:foreground="@drawable/round_select_effect_small"
-                android:padding="10dp"
+                android:padding="20dp"
                 android:src="@drawable/ic_previous_main" />
 
             <RelativeLayout
@@ -259,7 +259,7 @@
                 android:elevation="10dp"
                 android:focusable="true"
                 android:foreground="@drawable/round_select_effect_small"
-                android:padding="10dp"
+                android:padding="20dp"
                 android:src="@drawable/ic_next_main" />
 
             <ImageView
@@ -373,6 +373,7 @@
             android:focusable="true"
             android:foreground="@drawable/round_select_effect_small"
             android:padding="10dp"
+            android:cropToPadding="false"
             android:src="@drawable/ic_favorite_border"
             android:theme="@android:style/ThemeOverlay.Material.Dark"
             app:layout_constraintBottom_toBottomOf="parent"
