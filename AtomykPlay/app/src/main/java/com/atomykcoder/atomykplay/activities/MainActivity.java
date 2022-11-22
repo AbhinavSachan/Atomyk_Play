@@ -584,7 +584,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void setRingtone(MusicDataCapsule music) {
             Uri uri = Uri.fromFile(new File(music.getsPath()));
-            uri
             Log.i("info", String.valueOf(uri));
             RingtoneManager.setActualDefaultRingtoneUri(MainActivity.this,
                     RingtoneManager.TYPE_RINGTONE, uri);
