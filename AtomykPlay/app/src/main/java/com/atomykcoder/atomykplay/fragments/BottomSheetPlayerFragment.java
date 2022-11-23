@@ -226,7 +226,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
             setLyricsLayout();
             return false;
         });
-        //top right option button
+//        top right option button
         optionImg.setOnClickListener(v -> optionMenu());
 
         queueRecyclerView = view.findViewById(R.id.queue_music_recycler);

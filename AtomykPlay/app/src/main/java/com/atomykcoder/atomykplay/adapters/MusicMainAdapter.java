@@ -128,12 +128,7 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
 
 
         //add bottom sheet functions in three dot click
-        holder.imageButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mainActivity.openOptionMenu(currentItem);
-            }
-        });
+        holder.imageButton.setOnClickListener(view -> mainActivity.openOptionMenu(currentItem));
 
 
         holder.nameText.setText(currentItem.getsName());
@@ -169,5 +164,13 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
             durationText = itemView.findViewById(R.id.song_length);
 
         }
+    }
+
+    // TODO: 11/24/2022 fix adapter removing wrong item after one deletion has been performed
+    // to recreate : delete a song, then delete the song just below the previous one, list will remove
+    //wrong item
+    public void removeItem(MusicDataCapsule item) {
+        int position = musicArrayList.indexOf(item);
+        notifyItemRemoved(position);
     }
 }

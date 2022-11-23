@@ -7,10 +7,16 @@ import static com.atomykcoder.atomykplay.services.MediaPlayerService.is_playing;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.PendingIntent;
+import android.app.RecoverableSecurityException;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Rect;
 import android.media.AudioManager;
 import android.media.RingtoneManager;
@@ -20,9 +26,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -36,6 +44,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
@@ -214,8 +223,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     };
     private boolean startPlaying;
 
-    private View addPlayNextBtn, addToQueueBtn, setAsRingBtn;
-    private MusicDataCapsule activeItem;
+    private View addPlayNextBtn, addToQueueBtn, setAsRingBtn, deleteFromDeviceBtn;
+    private MusicDataCapsule itemOptionSelectedMusic;
     private ImageView optionCover, addToFav;
     private TextView optionName, optionArtist;
     private View optionSheet;
@@ -324,11 +333,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         optionArtist = findViewById(R.id.song_artist_name_option);
         optionName = findViewById(R.id.song_name_option);
         addToFav = findViewById(R.id.add_to_favourites);
+        deleteFromDeviceBtn = findViewById(R.id.delete_music_option);
 
         addPlayNextBtn.setOnClickListener(this);
         addToQueueBtn.setOnClickListener(this);
         setAsRingBtn.setOnClickListener(this);
         addToFav.setOnClickListener(this);
+        deleteFromDeviceBtn.setOnClickListener(this);
     }
 
     private void setBottomSheets() {
@@ -680,12 +691,77 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     public void openOptionMenu(MusicDataCapsule currentItem) {
-        activeItem = currentItem;
-
+        itemOptionSelectedMusic = currentItem;
         optionSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         optionName.setText(currentItem.getsName());
         optionArtist.setText(currentItem.getsArtist());
         GlideBuilt.glide(this, currentItem.getsAlbumUri(), R.drawable.ic_music, optionCover, 65);
+    }
+
+
+    /**
+     * delete song permanently from device *USE WITH CAUTION*
+     * @param music music to be deleted
+     */
+    private void deleteFromDevice(MusicDataCapsule music) {
+        Uri contentUri = getContentUri(music);
+        ContentResolver contentResolver = getContentResolver();
+        Uri normalUri = Uri.fromFile(new File(music.getsPath()));
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            // for android 11 and above
+            if(contentUri != null) {
+                List<Uri> uris = new ArrayList<>(1);
+                uris.add(contentUri);
+                PendingIntent pendingIntent = MediaStore.createDeleteRequest(contentResolver,uris);
+                try {
+                    //noinspection deprecation
+                    startIntentSenderForResult(pendingIntent.getIntentSender(),
+                            4494, null, 0, 0,
+                            0, null);
+                } catch (IntentSender.SendIntentException e) {
+                    e.printStackTrace();
+                }
+            }
+        } else if(Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
+            //for android 10
+            if(normalUri != null) {
+                try {
+                    contentResolver.delete(normalUri, null, null);
+                }
+                // for android 10 we must catch a recoverable security exception
+                catch (RecoverableSecurityException e) {
+                    final IntentSender intent = e.getUserAction().getActionIntent().getIntentSender();
+                    try {
+                        //noinspection deprecation
+                        startIntentSenderForResult(intent, 4494, null, 0,
+                                0, 0, null);
+                    } catch (IntentSender.SendIntentException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            }
+        }
+        else {
+            // for older devices
+            if (normalUri != null) {
+                contentResolver.delete(normalUri, null, null);
+                adapter.removeItem(itemOptionSelectedMusic);
+            }
+        }
+        closeOptionSheet();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        //yeah it has to be in reverse for some reason to work
+        if(resultCode == PackageManager.PERMISSION_DENIED) {
+            Log.i("info", "Item deleted");
+            adapter.removeItem(itemOptionSelectedMusic);
+        } else if(resultCode == PackageManager.PERMISSION_GRANTED) {
+            Log.i("info", "item not deleted");
+        }
     }
 
     private void addToNextPlay() {
@@ -905,8 +981,38 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 addToQueue();
             }
             case R.id.set_ringtone: {
-                setRingtone(activeItem);
+                setRingtone(itemOptionSelectedMusic);
             }
+            case R.id.delete_music_option: {
+                deleteFromDevice(itemOptionSelectedMusic);
+            }
+        }
+    }
+
+    /**
+     * get Content uri of music (Required to delete files in android 11 and above)
+     * @param music music
+     * @return returns content uri of given music
+     */
+    private Uri getContentUri(MusicDataCapsule music) {
+        File file = new File(music.getsPath());
+        String filePath = file.getAbsolutePath();
+        ContentResolver contentResolver = getContentResolver();
+
+        Cursor cursor = contentResolver.query(
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                new String[]{MediaStore.Audio.Media._ID},
+                MediaStore.Audio.Media.DATA + "=? ",
+                new String[]{filePath}, null);
+
+        if (cursor != null && cursor.moveToFirst()) {
+            @SuppressLint("Range") int id = cursor.getInt(
+                    cursor.getColumnIndex(MediaStore.MediaColumns._ID));
+            Uri baseUri = Uri.parse("content://media/external/audio/media");
+            cursor.close();
+            return Uri.withAppendedPath(baseUri, "" + id);
+        } else {
+            return null;
         }
     }
 }
