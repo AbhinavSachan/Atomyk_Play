@@ -45,6 +45,7 @@
                 android:layout_width="320dp"
                 android:layout_height="320dp"
                 android:layout_centerInParent="true"
+                android:visibility="visible"
                 app:cardBackgroundColor="@color/cover_black"
                 app:cardCornerRadius="25dp"
                 app:cardElevation="8dp">
@@ -114,6 +115,7 @@
                         android:layout_gravity="center"
                         android:layout_marginHorizontal="16dp"
                         android:text="@string/add_lyrics"
+                        android:padding="10dp"
                         android:textColor="@color/tertiary_bg"
                         android:textSize="@dimen/d_16sp"
                         android:textStyle="bold" />
@@ -447,7 +449,7 @@
         android:id="@+id/bottom_sheet"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:alpha="01"
+        android:alpha="0"
         android:background="@color/primary_bg"
         android:elevation="16dp"
         android:orientation="vertical"

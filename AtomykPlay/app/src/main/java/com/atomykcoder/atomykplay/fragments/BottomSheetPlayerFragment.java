@@ -532,7 +532,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         super.onStop();
     }
 
-    private void setLyricsLayout() {
+    public void setLyricsLayout() {
         FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
         Fragment fragment = fragmentManager.findFragmentByTag("AddLyricsFragment");
         if (fragment != null) {
@@ -932,6 +932,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
         if (fromUser) {
             curPosTv.setText(convertDuration(String.valueOf(progress)));
+            mini_progress.setProgress(progress);
         }
     }
 

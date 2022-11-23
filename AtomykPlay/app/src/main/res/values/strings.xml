@@ -22,8 +22,8 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="save">Save</string>
     <string name="find">Find</string>
-    <string name="no_lyrics_found">No Lyrics Found</string>
-    <string name="add_lyrics">Add Lyrics</string>
+    <string name="no_lyrics_found">No embedded lyrics found</string>
+    <string name="add_lyrics">Add lyrics</string>
     <string name="cancel">Cancel</string>
     <string name="ok">Ok</string>
     <string name="search_lyrics">Search Lyrics</string>
@@ -68,4 +68,8 @@
     <string name="keep_scr_des">Keep screen on while lyrics window is open \n(Battery consumption might increase)</string>
     <string name="details">Details</string>
     <string name="share">Share</string>
+    <string name="tag">Tag editor</string>
+    <string name="favorite">Favorites</string>
+    <string name="playList">Playlists</string>
+    <string name="help">Help ?</string>
 </resources>
