@@ -59,7 +59,7 @@
                 android:gravity="center_vertical"
                 android:orientation="vertical"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/add_to_favourites"
+                app:layout_constraintEnd_toStartOf="@+id/add_to_favourites_option"
                 app:layout_constraintStart_toEndOf="@+id/materialCardView"
                 app:layout_constraintTop_toTopOf="parent">
 
@@ -90,7 +90,7 @@
             </LinearLayout>
 
             <ImageView
-                android:id="@+id/add_to_favourites"
+                android:id="@+id/add_to_favourites_option"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:padding="10dp"
@@ -109,19 +109,19 @@
         android:background="#797E7E7E" />
 
     <LinearLayout
-        android:id="@+id/add_play_next"
+        android:id="@+id/add_play_next_option"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clickable="true"
         android:focusable="true"
         android:foreground="?android:selectableItemBackground"
         android:orientation="horizontal"
-        android:paddingStart="10dp"
-        android:paddingEnd="10dp">
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="4dp">
 
         <ImageView
-            android:layout_width="25dp"
-            android:layout_height="25dp"
+            android:layout_width="@dimen/option_icon_mea"
+            android:layout_height="@dimen/option_icon_mea"
             android:layout_margin="10dp"
             android:src="@drawable/ic_add_next" />
 
@@ -131,24 +131,24 @@
             android:gravity="center_vertical"
             android:text="@string/play_next"
             android:textColor="@color/text_color"
-            android:textStyle="bold"
-            android:textSize="@dimen/d_14sp" />
+            android:textSize="@dimen/d_14sp"
+            android:textStyle="bold" />
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/add_to_queue"
+        android:id="@+id/add_to_queue_option"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clickable="true"
         android:focusable="true"
         android:foreground="?android:selectableItemBackground"
         android:orientation="horizontal"
-        android:paddingStart="10dp"
-        android:paddingEnd="10dp">
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="4dp">
 
         <ImageView
-            android:layout_width="25dp"
-            android:layout_height="25dp"
+            android:layout_width="@dimen/option_icon_mea"
+            android:layout_height="@dimen/option_icon_mea"
             android:layout_margin="10dp"
             android:src="@drawable/ic_queue" />
 
@@ -158,26 +158,26 @@
             android:gravity="center_vertical"
             android:text="@string/add_queue"
             android:textColor="@color/text_color"
-            android:textStyle="bold"
-            android:textSize="@dimen/d_14sp" />
+            android:textSize="@dimen/d_14sp"
+            android:textStyle="bold" />
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/set_ringtone"
+        android:id="@+id/set_ringtone_option"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clickable="true"
         android:focusable="true"
         android:foreground="?android:selectableItemBackground"
         android:orientation="horizontal"
-        android:paddingStart="10dp"
-        android:paddingEnd="10dp">
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="4dp">
 
         <ImageView
-            android:layout_width="25dp"
-            android:layout_height="25dp"
+            android:layout_width="@dimen/option_icon_mea"
+            android:layout_height="@dimen/option_icon_mea"
             android:layout_margin="10dp"
-            android:src="@drawable/ic_music" />
+            android:src="@drawable/ic_music_note" />
 
         <TextView
             android:layout_width="match_parent"
@@ -185,8 +185,8 @@
             android:gravity="center_vertical"
             android:text="@string/set_as_ringtone"
             android:textColor="@color/text_color"
-            android:textStyle="bold"
-            android:textSize="@dimen/d_14sp" />
+            android:textSize="@dimen/d_14sp"
+            android:textStyle="bold" />
     </LinearLayout>
 
     <View
@@ -197,55 +197,57 @@
         android:background="#797E7E7E" />
 
     <LinearLayout
+        android:id="@+id/tagEditor_option"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clickable="true"
         android:focusable="true"
         android:foreground="?android:selectableItemBackground"
         android:orientation="horizontal"
-        android:paddingStart="10dp"
-        android:paddingEnd="10dp">
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="4dp">
 
         <ImageView
-            android:layout_width="25dp"
-            android:layout_height="25dp"
+            android:layout_width="@dimen/option_icon_mea"
+            android:layout_height="@dimen/option_icon_mea"
             android:layout_margin="10dp"
-            android:src="@drawable/ic_delete" />
+            android:src="@drawable/ic_tag_edit" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center_vertical"
-            android:text="@string/delete"
+            android:text="@string/tag"
             android:textColor="@color/text_color"
-            android:textStyle="bold"
-            android:textSize="@dimen/d_14sp" />
+            android:textSize="@dimen/d_14sp"
+            android:textStyle="bold" />
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/addLyrics_option"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clickable="true"
         android:focusable="true"
         android:foreground="?android:selectableItemBackground"
         android:orientation="horizontal"
-        android:paddingStart="10dp"
-        android:paddingEnd="10dp">
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="4dp">
 
         <ImageView
-            android:layout_width="25dp"
-            android:layout_height="25dp"
+            android:layout_width="@dimen/option_icon_mea"
+            android:layout_height="@dimen/option_icon_mea"
             android:layout_margin="10dp"
-            android:src="@drawable/ic_music" />
+            android:src="@drawable/ic_baseline_subtitles_24" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center_vertical"
-            android:text="@string/set_as_ringtone"
+            android:text="@string/add_lyrics"
             android:textColor="@color/text_color"
-            android:textStyle="bold"
-            android:textSize="@dimen/d_14sp" />
+            android:textSize="@dimen/d_14sp"
+            android:textStyle="bold" />
     </LinearLayout>
 
     <View
@@ -257,18 +259,19 @@
 
 
     <LinearLayout
+        android:id="@+id/details_option"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clickable="true"
         android:focusable="true"
         android:foreground="?android:selectableItemBackground"
         android:orientation="horizontal"
-        android:paddingStart="10dp"
-        android:paddingEnd="10dp">
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="4dp">
 
         <ImageView
-            android:layout_width="25dp"
-            android:layout_height="25dp"
+            android:layout_width="@dimen/option_icon_mea"
+            android:layout_height="@dimen/option_icon_mea"
             android:layout_margin="10dp"
             android:src="@drawable/ic_info" />
 
@@ -278,23 +281,24 @@
             android:gravity="center_vertical"
             android:text="@string/details"
             android:textColor="@color/text_color"
-            android:textStyle="bold"
-            android:textSize="@dimen/d_14sp" />
+            android:textSize="@dimen/d_14sp"
+            android:textStyle="bold" />
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/share_music_option"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clickable="true"
         android:focusable="true"
         android:foreground="?android:selectableItemBackground"
         android:orientation="horizontal"
-        android:paddingStart="10dp"
-        android:paddingEnd="10dp">
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="4dp">
 
         <ImageView
-            android:layout_width="25dp"
-            android:layout_height="25dp"
+            android:layout_width="@dimen/option_icon_mea"
+            android:layout_height="@dimen/option_icon_mea"
             android:layout_margin="10dp"
             android:src="@drawable/ic_share" />
 
@@ -304,8 +308,8 @@
             android:gravity="center_vertical"
             android:text="@string/share"
             android:textColor="@color/text_color"
-            android:textStyle="bold"
-            android:textSize="@dimen/d_14sp" />
+            android:textSize="@dimen/d_14sp"
+            android:textStyle="bold" />
     </LinearLayout>
 
     <LinearLayout
@@ -316,23 +320,23 @@
         android:focusable="true"
         android:foreground="?android:selectableItemBackground"
         android:orientation="horizontal"
-        android:paddingStart="10dp"
-        android:paddingEnd="10dp">
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="4dp">
 
         <ImageView
-            android:layout_width="25dp"
-            android:layout_height="25dp"
+            android:layout_width="@dimen/option_icon_mea"
+            android:layout_height="@dimen/option_icon_mea"
             android:layout_margin="10dp"
             android:src="@drawable/ic_delete" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="@string/delete"
             android:gravity="center_vertical"
+            android:text="@string/delete"
             android:textColor="@color/text_color"
-            android:textStyle="bold"
-            android:textSize="@dimen/d_14sp" />
+            android:textSize="@dimen/d_14sp"
+            android:textStyle="bold" />
 
     </LinearLayout>
 </LinearLayout>

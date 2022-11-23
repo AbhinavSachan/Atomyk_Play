@@ -67,6 +67,9 @@ import com.atomykcoder.atomykplay.events.RemoveLyricsHandlerEvent;
 import com.atomykcoder.atomykplay.events.SearchEvent;
 import com.atomykcoder.atomykplay.fragments.AboutFragment;
 import com.atomykcoder.atomykplay.fragments.BottomSheetPlayerFragment;
+import com.atomykcoder.atomykplay.fragments.FavoritesFragment;
+import com.atomykcoder.atomykplay.fragments.HelpFragment;
+import com.atomykcoder.atomykplay.fragments.PlaylistsFragment;
 import com.atomykcoder.atomykplay.fragments.SearchResultsFragment;
 import com.atomykcoder.atomykplay.fragments.SettingsFragment;
 import com.atomykcoder.atomykplay.helperFunctions.FetchMusic;
@@ -105,28 +108,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public static boolean phone_ringing = false;
 
     public static MediaPlayerService media_player_service;
-    private final BottomSheetBehavior.BottomSheetCallback optionCallback = new BottomSheetBehavior.BottomSheetCallback() {
-        @Override
-        public void onStateChanged(@NonNull View bottomSheet, int newState) {
-            if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
-                shadowOptionSheet.setClickable(true);
-                shadowOptionSheet.setFocusable(true);
-                shadowOptionSheet.setAlpha(0.7f);
-            } else if (newState == BottomSheetBehavior.STATE_EXPANDED) {
-                shadowOptionSheet.setClickable(true);
-                shadowOptionSheet.setFocusable(true);
-                shadowOptionSheet.setAlpha(1f);
-            } else if (newState == BottomSheetBehavior.STATE_HIDDEN) {
-                shadowOptionSheet.setClickable(false);
-                shadowOptionSheet.setFocusable(false);
-            }
-        }
-
-        @Override
-        public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-            shadowOptionSheet.setAlpha(0.7f + slideOffset);
-        }
-    };
     public ServiceConnection service_connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -175,6 +156,31 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private ProgressBar progressBar;
     private StorageUtil storageUtil;
     private DrawerLayout drawer;
+    private final BottomSheetBehavior.BottomSheetCallback optionCallback = new BottomSheetBehavior.BottomSheetCallback() {
+        @Override
+        public void onStateChanged(@NonNull View bottomSheet, int newState) {
+            if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
+                drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+                shadowOptionSheet.setClickable(true);
+                shadowOptionSheet.setFocusable(true);
+                shadowOptionSheet.setAlpha(0.7f);
+            } else if (newState == BottomSheetBehavior.STATE_EXPANDED) {
+                shadowOptionSheet.setClickable(true);
+                shadowOptionSheet.setFocusable(true);
+                drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+                shadowOptionSheet.setAlpha(1f);
+            } else if (newState == BottomSheetBehavior.STATE_HIDDEN) {
+                drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+                shadowOptionSheet.setClickable(false);
+                shadowOptionSheet.setFocusable(false);
+            }
+        }
+
+        @Override
+        public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+            shadowOptionSheet.setAlpha(0.7f + slideOffset);
+        }
+    };
     private NavigationView navigationView;
     private ImageView navCover;
     private TextView navSongName, navArtistName;
@@ -223,8 +229,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     };
     private boolean startPlaying;
 
-    private View addPlayNextBtn, addToQueueBtn, setAsRingBtn, deleteFromDeviceBtn;
     private MusicDataCapsule itemOptionSelectedMusic;
+    //option menu buttons
+    private View addPlayNextBtn, addToQueueBtn, setAsRingBtn, tagEditorBtn, addLyricsBtn, detailsBtn, shareBtn, deleteBtn;
     private ImageView optionCover, addToFav;
     private TextView optionName, optionArtist;
     private View optionSheet;
@@ -326,18 +333,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void setUpOptionMenuButtons() {
-        addPlayNextBtn = findViewById(R.id.add_play_next);
-        addToQueueBtn = findViewById(R.id.add_to_queue);
-        setAsRingBtn = findViewById(R.id.set_ringtone);
+        addPlayNextBtn = findViewById(R.id.add_play_next_option);
+        addToQueueBtn = findViewById(R.id.add_to_queue_option);
+        setAsRingBtn = findViewById(R.id.set_ringtone_option);
+        tagEditorBtn = findViewById(R.id.tagEditor_option);
+        addLyricsBtn = findViewById(R.id.addLyrics_option);
+        detailsBtn = findViewById(R.id.details_option);
+        shareBtn = findViewById(R.id.share_music_option);
+        deleteBtn = findViewById(R.id.delete_music_option);
         optionCover = findViewById(R.id.song_album_cover_option);
         optionArtist = findViewById(R.id.song_artist_name_option);
         optionName = findViewById(R.id.song_name_option);
-        addToFav = findViewById(R.id.add_to_favourites);
         deleteFromDeviceBtn = findViewById(R.id.delete_music_option);
+        addToFav = findViewById(R.id.add_to_favourites_option);
 
         addPlayNextBtn.setOnClickListener(this);
         addToQueueBtn.setOnClickListener(this);
         setAsRingBtn.setOnClickListener(this);
+        tagEditorBtn.setOnClickListener(this);
+        addLyricsBtn.setOnClickListener(this);
+        detailsBtn.setOnClickListener(this);
+        shareBtn.setOnClickListener(this);
+        deleteBtn.setOnClickListener(this);
         addToFav.setOnClickListener(this);
         deleteFromDeviceBtn.setOnClickListener(this);
     }
@@ -676,7 +693,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 requestWriteSettingsPermission();
             }
         }
-        closeOptionSheet();
     }
 
     private void requestWriteSettingsPermission() {
@@ -766,12 +782,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void addToNextPlay() {
         showToast("Added to next");
-        closeOptionSheet();
+
     }
 
     private void addToQueue() {
         showToast("Added to queue");
-        closeOptionSheet();
+
     }
 
     private void closeOptionSheet() {
@@ -932,32 +948,57 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         FragmentManager fragmentManager = getSupportFragmentManager();
-        Fragment fragment1 = fragmentManager.findFragmentByTag("AboutFragment");
-        Fragment fragment2 = fragmentManager.findFragmentByTag("SettingsFragment");
+        Fragment fragment1 = fragmentManager.findFragmentByTag("FavoritesFragment");
+        Fragment fragment2 = fragmentManager.findFragmentByTag("PlaylistsFragment");
+        Fragment fragment3 = fragmentManager.findFragmentByTag("SettingsFragment");
+        Fragment fragment4 = fragmentManager.findFragmentByTag("HelpFragment");
+        Fragment fragment5 = fragmentManager.findFragmentByTag("AboutFragment");
+
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         switch (item.getItemId()) {
             case R.id.navigation_home: {
-                if (fragment1 != null || fragment2 != null) {
+                if (fragment1 != null || fragment2 != null||fragment3 != null || fragment4 != null||fragment5 != null) {
                     fragmentManager.popBackStackImmediate();
                 }
                 break;
             }
+            case R.id.navigation_favorite: {
+                if (fragment1 != null || fragment2 != null||fragment3 != null || fragment4 != null||fragment5 != null) {
+                    fragmentManager.popBackStackImmediate();
+                }
+                transaction.replace(R.id.sec_container, new FavoritesFragment(), "FavoritesFragment").addToBackStack(null).commit();
+                break;
+            }
+            case R.id.navigation_playlist: {
+                if (fragment1 != null || fragment2 != null||fragment3 != null || fragment4 != null||fragment5 != null) {
+                    fragmentManager.popBackStackImmediate();
+                }
+                transaction.replace(R.id.sec_container, new PlaylistsFragment(), "PlaylistsFragment").addToBackStack(null).commit();
+                break;
+            }
             case R.id.navigation_setting: {
-                if (fragment1 != null || fragment2 != null) {
+                if (fragment1 != null || fragment2 != null||fragment3 != null || fragment4 != null||fragment5 != null) {
                     fragmentManager.popBackStackImmediate();
                 }
                 transaction.replace(R.id.sec_container, new SettingsFragment(), "SettingsFragment").addToBackStack(null).commit();
                 break;
             }
+            case R.id.navigation_help: {
+                if (fragment1 != null || fragment2 != null||fragment3 != null || fragment4 != null||fragment5 != null) {
+                    fragmentManager.popBackStackImmediate();
+                }
+                transaction.replace(R.id.sec_container, new HelpFragment(), "HelpFragment").addToBackStack(null).commit();
+                break;
+            }
             case R.id.navigation_about: {
-                if (fragment1 != null || fragment2 != null) {
+                if (fragment1 != null || fragment2 != null||fragment3 != null || fragment4 != null||fragment5 != null) {
                     fragmentManager.popBackStackImmediate();
                 }
                 transaction.replace(R.id.sec_container, new AboutFragment(), "AboutFragment").addToBackStack(null).commit();
                 break;
             }
             case R.id.navigation_donate: {
-                Toast.makeText(MainActivity.this, "donate $100 right now or else I will collect it in hell", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "I am the hunter", Toast.LENGTH_SHORT).show();
                 break;
             }
         }
@@ -974,19 +1015,60 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.add_play_next: {
+            case R.id.add_play_next_option: {
                 addToNextPlay();
+                break;
             }
-            case R.id.add_to_queue: {
+            case R.id.add_to_queue_option: {
                 addToQueue();
+                break;
             }
             case R.id.set_ringtone: {
                 setRingtone(itemOptionSelectedMusic);
+                break;
             }
             case R.id.delete_music_option: {
                 deleteFromDevice(itemOptionSelectedMusic);
+                break;
+
+            case R.id.tagEditor_option: {
+                openTagEditor();
+                break;
+            }
+            case R.id.addLyrics_option: {
+                bottomSheetPlayerFragment.setLyricsLayout();
+                break;
+            }
+            case R.id.details_option: {
+                openDetailsBox();
+                break;
+            }
+            case R.id.share_music_option: {
+                openShare();
+                break;
+            }
+            case R.id.add_to_favourites_option: {
+                showToast("Nope");
+                break;
             }
         }
+        closeOptionSheet();
+    }
+
+    private void deleteFromDevice() {
+
+    }
+
+    private void openShare() {
+
+    }
+
+    private void openDetailsBox() {
+
+    }
+
+    private void openTagEditor() {
+
     }
 
     /**

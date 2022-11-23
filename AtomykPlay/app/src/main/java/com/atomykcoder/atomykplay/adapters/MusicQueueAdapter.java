@@ -4,13 +4,11 @@ import static com.atomykcoder.atomykplay.helperFunctions.MusicHelper.convertDura
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,7 +21,6 @@ import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.classes.GlideBuilt;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.ItemTouchHelperAdapter;
-import com.atomykcoder.atomykplay.interfaces.ItemTouchHelperViewfinder;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 
@@ -144,10 +141,10 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
         else return -1;
     }
 
-    public static class MusicViewAdapter extends RecyclerView.ViewHolder implements ItemTouchHelperViewfinder {
+    public static class MusicViewAdapter extends RecyclerView.ViewHolder {
         private final ImageView imageView;
         private final ImageView imageButton;
-        private final RelativeLayout cardView;
+        private final View cardView;
         private final TextView nameText, artistText, durationText, musicIndex;
 
         public MusicViewAdapter(@NonNull View itemView) {
@@ -159,14 +156,6 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
             musicIndex = itemView.findViewById(R.id.song_index_num_queue);
             artistText = itemView.findViewById(R.id.song_artist_name_queue);
             durationText = itemView.findViewById(R.id.song_length_queue);
-        }
-
-        @Override
-        public void onItemSelected() {
-        }
-
-        @Override
-        public void onItemClear() {
         }
     }
 }

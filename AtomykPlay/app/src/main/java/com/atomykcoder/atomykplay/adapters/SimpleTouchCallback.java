@@ -8,9 +8,6 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.interfaces.ItemTouchHelperAdapter;
-import com.atomykcoder.atomykplay.interfaces.ItemTouchHelperViewfinder;
-
-import java.util.List;
 
 public class SimpleTouchCallback extends ItemTouchHelper.Callback {
 
@@ -41,7 +38,7 @@ public class SimpleTouchCallback extends ItemTouchHelper.Callback {
 
     @Override
     public void onMoved(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, int fromPos, @NonNull RecyclerView.ViewHolder target, int toPos, int x, int y) {
-        adapter.onItemMove(fromPos,toPos);
+        adapter.onItemMove(fromPos, toPos);
         super.onMoved(recyclerView, viewHolder, fromPos, target, toPos, x, y);
     }
 
@@ -72,12 +69,6 @@ public class SimpleTouchCallback extends ItemTouchHelper.Callback {
     //when item is selected we are calling interface that we created
     @Override
     public void onSelectedChanged(@Nullable RecyclerView.ViewHolder viewHolder, int actionState) {
-        if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
-            if (viewHolder instanceof ItemTouchHelperViewfinder) {
-                ItemTouchHelperViewfinder itemTouchHelperViewfinder = (ItemTouchHelperViewfinder) viewHolder;
-                itemTouchHelperViewfinder.onItemSelected();
-            }
-        }
         super.onSelectedChanged(viewHolder, actionState);
     }
 
@@ -85,9 +76,5 @@ public class SimpleTouchCallback extends ItemTouchHelper.Callback {
     public void clearView(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
         super.clearView(recyclerView, viewHolder);
         viewHolder.itemView.setAlpha(ALPHA_FULL);
-        if (viewHolder instanceof ItemTouchHelperViewfinder) {
-            ItemTouchHelperViewfinder itemTouchHelperViewfinder = (ItemTouchHelperViewfinder) viewHolder;
-            itemTouchHelperViewfinder.onItemClear();
-        }
     }
 }

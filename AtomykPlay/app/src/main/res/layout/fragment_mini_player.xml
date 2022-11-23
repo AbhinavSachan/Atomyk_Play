@@ -122,7 +122,7 @@
         android:layout_alignParentBottom="true"
         app:indicatorColor="@color/tertiary_bg"
         app:indicatorDirectionLinear="leftToRight"
-        app:trackColor="@color/primary_bg"
+        app:trackColor="@color/secondary_bg"
         app:trackCornerRadius="0dp"
         app:trackThickness="2dp" />
 

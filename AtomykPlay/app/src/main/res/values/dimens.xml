@@ -9,4 +9,5 @@
     <dimen name="d_32sp">32sp</dimen>
     <dimen name="d_18sp">18sp</dimen>
     <dimen name="d_15sp">15sp</dimen>
+    <dimen name="option_icon_mea">20dp</dimen>
 </resources>
