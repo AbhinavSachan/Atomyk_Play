@@ -327,7 +327,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         addPlayNextBtn.setOnClickListener(v -> addToNextPlay());
         addToQueueBtn.setOnClickListener(v -> addToQueue());
-        setAsRingBtn.setOnClickListener(v -> setAsRing());
+        setAsRingBtn.setOnClickListener(v -> requestWriteSettingsPermission());
         addToFav.setOnClickListener(v -> showToast("yeah"));
     }
 
@@ -660,15 +660,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 RingtoneManager.TYPE_RINGTONE, uri);
         Uri uri2 = RingtoneManager.getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_RINGTONE);
         Log.i("info", String.valueOf(uri2));
+        closeOptionSheet();
     }
 
-    private void requestWriteSettingsPermission(MusicDataCapsule currentItem) {
+    private void requestWriteSettingsPermission() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
 
             boolean canWrite = Settings.System.canWrite(this);
 
             if (canWrite) {
-                setRingtone(currentItem);
+                setRingtone(activeItem);
             } else {
                 Intent intent = new Intent();
                 intent.setAction(Settings.ACTION_MANAGE_WRITE_SETTINGS);
@@ -678,7 +679,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         }
     }
-private View optionEmptyCon;
     public void openOptionMenu(MusicDataCapsule currentItem) {
         activeItem = currentItem;
 
@@ -690,11 +690,6 @@ private View optionEmptyCon;
 
     private void addToNextPlay() {
         showToast("Added to next");
-        closeOptionSheet();
-    }
-
-    private void setAsRing() {
-        requestWriteSettingsPermission(activeItem);
         closeOptionSheet();
     }
 
