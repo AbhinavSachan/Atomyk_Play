@@ -8,6 +8,7 @@ import static com.atomykcoder.atomykplay.services.MediaPlayerService.is_playing;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -19,6 +20,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
@@ -654,12 +656,25 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void setRingtone(MusicDataCapsule music) {
-        Uri uri = Uri.fromFile(new File(music.getsPath()));
-        Log.i("info", String.valueOf(uri));
-        RingtoneManager.setActualDefaultRingtoneUri(MainActivity.this,
-                RingtoneManager.TYPE_RINGTONE, uri);
-        Uri uri2 = RingtoneManager.getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_RINGTONE);
-        Log.i("info", String.valueOf(uri2));
+        File file = new File(music.getsPath());
+        ContentValues content = new ContentValues();
+        content.put(MediaStore.MediaColumns.DATA, file.getAbsolutePath());
+        content.put(MediaStore.MediaColumns.TITLE, music.getsName());
+        content.put(MediaStore.MediaColumns.SIZE, music.getsLength());
+        content.put(MediaStore.MediaColumns.MIME_TYPE, music.getsMimeType());
+        content.put(MediaStore.Audio.Media.ARTIST, music.getsArtist());
+        content.put(MediaStore.Audio.Media.DURATION, music.getsLength());
+        content.put(MediaStore.Audio.Media.IS_RINGTONE, true);
+        content.put(MediaStore.Audio.Media.IS_NOTIFICATION, false);
+        content.put(MediaStore.Audio.Media.IS_ALARM, false);
+        content.put(MediaStore.Audio.Media.IS_MUSIC, false);
+
+        Log.i("info", "the absolute path of the file is :"+file.getAbsolutePath());
+        Uri uri = MediaStore.Audio.Media.getContentUriForPath(file.getAbsolutePath());
+        Uri newUri = getContentResolver().insert(uri, content);
+        Log.i("info", "the ringtone uri is : " + newUri);
+        RingtoneManager.setActualDefaultRingtoneUri(MainActivity.this, RingtoneManager.TYPE_RINGTONE, newUri);
+
         closeOptionSheet();
     }
 
