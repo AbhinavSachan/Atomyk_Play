@@ -5,7 +5,7 @@
     android:id="@+id/mini_player_layout"
     android:layout_width="match_parent"
     android:layout_height="68dp"
-    android:background="@color/primary_bg"
+    android:background="@color/secondary_bg"
     tools:context=".fragments.BottomSheetPlayerFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -22,7 +22,7 @@
             android:layout_width="41dp"
             android:layout_height="41dp"
             android:layout_margin="3dp"
-            app:cardBackgroundColor="@color/secondary_bg"
+            app:cardBackgroundColor="@color/cover_black"
             app:cardCornerRadius="6dp"
             app:cardElevation="3dp"
             app:layout_constraintBottom_toBottomOf="parent"

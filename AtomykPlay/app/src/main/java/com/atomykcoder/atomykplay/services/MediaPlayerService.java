@@ -34,7 +34,6 @@ import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.widget.Toast;
 
@@ -100,6 +99,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     //broadcast receivers
     //playing new song
     private StorageUtil storage;
+    private StorageUtil.SettingsStorage settingsStorage;
     //to pause when output device is unplugged
     private final BroadcastReceiver becomingNoisyReceiver = new BroadcastReceiver() {
         @Override
@@ -224,7 +224,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 }
 
             if (media_player == null) {
-                Log.i("media_state", "initiated");
                 try {
                     initiateMediaSession();
                 } catch (RemoteException e) {
@@ -232,15 +231,10 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 }
                 initiateMediaPlayer();
             } else {
-
                 if (media_player.isPlaying()) {
-                    Log.i("media_state", "paused");
-
                     pauseMedia();
                     EventBus.getDefault().post(new RemoveLyricsHandlerEvent());
                 } else {
-                    Log.i("media_state", "resumed");
-
                     resumeMedia();
                     if (service_bound) {
                         LRCMap lrcMap = storage.loadLyrics(activeMusic.getsName());
@@ -280,7 +274,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             initiateMediaPlayer();
         }
     };
-    private StorageUtil.SettingsStorage settingsStorage;
 
     /**
      * this function updates play icon according to media playback status
@@ -710,13 +703,13 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     public boolean onError(MediaPlayer mp, int what, int extra) {
         switch (what) {
             case MediaPlayer.MEDIA_ERROR_UNKNOWN:
-                Log.d("MediaPlayer Error", "MEDIA_ERROR_UNKNOWN" + extra);
+                Toast.makeText(this, "MEDIA_ERROR_UNKNOWN" + extra, Toast.LENGTH_SHORT).show();
                 return true;
             case MediaPlayer.MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK:
-                Log.d("MediaPlayer Error", "MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK" + extra);
+                Toast.makeText(this, "MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK" + extra, Toast.LENGTH_SHORT).show();
                 return true;
             case MediaPlayer.MEDIA_ERROR_SERVER_DIED:
-                Log.d("MediaPlayer Error", "MEDIA_ERROR_SERVER_DIED" + extra);
+                Toast.makeText(this, "MEDIA_ERROR_SERVER_DIED" + extra, Toast.LENGTH_SHORT).show();
                 return true;
             default:
                 break;
@@ -1053,7 +1046,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 pauseMedia();
                 break;
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
-                Log.i("settings","ducked");
                 if (settingsStorage.loadLowerVol()) {
                     if (media_player != null)
                         if (media_player.isPlaying()) {

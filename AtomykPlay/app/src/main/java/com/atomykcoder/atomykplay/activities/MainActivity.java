@@ -109,7 +109,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 shadowOptionSheet.setClickable(true);
                 shadowOptionSheet.setFocusable(true);
                 shadowOptionSheet.setAlpha(1f);
-            }else if (newState == BottomSheetBehavior.STATE_HIDDEN) {
+            } else if (newState == BottomSheetBehavior.STATE_HIDDEN) {
                 shadowOptionSheet.setClickable(false);
                 shadowOptionSheet.setFocusable(false);
             }
@@ -374,13 +374,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void resetDataInNavigation() {
         navSongName.setText("Song Name");
         navArtistName.setText("Artist");
-        GlideBuilt.glide(this, null, R.drawable.placeholder_nav, navCover, 400);
+        GlideBuilt.glide(this, null, R.drawable.placeholder_nav, navCover, 300);
     }
 
     public void setDataInNavigation(String song_name, String artist_name, String album_uri) {
         navSongName.setText(song_name);
         navArtistName.setText(artist_name);
-        GlideBuilt.glide(this, album_uri, R.drawable.ic_music, navCover, 400);
+        GlideBuilt.glide(this, album_uri, R.drawable.ic_music, navCover, 300);
     }
 
     private MusicDataCapsule getMusic() {
@@ -669,13 +669,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         content.put(MediaStore.Audio.Media.IS_ALARM, false);
         content.put(MediaStore.Audio.Media.IS_MUSIC, false);
 
-        Log.i("info", "the absolute path of the file is :"+file.getAbsolutePath());
+        Log.i("info", "the absolute path of the file is :" + file.getAbsolutePath());
         Uri uri = MediaStore.Audio.Media.getContentUriForPath(file.getAbsolutePath());
         Uri newUri = getContentResolver().insert(uri, content);
         Log.i("info", "the ringtone uri is : " + newUri);
         RingtoneManager.setActualDefaultRingtoneUri(MainActivity.this, RingtoneManager.TYPE_RINGTONE, newUri);
 
         closeOptionSheet();
+
     }
 
     private void requestWriteSettingsPermission() {
@@ -694,6 +695,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         }
     }
+
     public void openOptionMenu(MusicDataCapsule currentItem) {
         activeItem = currentItem;
 

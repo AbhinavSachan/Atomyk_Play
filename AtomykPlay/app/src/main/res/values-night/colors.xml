@@ -19,8 +19,8 @@
     <color name="for_empty_images">#C9AFB3AE</color>
     <color name="heart_bg">#DC2525</color>
     <color name="translucent_black">#EB030407</color>
-    <color name="player_shadow_black">#36040507</color>
-    <color name="center_player_shadow">#140F1313</color>
+    <color name="player_shadow_black">#36D3DBEC</color>
+    <color name="center_player_shadow">#14D6FDFD</color>
     <color name="thumb_light">#2D76CF</color>
     <color name="thumb_dark">#F5DADADA</color>
     <color name="switch_track_on">#922D76CF</color>

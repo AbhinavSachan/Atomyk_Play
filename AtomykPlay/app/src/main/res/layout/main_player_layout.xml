@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/primary_bg">
+    android:background="@color/secondary_bg"
+    tools:context=".fragments.BottomSheetPlayerFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/player_layout"
@@ -43,7 +45,7 @@
                 android:layout_width="320dp"
                 android:layout_height="320dp"
                 android:layout_centerInParent="true"
-                app:cardBackgroundColor="@color/secondary_bg"
+                app:cardBackgroundColor="@color/cover_black"
                 app:cardCornerRadius="25dp"
                 app:cardElevation="8dp">
 
@@ -369,11 +371,11 @@
             android:layout_marginBottom="8dp"
             android:clickable="true"
             android:contentDescription="@string/imageView"
+            android:cropToPadding="false"
             android:elevation="10dp"
             android:focusable="true"
             android:foreground="@drawable/round_select_effect_small"
             android:padding="10dp"
-            android:cropToPadding="false"
             android:src="@drawable/ic_favorite_border"
             android:theme="@android:style/ThemeOverlay.Material.Dark"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -445,7 +447,7 @@
         android:id="@+id/bottom_sheet"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:alpha="0"
+        android:alpha="01"
         android:background="@color/primary_bg"
         android:elevation="16dp"
         android:orientation="vertical"
@@ -457,16 +459,101 @@
             android:elevation="4dp"
             android:src="@drawable/ic_horizontal_rule" />
 
-        <View
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:layout_margin="@dimen/d_12sp"
-            android:background="@drawable/border_for_search_num" />
+            android:layout_height="wrap_content">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/queue_music_recycler"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/queue_music_item"
+                android:layout_width="match_parent"
+                android:layout_height="70dp"
+                android:layout_alignParentTop="true"
+                android:layout_margin="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardCornerRadius="12dp">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/border_for_queue_item"
+                    android:paddingHorizontal="8dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/materialCardView1"
+                        android:layout_width="41dp"
+                        android:layout_height="41dp"
+                        android:layout_margin="3dp"
+                        app:cardBackgroundColor="@color/cover_black"
+                        app:cardCornerRadius="6dp"
+                        app:cardElevation="3dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent">
+
+                        <ImageView
+                            android:id="@+id/song_album_cover_queue_item"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:contentDescription="@string/empty"
+                            android:scaleType="centerCrop"
+                            android:src="@drawable/ic_music" />
+
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="12dp"
+                        android:layout_marginEnd="12dp"
+                        android:gravity="center_vertical"
+                        android:orientation="vertical"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@+id/materialCardView1"
+                        app:layout_constraintTop_toTopOf="parent">
+
+                        <TextView
+                            android:id="@+id/song_name_queue_item"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:ellipsize="marquee"
+                            android:marqueeRepeatLimit="marquee_forever"
+                            android:singleLine="true"
+                            android:text="@string/song_name_e"
+                            android:textColor="@color/text_color"
+                            android:textSize="@dimen/d_16sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/song_artist_name_queue_item"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:ellipsize="marquee"
+                            android:marqueeRepeatLimit="marquee_forever"
+                            android:singleLine="true"
+                            android:text="@string/song_artist_e"
+                            android:textColor="@color/text_color"
+                            android:textSize="@dimen/d_14sp" />
+
+                    </LinearLayout>
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/queue_music_recycler"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/queue_music_item" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="12dp"
+                android:layout_below="@+id/queue_music_item"
+                android:background="@drawable/queue_top_shadow" />
+        </RelativeLayout>
 
     </LinearLayout>
 
@@ -475,7 +562,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:alpha="0"
-        android:background="@color/translucent_black" />
+        android:background="@color/translucent_black"
+        android:elevation="10dp" />
 
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

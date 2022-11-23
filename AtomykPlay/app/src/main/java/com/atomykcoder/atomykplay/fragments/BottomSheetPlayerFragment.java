@@ -20,7 +20,6 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -62,6 +61,7 @@ import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 import org.greenrobot.eventbus.EventBus;
@@ -128,12 +128,13 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     //to set it on app start ☺
     private StorageUtil storageUtil;
     private ItemTouchHelper itemTouchHelper;
-    private RecyclerView recyclerView;
+    private RecyclerView queueRecyclerView;
     private View lyricsRelativeLayout;
     private MainActivity mainActivity;
     private CardView coverCardView;
-    private ImageView lyricsImg;
+    private ImageView lyricsImg,queueCoverImg;
     private View shadowPlayer;
+    private TextView songNameQueueItem,artistQueueItem;
     private StorageUtil.SettingsStorage settingsStorage;
 
     @Override
@@ -181,10 +182,15 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         playerArtistNameTv = view.findViewById(R.id.player_song_artist_name_tv);//○
         bitrateTv = view.findViewById(R.id.player_bitrate_tv);//○
         mimeTv = view.findViewById(R.id.player_mime_tv);//○
+        CardView playCv = view.findViewById(R.id.player_play_cv);
         durationTv = view.findViewById(R.id.player_duration_tv);//○
         curPosTv = view.findViewById(R.id.player_current_pos_tv);//○
         lyricsImg = view.findViewById(R.id.player_lyrics_ll);
         timerTv = view.findViewById(R.id.countdown_tv);
+        queueCoverImg = view.findViewById(R.id.song_album_cover_queue_item);
+        MaterialCardView queueItem = view.findViewById(R.id.queue_music_item);
+        songNameQueueItem = view.findViewById(R.id.song_name_queue_item);
+        artistQueueItem = view.findViewById(R.id.song_artist_name_queue_item);
 
         shadowPlayer = view.findViewById(R.id.shadow_player);
 
@@ -193,7 +199,9 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
         playerSongNameTv.setSelected(true);
         mini_name_text.setSelected(true);
-        setDefaults();
+        songNameQueueItem.setSelected(true);
+
+        setAccorToSettings();
 
         //click listeners on mini player
         //and sending broadcast on click
@@ -205,7 +213,6 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         //main player events
         previousImg.setOnClickListener(v -> mainActivity.playPreviousAudio());
         nextImg.setOnClickListener(v -> mainActivity.playNextAudio());
-        CardView playCv = view.findViewById(R.id.player_play_cv);
         playCv.setOnClickListener(v -> mainActivity.pausePlayAudio());
         queImg.setOnClickListener(v -> openQue());
         repeatImg.setOnClickListener(v -> repeatFun());
@@ -214,6 +221,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         timerImg.setOnClickListener(v -> setTimer());
         timerTv.setOnClickListener(v -> cancelTimer());
         lyricsImg.setOnClickListener(v -> openLyricsPanel());
+        queueItem.setOnClickListener(v-> scrollToCurSong());
         lyricsImg.setOnLongClickListener(view1 -> {
             setLyricsLayout();
             return false;
@@ -221,16 +229,16 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         //top right option button
         optionImg.setOnClickListener(v -> optionMenu());
 
-        recyclerView = view.findViewById(R.id.queue_music_recycler);
+        queueRecyclerView = view.findViewById(R.id.queue_music_recycler);
+        linearLayoutManager = new LinearLayoutManager(getContext());
+
         queueBottomSheet = view.findViewById(R.id.bottom_sheet);
 
         //lyrics layout related initializations
         TextView button = view.findViewById(R.id.btn_add_lyrics);
         lyricsRecyclerView = view.findViewById(R.id.lyrics_recycler_view);
         noLyricsLayout = view.findViewById(R.id.no_lyrics_layout);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            lyricsRecyclerView.addOnScrollListener(onScrollListener);
-        }
+        lyricsRecyclerView.addOnScrollListener(onScrollListener);
         button.setOnClickListener(v -> setLyricsLayout());
 
 
@@ -252,9 +260,17 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     }
 
     /**
+     * this is for queue item click
+     */
+    private void scrollToCurSong() {
+        int index = storageUtil.loadMusicIndex();
+        linearLayoutManager.scrollToPositionWithOffset(index,0);
+    }
+
+    /**
      * This method sets elements according to settings values
      */
-    private void setDefaults() {
+    private void setAccorToSettings() {
         if (settingsStorage.loadShowArtist()) {
             mini_artist_text.setVisibility(View.VISIBLE);
         } else {
@@ -332,7 +348,9 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
                 try {
                     playerSongNameTv.setText(songName);
+                    songNameQueueItem.setText(songName);
                     playerArtistNameTv.setText(artistName);
+                    artistQueueItem.setText(artistName);
                     mimeTv.setText(getMime(mimeType));
                     durationTv.setText(convertDuration(duration));
                     mini_name_text.setText(songName);
@@ -346,8 +364,9 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                GlideBuilt.glide(requireContext(), albumUri, R.drawable.ic_music, playerCoverImage, 500);
+                GlideBuilt.glide(requireContext(), albumUri, R.drawable.ic_music, playerCoverImage, 512);
                 GlideBuilt.glide(requireContext(), albumUri, R.drawable.ic_music, mini_cover, 75);
+                GlideBuilt.glide(requireContext(), albumUri, R.drawable.ic_music, queueCoverImg, 75);
 
                 ((MainActivity) context).setDataInNavigation(songName, artistName, albumUri);
             }
@@ -526,9 +545,9 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         transaction.addToBackStack(null);
         transaction.commit();
     }
-
+    private LinearLayoutManager linearLayoutManager ;
     private void setupQueueBottomSheet() {
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        queueRecyclerView.setLayoutManager(linearLayoutManager);
         setAdapterInQueue();
 
         queueSheetBehaviour = (CustomBottomSheet<View>) BottomSheetBehavior.from(queueBottomSheet);
@@ -548,8 +567,8 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
             @Override
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-                bottomSheet.setAlpha(0 + slideOffset * 2);
-                shadowPlayer.setAlpha(0 + slideOffset * 2);
+                bottomSheet.setAlpha(0 + slideOffset*3);
+                shadowPlayer.setAlpha(0 + slideOffset);
             }
         });
 
@@ -562,11 +581,11 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         ArrayList<MusicDataCapsule> dataList;
         dataList = storageUtil.loadMusicList();
         MusicQueueAdapter adapter = new MusicQueueAdapter(getActivity(), dataList, this);
-        recyclerView.setAdapter(adapter);
+        queueRecyclerView.setAdapter(adapter);
 
         ItemTouchHelper.Callback callback = new SimpleTouchCallback(adapter);
         itemTouchHelper = new ItemTouchHelper(callback);
-        itemTouchHelper.attachToRecyclerView(recyclerView);
+        itemTouchHelper.attachToRecyclerView(queueRecyclerView);
     }
 
     /**
@@ -798,7 +817,6 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
         for (index = 0; index < list.size(); ++index) {
             if (list.get(index).getsName().equals(activeMusic.getsName()) && list.get(index).getsLength().equals(activeMusic.getsLength())) {
-                Log.d("Position", String.valueOf(index));
                 return index;
             }
         }

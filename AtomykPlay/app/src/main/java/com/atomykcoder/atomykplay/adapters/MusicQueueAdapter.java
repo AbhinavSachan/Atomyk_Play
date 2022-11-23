@@ -4,6 +4,7 @@ import static com.atomykcoder.atomykplay.helperFunctions.MusicHelper.convertDura
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -17,14 +18,14 @@ import androidx.annotation.NonNull;
 import androidx.core.view.MotionEventCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.R;
+import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.classes.GlideBuilt;
-import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.ItemTouchHelperAdapter;
 import com.atomykcoder.atomykplay.interfaces.ItemTouchHelperViewfinder;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
+import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -47,50 +48,42 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
     @Override
     public void onItemMove(int fromPos, int toPos) {
         StorageUtil storageUtil = new StorageUtil(context.getApplicationContext());
-//        int savedIndex;
-//        savedIndex = storageUtil.loadMusicIndex();
-
+        int savedIndex = storageUtil.loadMusicIndex();
 
         Collections.swap(musicArrayList, fromPos, toPos);
         notifyItemMoved(fromPos, toPos);
-        notifyItemRangeChanged(fromPos, 1);
-        notifyItemChanged(toPos, 1);
 
+        notifyItemRangeChanged(fromPos, 1, null);
+        notifyItemChanged(toPos, null);
+
+        if (fromPos < savedIndex) {
+            if (toPos == savedIndex || toPos > savedIndex) {
+                storageUtil.saveMusicIndex(savedIndex - 1);
+            }
+        } else if (fromPos > savedIndex) {
+            if (toPos == savedIndex || toPos < savedIndex) {
+                storageUtil.saveMusicIndex(savedIndex + 1);
+            }
+        } else {
+            storageUtil.saveMusicIndex(toPos);
+        }
         storageUtil.saveMusicList(musicArrayList);
-        // TODO: 11/16/2022 //FIX THIS POSITION ISSUE ☻
 
-//        if (fromPos == savedIndex) {
-//            storageUtil.saveMusicIndex(toPos);
-//        } else if (fromPos < savedIndex && fromPos < toPos) {
-//            storageUtil.saveMusicIndex(fromPos - 1);
-//        } else if (fromPos > savedIndex && fromPos > toPos) {
-//            storageUtil.saveMusicIndex(fromPos + 1);
-//        }
     }
 
     //removing item on swipe
     @Override
     public void onItemDismiss(int position) {
         StorageUtil storageUtil = new StorageUtil(context);
-        MusicDataCapsule activeMusic = null;
         int savedIndex;
         savedIndex = storageUtil.loadMusicIndex();
-        if (musicArrayList != null)
-            if (position != -1 && position < musicArrayList.size()) {
-                activeMusic = musicArrayList.get(position);
-            } else {
-                activeMusic = musicArrayList.get(0);
-            }
-        //if any item has been removed this will save new list on tem list
+        //if any item has been removed this will save new list on temp list
         if (musicArrayList != null) {
-            musicArrayList.remove(activeMusic);
-            storageUtil.saveMusicList(musicArrayList);
             if (position != -1 && position < musicArrayList.size()) {
                 musicArrayList.remove(position);
                 notifyItemRemoved(position);
             }
         }
-
         if (position == savedIndex) {
             mainActivity.playAudio();
         } else if (position < savedIndex) {
@@ -112,7 +105,7 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
     public void onBindViewHolder(@NonNull MusicQueueAdapter.MusicViewAdapter holder, @SuppressLint("RecyclerView") int position) {
         MusicDataCapsule currentItem = musicArrayList.get(position);
 
-        GlideBuilt.glide(context,currentItem.getsAlbumUri(),R.drawable.ic_music,holder.imageView,75);
+        GlideBuilt.glide(context, currentItem.getsAlbumUri(), R.drawable.ic_music, holder.imageView, 75);
         //playing song
         holder.cardView.setOnClickListener(v -> {
             File file = new File(currentItem.getsPath());
@@ -147,7 +140,7 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
 
     @Override
     public int getItemCount() {
-        if(musicArrayList != null) return  musicArrayList.size();
+        if (musicArrayList != null) return musicArrayList.size();
         else return -1;
     }
 
@@ -169,9 +162,11 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
         }
 
         @Override
-        public void onItemSelected() {}
+        public void onItemSelected() {
+        }
 
         @Override
-        public void onItemClear() {}
+        public void onItemClear() {
+        }
     }
 }
