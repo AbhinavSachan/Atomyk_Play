@@ -32,6 +32,6 @@
     </group>
     <item
         android:id="@+id/navigation_donate"
-        android:icon="@drawable/heart_with_mouse"
+        android:icon="@drawable/ic_donate"
         android:title="@string/donate" />
 </menu>
