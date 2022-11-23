@@ -2,10 +2,11 @@
 <resources>
     <color name="tertiary_bg">#2D76CF</color>
     <color name="secondary_bg">#0E0F12</color>
+    <color name="cover_recycler_item_bg">#191919</color>
     <color name="nav_center_shadow">#640E0F12</color>
     <color name="primary_bg">#181A1E</color>
     <color name="icons_bg">#CACACA</color>
-    <color name="play_icons_bg">#DCDCDC</color>
+    <color name="play_icons_bg">#FDFDFD</color>
     <color name="text_color">#E3E3E3</color>
     <color name="sub_text_grey">#BFB4B4</color>
     <color name="cover_image_grey">#555555</color>

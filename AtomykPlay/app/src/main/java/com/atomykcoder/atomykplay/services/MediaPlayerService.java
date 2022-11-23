@@ -464,35 +464,35 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     return PendingIntent.getService(this, actionNumber, playbackIntent, PendingIntent.FLAG_IMMUTABLE);
                 }
-                break;
+
             case 1:
                 //pause
                 playbackIntent.setAction(ACTION_PAUSE);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     return PendingIntent.getService(this, actionNumber, playbackIntent, PendingIntent.FLAG_IMMUTABLE);
                 }
-                break;
+
             case 2:
                 //next
                 playbackIntent.setAction(ACTION_NEXT);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     return PendingIntent.getService(this, actionNumber, playbackIntent, PendingIntent.FLAG_IMMUTABLE);
                 }
-                break;
+
             case 3:
                 //previous
                 playbackIntent.setAction(ACTION_PREVIOUS);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     return PendingIntent.getService(this, actionNumber, playbackIntent, PendingIntent.FLAG_IMMUTABLE);
                 }
-                break;
+
             case 4:
                 //stop
                 playbackIntent.setAction(ACTION_STOP);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     return PendingIntent.getService(this, actionNumber, playbackIntent, PendingIntent.FLAG_IMMUTABLE);
                 }
-                break;
+
             default:
                 break;
         }
@@ -607,15 +607,16 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 super.onCallStateChanged(state, phoneNumber);
                 switch (state) {
                     case TelephonyManager.CALL_STATE_OFFHOOK:
-                    case TelephonyManager.CALL_STATE_RINGING:
+                    case TelephonyManager.CALL_STATE_RINGING: {
                         if (media_player != null) {
                             if (media_player.isPlaying()) {
-                                pauseMedia();
                                 was_playing = true;
+                                pauseMedia();
                             }
                             MainActivity.phone_ringing = true;
                         }
-                        break;
+                    }
+                    break;
                     case TelephonyManager.CALL_STATE_IDLE: {
                         if (media_player != null) {
                             MainActivity.phone_ringing = false;
@@ -1039,11 +1040,18 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     public void onAudioFocusChange(int focusState) {
         switch (focusState) {
             case AudioManager.AUDIOFOCUS_GAIN:
-                resumeMedia();
+                if (was_playing) {
+                    resumeMedia();
+                    was_playing = false;
+                }
                 break;
             case AudioManager.AUDIOFOCUS_LOSS:
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
-                pauseMedia();
+                if (media_player != null)
+                    if (media_player.isPlaying()) {
+                        pauseMedia();
+                        was_playing = true;
+                    }
                 break;
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
                 if (settingsStorage.loadLowerVol()) {

@@ -7,10 +7,11 @@
     <color name="tertiary_bg">#2D76CF</color>
     <color name="icons_bg">#393939</color>
     <color name="text_color">#393939</color>
-    <color name="secondary_bg">#F8F8F8</color>
+    <color name="secondary_bg">#FDFDFD</color>
+    <color name="cover_recycler_item_bg">#FFFFFF</color>
     <color name="nav_center_shadow">#64F1F1F1</color>
     <color name="primary_bg">#EAEAEA</color>
-    <color name="play_icons_bg">#DCDCDC</color>
+    <color name="play_icons_bg">#FDFDFD</color>
     <color name="sub_text_grey">#505050</color>
     <color name="cover_image_grey">#555555</color>
     <color name="soft_black">#252525</color>

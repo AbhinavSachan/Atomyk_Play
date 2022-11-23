@@ -61,9 +61,11 @@
     <string name="self_break">Self Break</string>
     <string name="self_stop_des">Background service will stop after being idle for 5 minutes</string>
     <string name="set_as_ringtone">Set as ringtone</string>
-    <string name="delete">Delete</string>
+    <string name="delete">Delete from device</string>
     <string name="add_queue">Add to queue</string>
     <string name="play_next">Play next</string>
     <string name="keep_scr">Keep Screen On</string>
     <string name="keep_scr_des">Keep screen on while lyrics window is open \n(Battery consumption might increase)</string>
+    <string name="details">Details</string>
+    <string name="share">Share</string>
 </resources>

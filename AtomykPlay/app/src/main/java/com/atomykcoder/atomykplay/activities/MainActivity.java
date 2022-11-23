@@ -8,7 +8,6 @@ import static com.atomykcoder.atomykplay.services.MediaPlayerService.is_playing;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -16,15 +15,14 @@ import android.graphics.Rect;
 import android.media.AudioManager;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.provider.MediaStore;
 import android.provider.Settings;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -84,7 +82,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, NavigationView.OnNavigationItemSelectedListener {
 
     public static final String BROADCAST_PLAY_NEW_MUSIC = "com.atomykcoder.atomykplay.PlayNewMusic";
     public static final String BROADCAST_PAUSE_PLAY_MUSIC = "com.atomykcoder.atomykplay.PausePlayMusic";
@@ -327,10 +325,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         optionName = findViewById(R.id.song_name_option);
         addToFav = findViewById(R.id.add_to_favourites);
 
-        addPlayNextBtn.setOnClickListener(v -> addToNextPlay());
-        addToQueueBtn.setOnClickListener(v -> addToQueue());
-        setAsRingBtn.setOnClickListener(v -> requestWriteSettingsPermission());
-        addToFav.setOnClickListener(v -> showToast("yeah"));
+        addPlayNextBtn.setOnClickListener(this);
+        addToQueueBtn.setOnClickListener(this);
+        setAsRingBtn.setOnClickListener(this);
+        addToFav.setOnClickListener(this);
     }
 
     private void setBottomSheets() {
@@ -656,43 +654,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void setRingtone(MusicDataCapsule music) {
-        File file = new File(music.getsPath());
-        ContentValues content = new ContentValues();
-        content.put(MediaStore.MediaColumns.DATA, file.getAbsolutePath());
-        content.put(MediaStore.MediaColumns.TITLE, music.getsName());
-        content.put(MediaStore.MediaColumns.SIZE, music.getsLength());
-        content.put(MediaStore.MediaColumns.MIME_TYPE, music.getsMimeType());
-        content.put(MediaStore.Audio.Media.ARTIST, music.getsArtist());
-        content.put(MediaStore.Audio.Media.DURATION, music.getsLength());
-        content.put(MediaStore.Audio.Media.IS_RINGTONE, true);
-        content.put(MediaStore.Audio.Media.IS_NOTIFICATION, false);
-        content.put(MediaStore.Audio.Media.IS_ALARM, false);
-        content.put(MediaStore.Audio.Media.IS_MUSIC, false);
-
-        Log.i("info", "the absolute path of the file is :" + file.getAbsolutePath());
-        Uri uri = MediaStore.Audio.Media.getContentUriForPath(file.getAbsolutePath());
-        Uri newUri = getContentResolver().insert(uri, content);
-        Log.i("info", "the ringtone uri is : " + newUri);
-        RingtoneManager.setActualDefaultRingtoneUri(MainActivity.this, RingtoneManager.TYPE_RINGTONE, newUri);
-
-        closeOptionSheet();
-
-    }
-
-    private void requestWriteSettingsPermission() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-
             boolean canWrite = Settings.System.canWrite(this);
 
             if (canWrite) {
-                setRingtone(activeItem);
+                Uri newUri = Uri.fromFile(new File(music.getsPath()));
+                RingtoneManager.setActualDefaultRingtoneUri(MainActivity.this, RingtoneManager.TYPE_RINGTONE, newUri);
+                showToast("Ringtone set successfully");
             } else {
-                Intent intent = new Intent();
-                intent.setAction(Settings.ACTION_MANAGE_WRITE_SETTINGS);
-                Uri uri = Uri.fromParts("package", getApplicationContext().getPackageName(), null);
-                intent.setData(uri);
-                startActivity(intent);
+                requestWriteSettingsPermission();
             }
+        }
+        closeOptionSheet();
+    }
+
+    private void requestWriteSettingsPermission() {
+
+        Intent intent = new Intent();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            intent.setAction(Settings.ACTION_MANAGE_WRITE_SETTINGS);
+            Uri uri = Uri.fromParts("package", getApplicationContext().getPackageName(), null);
+            intent.setData(uri);
+            startActivity(intent);
         }
     }
 
@@ -911,4 +894,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         lyricsListBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
     }
 
+    @SuppressLint("NonConstantResourceId")
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.add_play_next: {
+                addToNextPlay();
+            }
+            case R.id.add_to_queue: {
+                addToQueue();
+            }
+            case R.id.set_ringtone: {
+                setRingtone(activeItem);
+            }
+        }
+    }
 }
