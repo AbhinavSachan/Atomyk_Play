@@ -344,7 +344,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         optionCover = findViewById(R.id.song_album_cover_option);
         optionArtist = findViewById(R.id.song_artist_name_option);
         optionName = findViewById(R.id.song_name_option);
-        deleteFromDeviceBtn = findViewById(R.id.delete_music_option);
         addToFav = findViewById(R.id.add_to_favourites_option);
 
         addPlayNextBtn.setOnClickListener(this);
@@ -356,7 +355,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         shareBtn.setOnClickListener(this);
         deleteBtn.setOnClickListener(this);
         addToFav.setOnClickListener(this);
-        deleteFromDeviceBtn.setOnClickListener(this);
     }
 
     private void setBottomSheets() {
@@ -1023,13 +1021,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 addToQueue();
                 break;
             }
-            case R.id.set_ringtone: {
+            case R.id.set_ringtone_option: {
                 setRingtone(itemOptionSelectedMusic);
                 break;
             }
             case R.id.delete_music_option: {
                 deleteFromDevice(itemOptionSelectedMusic);
                 break;
+            }
 
             case R.id.tagEditor_option: {
                 openTagEditor();
