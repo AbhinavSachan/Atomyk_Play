@@ -73,7 +73,6 @@ public class AddLyricsFragment extends Fragment {
         saveBtn.setOnClickListener(v -> saveMusic());
         btnFind.setOnClickListener(v -> setDialogBox());
 
-
         return view;
     }
 

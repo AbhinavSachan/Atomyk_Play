@@ -4,7 +4,7 @@
     android:id="@+id/option_bottom_sheet"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/secondary_bg"
+    android:background="@drawable/rounded_bottom_sheet"
     android:clickable="true"
     android:elevation="50dp"
     android:focusable="true"

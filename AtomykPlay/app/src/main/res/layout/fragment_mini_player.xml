@@ -5,7 +5,7 @@
     android:id="@+id/mini_player_layout"
     android:layout_width="match_parent"
     android:layout_height="68dp"
-    android:background="@color/secondary_bg"
+    android:background="@drawable/rounded_bottom_sheet"
     tools:context=".fragments.BottomSheetPlayerFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout

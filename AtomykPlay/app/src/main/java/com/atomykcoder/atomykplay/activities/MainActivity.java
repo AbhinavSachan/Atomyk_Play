@@ -16,7 +16,6 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.graphics.Rect;
 import android.media.AudioManager;
 import android.media.RingtoneManager;
@@ -30,7 +29,6 @@ import android.provider.MediaStore;
 import android.provider.Settings;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -694,7 +692,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void requestWriteSettingsPermission() {
-
         Intent intent = new Intent();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             intent.setAction(Settings.ACTION_MANAGE_WRITE_SETTINGS);
@@ -715,6 +712,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     /**
      * delete song permanently from device *USE WITH CAUTION*
+     *
      * @param music music to be deleted
      */
     private void deleteFromDevice(MusicDataCapsule music) {
@@ -724,10 +722,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             // for android 11 and above
-            if(contentUri != null) {
+            if (contentUri != null) {
                 List<Uri> uris = new ArrayList<>(1);
                 uris.add(contentUri);
-                PendingIntent pendingIntent = MediaStore.createDeleteRequest(contentResolver,uris);
+                PendingIntent pendingIntent = MediaStore.createDeleteRequest(contentResolver, uris);
                 try {
                     //noinspection deprecation
                     startIntentSenderForResult(pendingIntent.getIntentSender(),
@@ -737,9 +735,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     e.printStackTrace();
                 }
             }
-        } else if(Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
+        } else if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
             //for android 10
-            if(normalUri != null) {
+            if (normalUri != null) {
                 try {
                     contentResolver.delete(normalUri, null, null);
                 }
@@ -755,8 +753,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                 }
             }
-        }
-        else {
+        } else {
             // for older devices
             if (normalUri != null) {
                 contentResolver.delete(normalUri, null, null);
@@ -770,11 +767,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         //yeah it has to be in reverse for some reason to work
-        if(resultCode == PackageManager.PERMISSION_DENIED) {
-            Log.i("info", "Item deleted");
+        if (resultCode == PackageManager.PERMISSION_DENIED) {
             adapter.removeItem(itemOptionSelectedMusic);
-        } else if(resultCode == PackageManager.PERMISSION_GRANTED) {
-            Log.i("info", "item not deleted");
         }
     }
 
@@ -877,8 +871,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onBackPressed() {
         FragmentManager fragmentManager = getSupportFragmentManager();
-        Fragment fragment1 = fragmentManager.findFragmentByTag("AboutFragment");
-        Fragment fragment2 = fragmentManager.findFragmentByTag("SettingsFragment");
+        Fragment fragment1 = fragmentManager.findFragmentByTag("FavoritesFragment");
+        Fragment fragment2 = fragmentManager.findFragmentByTag("PlaylistsFragment");
+        Fragment fragment3 = fragmentManager.findFragmentByTag("SettingsFragment");
+        Fragment fragment4 = fragmentManager.findFragmentByTag("HelpFragment");
+        Fragment fragment5 = fragmentManager.findFragmentByTag("AboutFragment");
 
         if (mainPlayerSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED ||
                 mainPlayerSheetBehavior.getState() == BottomSheetBehavior.STATE_HIDDEN) {
@@ -890,7 +887,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         lyricsListBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
                     lyricsListBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
                 } else {
-                    if (fragment1 != null || fragment2 != null) {
+                    if (fragment1 != null || fragment2 != null || fragment3 != null || fragment4 != null || fragment5 != null) {
                         navigationView.setCheckedItem(R.id.navigation_home);
                     }
                     super.onBackPressed();
@@ -955,41 +952,41 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         switch (item.getItemId()) {
             case R.id.navigation_home: {
-                if (fragment1 != null || fragment2 != null||fragment3 != null || fragment4 != null||fragment5 != null) {
+                if (fragment1 != null || fragment2 != null || fragment3 != null || fragment4 != null || fragment5 != null) {
                     fragmentManager.popBackStackImmediate();
                 }
                 break;
             }
             case R.id.navigation_favorite: {
-                if (fragment1 != null || fragment2 != null||fragment3 != null || fragment4 != null||fragment5 != null) {
+                if (fragment1 != null || fragment2 != null || fragment3 != null || fragment4 != null || fragment5 != null) {
                     fragmentManager.popBackStackImmediate();
                 }
                 transaction.replace(R.id.sec_container, new FavoritesFragment(), "FavoritesFragment").addToBackStack(null).commit();
                 break;
             }
             case R.id.navigation_playlist: {
-                if (fragment1 != null || fragment2 != null||fragment3 != null || fragment4 != null||fragment5 != null) {
+                if (fragment1 != null || fragment2 != null || fragment3 != null || fragment4 != null || fragment5 != null) {
                     fragmentManager.popBackStackImmediate();
                 }
                 transaction.replace(R.id.sec_container, new PlaylistsFragment(), "PlaylistsFragment").addToBackStack(null).commit();
                 break;
             }
             case R.id.navigation_setting: {
-                if (fragment1 != null || fragment2 != null||fragment3 != null || fragment4 != null||fragment5 != null) {
+                if (fragment1 != null || fragment2 != null || fragment3 != null || fragment4 != null || fragment5 != null) {
                     fragmentManager.popBackStackImmediate();
                 }
                 transaction.replace(R.id.sec_container, new SettingsFragment(), "SettingsFragment").addToBackStack(null).commit();
                 break;
             }
             case R.id.navigation_help: {
-                if (fragment1 != null || fragment2 != null||fragment3 != null || fragment4 != null||fragment5 != null) {
+                if (fragment1 != null || fragment2 != null || fragment3 != null || fragment4 != null || fragment5 != null) {
                     fragmentManager.popBackStackImmediate();
                 }
                 transaction.replace(R.id.sec_container, new HelpFragment(), "HelpFragment").addToBackStack(null).commit();
                 break;
             }
             case R.id.navigation_about: {
-                if (fragment1 != null || fragment2 != null||fragment3 != null || fragment4 != null||fragment5 != null) {
+                if (fragment1 != null || fragment2 != null || fragment3 != null || fragment4 != null || fragment5 != null) {
                     fragmentManager.popBackStackImmediate();
                 }
                 transaction.replace(R.id.sec_container, new AboutFragment(), "AboutFragment").addToBackStack(null).commit();
@@ -1043,7 +1040,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             }
             case R.id.share_music_option: {
-                openShare();
+                openShare(itemOptionSelectedMusic);
                 break;
             }
             case R.id.add_to_favourites_option: {
@@ -1054,12 +1051,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         closeOptionSheet();
     }
 
-    private void deleteFromDevice() {
 
-    }
-
-    private void openShare() {
-
+    private void openShare(MusicDataCapsule itemOptionSelectedMusic) {
+        Uri uri = Uri.parse(itemOptionSelectedMusic.getsPath());
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("audio/*");
+        intent.putExtra(Intent.EXTRA_STREAM, uri);
+        startActivity(Intent.createChooser(intent, "Share Via ..."));
     }
 
     private void openDetailsBox() {
@@ -1072,28 +1070,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     /**
      * get Content uri of music (Required to delete files in android 11 and above)
+     *
      * @param music music
      * @return returns content uri of given music
      */
     private Uri getContentUri(MusicDataCapsule music) {
-        File file = new File(music.getsPath());
-        String filePath = file.getAbsolutePath();
-        ContentResolver contentResolver = getContentResolver();
 
-        Cursor cursor = contentResolver.query(
-                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                new String[]{MediaStore.Audio.Media._ID},
-                MediaStore.Audio.Media.DATA + "=? ",
-                new String[]{filePath}, null);
+        int id = Integer.parseInt(music.getsId());
+        Uri baseUri = Uri.parse("content://media/external/audio/media");
+        return Uri.withAppendedPath(baseUri, "" + id);
 
-        if (cursor != null && cursor.moveToFirst()) {
-            @SuppressLint("Range") int id = cursor.getInt(
-                    cursor.getColumnIndex(MediaStore.MediaColumns._ID));
-            Uri baseUri = Uri.parse("content://media/external/audio/media");
-            cursor.close();
-            return Uri.withAppendedPath(baseUri, "" + id);
-        } else {
-            return null;
-        }
     }
 }

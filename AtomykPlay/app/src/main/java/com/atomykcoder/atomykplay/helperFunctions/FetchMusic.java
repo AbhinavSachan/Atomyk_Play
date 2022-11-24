@@ -16,8 +16,6 @@ import java.util.Comparator;
 
 public class FetchMusic {
 
-    private static int filter;
-
     public static void fetchMusic(ArrayList<MusicDataCapsule> dataList, Context context) {
         String selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0";
         @SuppressLint("InlinedApi")
@@ -32,7 +30,8 @@ public class FetchMusic {
                 MediaStore.Audio.Media.SIZE,
                 MediaStore.Audio.Media.BITRATE,
                 MediaStore.Audio.Media.GENRE,
-                MediaStore.Audio.Media.DATE_ADDED
+                MediaStore.Audio.Media.DATE_ADDED,
+                MediaStore.Audio.Media._ID
         };
         //Creating a cursor to store all data of a song
         Cursor audioCursor = context.getContentResolver().query(
@@ -61,6 +60,8 @@ public class FetchMusic {
                     String sAlbum = audioCursor.getString(5);
                     String sMimeType = audioCursor.getString(6);
                     String sSize = audioCursor.getString(7);
+                    String sId = audioCursor.getString(11);
+
                     String sBitrate = "";
                     String sGenre = "";
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -68,12 +69,13 @@ public class FetchMusic {
                         sGenre = audioCursor.getString(9);
                     }
 
+
                     Uri uri = Uri.parse("content://media/external/audio/albumart");
                     String sAlbumUri = Uri.withAppendedPath(uri, sAlbumId).toString();
 
                     MusicDataCapsule music;
-                    filter = new StorageUtil.SettingsStorage(context).loadFilterDur() * 1000;
-                    music = new MusicDataCapsule(sTitle, sArtist, sAlbum, sAlbumUri, sLength, sPath, sBitrate, sMimeType, sSize, sGenre);
+                    int filter = new StorageUtil.SettingsStorage(context).loadFilterDur() * 1000;
+                    music = new MusicDataCapsule(sTitle, sArtist, sAlbum, sAlbumUri, sLength, sPath, sBitrate, sMimeType, sSize, sGenre,sId);
                     File file = new File(music.getsPath());
                     if (file.exists()) {
                         if (filter <= Integer.parseInt(music.getsLength())) {

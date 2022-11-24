@@ -91,6 +91,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     public View player_layout;
     public ImageView optionImg;
     public View info_layout;
+    public MusicQueueAdapter queueAdapter;
     private boolean userScrolling = false;
     RecyclerView.OnScrollListener onScrollListener = new RecyclerView.OnScrollListener() {
         @Override
@@ -132,10 +133,12 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     private View lyricsRelativeLayout;
     private MainActivity mainActivity;
     private CardView coverCardView;
-    private ImageView lyricsImg,queueCoverImg;
+    private ImageView lyricsImg, queueCoverImg;
     private View shadowPlayer;
-    private TextView songNameQueueItem,artistQueueItem;
+    private TextView songNameQueueItem, artistQueueItem;
     private StorageUtil.SettingsStorage settingsStorage;
+    private LinearLayoutManager linearLayoutManager;
+    private MusicLyricsAdapter lyricsAdapter;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -221,7 +224,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         timerImg.setOnClickListener(v -> setTimer());
         timerTv.setOnClickListener(v -> cancelTimer());
         lyricsImg.setOnClickListener(v -> openLyricsPanel());
-        queueItem.setOnClickListener(v-> scrollToCurSong());
+        queueItem.setOnClickListener(v -> scrollToCurSong());
         lyricsImg.setOnLongClickListener(view1 -> {
             setLyricsLayout();
             return false;
@@ -264,7 +267,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
      */
     private void scrollToCurSong() {
         int index = storageUtil.loadMusicIndex();
-        linearLayoutManager.scrollToPositionWithOffset(index,0);
+        linearLayoutManager.scrollToPositionWithOffset(index, 0);
     }
 
     /**
@@ -512,7 +515,6 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
     }
 
-
     public int getCurrentPos() {
         return media_player_service.media_player.getCurrentPosition();
     }
@@ -522,7 +524,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
         lyricsRecyclerView.setLayoutManager(lm);
 
-        MusicLyricsAdapter lyricsAdapter = new MusicLyricsAdapter(context, lyricsArrayList);
+        lyricsAdapter = new MusicLyricsAdapter(context, lyricsArrayList);
         lyricsRecyclerView.setAdapter(lyricsAdapter);
 
     }
@@ -545,7 +547,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         transaction.addToBackStack(null);
         transaction.commit();
     }
-    private LinearLayoutManager linearLayoutManager ;
+
     private void setupQueueBottomSheet() {
         queueRecyclerView.setLayoutManager(linearLayoutManager);
         setAdapterInQueue();
@@ -567,8 +569,8 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
             @Override
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-                bottomSheet.setAlpha(0 + slideOffset*3);
-                shadowPlayer.setAlpha(0 + slideOffset);
+                bottomSheet.setAlpha(0 + slideOffset + 1f);
+                shadowPlayer.setAlpha(0 + slideOffset + 1f);
             }
         });
 
@@ -580,10 +582,10 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     public void setAdapterInQueue() {
         ArrayList<MusicDataCapsule> dataList;
         dataList = storageUtil.loadMusicList();
-        MusicQueueAdapter adapter = new MusicQueueAdapter(getActivity(), dataList, this);
-        queueRecyclerView.setAdapter(adapter);
+        queueAdapter = new MusicQueueAdapter(getActivity(), dataList, this);
+        queueRecyclerView.setAdapter(queueAdapter);
 
-        ItemTouchHelper.Callback callback = new SimpleTouchCallback(adapter);
+        ItemTouchHelper.Callback callback = new SimpleTouchCallback(queueAdapter);
         itemTouchHelper = new ItemTouchHelper(callback);
         itemTouchHelper.attachToRecyclerView(queueRecyclerView);
     }

@@ -97,7 +97,7 @@
             android:id="@+id/found_lyrics_fragments"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/primary_bg"
+            android:background="@drawable/rounded_bottom_lyric_sheet"
             android:clickable="true"
             android:elevation="15dp"
             android:focusable="true"

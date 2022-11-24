@@ -4,6 +4,8 @@ import static com.atomykcoder.atomykplay.helperFunctions.MusicHelper.convertDura
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -27,6 +29,8 @@ import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.MusicViewAdapter> implements ItemTouchHelperAdapter {
     Context context;
@@ -113,17 +117,23 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
                 storage.saveMusicIndex(position);
                 mainActivity.playAudio();
             } else {
-                Toast.makeText(context, "Audio file is unavailable", Toast.LENGTH_SHORT).show();
-                notifyItemRemoved(position);
+                Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show();
+                removeItem(currentItem);
             }
 
         });
 
         //add bottom sheet functions in three dot click
         holder.imageButton.setOnTouchListener((v, event) -> {
-            //noinspection deprecation
-            if (MotionEventCompat.getActionMasked(event) == MotionEvent.ACTION_DOWN) {
-                onDragStartListener.onDragStart(holder);
+            File file = new File(currentItem.getsPath());
+            if (file.exists()) {
+                //noinspection deprecation
+                if (MotionEventCompat.getActionMasked(event) == MotionEvent.ACTION_DOWN) {
+                    onDragStartListener.onDragStart(holder);
+                }
+            } else {
+                Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show();
+                removeItem(currentItem);
             }
             return false;
         });
@@ -134,11 +144,20 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
         holder.artistText.setText(currentItem.getsArtist());
         holder.durationText.setText(convertDuration(currentItem.getsLength()));
     }
+    public void removeItem(MusicDataCapsule item) {
+        StorageUtil storageUtil = new StorageUtil(context);
+        int position = musicArrayList.indexOf(item);
 
+        if (item != null) {
+            musicArrayList.remove(item);
+        }
+        notifyItemRangeChanged(position, musicArrayList.size()-(position+1));
+        notifyItemRemoved(position);
+        storageUtil.saveMusicList(musicArrayList);
+    }
     @Override
     public int getItemCount() {
-        if (musicArrayList != null) return musicArrayList.size();
-        else return -1;
+        return musicArrayList.size();
     }
 
     public static class MusicViewAdapter extends RecyclerView.ViewHolder {

@@ -53,15 +53,17 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
-    public void onBindViewHolder(@NonNull MusicViewAdapter holder, @SuppressLint("RecyclerView") int position) {
-        MusicDataCapsule currentItem = musicArrayList.get(position);
+    public void onBindViewHolder(@NonNull MusicViewAdapter holder, @SuppressLint("RecyclerView") int pos) {
+        MusicDataCapsule currentItem = musicArrayList.get(pos);
 
         GlideBuilt.glide(context, currentItem.getsAlbumUri(), R.drawable.ic_music, holder.imageView, 75);
         //playing song
+        int position = holder.getAbsoluteAdapterPosition();
         holder.cardView.setOnClickListener(v -> {
             File file = new File(currentItem.getsPath());
             if (file.exists()) {
                 //check is service active
+
                 StorageUtil storage = new StorageUtil(context);
                 StorageUtil.SettingsStorage settingsStorage = new StorageUtil.SettingsStorage(context);
                 storage.saveMusicList(musicArrayList);
@@ -102,7 +104,7 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
                         service.shutdown();
 
                     }
-                } else if (!settingsStorage.loadKeepShuffle()){
+                } else if (!settingsStorage.loadKeepShuffle()) {
                     //Store serializable music list to sharedPreference
                     ExecutorService service = Executors.newSingleThreadExecutor();
                     Handler handler = new Handler(Looper.getMainLooper());
@@ -121,14 +123,22 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
                 }
             } else {
                 Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show();
-                notifyItemRemoved(position);
+                removeItem(currentItem);
             }
 
         });
 
 
         //add bottom sheet functions in three dot click
-        holder.imageButton.setOnClickListener(view -> mainActivity.openOptionMenu(currentItem));
+        holder.imageButton.setOnClickListener(view -> {
+            File file = new File(currentItem.getsPath());
+            if (file.exists()) {
+                mainActivity.openOptionMenu(currentItem);
+            } else {
+                Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show();
+                removeItem(currentItem);
+            }
+        });
 
 
         holder.nameText.setText(currentItem.getsName());
@@ -146,6 +156,32 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
         return musicArrayList.get(element).getsName().charAt(0);
     }
 
+    /**
+     * remove item from list after deleting it from device
+     *
+     * @param item selected delete item
+     */
+    public void removeItem(MusicDataCapsule item) {
+        StorageUtil storageUtil = new StorageUtil(context);
+        int position = musicArrayList.indexOf(item);
+        int savedIndex = storageUtil.loadMusicIndex();
+
+        if (position < savedIndex) {
+            storageUtil.saveMusicIndex(savedIndex - 1);
+        }
+        if (position!=-1) {
+            musicArrayList.remove(position);
+        }
+
+        notifyItemRangeChanged(position, musicArrayList.size()-(position+1));
+        notifyItemRemoved(position);
+
+        if (position == savedIndex) {
+            mainActivity.playAudio();
+        }
+        mainActivity.bottomSheetPlayerFragment.queueAdapter.removeItem(item);
+
+    }
 
     public static class MusicViewAdapter extends RecyclerView.ViewHolder {
         private final ImageView imageView;
@@ -164,13 +200,5 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
             durationText = itemView.findViewById(R.id.song_length);
 
         }
-    }
-
-    // TODO: 11/24/2022 fix adapter removing wrong item after one deletion has been performed
-    // to recreate : delete a song, then delete the song just below the previous one, list will remove
-    //wrong item
-    public void removeItem(MusicDataCapsule item) {
-        int position = musicArrayList.indexOf(item);
-        notifyItemRemoved(position);
     }
 }
