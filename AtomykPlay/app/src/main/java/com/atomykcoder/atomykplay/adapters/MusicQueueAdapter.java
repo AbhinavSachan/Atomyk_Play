@@ -101,7 +101,7 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
     public void onBindViewHolder(@NonNull MusicQueueAdapter.MusicViewAdapter holder, @SuppressLint("RecyclerView") int position) {
         MusicDataCapsule currentItem = musicArrayList.get(position);
 
-        GlideBuilt.glide(context, currentItem.getsAlbumUri(), R.drawable.ic_music, holder.imageView, 75);
+        GlideBuilt.glide(context, currentItem.getsAlbumUri(), R.drawable.ic_music, holder.imageView, 128);
         //playing song
         holder.cardView.setOnClickListener(v -> {
             File file = new File(currentItem.getsPath());

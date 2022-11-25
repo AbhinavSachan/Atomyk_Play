@@ -245,10 +245,6 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         lyricsRecyclerView.addOnScrollListener(onScrollListener);
         button.setOnClickListener(v -> setLyricsLayout());
 
-
-        queueBottomSheet.setClickable(true);
-        seekBarMain.setClickable(true);
-
         seekBarMain.setOnSeekBarChangeListener(this);
 
         mini_play_view.setOnClickListener(v -> {
@@ -368,6 +364,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+
                 GlideBuilt.glide(requireContext(), albumUri, R.drawable.ic_music, playerCoverImage, 512);
                 GlideBuilt.glide(requireContext(), albumUri, R.drawable.ic_music, mini_cover, 128);
                 GlideBuilt.glide(requireContext(), albumUri, R.drawable.ic_music, queueCoverImg, 128);

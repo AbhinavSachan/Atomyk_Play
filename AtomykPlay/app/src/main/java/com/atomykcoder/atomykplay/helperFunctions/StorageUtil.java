@@ -242,7 +242,7 @@ public class StorageUtil {
 
         public boolean loadShowInfo() {
             sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
-            return sharedPreferences.getBoolean("show_info", true);
+            return sharedPreferences.getBoolean("show_info", false);
         }
 
         public void showArtist(boolean show) {
@@ -338,6 +338,17 @@ public class StorageUtil {
         public boolean loadKeepScreenOn() {
             sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
             return sharedPreferences.getBoolean("keep_screen_on", false);
+        }
+        public void oneClickSkip(boolean b) {
+            sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean("one_click_skip", b);
+            editor.apply();
+        }
+
+        public boolean loadOneClickSkip() {
+            sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
+            return sharedPreferences.getBoolean("one_click_skip", false);
         }
 
 

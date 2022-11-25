@@ -10,13 +10,18 @@
        android:layout_height="match_parent"
        android:orientation="vertical"
        android:padding="16dp">
+
        <TextView
-           android:layout_width="wrap_content"
+           android:layout_width="match_parent"
            android:layout_height="wrap_content"
-           android:layout_gravity="start"
+           android:layout_marginTop="6dp"
+           android:layout_marginBottom="10dp"
+           android:padding="4dp"
            android:text="@string/sleep_timer_text"
-           android:textColor="@color/tertiary_bg"
-           android:textSize="20sp" />
+           android:textColor="@color/text_color"
+           android:textSize="@dimen/d_24sp"
+           android:textStyle="bold" />
+
 
        <TextView
            android:id="@+id/timer_time_textview"
@@ -26,7 +31,7 @@
            android:layout_marginTop="25dp"
            android:text="@string/empty"
            android:textColor="@color/sub_text_grey"
-           android:textSize="20sp" />
+           android:textSize="@dimen/d_18sp" />
 
        <SeekBar
            android:id="@+id/timer_time_seekbar"

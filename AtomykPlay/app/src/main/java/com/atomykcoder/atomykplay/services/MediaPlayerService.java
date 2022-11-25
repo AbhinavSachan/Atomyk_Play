@@ -132,15 +132,15 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                             break;
                         case 1:
                             if (!is_playing) {
-                                if (media_player == null) {
+                                if (media_player != null) {
+                                    resumeMedia();
+                                } else {
                                     try {
                                         initiateMediaSession();
                                     } catch (RemoteException e) {
                                         e.printStackTrace();
                                     }
                                     initiateMediaPlayer();
-                                } else {
-                                    resumeMedia();
                                 }
                             }
                             break;
@@ -896,21 +896,64 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     public void skipToPrevious() {
         storage.clearMusicLastPos();
 
-        if (musicList != null)
-            if (musicIndex == 0) {
-                musicIndex = musicList.size() - 1;
-                activeMusic = musicList.get(musicIndex);
-            } else {
-                activeMusic = musicList.get(--musicIndex);
+        if (settingsStorage.loadOneClickSkip()) {
+            if (musicList != null)
+                if (musicIndex == 0) {
+                    musicIndex = musicList.size() - 1;
+                    activeMusic = musicList.get(musicIndex);
+                } else {
+                    activeMusic = musicList.get(--musicIndex);
+                }
+            if (activeMusic != null) {
+                //update stored index
+                storage.saveMusicIndex(musicIndex);
+
+                stopMedia();
+                initiateMediaPlayer();
             }
-        if (activeMusic != null) {
-            //update stored index
-            storage.saveMusicIndex(musicIndex);
+        } else {
+            if (media_player != null) {
+                if (media_player.getCurrentPosition() >= 2000) {
+                    if (musicIndex == 0) {
+                        musicIndex = musicList.size() - 1;
+                    }
+                    activeMusic = musicList.get(musicIndex);
+                    if (activeMusic != null) {
+                        stopMedia();
+                        initiateMediaPlayer();
+                    }
+                } else {
+                    if (musicList != null)
+                        if (musicIndex == 0) {
+                            musicIndex = musicList.size() - 1;
+                            activeMusic = musicList.get(musicIndex);
+                        } else {
+                            activeMusic = musicList.get(--musicIndex);
+                        }
+                    if (activeMusic != null) {
+                        //update stored index
+                        storage.saveMusicIndex(musicIndex);
 
-            stopMedia();
-            initiateMediaPlayer();
+                        stopMedia();
+                        initiateMediaPlayer();
+                    }
+                }
+            } else {
+                if (musicList != null) {
+                    if (musicIndex == 0) {
+                        musicIndex = musicList.size() - 1;
+                    }
+                    activeMusic = musicList.get(musicIndex);
+                }
+                if (activeMusic != null) {
+                    //update stored index
+                    storage.saveMusicIndex(musicIndex);
+
+                    stopMedia();
+                    initiateMediaPlayer();
+                }
+            }
         }
-
     }
 
     /**

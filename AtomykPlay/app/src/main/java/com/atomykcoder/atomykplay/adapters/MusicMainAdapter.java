@@ -56,7 +56,7 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
     public void onBindViewHolder(@NonNull MusicViewAdapter holder, @SuppressLint("RecyclerView") int pos) {
         MusicDataCapsule currentItem = musicArrayList.get(pos);
 
-        GlideBuilt.glide(context, currentItem.getsAlbumUri(), R.drawable.ic_music, holder.imageView, 75);
+        GlideBuilt.glide(context, currentItem.getsAlbumUri(), R.drawable.ic_music, holder.imageView, 128);
         //playing song
         int position = holder.getAbsoluteAdapterPosition();
         holder.cardView.setOnClickListener(v -> {

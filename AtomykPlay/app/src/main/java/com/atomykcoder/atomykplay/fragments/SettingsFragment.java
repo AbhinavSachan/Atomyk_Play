@@ -26,12 +26,12 @@ public class SettingsFragment extends Fragment {
 
     private RadioGroup radioGroup;
     private RadioButton light_theme_btn, dark_theme_btn, default_theme_btn;
-    private SwitchCompat songInfoSwi, artistSwi, optionSwi, extraSwi, autoPlaySwi, keepShuffleSwi, lowerVolSwi,selfStopSwi,keepScreenOnSwi;
-    private View songInfoLl, artistLl, optionLl, extraLl, autoPlayLl, keepShuffleLl, lowerVolLl, blackListLl, filterDurLl,selfStopLl,keepScreenOnLl;
+    private SwitchCompat songInfoSwi, artistSwi, optionSwi, extraSwi, autoPlaySwi, keepShuffleSwi, lowerVolSwi, selfStopSwi, keepScreenOnSwi, oneClickSkipSwi;
+    private View songInfoLl, artistLl, optionLl, extraLl, autoPlayLl, keepShuffleLl, lowerVolLl, blackListLl, filterDurLl, selfStopLl, keepScreenOnLl, oneClickSkipLl;
 
 
     private String theme;
-    private boolean showInfo, showArtist, showOption, showExtra, autoPlay, keepShuffle, lowerVol,selfStop,keepScreenOn;
+    private boolean showInfo, showArtist, showOption, showExtra, autoPlay, keepShuffle, lowerVol, selfStop, keepScreenOn, oneClickSkip;
     private StorageUtil.SettingsStorage settingsStorage;
     private MainActivity mainActivity;
 
@@ -56,6 +56,7 @@ public class SettingsFragment extends Fragment {
         lowerVol = settingsStorage.loadLowerVol();
         selfStop = settingsStorage.loadSelfStop();
         keepScreenOn = settingsStorage.loadKeepScreenOn();
+        oneClickSkip = settingsStorage.loadOneClickSkip();
 
 
         //Player settings
@@ -79,6 +80,8 @@ public class SettingsFragment extends Fragment {
         lowerVolLl = view.findViewById(R.id.lower_vol_ll);
         selfStopSwi = view.findViewById(R.id.self_stop_swi);
         selfStopLl = view.findViewById(R.id.self_stop_ll);
+        oneClickSkipSwi = view.findViewById(R.id.one_click_skip_swi);
+        oneClickSkipLl = view.findViewById(R.id.one_click_skip_ll);
 
         //filter settings
         blackListLl = view.findViewById(R.id.blacklist_ll);
@@ -102,6 +105,7 @@ public class SettingsFragment extends Fragment {
         lowerVolLl.setOnClickListener(v -> lowerVolSwi.setChecked(!lowerVolSwi.isChecked()));
         selfStopLl.setOnClickListener(v -> selfStopSwi.setChecked(!selfStopSwi.isChecked()));
         keepScreenOnLl.setOnClickListener(v -> keepScreenOnSwi.setChecked(!keepScreenOnSwi.isChecked()));
+        oneClickSkipLl.setOnClickListener(v -> oneClickSkipSwi.setChecked(!oneClickSkipSwi.isChecked()));
         blackListLl.setOnClickListener(v -> showToast("coming soon!"));
         filterDurLl.setOnClickListener(v -> showToast("coming soon!"));
 
@@ -144,6 +148,10 @@ public class SettingsFragment extends Fragment {
         keepScreenOnSwi.setOnCheckedChangeListener((buttonView, isChecked) -> {
             keepScreenOnSwi.setChecked(isChecked);
             settingsStorage.keepScreenOn(isChecked);
+        });
+        oneClickSkipSwi.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            oneClickSkipSwi.setChecked(isChecked);
+            settingsStorage.oneClickSkip(isChecked);
         });
 
         //Check if any radio button is pressed
@@ -205,6 +213,7 @@ public class SettingsFragment extends Fragment {
         lowerVolSwi.setChecked(lowerVol);
         selfStopSwi.setChecked(selfStop);
         keepScreenOnSwi.setChecked(keepScreenOn);
+        oneClickSkipSwi.setChecked(oneClickSkip);
 
         switch (theme) {
             case system_follow:

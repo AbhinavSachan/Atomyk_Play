@@ -72,4 +72,6 @@
     <string name="favorite">Favorites</string>
     <string name="playList">Playlists</string>
     <string name="help">Help ?</string>
+    <string name="one_click">Single click skip</string>
+    <string name="one_click_des">Skip to previous song in single click</string>
 </resources>

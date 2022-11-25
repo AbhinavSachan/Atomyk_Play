@@ -1,6 +1,7 @@
 package com.atomykcoder.atomykplay.classes;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.widget.ImageView;
@@ -13,7 +14,7 @@ import com.bumptech.glide.request.RequestOptions;
 
 public class GlideBuilt {
 
-    public static void glide(Context context, String uri,int placeholderImage, ImageView imageView, int image_measure){
+    public static void glide(Context context, String uri, int placeholderImage, ImageView imageView, int image_measure){
         Glide.with(context).load(uri).apply(new RequestOptions().placeholder(placeholderImage))
                 .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                 .override(image_measure, image_measure)

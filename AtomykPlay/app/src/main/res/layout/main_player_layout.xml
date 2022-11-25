@@ -297,9 +297,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="33dp"
                 android:padding="15dp"
+                android:clickable="true"
                 android:progressDrawable="@drawable/seekbar_style"
                 android:splitTrack="false"
-                android:thumbTint="@color/tertiary_bg" />
+                android:thumbTint="@color/tertiary_bg"
+                android:focusable="true" />
 
             <TextView
                 android:id="@+id/player_current_pos_tv"
@@ -450,10 +452,12 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:alpha="0"
+        android:clickable="true"
         android:background="@drawable/rounded_bottom_lyric_sheet"
         android:elevation="16dp"
         android:orientation="vertical"
-        app:layout_behavior=".customScripts.CustomBottomSheet">
+        app:layout_behavior=".customScripts.CustomBottomSheet"
+        android:focusable="true">
 
         <ImageView
             android:layout_width="match_parent"
