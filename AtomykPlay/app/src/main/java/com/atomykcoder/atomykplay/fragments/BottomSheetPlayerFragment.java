@@ -139,6 +139,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     private StorageUtil.SettingsStorage settingsStorage;
     private LinearLayoutManager linearLayoutManager;
     private MusicLyricsAdapter lyricsAdapter;
+    private ArrayList<MusicDataCapsule> dataList;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -368,8 +369,8 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
                     e.printStackTrace();
                 }
                 GlideBuilt.glide(requireContext(), albumUri, R.drawable.ic_music, playerCoverImage, 512);
-                GlideBuilt.glide(requireContext(), albumUri, R.drawable.ic_music, mini_cover, 75);
-                GlideBuilt.glide(requireContext(), albumUri, R.drawable.ic_music, queueCoverImg, 75);
+                GlideBuilt.glide(requireContext(), albumUri, R.drawable.ic_music, mini_cover, 128);
+                GlideBuilt.glide(requireContext(), albumUri, R.drawable.ic_music, queueCoverImg, 128);
 
                 ((MainActivity) context).setDataInNavigation(songName, artistName, albumUri);
             }
@@ -393,8 +394,8 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         mini_progress.setMax(0);
         seekBarMain.setProgress(0);
         mini_progress.setProgress(0);
-        GlideBuilt.glide(requireContext(), null, R.drawable.ic_music, playerCoverImage, 500);
-        GlideBuilt.glide(requireContext(), null, R.drawable.ic_music, mini_cover, 65);
+        GlideBuilt.glide(requireContext(), null, R.drawable.ic_music, playerCoverImage, 512);
+        GlideBuilt.glide(requireContext(), null, R.drawable.ic_music, mini_cover, 128);
 
     }
 
@@ -550,7 +551,8 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
     private void setupQueueBottomSheet() {
         queueRecyclerView.setLayoutManager(linearLayoutManager);
-        setAdapterInQueue();
+        dataList = storageUtil.loadMusicList();
+        setQueueAdapter();
 
         queueSheetBehaviour = (CustomBottomSheet<View>) BottomSheetBehavior.from(queueBottomSheet);
         queueSheetBehaviour.setHideable(true);
@@ -569,8 +571,8 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
             @Override
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-                bottomSheet.setAlpha(0 + slideOffset + 1f);
-                shadowPlayer.setAlpha(0 + slideOffset + 1f);
+                bottomSheet.setAlpha(0 + (slideOffset + 1f));
+                shadowPlayer.setAlpha(0 + (slideOffset + 1f));
             }
         });
 
@@ -579,15 +581,22 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     /**
      * Setting adapter in queue list
      */
-    public void setAdapterInQueue() {
-        ArrayList<MusicDataCapsule> dataList;
-        dataList = storageUtil.loadMusicList();
+    private void setQueueAdapter() {
         queueAdapter = new MusicQueueAdapter(getActivity(), dataList, this);
         queueRecyclerView.setAdapter(queueAdapter);
 
         ItemTouchHelper.Callback callback = new SimpleTouchCallback(queueAdapter);
         itemTouchHelper = new ItemTouchHelper(callback);
         itemTouchHelper.attachToRecyclerView(queueRecyclerView);
+    }
+
+    /**
+     * Updating adapter in queue list
+     */
+    public void updateQueueAdapter(ArrayList<MusicDataCapsule> _dataList) {
+        dataList.clear();
+        dataList.addAll(_dataList);
+        queueAdapter.updateView();
     }
 
     /**
@@ -724,7 +733,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         int musicIndex;
         musicIndex = storageUtil.loadMusicIndex();
 
-        if (musicList != null)
+        if (musicList != null && musicList.size() != 0)
             if (musicIndex != -1 && musicIndex < musicList.size()) {
                 activeMusic = musicList.get(musicIndex);
             } else {
@@ -774,7 +783,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
                 storageUtil.saveMusicIndex(0);
                 // post-execute code here
                 handler.post(() -> {
-                    setAdapterInQueue();
+                    updateQueueAdapter(musicList);
                     shuffleImg.setClickable(true);
                     // stopping the background thread (crucial)
                 });
@@ -806,7 +815,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
                 storageUtil.saveMusicList(tempList);
                 // post-execute code here
                 handler.post(() -> {
-                    setAdapterInQueue();
+                    updateQueueAdapter(tempList);
                     shuffleImg.setClickable(true);
                 });
             });

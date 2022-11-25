@@ -20,6 +20,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.media.ThumbnailUtils;
 import android.media.session.MediaSessionManager;
 import android.net.Uri;
 import android.os.Binder;
@@ -122,29 +123,29 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                     } else {
                         stopSelf();
                     }
-
-                switch (state) {
-                    case 0:
-                        if (is_playing) {
-                            pauseMedia();
-                        }
-                        break;
-                    case 1:
-                        if (!is_playing) {
-                            if (media_player == null) {
-                                try {
-                                    initiateMediaSession();
-                                } catch (RemoteException e) {
-                                    e.printStackTrace();
-                                }
-                                initiateMediaPlayer();
-                            } else {
-                                resumeMedia();
+                if (settingsStorage.loadAutoPlay()) {
+                    switch (state) {
+                        case 0:
+                            if (is_playing) {
+                                pauseMedia();
                             }
-                        }
-                        break;
+                            break;
+                        case 1:
+                            if (!is_playing) {
+                                if (media_player == null) {
+                                    try {
+                                        initiateMediaSession();
+                                    } catch (RemoteException e) {
+                                        e.printStackTrace();
+                                    }
+                                    initiateMediaPlayer();
+                                } else {
+                                    resumeMedia();
+                                }
+                            }
+                            break;
+                    }
                 }
-
             }
         }
     };
@@ -346,6 +347,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         }
         InputStream input;
         Bitmap artwork = null;
+        Bitmap finalArtWork;
         try {
             if (albumUri != null) {
                 input = getApplicationContext().getContentResolver().openInputStream(Uri.parse(albumUri));
@@ -358,13 +360,17 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         } catch (IOException e) {
             e.printStackTrace();
         }
-        if (artwork == null) {
-            artwork = BitmapFactory.decodeResource(getResources(), R.drawable.dj);
+        if (artwork != null) {
+            int dimension = Math.min(artwork.getWidth(), artwork.getHeight());
+            finalArtWork = ThumbnailUtils.extractThumbnail(artwork, dimension - (dimension / 5), dimension - (dimension / 5), ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+        } else {
+            artwork = BitmapFactory.decodeResource(getResources(), R.drawable.placeholder_art);
+            int dimension = Math.min(artwork.getWidth(), artwork.getHeight());
+            finalArtWork = ThumbnailUtils.extractThumbnail(artwork, dimension - (dimension / 5), dimension - (dimension / 5), ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
         }
-
         if (musicList != null)
             mediaSession.setMetadata(new MediaMetadataCompat.Builder()
-                    .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, artwork)
+                    .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, finalArtWork)
                     .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artistName)
                     .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, album)
                     .putString(MediaMetadataCompat.METADATA_KEY_TITLE, songName)

@@ -97,7 +97,7 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
                             // post-execute code here
                             handler.post(() -> {
                                 mainActivity.playAudio();
-                                mainActivity.bottomSheetPlayerFragment.setAdapterInQueue();
+                                mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(shuffleList);
                                 mainActivity.openBottomPlayer();
                             });
                         });
@@ -115,7 +115,7 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
                         // post-execute code here
                         handler.post(() -> {
                             mainActivity.playAudio();
-                            mainActivity.bottomSheetPlayerFragment.setAdapterInQueue();
+                            mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(musicArrayList);
                             mainActivity.openBottomPlayer();
                         });
                     });

@@ -75,6 +75,5 @@ public class SimpleTouchCallback extends ItemTouchHelper.Callback {
     @Override
     public void clearView(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
         super.clearView(recyclerView, viewHolder);
-        viewHolder.itemView.setAlpha(ALPHA_FULL);
     }
 }

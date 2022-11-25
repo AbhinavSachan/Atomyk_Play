@@ -100,7 +100,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public static final String BROADCAST_PLAY_NEXT_MUSIC = "com.atomykcoder.atomykplay.PlayNextMusic";
     public static final String BROADCAST_PLAY_PREVIOUS_MUSIC = "com.atomykcoder.atomykplay.PlayPreviousMusic";
 
-
     public static boolean service_bound = false;
     public static boolean is_granted = false;
     public static boolean phone_ringing = false;
@@ -204,12 +203,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 mainPlayer.setAlpha(1);
                 shadowMain.setAlpha(1);
             } else if (newState == BottomSheetBehavior.STATE_HIDDEN) {
-                storageUtil.clearMusicLastPos();
-                storageUtil.clearAudioIndex();
-                storageUtil.clearMusicList();
-                storageUtil.clearTempMusicList();
-                resetDataInNavigation();
+                drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+                clearStorage();
                 bottomSheetPlayerFragment.resetMainPlayerLayout();
+                resetDataInNavigation();
                 stopMusic();
             }
         }
@@ -220,11 +217,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             View mainPlayer = bottomSheetPlayerFragment.player_layout;
             miniPlayer.setVisibility(View.VISIBLE);
             mainPlayer.setVisibility(View.VISIBLE);
-            miniPlayer.setAlpha(1 - slideOffset * 15);
+            miniPlayer.setAlpha(1 - slideOffset * 20);
             mainPlayer.setAlpha(0 + slideOffset * 3);
             shadowMain.setAlpha(0 + slideOffset);
         }
     };
+
+    public void clearStorage() {
+        storageUtil.clearMusicLastPos();
+        storageUtil.clearAudioIndex();
+        storageUtil.clearMusicList();
+        storageUtil.clearTempMusicList();
+    }
+
     private boolean startPlaying;
 
     private MusicDataCapsule itemOptionSelectedMusic;
@@ -411,7 +416,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         int musicIndex;
         musicIndex = storageUtil.loadMusicIndex();
 
-        if (musicList != null)
+        if (musicList != null && musicList.size() !=0)
             if (musicIndex != -1 && musicIndex < musicList.size()) {
                 activeMusic = musicList.get(musicIndex);
             } else {
@@ -442,7 +447,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         recyclerView.setAdapter(adapter);
     }
 
-    private void stopMusic() {
+    public void stopMusic() {
         if (!service_bound) {
             bindService();
             new Handler().postDelayed(() -> {

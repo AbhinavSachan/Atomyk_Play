@@ -4,8 +4,6 @@ import static com.atomykcoder.atomykplay.helperFunctions.MusicHelper.convertDura
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -29,8 +27,6 @@ import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.MusicViewAdapter> implements ItemTouchHelperAdapter {
     Context context;
@@ -82,7 +78,10 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
         if (musicArrayList != null) {
             if (position != -1 && position < musicArrayList.size()) {
                 musicArrayList.remove(position);
+
+                notifyItemRangeChanged(position, musicArrayList.size());
                 notifyItemRemoved(position);
+                storageUtil.saveMusicList(musicArrayList);
             }
         }
         if (position == savedIndex) {
@@ -90,8 +89,6 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
         } else if (position < savedIndex) {
             storageUtil.saveMusicIndex(savedIndex - 1);
         }
-        storageUtil.saveMusicList(musicArrayList);
-        notifyItemRangeChanged(position, musicArrayList.size());
     }
 
     @NonNull
@@ -144,6 +141,7 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
         holder.artistText.setText(currentItem.getsArtist());
         holder.durationText.setText(convertDuration(currentItem.getsLength()));
     }
+
     public void removeItem(MusicDataCapsule item) {
         StorageUtil storageUtil = new StorageUtil(context);
         int position = musicArrayList.indexOf(item);
@@ -151,13 +149,19 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
         if (item != null) {
             musicArrayList.remove(item);
         }
-        notifyItemRangeChanged(position, musicArrayList.size()-(position+1));
+        notifyItemRangeChanged(position, musicArrayList.size());
         notifyItemRemoved(position);
         storageUtil.saveMusicList(musicArrayList);
     }
+
     @Override
     public int getItemCount() {
         return musicArrayList.size();
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    public void updateView() {
+        notifyDataSetChanged();
     }
 
     public static class MusicViewAdapter extends RecyclerView.ViewHolder {
