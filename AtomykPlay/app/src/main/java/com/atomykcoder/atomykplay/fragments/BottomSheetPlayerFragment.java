@@ -236,7 +236,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         queueRecyclerView = view.findViewById(R.id.queue_music_recycler);
         linearLayoutManager = new LinearLayoutManager(getContext());
 
-        queueBottomSheet = view.findViewById(R.id.bottom_sheet);
+        queueBottomSheet = view.findViewById(R.id.queue_bottom_sheet);
 
         //lyrics layout related initializations
         TextView button = view.findViewById(R.id.btn_add_lyrics);

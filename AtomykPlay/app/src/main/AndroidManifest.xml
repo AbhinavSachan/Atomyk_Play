@@ -50,7 +50,6 @@
             android:name=".SplashActivity"
             android:exported="true"
             android:launchMode="singleTop"
-            android:screenOrientation="portrait"
             android:theme="@style/Theme.Splash"
             tools:ignore="LockedOrientationActivity">
             <intent-filter>
@@ -63,7 +62,6 @@
             android:name=".activities.MainActivity"
             android:exported="true"
             android:launchMode="singleTop"
-            android:screenOrientation="portrait"
             android:theme="@style/Theme.AtomykPlay"
             android:windowSoftInputMode="adjustPan"
             tools:ignore="LockedOrientationActivity" />
@@ -71,8 +69,9 @@
         <service
             android:name=".services.MediaPlayerService"
             android:enabled="true"
-            android:exported="false"
-            android:foregroundServiceType="mediaPlayback">
+            android:exported="true"
+            android:foregroundServiceType="mediaPlayback"
+            tools:ignore="ExportedService">
             <intent-filter>
                 <action android:name="android.media.browse.MediaBrowserService" />
             </intent-filter>

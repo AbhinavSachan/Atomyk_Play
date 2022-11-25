@@ -15,35 +15,39 @@
 
         <ImageView
             android:id="@+id/player_option_iv"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_marginStart="10dp"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="5dp"
             android:clickable="true"
             android:contentDescription="@string/imageView"
             android:elevation="10dp"
             android:focusable="true"
             android:foreground="@drawable/round_select_effect_small"
-            android:padding="12dp"
+            android:padding="10dp"
             android:src="@drawable/ic_more_horizontal"
             app:layout_constraintBottom_toTopOf="@+id/coverRelativeLayout"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
 
         <RelativeLayout
             android:id="@+id/coverRelativeLayout"
-            android:layout_width="match_parent"
-            android:layout_height="350dp"
-            android:layout_marginTop="30dp"
+            android:layout_width="0dp"
+            android:layout_height="330dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginBottom="15dp"
             android:clipToPadding="false"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/linearLayoutNameAndList"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/card_view_for_cover"
-                android:layout_width="320dp"
-                android:layout_height="320dp"
+                android:layout_width="300dp"
+                android:layout_height="300dp"
                 android:layout_centerInParent="true"
                 android:visibility="visible"
                 app:cardBackgroundColor="@color/cover_black"
@@ -78,13 +82,13 @@
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="175dp"
+                    android:layout_height="165dp"
                     android:layout_alignParentTop="true"
                     android:background="@drawable/fade_edge_start" />
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="175dp"
+                    android:layout_height="165dp"
                     android:layout_alignParentBottom="true"
                     android:background="@drawable/fade_edges_end" />
 
@@ -114,8 +118,8 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:layout_marginHorizontal="16dp"
-                        android:text="@string/add_lyrics"
                         android:padding="10dp"
+                        android:text="@string/add_lyrics"
                         android:textColor="@color/tertiary_bg"
                         android:textSize="@dimen/d_16sp"
                         android:textStyle="bold" />
@@ -127,13 +131,15 @@
 
         <LinearLayout
             android:id="@+id/linearLayoutNameAndList"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_below="@+id/coverRelativeLayout"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="10dp"
             android:orientation="horizontal"
             android:weightSum="16"
-            app:layout_constraintTop_toBottomOf="@+id/coverRelativeLayout">
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/coverRelativeLayout"
+            app:layout_constraintTop_toTopOf="parent">
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -147,12 +153,12 @@
                     android:layout_height="wrap_content"
                     android:ellipsize="marquee"
                     android:marqueeRepeatLimit="marquee_forever"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
+                    android:paddingStart="13dp"
+                    android:paddingEnd="13dp"
                     android:singleLine="true"
                     android:text="@string/song_name_e"
                     android:textColor="@color/text_color"
-                    android:textSize="@dimen/d_24sp"
+                    android:textSize="@dimen/d_22sp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -161,12 +167,12 @@
                     android:layout_height="wrap_content"
                     android:ellipsize="marquee"
                     android:marqueeRepeatLimit="marquee_forever"
-                    android:paddingStart="18dp"
-                    android:paddingEnd="18dp"
+                    android:paddingStart="15dp"
+                    android:paddingEnd="15dp"
                     android:singleLine="true"
                     android:text="@string/song_artist_e"
                     android:textColor="@color/text_color"
-                    android:textSize="@dimen/d_16sp"
+                    android:textSize="@dimen/d_14sp"
                     android:textStyle="normal" />
 
             </LinearLayout>
@@ -191,11 +197,11 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/linearLayoutNameAndList"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="40dp"
+            android:layout_marginTop="20dp"
             android:gravity="center"
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@id/coverRelativeLayout"
             app:layout_constraintTop_toBottomOf="@id/linearLayoutNameAndList">
 
             <ImageView
@@ -289,7 +295,7 @@
             android:layout_below="@+id/control_ll"
             android:padding="10dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@id/coverRelativeLayout"
             app:layout_constraintTop_toBottomOf="@+id/control_ll">
 
             <SeekBar
@@ -333,7 +339,7 @@
             android:gravity="center"
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@id/coverRelativeLayout"
             app:layout_constraintTop_toBottomOf="@+id/seekbar_relative_l">
 
             <TextView
@@ -392,7 +398,7 @@
             android:layout_marginTop="24dp"
             android:layout_marginBottom="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent">
+            app:layout_constraintStart_toEndOf="@id/coverRelativeLayout">
 
             <TextView
                 android:id="@+id/countdown_tv"
@@ -441,7 +447,7 @@
             android:src="@drawable/ic_baseline_subtitles_24"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toEndOf="@id/coverRelativeLayout" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -550,11 +556,13 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/queue_music_item" />
 
+            <!--this is fade effect in queue recycler-->
             <View
                 android:layout_width="match_parent"
                 android:layout_height="12dp"
                 android:layout_below="@+id/queue_music_item"
                 android:background="@drawable/queue_top_shadow" />
+
         </RelativeLayout>
 
     </LinearLayout>

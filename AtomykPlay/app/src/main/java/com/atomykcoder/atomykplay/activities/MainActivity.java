@@ -328,11 +328,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         player_bottom_sheet.setClickable(true);
 
-
         if (savedInstanceState == null) {
             navigationView.setCheckedItem(R.id.navigation_home);
         }
-
     }
 
     private void setUpOptionMenuButtons() {

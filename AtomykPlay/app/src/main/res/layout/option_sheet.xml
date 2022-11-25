@@ -102,241 +102,254 @@
 
     </RelativeLayout>
 
-    <View
+    <ScrollView
+        android:nestedScrollingEnabled="true"
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginBottom="12dp"
-        android:background="#797E7E7E" />
+        android:layout_height="match_parent">
 
-    <LinearLayout
-        android:id="@+id/add_play_next_option"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:focusable="true"
-        android:foreground="?android:selectableItemBackground"
-        android:orientation="horizontal"
-        android:paddingHorizontal="8dp"
-        android:paddingVertical="4dp">
-
-        <ImageView
-            android:layout_width="@dimen/option_icon_mea"
-            android:layout_height="@dimen/option_icon_mea"
-            android:layout_margin="10dp"
-            android:src="@drawable/ic_add_next" />
-
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center_vertical"
-            android:text="@string/play_next"
-            android:textColor="@color/text_color"
-            android:textSize="@dimen/d_14sp"
-            android:textStyle="bold" />
-    </LinearLayout>
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-    <LinearLayout
-        android:id="@+id/add_to_queue_option"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:focusable="true"
-        android:foreground="?android:selectableItemBackground"
-        android:orientation="horizontal"
-        android:paddingHorizontal="8dp"
-        android:paddingVertical="4dp">
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginBottom="12dp"
+                android:background="#797E7E7E" />
 
-        <ImageView
-            android:layout_width="@dimen/option_icon_mea"
-            android:layout_height="@dimen/option_icon_mea"
-            android:layout_margin="10dp"
-            android:src="@drawable/ic_queue" />
+            <LinearLayout
+                android:id="@+id/add_play_next_option"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?android:selectableItemBackground"
+                android:orientation="horizontal"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="4dp">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center_vertical"
-            android:text="@string/add_queue"
-            android:textColor="@color/text_color"
-            android:textSize="@dimen/d_14sp"
-            android:textStyle="bold" />
-    </LinearLayout>
+                <ImageView
+                    android:layout_width="@dimen/option_icon_mea"
+                    android:layout_height="@dimen/option_icon_mea"
+                    android:layout_margin="10dp"
+                    android:src="@drawable/ic_add_next" />
 
-    <LinearLayout
-        android:id="@+id/set_ringtone_option"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:focusable="true"
-        android:foreground="?android:selectableItemBackground"
-        android:orientation="horizontal"
-        android:paddingHorizontal="8dp"
-        android:paddingVertical="4dp">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:text="@string/play_next"
+                    android:textColor="@color/text_color"
+                    android:textSize="@dimen/d_14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
 
-        <ImageView
-            android:layout_width="@dimen/option_icon_mea"
-            android:layout_height="@dimen/option_icon_mea"
-            android:layout_margin="10dp"
-            android:src="@drawable/ic_music_note" />
+            <LinearLayout
+                android:id="@+id/add_to_queue_option"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?android:selectableItemBackground"
+                android:orientation="horizontal"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="4dp">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center_vertical"
-            android:text="@string/set_as_ringtone"
-            android:textColor="@color/text_color"
-            android:textSize="@dimen/d_14sp"
-            android:textStyle="bold" />
-    </LinearLayout>
+                <ImageView
+                    android:layout_width="@dimen/option_icon_mea"
+                    android:layout_height="@dimen/option_icon_mea"
+                    android:layout_margin="10dp"
+                    android:src="@drawable/ic_queue" />
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginVertical="12dp"
-        android:layout_marginStart="55dp"
-        android:background="#797E7E7E" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:text="@string/add_queue"
+                    android:textColor="@color/text_color"
+                    android:textSize="@dimen/d_14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/tagEditor_option"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:focusable="true"
-        android:foreground="?android:selectableItemBackground"
-        android:orientation="horizontal"
-        android:paddingHorizontal="8dp"
-        android:paddingVertical="4dp">
+            <LinearLayout
+                android:id="@+id/set_ringtone_option"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?android:selectableItemBackground"
+                android:orientation="horizontal"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="4dp">
 
-        <ImageView
-            android:layout_width="@dimen/option_icon_mea"
-            android:layout_height="@dimen/option_icon_mea"
-            android:layout_margin="10dp"
-            android:src="@drawable/ic_tag_edit" />
+                <ImageView
+                    android:layout_width="@dimen/option_icon_mea"
+                    android:layout_height="@dimen/option_icon_mea"
+                    android:layout_margin="10dp"
+                    android:src="@drawable/ic_music_note" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center_vertical"
-            android:text="@string/tag"
-            android:textColor="@color/text_color"
-            android:textSize="@dimen/d_14sp"
-            android:textStyle="bold" />
-    </LinearLayout>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:text="@string/set_as_ringtone"
+                    android:textColor="@color/text_color"
+                    android:textSize="@dimen/d_14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/addLyrics_option"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:focusable="true"
-        android:foreground="?android:selectableItemBackground"
-        android:orientation="horizontal"
-        android:paddingHorizontal="8dp"
-        android:paddingVertical="4dp">
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginVertical="12dp"
+                android:layout_marginStart="55dp"
+                android:background="#797E7E7E" />
 
-        <ImageView
-            android:layout_width="@dimen/option_icon_mea"
-            android:layout_height="@dimen/option_icon_mea"
-            android:layout_margin="10dp"
-            android:src="@drawable/ic_baseline_subtitles_24" />
+            <LinearLayout
+                android:id="@+id/tagEditor_option"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?android:selectableItemBackground"
+                android:orientation="horizontal"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="4dp">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center_vertical"
-            android:text="@string/add_lyrics"
-            android:textColor="@color/text_color"
-            android:textSize="@dimen/d_14sp"
-            android:textStyle="bold" />
-    </LinearLayout>
+                <ImageView
+                    android:layout_width="@dimen/option_icon_mea"
+                    android:layout_height="@dimen/option_icon_mea"
+                    android:layout_margin="10dp"
+                    android:src="@drawable/ic_tag_edit" />
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginVertical="12dp"
-        android:layout_marginStart="55dp"
-        android:background="#797E7E7E" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:text="@string/tag"
+                    android:textColor="@color/text_color"
+                    android:textSize="@dimen/d_14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/addLyrics_option"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?android:selectableItemBackground"
+                android:orientation="horizontal"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="4dp">
+
+                <ImageView
+                    android:layout_width="@dimen/option_icon_mea"
+                    android:layout_height="@dimen/option_icon_mea"
+                    android:layout_margin="10dp"
+                    android:src="@drawable/ic_baseline_subtitles_24" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:text="@string/add_lyrics"
+                    android:textColor="@color/text_color"
+                    android:textSize="@dimen/d_14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginVertical="12dp"
+                android:layout_marginStart="55dp"
+                android:background="#797E7E7E" />
 
 
-    <LinearLayout
-        android:id="@+id/details_option"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:focusable="true"
-        android:foreground="?android:selectableItemBackground"
-        android:orientation="horizontal"
-        android:paddingHorizontal="8dp"
-        android:paddingVertical="4dp">
+            <LinearLayout
+                android:id="@+id/details_option"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?android:selectableItemBackground"
+                android:orientation="horizontal"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="4dp">
 
-        <ImageView
-            android:layout_width="@dimen/option_icon_mea"
-            android:layout_height="@dimen/option_icon_mea"
-            android:layout_margin="10dp"
-            android:src="@drawable/ic_info" />
+                <ImageView
+                    android:layout_width="@dimen/option_icon_mea"
+                    android:layout_height="@dimen/option_icon_mea"
+                    android:layout_margin="10dp"
+                    android:src="@drawable/ic_info" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center_vertical"
-            android:text="@string/details"
-            android:textColor="@color/text_color"
-            android:textSize="@dimen/d_14sp"
-            android:textStyle="bold" />
-    </LinearLayout>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:text="@string/details"
+                    android:textColor="@color/text_color"
+                    android:textSize="@dimen/d_14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/share_music_option"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:focusable="true"
-        android:foreground="?android:selectableItemBackground"
-        android:orientation="horizontal"
-        android:paddingHorizontal="8dp"
-        android:paddingVertical="4dp">
+            <LinearLayout
+                android:id="@+id/share_music_option"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?android:selectableItemBackground"
+                android:orientation="horizontal"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="4dp">
 
-        <ImageView
-            android:layout_width="@dimen/option_icon_mea"
-            android:layout_height="@dimen/option_icon_mea"
-            android:layout_margin="10dp"
-            android:src="@drawable/ic_share" />
+                <ImageView
+                    android:layout_width="@dimen/option_icon_mea"
+                    android:layout_height="@dimen/option_icon_mea"
+                    android:layout_margin="10dp"
+                    android:src="@drawable/ic_share" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center_vertical"
-            android:text="@string/share"
-            android:textColor="@color/text_color"
-            android:textSize="@dimen/d_14sp"
-            android:textStyle="bold" />
-    </LinearLayout>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:text="@string/share"
+                    android:textColor="@color/text_color"
+                    android:textSize="@dimen/d_14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/delete_music_option"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:focusable="true"
-        android:foreground="?android:selectableItemBackground"
-        android:orientation="horizontal"
-        android:paddingHorizontal="8dp"
-        android:paddingVertical="4dp">
+            <LinearLayout
+                android:id="@+id/delete_music_option"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?android:selectableItemBackground"
+                android:orientation="horizontal"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="4dp">
 
-        <ImageView
-            android:layout_width="@dimen/option_icon_mea"
-            android:layout_height="@dimen/option_icon_mea"
-            android:layout_margin="10dp"
-            android:src="@drawable/ic_delete" />
+                <ImageView
+                    android:layout_width="@dimen/option_icon_mea"
+                    android:layout_height="@dimen/option_icon_mea"
+                    android:layout_margin="10dp"
+                    android:src="@drawable/ic_delete" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center_vertical"
-            android:text="@string/delete"
-            android:textColor="@color/text_color"
-            android:textSize="@dimen/d_14sp"
-            android:textStyle="bold" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:text="@string/delete"
+                    android:textColor="@color/text_color"
+                    android:textSize="@dimen/d_14sp"
+                    android:textStyle="bold" />
 
-    </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+
 </LinearLayout>

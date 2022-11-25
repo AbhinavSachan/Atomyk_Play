@@ -758,8 +758,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-
     }
 
     /**

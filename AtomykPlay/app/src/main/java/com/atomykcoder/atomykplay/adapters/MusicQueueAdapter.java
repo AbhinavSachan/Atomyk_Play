@@ -23,6 +23,7 @@ import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.ItemTouchHelperAdapter;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -77,11 +78,8 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
         //if any item has been removed this will save new list on temp list
         if (musicArrayList != null) {
             if (position != -1 && position < musicArrayList.size()) {
-                musicArrayList.remove(position);
-
-                notifyItemRangeChanged(position, musicArrayList.size());
-                notifyItemRemoved(position);
-                storageUtil.saveMusicList(musicArrayList);
+                MusicDataCapsule currentItem = musicArrayList.get(position);
+                removeItem(currentItem);
             }
         }
         if (position == savedIndex) {
@@ -145,13 +143,21 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
     public void removeItem(MusicDataCapsule item) {
         StorageUtil storageUtil = new StorageUtil(context);
         int position = musicArrayList.indexOf(item);
-
-        if (item != null) {
-            musicArrayList.remove(item);
+        if (musicArrayList.size() != 1 && !musicArrayList.isEmpty()) {
+            if (item != null) {
+                musicArrayList.remove(item);
+            }
+            notifyItemRangeChanged(position, musicArrayList.size() - (position+1));
+            notifyItemRemoved(position);
+            storageUtil.saveMusicList(musicArrayList);
+        } else if (musicArrayList.size() == 1) {
+            mainActivity.bottomSheetPlayerFragment.queueSheetBehaviour.setState(BottomSheetBehavior.STATE_HIDDEN);
+            mainActivity.clearStorage();
+            mainActivity.mainPlayerSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+            mainActivity.bottomSheetPlayerFragment.resetMainPlayerLayout();
+            mainActivity.resetDataInNavigation();
+            mainActivity.stopMusic();
         }
-        notifyItemRangeChanged(position, musicArrayList.size());
-        notifyItemRemoved(position);
-        storageUtil.saveMusicList(musicArrayList);
     }
 
     @Override

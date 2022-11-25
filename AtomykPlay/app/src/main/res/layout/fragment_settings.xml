@@ -15,8 +15,8 @@
         android:clickable="true"
         android:focusable="true"
         android:orientation="vertical"
-        android:paddingTop="90dp"
-        android:paddingBottom="90dp">
+        android:paddingTop="@dimen/most_top_padding"
+        android:paddingBottom="@dimen/most_bottom_padding">
 
         <LinearLayout
             android:layout_width="match_parent"

@@ -6,13 +6,12 @@
     android:background="@color/primary_bg"
     android:clickable="true"
     android:focusable="true"
-    android:paddingTop="90dp"
+    android:paddingTop="@dimen/most_top_padding"
     android:paddingBottom="16dp">
 
     <ScrollView
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginBottom="16dp"
         android:focusable="false"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -24,6 +23,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingStart="16dp"
+            android:paddingBottom="70dp"
             android:paddingEnd="16dp">
 
             <TextView
@@ -50,8 +50,8 @@
                 app:boxCornerRadiusBottomStart="8dp"
                 app:boxCornerRadiusTopEnd="8dp"
                 app:boxCornerRadiusTopStart="8dp"
-                app:errorEnabled="false"
                 app:boxStrokeWidth="0dp"
+                app:errorEnabled="false"
                 app:hintTextColor="@color/hint_color"
                 app:placeholderTextColor="@color/hint_color">
 
@@ -67,8 +67,7 @@
                     android:paddingTop="30dp"
                     android:textAlignment="gravity"
                     android:textColor="@color/text_color"
-                    android:textColorHint="@color/hint_color"
-                    />
+                    android:textColorHint="@color/hint_color" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
