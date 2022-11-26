@@ -2,7 +2,6 @@ package com.atomykcoder.atomykplay.fragments;
 
 import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.dark;
 import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.no_dark;
-import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.system_follow;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
@@ -25,7 +24,7 @@ import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 public class SettingsFragment extends Fragment {
 
     private RadioGroup radioGroup;
-    private RadioButton light_theme_btn, dark_theme_btn, default_theme_btn;
+    private RadioButton light_theme_btn, dark_theme_btn;
     private SwitchCompat songInfoSwi, artistSwi, optionSwi, extraSwi, autoPlaySwi, keepShuffleSwi, lowerVolSwi, selfStopSwi, keepScreenOnSwi, oneClickSkipSwi;
     private View songInfoLl, artistLl, optionLl, extraLl, autoPlayLl, keepShuffleLl, lowerVolLl, blackListLl, filterDurLl, selfStopLl, keepScreenOnLl, oneClickSkipLl;
 
@@ -91,7 +90,6 @@ public class SettingsFragment extends Fragment {
         radioGroup = view.findViewById(R.id.radio_group_theme);
         light_theme_btn = view.findViewById(R.id.light_button);
         dark_theme_btn = view.findViewById(R.id.dark_button);
-        default_theme_btn = view.findViewById(R.id.default_button);
 
         setButtonState();
 
@@ -216,9 +214,6 @@ public class SettingsFragment extends Fragment {
         oneClickSkipSwi.setChecked(oneClickSkip);
 
         switch (theme) {
-            case system_follow:
-                default_theme_btn.setChecked(true);
-                break;
             case no_dark:
                 light_theme_btn.setChecked(true);
                 break;
@@ -232,10 +227,6 @@ public class SettingsFragment extends Fragment {
     @SuppressLint("NonConstantResourceId")
     private void setTheme(int checkedId) {
         switch (checkedId) {
-            case R.id.default_button:
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
-                theme = system_follow;
-                break;
             case R.id.light_button:
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
                 theme = no_dark;

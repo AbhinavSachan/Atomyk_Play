@@ -2,7 +2,6 @@ package com.atomykcoder.atomykplay.activities;
 
 import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.dark;
 import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.no_dark;
-import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.system_follow;
 import static com.atomykcoder.atomykplay.services.MediaPlayerService.is_playing;
 
 import android.Manifest;
@@ -16,7 +15,7 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -34,6 +33,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -265,11 +266,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        String switch1 = new StorageUtil.SettingsStorage(this).loadTheme();
+        StorageUtil.SettingsStorage settingsStorage = new StorageUtil.SettingsStorage(this);
+        String switch1 = settingsStorage.loadTheme();
         switch (switch1) {
-            case system_follow:
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
-                break;
             case no_dark:
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
                 break;
@@ -277,6 +276,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
                 break;
         }
+        Window window = getWindow();
+        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+
+        if (settingsStorage.loadTheme().equals(no_dark)) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+            } else {
+                window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+            }
+        } else if (settingsStorage.loadTheme().equals(dark)) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+            } else {
+                window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+            }
+        }
+        window.setStatusBarColor(Color.TRANSPARENT);
         setContentView(R.layout.activity_main);
 
         //initializations
@@ -293,7 +311,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         shadowOuterSheet = findViewById(R.id.outer_sheet_shadow);
         optionSheet = findViewById(R.id.option_bottom_sheet);
         donationSheet = findViewById(R.id.donation_bottom_sheet);
-
 
         mainPlayerSheetBehavior = (CustomBottomSheet<View>) BottomSheetBehavior.from(player_bottom_sheet);
 
@@ -443,7 +460,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void setDataInNavigation(String song_name, String artist_name, String album_uri) {
         navSongName.setText(song_name);
         navArtistName.setText(artist_name);
-        GlideBuilt.glide(this, album_uri, R.drawable.ic_music, navCover,300);
+        GlideBuilt.glide(this, album_uri, R.drawable.ic_music, navCover, 300);
     }
 
     private MusicDataCapsule getMusic() {

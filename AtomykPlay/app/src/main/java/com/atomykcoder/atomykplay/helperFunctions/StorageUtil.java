@@ -20,7 +20,6 @@ public class StorageUtil {
     public static final String favorite = "favorite";
     public static final String shuffle = "shuffle";
     public static final String no_shuffle = "no_shuffle";
-    public static final String system_follow = "system_follow";
     public static final String dark = "dark";
     public static final String no_dark = "no_dark";
     //Storage Locations
@@ -230,7 +229,7 @@ public class StorageUtil {
 
         public String loadTheme() {
             sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
-            return sharedPreferences.getString("theme_name", system_follow);
+            return sharedPreferences.getString("theme_name", no_dark);
         }
 
         public void showInfo(boolean show) {

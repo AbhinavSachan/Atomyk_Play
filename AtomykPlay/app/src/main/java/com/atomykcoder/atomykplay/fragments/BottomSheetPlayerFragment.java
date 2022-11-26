@@ -324,9 +324,11 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         if (activeMusic != null) {
             songName = activeMusic.getsName();
             artistName = activeMusic.getsArtist();
-            mimeType = activeMusic.getsMimeType().toUpperCase();
-            duration = activeMusic.getsLength();
-            bitrate = activeMusic.getsBitrate();
+            mimeType = getMime(activeMusic.getsMimeType().toUpperCase());
+            duration = convertDuration(activeMusic.getsLength());
+            String rawBitrate = activeMusic.getsBitrate();
+            int bitrateInNum = Integer.parseInt(rawBitrate) / 1000;
+            bitrate = bitrateInNum + " KBPS";
             albumUri = activeMusic.getsAlbumUri();
         }
         if (activeMusic != null) {
@@ -351,16 +353,14 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
                     songNameQueueItem.setText(songName);
                     playerArtistNameTv.setText(artistName);
                     artistQueueItem.setText(artistName);
-                    mimeTv.setText(getMime(mimeType));
-                    durationTv.setText(convertDuration(duration));
+                    mimeTv.setText(mimeType);
+                    durationTv.setText(duration);
                     mini_name_text.setText(songName);
                     mini_artist_text.setText(artistName);
                     seekBarMain.setMax(Integer.parseInt(duration));
                     mini_progress.setMax(Integer.parseInt(duration));
+                    bitrateTv.setText(bitrate);
 
-                    int bitrateInNum = Integer.parseInt(bitrate) / 1000;
-                    String finalBitrate = bitrateInNum + " KBPS";
-                    bitrateTv.setText(finalBitrate);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -591,8 +591,10 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
      * Updating adapter in queue list
      */
     public void updateQueueAdapter(ArrayList<MusicDataCapsule> _dataList) {
-        dataList.clear();
-        dataList.addAll(_dataList);
+        if (dataList != null) {
+            dataList.clear();
+        }
+        dataList = new ArrayList<>(_dataList);
         queueAdapter.updateView();
     }
 

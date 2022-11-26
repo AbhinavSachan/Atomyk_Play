@@ -162,7 +162,11 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
 
     @Override
     public int getItemCount() {
-        return musicArrayList.size();
+        if (musicArrayList != null) {
+            return musicArrayList.size();
+        }else {
+            return 0;
+        }
     }
 
     @SuppressLint("NotifyDataSetChanged")

@@ -17,21 +17,29 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <androidx.appcompat.widget.Toolbar
-                android:id="@+id/toolbar"
+            <com.google.android.material.appbar.AppBarLayout
+                android:id="@+id/appBar_layout"
                 android:layout_width="match_parent"
-                android:layout_height="84dp"
-                android:background="@color/secondary_bg"
-                android:elevation="16dp"
-                android:paddingTop="30dp"
-                android:theme="@style/ThemeOverlay.AppCompat.DayNight"
-                app:popupTheme="@style/ThemeOverlay.AppCompat.DayNight" />
+                android:layout_height="wrap_content">
+
+                <androidx.appcompat.widget.Toolbar
+                    android:id="@+id/toolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="84dp"
+                    android:background="@color/secondary_bg"
+                    android:elevation="16dp"
+                    app:layout_scrollFlags="scroll|enterAlways"
+                    android:paddingTop="30dp"
+                    android:theme="@style/ThemeOverlay.AppCompat.DayNight"
+                    app:popupTheme="@style/ThemeOverlay.AppCompat.DayNight" />
+
+            </com.google.android.material.appbar.AppBarLayout>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/music_recycler"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_below="@id/toolbar"
+                android:layout_below="@id/appBar_layout"
                 android:clipToPadding="false"
                 android:paddingBottom="@dimen/most_bottom_padding" />
 
@@ -40,7 +48,7 @@
                 android:id="@+id/dragScrollBar"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_below="@+id/toolbar"
+                android:layout_below="@+id/appBar_layout"
                 android:layout_alignParentEnd="true"
                 android:layout_marginBottom="68dp"
                 app:msb_barColor="@color/primary_bg"
@@ -89,9 +97,9 @@
             android:id="@+id/shadow_lyrics_found"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:elevation="10dp"
             android:alpha="0"
-            android:background="@color/translucent_black" />
+            android:background="@color/translucent_black"
+            android:elevation="10dp" />
 
         <LinearLayout
             android:id="@+id/found_lyrics_fragments"
@@ -99,7 +107,7 @@
             android:layout_height="match_parent"
             android:background="@drawable/rounded_bottom_lyric_sheet"
             android:clickable="true"
-            android:elevation="15dp"
+            android:elevation="10dp"
             android:focusable="true"
             android:orientation="vertical"
             app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
@@ -123,23 +131,23 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="24dp"
-            android:elevation="20dp"
             android:background="@drawable/player_shadow"
+            android:elevation="15dp"
             app:layout_anchor="@id/player_main_container" />
 
         <View
             android:id="@+id/shadow_main"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:elevation="20dp"
             android:alpha="0"
-            android:background="@color/translucent_black" />
+            android:background="@color/translucent_black"
+            android:elevation="16dp" />
 
         <FrameLayout
             android:id="@+id/player_main_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:elevation="30dp"
+            android:elevation="20dp"
             app:layout_behavior=".customScripts.CustomBottomSheet" />
 
 
@@ -153,12 +161,13 @@
             android:id="@+id/outer_sheet_shadow"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:elevation="40dp"
             android:alpha="0"
-            android:background="@color/translucent_black" />
+            android:background="@color/translucent_black"
+            android:elevation="25dp" />
 
-        <include layout="@layout/option_sheet"/>
-        <include layout="@layout/donation_layout"/>
+        <include layout="@layout/option_sheet" />
+
+        <include layout="@layout/donation_layout" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
@@ -172,7 +181,6 @@
         app:headerLayout="@layout/nav_header"
         app:itemIconTint="@color/icons_bg"
         app:itemTextColor="@color/text_color"
-        app:itemRippleColor="@color/tertiary_bg"
         app:menu="@menu/navigation_menu" />
 
 </androidx.drawerlayout.widget.DrawerLayout>

@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@drawable/rounded_bottom_sheet"
     android:clickable="true"
-    android:elevation="60dp"
+    android:elevation="35dp"
     android:focusable="true"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
