@@ -35,6 +35,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -344,7 +345,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         DragScrollBar scrollBar = findViewById(R.id.dragScrollBar);
 
-        musicRecyclerView.setNestedScrollingEnabled(false);
         musicRecyclerView.setHasFixedSize(true);
 
 
@@ -954,6 +954,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         SearchView searchView = (SearchView) searchViewItem.getActionView();
 
         searchView.setOnSearchClickListener(v -> setSearchFragment());
+        searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {

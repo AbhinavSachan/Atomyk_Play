@@ -15,42 +15,21 @@
         <RelativeLayout
             android:id="@+id/sec_container"
             android:layout_width="match_parent"
+            android:paddingBottom="@dimen/most_bottom_padding"
+            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
             android:layout_height="match_parent">
-
-            <com.google.android.material.appbar.AppBarLayout
-                android:id="@+id/appBar_layout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <androidx.appcompat.widget.Toolbar
-                    android:id="@+id/toolbar"
-                    android:layout_width="match_parent"
-                    android:layout_height="84dp"
-                    android:background="@color/secondary_bg"
-                    android:elevation="16dp"
-                    app:layout_scrollFlags="scroll|enterAlways"
-                    android:paddingTop="30dp"
-                    android:theme="@style/ThemeOverlay.AppCompat.DayNight"
-                    app:popupTheme="@style/ThemeOverlay.AppCompat.DayNight" />
-
-            </com.google.android.material.appbar.AppBarLayout>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/music_recycler"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_below="@id/appBar_layout"
-                android:clipToPadding="false"
-                android:paddingBottom="@dimen/most_bottom_padding" />
-
+                android:clipToPadding="false" />
 
             <com.turingtechnologies.materialscrollbar.DragScrollBar
                 android:id="@+id/dragScrollBar"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_below="@+id/appBar_layout"
                 android:layout_alignParentEnd="true"
-                android:layout_marginBottom="68dp"
                 app:msb_barColor="@color/primary_bg"
                 app:msb_handleColor="@color/tertiary_bg"
                 app:msb_handleOffColor="@color/sub_text_grey"
@@ -92,6 +71,23 @@
                 android:visibility="gone" />
 
         </RelativeLayout>
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/appBar_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="84dp"
+                android:background="@color/secondary_bg"
+                android:elevation="16dp"
+                app:layout_scrollFlags="scroll|enterAlways"
+                android:paddingTop="30dp"
+                android:theme="@style/ThemeOverlay.AppCompat.DayNight"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.DayNight" />
+
+        </com.google.android.material.appbar.AppBarLayout>
 
         <View
             android:id="@+id/shadow_lyrics_found"
