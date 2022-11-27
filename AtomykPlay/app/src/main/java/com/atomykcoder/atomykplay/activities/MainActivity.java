@@ -1,7 +1,5 @@
 package com.atomykcoder.atomykplay.activities;
 
-import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.dark;
-import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.no_dark;
 import static com.atomykcoder.atomykplay.services.MediaPlayerService.is_playing;
 
 import android.Manifest;
@@ -28,18 +26,15 @@ import android.provider.MediaStore;
 import android.provider.Settings;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
-import android.view.Menu;
-import android.view.MenuInflater;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.inputmethod.EditorInfo;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -48,7 +43,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
-import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
@@ -64,7 +58,6 @@ import com.atomykcoder.atomykplay.classes.GlideBuilt;
 import com.atomykcoder.atomykplay.customScripts.CustomBottomSheet;
 import com.atomykcoder.atomykplay.events.PrepareRunnableEvent;
 import com.atomykcoder.atomykplay.events.RemoveLyricsHandlerEvent;
-import com.atomykcoder.atomykplay.events.SearchEvent;
 import com.atomykcoder.atomykplay.fragments.AboutFragment;
 import com.atomykcoder.atomykplay.fragments.BottomSheetPlayerFragment;
 import com.atomykcoder.atomykplay.fragments.FavoritesFragment;
@@ -77,14 +70,13 @@ import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.services.MediaPlayerService;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.navigation.NavigationView;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
-import com.turingtechnologies.materialscrollbar.AlphabetIndicator;
-import com.turingtechnologies.materialscrollbar.DragScrollBar;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -147,7 +139,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     };
     private ArrayList<MusicDataCapsule> dataList;
-    private MusicMainAdapter adapter;
+    private MusicMainAdapter musicMainAdapter;
     private LinearLayout linearLayout;
     private RecyclerView musicRecyclerView;
     private TelephonyManager telephonyManager;
@@ -244,8 +236,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             View mainPlayer = bottomSheetPlayerFragment.player_layout;
             miniPlayer.setVisibility(View.VISIBLE);
             mainPlayer.setVisibility(View.VISIBLE);
-            miniPlayer.setAlpha(1 - slideOffset * 20);
-            mainPlayer.setAlpha(0 + slideOffset * 3);
+            miniPlayer.setAlpha(1 - slideOffset * 35);
+            mainPlayer.setAlpha(0 + slideOffset);
             shadowMain.setAlpha(0 + slideOffset);
         }
     };
@@ -256,6 +248,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private TextView optionName, optionArtist;
     private View optionSheet;
     private View donationSheet;
+    private Runnable runnable;
 
     public void clearStorage() {
         storageUtil.clearMusicLastPos();
@@ -268,31 +261,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         StorageUtil.SettingsStorage settingsStorage = new StorageUtil.SettingsStorage(this);
-        String switch1 = settingsStorage.loadTheme();
-        switch (switch1) {
-            case no_dark:
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-                break;
-            case dark:
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-                break;
+        boolean switch1 = settingsStorage.loadTheme();
+        if (!switch1) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
         }
         Window window = getWindow();
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
 
-        if (settingsStorage.loadTheme().equals(no_dark)) {
+        if (!settingsStorage.loadTheme()) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                         | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
             } else {
                 window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
             }
-        } else if (settingsStorage.loadTheme().equals(dark)) {
+        } else {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
             } else {
-                window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+                window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
             }
         }
         window.setStatusBarColor(Color.TRANSPARENT);
@@ -301,7 +290,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //initializations
         storageUtil = new StorageUtil(MainActivity.this);
         searchFragmentManager = getSupportFragmentManager();
-        dataList = new ArrayList<>();
+        dataList = storageUtil.loadInitialList();
 
         linearLayout = findViewById(R.id.song_not_found_layout);
         musicRecyclerView = findViewById(R.id.music_recycler);
@@ -315,9 +304,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         mainPlayerSheetBehavior = (CustomBottomSheet<View>) BottomSheetBehavior.from(player_bottom_sheet);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        toolbar.setTitle(R.string.app_name);
+        ImageView openDrawer = findViewById(R.id.open_drawer_btn);
+        MaterialCardView toolbar = findViewById(R.id.toolbar);
+//        setSupportActionBar(toolbar);
+//        toolbar.setTitle(R.string.search_here);
 
         MediaPlayerService.ui_visible = true;
 
@@ -339,17 +329,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         navigationView.setNavigationItemSelectedListener(this);
 
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.drawer_toggle_open, R.string.drawer_toggle_close);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, null, R.string.drawer_toggle_open, R.string.drawer_toggle_close);
+        openDrawer.setOnClickListener(v -> {
+            if (!drawer.isDrawerOpen(GravityCompat.START)) {
+                drawer.openDrawer(GravityCompat.START);
+            }
+        });
+        toolbar.setOnClickListener(v -> setSearchFragment());
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        DragScrollBar scrollBar = findViewById(R.id.dragScrollBar);
-
         musicRecyclerView.setHasFixedSize(true);
 
-
-        scrollBar.setRecyclerView(musicRecyclerView);
-        scrollBar.setIndicator(new AlphabetIndicator(MainActivity.this), false);
+//        DragScrollBar scrollBar = findViewById(R.id.dragScrollBar);
+//        scrollBar.setRecyclerView(musicRecyclerView);
+//        scrollBar.setIndicator(new AlphabetIndicator(MainActivity.this), false);
 
         //Checking permissions before activity creation (method somewhere down in the script)
         checkPermission();
@@ -361,6 +355,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         setUpOptionMenuButtons();
 
+        if (is_granted) {
+            if (dataList != null) {
+                Handler handler = new Handler(Looper.getMainLooper());
+                runnable = () -> {
+                    checkForUpdateMusic();
+                    handler.postDelayed(runnable, 30000);
+                };
+                handler.postDelayed(runnable, 5000);
+            }
+        }
         lyricsListBehavior.addBottomSheetCallback(lrcFoundCallback);
         optionSheetBehavior.addBottomSheetCallback(optionCallback);
         donationSheetBehavior.addBottomSheetCallback(donationCallback);
@@ -371,6 +375,31 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (savedInstanceState == null) {
             navigationView.setCheckedItem(R.id.navigation_home);
         }
+    }
+
+    private void checkForUpdateMusic() {
+
+        ExecutorService service = Executors.newSingleThreadExecutor();
+        Handler handler = new Handler(Looper.getMainLooper());
+
+        // do in background code here
+        service.execute(() -> {
+            ArrayList<MusicDataCapsule> updatedList = new ArrayList<>();
+            FetchMusic.fetchMusic(updatedList, MainActivity.this);
+            // post-execute code here
+            handler.post(() -> {
+                //Setting up adapter
+                if (updatedList.isEmpty()) {
+                    linearLayout.setVisibility(View.VISIBLE);
+                } else {
+                    linearLayout.setVisibility(View.GONE);
+                    storageUtil.saveInitialList(updatedList);
+                }
+                musicMainAdapter.updateMusicListItems(updatedList);
+            });
+        });
+        service.shutdown();
+
     }
 
     private void setUpOptionMenuButtons() {
@@ -401,6 +430,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void setBottomSheets() {
         mainPlayerSheetBehavior.setHideable(true);
         mainPlayerSheetBehavior.setPeekHeight(136);
+
         if (getMusic() != null) {
             mainPlayerSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         } else {
@@ -632,6 +662,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * play or pause
      */
     public void pausePlayAudio() {
+        Log.i("hieght", String.valueOf(bottomSheetPlayerFragment.mini_play_view.getHeight()));
         if (!phone_ringing) {
             if (!service_bound) {
                 bindService();
@@ -793,7 +824,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             // for older devices
             if (normalUri != null) {
                 contentResolver.delete(normalUri, null, null);
-                adapter.removeItem(itemOptionSelectedMusic);
+                musicMainAdapter.removeItem(itemOptionSelectedMusic);
             }
         }
         closeOptionSheet();
@@ -804,7 +835,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onActivityResult(requestCode, resultCode, data);
         //yeah it has to be in reverse for some reason to work
         if (resultCode == PackageManager.PERMISSION_DENIED) {
-            adapter.removeItem(itemOptionSelectedMusic);
+            musicMainAdapter.removeItem(itemOptionSelectedMusic);
         }
     }
 
@@ -859,39 +890,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .withListener(new MultiplePermissionsListener() {
                     @Override
                     public void onPermissionsChecked(MultiplePermissionsReport multiplePermissionsReport) {
-                        //Fetch Music List along with it's metadata and save it in "dataList"
-
-                        ExecutorService service = Executors.newSingleThreadExecutor();
-                        Handler handler = new Handler(Looper.getMainLooper());
-                        progressBar.setVisibility(View.VISIBLE);
-                        LinearLayoutManager manager = new LinearLayoutManager(MainActivity.this, LinearLayoutManager.VERTICAL, false);
-                        manager.setSmoothScrollbarEnabled(true);
-
-
-                        // do in background code here
-                        service.execute(() -> {
-
-                            FetchMusic.fetchMusic(dataList, MainActivity.this);
-                            // post-execute code here
-                            handler.post(() -> {
-                                //saving this in storage for diff util
-                                //storageUtil.saveInitialMusicList(dataList);
-
-                                //Setting up adapter
-                                if (dataList.isEmpty()) {
-                                    linearLayout.setVisibility(View.VISIBLE);
-                                } else {
-                                    linearLayout.setVisibility(View.GONE);
-                                }
-                                progressBar.setVisibility(View.GONE);
-                                adapter = new MusicMainAdapter(MainActivity.this, dataList);
-                                musicRecyclerView.setAdapter(adapter);
-                                musicRecyclerView.setLayoutManager(manager);
-
-                            });
-                        });
-                        service.shutdown();
-
+                        scanAndSetMusicAdapter();
                         is_granted = true;
                     }
 
@@ -901,6 +900,51 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         is_granted = false;
                     }
                 }).check();
+
+    }
+
+    private void scanAndSetMusicAdapter() {
+        //Fetch Music List along with it's metadata and save it in "dataList"
+
+        ExecutorService service = Executors.newSingleThreadExecutor();
+        Handler handler = new Handler(Looper.getMainLooper());
+        progressBar.setVisibility(View.VISIBLE);
+        LinearLayoutManager manager = new LinearLayoutManager(MainActivity.this, LinearLayoutManager.VERTICAL, false);
+        manager.setSmoothScrollbarEnabled(true);
+
+        if (dataList != null) {
+            //Setting up adapter
+            if (dataList.isEmpty()) {
+                linearLayout.setVisibility(View.VISIBLE);
+            } else {
+                linearLayout.setVisibility(View.GONE);
+            }
+            progressBar.setVisibility(View.GONE);
+            musicMainAdapter = new MusicMainAdapter(MainActivity.this, dataList);
+            musicRecyclerView.setAdapter(musicMainAdapter);
+            musicRecyclerView.setLayoutManager(manager);
+        } else {
+            // do in background code here
+            service.execute(() -> {
+                dataList = new ArrayList<>();
+                FetchMusic.fetchMusic(dataList, MainActivity.this);
+                // post-execute code here
+                handler.post(() -> {
+                    //Setting up adapter
+                    if (dataList.isEmpty()) {
+                        linearLayout.setVisibility(View.VISIBLE);
+                    } else {
+                        linearLayout.setVisibility(View.GONE);
+                        storageUtil.saveInitialList(dataList);
+                    }
+                    progressBar.setVisibility(View.GONE);
+                    musicMainAdapter = new MusicMainAdapter(MainActivity.this, dataList);
+                    musicRecyclerView.setAdapter(musicMainAdapter);
+                    musicRecyclerView.setLayoutManager(manager);
+                });
+            });
+            service.shutdown();
+        }
 
     }
 
@@ -941,48 +985,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    //region Searchbar Functionality Code here
-    // Adding SearchView Icon to Toolbar
-    // Listening for Queries in Search View
-    // Sending Queries to SearchResultFragment to process
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu, menu);
-
-        MenuItem searchViewItem = menu.findItem(R.id.app_bar_search);
-        SearchView searchView = (SearchView) searchViewItem.getActionView();
-
-        searchView.setOnSearchClickListener(v -> setSearchFragment());
-        searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String query) {
-                EventBus.getDefault().post(new SearchEvent(query, dataList));
-                return false;
-            }
-
-        });
-
-        searchView.setOnCloseListener(() -> {
-            searchFragmentManager.popBackStackImmediate();
-            return false;
-        });
-        return super.onCreateOptionsMenu(menu);
-    }
-
     @SuppressLint("NonConstantResourceId")
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         FragmentManager fragmentManager = getSupportFragmentManager();
+        Fragment fragment3 = fragmentManager.findFragmentByTag("SettingsFragment");
         Fragment fragment1 = fragmentManager.findFragmentByTag("FavoritesFragment");
         Fragment fragment2 = fragmentManager.findFragmentByTag("PlaylistsFragment");
-        Fragment fragment3 = fragmentManager.findFragmentByTag("SettingsFragment");
         Fragment fragment4 = fragmentManager.findFragmentByTag("HelpFragment");
         Fragment fragment5 = fragmentManager.findFragmentByTag("AboutFragment");
 

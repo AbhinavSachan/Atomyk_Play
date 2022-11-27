@@ -5,6 +5,7 @@
     <string name="song_artist_e">Artist</string>
     <string name="nothing_to_show">Nothing to show</string>
     <string name="search">Search</string>
+    <string name="search_here">Search here</string>
     <string name="song_dur_e">Duration</string>
     <string name="extension">EXT</string>
     <string name="bitrate">FREQ</string>
@@ -74,4 +75,5 @@
     <string name="help">Help ?</string>
     <string name="one_click">Single click skip</string>
     <string name="one_click_des">Skip to previous song in single click</string>
+    <string name="search_here_song">Search your song</string>
 </resources>

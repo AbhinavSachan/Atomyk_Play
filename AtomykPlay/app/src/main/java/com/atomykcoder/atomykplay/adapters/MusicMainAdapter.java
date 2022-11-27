@@ -17,11 +17,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.classes.GlideBuilt;
+import com.atomykcoder.atomykplay.classes.MusicDiffCallback;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import com.turingtechnologies.materialscrollbar.INameableAdapter;
@@ -37,11 +39,19 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
     ArrayList<MusicDataCapsule> musicArrayList;
     MainActivity mainActivity;
 
-
     public MusicMainAdapter(Context context, ArrayList<MusicDataCapsule> musicArrayList) {
         this.context = context;
         this.musicArrayList = musicArrayList;
         mainActivity = (MainActivity) context;
+    }
+
+    public void updateMusicListItems(ArrayList<MusicDataCapsule> musicArrayList) {
+        final MusicDiffCallback diffCallback = new MusicDiffCallback(this.musicArrayList,musicArrayList);
+        final DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
+
+        this.musicArrayList.clear();
+        this.musicArrayList.addAll(musicArrayList);
+        diffResult.dispatchUpdatesTo(this);
     }
 
     @NonNull
@@ -169,11 +179,11 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
         if (position < savedIndex) {
             storageUtil.saveMusicIndex(savedIndex - 1);
         }
-        if (position!=-1) {
+        if (position != -1) {
             musicArrayList.remove(position);
         }
 
-        notifyItemRangeChanged(position, musicArrayList.size()-(position+1));
+        notifyItemRangeChanged(position, musicArrayList.size() - (position + 1));
         notifyItemRemoved(position);
 
         if (position == savedIndex) {

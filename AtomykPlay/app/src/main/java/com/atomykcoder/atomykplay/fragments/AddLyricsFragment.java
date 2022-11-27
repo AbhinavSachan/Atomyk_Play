@@ -177,7 +177,7 @@ public class AddLyricsFragment extends Fragment {
                     if (view != null) {
                         if (finalLyricsItems != null) {
                             ((MainActivity) requireContext()).openBottomSheet(finalLyricsItems);
-                        }else {
+                        } else {
                             Toast.makeText(requireContext(), "No Lyrics Found", Toast.LENGTH_SHORT).show();
                         }
                         fetchLyrics.onPostExecute(progressBar);

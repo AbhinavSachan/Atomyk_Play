@@ -62,7 +62,7 @@ public class FetchLyrics {
                         }
                     }
                 }
-            }else {
+            } else {
                 return null;
             }
         } catch (IOException e) {

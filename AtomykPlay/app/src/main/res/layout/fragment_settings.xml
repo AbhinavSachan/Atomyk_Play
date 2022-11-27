@@ -6,7 +6,9 @@
     android:layout_height="match_parent"
     android:clickable="true"
     android:focusable="true"
-    tools:context=".fragments.SettingsFragment">
+    android:paddingTop="@dimen/status_bar_padding"
+    tools:context=".fragments.SettingsFragment"
+    tools:ignore="UnusedAttribute">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -15,7 +17,6 @@
         android:clickable="true"
         android:focusable="true"
         android:orientation="vertical"
-        android:paddingTop="@dimen/most_top_padding"
         android:paddingBottom="@dimen/most_bottom_padding">
 
         <LinearLayout
@@ -52,7 +53,7 @@
                     android:paddingHorizontal="20dp"
                     android:text="@string/light_mode_tv"
                     android:textColor="@color/text_theme_state"
-                    android:textSize="16sp"  />
+                    android:textSize="16sp" />
 
                 <RadioButton
                     android:id="@+id/dark_button"
@@ -63,7 +64,7 @@
                     android:paddingHorizontal="20dp"
                     android:text="@string/dark_mode_tv"
                     android:textColor="@color/text_theme_state"
-                    android:textSize="16sp"/>
+                    android:textSize="16sp" />
 
             </RadioGroup>
 
@@ -194,6 +195,7 @@
                 android:layout_height="wrap_content"
                 android:clickable="true"
                 android:focusable="true"
+                android:visibility="gone"
                 android:foreground="?attr/selectableItemBackground"
                 android:orientation="horizontal"
                 android:paddingHorizontal="16dp"
@@ -559,6 +561,7 @@
                     android:thumb="@drawable/custom_switch_thumb"
                     app:track="@drawable/custom_track_switch" />
             </LinearLayout>
+
             <LinearLayout
                 android:id="@+id/one_click_skip_ll"
                 android:layout_width="match_parent"

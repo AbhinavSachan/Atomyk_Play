@@ -31,6 +31,7 @@
     <color name="thumb_dark">#F5242424</color>
     <color name="switch_track_on">#922D76CF</color>
     <color name="switch_track_off">#8F191717</color>
+    <color name="greyForTool">#676767</color>
 
 
 </resources>

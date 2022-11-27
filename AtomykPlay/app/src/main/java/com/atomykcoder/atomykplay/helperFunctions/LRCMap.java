@@ -9,8 +9,9 @@ public class LRCMap {
 
     /**
      * make a lrcmap with given timestamps and lyrics
+     *
      * @param _timestamps timestamps
-     * @param _lyrics lyrics
+     * @param _lyrics     lyrics
      */
     public LRCMap(ArrayList<String> _timestamps, ArrayList<String> _lyrics) {
         timestamps = _timestamps;
@@ -23,6 +24,7 @@ public class LRCMap {
 
     /**
      * Get Stamp at given index
+     *
      * @param i index
      * @return stamp at given index
      */
@@ -32,6 +34,7 @@ public class LRCMap {
 
     /**
      * Get lyric at given index
+     *
      * @param i index
      * @return lyric at given index
      */
@@ -41,6 +44,7 @@ public class LRCMap {
 
     /**
      * get all timestamps
+     *
      * @return timestamps array list
      */
     public ArrayList<String> getStamps() {
@@ -49,6 +53,7 @@ public class LRCMap {
 
     /**
      * get all lyrics
+     *
      * @return lyrics array list
      */
     public ArrayList<String> getLyrics() {
@@ -57,30 +62,32 @@ public class LRCMap {
 
     /**
      * get lyrics assigned to given timestamp
+     *
      * @param stamp stamp, which is used to find lyrics assigned to that stamp
      * @return lyric assigned to given stamp
      */
     public String get(String stamp) {
-        if(timestamps.contains(stamp)){
+        if (timestamps.contains(stamp)) {
             int i = timestamps.indexOf(stamp);
             return lyrics.get(i);
-        }
-        else return null;
+        } else return null;
     }
 
     /**
      * get Index of given stamp
+     *
      * @param stamp
      * @return returns index of given stamp if exist else returns -1
      */
     public int getIndexAtStamp(String stamp) {
-        if(timestamps.contains(stamp))
+        if (timestamps.contains(stamp))
             return timestamps.indexOf(stamp);
         else return -1;
     }
 
     /**
      * push given stamp and lyrics to the end of their respective array
+     *
      * @param _stamp timestamp
      * @param _lyric lyrics
      */
@@ -91,6 +98,7 @@ public class LRCMap {
 
     /**
      * push given arrays of stamps and lyrics  to the end of their respective array
+     *
      * @param _stamps timestamps
      * @param _lyrics lyrics
      */
@@ -101,6 +109,7 @@ public class LRCMap {
 
     /**
      * push a given lrc map to the end of already existing lrcmap
+     *
      * @param lrcMap lrcmap object
      */
     public void addAll(LRCMap lrcMap) {
@@ -118,6 +127,7 @@ public class LRCMap {
 
     /**
      * checks if lyrics and timestamps is empty
+     *
      * @return returns true if both lyrics and timestamps are empty, else returns false
      */
     public boolean isEmpty() {
@@ -126,6 +136,7 @@ public class LRCMap {
 
     /**
      * checks if timestamps array contains given stamp
+     *
      * @param stamp timestamp
      * @return returns true if given timestamp exist in timestamps array, else false
      */
@@ -135,6 +146,7 @@ public class LRCMap {
 
     /**
      * get arraylist size
+     *
      * @return arraylist size
      */
     public int size() {

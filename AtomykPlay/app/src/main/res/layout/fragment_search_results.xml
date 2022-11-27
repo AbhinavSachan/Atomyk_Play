@@ -1,19 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/primary_bg"
+    android:background="@color/secondary_bg"
     android:clickable="true"
     android:focusable="true"
-    tools:context=".fragments.SearchResultsFragment">
+    android:paddingTop="32dp"
+    tools:context=".fragments.SearchResultsFragment"
+    tools:ignore="UnusedAttribute">
 
+    <LinearLayout
+        android:id="@+id/search_layout_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/close_search_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/empty"
+            android:focusable="true"
+            android:layout_gravity="bottom"
+            android:paddingVertical="8dp"
+            android:paddingHorizontal="8dp"
+            android:src="@drawable/ic_back" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:gravity="center_vertical"
+            app:boxBackgroundColor="@color/secondary_bg"
+            app:boxCornerRadiusBottomEnd="0dp"
+            app:boxCornerRadiusBottomStart="0dp"
+            app:boxCornerRadiusTopEnd="0dp"
+            app:boxBackgroundMode="outline"
+            app:boxCornerRadiusTopStart="0dp"
+            app:boxStrokeWidth="0dp"
+            app:boxStrokeWidthFocused="0dp"
+            app:hintEnabled="false">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/search_view_search"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:hint="@string/search_here_song"
+                android:imeOptions="actionNext"
+                android:inputType="text"
+                android:maxLength="200"
+                android:maxLines="1"
+                android:textColor="@color/text_color"
+                android:textColorHint="@color/hint_color" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+    </LinearLayout>
+
+    <View
+        android:id="@+id/view_line"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@+id/search_layout_view"
+        android:background="@color/tertiary_bg" />
 
     <RadioGroup
         android:id="@+id/radio_group"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="84dp"
+        android:layout_below="@+id/view_line"
         android:orientation="horizontal">
 
         <RadioButton
@@ -62,16 +118,15 @@
         android:layout_margin="12dp"
         android:padding="4dp"
         android:text="@string/song0"
-        android:textStyle="bold"
         android:textColor="@color/sub_text_grey"
-        android:textSize="@dimen/d_16sp" />
+        android:textSize="@dimen/d_16sp"
+        android:textStyle="bold" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/search_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clipToPadding="false"
-        android:paddingBottom="70dp"
-        android:layout_below="@id/searched_song_num" />
+        android:layout_below="@id/searched_song_num"
+        android:clipToPadding="false" />
 
 </RelativeLayout>

@@ -1,6 +1,5 @@
 package com.atomykcoder.atomykplay.fragments;
 
-import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.dark;
 import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.no_dark;
 
 import android.annotation.SuppressLint;
@@ -29,7 +28,7 @@ public class SettingsFragment extends Fragment {
     private View songInfoLl, artistLl, optionLl, extraLl, autoPlayLl, keepShuffleLl, lowerVolLl, blackListLl, filterDurLl, selfStopLl, keepScreenOnLl, oneClickSkipLl;
 
 
-    private String theme;
+    private boolean dark;
     private boolean showInfo, showArtist, showOption, showExtra, autoPlay, keepShuffle, lowerVol, selfStop, keepScreenOn, oneClickSkip;
     private StorageUtil.SettingsStorage settingsStorage;
     private MainActivity mainActivity;
@@ -45,7 +44,7 @@ public class SettingsFragment extends Fragment {
         mainActivity = (MainActivity) requireContext();
 
         //saved values
-        theme = settingsStorage.loadTheme();
+        dark = settingsStorage.loadTheme();
         showInfo = settingsStorage.loadShowInfo();
         showArtist = settingsStorage.loadShowArtist();
         showExtra = settingsStorage.loadExtraCon();
@@ -154,7 +153,7 @@ public class SettingsFragment extends Fragment {
 
         //Check if any radio button is pressed
         radioGroup.setOnCheckedChangeListener((group, checkedId) -> {
-            setTheme(checkedId);
+            setDark(checkedId);
         });
 
         return view;
@@ -213,31 +212,28 @@ public class SettingsFragment extends Fragment {
         keepScreenOnSwi.setChecked(keepScreenOn);
         oneClickSkipSwi.setChecked(oneClickSkip);
 
-        switch (theme) {
-            case no_dark:
-                light_theme_btn.setChecked(true);
-                break;
-            case dark:
-                dark_theme_btn.setChecked(true);
-                break;
+        if (!dark) {
+            light_theme_btn.setChecked(true);
+        } else {
+            dark_theme_btn.setChecked(true);
         }
     }
 
 
     @SuppressLint("NonConstantResourceId")
-    private void setTheme(int checkedId) {
+    private void setDark(int checkedId) {
         switch (checkedId) {
             case R.id.light_button:
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-                theme = no_dark;
+                dark = false;
                 break;
             case R.id.dark_button:
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-                theme = dark;
+                dark = true;
                 break;
 
         }
-        settingsStorage.saveTheme(theme);
+        settingsStorage.saveTheme(dark);
     }
 
 }

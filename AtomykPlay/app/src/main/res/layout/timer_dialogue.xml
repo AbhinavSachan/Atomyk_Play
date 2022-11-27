@@ -5,53 +5,53 @@
     android:background="@color/secondary_bg"
     android:orientation="vertical">
 
-   <LinearLayout
-       android:layout_width="match_parent"
-       android:layout_height="match_parent"
-       android:orientation="vertical"
-       android:padding="16dp">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="16dp">
 
-       <TextView
-           android:layout_width="match_parent"
-           android:layout_height="wrap_content"
-           android:layout_marginTop="6dp"
-           android:layout_marginBottom="10dp"
-           android:padding="4dp"
-           android:text="@string/sleep_timer_text"
-           android:textColor="@color/text_color"
-           android:textSize="@dimen/d_24sp"
-           android:textStyle="bold" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="10dp"
+            android:padding="4dp"
+            android:text="@string/sleep_timer_text"
+            android:textColor="@color/text_color"
+            android:textSize="@dimen/d_24sp"
+            android:textStyle="bold" />
 
 
-       <TextView
-           android:id="@+id/timer_time_textview"
-           android:layout_width="wrap_content"
-           android:layout_height="wrap_content"
-           android:layout_gravity="center"
-           android:layout_marginTop="25dp"
-           android:text="@string/empty"
-           android:textColor="@color/sub_text_grey"
-           android:textSize="@dimen/d_18sp" />
+        <TextView
+            android:id="@+id/timer_time_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="25dp"
+            android:text="@string/empty"
+            android:textColor="@color/sub_text_grey"
+            android:textSize="@dimen/d_18sp" />
 
-       <SeekBar
-           android:id="@+id/timer_time_seekbar"
-           style="@style/Widget.AppCompat.SeekBar.Discrete"
-           android:layout_width="240dp"
-           android:layout_height="wrap_content"
-           android:layout_gravity="center"
-           android:layout_marginHorizontal="50dp"
-           android:layout_marginTop="15dp"
-           android:max="11" />
+        <SeekBar
+            android:id="@+id/timer_time_seekbar"
+            style="@style/Widget.AppCompat.SeekBar.Discrete"
+            android:layout_width="240dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginHorizontal="50dp"
+            android:layout_marginTop="15dp"
+            android:max="11" />
 
-       <Button
-           android:id="@+id/timer_confirm_button"
-           android:layout_width="wrap_content"
-           android:layout_height="wrap_content"
-           android:layout_gravity="center"
-           android:layout_marginTop="10dp"
-           android:backgroundTint="@color/tertiary_bg"
-           android:text="@string/start_text"
-           android:textSize="@dimen/d_12sp" />
+        <Button
+            android:id="@+id/timer_confirm_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            android:backgroundTint="@color/tertiary_bg"
+            android:text="@string/start_text"
+            android:textSize="@dimen/d_12sp" />
 
-   </LinearLayout>
+    </LinearLayout>
 </LinearLayout>

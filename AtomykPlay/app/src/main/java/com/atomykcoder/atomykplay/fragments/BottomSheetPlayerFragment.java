@@ -324,7 +324,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         if (activeMusic != null) {
             songName = activeMusic.getsName();
             artistName = activeMusic.getsArtist();
-            mimeType = getMime(activeMusic.getsMimeType().toUpperCase());
+            mimeType = getMime(activeMusic.getsMimeType()).toUpperCase();
             duration = convertDuration(activeMusic.getsLength());
             String rawBitrate = activeMusic.getsBitrate();
             int bitrateInNum = Integer.parseInt(rawBitrate) / 1000;
@@ -603,12 +603,12 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
      */
     private void openLyricsPanel() {
         if (coverCardView.getVisibility() == View.VISIBLE) {
-            lyricsImg.setImageResource(R.drawable.ic_baseline_subtitles_off);
+            lyricsImg.setImageResource(R.drawable.ic_lyrics_off);
             coverCardView.setVisibility(View.GONE);
             lyricsRelativeLayout.setVisibility(View.VISIBLE);
             lyricsRelativeLayout.setKeepScreenOn(settingsStorage.loadKeepScreenOn());
         } else if (coverCardView.getVisibility() == View.GONE) {
-            lyricsImg.setImageResource(R.drawable.ic_baseline_subtitles_24);
+            lyricsImg.setImageResource(R.drawable.ic_lyrics);
             coverCardView.setVisibility(View.VISIBLE);
             lyricsRelativeLayout.setVisibility(View.GONE);
             lyricsRelativeLayout.setKeepScreenOn(false);

@@ -5,35 +5,37 @@
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activities.MainActivity">
+    android:background="@color/secondary_bg"
+    tools:context=".activities.MainActivity"
+    tools:ignore="UnusedAttribute">
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/sec_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/primary_bg">
+        android:background="@color/secondary_bg">
 
         <RelativeLayout
-            android:id="@+id/sec_container"
             android:layout_width="match_parent"
-            android:paddingBottom="@dimen/most_bottom_padding"
-            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/music_recycler"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:clipToPadding="false" />
+                android:clipToPadding="false"
+                android:paddingBottom="@dimen/most_bottom_padding" />
 
-            <com.turingtechnologies.materialscrollbar.DragScrollBar
-                android:id="@+id/dragScrollBar"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_alignParentEnd="true"
-                app:msb_barColor="@color/primary_bg"
-                app:msb_handleColor="@color/tertiary_bg"
-                app:msb_handleOffColor="@color/sub_text_grey"
-                app:msb_lightOnTouch="true" />
+            <!--                <com.turingtechnologies.materialscrollbar.DragScrollBar-->
+            <!--                    android:id="@+id/dragScrollBar"-->
+            <!--                    android:layout_width="wrap_content"-->
+            <!--                    android:layout_height="match_parent"-->
+            <!--                    android:layout_alignParentEnd="true"-->
+            <!--                    app:msb_barColor="@color/primary_bg"-->
+            <!--                    app:msb_handleColor="@color/tertiary_bg"-->
+            <!--                    app:msb_handleOffColor="@color/sub_text_grey"-->
+            <!--                    app:msb_lightOnTouch="true" />-->
 
             <LinearLayout
                 android:id="@+id/song_not_found_layout"
@@ -41,7 +43,8 @@
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:orientation="vertical"
-                android:visibility="gone">
+                android:visibility="gone"
+                tools:ignore="UseCompoundDrawables">
 
                 <ImageView
                     android:layout_width="250dp"
@@ -67,26 +70,65 @@
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:indeterminateTint="@color/text_color"
-                android:interpolator="@android:anim/accelerate_decelerate_interpolator"
                 android:visibility="gone" />
 
         </RelativeLayout>
+
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/appBar_layout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:background="@null"
+            app:elevation="0dp">
 
-            <androidx.appcompat.widget.Toolbar
+            <com.google.android.material.card.MaterialCardView
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
-                android:layout_height="84dp"
-                android:background="@color/secondary_bg"
-                android:elevation="16dp"
-                app:layout_scrollFlags="scroll|enterAlways"
-                android:paddingTop="30dp"
+                android:layout_height="50dp"
+                android:layout_marginHorizontal="12dp"
+                android:layout_marginTop="42dp"
+                android:layout_marginBottom="12dp"
+                android:clickable="true"
+                android:focusable="true"
                 android:theme="@style/ThemeOverlay.AppCompat.DayNight"
-                app:popupTheme="@style/ThemeOverlay.AppCompat.DayNight" />
+                app:cardCornerRadius="36dp"
+                app:cardElevation="6dp"
+                app:layout_scrollFlags="scroll|enterAlways"
+                app:layout_scrollInterpolator="@android:interpolator/fast_out_slow_in">
 
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="8dp">
+
+                    <ImageView
+                        android:id="@+id/open_drawer_btn"
+                        android:layout_width="50dp"
+                        android:layout_height="match_parent"
+                        android:clickable="true"
+                        android:contentDescription="@string/empty"
+                        android:focusable="true"
+                        android:padding="10dp"
+                        android:src="@drawable/ic_ham_opt"
+                        tools:ignore="DuplicateSpeakableTextCheck" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:text="@string/search_here"
+                        android:textAppearance="@android:style/TextAppearance.DeviceDefault.SearchResult.Subtitle"
+                        android:textColor="@color/greyForTool" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+            <!-- add buttons here -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+            </com.google.android.material.card.MaterialCardView>
         </com.google.android.material.appbar.AppBarLayout>
 
         <View
@@ -106,8 +148,8 @@
             android:elevation="10dp"
             android:focusable="true"
             android:orientation="vertical"
-            app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
-
+            app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
+            tools:ignore="DuplicateClickableBoundsCheck">
 
             <ImageView
                 android:layout_width="match_parent"
@@ -148,6 +190,7 @@
 
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"

@@ -75,7 +75,7 @@ public class FetchMusic {
 
                     MusicDataCapsule music;
                     int filter = new StorageUtil.SettingsStorage(context).loadFilterDur() * 1000;
-                    music = new MusicDataCapsule(sTitle, sArtist, sAlbum, sAlbumUri, sLength, sPath, sBitrate, sMimeType, sSize, sGenre,sId);
+                    music = new MusicDataCapsule(sTitle, sArtist, sAlbum, sAlbumUri, sLength, sPath, sBitrate, sMimeType, sSize, sGenre, sId);
                     File file = new File(music.getsPath());
                     if (file.exists()) {
                         if (filter <= Integer.parseInt(music.getsLength())) {

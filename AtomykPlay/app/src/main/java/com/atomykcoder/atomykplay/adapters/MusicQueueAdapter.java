@@ -147,7 +147,7 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
             if (item != null) {
                 musicArrayList.remove(item);
             }
-            notifyItemRangeChanged(position, musicArrayList.size() - (position+1));
+            notifyItemRangeChanged(position, musicArrayList.size() - (position + 1));
             notifyItemRemoved(position);
             storageUtil.saveMusicList(musicArrayList);
         } else if (musicArrayList.size() == 1) {
@@ -164,7 +164,7 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
     public int getItemCount() {
         if (musicArrayList != null) {
             return musicArrayList.size();
-        }else {
+        } else {
             return 0;
         }
     }

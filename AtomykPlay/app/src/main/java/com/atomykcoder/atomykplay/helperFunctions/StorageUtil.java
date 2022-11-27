@@ -31,6 +31,7 @@ public class StorageUtil {
     private final String LYRICS_STORAGE = "com.atomykcoder.atomykplay.LYRICS_STORAGE";
     //Keys
     private final String musicList = "musicList";
+    private final String initialList = "initialList";
     private final String musicIndex = "musicIndex";
     private final String musicPosition = "musicPosition";
     private final String repeatStatus = "repeatStatus";
@@ -64,6 +65,25 @@ public class StorageUtil {
         return gson.fromJson(json, type);
     }
 
+    public void saveInitialList(ArrayList<MusicDataCapsule> list) {
+        sharedPreferences = context.getSharedPreferences(MUSIC_LIST_STORAGE, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(list);
+        editor.putString(initialList, json);
+        editor.apply();
+    }
+
+    public ArrayList<MusicDataCapsule> loadInitialList() {
+
+        sharedPreferences = context.getSharedPreferences(MUSIC_LIST_STORAGE, Context.MODE_PRIVATE);
+        Gson gson = new Gson();
+        String json = sharedPreferences.getString(initialList, null);
+        Type type = new TypeToken<ArrayList<MusicDataCapsule>>() {
+        }.getType();
+        return gson.fromJson(json, type);
+    }
+
     public void saveMusicIndex(int index) {
         sharedPreferences = context.getSharedPreferences(MUSIC_LIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -80,6 +100,12 @@ public class StorageUtil {
         sharedPreferences = context.getSharedPreferences(MUSIC_LIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.remove(musicList);
+        editor.apply();
+    }
+ public void clearInitialList() {
+        sharedPreferences = context.getSharedPreferences(MUSIC_LIST_STORAGE, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.remove(initialList);
         editor.apply();
     }
 
@@ -220,16 +246,16 @@ public class StorageUtil {
             this.context = context;
         }
 
-        public void saveTheme(String theme) {
+        public void saveTheme(boolean theme) {
             sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putString("theme_name", theme);
+            editor.putBoolean("theme_name", theme);
             editor.apply();
         }
 
-        public String loadTheme() {
+        public boolean loadTheme() {
             sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
-            return sharedPreferences.getString("theme_name", no_dark);
+            return sharedPreferences.getBoolean("theme_name", false);
         }
 
         public void showInfo(boolean show) {
@@ -279,6 +305,7 @@ public class StorageUtil {
             sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
             return sharedPreferences.getBoolean("show_opt_menu", true);
         }
+
         public void autoPlay(boolean b) {
             sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -338,6 +365,7 @@ public class StorageUtil {
             sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
             return sharedPreferences.getBoolean("keep_screen_on", false);
         }
+
         public void oneClickSkip(boolean b) {
             sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -349,7 +377,6 @@ public class StorageUtil {
             sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
             return sharedPreferences.getBoolean("one_click_skip", false);
         }
-
 
 
         /**

@@ -14,8 +14,6 @@ import com.atomykcoder.atomykplay.activities.MainActivity;
 
 import java.util.ArrayList;
 
-import kotlin.Unit;
-
 public class MusicLyricsAdapter extends RecyclerView.Adapter<MusicLyricsAdapter.LyricsViewAdapter> {
     private final Context context;
     private final ArrayList<String> arrayList;

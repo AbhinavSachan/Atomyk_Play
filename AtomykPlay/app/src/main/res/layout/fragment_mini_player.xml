@@ -6,7 +6,8 @@
     android:layout_width="match_parent"
     android:layout_height="68dp"
     android:background="@drawable/rounded_bottom_sheet"
-    tools:context=".fragments.BottomSheetPlayerFragment">
+    tools:context=".fragments.BottomSheetPlayerFragment"
+    tools:ignore="UnusedAttribute">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraint_layout"
@@ -34,16 +35,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:contentDescription="@string/empty"
-                android:src="@drawable/ic_music"
-                android:scaleType="centerCrop" />
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_music" />
 
         </com.google.android.material.card.MaterialCardView>
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:gravity="center_vertical"
             android:layout_marginStart="12dp"
+            android:gravity="center_vertical"
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/mini_image_ll"

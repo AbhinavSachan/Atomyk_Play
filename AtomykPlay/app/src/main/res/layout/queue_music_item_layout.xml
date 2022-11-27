@@ -8,16 +8,17 @@
     android:background="@color/secondary_bg"
     android:clickable="true"
     android:focusable="true"
-    android:foreground="?android:attr/selectableItemBackground">
+    android:foreground="?android:attr/selectableItemBackground"
+    tools:ignore="UnusedAttribute">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:clipToPadding="false"
         android:paddingStart="6dp"
         android:paddingTop="6dp"
         android:paddingEnd="0dp"
         android:paddingBottom="6dp"
-        android:clipToPadding="false"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -26,8 +27,8 @@
             android:id="@+id/materialCardView_queue"
             android:layout_width="56dp"
             android:layout_height="56dp"
-            android:padding="6dp"
             android:clipToPadding="false"
+            android:padding="6dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
@@ -45,35 +46,36 @@
                     android:id="@+id/song_album_cover_queue"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:src="@drawable/ic_music"
                     android:contentDescription="@string/empty"
-                    android:scaleType="centerCrop" />
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_music" />
 
             </com.google.android.material.card.MaterialCardView>
 
 
         </RelativeLayout>
+
         <com.google.android.material.card.MaterialCardView
             android:layout_width="20dp"
             android:layout_height="20dp"
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
             app:cardBackgroundColor="@color/secondary_bg"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/materialCardView_queue"
-            app:layout_constraintEnd_toEndOf="@+id/materialCardView_queue"
             app:cardCornerRadius="36dp"
-            app:cardElevation="5dp">
+            app:cardElevation="5dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/materialCardView_queue"
+            app:layout_constraintStart_toStartOf="@+id/materialCardView_queue">
 
             <TextView
                 android:id="@+id/song_index_num_queue"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:gravity="center"
-                android:singleLine="true"
                 android:ellipsize="marquee"
+                android:gravity="center"
                 android:marqueeRepeatLimit="marquee_forever"
                 android:scaleType="centerCrop"
+                android:singleLine="true"
                 android:textColor="@color/text_color"
                 android:textSize="10sp"
                 tools:ignore="SmallSp" />

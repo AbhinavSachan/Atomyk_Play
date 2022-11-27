@@ -4,8 +4,8 @@
 
     <gradient
         android:angle="30"
-        android:endColor="@android:color/transparent"
         android:centerColor="@color/center_player_shadow"
-        android:startColor="@color/player_shadow_black"/>
+        android:endColor="@android:color/transparent"
+        android:startColor="@color/player_shadow_black" />
 
 </shape>
