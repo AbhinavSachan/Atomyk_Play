@@ -55,7 +55,7 @@ import com.atomykcoder.atomykplay.events.RunnableSyncLyricsEvent;
 import com.atomykcoder.atomykplay.events.SetMainLayoutEvent;
 import com.atomykcoder.atomykplay.events.UpdateMusicImageEvent;
 import com.atomykcoder.atomykplay.events.UpdateMusicProgressEvent;
-import com.atomykcoder.atomykplay.helperFunctions.LRCMap;
+import com.atomykcoder.atomykplay.viewModals.LRCMap;
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;

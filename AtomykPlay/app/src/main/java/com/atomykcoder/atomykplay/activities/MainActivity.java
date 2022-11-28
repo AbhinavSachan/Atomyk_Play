@@ -69,6 +69,7 @@ import com.atomykcoder.atomykplay.helperFunctions.FetchMusic;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.services.MediaPlayerService;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
+import com.atomykcoder.atomykplay.viewModals.Playlist;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.navigation.NavigationView;
@@ -844,9 +845,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    private void addToQueue() {
+    private void addToQueue(MusicDataCapsule music) {
         showToast("Added to queue");
-
     }
 
     private void closeOptionSheet() {
@@ -1061,7 +1061,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             }
             case R.id.add_to_queue_option: {
-                addToQueue();
+                addToQueue(itemOptionSelectedMusic);
                 break;
             }
             case R.id.set_ringtone_option: {
@@ -1090,7 +1090,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             }
             case R.id.add_to_favourites_option: {
-                showToast("Nope");
+                showToast("fav");
                 break;
             }
         }
@@ -1121,8 +1121,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * @return returns content uri of given music
      */
     private Uri getContentUri(MusicDataCapsule music) {
-
         int id = Integer.parseInt(music.getsId());
+        Log.i("info", "" + id);
         Uri baseUri = Uri.parse("content://media/external/audio/media");
         return Uri.withAppendedPath(baseUri, "" + id);
 

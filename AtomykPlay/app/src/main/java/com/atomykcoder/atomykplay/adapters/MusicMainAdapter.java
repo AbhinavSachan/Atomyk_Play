@@ -181,6 +181,7 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
         }
         if (position != -1) {
             musicArrayList.remove(position);
+            storageUtil.saveInitialList(musicArrayList);
         }
 
         notifyItemRangeChanged(position, musicArrayList.size() - (position + 1));

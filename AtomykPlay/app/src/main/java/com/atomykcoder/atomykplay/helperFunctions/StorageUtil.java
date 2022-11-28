@@ -3,7 +3,9 @@ package com.atomykcoder.atomykplay.helperFunctions;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.atomykcoder.atomykplay.viewModals.LRCMap;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
+import com.atomykcoder.atomykplay.viewModals.Playlist;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -29,6 +31,7 @@ public class StorageUtil {
     private final String SHUFFLE_STORAGE = "com.atomykcoder.atomykplay.SHUFFLE_STORAGE";
     private final String FAVORITE_STORAGE = "com.atomykcoder.atomykplay.FAVORITE_STORAGE";
     private final String LYRICS_STORAGE = "com.atomykcoder.atomykplay.LYRICS_STORAGE";
+    private final String PLAYLISTS = "com.atomykcoder.atomykplay.PLAYLISTS";
     //Keys
     private final String musicList = "musicList";
     private final String initialList = "initialList";
@@ -230,6 +233,89 @@ public class StorageUtil {
         sharedPreferences = context.getSharedPreferences(LYRICS_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.remove(songName);
+        editor.apply();
+    }
+
+    public void createPlayList(String playlistName) {
+        sharedPreferences = context.getSharedPreferences(PLAYLISTS, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(new Playlist(playlistName));
+        editor.putString(playlistName, json);
+        editor.apply();
+    }
+
+    public void removePlayList(String playlistName) {
+        sharedPreferences = context.getSharedPreferences(PLAYLISTS, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.remove(playlistName);
+        editor.apply();
+    }
+
+    public Playlist loadPlaylist (String playlistName) {
+        sharedPreferences = context.getSharedPreferences(PLAYLISTS, Context.MODE_PRIVATE);
+        Gson gson = new Gson();
+        String json = sharedPreferences.getString(playlistName, null);
+        Type type = new TypeToken<Playlist>() {
+        }.getType();
+        return gson.fromJson(json, type);
+    }
+
+    public ArrayList<Playlist> getAllPlaylist() {
+        sharedPreferences = context.getSharedPreferences(PLAYLISTS, Context.MODE_PRIVATE);
+        Gson gson = new Gson();
+        ArrayList<Playlist> playlists = new ArrayList<>();
+        Map<String, ?> keys = sharedPreferences.getAll();
+        for(Map.Entry<String, ?> entry : keys.entrySet()) {
+            String json = sharedPreferences.getString(entry.getKey(), null);
+            Type type = new TypeToken<Playlist>() {}.getType();
+            Playlist playlist = gson.fromJson(json, type);
+            playlists.add(playlist);
+        }
+        return playlists;
+    }
+
+    public void addItemInPlayList(MusicDataCapsule music, String playlistName) {
+        //Shared Preferences Stuff
+        sharedPreferences = context.getSharedPreferences(PLAYLISTS, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        // New Gson object
+        Gson gson = new Gson();
+        // Retrieving playlist json
+        String json = sharedPreferences.getString(playlistName, null);
+        // Creating a playlist type
+        Type type = new TypeToken<Playlist>() {}.getType();
+        // converting json to gson then to playlist object
+        Playlist playlist = gson.fromJson(json, type);
+        //adding music to playlist object
+        playlist.addMusic(music);
+        // creating new json to save updated playlist
+        String newJson = gson.toJson(playlist);
+        // assign new json to given playlist key
+        editor.putString(playlistName, newJson);
+        // apply editor
+        editor.apply();
+    }
+
+    public void deleteItemInPlaylist(MusicDataCapsule music, String playlistName) {
+        //Shared Preferences Stuff
+        sharedPreferences = context.getSharedPreferences(PLAYLISTS, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        // New Gson object
+        Gson gson = new Gson();
+        // Retrieving playlist json
+        String json = sharedPreferences.getString(playlistName, null);
+        // Creating a playlist type
+        Type type = new TypeToken<Playlist>() {}.getType();
+        // converting json to gson then to playlist object
+        Playlist playlist = gson.fromJson(json, type);
+        //removing music to playlist object
+        playlist.removeMusic(music);
+        // creating new json to save updated playlist
+        String newJson = gson.toJson(playlist);
+        // assign new json to given playlist key
+        editor.putString(playlistName, newJson);
+        // apply editor
         editor.apply();
     }
 
