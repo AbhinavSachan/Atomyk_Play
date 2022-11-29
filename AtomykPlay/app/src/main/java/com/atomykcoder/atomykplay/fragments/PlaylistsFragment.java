@@ -15,13 +15,14 @@ import com.atomykcoder.atomykplay.adapters.PlaylistAdapter;
 import com.atomykcoder.atomykplay.customScripts.GridSpacing;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
+import com.atomykcoder.atomykplay.viewModals.Playlist;
 
 import java.util.ArrayList;
 
 public class PlaylistsFragment extends Fragment {
 
     private RecyclerView recyclerView;
-    private ArrayList<MusicDataCapsule> playlistList;
+    private ArrayList<Playlist> playlistList;
     private PlaylistAdapter playlistAdapter;
 
     @Override
@@ -37,7 +38,7 @@ public class PlaylistsFragment extends Fragment {
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.addItemDecoration(new GridSpacing(2, 8, true));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
-        playlistList = new StorageUtil(requireContext()).loadMusicList();
+        playlistList = new StorageUtil(requireContext()).getAllPlaylist();
 
         if (playlistList != null) {
             playlistAdapter = new PlaylistAdapter(requireContext(), playlistList);

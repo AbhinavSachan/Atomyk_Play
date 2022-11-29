@@ -31,7 +31,7 @@ public class StorageUtil {
     private final String SHUFFLE_STORAGE = "com.atomykcoder.atomykplay.SHUFFLE_STORAGE";
     private final String FAVORITE_STORAGE = "com.atomykcoder.atomykplay.FAVORITE_STORAGE";
     private final String LYRICS_STORAGE = "com.atomykcoder.atomykplay.LYRICS_STORAGE";
-    private final String PLAYLISTS = "com.atomykcoder.atomykplay.PLAYLISTS";
+    private final String PLAYLIST_STORAGE = "com.atomykcoder.atomykplay.PLAYLIST_STORAGE";
     //Keys
     private final String musicList = "musicList";
     private final String initialList = "initialList";
@@ -59,7 +59,6 @@ public class StorageUtil {
     }
 
     public ArrayList<MusicDataCapsule> loadMusicList() {
-
         sharedPreferences = context.getSharedPreferences(MUSIC_LIST_STORAGE, Context.MODE_PRIVATE);
         Gson gson = new Gson();
         String json = sharedPreferences.getString(musicList, null);
@@ -105,7 +104,8 @@ public class StorageUtil {
         editor.remove(musicList);
         editor.apply();
     }
- public void clearInitialList() {
+
+    public void clearInitialList() {
         sharedPreferences = context.getSharedPreferences(MUSIC_LIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.remove(initialList);
@@ -237,7 +237,7 @@ public class StorageUtil {
     }
 
     public void createPlayList(String playlistName) {
-        sharedPreferences = context.getSharedPreferences(PLAYLISTS, Context.MODE_PRIVATE);
+        sharedPreferences = context.getSharedPreferences(PLAYLIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         Gson gson = new Gson();
         String json = gson.toJson(new Playlist(playlistName));
@@ -246,14 +246,14 @@ public class StorageUtil {
     }
 
     public void removePlayList(String playlistName) {
-        sharedPreferences = context.getSharedPreferences(PLAYLISTS, Context.MODE_PRIVATE);
+        sharedPreferences = context.getSharedPreferences(PLAYLIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.remove(playlistName);
         editor.apply();
     }
 
-    public Playlist loadPlaylist (String playlistName) {
-        sharedPreferences = context.getSharedPreferences(PLAYLISTS, Context.MODE_PRIVATE);
+    public Playlist loadPlaylist(String playlistName) {
+        sharedPreferences = context.getSharedPreferences(PLAYLIST_STORAGE, Context.MODE_PRIVATE);
         Gson gson = new Gson();
         String json = sharedPreferences.getString(playlistName, null);
         Type type = new TypeToken<Playlist>() {
@@ -262,13 +262,14 @@ public class StorageUtil {
     }
 
     public ArrayList<Playlist> getAllPlaylist() {
-        sharedPreferences = context.getSharedPreferences(PLAYLISTS, Context.MODE_PRIVATE);
+        sharedPreferences = context.getSharedPreferences(PLAYLIST_STORAGE, Context.MODE_PRIVATE);
         Gson gson = new Gson();
         ArrayList<Playlist> playlists = new ArrayList<>();
         Map<String, ?> keys = sharedPreferences.getAll();
-        for(Map.Entry<String, ?> entry : keys.entrySet()) {
+        for (Map.Entry<String, ?> entry : keys.entrySet()) {
             String json = sharedPreferences.getString(entry.getKey(), null);
-            Type type = new TypeToken<Playlist>() {}.getType();
+            Type type = new TypeToken<Playlist>() {
+            }.getType();
             Playlist playlist = gson.fromJson(json, type);
             playlists.add(playlist);
         }
@@ -277,14 +278,15 @@ public class StorageUtil {
 
     public void addItemInPlayList(MusicDataCapsule music, String playlistName) {
         //Shared Preferences Stuff
-        sharedPreferences = context.getSharedPreferences(PLAYLISTS, Context.MODE_PRIVATE);
+        sharedPreferences = context.getSharedPreferences(PLAYLIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         // New Gson object
         Gson gson = new Gson();
         // Retrieving playlist json
         String json = sharedPreferences.getString(playlistName, null);
         // Creating a playlist type
-        Type type = new TypeToken<Playlist>() {}.getType();
+        Type type = new TypeToken<Playlist>() {
+        }.getType();
         // converting json to gson then to playlist object
         Playlist playlist = gson.fromJson(json, type);
         //adding music to playlist object
@@ -299,14 +301,15 @@ public class StorageUtil {
 
     public void deleteItemInPlaylist(MusicDataCapsule music, String playlistName) {
         //Shared Preferences Stuff
-        sharedPreferences = context.getSharedPreferences(PLAYLISTS, Context.MODE_PRIVATE);
+        sharedPreferences = context.getSharedPreferences(PLAYLIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         // New Gson object
         Gson gson = new Gson();
         // Retrieving playlist json
         String json = sharedPreferences.getString(playlistName, null);
         // Creating a playlist type
-        Type type = new TypeToken<Playlist>() {}.getType();
+        Type type = new TypeToken<Playlist>() {
+        }.getType();
         // converting json to gson then to playlist object
         Playlist playlist = gson.fromJson(json, type);
         //removing music to playlist object

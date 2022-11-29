@@ -28,8 +28,7 @@ public class Playlist {
     }
 
     public void addMusic(MusicDataCapsule music) {
-        Log.i("info", "music added");
-        Log.i("info", "value: " + music.getsId());
+        Log.i("info", "music added: " + music.getsId());
         musicMap.put(music.getsId(), music);
     }
 

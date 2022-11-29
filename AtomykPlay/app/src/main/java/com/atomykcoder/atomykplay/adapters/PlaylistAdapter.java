@@ -14,15 +14,16 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.classes.GlideBuilt;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
+import com.atomykcoder.atomykplay.viewModals.Playlist;
 import com.google.android.material.card.MaterialCardView;
 
 import java.util.ArrayList;
 
 public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.PlaylistViewHolder> {
     private final Context context;
-    private final ArrayList<MusicDataCapsule> arrayList;
+    private final ArrayList<Playlist> arrayList;
 
-    public PlaylistAdapter(Context context, ArrayList<MusicDataCapsule> arrayList) {
+    public PlaylistAdapter(Context context, ArrayList<Playlist> arrayList) {
         this.context = context;
         this.arrayList = arrayList;
     }
@@ -36,10 +37,10 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
 
     @Override
     public void onBindViewHolder(@NonNull PlaylistAdapter.PlaylistViewHolder holder, int position) {
-        MusicDataCapsule capsule = arrayList.get(position);
-        GlideBuilt.glide(context,capsule.getsAlbumUri(),R.drawable.ic_music,holder.imageView,300);
+        Playlist capsule = arrayList.get(position);
+//        GlideBuilt.glide(context,capsule.getCoverUri(),R.drawable.ic_music,holder.imageView,300);
         String count = arrayList.size() + " Songs";
-        holder.playlistName.setText(capsule.getsName());
+        holder.playlistName.setText(capsule.getName());
         holder.songCount.setText(count);
         holder.cardView.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -76,4 +76,7 @@
     <string name="one_click">Single click skip</string>
     <string name="one_click_des">Skip to previous song in single click</string>
     <string name="search_here_song">Search your song</string>
+    <string name="shuffle_play">Shuffle</string>
+    <string name="last_added">Last added</string>
+    <string name="add_playlist">Add to playlist</string>
 </resources>

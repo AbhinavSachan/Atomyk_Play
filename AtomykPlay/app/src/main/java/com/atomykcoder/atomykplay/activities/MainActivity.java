@@ -248,7 +248,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     };
     private MusicDataCapsule optionItemSelected;
     //option menu buttons
-    private View addPlayNextBtn, addToQueueBtn, setAsRingBtn, tagEditorBtn, addLyricsBtn, detailsBtn, shareBtn, deleteBtn;
+    private View addPlayNextBtn, addToQueueBtn,addToPlaylist, setAsRingBtn, tagEditorBtn, addLyricsBtn, detailsBtn, shareBtn, deleteBtn;
     private ImageView optionCover, addToFav;
     private TextView optionName, optionArtist;
     private View optionSheet;
@@ -408,6 +408,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void setUpOptionMenuButtons() {
         addPlayNextBtn = findViewById(R.id.add_play_next_option);
         addToQueueBtn = findViewById(R.id.add_to_queue_option);
+        addToPlaylist = findViewById(R.id.add_to_playlist_option);
         setAsRingBtn = findViewById(R.id.set_ringtone_option);
         tagEditorBtn = findViewById(R.id.tagEditor_option);
         addLyricsBtn = findViewById(R.id.addLyrics_option);
@@ -421,6 +422,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         addPlayNextBtn.setOnClickListener(this);
         addToQueueBtn.setOnClickListener(this);
+        addToPlaylist.setOnClickListener(this);
         setAsRingBtn.setOnClickListener(this);
         tagEditorBtn.setOnClickListener(this);
         addLyricsBtn.setOnClickListener(this);
@@ -1086,6 +1088,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 addToQueue(optionItemSelected);
                 break;
             }
+            case R.id.add_to_playlist_option: {
+                addToPlaylist(optionItemSelected);
+                break;
+            }
             case R.id.set_ringtone_option: {
                 setRingtone(optionItemSelected);
                 break;
@@ -1117,6 +1123,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         }
         closeOptionSheet();
+    }
+
+    private void addToPlaylist(MusicDataCapsule optionItemSelected) {
+        
     }
 
 
