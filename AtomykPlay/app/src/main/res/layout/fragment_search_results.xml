@@ -8,7 +8,7 @@
     android:clickable="true"
     android:focusable="true"
     android:paddingTop="32dp"
-    tools:context=".fragments.SearchResultsFragment"
+    tools:context=".fragments.SearchFragment"
     tools:ignore="UnusedAttribute">
 
     <LinearLayout
@@ -40,6 +40,8 @@
             app:boxBackgroundMode="outline"
             app:boxCornerRadiusTopStart="0dp"
             app:boxStrokeWidth="0dp"
+            app:endIconMode="clear_text"
+            app:endIconDrawable="@drawable/ic_close"
             app:boxStrokeWidthFocused="0dp"
             app:hintEnabled="false">
 
@@ -47,7 +49,7 @@
                 android:id="@+id/search_view_search"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:hint="@string/search_here_song"
+                android:hint="@string/search_here"
                 android:imeOptions="actionNext"
                 android:inputType="text"
                 android:maxLength="200"

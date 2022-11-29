@@ -1,12 +1,15 @@
 package com.atomykcoder.atomykplay.fragments;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.hardware.input.InputManager;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioButton;
@@ -28,7 +31,7 @@ import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import java.util.ArrayList;
 
 //Search Layout Fragment for Performing Searches and Presenting Results
-public class SearchResultsFragment extends Fragment {
+public class SearchFragment extends Fragment {
 
     private RecyclerView recycler_view;
     private RadioGroup radioGroup;
@@ -70,9 +73,17 @@ public class SearchResultsFragment extends Fragment {
         ArrayList<MusicDataCapsule> dataList = new StorageUtil(getContext()).loadInitialList();
         FragmentManager fragmentManager = ((MainActivity) requireContext()).getSupportFragmentManager();
 
+        InputMethodManager manager = (InputMethodManager) requireContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+
+
         EditText searchView = view.findViewById(R.id.search_view_search);
         ImageView closeSearch = view.findViewById(R.id.close_search_btn);
-
+        searchView.requestFocus();
+        try {
+            manager.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT,InputMethodManager.HIDE_IMPLICIT_ONLY);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         searchView.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -89,7 +100,15 @@ public class SearchResultsFragment extends Fragment {
             public void afterTextChanged(Editable s) {
             }
         });
-        closeSearch.setOnClickListener(v -> fragmentManager.popBackStackImmediate());
+        closeSearch.setOnClickListener(v ->{
+            searchView.clearFocus();
+            try {
+                manager.hideSoftInputFromWindow(searchView.getWindowToken(),InputMethodManager.HIDE_IMPLICIT_ONLY);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            fragmentManager.popBackStackImmediate();
+        });
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(view.getContext());
         recycler_view.setLayoutManager(layoutManager);
@@ -182,8 +201,10 @@ public class SearchResultsFragment extends Fragment {
 
 
     public void handleSearchEvent(String query, ArrayList<MusicDataCapsule> dataList) {
-        search(query, dataList);
-        searchWithFilters(query, dataList);
+        if (dataList!= null) {
+            search(query, dataList);
+            searchWithFilters(query, dataList);
+        }
     }
 
     //get radio get based on which radio button is selected

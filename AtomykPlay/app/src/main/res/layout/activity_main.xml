@@ -82,7 +82,7 @@
             app:elevation="0dp">
 
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/toolbar"
+                android:id="@+id/searchBar_card"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:layout_marginHorizontal="12dp"
@@ -93,8 +93,7 @@
                 android:theme="@style/ThemeOverlay.AppCompat.DayNight"
                 app:cardCornerRadius="36dp"
                 app:cardElevation="6dp"
-                app:layout_scrollFlags="scroll|enterAlways"
-                app:layout_scrollInterpolator="@android:interpolator/fast_out_slow_in">
+                app:layout_scrollFlags="scroll|enterAlways">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -115,6 +114,7 @@
                         tools:ignore="DuplicateSpeakableTextCheck" />
 
                     <TextView
+                        android:id="@+id/text_view_transition"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:padding="10dp"
@@ -130,6 +130,18 @@
 
             </com.google.android.material.card.MaterialCardView>
         </com.google.android.material.appbar.AppBarLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_gravity="top"
+            android:background="@color/status_bar_color" />
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
         <View
             android:id="@+id/shadow_lyrics_found"
@@ -167,6 +179,7 @@
         </LinearLayout>
 
         <View
+            android:id="@+id/anchored_player_shadow"
             android:layout_width="match_parent"
             android:layout_height="24dp"
             android:background="@drawable/player_shadow"
@@ -187,10 +200,7 @@
             android:layout_height="match_parent"
             android:elevation="20dp"
             app:layout_behavior=".customScripts.CustomBottomSheet" />
-
-
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
-
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"

@@ -334,6 +334,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="3dp"
                 android:text="@string/big_dot"
+                android:textAllCaps="true"
                 android:textColor="@color/light_slate_gray_blue" />
 
 
@@ -342,6 +343,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/bitrate"
+                android:textAllCaps="true"
                 android:textColor="@color/light_slate_gray_blue" />
 
 

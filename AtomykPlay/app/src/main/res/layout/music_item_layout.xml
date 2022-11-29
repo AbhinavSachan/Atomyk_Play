@@ -102,7 +102,7 @@
         </LinearLayout>
 
         <ImageView
-            android:id="@+id/more_option_i_btn"
+            android:id="@+id/playlist_option"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:contentDescription="@string/empty"

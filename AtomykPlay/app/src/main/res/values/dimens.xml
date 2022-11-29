@@ -14,5 +14,5 @@
     <dimen name="most_bottom_padding">86dp</dimen>
     <dimen name="most_top_padding">90dp</dimen>
     <dimen name="player_icon_size">50dp</dimen>
-    <dimen name="status_bar_padding">32dp</dimen>
+    <dimen name="status_bar_padding">30dp</dimen>
 </resources>

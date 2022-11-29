@@ -1,6 +1,5 @@
-package com.atomykcoder.atomykplay.classes;
+package com.atomykcoder.atomykplay.helperFunctions;
 
-import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.DiffUtil.Callback;
 
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
@@ -9,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class MusicDiffCallback extends Callback {
+
     private final ArrayList<MusicDataCapsule> oldMusicList;
     private final ArrayList<MusicDataCapsule> newMusicList;
 
@@ -36,12 +36,7 @@ public class MusicDiffCallback extends Callback {
     public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
         MusicDataCapsule oldMusic = oldMusicList.get(oldItemPosition);
         MusicDataCapsule newMusic = newMusicList.get(newItemPosition);
-        return oldMusic.getsName().equals(newMusic.getsName()) &&  oldMusic.getsLength().equals(newMusic.getsLength());
+        return oldMusic.getsName().equals(newMusic.getsName()) && oldMusic.getsLength().equals(newMusic.getsLength()) && oldMusic.getsArtist().equals(newMusic.getsArtist());
     }
 
-    @Nullable
-    @Override
-    public Object getChangePayload(int oldItemPosition, int newItemPosition) {
-        return super.getChangePayload(oldItemPosition, newItemPosition);
-    }
 }

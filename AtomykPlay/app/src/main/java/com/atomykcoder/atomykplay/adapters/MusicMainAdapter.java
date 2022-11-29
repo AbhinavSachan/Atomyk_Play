@@ -23,7 +23,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.classes.GlideBuilt;
-import com.atomykcoder.atomykplay.classes.MusicDiffCallback;
+import com.atomykcoder.atomykplay.helperFunctions.MusicDiffCallback;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import com.turingtechnologies.materialscrollbar.INameableAdapter;
@@ -203,7 +203,7 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
             super(itemView);
 
             imageView = itemView.findViewById(R.id.song_album_cover);
-            imageButton = itemView.findViewById(R.id.more_option_i_btn);
+            imageButton = itemView.findViewById(R.id.playlist_option);
             cardView = itemView.findViewById(R.id.cv_song_play);
             nameText = itemView.findViewById(R.id.song_name);
             artistText = itemView.findViewById(R.id.song_artist_name);

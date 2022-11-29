@@ -5,6 +5,7 @@
     android:layout_height="match_parent"
     android:background="@color/secondary_bg"
     android:clickable="true"
+    android:paddingTop="@dimen/status_bar_padding"
     android:focusable="true">
 
     <ScrollView

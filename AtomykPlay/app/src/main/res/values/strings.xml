@@ -8,7 +8,7 @@
     <string name="search_here">Search here</string>
     <string name="song_dur_e">Duration</string>
     <string name="extension">EXT</string>
-    <string name="bitrate">FREQ</string>
+    <string name="bitrate">BITRATE</string>
     <string name="big_dot">•</string>
     <string name="your_lyrics">Paste Here Your Lyrics …</string>
     <string name="imageView">"Music cover image"</string>

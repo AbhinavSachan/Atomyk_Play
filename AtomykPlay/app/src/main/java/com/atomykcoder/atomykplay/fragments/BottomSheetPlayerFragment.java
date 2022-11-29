@@ -39,6 +39,7 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.transition.TransitionInflater;
 
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.activities.MainActivity;
@@ -323,12 +324,10 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
             }
         if (activeMusic != null) {
             songName = activeMusic.getsName();
+            bitrate = activeMusic.getsBitrate();
             artistName = activeMusic.getsArtist();
             mimeType = getMime(activeMusic.getsMimeType()).toUpperCase();
-            duration = convertDuration(activeMusic.getsLength());
-            String rawBitrate = activeMusic.getsBitrate();
-            int bitrateInNum = Integer.parseInt(rawBitrate) / 1000;
-            bitrate = bitrateInNum + " KBPS";
+            duration = activeMusic.getsLength();
             albumUri = activeMusic.getsAlbumUri();
         }
         if (activeMusic != null) {
@@ -354,12 +353,14 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
                     playerArtistNameTv.setText(artistName);
                     artistQueueItem.setText(artistName);
                     mimeTv.setText(mimeType);
-                    durationTv.setText(duration);
+                    durationTv.setText(convertDuration(duration));
                     mini_name_text.setText(songName);
                     mini_artist_text.setText(artistName);
                     seekBarMain.setMax(Integer.parseInt(duration));
                     mini_progress.setMax(Integer.parseInt(duration));
-                    bitrateTv.setText(bitrate);
+                    int bitrateInNum = Integer.parseInt(bitrate) / 1000;
+                    String finalBitrate = bitrateInNum + " KBPS";
+                    bitrateTv.setText(finalBitrate);
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -539,6 +540,8 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
             fragmentManager.popBackStackImmediate();
         }
         AddLyricsFragment addLyricsFragment = new AddLyricsFragment();
+        addLyricsFragment.setEnterTransition(TransitionInflater.from(requireContext()).inflateTransition(android.R.transition.slide_top));
+
         mainActivity.mainPlayerSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.replace(R.id.sec_container, addLyricsFragment, "AddLyricsFragment");
@@ -579,12 +582,13 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
      * Setting adapter in queue list
      */
     private void setQueueAdapter() {
-        queueAdapter = new MusicQueueAdapter(getActivity(), dataList, this);
-        queueRecyclerView.setAdapter(queueAdapter);
-
-        ItemTouchHelper.Callback callback = new SimpleTouchCallback(queueAdapter);
-        itemTouchHelper = new ItemTouchHelper(callback);
-        itemTouchHelper.attachToRecyclerView(queueRecyclerView);
+        if (dataList != null) {
+            queueAdapter = new MusicQueueAdapter(getActivity(), dataList, this);
+            queueRecyclerView.setAdapter(queueAdapter);
+            ItemTouchHelper.Callback callback = new SimpleTouchCallback(queueAdapter);
+            itemTouchHelper = new ItemTouchHelper(callback);
+            itemTouchHelper.attachToRecyclerView(queueRecyclerView);
+        }
     }
 
     /**
@@ -593,9 +597,18 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     public void updateQueueAdapter(ArrayList<MusicDataCapsule> _dataList) {
         if (dataList != null) {
             dataList.clear();
+            dataList.addAll(_dataList);
+            queueAdapter.updateView();
+        } else {
+            dataList = new ArrayList<>();
+            dataList.addAll(_dataList);
+
+            queueAdapter = new MusicQueueAdapter(getActivity(), dataList, this);
+            queueRecyclerView.setAdapter(queueAdapter);
+            ItemTouchHelper.Callback callback = new SimpleTouchCallback(queueAdapter);
+            itemTouchHelper = new ItemTouchHelper(callback);
+            itemTouchHelper.attachToRecyclerView(queueRecyclerView);
         }
-        dataList = new ArrayList<>(_dataList);
-        queueAdapter.updateView();
     }
 
     /**
@@ -1043,7 +1056,9 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
     @Override
     public void onDragStart(RecyclerView.ViewHolder viewHolder) {
-        itemTouchHelper.startDrag(viewHolder);
+        if (dataList!= null) {
+            itemTouchHelper.startDrag(viewHolder);
+        }
     }
 
 }
