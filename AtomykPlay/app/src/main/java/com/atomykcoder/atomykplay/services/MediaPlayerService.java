@@ -238,7 +238,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 } else {
                     resumeMedia();
                     if (service_bound) {
-                        LRCMap lrcMap = storage.loadLyrics(activeMusic.getsName());
+                        LRCMap lrcMap = storage.loadLyrics(activeMusic.getsId());
                         if (lrcMap != null) {
                             EventBus.getDefault().post(new PrepareRunnableEvent());
                         }

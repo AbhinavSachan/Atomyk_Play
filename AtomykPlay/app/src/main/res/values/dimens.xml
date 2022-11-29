@@ -15,4 +15,6 @@
     <dimen name="most_top_padding">90dp</dimen>
     <dimen name="player_icon_size">50dp</dimen>
     <dimen name="status_bar_padding">30dp</dimen>
+    <dimen name="d_17sp">17sp</dimen>
+    <dimen name="dialog_btn_ver_pad">12dp</dimen>
 </resources>

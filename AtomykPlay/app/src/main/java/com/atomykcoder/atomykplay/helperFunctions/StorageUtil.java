@@ -211,28 +211,28 @@ public class StorageUtil {
         editor.apply();
     }
 
-    public void saveLyrics(String songName, LRCMap _lrcMap) {
+    public void saveLyrics(String musicId, LRCMap _lrcMap) {
         sharedPreferences = context.getSharedPreferences(LYRICS_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         Gson gson = new Gson();
         String json = gson.toJson(_lrcMap);
-        editor.putString(songName, json);
+        editor.putString(musicId, json);
         editor.apply();
     }
 
-    public LRCMap loadLyrics(String songName) {
+    public LRCMap loadLyrics(String musicId) {
         sharedPreferences = context.getSharedPreferences(LYRICS_STORAGE, Context.MODE_PRIVATE);
         Gson gson = new Gson();
-        String json = sharedPreferences.getString(songName, null);
+        String json = sharedPreferences.getString(musicId, null);
         Type type = new TypeToken<LRCMap>() {
         }.getType();
         return gson.fromJson(json, type);
     }
 
-    public void removeLyrics(String songName) {
+    public void removeLyrics(String musicId) {
         sharedPreferences = context.getSharedPreferences(LYRICS_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.remove(songName);
+        editor.remove(musicId);
         editor.apply();
     }
 

@@ -155,7 +155,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         //StorageUtil initialization
         storageUtil = new StorageUtil(requireContext());
         if (getMusic() != null) {
-            lrcMap = storageUtil.loadLyrics(getMusic().getsName());
+            lrcMap = storageUtil.loadLyrics(getMusic().getsId());
         }
         settingsStorage = new StorageUtil.SettingsStorage(requireContext());
         mainActivity = (MainActivity) requireContext();
@@ -228,7 +228,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         lyricsImg.setOnClickListener(v -> openLyricsPanel());
         queueItem.setOnClickListener(v -> scrollToCurSong());
         lyricsImg.setOnLongClickListener(view1 -> {
-            setLyricsLayout();
+            setLyricsLayout(getMusic());
             return false;
         });
 //        top right option button
@@ -244,7 +244,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         lyricsRecyclerView = view.findViewById(R.id.lyrics_recycler_view);
         noLyricsLayout = view.findViewById(R.id.no_lyrics_layout);
         lyricsRecyclerView.addOnScrollListener(onScrollListener);
-        button.setOnClickListener(v -> setLyricsLayout());
+        button.setOnClickListener(v -> setLyricsLayout(getMusic()));
 
         seekBarMain.setOnSeekBarChangeListener(this);
 
@@ -412,7 +412,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
             }
 
         if (activeMusic != null) {
-            lrcMap = storageUtil.loadLyrics(activeMusic.getsName());
+            lrcMap = storageUtil.loadLyrics(activeMusic.getsId());
             if (lrcMap != null) {
                 noLyricsLayout.setVisibility(View.GONE);
                 lyricsRecyclerView.setVisibility(View.VISIBLE);
@@ -533,13 +533,16 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         super.onStop();
     }
 
-    public void setLyricsLayout() {
+    public void setLyricsLayout(MusicDataCapsule selectedMusic) {
         FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
         Fragment fragment = fragmentManager.findFragmentByTag("AddLyricsFragment");
         if (fragment != null) {
             fragmentManager.popBackStackImmediate();
         }
+        Bundle music = new Bundle();
+        music.putSerializable("selectedMusic",selectedMusic);
         AddLyricsFragment addLyricsFragment = new AddLyricsFragment();
+        addLyricsFragment.setArguments(music);
         addLyricsFragment.setEnterTransition(TransitionInflater.from(requireContext()).inflateTransition(android.R.transition.slide_top));
 
         mainActivity.mainPlayerSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);

@@ -42,7 +42,7 @@ public class AddLyricsFragment extends Fragment {
     private StorageUtil storageUtil;
     private Button btnFind;
     private Dialog dialog;
-    private String name, artist;
+    private String name, artist,musicId;
     private View view;
 
     @Override
@@ -58,14 +58,18 @@ public class AddLyricsFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_add_lyrics, container, false);
+
+        MusicDataCapsule selectedMusic = (MusicDataCapsule) (getArguments() != null ? getArguments().getSerializable("selectedMusic") : null);
+
         editTextLyrics = view.findViewById(R.id.edit_lyrics);
         Button saveBtn = view.findViewById(R.id.btn_save);
         btnFind = view.findViewById(R.id.btn_find);
         progressBar = view.findViewById(R.id.progress_lyrics);
         storageUtil = new StorageUtil(getContext());
 
-        name = getMusic().getsName() != null ? getMusic().getsName() : "";
-        artist = getMusic().getsArtist() != null ? getMusic().getsArtist() : "";
+        name = selectedMusic != null ? selectedMusic.getsName() : "";
+        artist = selectedMusic != null ? selectedMusic.getsArtist() : "";
+        musicId = selectedMusic != null ? selectedMusic.getsId() : "";
 
         TextView nameText = view.findViewById(R.id.song_name_tv);
         nameText.setText(name);
@@ -98,11 +102,11 @@ public class AddLyricsFragment extends Fragment {
 
 
     private void saveLyrics() {
-        if (storageUtil.loadLyrics(name) == null)
-            storageUtil.saveLyrics(name, lrcMap);
+        if (storageUtil.loadLyrics(musicId) == null)
+            storageUtil.saveLyrics(musicId, lrcMap);
         else {
-            storageUtil.removeLyrics(name);
-            storageUtil.saveLyrics(name, lrcMap);
+            storageUtil.removeLyrics(musicId);
+            storageUtil.saveLyrics(musicId, lrcMap);
         }
         showToast("Saved");
         EventBus.getDefault().post(new RunnableSyncLyricsEvent());
@@ -223,24 +227,4 @@ public class AddLyricsFragment extends Fragment {
         }
     }
 
-
-    /**
-     * retrieve current music loaded into player fragment
-     *
-     * @return active music
-     */
-    private MusicDataCapsule getMusic() {
-        ArrayList<MusicDataCapsule> musicList = storageUtil.loadMusicList();
-        MusicDataCapsule activeMusic = null;
-        int musicIndex;
-        musicIndex = storageUtil.loadMusicIndex();
-
-        if (musicList != null)
-            if (musicIndex != -1 && musicIndex < musicList.size()) {
-                activeMusic = musicList.get(musicIndex);
-            } else {
-                activeMusic = musicList.get(0);
-            }
-        return activeMusic;
-    }
 }

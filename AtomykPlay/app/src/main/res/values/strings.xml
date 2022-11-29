@@ -79,4 +79,9 @@
     <string name="shuffle_play">Shuffle</string>
     <string name="last_added">Last added</string>
     <string name="add_playlist">Add to playlist</string>
+    <string name="cnp">Create new playlist</string>
+    <string name="add_fav">Favorites</string>
+    <string name="choose_pl">Choose a playlist</string>
+    <string name="create_pl">Create playlist</string>
+    <string name="pl_name">Playlist name</string>
 </resources>

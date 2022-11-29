@@ -24,6 +24,7 @@ public class PlaylistsFragment extends Fragment {
     private RecyclerView recyclerView;
     private ArrayList<Playlist> playlistList;
     private PlaylistAdapter playlistAdapter;
+    public View noPlLayout;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -32,17 +33,22 @@ public class PlaylistsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_playlists, container, false);
 
         recyclerView = view.findViewById(R.id.playlist_recycler_view);
+        noPlLayout = view.findViewById(R.id.no_pl_layout);
 
         recyclerView.setHasFixedSize(true);
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getContext(), 2);
+
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.addItemDecoration(new GridSpacing(2, 8, true));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         playlistList = new StorageUtil(requireContext()).getAllPlaylist();
 
-        if (playlistList != null) {
+        if (playlistList != null&&!playlistList.isEmpty()) {
+            noPlLayout.setVisibility(View.GONE);
             playlistAdapter = new PlaylistAdapter(requireContext(), playlistList);
             recyclerView.setAdapter(playlistAdapter);
+        }else {
+            noPlLayout.setVisibility(View.VISIBLE);
         }
 
         return view;

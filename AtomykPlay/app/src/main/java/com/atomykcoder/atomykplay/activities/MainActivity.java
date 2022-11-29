@@ -4,6 +4,7 @@ import static com.atomykcoder.atomykplay.services.MediaPlayerService.is_playing;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.app.PendingIntent;
 import android.app.RecoverableSecurityException;
 import android.content.ComponentName;
@@ -32,6 +33,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -54,6 +57,7 @@ import androidx.transition.TransitionInflater;
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.adapters.FoundLyricsAdapter;
 import com.atomykcoder.atomykplay.adapters.MusicMainAdapter;
+import com.atomykcoder.atomykplay.adapters.PlaylistDialogAdapter;
 import com.atomykcoder.atomykplay.classes.GlideBuilt;
 import com.atomykcoder.atomykplay.customScripts.CustomBottomSheet;
 import com.atomykcoder.atomykplay.events.PrepareRunnableEvent;
@@ -69,6 +73,7 @@ import com.atomykcoder.atomykplay.helperFunctions.FetchMusic;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.services.MediaPlayerService;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
+import com.atomykcoder.atomykplay.viewModals.Playlist;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.navigation.NavigationView;
@@ -120,6 +125,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public BottomSheetBehavior<View> lyricsListBehavior;
     public CustomBottomSheet<View> optionSheetBehavior;
     public BottomSheetBehavior<View> donationSheetBehavior;
+    public MusicDataCapsule optionItemSelected;
     FragmentManager searchFragmentManager;
     private View shadowMain;
     private View shadowLyrFound, shadowOuterSheet;
@@ -246,14 +252,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             anchoredShadow.setAlpha(0 + slideOffset);
         }
     };
-    private MusicDataCapsule optionItemSelected;
     //option menu buttons
-    private View addPlayNextBtn, addToQueueBtn,addToPlaylist, setAsRingBtn, tagEditorBtn, addLyricsBtn, detailsBtn, shareBtn, deleteBtn;
+    private View addPlayNextBtn, addToQueueBtn, addToPlaylist, setAsRingBtn, tagEditorBtn, addLyricsBtn, detailsBtn, shareBtn, deleteBtn;
     private ImageView optionCover, addToFav;
     private TextView optionName, optionArtist;
     private View optionSheet;
     private View donationSheet;
     private Runnable runnable;
+    private View createPlaylistBtnDialog, addFavBtnDialog;
+    public Dialog addToPlDialog;
+    private PlaylistDialogAdapter playlistDialogAdapter;
+    private ArrayList<Playlist> playlistArrayList;
+    private RecyclerView plDialogRecyclerView;
 
     public void clearStorage() {
         storageUtil.clearMusicLastPos();
@@ -312,8 +322,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         ImageView openDrawer = findViewById(R.id.open_drawer_btn);
         MaterialCardView searchBar = findViewById(R.id.searchBar_card);
-//        setSupportActionBar(toolbar);
-//        toolbar.setTitle(R.string.search_here);
+        MaterialCardView plCard = findViewById(R.id.playlist_card_view_ma);
+        MaterialCardView lastAddCard = findViewById(R.id.last_added_card_view);
+        MaterialCardView shuffleCard = findViewById(R.id.shuffle_play_card_view);
 
         MediaPlayerService.ui_visible = true;
 
@@ -341,6 +352,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
         searchBar.setOnClickListener(v -> setSearchFragment());
+        plCard.setOnClickListener(v -> setPlaylistFragment());
+        lastAddCard.setOnClickListener(v -> setLastAddFragment());
+        shuffleCard.setOnClickListener(v -> playShuffleSong());
 
         musicRecyclerView.setHasFixedSize(true);
 
@@ -348,7 +362,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //        scrollBar.setRecyclerView(musicRecyclerView);
 //        scrollBar.setIndicator(new AlphabetIndicator(MainActivity.this), false);
 
-        //Checking permissions before activity creation (method somewhere down in the script)
+        //Checking storage & other permissions before activity creation (method somewhere down in the script)
         checkPermission();
         if (is_granted) {
             callStateListener();
@@ -378,6 +392,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (savedInstanceState == null) {
             navigationView.setCheckedItem(R.id.navigation_home);
         }
+    }
+
+    private void playShuffleSong() {
+
+    }
+
+    private void setLastAddFragment() {
+
+    }
+
+    private void setPlaylistFragment() {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        PlaylistsFragment fragment = new PlaylistsFragment();
+        fragment.setEnterTransition(TransitionInflater.from(this).inflateTransition(android.R.transition.slide_bottom));
+        transaction.replace(R.id.sec_container, fragment, "PlaylistsFragment").addToBackStack(null).commit();
     }
 
     private void checkForUpdateMusic() {
@@ -786,7 +816,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         GlideBuilt.glide(this, currentItem.getsAlbumUri(), R.drawable.ic_music, optionCover, 65);
     }
 
-
     /**
      * delete song permanently from device *USE WITH CAUTION*
      *
@@ -849,7 +878,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    private void addToNextPlay() {
+    private void addToNextPlay(MusicDataCapsule optionItemSelected) {
         showToast("Added to next");
 
     }
@@ -917,8 +946,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         ExecutorService service = Executors.newSingleThreadExecutor();
         Handler handler = new Handler(Looper.getMainLooper());
         progressBar.setVisibility(View.VISIBLE);
-        LinearLayoutManager manager = new LinearLayoutManager(MainActivity.this, LinearLayoutManager.VERTICAL, false);
-        manager.setSmoothScrollbarEnabled(true);
+        LinearLayoutManager manager = new LinearLayoutManager(MainActivity.this);
 
         if (dataList != null) {
             //Setting up adapter
@@ -959,8 +987,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onBackPressed() {
         FragmentManager fragmentManager = getSupportFragmentManager();
-        Fragment fragment1 = fragmentManager.findFragmentByTag("FavoritesFragment");
-        Fragment fragment2 = fragmentManager.findFragmentByTag("PlaylistsFragment");
         Fragment fragment3 = fragmentManager.findFragmentByTag("SettingsFragment");
         Fragment fragment4 = fragmentManager.findFragmentByTag("HelpFragment");
         Fragment fragment5 = fragmentManager.findFragmentByTag("AboutFragment");
@@ -975,7 +1001,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         lyricsListBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
                     lyricsListBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
                 } else {
-                    if (fragment1 != null || fragment2 != null || fragment3 != null || fragment4 != null || fragment5 != null) {
+                    if ( fragment3 != null || fragment4 != null || fragment5 != null) {
                         navigationView.setCheckedItem(R.id.navigation_home);
                     }
                     super.onBackPressed();
@@ -999,41 +1025,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         drawer.closeDrawer(GravityCompat.START);
         FragmentManager fragmentManager = getSupportFragmentManager();
         Fragment fragment3 = fragmentManager.findFragmentByTag("SettingsFragment");
-        Fragment fragment1 = fragmentManager.findFragmentByTag("FavoritesFragment");
-        Fragment fragment2 = fragmentManager.findFragmentByTag("PlaylistsFragment");
         Fragment fragment4 = fragmentManager.findFragmentByTag("HelpFragment");
         Fragment fragment5 = fragmentManager.findFragmentByTag("AboutFragment");
 
         FragmentTransaction transaction = fragmentManager.beginTransaction();
+
         switch (item.getItemId()) {
             case R.id.navigation_home: {
-                if (fragment1 != null || fragment2 != null || fragment3 != null || fragment4 != null || fragment5 != null) {
+                if ( fragment3 != null || fragment4 != null || fragment5 != null) {
                     fragmentManager.popBackStackImmediate();
                 }
-                break;
-            }
-            case R.id.navigation_favorite: {
-                if (fragment1 != null || fragment2 != null || fragment3 != null || fragment4 != null || fragment5 != null) {
-                    fragmentManager.popBackStackImmediate();
-                }
-                FavoritesFragment fragment = new FavoritesFragment();
-                fragment.setEnterTransition(TransitionInflater.from(this).inflateTransition(android.R.transition.slide_right));
-
-                transaction.replace(R.id.sec_container, fragment, "FavoritesFragment").addToBackStack(null).commit();
-                break;
-            }
-            case R.id.navigation_playlist: {
-                if (fragment1 != null || fragment2 != null || fragment3 != null || fragment4 != null || fragment5 != null) {
-                    fragmentManager.popBackStackImmediate();
-                }
-                PlaylistsFragment fragment = new PlaylistsFragment();
-                fragment.setEnterTransition(TransitionInflater.from(this).inflateTransition(android.R.transition.slide_right));
-
-                transaction.replace(R.id.sec_container, fragment, "PlaylistsFragment").addToBackStack(null).commit();
                 break;
             }
             case R.id.navigation_setting: {
-                if (fragment1 != null || fragment2 != null || fragment3 != null || fragment4 != null || fragment5 != null) {
+                if ( fragment3 != null || fragment4 != null || fragment5 != null) {
                     fragmentManager.popBackStackImmediate();
                 }
                 SettingsFragment fragment = new SettingsFragment();
@@ -1043,7 +1048,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             }
             case R.id.navigation_help: {
-                if (fragment1 != null || fragment2 != null || fragment3 != null || fragment4 != null || fragment5 != null) {
+                if ( fragment3 != null || fragment4 != null || fragment5 != null) {
                     fragmentManager.popBackStackImmediate();
                 }
                 HelpFragment fragment = new HelpFragment();
@@ -1053,7 +1058,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             }
             case R.id.navigation_about: {
-                if (fragment1 != null || fragment2 != null || fragment3 != null || fragment4 != null || fragment5 != null) {
+                if ( fragment3 != null || fragment4 != null || fragment5 != null) {
                     fragmentManager.popBackStackImmediate();
                 }
                 AboutFragment fragment = new AboutFragment();
@@ -1081,7 +1086,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.add_play_next_option: {
-                addToNextPlay();
+                addToNextPlay(optionItemSelected);
                 break;
             }
             case R.id.add_to_queue_option: {
@@ -1102,15 +1107,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
 
             case R.id.tagEditor_option: {
-                openTagEditor();
+                openTagEditor(optionItemSelected);
                 break;
             }
             case R.id.addLyrics_option: {
-                bottomSheetPlayerFragment.setLyricsLayout();
+                bottomSheetPlayerFragment.setLyricsLayout(optionItemSelected);
                 break;
             }
             case R.id.details_option: {
-                openDetailsBox();
+                openDetailsBox(optionItemSelected);
                 break;
             }
             case R.id.share_music_option: {
@@ -1118,7 +1123,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             }
             case R.id.add_to_favourites_option: {
-                showToast("fav");
+                addToFavorite(optionItemSelected);
                 break;
             }
         }
@@ -1126,7 +1131,73 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void addToPlaylist(MusicDataCapsule optionItemSelected) {
-        
+        openPlaylistDialog(optionItemSelected);
+    }
+
+    private void openPlaylistDialog(MusicDataCapsule optionItemSelected) {
+        addToPlDialog = new Dialog(MainActivity.this);
+
+        addToPlDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        addToPlDialog.setContentView(R.layout.playlist_dialog_layout);
+
+        //Initialize Dialogue Box UI Items
+        playlistArrayList = storageUtil.getAllPlaylist();
+        plDialogRecyclerView = addToPlDialog.findViewById(R.id.playlist_dialog_recycler);
+        createPlaylistBtnDialog = addToPlDialog.findViewById(R.id.create_playlist);
+        addFavBtnDialog = addToPlDialog.findViewById(R.id.add_to_fav_dialog_box);
+
+        createPlaylistBtnDialog.setOnClickListener(v -> {
+            openCreatePlaylistDialog(optionItemSelected);
+        });
+        addFavBtnDialog.setOnClickListener(v -> {
+            addToFavorite(optionItemSelected);
+        });
+
+        LinearLayoutManager manager = new LinearLayoutManager(MainActivity.this);
+        plDialogRecyclerView.setLayoutManager(manager);
+
+        if (playlistArrayList != null) {
+            playlistDialogAdapter = new PlaylistDialogAdapter(this, playlistArrayList,optionItemSelected);
+            plDialogRecyclerView.setAdapter(playlistDialogAdapter);
+        }
+        addToPlDialog.show();
+    }
+
+    private void addToFavorite(MusicDataCapsule optionItemSelected) {
+
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private void openCreatePlaylistDialog(MusicDataCapsule optionItemSelected) {
+        Dialog plDialog = new Dialog(MainActivity.this);
+        plDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        plDialog.setContentView(R.layout.create_playlist_layout);
+
+        EditText editText = plDialog.findViewById(R.id.edit_playlist_name);
+        Button btnOk = plDialog.findViewById(R.id.btn_ok_pl);
+        Button btnCancel = plDialog.findViewById(R.id.btn_cancel_pl);
+
+        btnOk.setOnClickListener(v -> {
+            String plKey = editText.getText().toString().trim();
+            if (!plKey.equals("")) {
+                storageUtil.createPlayList(plKey);
+                ArrayList<Playlist> allList = storageUtil.getAllPlaylist();
+                if (playlistArrayList != null) {
+                    playlistArrayList.clear();
+                    playlistArrayList.addAll(allList);
+                    playlistDialogAdapter.notifyDataSetChanged();
+                } else {
+                    playlistDialogAdapter = new PlaylistDialogAdapter(this, allList,optionItemSelected);
+                    plDialogRecyclerView.setAdapter(playlistDialogAdapter);
+                }
+                plDialog.cancel();
+            } else {
+                editText.setError("Empty");
+            }
+        });
+        btnCancel.setOnClickListener(v -> plDialog.cancel());
+
+        plDialog.show();
     }
 
 
@@ -1138,11 +1209,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         startActivity(Intent.createChooser(intent, "Share Via ..."));
     }
 
-    private void openDetailsBox() {
+    private void openDetailsBox(MusicDataCapsule optionItemSelected) {
 
     }
 
-    private void openTagEditor() {
+    private void openTagEditor(MusicDataCapsule optionItemSelected) {
 
     }
 

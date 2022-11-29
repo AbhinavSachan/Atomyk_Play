@@ -10,10 +10,12 @@
         <item
             android:id="@+id/navigation_favorite"
             android:icon="@drawable/ic_favorite"
+            android:enabled="false"
             android:title="@string/favorite" />
         <item
             android:id="@+id/navigation_playlist"
             android:icon="@drawable/ic_music_list"
+            android:enabled="false"
             android:title="@string/playList" />
         <item
             android:id="@+id/navigation_setting"
