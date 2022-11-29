@@ -1,6 +1,8 @@
 package com.atomykcoder.atomykplay.viewModals;
 
 import android.util.Log;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,8 +25,16 @@ public class Playlist {
         return name;
     }
 
-    public Map<String, MusicDataCapsule> getMusicList() {
+    public Map<String, MusicDataCapsule> getMusicMapList() {
         return musicMap;
+    }
+
+    public ArrayList<MusicDataCapsule> getMusicArrayList() {
+        ArrayList<MusicDataCapsule> playlistItems = new ArrayList<>();
+        for(Map.Entry<String, MusicDataCapsule> entry : musicMap.entrySet()) {
+            playlistItems.add(entry.getValue());
+        }
+        return playlistItems;
     }
 
     public void addMusic(MusicDataCapsule music) {

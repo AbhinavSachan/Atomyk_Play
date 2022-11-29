@@ -276,6 +276,11 @@ public class StorageUtil {
         return playlists;
     }
 
+    /**
+     * add Item in playlist
+     * @param music music to be added
+     * @param playlistName playlist in which, music is to be added
+     */
     public void addItemInPlayList(MusicDataCapsule music, String playlistName) {
         //Shared Preferences Stuff
         sharedPreferences = context.getSharedPreferences(PLAYLIST_STORAGE, Context.MODE_PRIVATE);
