@@ -66,6 +66,7 @@ import com.atomykcoder.atomykplay.fragments.PlaylistsFragment;
 import com.atomykcoder.atomykplay.fragments.SearchFragment;
 import com.atomykcoder.atomykplay.fragments.SettingsFragment;
 import com.atomykcoder.atomykplay.helperFunctions.FetchMusic;
+import com.atomykcoder.atomykplay.helperFunctions.PlaylistHelper;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.services.MediaPlayerService;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
@@ -83,6 +84,7 @@ import org.greenrobot.eventbus.EventBus;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -854,7 +856,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    private void addToQueue(MusicDataCapsule optionItemSelected) {
+    private void addToQueue(MusicDataCapsule music) {
+        showToast("Added to queue");
     }
 
     private void closeOptionSheet() {
