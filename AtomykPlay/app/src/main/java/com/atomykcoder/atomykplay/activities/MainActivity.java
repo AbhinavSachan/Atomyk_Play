@@ -6,7 +6,6 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.app.RecoverableSecurityException;
-import android.app.SharedElementCallback;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -31,10 +30,8 @@ import android.util.DisplayMetrics;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -43,10 +40,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
@@ -54,13 +49,11 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.transition.Transition;
 import androidx.transition.TransitionInflater;
 
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.adapters.FoundLyricsAdapter;
 import com.atomykcoder.atomykplay.adapters.MusicMainAdapter;
-import com.atomykcoder.atomykplay.adapters.PlaylistAdapter;
 import com.atomykcoder.atomykplay.classes.GlideBuilt;
 import com.atomykcoder.atomykplay.customScripts.CustomBottomSheet;
 import com.atomykcoder.atomykplay.events.PrepareRunnableEvent;
@@ -250,7 +243,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             miniPlayer.setAlpha(1 - slideOffset * 35);
             mainPlayer.setAlpha(0 + slideOffset);
             shadowMain.setAlpha(0 + slideOffset);
-            anchoredShadow.setAlpha(0+slideOffset);
+            anchoredShadow.setAlpha(0 + slideOffset);
         }
     };
     private MusicDataCapsule optionItemSelected;
@@ -860,8 +853,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void addToQueue(MusicDataCapsule optionItemSelected) {
-        showToast("Added to queue");
-
     }
 
     private void closeOptionSheet() {
@@ -1121,7 +1112,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             }
             case R.id.add_to_favourites_option: {
-                showToast("Nope");
+                showToast("fav");
                 break;
             }
         }
@@ -1152,7 +1143,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * @return returns content uri of given music
      */
     private Uri getContentUri(MusicDataCapsule music) {
-
         int id = Integer.parseInt(music.getsId());
         Uri baseUri = Uri.parse("content://media/external/audio/media");
         return Uri.withAppendedPath(baseUri, "" + id);

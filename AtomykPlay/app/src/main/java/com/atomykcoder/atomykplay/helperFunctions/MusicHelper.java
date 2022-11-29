@@ -2,6 +2,8 @@ package com.atomykcoder.atomykplay.helperFunctions;
 
 import android.annotation.SuppressLint;
 
+import com.atomykcoder.atomykplay.viewModals.LRCMap;
+
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
