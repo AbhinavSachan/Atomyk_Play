@@ -133,7 +133,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public MusicDataCapsule optionItemSelected;
     FragmentManager searchFragmentManager;
     private View shadowMain;
-    private View shadowLyrFound, shadowOuterSheet;
+    private View shadowLyrFound, shadowOuterSheet,playerPickCover_l;
     private ImageView playlist_image_View;
     private Uri playListImageUri;
     private final BottomSheetBehavior.BottomSheetCallback lrcFoundCallback = new BottomSheetBehavior.BottomSheetCallback() {
@@ -1190,8 +1190,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Button btnOk = plDialog.findViewById(R.id.btn_ok_pl);
         Button btnCancel = plDialog.findViewById(R.id.btn_cancel_pl);
         playlist_image_View = plDialog.findViewById(R.id.playlist_image_view);
+        playerPickCover_l = plDialog.findViewById(R.id.playlist_cover_pick);
 
-        playlist_image_View.setOnClickListener(v -> {
+        playerPickCover_l.setOnClickListener(v -> {
             Intent gallery = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI);
             startActivityForResult(gallery, PICK_IMAGE);
         });

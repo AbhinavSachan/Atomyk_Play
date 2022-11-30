@@ -565,7 +565,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
      * Setting adapter in queue list
      */
     private void setQueueAdapter() {
-        if (dataList != null && !dataList.isEmpty()) {
+        if (dataList != null) {
             queueAdapter = new MusicQueueAdapter(getActivity(), dataList, this);
             queueRecyclerView.setAdapter(queueAdapter);
             ItemTouchHelper.Callback callback = new SimpleTouchCallback(queueAdapter);

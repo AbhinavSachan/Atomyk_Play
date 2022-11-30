@@ -9,24 +9,24 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.DiffUtil;
+import androidx.core.view.MotionEventCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.classes.GlideBuilt;
-import com.atomykcoder.atomykplay.helperFunctions.MusicDiffCallback;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
+import com.atomykcoder.atomykplay.interfaces.ItemTouchHelperAdapter;
+import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
-import com.turingtechnologies.materialscrollbar.INameableAdapter;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -34,41 +34,68 @@ import java.util.Collections;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.MusicViewAdapter> implements INameableAdapter {
-    Context context;
+public class OpenPlayListAdapter extends RecyclerView.Adapter<OpenPlayListAdapter.OpenItemViewHolder> implements ItemTouchHelperAdapter {
+    private final Context context;
+    private final MainActivity mainActivity;
+    String playlistName;
     ArrayList<MusicDataCapsule> musicArrayList;
-    MainActivity mainActivity;
+    OnDragStartListener onDragStartListener;
 
-    public MusicMainAdapter(Context context, ArrayList<MusicDataCapsule> musicArrayList) {
+    public OpenPlayListAdapter(Context context, String playlistName, ArrayList<MusicDataCapsule> musicArrayList, OnDragStartListener onDragStartListener) {
         this.context = context;
+        this.playlistName = playlistName;
         this.musicArrayList = musicArrayList;
+        this.onDragStartListener = onDragStartListener;
         mainActivity = (MainActivity) context;
     }
 
-    public void updateMusicListItems(ArrayList<MusicDataCapsule> musicArrayList) {
-        final MusicDiffCallback diffCallback = new MusicDiffCallback(this.musicArrayList, musicArrayList);
-        final DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
+    //when item starts to move it will change positions of every item in real time
+    @Override
+    public void onItemMove(int fromPos, int toPos) {
+        StorageUtil storageUtil = new StorageUtil(context);
 
-        this.musicArrayList.clear();
-        this.musicArrayList.addAll(musicArrayList);
-        diffResult.dispatchUpdatesTo(this);
+        Collections.swap(musicArrayList, fromPos, toPos);
+        notifyItemMoved(fromPos, toPos);
+
+        notifyItemRangeChanged(fromPos, 1, null);
+        notifyItemChanged(toPos, null);
+
+//        storageUtil.saveMusicList(musicArrayList);
+
+    }
+
+    //removing item on swipe
+    @Override
+    public void onItemDismiss(int position) {
+        StorageUtil storageUtil = new StorageUtil(context);
+        //if any item has been removed this will save new list on temp list
+        if (musicArrayList != null) {
+            if (position != -1 && position < musicArrayList.size()) {
+                MusicDataCapsule currentItem = musicArrayList.get(position);
+                removeItem(currentItem);
+            }
+        }
+
     }
 
     @NonNull
     @Override
-    public MusicViewAdapter onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.music_item_layout, parent, false);
-        return new MusicViewAdapter(view);
+    public OpenPlayListAdapter.OpenItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(context).inflate(R.layout.open_playlist_music_item, parent, false);
+        return new OpenItemViewHolder(view);
     }
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
-    public void onBindViewHolder(@NonNull MusicViewAdapter holder, @SuppressLint("RecyclerView") int pos) {
-        MusicDataCapsule currentItem = musicArrayList.get(pos);
+    public void onBindViewHolder(@NonNull OpenPlayListAdapter.OpenItemViewHolder holder, int position) {
+        MusicDataCapsule currentItem = musicArrayList.get(position);
+
+        holder.nameText.setText(currentItem.getsName());
+        holder.artistText.setText(currentItem.getsArtist());
+        holder.durationText.setText(convertDuration(currentItem.getsLength()));
 
         GlideBuilt.glide(context, currentItem.getsAlbumUri(), R.drawable.ic_music, holder.imageView, 128);
-        //playing song
-        int position = holder.getAbsoluteAdapterPosition();
+
         holder.cardView.setOnClickListener(v -> {
             File file = new File(currentItem.getsPath());
             if (file.exists()) {
@@ -76,6 +103,7 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
 
                 StorageUtil storage = new StorageUtil(context);
                 StorageUtil.SettingsStorage settingsStorage = new StorageUtil.SettingsStorage(context);
+
                 //if shuffle button is already on it will shuffle it from start
                 if (settingsStorage.loadKeepShuffle()) {
                     ArrayList<MusicDataCapsule> shuffleList = new ArrayList<>(musicArrayList);
@@ -103,6 +131,7 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
                         });
                     });
                     service.shutdown();
+
                 } else if (!settingsStorage.loadKeepShuffle()) {
                     //Store serializable music list to sharedPreference
                     ExecutorService service = Executors.newSingleThreadExecutor();
@@ -124,42 +153,23 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
                 Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show();
                 removeItem(currentItem);
             }
-
         });
-
-
         //add bottom sheet functions in three dot click
-        holder.imageButton.setOnClickListener(view -> {
+        holder.imageButton.setOnTouchListener((v, event) -> {
             File file = new File(currentItem.getsPath());
             if (file.exists()) {
-                mainActivity.openOptionMenu(currentItem);
+                //noinspection deprecation
+                if (MotionEventCompat.getActionMasked(event) == MotionEvent.ACTION_DOWN) {
+                    onDragStartListener.onDragStart(holder);
+                }
             } else {
                 Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show();
                 removeItem(currentItem);
             }
+            return false;
         });
-
-
-        holder.nameText.setText(currentItem.getsName());
-        holder.artistText.setText(currentItem.getsArtist());
-        holder.durationText.setText(convertDuration(currentItem.getsLength()));
     }
 
-    @Override
-    public int getItemCount() {
-        return musicArrayList.size();
-    }
-
-    @Override
-    public Character getCharacterForElement(int element) {
-        return musicArrayList.get(element).getsName().charAt(0);
-    }
-
-    /**
-     * remove item from list after deleting it from device
-     *
-     * @param item selected delete item
-     */
     public void removeItem(MusicDataCapsule item) {
         StorageUtil storageUtil = new StorageUtil(context);
         int position = musicArrayList.indexOf(item);
@@ -170,35 +180,33 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
         }
         if (position != -1) {
             musicArrayList.remove(position);
-            storageUtil.saveInitialList(musicArrayList);
+            storageUtil.deleteItemInPlaylist(item, playlistName);
         }
 
         notifyItemRangeChanged(position, musicArrayList.size() - (position + 1));
         notifyItemRemoved(position);
 
-        if (position == savedIndex) {
-            mainActivity.playAudio();
-        }
-        mainActivity.bottomSheetPlayerFragment.queueAdapter.removeItem(item);
-
     }
 
-    public static class MusicViewAdapter extends RecyclerView.ViewHolder {
+    @Override
+    public int getItemCount() {
+        return musicArrayList.size();
+    }
+
+    public static class OpenItemViewHolder extends RecyclerView.ViewHolder {
         private final ImageView imageView;
         private final ImageView imageButton;
-        private final RelativeLayout cardView;
+        private final View cardView;
         private final TextView nameText, artistText, durationText;
 
-        public MusicViewAdapter(@NonNull View itemView) {
+        public OpenItemViewHolder(@NonNull View itemView) {
             super(itemView);
-
-            imageView = itemView.findViewById(R.id.song_album_cover);
-            imageButton = itemView.findViewById(R.id.option);
-            cardView = itemView.findViewById(R.id.cv_song_play);
-            nameText = itemView.findViewById(R.id.song_name);
-            artistText = itemView.findViewById(R.id.song_artist_name);
-            durationText = itemView.findViewById(R.id.song_length);
-
+            imageView = itemView.findViewById(R.id.song_album_cover_opl);
+            imageButton = itemView.findViewById(R.id.drag_i_btn_playlist);
+            cardView = itemView.findViewById(R.id.cv_song_play_opl);
+            nameText = itemView.findViewById(R.id.song_name_opl);
+            artistText = itemView.findViewById(R.id.song_artist_name_opl);
+            durationText = itemView.findViewById(R.id.song_length_opl);
         }
     }
 }

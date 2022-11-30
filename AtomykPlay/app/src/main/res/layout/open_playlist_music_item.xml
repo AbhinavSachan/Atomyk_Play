@@ -43,7 +43,7 @@
                 app:cardElevation="4dp">
 
                 <ImageView
-                    android:id="@+id/song_album_cover_queue"
+                    android:id="@+id/song_album_cover_opl"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:contentDescription="@string/empty"

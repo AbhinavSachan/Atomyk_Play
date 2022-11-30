@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/primary_bg"
+    android:paddingTop="@dimen/status_bar_padding"
     tools:context=".fragments.OpenPlayListFragment">
 
     <androidx.recyclerview.widget.RecyclerView
@@ -12,5 +13,31 @@
         android:layout_height="wrap_content"
         android:clipToPadding="false"
         android:paddingBottom="@dimen/most_bottom_padding" />
+    <LinearLayout
+        android:id="@+id/song_not_found_layout_opl"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:orientation="vertical"
+        android:visibility="gone"
+        tools:ignore="UseCompoundDrawables">
+
+        <ImageView
+            android:layout_width="250dp"
+            android:layout_height="250dp"
+            android:contentDescription="@string/empty"
+            android:padding="2dp"
+            android:src="@drawable/no_song_image" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/nothing_to_show"
+            android:textColor="@color/text_color"
+            android:textSize="@dimen/d_28sp"
+            android:textStyle="bold" />
+
+    </LinearLayout>
 
 </RelativeLayout>

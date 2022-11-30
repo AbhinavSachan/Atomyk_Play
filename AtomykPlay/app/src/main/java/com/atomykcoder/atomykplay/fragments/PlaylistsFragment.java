@@ -14,17 +14,16 @@ import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.adapters.PlaylistAdapter;
 import com.atomykcoder.atomykplay.customScripts.GridSpacing;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
-import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import com.atomykcoder.atomykplay.viewModals.Playlist;
 
 import java.util.ArrayList;
 
 public class PlaylistsFragment extends Fragment {
 
+    public View noPlLayout;
     private RecyclerView recyclerView;
     private ArrayList<Playlist> playlistList;
     private PlaylistAdapter playlistAdapter;
-    public View noPlLayout;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -43,14 +42,13 @@ public class PlaylistsFragment extends Fragment {
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         playlistList = new StorageUtil(requireContext()).getAllPlaylist();
 
-        if (playlistList != null&&!playlistList.isEmpty()) {
+        if (playlistList != null && !playlistList.isEmpty()) {
             noPlLayout.setVisibility(View.GONE);
-            playlistAdapter = new PlaylistAdapter(requireContext(), playlistList);
+            if (playlistList.isEmpty()) {
+                noPlLayout.setVisibility(View.VISIBLE);
+            }            playlistAdapter = new PlaylistAdapter(getContext(), playlistList);
             recyclerView.setAdapter(playlistAdapter);
-        }else {
-            noPlLayout.setVisibility(View.VISIBLE);
         }
-
         return view;
     }
 }

@@ -45,7 +45,7 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
     //when item starts to move it will change positions of every item in real time
     @Override
     public void onItemMove(int fromPos, int toPos) {
-        StorageUtil storageUtil = new StorageUtil(context.getApplicationContext());
+        StorageUtil storageUtil = new StorageUtil(context);
         int savedIndex = storageUtil.loadMusicIndex();
 
         Collections.swap(musicArrayList, fromPos, toPos);
@@ -162,11 +162,7 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
 
     @Override
     public int getItemCount() {
-        if (musicArrayList != null) {
-            return musicArrayList.size();
-        } else {
-            return 0;
-        }
+        return musicArrayList.size();
     }
 
     @SuppressLint("NotifyDataSetChanged")

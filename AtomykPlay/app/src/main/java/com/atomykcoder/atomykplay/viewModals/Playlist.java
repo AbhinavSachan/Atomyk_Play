@@ -2,11 +2,12 @@ package com.atomykcoder.atomykplay.viewModals;
 
 import android.util.Log;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Playlist {
+public class Playlist implements Serializable {
     private final String name;
     private final String coverUri;
     private final Map<String, MusicDataCapsule> musicMap;

@@ -2,6 +2,7 @@ package com.atomykcoder.atomykplay.adapters;
 
 import android.content.Context;
 import android.net.Uri;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,10 +12,17 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.transition.TransitionInflater;
 
 import com.atomykcoder.atomykplay.R;
+import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.classes.GlideBuilt;
+import com.atomykcoder.atomykplay.fragments.OpenPlayListFragment;
+import com.atomykcoder.atomykplay.fragments.SettingsFragment;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import com.atomykcoder.atomykplay.viewModals.Playlist;
 import com.google.android.material.card.MaterialCardView;
@@ -44,12 +52,24 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
         Playlist capsule = arrayList.get(position);
         ArrayList<MusicDataCapsule> musicList = capsule.getMusicArrayList();
 
-        GlideBuilt.glide(context,capsule.getCoverUri(),R.drawable.ic_music,holder.imageView,300);
+        GlideBuilt.glide(context,capsule.getCoverUri(),R.drawable.ic_music_list,holder.imageView,300);
         String count = musicList.size() + " Songs";
         holder.playlistName.setText(capsule.getName());
         holder.songCount.setText(count);
 
         holder.cardView.setOnClickListener(v -> {
+            //opening fragment when clicked on playlist
+            FragmentManager fragmentManager = ((MainActivity)context).getSupportFragmentManager();
+            FragmentTransaction transaction = fragmentManager.beginTransaction();
+
+            Bundle bundle = new Bundle();
+            bundle.putSerializable("currentPlaylist",capsule);
+
+            OpenPlayListFragment fragment = new OpenPlayListFragment();
+            fragment.setArguments(bundle);
+            fragment.setEnterTransition(TransitionInflater.from(context).inflateTransition(android.R.transition.slide_bottom));
+
+            transaction.replace(R.id.sec_container, fragment, "OpenPlayListFragment").addToBackStack(null).commit();
 
         });
         holder.optImg.setOnClickListener(v->{

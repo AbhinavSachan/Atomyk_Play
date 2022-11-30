@@ -84,4 +84,5 @@
     <string name="choose_pl">Choose a playlist</string>
     <string name="create_pl">Create playlist</string>
     <string name="pl_name">Playlist name</string>
+    <string name="cci">Choose a cover image</string>
 </resources>
