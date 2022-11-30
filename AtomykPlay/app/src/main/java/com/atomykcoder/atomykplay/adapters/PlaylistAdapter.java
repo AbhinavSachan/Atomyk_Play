@@ -1,11 +1,13 @@
 package com.atomykcoder.atomykplay.adapters;
 
 import android.content.Context;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
@@ -38,14 +40,14 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
     @Override
     public void onBindViewHolder(@NonNull PlaylistAdapter.PlaylistViewHolder holder, int position) {
         Playlist capsule = arrayList.get(position);
-        GlideBuilt.glide(context,null,R.drawable.ic_music,holder.imageView,300);
+        GlideBuilt.glide(context,capsule.getCoverUri(),R.drawable.ic_music,holder.imageView,300);
         String count = arrayList.size() + " Songs";
         holder.playlistName.setText(capsule.getName());
         holder.songCount.setText(count);
         holder.cardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                Toast.makeText(context, "clicked", Toast.LENGTH_SHORT).show();
             }
         });
     }
