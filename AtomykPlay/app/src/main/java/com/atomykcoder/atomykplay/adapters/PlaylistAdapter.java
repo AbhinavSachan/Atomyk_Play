@@ -1,15 +1,13 @@
 package com.atomykcoder.atomykplay.adapters;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
@@ -45,9 +43,8 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
     public void onBindViewHolder(@NonNull PlaylistAdapter.PlaylistViewHolder holder, int position) {
         Playlist capsule = arrayList.get(position);
         ArrayList<MusicDataCapsule> musicList = capsule.getMusicArrayList();
-        String albumUri = "content://media/external/audio/albumart/3034807079553410561";
 
-        GlideBuilt.glide(context,albumUri,R.drawable.ic_music,holder.imageView,300);
+        GlideBuilt.glide(context,capsule.getCoverUri(),R.drawable.ic_music,holder.imageView,300);
         String count = musicList.size() + " Songs";
         holder.playlistName.setText(capsule.getName());
         holder.songCount.setText(count);
@@ -58,6 +55,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
         holder.optImg.setOnClickListener(v->{
 
         });
+
     }
 
     @Override

@@ -236,11 +236,11 @@ public class StorageUtil {
         editor.apply();
     }
 
-    public void createPlayList(String playlistName) {
+    public void createPlayList(String playlistName, String coverUri) {
         sharedPreferences = context.getSharedPreferences(PLAYLIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         Gson gson = new Gson();
-        String json = gson.toJson(new Playlist(playlistName));
+        String json = gson.toJson(new Playlist(playlistName, coverUri));
         editor.putString(playlistName, json);
         editor.apply();
     }

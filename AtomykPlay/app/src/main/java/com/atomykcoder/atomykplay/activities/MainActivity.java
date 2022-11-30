@@ -102,6 +102,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public static final String BROADCAST_PLAY_NEXT_MUSIC = "com.atomykcoder.atomykplay.PlayNextMusic";
     public static final String BROADCAST_PLAY_PREVIOUS_MUSIC = "com.atomykcoder.atomykplay.PlayPreviousMusic";
 
+    private final int DELETE_ITEM = 200;
+    private final int PICK_IMAGE = 100;
     public static boolean service_bound = false;
     public static boolean is_granted = false;
     public static boolean phone_ringing = false;
@@ -132,6 +134,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     FragmentManager searchFragmentManager;
     private View shadowMain;
     private View shadowLyrFound, shadowOuterSheet;
+    private ImageView playlist_image_View;
+    private Uri playListImageUri;
     private final BottomSheetBehavior.BottomSheetCallback lrcFoundCallback = new BottomSheetBehavior.BottomSheetCallback() {
         @Override
         public void onStateChanged(@NonNull View bottomSheet, int newState) {
@@ -837,7 +841,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 try {
                     //noinspection deprecation
                     startIntentSenderForResult(pendingIntent.getIntentSender(),
-                            4494, null, 0, 0,
+                            DELETE_ITEM, null, 0, 0,
                             0, null);
                 } catch (IntentSender.SendIntentException e) {
                     e.printStackTrace();
@@ -854,7 +858,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     final IntentSender intent = e.getUserAction().getActionIntent().getIntentSender();
                     try {
                         //noinspection deprecation
-                        startIntentSenderForResult(intent, 4494, null, 0,
+                        startIntentSenderForResult(intent, DELETE_ITEM, null, 0,
                                 0, 0, null);
                     } catch (IntentSender.SendIntentException ex) {
                         ex.printStackTrace();
@@ -875,8 +879,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         //yeah it has to be in reverse for some reason to work
-        if (resultCode == PackageManager.PERMISSION_DENIED) {
+        if (resultCode == RESULT_OK && requestCode == DELETE_ITEM) {
             musicMainAdapter.removeItem(optionItemSelected);
+        }
+        if (resultCode == RESULT_OK && requestCode == PICK_IMAGE) {
+            if (data != null) {
+                playListImageUri = data.getData();
+                playlist_image_View.setImageURI(playListImageUri);
+            }
         }
     }
 
@@ -1179,18 +1189,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         EditText editText = plDialog.findViewById(R.id.edit_playlist_name);
         Button btnOk = plDialog.findViewById(R.id.btn_ok_pl);
         Button btnCancel = plDialog.findViewById(R.id.btn_cancel_pl);
+        playlist_image_View = plDialog.findViewById(R.id.playlist_image_view);
+
+        playlist_image_View.setOnClickListener(v -> {
+            Intent gallery = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI);
+            startActivityForResult(gallery, PICK_IMAGE);
+        });
 
         btnOk.setOnClickListener(v -> {
             String plKey = editText.getText().toString().trim();
+            String plCoverUri = playListImageUri != null ? playListImageUri.toString() : "";
             if (!plKey.equals("")) {
-                storageUtil.createPlayList(plKey);
+                storageUtil.createPlayList(plKey, plCoverUri);
                 ArrayList<Playlist> allList = storageUtil.getAllPlaylist();
                 if (playlistArrayList != null) {
                     playlistArrayList.clear();
                     playlistArrayList.addAll(allList);
                     playlistDialogAdapter.notifyDataSetChanged();
+                    playListImageUri = null;
                 } else {
-                    playlistDialogAdapter = new PlaylistDialogAdapter(this, allList,optionItemSelected);
+                    playlistDialogAdapter = new PlaylistDialogAdapter(this, allList, optionItemSelected);
                     plDialogRecyclerView.setAdapter(playlistDialogAdapter);
                 }
                 plDialog.cancel();
