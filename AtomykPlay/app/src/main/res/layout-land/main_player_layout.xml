@@ -31,9 +31,9 @@
                 android:layout_height="310dp"
                 android:layout_centerInParent="true"
                 android:visibility="visible"
-                app:cardBackgroundColor="@color/cover_black"
-                app:cardCornerRadius="25dp"
-                app:cardElevation="8dp">
+                app:cardBackgroundColor="@color/cover_black_player"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="6dp">
 
                 <ImageView
                     android:id="@+id/player_cover_iv"
@@ -101,7 +101,7 @@
                         android:layout_marginHorizontal="16dp"
                         android:padding="10dp"
                         android:text="@string/add_lyrics"
-                        android:textColor="@color/tertiary_bg"
+                        android:textColor="@color/accent_color_bg"
                         android:textSize="@dimen/d_16sp"
                         android:textStyle="bold" />
 
@@ -225,9 +225,9 @@
                     android:clickable="true"
                     android:focusable="true"
                     android:foreground="@drawable/round_select_effect_for_play_btn"
-                    app:cardBackgroundColor="@color/tertiary_bg"
+                    app:cardBackgroundColor="@color/accent_color_bg"
                     app:cardCornerRadius="50dp"
-                    app:cardElevation="8dp">
+                    app:cardElevation="6dp">
 
                     <ImageView
                         android:id="@+id/player_play_iv"
@@ -286,7 +286,7 @@
                 android:padding="15dp"
                 android:progressDrawable="@drawable/seekbar_style"
                 android:splitTrack="false"
-                android:thumbTint="@color/tertiary_bg" />
+                android:thumbTint="@color/accent_color_bg" />
 
             <TextView
                 android:id="@+id/player_current_pos_tv"
@@ -357,11 +357,41 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/coverRelativeLayout">
 
+            <ImageView
+                android:id="@+id/player_lyrics_ll"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="8dp"
+                android:clickable="true"
+                android:contentDescription="@string/imageView"
+                android:elevation="10dp"
+                android:focusable="true"
+                android:foreground="@drawable/round_select_effect_small"
+                android:padding="12dp"
+                android:src="@drawable/ic_lyrics" />
+
+            <ImageView
+                android:id="@+id/player_favorite_iv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="8dp"
+                android:clickable="true"
+                android:contentDescription="@string/imageView"
+                android:cropToPadding="false"
+                android:elevation="10dp"
+                android:focusable="true"
+                android:foreground="@drawable/round_select_effect_small"
+                android:padding="12dp"
+                android:src="@drawable/ic_favorite_border"
+                android:theme="@android:style/ThemeOverlay.Material.Dark"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
 
             <RelativeLayout
                 android:layout_width="wrap_content"
-                android:layout_marginHorizontal="8dp"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="8dp">
 
                 <TextView
                     android:id="@+id/countdown_tv"
@@ -393,49 +423,17 @@
             </RelativeLayout>
 
             <ImageView
-                android:id="@+id/player_favorite_iv"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:clickable="true"
-                android:contentDescription="@string/imageView"
-                android:cropToPadding="false"
-                android:padding="12dp"
-                android:layout_marginHorizontal="8dp"
-                android:elevation="10dp"
-                android:focusable="true"
-                android:foreground="@drawable/round_select_effect_small"
-                android:src="@drawable/ic_favorite_border"
-                android:theme="@android:style/ThemeOverlay.Material.Dark"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
-
-            <ImageView
-                android:id="@+id/player_lyrics_ll"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:clickable="true"
-                android:contentDescription="@string/imageView"
-                android:elevation="10dp"
-                android:focusable="true"
-                android:layout_marginHorizontal="8dp"
-                android:padding="12dp"
-                android:foreground="@drawable/round_select_effect_small"
-                android:src="@drawable/ic_lyrics" />
-
-
-            <ImageView
                 android:id="@+id/player_option_iv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginHorizontal="8dp"
                 android:clickable="true"
                 android:contentDescription="@string/imageView"
                 android:elevation="10dp"
                 android:focusable="true"
-                android:layout_marginHorizontal="8dp"
-                android:padding="12dp"
                 android:foreground="@drawable/round_select_effect_small"
+                android:padding="12dp"
                 android:src="@drawable/ic_more_horizontal" />
-
 
         </LinearLayout>
 

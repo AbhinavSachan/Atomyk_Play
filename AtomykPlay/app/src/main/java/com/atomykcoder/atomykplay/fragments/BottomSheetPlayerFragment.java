@@ -310,18 +310,8 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     // Don't Remove This Event Bus is using this method (It might look unused still DON'T REMOVE
     @Subscribe
     public void setMainPlayerLayout(SetMainLayoutEvent event) {
-        ArrayList<MusicDataCapsule> musicList = storageUtil.loadMusicList();
-        MusicDataCapsule activeMusic = null;
-        int musicIndex;
-        musicIndex = storageUtil.loadMusicIndex();
+        MusicDataCapsule activeMusic = event.activeMusic;
 
-
-        if (musicList != null)
-            if (musicIndex != -1 && musicIndex < musicList.size()) {
-                activeMusic = musicList.get(musicIndex);
-            } else {
-                activeMusic = musicList.get(0);
-            }
         if (activeMusic != null) {
             songName = activeMusic.getsName();
             bitrate = activeMusic.getsBitrate();
@@ -329,8 +319,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
             mimeType = getMime(activeMusic.getsMimeType()).toUpperCase();
             duration = activeMusic.getsLength();
             albumUri = activeMusic.getsAlbumUri();
-        }
-        if (activeMusic != null) {
+
             if (storageUtil.loadFavorite(songName).equals("no_favorite")) {
                 favoriteImg.setImageResource(R.drawable.ic_favorite_border);
             } else if (storageUtil.loadFavorite(songName).equals("favorite")) {
@@ -341,39 +330,30 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
             } else if (storageUtil.loadShuffle().equals(shuffle)) {
                 shuffleImg.setImageResource(R.drawable.ic_shuffle);
             }
-        }
 
-        //main layout setup
-        try {
-            if (activeMusic != null) {
-
-                try {
-                    playerSongNameTv.setText(songName);
-                    songNameQueueItem.setText(songName);
-                    playerArtistNameTv.setText(artistName);
-                    artistQueueItem.setText(artistName);
-                    mimeTv.setText(mimeType);
-                    durationTv.setText(convertDuration(duration));
-                    mini_name_text.setText(songName);
-                    mini_artist_text.setText(artistName);
-                    seekBarMain.setMax(Integer.parseInt(duration));
-                    mini_progress.setMax(Integer.parseInt(duration));
-                    int bitrateInNum = Integer.parseInt(bitrate) / 1000;
-                    String finalBitrate = bitrateInNum + " KBPS";
-                    bitrateTv.setText(finalBitrate);
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
+            try {
+                playerSongNameTv.setText(songName);
+                songNameQueueItem.setText(songName);
+                playerArtistNameTv.setText(artistName);
+                artistQueueItem.setText(artistName);
+                mimeTv.setText(mimeType);
+                durationTv.setText(convertDuration(duration));
+                mini_name_text.setText(songName);
+                mini_artist_text.setText(artistName);
+                seekBarMain.setMax(Integer.parseInt(duration));
+                mini_progress.setMax(Integer.parseInt(duration));
+                int bitrateInNum = Integer.parseInt(bitrate) / 1000;
+                String finalBitrate = bitrateInNum + " KBPS";
+                bitrateTv.setText(finalBitrate);
                 GlideBuilt.glide(requireContext(), albumUri, R.drawable.ic_music, playerCoverImage, 512);
                 GlideBuilt.glide(requireContext(), albumUri, R.drawable.ic_music, mini_cover, 128);
                 GlideBuilt.glide(requireContext(), albumUri, R.drawable.ic_music, queueCoverImg, 128);
 
                 ((MainActivity) context).setDataInNavigation(songName, artistName, albumUri);
+
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
         EventBus.getDefault().post(new RunnableSyncLyricsEvent());
     }
@@ -585,7 +565,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
      * Setting adapter in queue list
      */
     private void setQueueAdapter() {
-        if (dataList != null) {
+        if (dataList != null && !dataList.isEmpty()) {
             queueAdapter = new MusicQueueAdapter(getActivity(), dataList, this);
             queueRecyclerView.setAdapter(queueAdapter);
             ItemTouchHelper.Callback callback = new SimpleTouchCallback(queueAdapter);
@@ -1036,7 +1016,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     public void setPreviousData() {
         MusicDataCapsule activeMusic = getMusic();
 
-        EventBus.getDefault().post(new SetMainLayoutEvent());
+        EventBus.getDefault().post(new SetMainLayoutEvent(activeMusic));
 
         if (activeMusic != null) {
             seekBarMain.setMax(Integer.parseInt(activeMusic.getsLength()));

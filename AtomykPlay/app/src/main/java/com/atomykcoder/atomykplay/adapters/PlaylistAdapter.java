@@ -1,6 +1,10 @@
 package com.atomykcoder.atomykplay.adapters;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.ThumbnailUtils;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +21,8 @@ import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import com.atomykcoder.atomykplay.viewModals.Playlist;
 import com.google.android.material.card.MaterialCardView;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 
 public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.PlaylistViewHolder> {
@@ -38,15 +44,19 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
     @Override
     public void onBindViewHolder(@NonNull PlaylistAdapter.PlaylistViewHolder holder, int position) {
         Playlist capsule = arrayList.get(position);
-        GlideBuilt.glide(context,null,R.drawable.ic_music,holder.imageView,300);
-        String count = arrayList.size() + " Songs";
+        ArrayList<MusicDataCapsule> musicList = capsule.getMusicArrayList();
+        String albumUri = "content://media/external/audio/albumart/3034807079553410561";
+
+        GlideBuilt.glide(context,albumUri,R.drawable.ic_music,holder.imageView,300);
+        String count = musicList.size() + " Songs";
         holder.playlistName.setText(capsule.getName());
         holder.songCount.setText(count);
-        holder.cardView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
 
-            }
+        holder.cardView.setOnClickListener(v -> {
+
+        });
+        holder.optImg.setOnClickListener(v->{
+
         });
     }
 
@@ -58,13 +68,14 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
     public static class PlaylistViewHolder extends RecyclerView.ViewHolder {
         private final TextView playlistName;
         private final TextView songCount;
-        private final ImageView imageView;
+        private final ImageView imageView,optImg;
         private final MaterialCardView cardView;
         public PlaylistViewHolder(@NonNull View view) {
             super(view);
             playlistName = view.findViewById(R.id.playlist_name_tv);
             songCount = view.findViewById(R.id.playlist_item_count_tv);
             imageView = view.findViewById(R.id.playlist_cover_img);
+            optImg = view.findViewById(R.id.playlist_option);
             cardView = view.findViewById(R.id.playlist_card);
         }
     }

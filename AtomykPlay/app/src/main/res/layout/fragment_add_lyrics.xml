@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/secondary_bg"
+    android:background="@color/primary_bg"
     android:clickable="true"
     android:paddingTop="@dimen/status_bar_padding"
     android:focusable="true">
@@ -44,7 +44,7 @@
                 android:fadingEdge="vertical"
                 android:fadingEdgeLength="20dp"
                 android:fitsSystemWindows="true"
-                app:boxBackgroundColor="@color/primary_bg"
+                app:boxBackgroundColor="@color/tertiary_bg"
                 app:boxCornerRadiusBottomEnd="8dp"
                 app:boxCornerRadiusBottomStart="8dp"
                 app:boxCornerRadiusTopEnd="8dp"
@@ -52,7 +52,7 @@
                 app:boxStrokeWidth="0dp"
                 app:boxStrokeWidthFocused="0dp"
                 app:errorEnabled="false"
-                app:hintTextColor="@color/tertiary_bg"
+                app:hintTextColor="@color/accent_color_bg"
                 app:placeholderTextColor="@color/hint_color">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -82,7 +82,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginHorizontal="16dp"
                         android:layout_weight="1"
-                        android:backgroundTint="@color/tertiary_bg"
+                        android:backgroundTint="@color/accent_color_bg"
                         android:text="@string/save"
                         android:textColor="@color/play_icons_bg" />
 
@@ -92,7 +92,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginHorizontal="16dp"
                         android:layout_weight="1"
-                        android:backgroundTint="@color/tertiary_bg"
+                        android:backgroundTint="@color/accent_color_bg"
                         android:text="@string/find"
                         android:textColor="@color/play_icons_bg"
                         android:visibility="visible" />

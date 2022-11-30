@@ -405,7 +405,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                     .setShowWhen(false).setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
                             .setMediaSession(mediaSession.getSessionToken())
                             .setShowActionsInCompactView(0, 1, 2))
-                    .setColor(getResources().getColor(R.color.primary_bg, getTheme()))
+                    .setColor(getResources().getColor(R.color.tertiary_bg, getTheme()))
                     .setColorized(true)
                     .setSmallIcon(R.drawable.ic_headset)
                     //set content
@@ -665,11 +665,12 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
     @Override
     public void onPrepared(MediaPlayer mp) {
-        resumeMedia();
         if (service_bound) {
             updateMetaData();
-            EventBus.getDefault().post(new SetMainLayoutEvent());
+            EventBus.getDefault().post(new SetMainLayoutEvent(activeMusic));
         }
+        resumeMedia();
+
     }
 
     @Override

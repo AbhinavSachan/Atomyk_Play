@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/cv_song_play_queue"
+    android:id="@+id/cv_song_play_opl"
     android:layout_width="match_parent"
     android:layout_height="70dp"
     android:background="@color/primary_bg"
@@ -17,14 +17,14 @@
         android:clipToPadding="false"
         android:paddingStart="6dp"
         android:paddingTop="6dp"
-        android:paddingEnd="0dp"
+        android:paddingEnd="2dp"
         android:paddingBottom="6dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
 
         <RelativeLayout
-            android:id="@+id/materialCardView_queue"
+            android:id="@+id/materialCardView_opl"
             android:layout_width="56dp"
             android:layout_height="56dp"
             android:clipToPadding="false"
@@ -55,46 +55,18 @@
 
         </RelativeLayout>
 
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            app:cardBackgroundColor="@color/primary_bg"
-            app:cardCornerRadius="36dp"
-            app:cardElevation="5dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@+id/materialCardView_queue"
-            app:layout_constraintStart_toStartOf="@+id/materialCardView_queue">
-
-            <TextView
-                android:id="@+id/song_index_num_queue"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:ellipsize="start"
-                android:gravity="center"
-                android:scaleType="centerCrop"
-                android:singleLine="true"
-                android:textColor="@color/text_color"
-                android:textSize="10sp"
-                tools:ignore="SmallSp" />
-
-        </com.google.android.material.card.MaterialCardView>
-
-
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_marginStart="58dp"
-            android:layout_marginEnd="56dp"
             android:gravity="center"
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/materialCardView_queue"
+            app:layout_constraintStart_toEndOf="@+id/materialCardView_opl"
+            app:layout_constraintEnd_toStartOf="@+id/playlist_itemOpt"
             app:layout_constraintTop_toTopOf="parent">
 
             <TextView
-                android:id="@+id/song_name_queue"
+                android:id="@+id/song_name_opl"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ellipsize="marquee"
@@ -112,7 +84,7 @@
                 android:weightSum="4">
 
                 <TextView
-                    android:id="@+id/song_artist_name_queue"
+                    android:id="@+id/song_artist_name_opl"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="2.8"
@@ -125,7 +97,7 @@
                     android:textSize="@dimen/d_14sp" />
 
                 <TextView
-                    android:id="@+id/song_length_queue"
+                    android:id="@+id/song_length_opl"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="10dp"
@@ -141,14 +113,25 @@
         </LinearLayout>
 
         <ImageView
-            android:id="@+id/drag_i_btn_queue"
+            android:id="@+id/playlist_itemOpt"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/empty"
+            android:focusable="true"
+            android:padding="6dp"
+            android:src="@drawable/ic_option"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/drag_i_btn_playlist"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/drag_i_btn_playlist"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:clickable="true"
             android:contentDescription="@string/empty"
             android:focusable="true"
-            android:foreground="@drawable/round_select_effect_small"
-            android:padding="13dp"
+            android:padding="6dp"
             android:src="@drawable/ic_drag_handle"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

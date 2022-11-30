@@ -28,6 +28,7 @@ import android.provider.Settings;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -230,7 +231,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
                 miniPlayer.setAlpha(0);
                 mainPlayer.setAlpha(1);
-                anchoredShadow.setAlpha(0);
+                anchoredShadow.setAlpha(1);
                 shadowMain.setAlpha(1);
             } else if (newState == BottomSheetBehavior.STATE_HIDDEN) {
                 anchoredShadow.setAlpha(0);
@@ -251,7 +252,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             miniPlayer.setAlpha(1 - slideOffset * 35);
             mainPlayer.setAlpha(0 + slideOffset);
             shadowMain.setAlpha(0 + slideOffset);
-            anchoredShadow.setAlpha(0 + slideOffset);
         }
     };
     //option menu buttons
@@ -324,9 +324,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         ImageView openDrawer = findViewById(R.id.open_drawer_btn);
         MaterialCardView searchBar = findViewById(R.id.searchBar_card);
-        MaterialCardView plCard = findViewById(R.id.playlist_card_view_ma);
-        MaterialCardView lastAddCard = findViewById(R.id.last_added_card_view);
-        MaterialCardView shuffleCard = findViewById(R.id.shuffle_play_card_view);
+        View plCard = findViewById(R.id.playlist_card_view_ma);
+        View lastAddCard = findViewById(R.id.last_added_card_view);
+        View shuffleCard = findViewById(R.id.shuffle_play_card_view);
 
         MediaPlayerService.ui_visible = true;
 

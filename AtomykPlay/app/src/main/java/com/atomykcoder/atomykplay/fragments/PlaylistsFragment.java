@@ -39,7 +39,7 @@ public class PlaylistsFragment extends Fragment {
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getContext(), 2);
 
         recyclerView.setLayoutManager(layoutManager);
-        recyclerView.addItemDecoration(new GridSpacing(2, 8, true));
+        recyclerView.addItemDecoration(new GridSpacing(2, 8, false));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         playlistList = new StorageUtil(requireContext()).getAllPlaylist();
 

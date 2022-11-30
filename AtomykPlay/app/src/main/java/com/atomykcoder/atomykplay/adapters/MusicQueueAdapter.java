@@ -183,7 +183,7 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
         public MusicViewAdapter(@NonNull View itemView) {
             super(itemView);
             imageView = itemView.findViewById(R.id.song_album_cover_queue);
-            imageButton = itemView.findViewById(R.id.more_option_i_btn_queue);
+            imageButton = itemView.findViewById(R.id.drag_i_btn_queue);
             cardView = itemView.findViewById(R.id.cv_song_play_queue);
             nameText = itemView.findViewById(R.id.song_name_queue);
             musicIndex = itemView.findViewById(R.id.song_index_num_queue);

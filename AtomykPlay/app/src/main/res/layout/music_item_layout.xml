@@ -5,7 +5,7 @@
     android:id="@+id/cv_song_play"
     android:layout_width="match_parent"
     android:layout_height="70dp"
-    android:background="@color/secondary_bg"
+    android:background="@color/primary_bg"
     android:clickable="true"
     android:focusable="true"
     android:foreground="?android:attr/selectableItemBackground"
@@ -21,37 +21,48 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <com.google.android.material.card.MaterialCardView
+        <RelativeLayout
             android:id="@+id/materialCardView"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
-            android:layout_margin="3dp"
-            app:cardBackgroundColor="@color/cover_black"
-            app:cardCornerRadius="6dp"
-            app:cardElevation="4dp"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:clipToPadding="false"
+            android:padding="6dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-            <ImageView
-                android:id="@+id/song_album_cover"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:contentDescription="@string/empty"
-                android:scaleType="centerCrop"
-                android:src="@drawable/ic_music" />
 
-        </com.google.android.material.card.MaterialCardView>
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_margin="3dp"
+                app:cardBackgroundColor="@color/cover_black"
+                app:cardCornerRadius="6dp"
+                app:cardElevation="4dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
+                <ImageView
+                    android:id="@+id/song_album_cover"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="@string/empty"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_music" />
+
+            </com.google.android.material.card.MaterialCardView>
+
+
+        </RelativeLayout>
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_marginStart="58dp"
-            android:layout_marginEnd="40dp"
             android:gravity="center"
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@+id/materialCardView"
+            app:layout_constraintEnd_toStartOf="@+id/option"
             app:layout_constraintTop_toTopOf="parent">
 
             <TextView
@@ -102,13 +113,13 @@
         </LinearLayout>
 
         <ImageView
-            android:id="@+id/playlist_option"
+            android:id="@+id/option"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:contentDescription="@string/empty"
             android:focusable="true"
             android:foreground="@drawable/round_select_effect_small"
-            android:padding="13dp"
+            android:padding="10dp"
             android:src="@drawable/ic_option"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

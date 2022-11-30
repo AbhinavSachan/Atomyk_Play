@@ -5,7 +5,6 @@
     android:id="@+id/mini_player_layout"
     android:layout_width="match_parent"
     android:layout_height="68dp"
-    android:background="@drawable/rounded_bottom_sheet"
     tools:context=".fragments.BottomSheetPlayerFragment"
     tools:ignore="UnusedAttribute">
 
@@ -23,7 +22,7 @@
             android:layout_width="41dp"
             android:layout_height="41dp"
             android:layout_margin="3dp"
-            app:cardBackgroundColor="@color/cover_black"
+            app:cardBackgroundColor="@color/cover_black_player"
             app:cardCornerRadius="6dp"
             app:cardElevation="3dp"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -121,9 +120,9 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
-        app:indicatorColor="@color/tertiary_bg"
+        app:indicatorColor="@color/accent_color_bg"
         app:indicatorDirectionLinear="leftToRight"
-        app:trackColor="@color/secondary_bg"
+        app:trackColor="@color/primary_bg"
         app:trackCornerRadius="0dp"
         app:trackThickness="2dp" />
 

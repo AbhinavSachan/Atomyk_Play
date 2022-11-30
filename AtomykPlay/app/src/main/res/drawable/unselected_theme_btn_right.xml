@@ -8,6 +8,6 @@
     <corners
         android:bottomRightRadius="50dp"
         android:topRightRadius="50dp" />
-    <solid android:color="@color/secondary_bg" />
+    <solid android:color="@color/primary_bg" />
 
 </shape>

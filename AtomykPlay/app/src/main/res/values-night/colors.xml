@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="tertiary_bg">#2D76CF</color>
-    <color name="secondary_bg">#0E0F12</color>
+    <color name="accent_color_bg">#245EA5</color>
+    <color name="primary_bg">#101213</color>
+    <color name="secondary_bg">#1D1E22</color>
     <color name="nav_center_shadow">#640E0F12</color>
-    <color name="primary_bg">#181A1E</color>
-    <color name="icons_bg">#CACACA</color>
-    <color name="play_icons_bg">#FDFDFD</color>
-    <color name="text_color">#E3E3E3</color>
+    <color name="tertiary_bg">#181A1E</color>
+    <color name="icons_bg">#CCCCCC</color>
+    <color name="play_icons_bg">#CCCCCC</color>
+    <color name="text_color">#CCCCCC</color>
     <color name="sub_text_grey">#BFB4B4</color>
     <color name="cover_image_grey">#555555</color>
     <color name="soft_black">#BDBDBD</color>
-    <color name="cover_black">#191919</color>
+    <color name="cover_black">#161819</color>
     <color name="light_slate_gray_blue">#A1A1A1</color>
     <color name="click_effect_color">#7CF3C2EC</color>
     <color name="click_effect_color_inverse">#9A231F1F</color>
@@ -26,6 +27,8 @@
     <color name="switch_track_on">#922D76CF</color>
     <color name="switch_track_off">#8FE3D8D8</color>
     <color name="status_bar_color">#B40E0F12</color>
+    <color name="cover_black_player">#1A1D1E</color>
+    <color name="player_bg">#16161A</color>
 
 
 </resources>

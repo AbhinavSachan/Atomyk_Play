@@ -204,7 +204,7 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
             super(itemView);
 
             imageView = itemView.findViewById(R.id.song_album_cover);
-            imageButton = itemView.findViewById(R.id.playlist_option);
+            imageButton = itemView.findViewById(R.id.option);
             cardView = itemView.findViewById(R.id.cv_song_play);
             nameText = itemView.findViewById(R.id.song_name);
             artistText = itemView.findViewById(R.id.song_artist_name);

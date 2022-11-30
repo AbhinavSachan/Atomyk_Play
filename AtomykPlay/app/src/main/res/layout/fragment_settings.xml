@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/secondary_bg"
+    android:background="@color/primary_bg"
     android:clickable="true"
     android:focusable="true"
     android:paddingTop="@dimen/status_bar_padding"
@@ -14,7 +14,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/primary_bg"
+        android:background="@color/tertiary_bg"
         android:clickable="true"
         android:focusable="true"
         android:orientation="vertical"
@@ -24,7 +24,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="6dp"
-            android:background="@color/secondary_bg"
+            android:background="@color/primary_bg"
             android:orientation="vertical"
             android:paddingBottom="16dp">
 
@@ -76,7 +76,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
             android:layout_marginBottom="6dp"
-            android:background="@color/secondary_bg"
+            android:background="@color/primary_bg"
             android:orientation="vertical"
             android:paddingBottom="16dp">
 
@@ -349,7 +349,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
             android:layout_marginBottom="6dp"
-            android:background="@color/secondary_bg"
+            android:background="@color/primary_bg"
             android:orientation="vertical"
             android:paddingBottom="16dp">
 
@@ -620,7 +620,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
             android:layout_marginBottom="12dp"
-            android:background="@color/secondary_bg"
+            android:background="@color/primary_bg"
             android:orientation="vertical"
             android:paddingBottom="16dp">
 

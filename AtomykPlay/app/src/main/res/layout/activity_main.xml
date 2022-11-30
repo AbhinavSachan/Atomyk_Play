@@ -5,7 +5,7 @@
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/secondary_bg"
+    android:background="@color/primary_bg"
     tools:context=".activities.MainActivity"
     tools:ignore="UnusedAttribute">
 
@@ -13,7 +13,7 @@
         android:id="@+id/sec_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/secondary_bg">
+        android:background="@color/primary_bg">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -88,8 +88,8 @@
                 android:layout_marginHorizontal="12dp"
                 android:layout_marginTop="42dp"
                 android:layout_marginBottom="6dp"
-                android:theme="@style/ThemeOverlay.AppCompat.DayNight"
-                app:cardCornerRadius="6dp"
+                app:cardBackgroundColor="@color/secondary_bg"
+                app:cardCornerRadius="16dp"
                 app:cardElevation="6dp"
                 app:layout_scrollFlags="scroll|enterAlways">
 
@@ -129,24 +129,23 @@
                 android:orientation="horizontal"
                 app:layout_scrollFlags="scroll|enterAlways">
 
-                <com.google.android.material.card.MaterialCardView
+                <LinearLayout
                     android:id="@+id/playlist_card_view_ma"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_marginHorizontal="12dp"
                     android:layout_marginTop="6dp"
                     android:layout_marginBottom="12dp"
                     android:layout_weight="1"
-                    android:theme="@style/ThemeOverlay.AppCompat.DayNight"
-                    app:cardCornerRadius="8dp"
-                    app:cardElevation="3dp">
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:paddingHorizontal="8dp">
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center_vertical"
-                        android:orientation="vertical"
-                        android:paddingHorizontal="8dp">
+                    <RelativeLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/round_bg_for_pl"
+                        android:padding="5dp">
 
                         <ImageView
                             android:layout_width="40dp"
@@ -155,37 +154,37 @@
                             android:contentDescription="@string/empty"
                             android:padding="8dp"
                             android:src="@drawable/ic_music_list"
+                            app:tint="@color/accent_color_bg"
                             tools:ignore="DuplicateSpeakableTextCheck" />
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:paddingBottom="6dp"
-                            android:text="@string/playList"
-                            android:textAppearance="@android:style/TextAppearance.DeviceDefault.SearchResult.Subtitle"
-                            android:textColor="@color/greyForTool" />
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
+                    </RelativeLayout>
 
-                <com.google.android.material.card.MaterialCardView
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:paddingBottom="6dp"
+                        android:text="@string/playList"
+                        android:textColor="@color/text_color" />
+                </LinearLayout>
+
+                <LinearLayout
                     android:id="@+id/last_added_card_view"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_marginHorizontal="12dp"
                     android:layout_marginTop="6dp"
                     android:layout_marginBottom="12dp"
                     android:layout_weight="1"
-                    android:theme="@style/ThemeOverlay.AppCompat.DayNight"
-                    app:cardCornerRadius="8dp"
-                    app:cardElevation="3dp">
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:paddingHorizontal="8dp">
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center_vertical"
-                        android:orientation="vertical"
-                        android:paddingHorizontal="8dp">
+                    <RelativeLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/round_bg_for_pl"
+                        android:padding="5dp">
 
                         <ImageView
                             android:layout_width="40dp"
@@ -194,37 +193,37 @@
                             android:contentDescription="@string/empty"
                             android:padding="8dp"
                             android:src="@drawable/ic_last_added"
+                            app:tint="@color/accent_color_bg"
                             tools:ignore="DuplicateSpeakableTextCheck" />
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:paddingBottom="6dp"
-                            android:text="@string/last_added"
-                            android:textAppearance="@android:style/TextAppearance.DeviceDefault.SearchResult.Subtitle"
-                            android:textColor="@color/greyForTool" />
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
+                    </RelativeLayout>
 
-                <com.google.android.material.card.MaterialCardView
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:paddingBottom="6dp"
+                        android:text="@string/last_added"
+                        android:textColor="@color/text_color" />
+                </LinearLayout>
+
+                <LinearLayout
                     android:id="@+id/shuffle_play_card_view"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_marginHorizontal="12dp"
                     android:layout_marginTop="6dp"
                     android:layout_marginBottom="12dp"
                     android:layout_weight="1"
-                    android:theme="@style/ThemeOverlay.AppCompat.DayNight"
-                    app:cardCornerRadius="8dp"
-                    app:cardElevation="3dp">
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:paddingHorizontal="8dp">
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center_vertical"
-                        android:orientation="vertical"
-                        android:paddingHorizontal="8dp">
+                    <RelativeLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/round_bg_for_pl"
+                        android:padding="5dp">
 
                         <ImageView
                             android:layout_width="40dp"
@@ -233,18 +232,20 @@
                             android:contentDescription="@string/empty"
                             android:padding="8dp"
                             android:src="@drawable/ic_shuffle"
+                            app:tint="@color/accent_color_bg"
                             tools:ignore="DuplicateSpeakableTextCheck" />
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:paddingBottom="6dp"
-                            android:text="@string/shuffle_play"
-                            android:textAppearance="@android:style/TextAppearance.DeviceDefault.SearchResult.Subtitle"
-                            android:textColor="@color/greyForTool" />
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
+                    </RelativeLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:paddingBottom="6dp"
+                        android:text="@string/shuffle_play"
+                        android:textColor="@color/text_color" />
+                </LinearLayout>
+
             </LinearLayout>
         </com.google.android.material.appbar.AppBarLayout>
 
@@ -315,6 +316,7 @@
             android:id="@+id/player_main_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="@drawable/rounded_bottom_sheet"
             android:elevation="20dp"
             app:layout_behavior=".customScripts.CustomBottomSheet" />
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
@@ -342,7 +344,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:backgroundTint="@color/secondary_bg"
+        android:backgroundTint="@color/primary_bg"
         android:fitsSystemWindows="true"
         app:headerLayout="@layout/nav_header"
         app:itemIconTint="@color/icons_bg"

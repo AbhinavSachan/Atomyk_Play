@@ -4,14 +4,15 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="tertiary_bg">#2D76CF</color>
+    <color name="accent_color_bg">#2D76CF</color>
     <color name="icons_bg">#393939</color>
     <color name="text_color">#393939</color>
     <color name="text_lyrics_color">#8E8E8E</color>
-    <color name="secondary_bg">#FDFDFD</color>
+    <color name="primary_bg">#F6F3F3</color>
+    <color name="secondary_bg">#F6F6F6</color>
     <color name="nav_center_shadow">#64F1F1F1</color>
-    <color name="primary_bg">#EAEAEA</color>
-    <color name="play_icons_bg">#FDFDFD</color>
+    <color name="tertiary_bg">#EAEAEA</color>
+    <color name="play_icons_bg">#F6F6F6</color>
     <color name="sub_text_grey">#5E5E5E</color>
     <color name="cover_image_grey">#555555</color>
     <color name="soft_black">#252525</color>
@@ -32,7 +33,9 @@
     <color name="switch_track_on">#922D76CF</color>
     <color name="switch_track_off">#8F191717</color>
     <color name="greyForTool">#676767</color>
-    <color name="status_bar_color">#B4FDFDFD</color>
+    <color name="status_bar_color">#B4F6F6F6</color>
+    <color name="cover_black_player">#191919</color>
+    <color name="player_bg">#F6F6F6</color>
 
 
 </resources>

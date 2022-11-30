@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/secondary_bg"
+    android:background="@color/primary_bg"
     android:clickable="true"
     android:focusable="true"
     android:paddingTop="32dp"
@@ -33,7 +33,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:gravity="center_vertical"
-            app:boxBackgroundColor="@color/secondary_bg"
+            app:boxBackgroundColor="@color/primary_bg"
             app:boxCornerRadiusBottomEnd="0dp"
             app:boxCornerRadiusBottomStart="0dp"
             app:boxCornerRadiusTopEnd="0dp"
@@ -65,7 +65,7 @@
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_below="@+id/search_layout_view"
-        android:background="@color/tertiary_bg" />
+        android:background="@color/accent_color_bg" />
 
     <RadioGroup
         android:id="@+id/radio_group"
