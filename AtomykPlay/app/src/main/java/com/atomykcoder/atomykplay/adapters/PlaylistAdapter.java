@@ -69,7 +69,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
             fragment.setArguments(bundle);
             fragment.setEnterTransition(TransitionInflater.from(context).inflateTransition(android.R.transition.slide_bottom));
 
-            transaction.replace(R.id.sec_container, fragment, "OpenPlayListFragment").addToBackStack(null).commit();
+            transaction.add(R.id.sec_container, fragment, "OpenPlayListFragment").addToBackStack(null).commit();
 
         });
         holder.optImg.setOnClickListener(v->{
@@ -87,7 +87,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
         private final TextView playlistName;
         private final TextView songCount;
         private final ImageView imageView,optImg;
-        private final MaterialCardView cardView;
+        private final View cardView;
         public PlaylistViewHolder(@NonNull View view) {
             super(view);
             playlistName = view.findViewById(R.id.playlist_name_tv);

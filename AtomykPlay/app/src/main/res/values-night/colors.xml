@@ -2,6 +2,7 @@
 <resources>
     <color name="accent_color_bg">#245EA5</color>
     <color name="primary_bg">#101213</color>
+    <color name="black">#FFFFFF</color>
     <color name="secondary_bg">#1D1E22</color>
     <color name="nav_center_shadow">#640E0F12</color>
     <color name="tertiary_bg">#181A1E</color>

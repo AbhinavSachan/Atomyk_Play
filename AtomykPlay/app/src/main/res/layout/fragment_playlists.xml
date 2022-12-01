@@ -1,44 +1,114 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/primary_bg"
-    android:paddingTop="@dimen/status_bar_padding"
     tools:context=".fragments.PlaylistsFragment">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/playlist_recycler_view"
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clipToPadding="false"
-        android:paddingBottom="85dp" />
+        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
-    <!--no data layout-->
-    <LinearLayout
-        android:id="@+id/no_pl_layout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:orientation="vertical"
-        tools:ignore="UseCompoundDrawables">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-        <ImageView
-            android:layout_width="250dp"
-            android:layout_height="250dp"
-            android:contentDescription="@string/empty"
-            android:padding="2dp"
-            android:src="@drawable/no_song_image" />
+            <RelativeLayout
+                android:id="@+id/pl_favorites_btn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="12dp"
+                android:layout_marginBottom="12dp"
+                android:background="@drawable/fav_btn_bg"
+                android:clickable="true"
+                android:focusable="true">
 
-        <TextView
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:padding="12dp"
+                    android:text="@string/favorite"
+                    android:textColor="@color/heart_bg"
+                    android:textSize="@dimen/d_20sp" />
+            </RelativeLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/playlist_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@+id/pl_favorites_btn"
+                android:clipToPadding="false"
+                android:nestedScrollingEnabled="false"
+                android:paddingBottom="90dp" />
+
+            <!--no data layout-->
+            <LinearLayout
+                android:id="@+id/no_pl_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_marginTop="70dp"
+                android:orientation="vertical"
+                android:visibility="gone"
+                tools:ignore="UseCompoundDrawables">
+
+                <ImageView
+                    android:layout_width="250dp"
+                    android:layout_height="250dp"
+                    android:contentDescription="@string/empty"
+                    android:padding="2dp"
+                    android:src="@drawable/no_song_image" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/nothing_to_show"
+                    android:textColor="@color/text_color"
+                    android:textSize="@dimen/d_28sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+        </RelativeLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.appbar.CollapsingToolbarLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="@string/nothing_to_show"
-            android:textColor="@color/text_color"
-            android:textSize="@dimen/d_28sp"
-            android:textStyle="bold" />
+            android:background="@color/primary_bg"
+            app:collapsedTitleGravity="center_vertical"
+            app:contentScrim="@color/secondary_bg"
+            app:expandedTitleGravity="bottom|center_horizontal"
+            app:expandedTitleTextAppearance="@style/App.Custom.Title"
+            app:layout_scrollFlags="scroll|snap|exitUntilCollapsed"
+            app:title="@string/playLists">
 
-    </LinearLayout>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                app:layout_collapseMode="parallax"
+                app:layout_collapseParallaxMultiplier="0.7" />
 
-</RelativeLayout>
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar_playlists"
+                android:layout_width="match_parent"
+                android:layout_height="?actionBarSize"
+                android:layout_marginTop="@dimen/status_bar_padding"
+                app:layout_collapseMode="pin" />
+
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

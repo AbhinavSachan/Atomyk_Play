@@ -16,6 +16,12 @@
 
     </style> <!-- Base application theme. -->
 
+    <style name="App.Custom.Title" parent="TextAppearance.AppCompat.Large">
+        <item name="android:textSize">@dimen/d_32sp</item>
+        <item name="android:textColor">@color/text_color</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
     <style name="Theme.Splash" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/tertiary_bg</item>

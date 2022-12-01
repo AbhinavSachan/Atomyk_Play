@@ -52,7 +52,7 @@ public class FetchMusic {
                             .replace("%20", " ")
                             .replace("_", " ")
                             .replace("&amp;", ",").trim();
-                    String sArtist = audioCursor.getString(1);
+                    String sArtist = audioCursor.getString(1).trim();
                     String sAlbumId = audioCursor.getString(2);
                     //converting duration in readable format
                     String sLength = audioCursor.getString(3);
@@ -73,9 +73,9 @@ public class FetchMusic {
                     Uri uri = Uri.parse("content://media/external/audio/albumart");
                     String sAlbumUri = Uri.withAppendedPath(uri, sAlbumId).toString();
 
-                    MusicDataCapsule music;
                     int filter = new StorageUtil.SettingsStorage(context).loadFilterDur() * 1000;
-                    music = new MusicDataCapsule(sTitle, sArtist, sAlbum, sAlbumUri, sLength, sPath, sBitrate, sMimeType, sSize, sGenre, sId);
+                    MusicDataCapsule music = new MusicDataCapsule(sTitle, sArtist,
+                            sAlbum, sAlbumUri, sLength, sPath, sBitrate, sMimeType, sSize, sGenre, sId);
                     File file = new File(music.getsPath());
                     if (file.exists()) {
                         if (filter <= Integer.parseInt(music.getsLength())) {

@@ -5,10 +5,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.transition.TransitionInflater;
 
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.adapters.PlaylistAdapter;
@@ -33,6 +37,30 @@ public class PlaylistsFragment extends Fragment {
 
         recyclerView = view.findViewById(R.id.playlist_recycler_view);
         noPlLayout = view.findViewById(R.id.no_pl_layout);
+        View favBtn = view.findViewById(R.id.pl_favorites_btn);
+
+        Toolbar toolbar = view.findViewById(R.id.toolbar_playlists);
+
+        toolbar.setNavigationIcon(R.drawable.ic_back);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                requireActivity().onBackPressed();
+            }
+        });
+
+        favBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
+                FragmentTransaction transaction = fragmentManager.beginTransaction();
+
+                FavoritesFragment fragment = new FavoritesFragment();
+                fragment.setEnterTransition(TransitionInflater.from(requireContext()).inflateTransition(android.R.transition.slide_bottom));
+
+                transaction.replace(R.id.sec_container, fragment, "SettingsFragment").addToBackStack(null).commit();
+            }
+        });
 
         recyclerView.setHasFixedSize(true);
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getContext(), 2);

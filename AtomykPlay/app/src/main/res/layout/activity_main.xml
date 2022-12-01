@@ -164,7 +164,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:paddingBottom="6dp"
-                        android:text="@string/playList"
+                        android:text="@string/playLists"
                         android:textColor="@color/text_color" />
                 </LinearLayout>
 

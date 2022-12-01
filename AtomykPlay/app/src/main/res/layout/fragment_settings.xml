@@ -1,705 +1,693 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/primary_bg"
     android:clickable="true"
+    android:background="@color/primary_bg"
     android:focusable="true"
-    android:paddingTop="@dimen/status_bar_padding"
     tools:context=".fragments.SettingsFragment"
     tools:ignore="UnusedAttribute">
 
-    <LinearLayout
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/tertiary_bg"
-        android:clickable="true"
-        android:focusable="true"
-        android:orientation="vertical"
-        android:paddingBottom="@dimen/most_bottom_padding">
+        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="6dp"
-            android:background="@color/primary_bg"
+            android:background="@color/tertiary_bg"
+            android:clickable="true"
+            android:focusable="true"
             android:orientation="vertical"
-            android:paddingBottom="16dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginVertical="16dp"
-                android:paddingHorizontal="16dp"
-                android:text="@string/theme_amp_colors"
-                android:textColor="@color/text_color"
-                android:textSize="@dimen/d_32sp"
-                android:textStyle="bold" />
-
-            <RadioGroup
-                android:id="@+id/radio_group_theme"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:orientation="horizontal">
-
-                <RadioButton
-                    android:id="@+id/light_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/left_selector"
-                    android:button="@android:color/transparent"
-                    android:paddingHorizontal="20dp"
-                    android:text="@string/light_mode_tv"
-                    android:textColor="@color/text_theme_state"
-                    android:textSize="16sp" />
-
-                <RadioButton
-                    android:id="@+id/dark_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/right_selector"
-                    android:button="@android:color/transparent"
-                    android:paddingHorizontal="20dp"
-                    android:text="@string/dark_mode_tv"
-                    android:textColor="@color/text_theme_state"
-                    android:textSize="16sp" />
-
-            </RadioGroup>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:layout_marginBottom="6dp"
-            android:background="@color/primary_bg"
-            android:orientation="vertical"
-            android:paddingBottom="16dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginVertical="16dp"
-                android:paddingHorizontal="16dp"
-                android:text="@string/player_info"
-                android:textColor="@color/text_color"
-                android:textSize="@dimen/d_32sp"
-                android:textStyle="bold" />
+            android:paddingBottom="@dimen/most_bottom_padding">
 
             <LinearLayout
-                android:id="@+id/show_file_info_ll"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"
-                android:orientation="horizontal"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="4dp"
-                android:weightSum="6">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="5"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="sans-serif"
-                        android:paddingVertical="4dp"
-                        android:text="@string/show_song_info"
-                        android:textColor="@color/text_color"
-                        android:textSize="@dimen/d_18sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="sans-serif"
-                        android:paddingStart="2dp"
-                        android:paddingEnd="16dp"
-                        android:text="@string/info_des"
-                        android:textColor="@color/sub_text_grey"
-                        android:textSize="@dimen/d_15sp" />
-
-                </LinearLayout>
-
-                <androidx.appcompat.widget.SwitchCompat
-                    android:id="@+id/show_file_info_swi"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:thumb="@drawable/custom_switch_thumb"
-                    app:track="@drawable/custom_track_switch" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/show_artist_ll"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"
-                android:orientation="horizontal"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="4dp"
-                android:weightSum="6">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="5"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="sans-serif"
-                        android:paddingVertical="4dp"
-                        android:text="@string/ShowArtistInMini"
-                        android:textColor="@color/text_color"
-                        android:textSize="@dimen/d_18sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="sans-serif"
-                        android:paddingStart="2dp"
-                        android:paddingEnd="16dp"
-                        android:text="@string/ShowArtistInMiniDes"
-                        android:textColor="@color/sub_text_grey"
-                        android:textSize="@dimen/d_15sp" />
-
-                </LinearLayout>
-
-                <androidx.appcompat.widget.SwitchCompat
-                    android:id="@+id/show_artist_swi"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:thumb="@drawable/custom_switch_thumb"
-                    app:track="@drawable/custom_track_switch" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/show_option_ll"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:clickable="true"
-                android:focusable="true"
-                android:visibility="gone"
-                android:foreground="?attr/selectableItemBackground"
-                android:orientation="horizontal"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="4dp"
-                android:weightSum="6">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="5"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="sans-serif"
-                        android:paddingVertical="4dp"
-                        android:text="@string/show_option_menu"
-                        android:textColor="@color/text_color"
-                        android:textSize="@dimen/d_18sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="sans-serif"
-                        android:paddingStart="2dp"
-                        android:paddingEnd="16dp"
-                        android:text="@string/option_des"
-                        android:textColor="@color/sub_text_grey"
-                        android:textSize="@dimen/d_15sp" />
-
-                </LinearLayout>
-
-                <androidx.appcompat.widget.SwitchCompat
-                    android:id="@+id/show_option_swi"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:thumb="@drawable/custom_switch_thumb"
-                    app:track="@drawable/custom_track_switch" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/show_extra_ll"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"
-                android:orientation="horizontal"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="4dp"
-                android:weightSum="6">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="5"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="sans-serif"
-                        android:paddingVertical="4dp"
-                        android:text="@string/show_extra_con"
-                        android:textColor="@color/text_color"
-                        android:textSize="@dimen/d_18sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="sans-serif"
-                        android:paddingStart="2dp"
-                        android:paddingEnd="16dp"
-                        android:text="@string/ext_con_des"
-                        android:textColor="@color/sub_text_grey"
-                        android:textSize="@dimen/d_15sp" />
-
-                </LinearLayout>
-
-                <androidx.appcompat.widget.SwitchCompat
-                    android:id="@+id/show_extra_swi"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:thumb="@drawable/custom_switch_thumb"
-                    app:track="@drawable/custom_track_switch" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/keep_screen_ll"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"
-                android:orientation="horizontal"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="4dp"
-                android:weightSum="6">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="5"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="sans-serif"
-                        android:paddingVertical="4dp"
-                        android:text="@string/keep_scr"
-                        android:textColor="@color/text_color"
-                        android:textSize="@dimen/d_18sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="sans-serif"
-                        android:paddingStart="2dp"
-                        android:paddingEnd="16dp"
-                        android:text="@string/keep_scr_des"
-                        android:textColor="@color/sub_text_grey"
-                        android:textSize="@dimen/d_15sp" />
-
-                </LinearLayout>
-
-                <androidx.appcompat.widget.SwitchCompat
-                    android:id="@+id/keep_screen_swi"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:thumb="@drawable/custom_switch_thumb"
-                    app:track="@drawable/custom_track_switch" />
-            </LinearLayout>
-
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:layout_marginBottom="6dp"
-            android:background="@color/primary_bg"
-            android:orientation="vertical"
-            android:paddingBottom="16dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginVertical="16dp"
-                android:paddingHorizontal="16dp"
-                android:text="@string/audio"
-                android:textColor="@color/text_color"
-                android:textSize="@dimen/d_32sp"
-                android:textStyle="bold" />
-
-            <LinearLayout
-                android:id="@+id/autoPlay_ll"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"
-                android:orientation="horizontal"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="4dp"
-                android:weightSum="6">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="5"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="sans-serif"
-                        android:paddingVertical="4dp"
-                        android:text="@string/auto_play"
-                        android:textColor="@color/text_color"
-                        android:textSize="@dimen/d_18sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="sans-serif"
-                        android:paddingStart="2dp"
-                        android:paddingEnd="16dp"
-                        android:text="@string/autoplay_des"
-                        android:textColor="@color/sub_text_grey"
-                        android:textSize="@dimen/d_15sp" />
-
-                </LinearLayout>
-
-                <androidx.appcompat.widget.SwitchCompat
-                    android:id="@+id/autoPlay_swi"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:thumb="@drawable/custom_switch_thumb"
-                    app:track="@drawable/custom_track_switch" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/keep_shuffle_ll"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"
-                android:orientation="horizontal"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="4dp"
-                android:weightSum="6">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="5"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="sans-serif"
-                        android:paddingVertical="4dp"
-                        android:text="@string/keep_shuffle_on"
-                        android:textColor="@color/text_color"
-                        android:textSize="@dimen/d_18sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="sans-serif"
-                        android:paddingStart="2dp"
-                        android:paddingEnd="16dp"
-                        android:text="@string/shuffle_des"
-                        android:textColor="@color/sub_text_grey"
-                        android:textSize="@dimen/d_15sp" />
-
-                </LinearLayout>
-
-                <androidx.appcompat.widget.SwitchCompat
-                    android:id="@+id/keep_shuffle_swi"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:thumb="@drawable/custom_switch_thumb"
-                    app:track="@drawable/custom_track_switch" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/lower_vol_ll"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"
-                android:orientation="horizontal"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="4dp"
-                android:weightSum="6">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="5"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="sans-serif"
-                        android:paddingVertical="4dp"
-                        android:text="@string/lowerVol"
-                        android:textColor="@color/text_color"
-                        android:textSize="@dimen/d_18sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="sans-serif"
-                        android:paddingStart="2dp"
-                        android:paddingEnd="16dp"
-                        android:text="@string/vol_des"
-                        android:textColor="@color/sub_text_grey"
-                        android:textSize="@dimen/d_15sp" />
-
-                </LinearLayout>
-
-                <androidx.appcompat.widget.SwitchCompat
-                    android:id="@+id/lower_vol_swi"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:thumb="@drawable/custom_switch_thumb"
-                    app:track="@drawable/custom_track_switch" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/self_stop_ll"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"
-                android:orientation="horizontal"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="4dp"
-                android:weightSum="6">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="5"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="sans-serif"
-                        android:paddingVertical="4dp"
-                        android:text="@string/self_break"
-                        android:textColor="@color/text_color"
-                        android:textSize="@dimen/d_18sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="sans-serif"
-                        android:paddingStart="2dp"
-                        android:paddingEnd="16dp"
-                        android:text="@string/self_stop_des"
-                        android:textColor="@color/sub_text_grey"
-                        android:textSize="@dimen/d_15sp" />
-
-                </LinearLayout>
-
-                <androidx.appcompat.widget.SwitchCompat
-                    android:id="@+id/self_stop_swi"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:thumb="@drawable/custom_switch_thumb"
-                    app:track="@drawable/custom_track_switch" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/one_click_skip_ll"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"
-                android:orientation="horizontal"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="4dp"
-                android:weightSum="6">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="5"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="sans-serif"
-                        android:paddingVertical="4dp"
-                        android:text="@string/one_click"
-                        android:textColor="@color/text_color"
-                        android:textSize="@dimen/d_18sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="sans-serif"
-                        android:paddingStart="2dp"
-                        android:paddingEnd="16dp"
-                        android:text="@string/one_click_des"
-                        android:textColor="@color/sub_text_grey"
-                        android:textSize="@dimen/d_15sp" />
-
-                </LinearLayout>
-
-                <androidx.appcompat.widget.SwitchCompat
-                    android:id="@+id/one_click_skip_swi"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:thumb="@drawable/custom_switch_thumb"
-                    app:track="@drawable/custom_track_switch" />
-            </LinearLayout>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:layout_marginBottom="12dp"
-            android:background="@color/primary_bg"
-            android:orientation="vertical"
-            android:paddingBottom="16dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginVertical="16dp"
-                android:paddingHorizontal="16dp"
-                android:text="@string/filter"
-                android:textColor="@color/text_color"
-                android:textSize="@dimen/d_32sp"
-                android:textStyle="bold" />
-
-            <LinearLayout
-                android:id="@+id/blacklist_ll"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"
+                android:layout_marginBottom="6dp"
+                android:background="@color/secondary_bg"
                 android:orientation="vertical"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="4dp">
+                android:paddingBottom="16dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif"
-                    android:paddingVertical="4dp"
-                    android:text="@string/blacklist"
+                    android:layout_marginVertical="16dp"
+                    android:paddingHorizontal="16dp"
+                    android:text="@string/theme_amp_colors"
                     android:textColor="@color/text_color"
-                    android:textSize="@dimen/d_18sp" />
+                    android:textSize="@dimen/d_20sp"
+                    android:textStyle="bold" />
 
-                <TextView
+                <RadioGroup
+                    android:id="@+id/radio_group_theme"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif"
-                    android:paddingStart="2dp"
-                    android:paddingEnd="16dp"
-                    android:text="@string/blacklist_des"
-                    android:textColor="@color/sub_text_grey"
-                    android:textSize="@dimen/d_15sp" />
+                    android:layout_gravity="center"
+                    android:orientation="horizontal">
+
+                    <RadioButton
+                        android:id="@+id/light_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/left_selector"
+                        android:button="@android:color/transparent"
+                        android:paddingHorizontal="20dp"
+                        android:text="@string/light_mode_tv"
+                        android:textColor="@color/text_theme_state"
+                        android:textSize="16sp" />
+
+                    <RadioButton
+                        android:id="@+id/dark_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/right_selector"
+                        android:button="@android:color/transparent"
+                        android:paddingHorizontal="20dp"
+                        android:text="@string/dark_mode_tv"
+                        android:textColor="@color/text_theme_state"
+                        android:textSize="16sp" />
+
+                </RadioGroup>
 
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/filter_dur_ll"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"
+                android:layout_marginTop="6dp"
+                android:layout_marginBottom="6dp"
+                android:background="@color/secondary_bg"
                 android:orientation="vertical"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="4dp">
+                android:paddingBottom="16dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif"
-                    android:paddingVertical="4dp"
-                    android:text="@string/filter_by_dur"
+                    android:layout_marginVertical="16dp"
+                    android:paddingHorizontal="16dp"
+                    android:text="@string/player_info"
                     android:textColor="@color/text_color"
-                    android:textSize="@dimen/d_18sp" />
+                    android:textSize="@dimen/d_20sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:id="@+id/show_file_info_ll"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="4dp"
+                    android:weightSum="6">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="5"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif"
+                            android:paddingVertical="4dp"
+                            android:text="@string/show_song_info"
+                            android:textColor="@color/text_color"
+                            android:textSize="@dimen/d_18sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif"
+                            android:paddingStart="2dp"
+                            android:paddingEnd="16dp"
+                            android:text="@string/info_des"
+                            android:textColor="@color/sub_text_grey"
+                            android:textSize="@dimen/d_15sp" />
+
+                    </LinearLayout>
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/show_file_info_swi"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:thumb="@drawable/custom_switch_thumb"
+                        app:track="@drawable/custom_track_switch" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/show_artist_ll"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="4dp"
+                    android:weightSum="6">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="5"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif"
+                            android:paddingVertical="4dp"
+                            android:text="@string/ShowArtistInMini"
+                            android:textColor="@color/text_color"
+                            android:textSize="@dimen/d_18sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif"
+                            android:paddingStart="2dp"
+                            android:paddingEnd="16dp"
+                            android:text="@string/ShowArtistInMiniDes"
+                            android:textColor="@color/sub_text_grey"
+                            android:textSize="@dimen/d_15sp" />
+
+                    </LinearLayout>
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/show_artist_swi"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:thumb="@drawable/custom_switch_thumb"
+                        app:track="@drawable/custom_track_switch" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/show_extra_ll"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="4dp"
+                    android:weightSum="6">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="5"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif"
+                            android:paddingVertical="4dp"
+                            android:text="@string/show_extra_con"
+                            android:textColor="@color/text_color"
+                            android:textSize="@dimen/d_18sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif"
+                            android:paddingStart="2dp"
+                            android:paddingEnd="16dp"
+                            android:text="@string/ext_con_des"
+                            android:textColor="@color/sub_text_grey"
+                            android:textSize="@dimen/d_15sp" />
+
+                    </LinearLayout>
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/show_extra_swi"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:thumb="@drawable/custom_switch_thumb"
+                        app:track="@drawable/custom_track_switch" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/keep_screen_ll"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="4dp"
+                    android:weightSum="6">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="5"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif"
+                            android:paddingVertical="4dp"
+                            android:text="@string/keep_scr"
+                            android:textColor="@color/text_color"
+                            android:textSize="@dimen/d_18sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif"
+                            android:paddingStart="2dp"
+                            android:paddingEnd="16dp"
+                            android:text="@string/keep_scr_des"
+                            android:textColor="@color/sub_text_grey"
+                            android:textSize="@dimen/d_15sp" />
+
+                    </LinearLayout>
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/keep_screen_swi"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:thumb="@drawable/custom_switch_thumb"
+                        app:track="@drawable/custom_track_switch" />
+                </LinearLayout>
+
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:layout_marginBottom="6dp"
+                android:background="@color/secondary_bg"
+                android:orientation="vertical"
+                android:paddingBottom="16dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif"
-                    android:paddingStart="2dp"
-                    android:paddingEnd="16dp"
-                    android:text="@string/fil_dur_des"
-                    android:textColor="@color/sub_text_grey"
-                    android:textSize="@dimen/d_15sp" />
+                    android:layout_marginVertical="16dp"
+                    android:paddingHorizontal="16dp"
+                    android:text="@string/audio"
+                    android:textColor="@color/text_color"
+                    android:textSize="@dimen/d_20sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:id="@+id/autoPlay_ll"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="4dp"
+                    android:weightSum="6">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="5"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif"
+                            android:paddingVertical="4dp"
+                            android:text="@string/auto_play"
+                            android:textColor="@color/text_color"
+                            android:textSize="@dimen/d_18sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif"
+                            android:paddingStart="2dp"
+                            android:paddingEnd="16dp"
+                            android:text="@string/autoplay_des"
+                            android:textColor="@color/sub_text_grey"
+                            android:textSize="@dimen/d_15sp" />
+
+                    </LinearLayout>
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/autoPlay_swi"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:thumb="@drawable/custom_switch_thumb"
+                        app:track="@drawable/custom_track_switch" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/keep_shuffle_ll"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="4dp"
+                    android:weightSum="6">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="5"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif"
+                            android:paddingVertical="4dp"
+                            android:text="@string/keep_shuffle_on"
+                            android:textColor="@color/text_color"
+                            android:textSize="@dimen/d_18sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif"
+                            android:paddingStart="2dp"
+                            android:paddingEnd="16dp"
+                            android:text="@string/shuffle_des"
+                            android:textColor="@color/sub_text_grey"
+                            android:textSize="@dimen/d_15sp" />
+
+                    </LinearLayout>
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/keep_shuffle_swi"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:thumb="@drawable/custom_switch_thumb"
+                        app:track="@drawable/custom_track_switch" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/lower_vol_ll"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="4dp"
+                    android:weightSum="6">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="5"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif"
+                            android:paddingVertical="4dp"
+                            android:text="@string/lowerVol"
+                            android:textColor="@color/text_color"
+                            android:textSize="@dimen/d_18sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif"
+                            android:paddingStart="2dp"
+                            android:paddingEnd="16dp"
+                            android:text="@string/vol_des"
+                            android:textColor="@color/sub_text_grey"
+                            android:textSize="@dimen/d_15sp" />
+
+                    </LinearLayout>
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/lower_vol_swi"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:thumb="@drawable/custom_switch_thumb"
+                        app:track="@drawable/custom_track_switch" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/self_stop_ll"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="4dp"
+                    android:weightSum="6">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="5"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif"
+                            android:paddingVertical="4dp"
+                            android:text="@string/self_break"
+                            android:textColor="@color/text_color"
+                            android:textSize="@dimen/d_18sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif"
+                            android:paddingStart="2dp"
+                            android:paddingEnd="16dp"
+                            android:text="@string/self_stop_des"
+                            android:textColor="@color/sub_text_grey"
+                            android:textSize="@dimen/d_15sp" />
+
+                    </LinearLayout>
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/self_stop_swi"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:thumb="@drawable/custom_switch_thumb"
+                        app:track="@drawable/custom_track_switch" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/one_click_skip_ll"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="4dp"
+                    android:weightSum="6">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="5"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif"
+                            android:paddingVertical="4dp"
+                            android:text="@string/one_click"
+                            android:textColor="@color/text_color"
+                            android:textSize="@dimen/d_18sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif"
+                            android:paddingStart="2dp"
+                            android:paddingEnd="16dp"
+                            android:text="@string/one_click_des"
+                            android:textColor="@color/sub_text_grey"
+                            android:textSize="@dimen/d_15sp" />
+
+                    </LinearLayout>
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/one_click_skip_swi"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:thumb="@drawable/custom_switch_thumb"
+                        app:track="@drawable/custom_track_switch" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:layout_marginBottom="12dp"
+                android:background="@color/secondary_bg"
+                android:orientation="vertical"
+                android:paddingBottom="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="16dp"
+                    android:paddingHorizontal="16dp"
+                    android:text="@string/filter"
+                    android:textColor="@color/text_color"
+                    android:textSize="@dimen/d_20sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:id="@+id/blacklist_ll"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:orientation="vertical"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="4dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif"
+                        android:paddingVertical="4dp"
+                        android:text="@string/blacklist"
+                        android:textColor="@color/text_color"
+                        android:textSize="@dimen/d_18sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif"
+                        android:paddingStart="2dp"
+                        android:paddingEnd="16dp"
+                        android:text="@string/blacklist_des"
+                        android:textColor="@color/sub_text_grey"
+                        android:textSize="@dimen/d_15sp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/filter_dur_ll"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:orientation="vertical"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="4dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif"
+                        android:paddingVertical="4dp"
+                        android:text="@string/filter_by_dur"
+                        android:textColor="@color/text_color"
+                        android:textSize="@dimen/d_18sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif"
+                        android:paddingStart="2dp"
+                        android:paddingEnd="16dp"
+                        android:text="@string/fil_dur_des"
+                        android:textColor="@color/sub_text_grey"
+                        android:textSize="@dimen/d_15sp" />
+
+                </LinearLayout>
 
             </LinearLayout>
 
         </LinearLayout>
 
-    </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
-</ScrollView>
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.appbar.CollapsingToolbarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/secondary_bg"
+            app:collapsedTitleGravity="center_vertical"
+            app:contentScrim="@color/player_bg"
+            app:expandedTitleGravity="bottom|center_horizontal"
+            app:expandedTitleTextAppearance="@style/App.Custom.Title"
+            app:layout_scrollFlags="scroll|snap|exitUntilCollapsed"
+            app:title="@string/settings">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                app:layout_collapseMode="parallax"
+                app:layout_collapseParallaxMultiplier="0.7" />
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar_settings"
+                android:layout_width="match_parent"
+                android:layout_height="?actionBarSize"
+                android:layout_marginTop="@dimen/status_bar_padding"
+                app:layout_collapseMode="pin" />
+
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
+

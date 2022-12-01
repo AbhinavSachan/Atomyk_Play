@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/playlist_card"
@@ -8,22 +8,19 @@
     android:layout_margin="4dp"
     android:clickable="true"
     android:focusable="true"
-    app:cardBackgroundColor="@color/primary_bg"
-    app:cardCornerRadius="6dp"
-    app:cardElevation="3dp"
     tools:ignore="UnusedAttribute">
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content">
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardView"
             android:layout_width="match_parent"
             android:layout_height="165dp"
-            app:cardBackgroundColor="@color/primary_bg"
+            app:cardBackgroundColor="@color/secondary_bg"
             app:cardCornerRadius="6dp"
-            app:cardElevation="1dp">
+            app:cardElevation="4dp">
 
             <ImageView
                 android:id="@+id/playlist_cover_img"
@@ -91,4 +88,4 @@
 
     </RelativeLayout>
 
-</com.google.android.material.card.MaterialCardView>
+</RelativeLayout>

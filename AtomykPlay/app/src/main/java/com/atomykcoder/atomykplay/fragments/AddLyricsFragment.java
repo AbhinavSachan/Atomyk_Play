@@ -14,6 +14,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 
 import com.atomykcoder.atomykplay.R;
@@ -67,6 +68,15 @@ public class AddLyricsFragment extends Fragment {
         progressBar = view.findViewById(R.id.progress_lyrics);
         storageUtil = new StorageUtil(getContext());
 
+        Toolbar toolbar = view.findViewById(R.id.toolbar_add_lyric);
+        toolbar.setNavigationIcon(R.drawable.ic_back);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                requireActivity().onBackPressed();
+            }
+        });
+
         name = selectedMusic != null ? selectedMusic.getsName() : "";
         artist = selectedMusic != null ? selectedMusic.getsArtist() : "";
         musicId = selectedMusic != null ? selectedMusic.getsId() : "";
@@ -116,7 +126,6 @@ public class AddLyricsFragment extends Fragment {
         dialog = new Dialog(getContext());
 
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setCancelable(false);
         dialog.setContentView(R.layout.edit_name_dialog_box);
 
         //Initialize Dialogue Box UI Items

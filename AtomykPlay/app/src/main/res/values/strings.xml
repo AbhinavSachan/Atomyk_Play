@@ -71,7 +71,8 @@
     <string name="share">Share</string>
     <string name="tag">Tag editor</string>
     <string name="favorite">Favorites</string>
-    <string name="playList">Playlists</string>
+    <string name="playLists">Playlists</string>
+    <string name="playList">Playlist</string>
     <string name="help">Help ?</string>
     <string name="one_click">Single click skip</string>
     <string name="one_click_des">Skip to previous song in single click</string>

@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.SwitchCompat;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 
 import com.atomykcoder.atomykplay.R;
@@ -24,8 +25,8 @@ public class SettingsFragment extends Fragment {
 
     private RadioGroup radioGroup;
     private RadioButton light_theme_btn, dark_theme_btn;
-    private SwitchCompat songInfoSwi, artistSwi, optionSwi, extraSwi, autoPlaySwi, keepShuffleSwi, lowerVolSwi, selfStopSwi, keepScreenOnSwi, oneClickSkipSwi;
-    private View songInfoLl, artistLl, optionLl, extraLl, autoPlayLl, keepShuffleLl, lowerVolLl, blackListLl, filterDurLl, selfStopLl, keepScreenOnLl, oneClickSkipLl;
+    private SwitchCompat songInfoSwi, artistSwi, extraSwi, autoPlaySwi, keepShuffleSwi, lowerVolSwi, selfStopSwi, keepScreenOnSwi, oneClickSkipSwi;
+    private View songInfoLl, artistLl, extraLl, autoPlayLl, keepShuffleLl, lowerVolLl, blackListLl, filterDurLl, selfStopLl, keepScreenOnLl, oneClickSkipLl;
 
 
     private boolean dark;
@@ -42,7 +43,14 @@ public class SettingsFragment extends Fragment {
 
         settingsStorage = new StorageUtil.SettingsStorage(requireContext());
         mainActivity = (MainActivity) requireContext();
-
+        Toolbar toolbar = view.findViewById(R.id.toolbar_settings);
+        toolbar.setNavigationIcon(R.drawable.ic_back);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                requireActivity().onBackPressed();
+            }
+        });
         //saved values
         dark = settingsStorage.loadTheme();
         showInfo = settingsStorage.loadShowInfo();
@@ -62,8 +70,6 @@ public class SettingsFragment extends Fragment {
         songInfoLl = view.findViewById(R.id.show_file_info_ll);
         artistSwi = view.findViewById(R.id.show_artist_swi);
         artistLl = view.findViewById(R.id.show_artist_ll);
-        optionSwi = view.findViewById(R.id.show_option_swi);
-        optionLl = view.findViewById(R.id.show_option_ll);
         extraSwi = view.findViewById(R.id.show_extra_swi);
         extraLl = view.findViewById(R.id.show_extra_ll);
         keepScreenOnSwi = view.findViewById(R.id.keep_screen_swi);
@@ -96,7 +102,6 @@ public class SettingsFragment extends Fragment {
         songInfoLl.setOnClickListener(v -> songInfoSwi.setChecked(!songInfoSwi.isChecked()));
         artistLl.setOnClickListener(v -> artistSwi.setChecked(!artistSwi.isChecked()));
         extraLl.setOnClickListener(v -> extraSwi.setChecked(!extraSwi.isChecked()));
-        optionLl.setOnClickListener(v -> optionSwi.setChecked(!optionSwi.isChecked()));
         autoPlayLl.setOnClickListener(v -> autoPlaySwi.setChecked(!autoPlaySwi.isChecked()));
         keepShuffleLl.setOnClickListener(v -> keepShuffleSwi.setChecked(!keepShuffleSwi.isChecked()));
         lowerVolLl.setOnClickListener(v -> lowerVolSwi.setChecked(!lowerVolSwi.isChecked()));
@@ -120,11 +125,6 @@ public class SettingsFragment extends Fragment {
             extraSwi.setChecked(isChecked);
             settingsStorage.showExtraCon(isChecked);
             hideExtra(isChecked);
-        });
-        optionSwi.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            optionSwi.setChecked(isChecked);
-            settingsStorage.showOptionMenu(isChecked);
-            hideOptions(isChecked);
         });
         autoPlaySwi.setOnCheckedChangeListener((buttonView, isChecked) -> {
             autoPlaySwi.setChecked(isChecked);
@@ -163,14 +163,6 @@ public class SettingsFragment extends Fragment {
         Toast.makeText(requireContext(), s, Toast.LENGTH_SHORT).show();
     }
 
-    private void hideOptions(boolean v) {
-        if (v) {
-            mainActivity.bottomSheetPlayerFragment.optionImg.setVisibility(View.VISIBLE);
-        } else {
-            mainActivity.bottomSheetPlayerFragment.optionImg.setVisibility(View.GONE);
-        }
-    }
-
     private void hideExtra(boolean v) {
         if (v) {
             mainActivity.bottomSheetPlayerFragment.mini_next.setVisibility(View.VISIBLE);
@@ -204,7 +196,6 @@ public class SettingsFragment extends Fragment {
         songInfoSwi.setChecked(showInfo);
         artistSwi.setChecked(showArtist);
         extraSwi.setChecked(showExtra);
-        optionSwi.setChecked(showOption);
         autoPlaySwi.setChecked(autoPlay);
         keepShuffleSwi.setChecked(keepShuffle);
         lowerVolSwi.setChecked(lowerVol);

@@ -36,6 +36,7 @@
     <color name="status_bar_color">#B4F6F6F6</color>
     <color name="cover_black_player">#191919</color>
     <color name="player_bg">#F6F6F6</color>
+    <color name="red_layer">#0FDC2525</color>
 
 
 </resources>

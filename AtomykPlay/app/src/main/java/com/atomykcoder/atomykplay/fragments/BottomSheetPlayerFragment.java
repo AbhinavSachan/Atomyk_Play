@@ -15,6 +15,10 @@ import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.shuffle;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.MediaMetadataRetriever;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -320,6 +324,21 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
             duration = activeMusic.getsLength();
             albumUri = activeMusic.getsAlbumUri();
 
+            String convertedDur = convertDuration(duration);
+
+            //image decoder
+            MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
+            mediaMetadataRetriever.setDataSource(activeMusic.getsPath());
+            byte[] art = mediaMetadataRetriever.getEmbeddedPicture();
+            Bitmap image;
+            try {
+                image = BitmapFactory.decodeByteArray(art,0,art.length);
+            } catch (Exception e) {
+                image = null;
+            }
+            int bitrateInNum = Integer.parseInt(bitrate) / 1000;
+            String finalBitrate = bitrateInNum + " KBPS";
+
             if (storageUtil.loadFavorite(songName).equals("no_favorite")) {
                 favoriteImg.setImageResource(R.drawable.ic_favorite_border);
             } else if (storageUtil.loadFavorite(songName).equals("favorite")) {
@@ -337,15 +356,14 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
                 playerArtistNameTv.setText(artistName);
                 artistQueueItem.setText(artistName);
                 mimeTv.setText(mimeType);
-                durationTv.setText(convertDuration(duration));
+                durationTv.setText(convertedDur);
                 mini_name_text.setText(songName);
                 mini_artist_text.setText(artistName);
                 seekBarMain.setMax(Integer.parseInt(duration));
                 mini_progress.setMax(Integer.parseInt(duration));
-                int bitrateInNum = Integer.parseInt(bitrate) / 1000;
-                String finalBitrate = bitrateInNum + " KBPS";
                 bitrateTv.setText(finalBitrate);
-                GlideBuilt.glide(requireContext(), albumUri, R.drawable.ic_music, playerCoverImage, 512);
+
+                GlideBuilt.glideBitmap(requireContext(), image, R.drawable.ic_music, playerCoverImage, 512);
                 GlideBuilt.glide(requireContext(), albumUri, R.drawable.ic_music, mini_cover, 128);
                 GlideBuilt.glide(requireContext(), albumUri, R.drawable.ic_music, queueCoverImg, 128);
 

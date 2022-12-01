@@ -16,7 +16,7 @@
             android:id="@+id/navigation_playlist"
             android:icon="@drawable/ic_music_list"
             android:enabled="false"
-            android:title="@string/playList" />
+            android:title="@string/playLists" />
         <item
             android:id="@+id/navigation_setting"
             android:icon="@drawable/settings"
