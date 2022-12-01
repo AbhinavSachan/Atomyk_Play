@@ -332,11 +332,11 @@
             android:alpha="0"
             android:background="@color/translucent_black"
             android:elevation="25dp" />
-
-        <include layout="@layout/option_sheet" />
-
         <include layout="@layout/donation_layout" />
 
+        <include layout="@layout/playlist_option_sheet" />
+
+        <include layout="@layout/option_sheet" />
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
     <com.google.android.material.navigation.NavigationView

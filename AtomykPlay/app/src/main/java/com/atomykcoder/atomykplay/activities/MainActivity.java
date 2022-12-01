@@ -13,7 +13,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.ServiceConnection;
-import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.media.RingtoneManager;
@@ -28,7 +28,6 @@ import android.provider.Settings;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -65,13 +64,11 @@ import com.atomykcoder.atomykplay.events.PrepareRunnableEvent;
 import com.atomykcoder.atomykplay.events.RemoveLyricsHandlerEvent;
 import com.atomykcoder.atomykplay.fragments.AboutFragment;
 import com.atomykcoder.atomykplay.fragments.BottomSheetPlayerFragment;
-import com.atomykcoder.atomykplay.fragments.FavoritesFragment;
 import com.atomykcoder.atomykplay.fragments.HelpFragment;
 import com.atomykcoder.atomykplay.fragments.PlaylistsFragment;
 import com.atomykcoder.atomykplay.fragments.SearchFragment;
 import com.atomykcoder.atomykplay.fragments.SettingsFragment;
 import com.atomykcoder.atomykplay.helperFunctions.FetchMusic;
-import com.atomykcoder.atomykplay.helperFunctions.PlaylistHelper;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.services.MediaPlayerService;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
@@ -90,7 +87,6 @@ import org.greenrobot.eventbus.EventBus;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -101,14 +97,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public static final String BROADCAST_STOP_MUSIC = "com.atomykcoder.atomykplay.StopMusic";
     public static final String BROADCAST_PLAY_NEXT_MUSIC = "com.atomykcoder.atomykplay.PlayNextMusic";
     public static final String BROADCAST_PLAY_PREVIOUS_MUSIC = "com.atomykcoder.atomykplay.PlayPreviousMusic";
-
-    private final int DELETE_ITEM = 200;
-    private final int PICK_IMAGE = 100;
     public static boolean service_bound = false;
     public static boolean is_granted = false;
     public static boolean phone_ringing = false;
-
     public static MediaPlayerService media_player_service;
+    private final int DELETE_ITEM = 200;
+    private final int PICK_IMAGE = 100;
     public ServiceConnection service_connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -131,11 +125,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public CustomBottomSheet<View> optionSheetBehavior;
     public BottomSheetBehavior<View> donationSheetBehavior;
     public MusicDataCapsule optionItemSelected;
+    public Playlist plOptionItemSelected;
+    public Dialog addToPlDialog;
+    public CustomBottomSheet<View> plSheetBehavior;
+    public View plSheet;
     FragmentManager searchFragmentManager;
     private View shadowMain;
-    private View shadowLyrFound, shadowOuterSheet,playerPickCover_l;
-    private ImageView playlist_image_View;
-    private Uri playListImageUri;
+    private View shadowLyrFound, shadowOuterSheet, playerPickCover_l;
     private final BottomSheetBehavior.BottomSheetCallback lrcFoundCallback = new BottomSheetBehavior.BottomSheetCallback() {
         @Override
         public void onStateChanged(@NonNull View bottomSheet, int newState) {
@@ -151,6 +147,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             shadowLyrFound.setAlpha(0.2f + slideOffset);
         }
     };
+    private ImageView playlist_image_View;
+    private Uri playListImageUri;
     private ArrayList<MusicDataCapsule> dataList;
     private MusicMainAdapter musicMainAdapter;
     private LinearLayout linearLayout;
@@ -186,6 +184,31 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     };
     private final BottomSheetBehavior.BottomSheetCallback donationCallback = new BottomSheetBehavior.BottomSheetCallback() {
+        @Override
+        public void onStateChanged(@NonNull View bottomSheet, int newState) {
+            if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
+                drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+                shadowOuterSheet.setClickable(true);
+                shadowOuterSheet.setFocusable(true);
+                shadowOuterSheet.setAlpha(0.6f);
+            } else if (newState == BottomSheetBehavior.STATE_EXPANDED) {
+                shadowOuterSheet.setClickable(true);
+                shadowOuterSheet.setFocusable(true);
+                drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+                shadowOuterSheet.setAlpha(1f);
+            } else if (newState == BottomSheetBehavior.STATE_HIDDEN) {
+                drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+                shadowOuterSheet.setClickable(false);
+                shadowOuterSheet.setFocusable(false);
+            }
+        }
+
+        @Override
+        public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+            shadowOuterSheet.setAlpha(0.6f + slideOffset);
+        }
+    };
+    private final BottomSheetBehavior.BottomSheetCallback plSheetCallback = new BottomSheetBehavior.BottomSheetCallback() {
         @Override
         public void onStateChanged(@NonNull View bottomSheet, int newState) {
             if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
@@ -266,10 +289,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private View donationSheet;
     private Runnable runnable;
     private View createPlaylistBtnDialog, addFavBtnDialog;
-    public Dialog addToPlDialog;
     private PlaylistDialogAdapter playlistDialogAdapter;
     private ArrayList<Playlist> playlistArrayList;
     private RecyclerView plDialogRecyclerView;
+    private View addPlayNextPlBtn, addToQueuePlBtn, addToPlaylistPl, nameEditorBtnPl, chooseCoverPl, deletePlBtn;
+    private ImageView plOptionCover;
+    private TextView plOptionName, optionPlCount;
 
     public void clearStorage() {
         storageUtil.clearMusicLastPos();
@@ -322,6 +347,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         shadowOuterSheet = findViewById(R.id.outer_sheet_shadow);
         optionSheet = findViewById(R.id.option_bottom_sheet);
         donationSheet = findViewById(R.id.donation_bottom_sheet);
+        plSheet = findViewById(R.id.pl_option_bottom_sheet);
         anchoredShadow = findViewById(R.id.anchored_player_shadow);
 
         mainPlayerSheetBehavior = (CustomBottomSheet<View>) BottomSheetBehavior.from(player_bottom_sheet);
@@ -377,19 +403,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setBottomSheets();
 
         setUpOptionMenuButtons();
+        setUpPlOptionMenuButtons();
 
         if (is_granted) {
             if (dataList != null) {
-                Handler handler = new Handler(Looper.getMainLooper());
-                runnable = () -> {
-                    checkForUpdateMusic();
-                    handler.postDelayed(runnable, 30000);
-                };
+                Handler handler = new Handler();
+                runnable = this::checkForUpdateMusic;
                 handler.postDelayed(runnable, 5000);
             }
         }
         lyricsListBehavior.addBottomSheetCallback(lrcFoundCallback);
         optionSheetBehavior.addBottomSheetCallback(optionCallback);
+        plSheetBehavior.addBottomSheetCallback(plSheetCallback);
         donationSheetBehavior.addBottomSheetCallback(donationCallback);
         mainPlayerSheetBehavior.addBottomSheetCallback(bottomSheetCallback);
 
@@ -398,6 +423,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (savedInstanceState == null) {
             navigationView.setCheckedItem(R.id.navigation_home);
         }
+    }
+
+    private void setUpPlOptionMenuButtons() {
+        addPlayNextPlBtn = findViewById(R.id.add_play_next_pl_option);
+        addToQueuePlBtn = findViewById(R.id.add_to_queue_pl_option);
+        addToPlaylistPl = findViewById(R.id.add_to_playlist_pl_option);
+        nameEditorBtnPl = findViewById(R.id.rename_pl_option);
+        chooseCoverPl = findViewById(R.id.choose_cover_option);
+        deletePlBtn = findViewById(R.id.delete_pl_option);
+        plOptionCover = findViewById(R.id.playlist_cover_option);
+        plOptionName = findViewById(R.id.playlist_name_option);
+        optionPlCount = findViewById(R.id.playlist_count_name_option);
+
+        addPlayNextPlBtn.setOnClickListener(this);
+        addToQueuePlBtn.setOnClickListener(this);
+        addToPlaylistPl.setOnClickListener(this);
+        nameEditorBtnPl.setOnClickListener(this);
+        chooseCoverPl.setOnClickListener(this);
+        deletePlBtn.setOnClickListener(this);
+
     }
 
     private void playShuffleSong() {
@@ -410,14 +455,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void setPlaylistFragment() {
         FragmentManager fragmentManager = getSupportFragmentManager();
+        Fragment fragment3 = fragmentManager.findFragmentByTag("PlaylistsFragment");
+
         FragmentTransaction transaction = fragmentManager.beginTransaction();
+        if (fragment3 != null) {
+            fragmentManager.popBackStackImmediate();
+        }
         PlaylistsFragment fragment = new PlaylistsFragment();
         fragment.setEnterTransition(TransitionInflater.from(this).inflateTransition(android.R.transition.slide_bottom));
         transaction.replace(R.id.sec_container, fragment, "PlaylistsFragment").addToBackStack(null).commit();
     }
 
     private void checkForUpdateMusic() {
-
         ExecutorService service = Executors.newSingleThreadExecutor();
         Handler handler = new Handler(Looper.getMainLooper());
 
@@ -471,9 +520,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void setBottomSheets() {
         DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
-        int peekHeight = (int) (metrics.heightPixels / 10.6f);
+
+        int mainPlayerPeekHeight = (int) (metrics.heightPixels / 10.6f);
         mainPlayerSheetBehavior.setHideable(true);
-        mainPlayerSheetBehavior.setPeekHeight(peekHeight);
+        mainPlayerSheetBehavior.setPeekHeight(mainPlayerPeekHeight);
 
         if (getMusic() != null) {
             mainPlayerSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
@@ -482,24 +532,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             mainPlayerSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
         }
 
+        int optionPeekHeight = (int) (metrics.heightPixels / 1.3f);
         optionSheetBehavior = (CustomBottomSheet<View>) BottomSheetBehavior.from(optionSheet);
         optionSheetBehavior.setHideable(true);
-        optionSheetBehavior.setPeekHeight(1100);
+        optionSheetBehavior.setPeekHeight(optionPeekHeight);
         optionSheetBehavior.setSkipCollapsed(true);
         optionSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
 
+        int lyricFoundPeekHeight = (int) (metrics.heightPixels / 3.5f);
         View lyricsListView = findViewById(R.id.found_lyrics_fragments);
         lyricsListBehavior = BottomSheetBehavior.from(lyricsListView);
         lyricsListBehavior.setHideable(true);
-        lyricsListBehavior.setPeekHeight(360);
+        lyricsListBehavior.setPeekHeight(lyricFoundPeekHeight);
         lyricsListBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
 
 
+        int donationPeekHeight = (int) (metrics.heightPixels / 1.4f);
         donationSheetBehavior = BottomSheetBehavior.from(donationSheet);
         donationSheetBehavior.setHideable(true);
-        donationSheetBehavior.setPeekHeight(900);
+        donationSheetBehavior.setPeekHeight(donationPeekHeight);
         donationSheetBehavior.setSkipCollapsed(true);
         donationSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+
+        int plOptionPeekHeight = (int) (metrics.heightPixels / 1.8f);
+        plSheetBehavior = (CustomBottomSheet<View>) BottomSheetBehavior.from(plSheet);
+        plSheetBehavior.setHideable(true);
+        plSheetBehavior.setPeekHeight(plOptionPeekHeight);
+        plSheetBehavior.setSkipCollapsed(true);
+        plSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
 
     }
 
@@ -521,6 +581,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     donationSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
                 }
             }
+            if (plSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
+                Rect outRect = new Rect();
+                plSheet.getGlobalVisibleRect(outRect);
+                if (!outRect.contains((int) event.getRawX(), (int) event.getRawY())) {
+                    plSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+                }
+            }
         }
         return super.dispatchTouchEvent(event);
     }
@@ -532,10 +599,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         GlideBuilt.glide(this, null, R.drawable.placeholder_nav, navCover, 300);
     }
 
-    public void setDataInNavigation(String song_name, String artist_name, String album_uri) {
+    public void setDataInNavigation(String song_name, String artist_name, Bitmap album_uri) {
         navSongName.setText(song_name);
         navArtistName.setText(artist_name);
-        GlideBuilt.glide(this, album_uri, R.drawable.ic_music, navCover, 300);
+        GlideBuilt.glideBitmap(this, album_uri, R.drawable.ic_music, navCover, 300);
     }
 
     private MusicDataCapsule getMusic() {
@@ -822,6 +889,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         GlideBuilt.glide(this, currentItem.getsAlbumUri(), R.drawable.ic_music, optionCover, 65);
     }
 
+    public void openPlOptionMenu(Playlist currentItem) {
+        plOptionItemSelected = currentItem;
+        String count = currentItem.getMusicArrayList().size() +" Songs";
+        plSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        plOptionName.setText(currentItem.getName());
+        optionPlCount.setText(count);
+        GlideBuilt.glide(this, currentItem.getCoverUri(), R.drawable.ic_music_list, plOptionCover, 200);
+    }
+
     /**
      * delete song permanently from device *USE WITH CAUTION*
      *
@@ -1014,7 +1090,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         lyricsListBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
                     lyricsListBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
                 } else {
-                    if ( fragment3 != null || fragment4 != null || fragment5 != null) {
+                    if (fragment3 != null || fragment4 != null || fragment5 != null) {
                         navigationView.setCheckedItem(R.id.navigation_home);
                     }
                     super.onBackPressed();
@@ -1045,13 +1121,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         switch (item.getItemId()) {
             case R.id.navigation_home: {
-                if ( fragment3 != null || fragment4 != null || fragment5 != null) {
+                if (fragment3 != null || fragment4 != null || fragment5 != null) {
                     fragmentManager.popBackStackImmediate();
                 }
                 break;
             }
             case R.id.navigation_setting: {
-                if ( fragment3 != null || fragment4 != null || fragment5 != null) {
+                if (fragment3 != null || fragment4 != null || fragment5 != null) {
                     fragmentManager.popBackStackImmediate();
                 }
                 SettingsFragment fragment = new SettingsFragment();
@@ -1061,7 +1137,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             }
             case R.id.navigation_help: {
-                if ( fragment3 != null || fragment4 != null || fragment5 != null) {
+                if (fragment3 != null || fragment4 != null || fragment5 != null) {
                     fragmentManager.popBackStackImmediate();
                 }
                 HelpFragment fragment = new HelpFragment();
@@ -1071,7 +1147,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             }
             case R.id.navigation_about: {
-                if ( fragment3 != null || fragment4 != null || fragment5 != null) {
+                if (fragment3 != null || fragment4 != null || fragment5 != null) {
                     fragmentManager.popBackStackImmediate();
                 }
                 AboutFragment fragment = new AboutFragment();
@@ -1170,7 +1246,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         plDialogRecyclerView.setLayoutManager(manager);
 
         if (playlistArrayList != null) {
-            playlistDialogAdapter = new PlaylistDialogAdapter(this, playlistArrayList,optionItemSelected);
+            playlistDialogAdapter = new PlaylistDialogAdapter(this, playlistArrayList, optionItemSelected);
             plDialogRecyclerView.setAdapter(playlistDialogAdapter);
         }
         addToPlDialog.show();
@@ -1218,7 +1294,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
         btnCancel.setOnClickListener(v -> plDialog.cancel());
-
         plDialog.show();
     }
 

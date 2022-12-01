@@ -1,7 +1,6 @@
 package com.atomykcoder.atomykplay.adapters;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,7 +10,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -22,13 +20,10 @@ import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.classes.GlideBuilt;
 import com.atomykcoder.atomykplay.fragments.OpenPlayListFragment;
-import com.atomykcoder.atomykplay.fragments.SettingsFragment;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import com.atomykcoder.atomykplay.viewModals.Playlist;
-import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 
 public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.PlaylistViewHolder> {
@@ -49,21 +44,28 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
 
     @Override
     public void onBindViewHolder(@NonNull PlaylistAdapter.PlaylistViewHolder holder, int position) {
-        Playlist capsule = arrayList.get(position);
-        ArrayList<MusicDataCapsule> musicList = capsule.getMusicArrayList();
+        Playlist currentItem = arrayList.get(position);
+        ArrayList<MusicDataCapsule> musicList = currentItem.getMusicArrayList();
 
-        GlideBuilt.glide(context,capsule.getCoverUri(),R.drawable.ic_music_list,holder.imageView,300);
+        GlideBuilt.glide(context, currentItem.getCoverUri(), R.drawable.ic_music_list, holder.imageView, 300);
         String count = musicList.size() + " Songs";
-        holder.playlistName.setText(capsule.getName());
+        holder.playlistName.setText(currentItem.getName());
         holder.songCount.setText(count);
 
         holder.cardView.setOnClickListener(v -> {
             //opening fragment when clicked on playlist
-            FragmentManager fragmentManager = ((MainActivity)context).getSupportFragmentManager();
+            FragmentManager fragmentManager = ((MainActivity) context).getSupportFragmentManager();
+
+            Fragment fragment3 = fragmentManager.findFragmentByTag("OpenPlayListFragment");
+
             FragmentTransaction transaction = fragmentManager.beginTransaction();
 
             Bundle bundle = new Bundle();
-            bundle.putSerializable("currentPlaylist",capsule);
+            bundle.putSerializable("currentPlaylist", currentItem);
+
+            if (fragment3 != null) {
+                fragmentManager.popBackStackImmediate();
+            }
 
             OpenPlayListFragment fragment = new OpenPlayListFragment();
             fragment.setArguments(bundle);
@@ -72,9 +74,8 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
             transaction.add(R.id.sec_container, fragment, "OpenPlayListFragment").addToBackStack(null).commit();
 
         });
-        holder.optImg.setOnClickListener(v->{
 
-        });
+        holder.optImg.setOnClickListener(v -> ((MainActivity) context).openPlOptionMenu(currentItem));
 
     }
 
@@ -86,8 +87,9 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
     public static class PlaylistViewHolder extends RecyclerView.ViewHolder {
         private final TextView playlistName;
         private final TextView songCount;
-        private final ImageView imageView,optImg;
+        private final ImageView imageView, optImg;
         private final View cardView;
+
         public PlaylistViewHolder(@NonNull View view) {
             super(view);
             playlistName = view.findViewById(R.id.playlist_name_tv);

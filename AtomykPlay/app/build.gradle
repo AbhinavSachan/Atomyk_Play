@@ -48,7 +48,7 @@ android {
 }
 
 dependencies {
-//    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.10'
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.10'
     //event bus implementations
     implementation 'org.greenrobot:eventbus:3.3.1'
 
