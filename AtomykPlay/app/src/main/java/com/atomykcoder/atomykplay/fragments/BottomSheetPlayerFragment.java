@@ -543,7 +543,9 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         addLyricsFragment.setArguments(music);
         addLyricsFragment.setEnterTransition(TransitionInflater.from(requireContext()).inflateTransition(android.R.transition.slide_top));
 
-        mainActivity.mainPlayerSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        if (getMusic() != null) {
+            mainActivity.mainPlayerSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        }
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.replace(R.id.sec_container, addLyricsFragment, "AddLyricsFragment");
         transaction.addToBackStack(null);
