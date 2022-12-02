@@ -2,6 +2,7 @@ package com.atomykcoder.atomykplay.helperFunctions;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import com.atomykcoder.atomykplay.viewModals.LRCMap;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
@@ -150,20 +151,12 @@ public class StorageUtil {
         editor.apply();
     }
 
-    public Map<String, ?> getFavouriteList() {
-        sharedPreferences = context.getSharedPreferences(FAVORITE_STORAGE, Context.MODE_PRIVATE);
-        return sharedPreferences.getAll();
-    }
-
-    public void saveFavorite(MusicDataCapsule music, boolean isFav) {
+    public void saveFavorite(MusicDataCapsule music) {
         sharedPreferences = context.getSharedPreferences(FAVORITE_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         Gson gson = new Gson();
         String json = gson.toJson(music);
-        if(isFav)
-            editor.putString(json, favorite);
-        else
-            editor.putString(json, no_favorite);
+        editor.putString(json, favorite);
         editor.apply();
     }
 
@@ -182,6 +175,21 @@ public class StorageUtil {
         String json = gson.toJson(music);
         editor.remove(json);
         editor.apply();
+    }
+
+    public ArrayList<MusicDataCapsule> getFavouriteList() {
+        sharedPreferences = context.getSharedPreferences(FAVORITE_STORAGE, Context.MODE_PRIVATE);
+        Gson gson = new Gson();
+        ArrayList<MusicDataCapsule> favouriteList = new ArrayList<>();
+        Map<String, ?> keys = sharedPreferences.getAll();
+        for (Map.Entry<String, ?> entry : keys.entrySet()) {
+            String json = entry.getKey();
+            Log.i("info", "fav music: " + json);
+            Type type = new TypeToken<MusicDataCapsule>(){}.getType();
+            MusicDataCapsule music = gson.fromJson(entry.getKey(), type);
+            favouriteList.add(music);
+        }
+        return  favouriteList;
     }
 
     public String loadShuffle() {

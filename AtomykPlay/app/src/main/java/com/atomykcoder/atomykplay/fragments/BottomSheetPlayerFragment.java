@@ -732,7 +732,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         MusicDataCapsule activeMusic = getMusic();
         if (activeMusic != null) {
             if (storageUtil.checkFavourite(activeMusic).equals("no_favorite")) {
-                storageUtil.saveFavorite(activeMusic, true);
+                storageUtil.saveFavorite(activeMusic);
                 favoriteImg.setImageResource(R.drawable.ic_favorite);
                 Log.i("info", "saved");
             } else if (storageUtil.checkFavourite(activeMusic).equals("favorite")){

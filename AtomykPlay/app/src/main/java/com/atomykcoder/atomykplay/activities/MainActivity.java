@@ -28,6 +28,7 @@ import android.provider.Settings;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -424,6 +425,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (savedInstanceState == null) {
             navigationView.setCheckedItem(R.id.navigation_home);
         }
+
+        //TESTING FAVOURITE
+        ArrayList<MusicDataCapsule> musicList = storageUtil.getFavouriteList();
     }
 
     private void setUpPlOptionMenuButtons() {
@@ -1256,7 +1260,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void addToFavorite(MusicDataCapsule optionItemSelected) {
-
+        storageUtil.saveFavorite(optionItemSelected);
     }
 
     @SuppressLint("NotifyDataSetChanged")
