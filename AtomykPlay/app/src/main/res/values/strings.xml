@@ -86,4 +86,7 @@
     <string name="create_pl">Create playlist</string>
     <string name="pl_name">Playlist name</string>
     <string name="cci">Choose a cover image</string>
+    <string name="delete_pl">Delete playlist</string>
+    <string name="choose_pl_cover">Choose artwork</string>
+    <string name="rename">Rename</string>
 </resources>

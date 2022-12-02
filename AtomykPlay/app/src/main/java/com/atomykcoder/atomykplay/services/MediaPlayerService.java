@@ -4,6 +4,7 @@ import static com.atomykcoder.atomykplay.activities.MainActivity.BROADCAST_PAUSE
 import static com.atomykcoder.atomykplay.activities.MainActivity.BROADCAST_PLAY_NEXT_MUSIC;
 import static com.atomykcoder.atomykplay.activities.MainActivity.BROADCAST_PLAY_PREVIOUS_MUSIC;
 import static com.atomykcoder.atomykplay.activities.MainActivity.BROADCAST_STOP_MUSIC;
+import static com.atomykcoder.atomykplay.activities.MainActivity.activityPaused;
 import static com.atomykcoder.atomykplay.activities.MainActivity.service_bound;
 import static com.atomykcoder.atomykplay.classes.ApplicationClass.CHANNEL_ID;
 
@@ -234,10 +235,12 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             } else {
                 if (media_player.isPlaying()) {
                     pauseMedia();
-                    EventBus.getDefault().post(new RemoveLyricsHandlerEvent());
+                    if (!activityPaused) {
+                        EventBus.getDefault().post(new RemoveLyricsHandlerEvent());
+                    }
                 } else {
                     resumeMedia();
-                    if (service_bound) {
+                    if (!activityPaused) {
                         LRCMap lrcMap = storage.loadLyrics(activeMusic.getsId());
                         if (lrcMap != null) {
                             EventBus.getDefault().post(new PrepareRunnableEvent());

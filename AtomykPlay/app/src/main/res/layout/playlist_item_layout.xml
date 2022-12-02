@@ -7,6 +7,7 @@
     android:layout_height="wrap_content"
     android:layout_margin="4dp"
     android:clickable="true"
+    android:foreground="?selectableItemBackground"
     android:focusable="true"
     tools:ignore="UnusedAttribute">
 
@@ -18,9 +19,9 @@
             android:id="@+id/cardView"
             android:layout_width="match_parent"
             android:layout_height="165dp"
-            app:cardBackgroundColor="@color/secondary_bg"
+            app:cardBackgroundColor="@color/cover_black"
             app:cardCornerRadius="6dp"
-            app:cardElevation="4dp">
+            app:cardElevation="1dp">
 
             <ImageView
                 android:id="@+id/playlist_cover_img"

@@ -16,9 +16,11 @@ import androidx.transition.TransitionInflater;
 
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.adapters.PlaylistAdapter;
+import com.atomykcoder.atomykplay.customScripts.CustomBottomSheet;
 import com.atomykcoder.atomykplay.customScripts.GridSpacing;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.viewModals.Playlist;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 import java.util.ArrayList;
 
@@ -39,6 +41,7 @@ public class PlaylistsFragment extends Fragment {
 
         recyclerView = view.findViewById(R.id.playlist_recycler_view);
         noPlLayout = view.findViewById(R.id.no_pl_layout);
+
         View favBtn = view.findViewById(R.id.pl_favorites_btn);
 
         Toolbar toolbar = view.findViewById(R.id.toolbar_playlists);
@@ -60,7 +63,7 @@ public class PlaylistsFragment extends Fragment {
                 FavoritesFragment fragment = new FavoritesFragment();
                 fragment.setEnterTransition(TransitionInflater.from(requireContext()).inflateTransition(android.R.transition.slide_bottom));
 
-                transaction.replace(R.id.sec_container, fragment, "SettingsFragment").addToBackStack(null).commit();
+                transaction.add(R.id.sec_container, fragment, "FavoritesFragment").addToBackStack(null).commit();
             }
         });
 

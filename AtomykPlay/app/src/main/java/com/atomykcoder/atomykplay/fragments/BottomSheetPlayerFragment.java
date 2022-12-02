@@ -366,7 +366,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
                 GlideBuilt.glide(requireContext(), albumUri, R.drawable.ic_music, mini_cover, 128);
                 GlideBuilt.glide(requireContext(), albumUri, R.drawable.ic_music, queueCoverImg, 128);
 
-                ((MainActivity) context).setDataInNavigation(songName, artistName, albumUri);
+                ((MainActivity) context).setDataInNavigation(songName, artistName, image);
 
             } catch (NumberFormatException e) {
                 e.printStackTrace();
@@ -542,7 +542,9 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         addLyricsFragment.setArguments(music);
         addLyricsFragment.setEnterTransition(TransitionInflater.from(requireContext()).inflateTransition(android.R.transition.slide_top));
 
-        mainActivity.mainPlayerSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        if (mainActivity.mainPlayerSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+            mainActivity.mainPlayerSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        }
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.replace(R.id.sec_container, addLyricsFragment, "AddLyricsFragment");
         transaction.addToBackStack(null);
