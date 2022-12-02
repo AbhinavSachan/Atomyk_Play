@@ -101,6 +101,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public static boolean is_granted = false;
     public static boolean phone_ringing = false;
     public static MediaPlayerService media_player_service;
+    public static boolean activityPaused = false;
     private final int DELETE_ITEM = 200;
     private final int PICK_IMAGE = 100;
     public ServiceConnection service_connection = new ServiceConnection() {
@@ -688,6 +689,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (is_playing) {
                 media_player_service.setSeekBar();
                 EventBus.getDefault().post(new PrepareRunnableEvent());
+                activityPaused = false;
             }
         }
     }
@@ -706,6 +708,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (media_player_service.handler != null) {
                 media_player_service.handler.removeCallbacks(media_player_service.runnable);
                 EventBus.getDefault().post(new RemoveLyricsHandlerEvent());
+                activityPaused = true;
             }
         }
         super.onPause();
@@ -891,7 +894,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public void openPlOptionMenu(Playlist currentItem) {
         plOptionItemSelected = currentItem;
-        String count = currentItem.getMusicArrayList().size() +" Songs";
+        String count = currentItem.getMusicArrayList().size() + " Songs";
         plSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         plOptionName.setText(currentItem.getName());
         optionPlCount.setText(count);
