@@ -29,6 +29,8 @@ public class PlaylistsFragment extends Fragment {
     private ArrayList<Playlist> playlistList;
     private PlaylistAdapter playlistAdapter;
 
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -78,5 +80,11 @@ public class PlaylistsFragment extends Fragment {
             recyclerView.setAdapter(playlistAdapter);
         }
         return view;
+    }
+
+    @Override
+    public void onDestroyView() {
+        noPlLayout = null;
+        super.onDestroyView();
     }
 }

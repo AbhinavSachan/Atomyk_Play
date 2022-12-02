@@ -150,27 +150,37 @@ public class StorageUtil {
         editor.apply();
     }
 
-    public String loadFavorite(String id) {
-        sharedPreferences = context.getSharedPreferences(FAVORITE_STORAGE, Context.MODE_PRIVATE);
-        return sharedPreferences.getString(id, no_favorite);
-    }
-
     public Map<String, ?> getFavouriteList() {
         sharedPreferences = context.getSharedPreferences(FAVORITE_STORAGE, Context.MODE_PRIVATE);
         return sharedPreferences.getAll();
     }
 
-    public void saveFavorite(String id) {
+    public void saveFavorite(MusicDataCapsule music, boolean isFav) {
         sharedPreferences = context.getSharedPreferences(FAVORITE_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(id, favorite);
+        Gson gson = new Gson();
+        String json = gson.toJson(music);
+        if(isFav)
+            editor.putString(json, favorite);
+        else
+            editor.putString(json, no_favorite);
         editor.apply();
     }
 
-    public void removeFavorite(String id) {
+    public String checkFavourite(MusicDataCapsule music) {
+        sharedPreferences = context.getSharedPreferences(FAVORITE_STORAGE, Context.MODE_PRIVATE);
+        Gson gson = new Gson();
+        String json = gson.toJson(music);
+        return sharedPreferences.getString(json, no_favorite);
+    }
+
+
+    public void removeFavorite(MusicDataCapsule music) {
         sharedPreferences = context.getSharedPreferences(FAVORITE_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.remove(id);
+        Gson gson = new Gson();
+        String json = gson.toJson(music);
+        editor.remove(json);
         editor.apply();
     }
 
@@ -326,6 +336,7 @@ public class StorageUtil {
         // apply editor
         editor.apply();
     }
+
 
     /**
      * This class is only for settings page don't use it anywhere else

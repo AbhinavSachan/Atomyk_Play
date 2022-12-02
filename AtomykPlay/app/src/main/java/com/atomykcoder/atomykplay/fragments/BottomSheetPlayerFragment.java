@@ -4,8 +4,6 @@ import static com.atomykcoder.atomykplay.activities.MainActivity.media_player_se
 import static com.atomykcoder.atomykplay.activities.MainActivity.service_bound;
 import static com.atomykcoder.atomykplay.helperFunctions.MusicHelper.convertDuration;
 import static com.atomykcoder.atomykplay.helperFunctions.MusicHelper.convertToMillis;
-import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.favorite;
-import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.no_favorite;
 import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.no_repeat;
 import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.no_shuffle;
 import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.repeat;
@@ -24,6 +22,7 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -339,9 +338,9 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
             int bitrateInNum = Integer.parseInt(bitrate) / 1000;
             String finalBitrate = bitrateInNum + " KBPS";
 
-            if (storageUtil.loadFavorite(songName).equals("no_favorite")) {
+            if (storageUtil.checkFavourite(activeMusic).equals("no_favorite")) {
                 favoriteImg.setImageResource(R.drawable.ic_favorite_border);
-            } else if (storageUtil.loadFavorite(songName).equals("favorite")) {
+            } else if (storageUtil.checkFavourite(activeMusic).equals("favorite")){
                 favoriteImg.setImageResource(R.drawable.ic_favorite);
             }
             if (storageUtil.loadShuffle().equals(no_shuffle)) {
@@ -730,12 +729,14 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     private void addFavorite() {
         MusicDataCapsule activeMusic = getMusic();
         if (activeMusic != null) {
-            if (storageUtil.loadFavorite(activeMusic.getsName()).equals(no_favorite)) {
+            if (storageUtil.checkFavourite(activeMusic).equals("no_favorite")) {
+                storageUtil.saveFavorite(activeMusic, true);
                 favoriteImg.setImageResource(R.drawable.ic_favorite);
-                storageUtil.saveFavorite(activeMusic.getsName());
-            } else if (storageUtil.loadFavorite(activeMusic.getsName()).equals(favorite)) {
+                Log.i("info", "saved");
+            } else if (storageUtil.checkFavourite(activeMusic).equals("favorite")){
+                storageUtil.removeFavorite(activeMusic);
                 favoriteImg.setImageResource(R.drawable.ic_favorite_border);
-                storageUtil.removeFavorite(activeMusic.getsName());
+                Log.i("info", "removed");
             }
         }
     }
@@ -939,9 +940,9 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     private void setButton() {
         MusicDataCapsule activeMusic = getMusic();
         if (activeMusic != null) {
-            if (storageUtil.loadFavorite(activeMusic.getsName()).equals(no_favorite)) {
+            if (storageUtil.checkFavourite(activeMusic).equals("no_favorite")) {
                 favoriteImg.setImageResource(R.drawable.ic_favorite_border);
-            } else if (storageUtil.loadFavorite(activeMusic.getsName()).equals(favorite)) {
+            } else if(storageUtil.checkFavourite(activeMusic).equals("favorite")) {
                 favoriteImg.setImageResource(R.drawable.ic_favorite);
             }
         }
