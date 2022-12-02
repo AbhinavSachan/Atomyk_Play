@@ -38,7 +38,7 @@
                         android:layout_centerHorizontal="true"
                         android:padding="8dp"
                         android:text="@string/favorite"
-                        android:textColor="@color/heart_bg"
+                        android:textColor="@color/heart_red"
                         android:textSize="@dimen/d_18sp" />
                 </RelativeLayout>
 

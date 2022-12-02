@@ -10,7 +10,7 @@
     android:elevation="30dp"
     android:focusable="true"
     android:orientation="vertical"
-    app:layout_behavior=".customScripts.CustomBottomSheet"
+    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
     tools:ignore="UnusedAttribute">
 
     <ImageView

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/primary_bg"
@@ -23,25 +24,52 @@
             android:textStyle="bold" />
 
 
-        <TextView
-            android:id="@+id/timer_time_textview"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginTop="25dp"
-            android:text="@string/empty"
-            android:textColor="@color/sub_text_grey"
-            android:textSize="@dimen/d_18sp" />
+            android:orientation="horizontal"
+            tools:ignore="HardcodedText">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Stop audio in "
+                android:textColor="@color/text_color"
+                android:textSize="@dimen/d_18sp" />
+
+            <TextView
+                android:id="@+id/timer_time_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/heart_red"
+                android:text="5"
+                android:textStyle="bold"
+                android:textSize="@dimen/d_18sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" min"
+                android:textStyle="italic"
+                android:textColor="@color/text_color"
+                android:textSize="@dimen/d_18sp" />
+
+        </LinearLayout>
 
         <SeekBar
             android:id="@+id/timer_time_seekbar"
             style="@style/Widget.AppCompat.SeekBar.Discrete"
             android:layout_width="240dp"
-            android:layout_height="wrap_content"
+            android:layout_height="24dp"
             android:layout_gravity="center"
             android:layout_marginHorizontal="50dp"
             android:layout_marginTop="15dp"
-            android:max="11" />
+            android:max="11"
+            android:progressBackgroundTint="@color/primary_bg"
+            android:progressTint="@color/primary_bg"
+            android:thumbTint="@color/black" />
 
         <Button
             android:id="@+id/timer_confirm_button"

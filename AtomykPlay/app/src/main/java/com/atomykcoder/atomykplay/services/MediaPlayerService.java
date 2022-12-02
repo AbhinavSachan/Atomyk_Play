@@ -83,8 +83,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     //binder
     private final IBinder iBinder = new LocalBinder();
     public MediaPlayer media_player;
-    public Runnable runnable;
-    public Handler handler;
+    public Runnable seekBarRunnable;
+    public Handler seekBarHandler;
     private boolean was_playing = false;
     //media session
     private MediaSessionManager mediaSessionManager;
@@ -115,15 +115,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             if (intent.getAction().equals(Intent.ACTION_HEADSET_PLUG)) {
                 int state = intent.getIntExtra("state", -1);
 
-                musicList = storage.loadMusicList();
-                musicIndex = storage.loadMusicIndex();
-
-                if (musicList != null)
-                    if (musicIndex != -1 && musicIndex < musicList.size()) {
-                        activeMusic = musicList.get(musicIndex);
-                    } else {
-                        stopSelf();
-                    }
                 if (settingsStorage.loadAutoPlay()) {
                     switch (state) {
                         case 0:
@@ -159,18 +150,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     private final BroadcastReceiver nextMusicReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            //get the new media index from SP
 
-//load data from SharedPref
-            musicList = storage.loadMusicList();
-            musicIndex = storage.loadMusicIndex();
-
-            if (musicList != null)
-                if (musicIndex != -1 && musicIndex < musicList.size()) {
-                    activeMusic = musicList.get(musicIndex);
-                } else {
-                    stopSelf();
-                }
             if (mediaSessionManager == null) {
                 try {
                     initiateMediaSession();
@@ -186,17 +166,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     private final BroadcastReceiver prevMusicReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-//load data from SharedPref
-            musicList = storage.loadMusicList();
-            musicIndex = storage.loadMusicIndex();
-
-            if (musicList != null)
-                if (musicIndex != -1 && musicIndex < musicList.size()) {
-                    activeMusic = musicList.get(musicIndex);
-                } else {
-                    stopSelf();
-                }
-
 
             if (mediaSessionManager == null) {
                 try {
@@ -213,17 +182,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     private final BroadcastReceiver pausePlayMusicReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-
-//load data from SharedPref
-            musicList = storage.loadMusicList();
-            musicIndex = storage.loadMusicIndex();
-
-            if (musicList != null)
-                if (musicIndex != -1 && musicIndex < musicList.size()) {
-                    activeMusic = musicList.get(musicIndex);
-                } else {
-                    stopSelf();
-                }
 
             if (media_player == null) {
                 try {
@@ -253,8 +211,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     private final BroadcastReceiver playNewMusicReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            //get the new media index from SP
-//load data from SharedPref
             musicList = storage.loadMusicList();
             musicIndex = storage.loadMusicIndex();
 
@@ -264,7 +220,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 } else {
                     stopSelf();
                 }
-
             if (mediaSessionManager == null) {
                 try {
                     initiateMediaSession();
@@ -334,7 +289,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     /**
      * this function updates new music data in notification
      */
-    private void updateMetaData() {
+    private void updateMetaData(MusicDataCapsule activeMusic) {
         musicList = storage.loadMusicList();
         musicIndex = storage.loadMusicIndex();
         String songName = null;
@@ -669,11 +624,10 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     @Override
     public void onPrepared(MediaPlayer mp) {
         if (service_bound) {
-            updateMetaData();
             EventBus.getDefault().post(new SetMainLayoutEvent(activeMusic));
+            updateMetaData(activeMusic);
         }
         resumeMedia();
-
     }
 
     @Override
@@ -681,13 +635,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         storage.clearMusicLastPos();
         musicList = storage.loadMusicList();
         musicIndex = storage.loadMusicIndex();
-        if (media_player.isPlaying()) {
-            setIcon(PlaybackStatus.PLAYING);
-            buildNotification(PlaybackStatus.PLAYING, 1f);
-        } else {
-            setIcon(PlaybackStatus.PAUSED);
-            buildNotification(PlaybackStatus.PAUSED, 0f);
-        }
 
         if (storage.loadRepeatStatus().equals("no_repeat")) {
             if (musicList != null)
@@ -701,6 +648,13 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         } else if (storage.loadRepeatStatus().equals("repeat_one")) {
             playMedia();
             EventBus.getDefault().post(new PrepareRunnableEvent());
+        }
+        if (media_player.isPlaying()) {
+            setIcon(PlaybackStatus.PLAYING);
+            buildNotification(PlaybackStatus.PLAYING, 1f);
+        } else {
+            setIcon(PlaybackStatus.PAUSED);
+            buildNotification(PlaybackStatus.PAUSED, 0f);
         }
 
     }
@@ -795,6 +749,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         }
         if (media_player.isPlaying()) {
             media_player.stop();
+            media_player.release();
             is_playing = false;
         }
 
@@ -807,7 +762,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         if (media_player != null)
             if (media_player.isPlaying()) {
                 storage.saveMusicLastPos(media_player.getCurrentPosition());
-                buildNotification(PlaybackStatus.PAUSED, 0f);
                 media_player.stop();
                 is_playing = false;
                 setIcon(PlaybackStatus.PAUSED);
@@ -824,13 +778,13 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             requestAudioFocus();
         }
         if (audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) == 0f) {
-            Toast.makeText(this, "Please turn the volume UP", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "Please turn the volume UP", Toast.LENGTH_SHORT).show();
         }
         if (!MainActivity.phone_ringing) {
             if (media_player != null) {
                 if (!media_player.isPlaying()) {
                     int position = storage.loadMusicLastPos();
-                    if (service_bound) {
+                    if (!activityPaused) {
                         setSeekBar();
                     }
                     is_playing = true;
@@ -855,8 +809,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     public void pauseMedia() {
         if (media_player != null) {
             if (media_player.isPlaying()) {
-                if (handler != null) {
-                    handler.removeCallbacks(runnable);
+                if (seekBarHandler != null) {
+                    seekBarHandler.removeCallbacks(seekBarRunnable);
                 }
 
                 storage.saveMusicLastPos(media_player.getCurrentPosition());
@@ -873,10 +827,10 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
      * This function sends music position to main ui
      */
     public void setSeekBar() {
-        handler = new Handler(Looper.getMainLooper());
+        seekBarHandler = new Handler(Looper.getMainLooper());
         if (media_player != null) {
             if (media_player.getCurrentPosition() <= media_player.getDuration()) {
-                runnable = () -> {
+                seekBarRunnable = () -> {
                     int position = 0;
                     if (media_player != null) {
                         try {
@@ -885,11 +839,10 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                             e.printStackTrace();
                         }
                     }
-
                     EventBus.getDefault().post(new UpdateMusicProgressEvent(position));
-                    handler.postDelayed(runnable, 10);
+                    seekBarHandler.postDelayed(seekBarRunnable, 300);
                 };
-                handler.postDelayed(runnable, 0);
+                seekBarHandler.postDelayed(seekBarRunnable, 0);
             }
         }
     }
@@ -898,6 +851,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
      * This function skips music to previous index
      */
     public void skipToPrevious() {
+        int lastPos = storage.loadMusicLastPos();
         storage.clearMusicLastPos();
 
         if (settingsStorage.loadOneClickSkip()) {
@@ -917,10 +871,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             }
         } else {
             if (media_player != null) {
-                if (media_player.getCurrentPosition() >= 2000) {
-                    if (musicIndex == 0) {
-                        musicIndex = musicList.size() - 1;
-                    }
+                if (media_player.getCurrentPosition() >= 3000) {
                     activeMusic = musicList.get(musicIndex);
                     if (activeMusic != null) {
                         stopMedia();
@@ -943,18 +894,27 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                     }
                 }
             } else {
-                if (musicList != null) {
-                    if (musicIndex == 0) {
-                        musicIndex = musicList.size() - 1;
-                    }
+                if (lastPos >= 3000) {
                     activeMusic = musicList.get(musicIndex);
-                }
-                if (activeMusic != null) {
-                    //update stored index
-                    storage.saveMusicIndex(musicIndex);
+                    if (activeMusic != null) {
+                        stopMedia();
+                        initiateMediaPlayer();
+                    }
+                } else {
+                    if (musicList != null)
+                        if (musicIndex == 0) {
+                            musicIndex = musicList.size() - 1;
+                            activeMusic = musicList.get(musicIndex);
+                        } else {
+                            activeMusic = musicList.get(--musicIndex);
+                        }
+                    if (activeMusic != null) {
+                        //update stored index
+                        storage.saveMusicIndex(musicIndex);
 
-                    stopMedia();
-                    initiateMediaPlayer();
+                        stopMedia();
+                        initiateMediaPlayer();
+                    }
                 }
             }
         }
@@ -981,7 +941,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
             stopMedia();
             initiateMediaPlayer();
-
         }
     }
 
@@ -996,7 +955,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         mediaSession.setActive(true);
         mediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_QUEUE_COMMANDS);
 
-        updateMetaData();
+//        updateMetaData(activeMusic);
+
         mediaSession.setCallback(new MediaSessionCompat.Callback() {
             @Override
             public boolean onMediaButtonEvent(Intent mediaButtonEvent) {
@@ -1070,8 +1030,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 //first checking setting the media seek to current position of seek bar and then setting all data in UI•
                 if (service_bound) {
                     //removing handler so that we can seek without glitches handler will restart in setSeekBar() method☻
-                    if (handler != null)
-                        handler.removeCallbacks(runnable);
+                    if (seekBarHandler != null)
+                        seekBarHandler.removeCallbacks(seekBarRunnable);
                     if (media_player != null) {
                         media_player.seekTo(Math.toIntExact(pos));
                         if (media_player.isPlaying()) {
@@ -1124,6 +1084,13 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         settingsStorage = new StorageUtil.SettingsStorage(getApplicationContext());
         musicList = storage.loadMusicList();
         musicIndex = storage.loadMusicIndex();
+
+        if (musicList != null)
+            if (musicIndex != -1 && musicIndex < musicList.size()) {
+                activeMusic = musicList.get(musicIndex);
+            } else {
+                stopSelf();
+            }
 
         return START_STICKY;
     }

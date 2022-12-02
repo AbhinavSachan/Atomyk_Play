@@ -16,7 +16,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -59,10 +58,10 @@ import com.atomykcoder.atomykplay.events.RunnableSyncLyricsEvent;
 import com.atomykcoder.atomykplay.events.SetMainLayoutEvent;
 import com.atomykcoder.atomykplay.events.UpdateMusicImageEvent;
 import com.atomykcoder.atomykplay.events.UpdateMusicProgressEvent;
-import com.atomykcoder.atomykplay.viewModals.LRCMap;
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
+import com.atomykcoder.atomykplay.viewModals.LRCMap;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.card.MaterialCardView;
@@ -144,6 +143,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     private LinearLayoutManager linearLayoutManager;
     private MusicLyricsAdapter lyricsAdapter;
     private ArrayList<MusicDataCapsule> dataList;
+    private Dialog timerDialogue;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -331,7 +331,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
             byte[] art = mediaMetadataRetriever.getEmbeddedPicture();
             Bitmap image;
             try {
-                image = BitmapFactory.decodeByteArray(art,0,art.length);
+                image = BitmapFactory.decodeByteArray(art, 0, art.length);
             } catch (Exception e) {
                 image = null;
             }
@@ -537,7 +537,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
             fragmentManager.popBackStackImmediate();
         }
         Bundle music = new Bundle();
-        music.putSerializable("selectedMusic",selectedMusic);
+        music.putSerializable("selectedMusic", selectedMusic);
         AddLyricsFragment addLyricsFragment = new AddLyricsFragment();
         addLyricsFragment.setArguments(music);
         addLyricsFragment.setEnterTransition(TransitionInflater.from(requireContext()).inflateTransition(android.R.transition.slide_top));
@@ -639,7 +639,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     //region Timer setup
     private void setTimer() {
         //Create a dialogue Box
-        final Dialog timerDialogue = new Dialog(context);
+        timerDialogue = new Dialog(context);
         timerDialogue.requestWindowFeature(Window.FEATURE_NO_TITLE);
         timerDialogue.setCancelable(true);
         timerDialogue.setContentView(R.layout.timer_dialogue);
@@ -650,7 +650,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         Button timerConfirmButton = timerDialogue.findViewById(R.id.timer_confirm_button);
 
         //Set TextView Initially based on seekbar progress
-        String finalTextTime = timerSeekBar.getProgress() + 5 + " Minutes";
+        String finalTextTime = String.valueOf(timerSeekBar.getProgress() + 5);
         showTimeText.setText(finalTextTime);
 
         //Update Text based on Seekbar Progress
@@ -659,7 +659,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
             public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
 
                 progress = progress * 5;
-                String finalProgress = progress + 5 + " Minutes";
+                String finalProgress = String.valueOf(progress + 5);
                 showTimeText.setText(finalProgress);
             }
 
@@ -771,7 +771,6 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         }
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     private void shuffleListAndSave() {
         ArrayList<MusicDataCapsule> musicList = storageUtil.loadMusicList();
         MusicDataCapsule activeMusic = getMusic();
@@ -810,7 +809,6 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     private void restoreLastListAndPos() {
         ArrayList<MusicDataCapsule> tempList = storageUtil.loadTempMusicList();
         MusicDataCapsule activeMusic = getMusic();
@@ -953,6 +951,11 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     @Override
     public void onPause() {
         super.onPause();
+        if (timerDialogue != null) {
+            if (timerDialogue.isShowing()) {
+                timerDialogue.dismiss();
+            }
+        }
     }
 
     @Override
@@ -967,8 +970,8 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     public void onStartTrackingTouch(SeekBar seekBar) {
         //removing handler so we can change position of seekbar
         if (service_bound) {
-            if (media_player_service.handler != null)
-                media_player_service.handler.removeCallbacks(media_player_service.runnable);
+            if (media_player_service.seekBarHandler != null)
+                media_player_service.seekBarHandler.removeCallbacks(media_player_service.seekBarRunnable);
         }
     }
 
@@ -982,8 +985,8 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
         //first checking setting the media seek to current position of seek bar and then setting all data in UI
         if (service_bound) {
-            if (media_player_service.handler != null)
-                media_player_service.handler.removeCallbacks(media_player_service.runnable);
+            if (media_player_service.seekBarHandler != null)
+                media_player_service.seekBarHandler.removeCallbacks(media_player_service.seekBarRunnable);
             if (media_player_service.media_player != null) {
                 media_player_service.media_player.seekTo(seekBar.getProgress());
                 if (media_player_service.media_player.isPlaying()) {
@@ -1017,8 +1020,8 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
             //first checking setting the media seek to current position of seek bar and then setting all data in UI
             if (service_bound) {
-                if (media_player_service.handler != null)
-                    media_player_service.handler.removeCallbacks(media_player_service.runnable);
+                if (media_player_service.seekBarHandler != null)
+                    media_player_service.seekBarHandler.removeCallbacks(media_player_service.seekBarRunnable);
                 if (media_player_service.media_player != null) {
                     media_player_service.media_player.seekTo(position);
                     if (media_player_service.media_player.isPlaying()) {
@@ -1060,7 +1063,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
     @Override
     public void onDragStart(RecyclerView.ViewHolder viewHolder) {
-        if (dataList!= null) {
+        if (dataList != null) {
             itemTouchHelper.startDrag(viewHolder);
         }
     }
