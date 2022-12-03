@@ -28,6 +28,7 @@ public class PlaylistDialogAdapter extends RecyclerView.Adapter<PlaylistDialogAd
         this.playlists = playlists;
         this.selectedMusic = selectedMusic;
     }
+
     @NonNull
     @Override
     public PlaylistDialogAdapter.PlaylistViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -45,7 +46,7 @@ public class PlaylistDialogAdapter extends RecyclerView.Adapter<PlaylistDialogAd
             @Override
             public void onClick(View v) {
                 storageUtil.addItemInPlayList(selectedMusic,playlist.getName());
-                mainActivity.addToPlDialog.cancel();
+                mainActivity.addToPlDialog.dismiss();
                 Toast.makeText(context,"added to "+playlist.getName(),Toast.LENGTH_SHORT).show();
             }
         });

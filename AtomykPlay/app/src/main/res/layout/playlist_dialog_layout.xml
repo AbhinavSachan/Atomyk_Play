@@ -67,14 +67,14 @@
             android:layout_gravity="center_vertical"
             android:layout_marginHorizontal="12dp"
             android:src="@drawable/ic_favorite_border"
-            app:tint="@color/heart_bg" />
+            app:tint="@color/heart_red" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingVertical="@dimen/dialog_btn_ver_pad"
             android:text="@string/add_fav"
-            android:textColor="@color/heart_bg"
+            android:textColor="@color/heart_red"
             android:textSize="@dimen/d_15sp"
             android:textStyle="bold" />
 

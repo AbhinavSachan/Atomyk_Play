@@ -3,7 +3,7 @@
     android:shape="rectangle">
 
     <solid android:color="@color/fav_btn_state" />
-    <stroke android:color="@color/heart_bg" android:width="2dp"/>
+    <stroke android:color="@color/heart_red" android:width="2dp"/>
     <corners android:radius="6dp" />
 
 </shape>

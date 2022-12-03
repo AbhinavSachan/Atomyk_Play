@@ -124,12 +124,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public CustomBottomSheet<View> mainPlayerSheetBehavior;
     public BottomSheetPlayerFragment bottomSheetPlayerFragment;
     public BottomSheetBehavior<View> lyricsListBehavior;
-    public CustomBottomSheet<View> optionSheetBehavior;
+    public BottomSheetBehavior<View> optionSheetBehavior;
     public BottomSheetBehavior<View> donationSheetBehavior;
     public MusicDataCapsule optionItemSelected;
     public Playlist plOptionItemSelected;
     public Dialog addToPlDialog;
-    public CustomBottomSheet<View> plSheetBehavior;
+    private Dialog plDialog;
+    public BottomSheetBehavior<View> plSheetBehavior;
     public View plSheet;
     FragmentManager searchFragmentManager;
     private View shadowMain;
@@ -425,6 +426,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (savedInstanceState == null) {
             navigationView.setCheckedItem(R.id.navigation_home);
         }
+
+        //TESTING FAVOURITE
+        storageUtil.getFavouriteList();
     }
 
     private void setUpPlOptionMenuButtons() {
@@ -519,6 +523,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         addToFav.setOnClickListener(this);
     }
 
+    private void setBottomSheetProperties(BottomSheetBehavior<View> sheet, int peekHeight, boolean hideable, boolean skipCollapse) {
+        sheet.setHideable(hideable);
+        sheet.setPeekHeight(peekHeight);
+        sheet.setSkipCollapsed(skipCollapse);
+        sheet.setState(BottomSheetBehavior.STATE_HIDDEN);
+    }
+
     private void setBottomSheets() {
         DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
@@ -535,61 +546,46 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         int optionPeekHeight = (int) (metrics.heightPixels / 1.3f);
-        optionSheetBehavior = (CustomBottomSheet<View>) BottomSheetBehavior.from(optionSheet);
-        optionSheetBehavior.setHideable(true);
-        optionSheetBehavior.setPeekHeight(optionPeekHeight);
-        optionSheetBehavior.setSkipCollapsed(true);
-        optionSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+        optionSheetBehavior = BottomSheetBehavior.from(optionSheet);
+
+        setBottomSheetProperties(optionSheetBehavior,optionPeekHeight,true,true);
 
         int lyricFoundPeekHeight = (int) (metrics.heightPixels / 3.5f);
         View lyricsListView = findViewById(R.id.found_lyrics_fragments);
         lyricsListBehavior = BottomSheetBehavior.from(lyricsListView);
-        lyricsListBehavior.setHideable(true);
-        lyricsListBehavior.setPeekHeight(lyricFoundPeekHeight);
-        lyricsListBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+
+        setBottomSheetProperties(lyricsListBehavior,lyricFoundPeekHeight,true,false);
 
 
         int donationPeekHeight = (int) (metrics.heightPixels / 1.4f);
         donationSheetBehavior = BottomSheetBehavior.from(donationSheet);
-        donationSheetBehavior.setHideable(true);
-        donationSheetBehavior.setPeekHeight(donationPeekHeight);
-        donationSheetBehavior.setSkipCollapsed(true);
-        donationSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+
+        setBottomSheetProperties(donationSheetBehavior,donationPeekHeight,true,true);
 
         int plOptionPeekHeight = (int) (metrics.heightPixels / 1.8f);
-        plSheetBehavior = (CustomBottomSheet<View>) BottomSheetBehavior.from(plSheet);
-        plSheetBehavior.setHideable(true);
-        plSheetBehavior.setPeekHeight(plOptionPeekHeight);
-        plSheetBehavior.setSkipCollapsed(true);
-        plSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+        plSheetBehavior = BottomSheetBehavior.from(plSheet);
 
+        setBottomSheetProperties(plSheetBehavior,plOptionPeekHeight,true,true);
+
+    }
+
+    private void closeSheetWhenClickOutSide(BottomSheetBehavior<View> sheetBehavior,View sheet,MotionEvent event){
+        if (sheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
+            Rect outRect = new Rect();
+            sheet.getGlobalVisibleRect(outRect);
+            if (!outRect.contains((int) event.getRawX(), (int) event.getRawY())) {
+                sheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+            }
+        }
     }
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
         //this function will collapse the option bottom sheet if we click outside of sheet
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            if (optionSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
-                Rect outRect = new Rect();
-                optionSheet.getGlobalVisibleRect(outRect);
-                if (!outRect.contains((int) event.getRawX(), (int) event.getRawY())) {
-                    optionSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-                }
-            }
-            if (donationSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
-                Rect outRect = new Rect();
-                donationSheet.getGlobalVisibleRect(outRect);
-                if (!outRect.contains((int) event.getRawX(), (int) event.getRawY())) {
-                    donationSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-                }
-            }
-            if (plSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
-                Rect outRect = new Rect();
-                plSheet.getGlobalVisibleRect(outRect);
-                if (!outRect.contains((int) event.getRawX(), (int) event.getRawY())) {
-                    plSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-                }
-            }
+            closeSheetWhenClickOutSide(optionSheetBehavior,optionSheet,event);
+            closeSheetWhenClickOutSide(donationSheetBehavior,donationSheet,event);
+            closeSheetWhenClickOutSide(plSheetBehavior,plSheet,event);
         }
         return super.dispatchTouchEvent(event);
     }
@@ -705,9 +701,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     protected void onPause() {
+        if (plDialog != null){
+            if (plDialog.isShowing()){
+                plDialog.dismiss();
+            }
+        }
+        if (addToPlDialog != null){
+            if (addToPlDialog.isShowing()){
+                addToPlDialog.dismiss();
+            }
+        }
         if (service_bound) {
-            if (media_player_service.handler != null) {
-                media_player_service.handler.removeCallbacks(media_player_service.runnable);
+            if (media_player_service.seekBarHandler != null) {
+                media_player_service.seekBarHandler.removeCallbacks(media_player_service.seekBarRunnable);
                 EventBus.getDefault().post(new RemoveLyricsHandlerEvent());
                 activityPaused = true;
             }
@@ -745,7 +751,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             MainActivity.this.bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
             startService(playerIntent);
         } else {
-            Toast.makeText(this, "Can't play while on call.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "Can't play while on call.", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -770,7 +776,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 sendBroadcast(broadcastIntent);
             }
         } else {
-            Toast.makeText(this, "Can't play while on call", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "Can't play while on call", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -792,7 +798,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 sendBroadcast(broadcastIntent);
             }
         } else {
-            Toast.makeText(this, "Can't play while on call", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "Can't play while on call", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -814,7 +820,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 sendBroadcast(broadcastIntent);
             }
         } else {
-            Toast.makeText(this, "Can't play while on call", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "Can't play while on call", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -836,7 +842,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 sendBroadcast(broadcastIntent);
             }
         } else {
-            Toast.makeText(this, "Can't play while on call", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "Can't play while on call", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -852,13 +858,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void setSearchFragment() {
-        SearchFragment searchFragment = new SearchFragment();
-        FragmentTransaction transaction = searchFragmentManager.beginTransaction();
-
-        searchFragment.setEnterTransition(TransitionInflater.from(this).inflateTransition(android.R.transition.fade));
-        transaction.replace(R.id.sec_container, searchFragment, "SearchResultsFragment");
-        transaction.addToBackStack(null);
-        transaction.commit();
+        replaceFragment(R.id.sec_container, new SearchFragment(), android.R.transition.fade, "SearchResultsFragment");
     }
 
     private void setRingtone(MusicDataCapsule music) {
@@ -984,7 +984,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void showToast(String s) {
-        Toast.makeText(MainActivity.this, s, Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(), s, Toast.LENGTH_SHORT).show();
 
     }
 
@@ -1117,47 +1117,36 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         drawer.closeDrawer(GravityCompat.START);
         FragmentManager fragmentManager = getSupportFragmentManager();
-        Fragment fragment3 = fragmentManager.findFragmentByTag("SettingsFragment");
-        Fragment fragment4 = fragmentManager.findFragmentByTag("HelpFragment");
-        Fragment fragment5 = fragmentManager.findFragmentByTag("AboutFragment");
-
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        Fragment fragment1 = fragmentManager.findFragmentByTag("SettingsFragment");
+        Fragment fragment2 = fragmentManager.findFragmentByTag("HelpFragment");
+        Fragment fragment3 = fragmentManager.findFragmentByTag("AboutFragment");
 
         switch (item.getItemId()) {
             case R.id.navigation_home: {
-                if (fragment3 != null || fragment4 != null || fragment5 != null) {
+                if (fragment1 != null || fragment2 != null || fragment3 != null) {
                     fragmentManager.popBackStackImmediate();
                 }
                 break;
             }
             case R.id.navigation_setting: {
-                if (fragment3 != null || fragment4 != null || fragment5 != null) {
+                if (fragment1 != null || fragment2 != null || fragment3 != null) {
                     fragmentManager.popBackStackImmediate();
                 }
-                SettingsFragment fragment = new SettingsFragment();
-                fragment.setEnterTransition(TransitionInflater.from(this).inflateTransition(android.R.transition.slide_right));
-
-                transaction.replace(R.id.sec_container, fragment, "SettingsFragment").addToBackStack(null).commit();
+                replaceFragment(R.id.sec_container, new SettingsFragment(), android.R.transition.slide_right, "SettingsFragment");
                 break;
             }
             case R.id.navigation_help: {
-                if (fragment3 != null || fragment4 != null || fragment5 != null) {
+                if (fragment1 != null || fragment2 != null || fragment3 != null) {
                     fragmentManager.popBackStackImmediate();
                 }
-                HelpFragment fragment = new HelpFragment();
-                fragment.setEnterTransition(TransitionInflater.from(this).inflateTransition(android.R.transition.slide_right));
-
-                transaction.replace(R.id.sec_container, fragment, "HelpFragment").addToBackStack(null).commit();
+                replaceFragment(R.id.sec_container, new HelpFragment(), android.R.transition.slide_right, "HelpFragment");
                 break;
             }
             case R.id.navigation_about: {
-                if (fragment3 != null || fragment4 != null || fragment5 != null) {
+                if (fragment1 != null || fragment2 != null || fragment3 != null) {
                     fragmentManager.popBackStackImmediate();
                 }
-                AboutFragment fragment = new AboutFragment();
-                fragment.setEnterTransition(TransitionInflater.from(this).inflateTransition(android.R.transition.slide_right));
-
-                transaction.replace(R.id.sec_container, fragment, "AboutFragment").addToBackStack(null).commit();
+                replaceFragment(R.id.sec_container, new AboutFragment(), android.R.transition.slide_right, "AboutFragment");
                 break;
             }
             case R.id.navigation_donate: {
@@ -1167,6 +1156,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         return true;
+    }
+
+    /**
+     * Fragment replacer
+     *
+     * @param container the layout id you want to replace with
+     * @param fragment  new Fragment you want to replace
+     * @param animation ex- android.R.transition.explode
+     * @param tag fragment tag to call it later
+     */
+    private void replaceFragment(int container, Fragment fragment, int animation, String tag) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+
+        fragment.setEnterTransition(TransitionInflater.from(this).inflateTransition(animation));
+        transaction.replace(container, fragment, tag).addToBackStack(null).commit();
     }
 
     public void openBottomSheet(Bundle bundle) {
@@ -1262,7 +1267,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @SuppressLint("NotifyDataSetChanged")
     private void openCreatePlaylistDialog(MusicDataCapsule optionItemSelected) {
-        Dialog plDialog = new Dialog(MainActivity.this);
+        plDialog = new Dialog(MainActivity.this);
         plDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         plDialog.setContentView(R.layout.create_playlist_layout);
 
@@ -1292,12 +1297,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     playlistDialogAdapter = new PlaylistDialogAdapter(this, allList, optionItemSelected);
                     plDialogRecyclerView.setAdapter(playlistDialogAdapter);
                 }
-                plDialog.cancel();
+                plDialog.dismiss();
             } else {
                 editText.setError("Empty");
             }
         });
-        btnCancel.setOnClickListener(v -> plDialog.cancel());
+        btnCancel.setOnClickListener(v -> plDialog.dismiss());
         plDialog.show();
     }
 

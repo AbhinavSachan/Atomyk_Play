@@ -16,11 +16,9 @@ import androidx.transition.TransitionInflater;
 
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.adapters.PlaylistAdapter;
-import com.atomykcoder.atomykplay.customScripts.CustomBottomSheet;
 import com.atomykcoder.atomykplay.customScripts.GridSpacing;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.viewModals.Playlist;
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 import java.util.ArrayList;
 
@@ -58,8 +56,12 @@ public class PlaylistsFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
+                Fragment fragment1 = fragmentManager.findFragmentByTag("FavoritesFragment");
                 FragmentTransaction transaction = fragmentManager.beginTransaction();
 
+                if (fragment1 != null) {
+                    fragmentManager.popBackStackImmediate();
+                }
                 FavoritesFragment fragment = new FavoritesFragment();
                 fragment.setEnterTransition(TransitionInflater.from(requireContext()).inflateTransition(android.R.transition.slide_bottom));
 
@@ -79,7 +81,8 @@ public class PlaylistsFragment extends Fragment {
             noPlLayout.setVisibility(View.GONE);
             if (playlistList.isEmpty()) {
                 noPlLayout.setVisibility(View.VISIBLE);
-            }            playlistAdapter = new PlaylistAdapter(getContext(), playlistList);
+            }
+            playlistAdapter = new PlaylistAdapter(getContext(), playlistList);
             recyclerView.setAdapter(playlistAdapter);
         }
         return view;

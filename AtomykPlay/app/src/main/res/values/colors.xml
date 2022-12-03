@@ -24,7 +24,7 @@
     <color name="seekbar_shadow_start">#6D081429</color>
     <color name="for_empty_images">#DD858585</color>
     <color name="hint_color">#494949</color>
-    <color name="heart_bg">#DC2525</color>
+    <color name="heart_red">#DC2525</color>
     <color name="translucent_black">#EB030407</color>
     <color name="player_shadow_black">#36040507</color>
     <color name="center_player_shadow">#140F1313</color>
