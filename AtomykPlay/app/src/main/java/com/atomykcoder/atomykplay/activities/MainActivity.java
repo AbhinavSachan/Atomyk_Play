@@ -28,6 +28,7 @@ import android.provider.Settings;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -424,29 +425,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (savedInstanceState == null) {
             navigationView.setCheckedItem(R.id.navigation_home);
         }
-
-        //TESTING FAVOURITE
-        ArrayList<MusicDataCapsule> musicList = storageUtil.getFavouriteList();
-    }
-
-    private void setUpPlOptionMenuButtons() {
-        addPlayNextPlBtn = findViewById(R.id.add_play_next_pl_option);
-        addToQueuePlBtn = findViewById(R.id.add_to_queue_pl_option);
-        addToPlaylistPl = findViewById(R.id.add_to_playlist_pl_option);
-        nameEditorBtnPl = findViewById(R.id.rename_pl_option);
-        chooseCoverPl = findViewById(R.id.choose_cover_option);
-        deletePlBtn = findViewById(R.id.delete_pl_option);
-        plOptionCover = findViewById(R.id.playlist_cover_option);
-        plOptionName = findViewById(R.id.playlist_name_option);
-        optionPlCount = findViewById(R.id.playlist_count_name_option);
-
-        addPlayNextPlBtn.setOnClickListener(this);
-        addToQueuePlBtn.setOnClickListener(this);
-        addToPlaylistPl.setOnClickListener(this);
-        nameEditorBtnPl.setOnClickListener(this);
-        chooseCoverPl.setOnClickListener(this);
-        deletePlBtn.setOnClickListener(this);
-
     }
 
     private void setUpPlOptionMenuButtons() {
