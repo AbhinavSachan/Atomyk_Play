@@ -170,7 +170,7 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
         notifyDataSetChanged();
     }
 
-    public static class MusicViewAdapter extends RecyclerView.ViewHolder {
+    public class MusicViewAdapter extends RecyclerView.ViewHolder {
         private final ImageView imageView;
         private final ImageView imageButton;
         private final View cardView;

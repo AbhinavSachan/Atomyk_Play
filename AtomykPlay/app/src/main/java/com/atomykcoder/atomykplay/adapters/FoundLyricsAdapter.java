@@ -56,7 +56,7 @@ public class FoundLyricsAdapter extends RecyclerView.Adapter<FoundLyricsAdapter.
         return titles.size();
     }
 
-    public static class FoundLyricsViewHolder extends RecyclerView.ViewHolder {
+    public class FoundLyricsViewHolder extends RecyclerView.ViewHolder {
         public TextView song_title;
         public TextView song_sampleLyrics;
 

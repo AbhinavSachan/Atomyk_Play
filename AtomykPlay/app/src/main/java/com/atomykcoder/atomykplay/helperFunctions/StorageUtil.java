@@ -183,13 +183,12 @@ public class StorageUtil {
         ArrayList<MusicDataCapsule> favouriteList = new ArrayList<>();
         Map<String, ?> keys = sharedPreferences.getAll();
         for (Map.Entry<String, ?> entry : keys.entrySet()) {
-            String json = entry.getKey();
-            Log.i("info", "fav music: " + json);
-            Type type = new TypeToken<MusicDataCapsule>(){}.getType();
+            Type type = new TypeToken<MusicDataCapsule>() {
+            }.getType();
             MusicDataCapsule music = gson.fromJson(entry.getKey(), type);
             favouriteList.add(music);
         }
-        return  favouriteList;
+        return favouriteList;
     }
 
     public String loadShuffle() {
@@ -254,7 +253,7 @@ public class StorageUtil {
         editor.apply();
     }
 
-    public void createPlayList(String playlistName, String coverUri) {
+    public void savePlayList(String playlistName, String coverUri) {
         sharedPreferences = context.getSharedPreferences(PLAYLIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         Gson gson = new Gson();
@@ -296,10 +295,11 @@ public class StorageUtil {
 
     /**
      * add Item in playlist
-     * @param music music to be added
+     *
+     * @param music        music to be added
      * @param playlistName playlist in which, music is to be added
      */
-    public void addItemInPlayList(MusicDataCapsule music, String playlistName) {
+    public void saveItemInPlayList(MusicDataCapsule music, String playlistName) {
         //Shared Preferences Stuff
         sharedPreferences = context.getSharedPreferences(PLAYLIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -322,7 +322,7 @@ public class StorageUtil {
         editor.apply();
     }
 
-    public void deleteItemInPlaylist(MusicDataCapsule music, String playlistName) {
+    public void removeItemInPlaylist(MusicDataCapsule music, String playlistName) {
         //Shared Preferences Stuff
         sharedPreferences = context.getSharedPreferences(PLAYLIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();

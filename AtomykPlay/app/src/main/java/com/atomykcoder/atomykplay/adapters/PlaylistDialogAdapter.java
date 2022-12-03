@@ -45,7 +45,7 @@ public class PlaylistDialogAdapter extends RecyclerView.Adapter<PlaylistDialogAd
         holder.view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                storageUtil.addItemInPlayList(selectedMusic,playlist.getName());
+                storageUtil.saveItemInPlayList(selectedMusic,playlist.getName());
                 mainActivity.addToPlDialog.dismiss();
                 Toast.makeText(context,"added to "+playlist.getName(),Toast.LENGTH_SHORT).show();
             }
@@ -57,7 +57,7 @@ public class PlaylistDialogAdapter extends RecyclerView.Adapter<PlaylistDialogAd
         return playlists.size();
     }
 
-    public static class PlaylistViewHolder extends RecyclerView.ViewHolder {
+    public class PlaylistViewHolder extends RecyclerView.ViewHolder {
         private final TextView textView;
         private final View view;
         public PlaylistViewHolder(@NonNull View itemView) {

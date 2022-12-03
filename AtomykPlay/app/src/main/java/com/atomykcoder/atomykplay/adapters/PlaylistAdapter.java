@@ -84,7 +84,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
         return arrayList.size();
     }
 
-    public static class PlaylistViewHolder extends RecyclerView.ViewHolder {
+    public class PlaylistViewHolder extends RecyclerView.ViewHolder {
         private final TextView playlistName;
         private final TextView songCount;
         private final ImageView imageView, optImg;

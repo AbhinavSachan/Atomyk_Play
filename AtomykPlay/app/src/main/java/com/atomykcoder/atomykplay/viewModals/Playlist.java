@@ -59,7 +59,6 @@ public class Playlist implements Serializable {
      * @param music music to be added
      */
     public void addMusic(MusicDataCapsule music) {
-        Log.i("info", "music added: " + music.getsId());
         musicMap.put(music.getsId(), music);
     }
 
@@ -68,7 +67,6 @@ public class Playlist implements Serializable {
      * @param music music to be removed
      */
     public void removeMusic(MusicDataCapsule music) {
-        Log.i("info", "music removed");
         musicMap.remove(music.getsId());
     }
 

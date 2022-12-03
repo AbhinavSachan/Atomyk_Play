@@ -46,12 +46,7 @@ public class OpenPlayListFragment extends Fragment implements OnDragStartListene
         ImageView imageView = view.findViewById(R.id.toolbar_cover_opl);
         Toolbar toolbar = view.findViewById(R.id.toolbar_opl);
         toolbar.setNavigationIcon(R.drawable.ic_back);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                requireActivity().onBackPressed();
-            }
-        });
+        toolbar.setNavigationOnClickListener(v -> requireActivity().onBackPressed());
 
         recyclerView.setHasFixedSize(true);
         LinearLayoutManager manager = new LinearLayoutManager(getContext());

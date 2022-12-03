@@ -42,7 +42,7 @@ public class MusicLyricsAdapter extends RecyclerView.Adapter<MusicLyricsAdapter.
         return arrayList.size();
     }
 
-    public static class LyricsViewAdapter extends RecyclerView.ViewHolder {
+    public class LyricsViewAdapter extends RecyclerView.ViewHolder {
         private final TextView textView;
 
         public LyricsViewAdapter(@NonNull View itemView) {

@@ -128,10 +128,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public MusicDataCapsule optionItemSelected;
     public Playlist plOptionItemSelected;
     public Dialog addToPlDialog;
-    private Dialog plDialog;
     public BottomSheetBehavior<View> plSheetBehavior;
     public View plSheet;
     FragmentManager searchFragmentManager;
+    private Dialog plDialog;
     private View shadowMain;
     private View shadowLyrFound, shadowOuterSheet, playerPickCover_l;
     private final BottomSheetBehavior.BottomSheetCallback lrcFoundCallback = new BottomSheetBehavior.BottomSheetCallback() {
@@ -450,26 +450,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    private void setUpPlOptionMenuButtons() {
-        addPlayNextPlBtn = findViewById(R.id.add_play_next_pl_option);
-        addToQueuePlBtn = findViewById(R.id.add_to_queue_pl_option);
-        addToPlaylistPl = findViewById(R.id.add_to_playlist_pl_option);
-        nameEditorBtnPl = findViewById(R.id.rename_pl_option);
-        chooseCoverPl = findViewById(R.id.choose_cover_option);
-        deletePlBtn = findViewById(R.id.delete_pl_option);
-        plOptionCover = findViewById(R.id.playlist_cover_option);
-        plOptionName = findViewById(R.id.playlist_name_option);
-        optionPlCount = findViewById(R.id.playlist_count_name_option);
-
-        addPlayNextPlBtn.setOnClickListener(this);
-        addToQueuePlBtn.setOnClickListener(this);
-        addToPlaylistPl.setOnClickListener(this);
-        nameEditorBtnPl.setOnClickListener(this);
-        chooseCoverPl.setOnClickListener(this);
-        deletePlBtn.setOnClickListener(this);
-
-    }
-
     private void playShuffleSong() {
 
     }
@@ -567,28 +547,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         int optionPeekHeight = (int) (metrics.heightPixels / 1.3f);
         optionSheetBehavior = BottomSheetBehavior.from(optionSheet);
 
-        setBottomSheetProperties(optionSheetBehavior,optionPeekHeight,true,true);
+        setBottomSheetProperties(optionSheetBehavior, optionPeekHeight, true, true);
 
         int lyricFoundPeekHeight = (int) (metrics.heightPixels / 3.5f);
         View lyricsListView = findViewById(R.id.found_lyrics_fragments);
         lyricsListBehavior = BottomSheetBehavior.from(lyricsListView);
 
-        setBottomSheetProperties(lyricsListBehavior,lyricFoundPeekHeight,true,false);
+        setBottomSheetProperties(lyricsListBehavior, lyricFoundPeekHeight, true, false);
 
 
         int donationPeekHeight = (int) (metrics.heightPixels / 1.4f);
         donationSheetBehavior = BottomSheetBehavior.from(donationSheet);
 
-        setBottomSheetProperties(donationSheetBehavior,donationPeekHeight,true,true);
+        setBottomSheetProperties(donationSheetBehavior, donationPeekHeight, true, true);
 
         int plOptionPeekHeight = (int) (metrics.heightPixels / 1.8f);
         plSheetBehavior = BottomSheetBehavior.from(plSheet);
 
-        setBottomSheetProperties(plSheetBehavior,plOptionPeekHeight,true,true);
+        setBottomSheetProperties(plSheetBehavior, plOptionPeekHeight, true, true);
 
     }
 
-    private void closeSheetWhenClickOutSide(BottomSheetBehavior<View> sheetBehavior,View sheet,MotionEvent event){
+    private void closeSheetWhenClickOutSide(BottomSheetBehavior<View> sheetBehavior, View sheet, MotionEvent event) {
         if (sheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
             Rect outRect = new Rect();
             sheet.getGlobalVisibleRect(outRect);
@@ -602,9 +582,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public boolean dispatchTouchEvent(MotionEvent event) {
         //this function will collapse the option bottom sheet if we click outside of sheet
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            closeSheetWhenClickOutSide(optionSheetBehavior,optionSheet,event);
-            closeSheetWhenClickOutSide(donationSheetBehavior,donationSheet,event);
-            closeSheetWhenClickOutSide(plSheetBehavior,plSheet,event);
+            closeSheetWhenClickOutSide(optionSheetBehavior, optionSheet, event);
+            closeSheetWhenClickOutSide(donationSheetBehavior, donationSheet, event);
+            closeSheetWhenClickOutSide(plSheetBehavior, plSheet, event);
         }
         return super.dispatchTouchEvent(event);
     }
@@ -690,6 +670,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         lyricsListBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
     }
 
+
+
     @Override
     protected void onStart() {
         if (is_granted) {
@@ -720,17 +702,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     protected void onPause() {
-        if (plDialog != null){
-            if (plDialog.isShowing()){
+        if (plDialog != null) {
+            if (plDialog.isShowing()) {
                 plDialog.dismiss();
             }
         }
-        if (addToPlDialog != null){
-            if (addToPlDialog.isShowing()){
+        if (addToPlDialog != null) {
+            if (addToPlDialog.isShowing()) {
                 addToPlDialog.dismiss();
             }
         }
         if (service_bound) {
+            if (media_player_service!=null)
             if (media_player_service.seekBarHandler != null) {
                 media_player_service.seekBarHandler.removeCallbacks(media_player_service.seekBarRunnable);
                 EventBus.getDefault().post(new RemoveLyricsHandlerEvent());
@@ -746,6 +729,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setSupportActionBar(null);
         if (service_bound) {
             //if media player is not playing it will stop the service
+            if (media_player_service!=null)
             if (media_player_service.media_player != null) {
                 if (!is_playing) {
                     stopService(new Intent(MainActivity.this, MediaPlayerService.class));
@@ -1183,7 +1167,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * @param container the layout id you want to replace with
      * @param fragment  new Fragment you want to replace
      * @param animation ex- android.R.transition.explode
-     * @param tag fragment tag to call it later
+     * @param tag       fragment tag to call it later
      */
     private void replaceFragment(int container, Fragment fragment, int animation, String tag) {
         FragmentManager fragmentManager = getSupportFragmentManager();
@@ -1305,7 +1289,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             String plKey = editText.getText().toString().trim();
             String plCoverUri = playListImageUri != null ? playListImageUri.toString() : "";
             if (!plKey.equals("")) {
-                storageUtil.createPlayList(plKey, plCoverUri);
+                storageUtil.savePlayList(plKey, plCoverUri);
                 ArrayList<Playlist> allList = storageUtil.getAllPlaylist();
                 if (playlistArrayList != null) {
                     playlistArrayList.clear();

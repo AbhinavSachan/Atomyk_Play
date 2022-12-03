@@ -45,28 +45,20 @@ public class PlaylistsFragment extends Fragment {
         Toolbar toolbar = view.findViewById(R.id.toolbar_playlists);
 
         toolbar.setNavigationIcon(R.drawable.ic_back);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                requireActivity().onBackPressed();
+        toolbar.setNavigationOnClickListener(v -> requireActivity().onBackPressed());
+
+        favBtn.setOnClickListener(v -> {
+            FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
+            Fragment fragment1 = fragmentManager.findFragmentByTag("FavoritesFragment");
+            FragmentTransaction transaction = fragmentManager.beginTransaction();
+
+            if (fragment1 != null) {
+                fragmentManager.popBackStackImmediate();
             }
-        });
+            FavoritesFragment fragment = new FavoritesFragment();
+            fragment.setEnterTransition(TransitionInflater.from(requireContext()).inflateTransition(android.R.transition.slide_bottom));
 
-        favBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
-                Fragment fragment1 = fragmentManager.findFragmentByTag("FavoritesFragment");
-                FragmentTransaction transaction = fragmentManager.beginTransaction();
-
-                if (fragment1 != null) {
-                    fragmentManager.popBackStackImmediate();
-                }
-                FavoritesFragment fragment = new FavoritesFragment();
-                fragment.setEnterTransition(TransitionInflater.from(requireContext()).inflateTransition(android.R.transition.slide_bottom));
-
-                transaction.add(R.id.sec_container, fragment, "FavoritesFragment").addToBackStack(null).commit();
-            }
+            transaction.add(R.id.sec_container, fragment, "FavoritesFragment").addToBackStack(null).commit();
         });
 
         recyclerView.setHasFixedSize(true);

@@ -34,16 +34,14 @@ import java.util.Collections;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class OpenPlayListAdapter extends RecyclerView.Adapter<OpenPlayListAdapter.OpenItemViewHolder> implements ItemTouchHelperAdapter {
+public class FavoriteListAdapter extends RecyclerView.Adapter<FavoriteListAdapter.FavoriteViewHolder> implements ItemTouchHelperAdapter {
     private final Context context;
-    private final MainActivity mainActivity;
-    String playlistName;
+    MainActivity mainActivity;
     ArrayList<MusicDataCapsule> musicArrayList;
     OnDragStartListener onDragStartListener;
 
-    public OpenPlayListAdapter(Context context, String playlistName, ArrayList<MusicDataCapsule> musicArrayList, OnDragStartListener onDragStartListener) {
+    public FavoriteListAdapter(Context context, ArrayList<MusicDataCapsule> musicArrayList, OnDragStartListener onDragStartListener) {
         this.context = context;
-        this.playlistName = playlistName;
         this.musicArrayList = musicArrayList;
         this.onDragStartListener = onDragStartListener;
         mainActivity = (MainActivity) context;
@@ -60,7 +58,7 @@ public class OpenPlayListAdapter extends RecyclerView.Adapter<OpenPlayListAdapte
         notifyItemRangeChanged(fromPos, 1, null);
         notifyItemChanged(toPos, null);
 
-//        storageUtil.updatePlayListMap();
+//      updateList in storage
 
     }
 
@@ -75,26 +73,23 @@ public class OpenPlayListAdapter extends RecyclerView.Adapter<OpenPlayListAdapte
                 removeItem(currentItem);
             }
         }
-
     }
 
     @NonNull
     @Override
-    public OpenPlayListAdapter.OpenItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.open_playlist_music_item, parent, false);
-        return new OpenItemViewHolder(view);
+    public FavoriteListAdapter.FavoriteViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(context).inflate(R.layout.favorite_item_layout, parent, false);
+        return new FavoriteViewHolder(view);
     }
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
-    public void onBindViewHolder(@NonNull OpenPlayListAdapter.OpenItemViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull FavoriteListAdapter.FavoriteViewHolder holder, int position) {
         MusicDataCapsule currentItem = musicArrayList.get(position);
 
         holder.nameText.setText(currentItem.getsName());
         holder.artistText.setText(currentItem.getsArtist());
         holder.durationText.setText(convertDuration(currentItem.getsLength()));
-
-        GlideBuilt.glide(context, currentItem.getsAlbumUri(), R.drawable.ic_music, holder.imageView, 128);
 
         holder.cardView.setOnClickListener(v -> {
             File file = new File(currentItem.getsPath());
@@ -168,6 +163,7 @@ public class OpenPlayListAdapter extends RecyclerView.Adapter<OpenPlayListAdapte
             }
             return false;
         });
+
     }
 
     public void removeItem(MusicDataCapsule item) {
@@ -176,11 +172,12 @@ public class OpenPlayListAdapter extends RecyclerView.Adapter<OpenPlayListAdapte
 
         if (position != -1) {
             musicArrayList.remove(position);
-            storageUtil.removeItemInPlaylist(item, playlistName);
+            storageUtil.removeFavorite(item);
         }
 
         notifyItemRangeChanged(position, musicArrayList.size() - (position + 1));
         notifyItemRemoved(position);
+
     }
 
     @Override
@@ -188,21 +185,21 @@ public class OpenPlayListAdapter extends RecyclerView.Adapter<OpenPlayListAdapte
         return musicArrayList.size();
     }
 
-    public class OpenItemViewHolder extends RecyclerView.ViewHolder {
+    public class FavoriteViewHolder extends RecyclerView.ViewHolder {
         private final ImageView imageView;
         private final ImageView dragBtn,optBtn;
         private final View cardView;
         private final TextView nameText, artistText, durationText;
 
-        public OpenItemViewHolder(@NonNull View itemView) {
+        public FavoriteViewHolder(@NonNull View itemView) {
             super(itemView);
-            imageView = itemView.findViewById(R.id.song_album_cover_opl);
-            dragBtn = itemView.findViewById(R.id.drag_i_btn_playlist);
-            optBtn = itemView.findViewById(R.id.playlist_itemOpt);
-            cardView = itemView.findViewById(R.id.cv_song_play_opl);
-            nameText = itemView.findViewById(R.id.song_name_opl);
-            artistText = itemView.findViewById(R.id.song_artist_name_opl);
-            durationText = itemView.findViewById(R.id.song_length_opl);
+            imageView = itemView.findViewById(R.id.song_album_cover_favorite);
+            dragBtn = itemView.findViewById(R.id.drag_i_btn_favorite);
+            optBtn = itemView.findViewById(R.id.favorite_itemOpt);
+            cardView = itemView.findViewById(R.id.cv_song_play_favorite);
+            nameText = itemView.findViewById(R.id.song_name_favorite);
+            artistText = itemView.findViewById(R.id.song_artist_name_favorite);
+            durationText = itemView.findViewById(R.id.song_length_favorite);
         }
     }
 }
