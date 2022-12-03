@@ -2,7 +2,6 @@ package com.atomykcoder.atomykplay.helperFunctions;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
 
 import com.atomykcoder.atomykplay.viewModals.LRCMap;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
@@ -262,12 +261,47 @@ public class StorageUtil {
         editor.apply();
     }
 
+    /**
+     * overloaded create playlist
+     *
+     * @param playlistName playlist name
+     * @param coverUri     cover uri for playlist
+     * @param map          songs list in a hashmap <String, MusicDataCapsule> format
+     */
+    public void createPlayList(String playlistName, String coverUri, Map<String, MusicDataCapsule> map) {
+        sharedPreferences = context.getSharedPreferences(PLAYLIST_STORAGE, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(new Playlist(playlistName, coverUri, map));
+        editor.putString(playlistName, json);
+        editor.apply();
+    }
+
+
+    /**
+     * replaces old playlist with new playlist without losing music list
+     *
+     * @param oldPlaylist  old playlist
+     * @param playlistName new playlist name (use Empty string for optional use)
+     * @param coverUri     new cover uri (use Empty string for optional use)
+     */
+    public void replacePlaylist(
+            Playlist oldPlaylist, String playlistName, String coverUri) {
+        String uri = !coverUri.equals("") ? coverUri : oldPlaylist.getCoverUri();
+        String name = !playlistName.equals("") ? playlistName : oldPlaylist.getName();
+
+        removePlayList(oldPlaylist.getName());
+        createPlayList(name, uri, oldPlaylist.getMusicMapList());
+    }
+
+
     public void removePlayList(String playlistName) {
         sharedPreferences = context.getSharedPreferences(PLAYLIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.remove(playlistName);
         editor.apply();
     }
+
 
     public Playlist loadPlaylist(String playlistName) {
         sharedPreferences = context.getSharedPreferences(PLAYLIST_STORAGE, Context.MODE_PRIVATE);
