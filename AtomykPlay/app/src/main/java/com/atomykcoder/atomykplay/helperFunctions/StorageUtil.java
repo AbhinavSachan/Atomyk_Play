@@ -11,6 +11,7 @@ import com.atomykcoder.atomykplay.viewModals.Playlist;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Map;
@@ -384,6 +385,7 @@ public class StorageUtil {
     public static class SettingsStorage {
 
         private final String SETTINGS_STORAGE = "com.atomykcoder.atomykplay.settings.SETTINGS_STORAGE";
+        private final String BLACK_LIST_STORAGE = "com.atomykcoder.atomykplay.settings.BLACK_LIST_STORAGE";
         private final Context context;
         private SharedPreferences sharedPreferences;
 
@@ -537,6 +539,42 @@ public class StorageUtil {
         public int loadFilterDur() {
             sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
             return sharedPreferences.getInt("filter_dur", 10);
+        }
+
+        /**
+         * save given path in black list storage
+         * @param path path to be saved in black list storage
+         */
+        public void saveInBlackList(String path) {
+            sharedPreferences = context.getSharedPreferences(BLACK_LIST_STORAGE, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString(path, "black_list");
+            editor.apply();
+        }
+
+        /**
+         * get all paths in arraylist<String> format from black list storage
+         * @return returns paths in arraylist<String> format
+         */
+        public ArrayList<String> loadBlackList() {
+            sharedPreferences = context.getSharedPreferences(BLACK_LIST_STORAGE, Context.MODE_PRIVATE);
+            Map<String, ?> map = sharedPreferences.getAll();
+            ArrayList<String> paths = new ArrayList<>();
+            for(Map.Entry<String, ?> entry : map.entrySet()) {
+                paths.add(entry.getKey());
+            }
+            return paths;
+        }
+
+        /**
+         * remove given path from black list storage
+         * @param path path to be removed (URI)
+         */
+        public void removeFromBlackList(String path) {
+            sharedPreferences = context.getSharedPreferences(BLACK_LIST_STORAGE, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.remove(path);
+            editor.apply();
         }
 
     }

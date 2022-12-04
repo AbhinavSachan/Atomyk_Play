@@ -91,6 +91,7 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -1027,16 +1028,41 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        //yeah it has to be in reverse for some reason to work
+        // check for delete item request
         if (resultCode == RESULT_OK && requestCode == DELETE_ITEM) {
             musicMainAdapter.removeItem(optionItemSelected);
         }
+
+        // check for new playlist image request
         if (resultCode == RESULT_OK && requestCode == PICK_IMAGE) {
             if (data != null) {
                 playListImageUri = data.getData();
                 playlist_image_View.setImageURI(playListImageUri);
             }
         }
+
+        // check for blacklist folder select request
+        if(resultCode == RESULT_OK && requestCode == 2020) {
+            if(data != null) {
+                // find fragment
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                SettingsFragment fragment = (SettingsFragment) fragmentManager.findFragmentByTag("SettingsFragment");
+                // set settings fragment UI here
+               if(fragment != null) {
+                   Uri uri = data.getData();
+                   String treePath = uri.getPath();
+                   // this is temporary (only works with internal storage)
+                   treePath = treePath.replace("/tree/primary:", "/storage/emulated/0/");
+                   fragment.directory_path_tv.setText(treePath);
+               }
+            }
+        }
+    }
+
+    public void startPickFolderActivity() {
+        Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+        i.addCategory(Intent.CATEGORY_DEFAULT);
+        startActivityForResult(i, 2020);
     }
 
     private void addToNextPlay(MusicDataCapsule optionItemSelected) {
@@ -1105,7 +1131,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void scanAndSetMusicAdapter() {
         //Fetch Music List along with it's metadata and save it in "dataList"
-
         ExecutorService service = Executors.newSingleThreadExecutor();
         Handler handler = new Handler(Looper.getMainLooper());
         progressBar.setVisibility(View.VISIBLE);
