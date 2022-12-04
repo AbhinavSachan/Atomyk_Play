@@ -62,6 +62,7 @@
         android:paddingHorizontal="12dp">
 
         <ImageView
+            android:id="@+id/add_to_fav_dialog_box_img"
             android:layout_width="20dp"
             android:layout_height="20dp"
             android:layout_gravity="center_vertical"

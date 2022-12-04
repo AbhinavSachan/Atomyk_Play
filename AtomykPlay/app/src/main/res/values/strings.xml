@@ -89,4 +89,6 @@
     <string name="delete_pl">Delete playlist</string>
     <string name="choose_pl_cover">Choose artwork</string>
     <string name="rename">Rename</string>
+    <string name="rename_pl">Rename playlist</string>
+    <string name="remove">Remove from list</string>
 </resources>

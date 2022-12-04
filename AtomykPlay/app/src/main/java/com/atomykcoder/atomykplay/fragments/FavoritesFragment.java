@@ -16,10 +16,14 @@ import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.adapters.FavoriteListAdapter;
 import com.atomykcoder.atomykplay.adapters.OpenPlayListAdapter;
 import com.atomykcoder.atomykplay.adapters.SimpleTouchCallback;
+import com.atomykcoder.atomykplay.events.RemoveFromFavoriteEvent;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
 
@@ -32,6 +36,10 @@ public class FavoritesFragment extends Fragment implements OnDragStartListener {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view =inflater.inflate(R.layout.fragment_favorites, container, false);
+
+        if (!EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().register(this);
+        }
 
         StorageUtil storageUtil =new StorageUtil(getContext());
 
@@ -49,7 +57,7 @@ public class FavoritesFragment extends Fragment implements OnDragStartListener {
 
 
         if (dataList != null) {
-            FavoriteListAdapter playListAdapter = new FavoriteListAdapter(getContext(), dataList, this);
+            playListAdapter = new FavoriteListAdapter(getContext(), dataList, this);
             recyclerView.setLayoutManager(manager);
             recyclerView.setAdapter(playListAdapter);
             noPlLayout.setVisibility(View.GONE);
@@ -61,13 +69,27 @@ public class FavoritesFragment extends Fragment implements OnDragStartListener {
             ItemTouchHelper.Callback callback = new SimpleTouchCallback(playListAdapter);
             itemTouchHelper = new ItemTouchHelper(callback);
             itemTouchHelper.attachToRecyclerView(recyclerView);
+        }else {
+            noPlLayout.setVisibility(View.VISIBLE);
+
         }
 
         return view;
     }
-
+private FavoriteListAdapter playListAdapter;
     @Override
     public void onDragStart(RecyclerView.ViewHolder viewHolder) {
         itemTouchHelper.startDrag(viewHolder);
+    }
+
+    @Subscribe
+    public void removeFromPlaylist(RemoveFromFavoriteEvent event){
+        playListAdapter.removeItem(event.music);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
     }
 }

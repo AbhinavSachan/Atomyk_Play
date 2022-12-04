@@ -125,21 +125,8 @@
             android:padding="6dp"
             android:src="@drawable/ic_option"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/drag_i_btn_favorite"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <ImageView
-            android:id="@+id/drag_i_btn_favorite"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:contentDescription="@string/empty"
-            android:focusable="true"
-            android:padding="6dp"
-            android:src="@drawable/ic_drag_handle"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
-
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

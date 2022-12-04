@@ -50,22 +50,12 @@ public class FavoriteListAdapter extends RecyclerView.Adapter<FavoriteListAdapte
     //when item starts to move it will change positions of every item in real time
     @Override
     public void onItemMove(int fromPos, int toPos) {
-        StorageUtil storageUtil = new StorageUtil(context);
-
-        Collections.swap(musicArrayList, fromPos, toPos);
-        notifyItemMoved(fromPos, toPos);
-
-        notifyItemRangeChanged(fromPos, 1, null);
-        notifyItemChanged(toPos, null);
-
-//      updateList in storage
 
     }
 
     //removing item on swipe
     @Override
     public void onItemDismiss(int position) {
-        StorageUtil storageUtil = new StorageUtil(context);
         //if any item has been removed this will save new list on temp list
         if (musicArrayList != null) {
             if (position != -1 && position < musicArrayList.size()) {
@@ -87,17 +77,19 @@ public class FavoriteListAdapter extends RecyclerView.Adapter<FavoriteListAdapte
     public void onBindViewHolder(@NonNull FavoriteListAdapter.FavoriteViewHolder holder, int position) {
         MusicDataCapsule currentItem = musicArrayList.get(position);
 
+        StorageUtil storage = new StorageUtil(context);
+        StorageUtil.SettingsStorage settingsStorage = new StorageUtil.SettingsStorage(context);
+        Handler handler = new Handler(Looper.getMainLooper());
+
         holder.nameText.setText(currentItem.getsName());
         holder.artistText.setText(currentItem.getsArtist());
         holder.durationText.setText(convertDuration(currentItem.getsLength()));
+
 
         holder.cardView.setOnClickListener(v -> {
             File file = new File(currentItem.getsPath());
             if (file.exists()) {
                 //check is service active
-
-                StorageUtil storage = new StorageUtil(context);
-                StorageUtil.SettingsStorage settingsStorage = new StorageUtil.SettingsStorage(context);
 
                 //if shuffle button is already on it will shuffle it from start
                 if (settingsStorage.loadKeepShuffle()) {
@@ -107,7 +99,6 @@ public class FavoriteListAdapter extends RecyclerView.Adapter<FavoriteListAdapte
                     storage.saveShuffle(shuffle);
 
                     ExecutorService service = Executors.newSingleThreadExecutor();
-                    Handler handler = new Handler(Looper.getMainLooper());
                     service.execute(() -> {
                         //removing current item from list
                         shuffleList.remove(position);
@@ -130,7 +121,6 @@ public class FavoriteListAdapter extends RecyclerView.Adapter<FavoriteListAdapte
                 } else if (!settingsStorage.loadKeepShuffle()) {
                     //Store serializable music list to sharedPreference
                     ExecutorService service = Executors.newSingleThreadExecutor();
-                    Handler handler = new Handler(Looper.getMainLooper());
                     service.execute(() -> {
                         storage.saveShuffle(no_shuffle);
                         storage.saveMusicList(musicArrayList);
@@ -149,20 +139,8 @@ public class FavoriteListAdapter extends RecyclerView.Adapter<FavoriteListAdapte
                 removeItem(currentItem);
             }
         });
-        //add bottom sheet functions in three dot click
-        holder.dragBtn.setOnTouchListener((v, event) -> {
-            File file = new File(currentItem.getsPath());
-            if (file.exists()) {
-                //noinspection deprecation
-                if (MotionEventCompat.getActionMasked(event) == MotionEvent.ACTION_DOWN) {
-                    onDragStartListener.onDragStart(holder);
-                }
-            } else {
-                Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show();
-                removeItem(currentItem);
-            }
-            return false;
-        });
+
+        holder.optBtn.setOnClickListener(v->mainActivity.openOptionMenu(currentItem,"favoriteList"));
 
     }
 
@@ -187,14 +165,13 @@ public class FavoriteListAdapter extends RecyclerView.Adapter<FavoriteListAdapte
 
     public class FavoriteViewHolder extends RecyclerView.ViewHolder {
         private final ImageView imageView;
-        private final ImageView dragBtn,optBtn;
+        private final ImageView optBtn;
         private final View cardView;
         private final TextView nameText, artistText, durationText;
 
         public FavoriteViewHolder(@NonNull View itemView) {
             super(itemView);
             imageView = itemView.findViewById(R.id.song_album_cover_favorite);
-            dragBtn = itemView.findViewById(R.id.drag_i_btn_favorite);
             optBtn = itemView.findViewById(R.id.favorite_itemOpt);
             cardView = itemView.findViewById(R.id.cv_song_play_favorite);
             nameText = itemView.findViewById(R.id.song_name_favorite);

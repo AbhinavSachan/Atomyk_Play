@@ -1,5 +1,6 @@
 package com.atomykcoder.atomykplay.adapters;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -7,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -22,7 +22,6 @@ import com.atomykcoder.atomykplay.classes.GlideBuilt;
 import com.atomykcoder.atomykplay.fragments.OpenPlayListFragment;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import com.atomykcoder.atomykplay.viewModals.Playlist;
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 import java.util.ArrayList;
 
@@ -66,17 +65,21 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
             if (fragment3 != null) {
                 fragmentManager.popBackStackImmediate();
             }
+            OpenPlayListFragment openPlayListFragment = new OpenPlayListFragment();
+            openPlayListFragment.setArguments(bundle);
+            openPlayListFragment.setEnterTransition(TransitionInflater.from(context).inflateTransition(android.R.transition.slide_bottom));
 
-            OpenPlayListFragment fragment = new OpenPlayListFragment();
-            fragment.setArguments(bundle);
-            fragment.setEnterTransition(TransitionInflater.from(context).inflateTransition(android.R.transition.slide_bottom));
-
-            transaction.add(R.id.sec_container, fragment, "OpenPlayListFragment").addToBackStack(null).commit();
+            transaction.add(R.id.sec_container, openPlayListFragment, "OpenPlayListFragment").addToBackStack(null).commit();
 
         });
 
         holder.optImg.setOnClickListener(v -> ((MainActivity) context).openPlOptionMenu(currentItem));
 
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    public void updateView(){
+        notifyDataSetChanged();
     }
 
     @Override

@@ -9,47 +9,50 @@
     android:focusable="true"
     tools:context=".fragments.FavoritesFragment">
 
-    <LinearLayout
-        android:id="@+id/song_not_found_layout_favorite"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="70dp"
-        android:orientation="vertical"
-        android:visibility="gone"
-        tools:ignore="UseCompoundDrawables">
-
-        <ImageView
-            android:layout_width="250dp"
-            android:layout_height="250dp"
-            android:contentDescription="@string/empty"
-            android:padding="2dp"
-            android:src="@drawable/no_song_image" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="@string/nothing_to_show"
-            android:textColor="@color/text_color"
-            android:textSize="@dimen/d_28sp"
-            android:textStyle="bold" />
-
-    </LinearLayout>
-
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:paddingBottom="@dimen/most_bottom_padding"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/favorite_music_recycler"
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:clipToPadding="false"
-            android:nestedScrollingEnabled="false"
-            android:paddingBottom="@dimen/most_bottom_padding" />
+            android:layout_height="match_parent">
 
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/favorite_music_recycler"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false" />
+
+            <LinearLayout
+                android:id="@+id/song_not_found_layout_favorite"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="120dp"
+                android:orientation="vertical"
+                android:visibility="gone"
+                tools:ignore="UseCompoundDrawables">
+
+                <ImageView
+                    android:layout_width="250dp"
+                    android:layout_height="250dp"
+                    android:contentDescription="@string/empty"
+                    android:padding="2dp"
+                    android:src="@drawable/no_song_image" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/nothing_to_show"
+                    android:textColor="@color/text_color"
+                    android:textSize="@dimen/d_28sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+        </RelativeLayout>
     </androidx.core.widget.NestedScrollView>
 
 

@@ -178,7 +178,7 @@
                     android:layout_width="@dimen/option_icon_mea"
                     android:layout_height="@dimen/option_icon_mea"
                     android:layout_margin="10dp"
-                    android:src="@drawable/ic_add_pl" />
+                    android:src="@drawable/ic_add_to_list" />
 
                 <TextView
                     android:layout_width="match_parent"

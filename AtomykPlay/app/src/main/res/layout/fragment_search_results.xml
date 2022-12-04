@@ -7,7 +7,8 @@
     android:background="@color/primary_bg"
     android:clickable="true"
     android:focusable="true"
-    android:paddingTop="32dp"
+    android:paddingTop="@dimen/status_bar_padding"
+    android:paddingBottom="@dimen/most_bottom_padding"
     tools:context=".fragments.SearchFragment"
     tools:ignore="UnusedAttribute">
 
@@ -128,7 +129,6 @@
         android:id="@+id/search_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/searched_song_num"
-        android:clipToPadding="false" />
+        android:layout_below="@id/searched_song_num" />
 
 </RelativeLayout>

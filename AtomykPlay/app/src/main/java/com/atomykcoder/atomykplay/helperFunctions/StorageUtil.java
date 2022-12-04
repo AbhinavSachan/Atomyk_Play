@@ -3,6 +3,8 @@ package com.atomykcoder.atomykplay.helperFunctions;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import androidx.annotation.NonNull;
+
 import com.atomykcoder.atomykplay.viewModals.LRCMap;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import com.atomykcoder.atomykplay.viewModals.Playlist;
@@ -285,13 +287,9 @@ public class StorageUtil {
      * @param playlistName new playlist name (use Empty string for optional use)
      * @param coverUri     new cover uri (use Empty string for optional use)
      */
-    public void replacePlaylist(
-            Playlist oldPlaylist, String playlistName, String coverUri) {
-        String uri = !coverUri.equals("") ? coverUri : oldPlaylist.getCoverUri();
-        String name = !playlistName.equals("") ? playlistName : oldPlaylist.getName();
-
+    public void replacePlaylist(Playlist oldPlaylist, String playlistName, String coverUri) {
         removePlayList(oldPlaylist.getName());
-        createPlayList(name, uri, oldPlaylist.getMusicMapList());
+        createPlayList(playlistName, coverUri, oldPlaylist.getMusicMapList());
     }
 
 

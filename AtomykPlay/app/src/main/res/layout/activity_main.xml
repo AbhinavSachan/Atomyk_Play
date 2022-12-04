@@ -16,6 +16,7 @@
         android:background="@color/primary_bg">
 
         <RelativeLayout
+            android:id="@+id/third_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">

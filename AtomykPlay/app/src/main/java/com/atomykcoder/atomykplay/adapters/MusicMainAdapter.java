@@ -132,7 +132,7 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
         holder.imageButton.setOnClickListener(view -> {
             File file = new File(currentItem.getsPath());
             if (file.exists()) {
-                mainActivity.openOptionMenu(currentItem);
+                mainActivity.openOptionMenu(currentItem, "mainList");
             } else {
                 Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show();
                 removeItem(currentItem);

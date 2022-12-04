@@ -1,15 +1,19 @@
 package com.atomykcoder.atomykplay.activities;
 
+import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.favorite;
+import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.no_favorite;
 import static com.atomykcoder.atomykplay.services.MediaPlayerService.is_playing;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.PendingIntent;
 import android.app.RecoverableSecurityException;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.ServiceConnection;
@@ -28,7 +32,6 @@ import android.provider.Settings;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -62,6 +65,8 @@ import com.atomykcoder.atomykplay.adapters.PlaylistDialogAdapter;
 import com.atomykcoder.atomykplay.classes.GlideBuilt;
 import com.atomykcoder.atomykplay.customScripts.CustomBottomSheet;
 import com.atomykcoder.atomykplay.events.PrepareRunnableEvent;
+import com.atomykcoder.atomykplay.events.RemoveFromFavoriteEvent;
+import com.atomykcoder.atomykplay.events.RemoveFromPlaylistEvent;
 import com.atomykcoder.atomykplay.events.RemoveLyricsHandlerEvent;
 import com.atomykcoder.atomykplay.fragments.AboutFragment;
 import com.atomykcoder.atomykplay.fragments.BottomSheetPlayerFragment;
@@ -298,6 +303,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private View addPlayNextPlBtn, addToQueuePlBtn, addToPlaylistPl, nameEditorBtnPl, chooseCoverPl, deletePlBtn;
     private ImageView plOptionCover;
     private TextView plOptionName, optionPlCount;
+    private PlaylistsFragment playlistFragment;
+    private Dialog renameDialog;
+    private View removeFromList;
+    private String optionTag;
+    private AlertDialog dialog = null;
 
     public void clearStorage() {
         storageUtil.clearMusicLastPos();
@@ -426,9 +436,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (savedInstanceState == null) {
             navigationView.setCheckedItem(R.id.navigation_home);
         }
-
-        //TESTING FAVOURITE
-        storageUtil.getFavouriteList();
     }
 
     private void setUpPlOptionMenuButtons() {
@@ -467,9 +474,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (fragment3 != null) {
             fragmentManager.popBackStackImmediate();
         }
-        PlaylistsFragment fragment = new PlaylistsFragment();
-        fragment.setEnterTransition(TransitionInflater.from(this).inflateTransition(android.R.transition.slide_bottom));
-        transaction.replace(R.id.sec_container, fragment, "PlaylistsFragment").addToBackStack(null).commit();
+        playlistFragment = new PlaylistsFragment();
+        playlistFragment.setEnterTransition(TransitionInflater.from(this).inflateTransition(android.R.transition.slide_bottom));
+        transaction.replace(R.id.sec_container, playlistFragment, "PlaylistsFragment").addToBackStack(null).commit();
     }
 
     private void checkForUpdateMusic() {
@@ -510,6 +517,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         optionArtist = findViewById(R.id.song_artist_name_option);
         optionName = findViewById(R.id.song_name_option);
         addToFav = findViewById(R.id.add_to_favourites_option);
+        removeFromList = findViewById(R.id.remove_music_option);
 
         addPlayNextBtn.setOnClickListener(this);
         addToQueueBtn.setOnClickListener(this);
@@ -521,6 +529,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         shareBtn.setOnClickListener(this);
         deleteBtn.setOnClickListener(this);
         addToFav.setOnClickListener(this);
+        removeFromList.setOnClickListener(this);
     }
 
     private void setBottomSheetProperties(BottomSheetBehavior<View> sheet, int peekHeight, boolean hideable, boolean skipCollapse) {
@@ -671,8 +680,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         lyricsListBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
     }
 
-
-
     @Override
     protected void onStart() {
         if (is_granted) {
@@ -708,18 +715,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 plDialog.dismiss();
             }
         }
+        if (renameDialog != null) {
+            if (renameDialog.isShowing()) {
+                renameDialog.dismiss();
+            }
+        }
         if (addToPlDialog != null) {
             if (addToPlDialog.isShowing()) {
                 addToPlDialog.dismiss();
             }
         }
-        if (service_bound) {
-            if (media_player_service!=null)
-            if (media_player_service.seekBarHandler != null) {
-                media_player_service.seekBarHandler.removeCallbacks(media_player_service.seekBarRunnable);
-                EventBus.getDefault().post(new RemoveLyricsHandlerEvent());
-                activityPaused = true;
+        if (dialog != null) {
+            if (dialog.isShowing()) {
+                dialog.dismiss();
             }
+        }
+        if (service_bound) {
+            if (media_player_service != null)
+                if (media_player_service.seekBarHandler != null) {
+                    media_player_service.seekBarHandler.removeCallbacks(media_player_service.seekBarRunnable);
+                    EventBus.getDefault().post(new RemoveLyricsHandlerEvent());
+                    activityPaused = true;
+                }
         }
         super.onPause();
     }
@@ -730,14 +747,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setSupportActionBar(null);
         if (service_bound) {
             //if media player is not playing it will stop the service
-            if (media_player_service!=null)
-            if (media_player_service.media_player != null) {
-                if (!is_playing) {
-                    stopService(new Intent(MainActivity.this, MediaPlayerService.class));
-                    service_bound = false;
-                    is_playing = false;
+            if (media_player_service != null)
+                if (media_player_service.media_player != null) {
+                    if (!is_playing) {
+                        stopService(new Intent(MainActivity.this, MediaPlayerService.class));
+                        service_bound = false;
+                        is_playing = false;
+                    }
                 }
-            }
         }
         MediaPlayerService.ui_visible = false;
         if (phoneStateListener != null && telephonyManager != null) {
@@ -866,17 +883,44 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void setRingtone(MusicDataCapsule music) {
+
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
             boolean canWrite = Settings.System.canWrite(this);
 
             if (canWrite) {
                 Uri newUri = Uri.fromFile(new File(music.getsPath()));
-                RingtoneManager.setActualDefaultRingtoneUri(MainActivity.this, RingtoneManager.TYPE_RINGTONE, newUri);
-                showToast("Ringtone set successfully");
+                AlertDialog.Builder ringtoneDialog = new AlertDialog.Builder(MainActivity.this);
+                ringtoneDialog.setTitle("Confirmation");
+                ringtoneDialog.setMessage(music.getsName() + " - Set as ringtone");
+                ringtoneDialog.setCancelable(true);
+                ringtoneDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        RingtoneManager.setActualDefaultRingtoneUri(MainActivity.this, RingtoneManager.TYPE_RINGTONE, newUri);
+                        showToast("Ringtone set successfully");
+                    }
+
+                });
+                ringtoneDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+
+                try {
+                    dialog = ringtoneDialog.create();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                if (dialog != null) {
+                    dialog.show();
+                }
             } else {
                 requestWriteSettingsPermission();
             }
         }
+
     }
 
     private void requestWriteSettingsPermission() {
@@ -889,8 +933,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    public void openOptionMenu(MusicDataCapsule currentItem) {
+    public void openOptionMenu(MusicDataCapsule currentItem, String tag) {
         optionItemSelected = currentItem;
+        optionTag = tag;
+        removeFromList.setVisibility(View.GONE);
+        deleteBtn.setVisibility(View.GONE);
+
+        if (storageUtil.checkFavourite(currentItem).equals(no_favorite)) {
+            addToFav.setImageResource(R.drawable.ic_favorite_border);
+        } else if (storageUtil.checkFavourite(currentItem).equals(favorite)) {
+            addToFav.setImageResource(R.drawable.ic_favorite);
+        }
+
+        switch (tag) {
+            case "openPlaylist":
+            case "favoriteList":
+                removeFromList.setVisibility(View.VISIBLE);
+                deleteBtn.setVisibility(View.GONE);
+                break;
+            case "mainList":
+                removeFromList.setVisibility(View.GONE);
+                deleteBtn.setVisibility(View.VISIBLE);
+                break;
+        }
+
         optionSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         optionName.setText(currentItem.getsName());
         optionArtist.setText(currentItem.getsArtist());
@@ -956,7 +1022,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 musicMainAdapter.removeItem(optionItemSelected);
             }
         }
-        closeOptionSheet();
     }
 
     @Override
@@ -975,11 +1040,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void addToNextPlay(MusicDataCapsule optionItemSelected) {
-        showToast("Added to next");
 
+        showToast("Added to next");
     }
 
     private void addToQueue(MusicDataCapsule music) {
+
         showToast("Added to queue");
     }
 
@@ -1188,48 +1254,167 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.add_play_next_option: {
+                closeOptionSheet();
                 addToNextPlay(optionItemSelected);
                 break;
             }
             case R.id.add_to_queue_option: {
+                closeOptionSheet();
                 addToQueue(optionItemSelected);
                 break;
             }
             case R.id.add_to_playlist_option: {
+                closeOptionSheet();
                 addToPlaylist(optionItemSelected);
                 break;
             }
             case R.id.set_ringtone_option: {
+                closeOptionSheet();
                 setRingtone(optionItemSelected);
                 break;
             }
             case R.id.delete_music_option: {
+                closeOptionSheet();
                 deleteFromDevice(optionItemSelected);
                 break;
             }
-
             case R.id.tagEditor_option: {
+                closeOptionSheet();
                 openTagEditor(optionItemSelected);
                 break;
             }
             case R.id.addLyrics_option: {
+                closeOptionSheet();
                 bottomSheetPlayerFragment.setLyricsLayout(optionItemSelected);
                 break;
             }
             case R.id.details_option: {
+                closeOptionSheet();
                 openDetailsBox(optionItemSelected);
                 break;
             }
             case R.id.share_music_option: {
+                closeOptionSheet();
                 openShare(optionItemSelected);
                 break;
             }
             case R.id.add_to_favourites_option: {
-                addToFavorite(optionItemSelected);
+                bottomSheetPlayerFragment.addFavorite(storageUtil, optionItemSelected, addToFav);
+                break;
+            }
+            case R.id.add_play_next_pl_option: {
+                closePlOptionSheet();
+                addToNextPlayPl(plOptionItemSelected);
+                break;
+            }
+            case R.id.add_to_queue_pl_option: {
+                closePlOptionSheet();
+                addToQueuePl(plOptionItemSelected);
+                break;
+            }
+            case R.id.add_to_playlist_pl_option: {
+                closePlOptionSheet();
+                addToPlaylistPl(plOptionItemSelected);
+                break;
+            }
+            case R.id.rename_pl_option: {
+                closePlOptionSheet();
+                openRenameDialog(plOptionItemSelected);
+                break;
+            }
+            case R.id.choose_cover_option: {
+                closePlOptionSheet();
+                changeUriPl(plOptionItemSelected);
+                break;
+            }
+            case R.id.delete_pl_option: {
+                closePlOptionSheet();
+                deletePl(plOptionItemSelected);
+                break;
+            }
+            case R.id.remove_music_option: {
+                closeOptionSheet();
+                removeFromList(optionItemSelected, optionTag);
                 break;
             }
         }
-        closeOptionSheet();
+
+    }
+
+    private void removeFromList(MusicDataCapsule item, String optionTag) {
+        if (optionTag.equals("openPlaylist")) {
+            EventBus.getDefault().post(new RemoveFromPlaylistEvent(item));
+        } else if (optionTag.equals("favoriteList")) {
+            EventBus.getDefault().post(new RemoveFromFavoriteEvent(item));
+        }
+    }
+
+    private void openRenameDialog(Playlist playlist) {
+        renameDialog = new Dialog(MainActivity.this);
+
+        renameDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        renameDialog.setContentView(R.layout.rename_playlist_layout);
+
+        playlistArrayList = storageUtil.getAllPlaylist();
+        EditText editText = renameDialog.findViewById(R.id.edit_playlist_rename);
+        Button btnOk = renameDialog.findViewById(R.id.btn_ok_rename_pl);
+        Button btnCancel = renameDialog.findViewById(R.id.btn_cancel_rename_pl);
+
+        btnOk.setOnClickListener(v -> {
+            String plKey = editText.getText().toString().trim();
+
+            ArrayList<String> playlistNames = new ArrayList<>();
+            for (Playlist playlist1 : playlistArrayList) {
+                playlistNames.add(playlist1.getName());
+            }
+
+            if (!plKey.equals("")) {
+                if (!playlistNames.contains(plKey)) {
+                    renamePl(playlist, plKey);
+                    renameDialog.dismiss();
+                } else {
+                    editText.setError("Name already exist");
+                }
+            } else {
+                editText.setError("Empty");
+            }
+        });
+        btnCancel.setOnClickListener(v -> renameDialog.dismiss());
+        renameDialog.show();
+    }
+
+    private void deletePl(Playlist playlist) {
+        playlistFragment.playlistList.remove(playlist);
+        storageUtil.removePlayList(playlist.getName());
+        playlistFragment.playlistAdapter.updateView();
+    }
+
+    private void renamePl(Playlist playlist, String newName) {
+        storageUtil.replacePlaylist(playlist, newName, playlist.getCoverUri());
+        ArrayList<Playlist> arrayList = storageUtil.getAllPlaylist();
+        playlistFragment.playlistList.clear();
+        playlistFragment.playlistList.addAll(arrayList);
+        playlistFragment.playlistAdapter.updateView();
+    }
+
+    private void changeUriPl(Playlist playlist) {
+
+    }
+
+    private void addToPlaylistPl(Playlist playlist) {
+
+    }
+
+    private void addToQueuePl(Playlist playlist) {
+
+    }
+
+    private void addToNextPlayPl(Playlist playlist) {
+
+    }
+
+    private void closePlOptionSheet() {
+        plSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
     }
 
     private void addToPlaylist(MusicDataCapsule optionItemSelected) {
@@ -1244,15 +1429,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         //Initialize Dialogue Box UI Items
         playlistArrayList = storageUtil.getAllPlaylist();
+        ImageView image = addToPlDialog.findViewById(R.id.add_to_fav_dialog_box_img);
+        if (storageUtil.checkFavourite(optionItemSelected).equals(no_favorite)) {
+            image.setImageResource(R.drawable.ic_favorite_border);
+        } else if (storageUtil.checkFavourite(optionItemSelected).equals(favorite)) {
+            image.setImageResource(R.drawable.ic_favorite);
+        }
         plDialogRecyclerView = addToPlDialog.findViewById(R.id.playlist_dialog_recycler);
         createPlaylistBtnDialog = addToPlDialog.findViewById(R.id.create_playlist);
         addFavBtnDialog = addToPlDialog.findViewById(R.id.add_to_fav_dialog_box);
 
-        createPlaylistBtnDialog.setOnClickListener(v -> {
-            openCreatePlaylistDialog(optionItemSelected);
-        });
+        createPlaylistBtnDialog.setOnClickListener(v -> openCreatePlaylistDialog(optionItemSelected));
+
         addFavBtnDialog.setOnClickListener(v -> {
             addToFavorite(optionItemSelected);
+            addToPlDialog.dismiss();
         });
 
         LinearLayoutManager manager = new LinearLayoutManager(MainActivity.this);
@@ -1285,23 +1476,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Intent gallery = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI);
             startActivityForResult(gallery, PICK_IMAGE);
         });
-
+//check if previous list contains the same name as we are saving
         btnOk.setOnClickListener(v -> {
             String plKey = editText.getText().toString().trim();
             String plCoverUri = playListImageUri != null ? playListImageUri.toString() : "";
+
+            ArrayList<String> playlistNames = new ArrayList<>();
+            for (Playlist playlist : playlistArrayList) {
+                playlistNames.add(playlist.getName());
+            }
+
             if (!plKey.equals("")) {
-                storageUtil.savePlayList(plKey, plCoverUri);
-                ArrayList<Playlist> allList = storageUtil.getAllPlaylist();
-                if (playlistArrayList != null) {
-                    playlistArrayList.clear();
-                    playlistArrayList.addAll(allList);
-                    playlistDialogAdapter.notifyDataSetChanged();
-                    playListImageUri = null;
+                if (!playlistNames.contains(plKey)) {
+                    storageUtil.savePlayList(plKey, plCoverUri);
+                    ArrayList<Playlist> allList = storageUtil.getAllPlaylist();
+                    if (playlistArrayList != null) {
+                        playlistArrayList.clear();
+                        playlistArrayList.addAll(allList);
+                        playlistDialogAdapter.notifyDataSetChanged();
+                        playListImageUri = null;
+                    } else {
+                        playlistDialogAdapter = new PlaylistDialogAdapter(this, allList, optionItemSelected);
+                        plDialogRecyclerView.setAdapter(playlistDialogAdapter);
+                    }
+                    plDialog.dismiss();
                 } else {
-                    playlistDialogAdapter = new PlaylistDialogAdapter(this, allList, optionItemSelected);
-                    plDialogRecyclerView.setAdapter(playlistDialogAdapter);
+                    editText.setError("Name already exist");
                 }
-                plDialog.dismiss();
             } else {
                 editText.setError("Empty");
             }
@@ -1312,6 +1513,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
     private void openShare(MusicDataCapsule itemOptionSelectedMusic) {
+
         Uri uri = Uri.parse(itemOptionSelectedMusic.getsPath());
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("audio/*");

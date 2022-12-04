@@ -26,8 +26,8 @@ public class PlaylistsFragment extends Fragment {
 
     public View noPlLayout;
     private RecyclerView recyclerView;
-    private ArrayList<Playlist> playlistList;
-    private PlaylistAdapter playlistAdapter;
+    public ArrayList<Playlist> playlistList;
+    public PlaylistAdapter playlistAdapter;
 
 
 
@@ -69,13 +69,15 @@ public class PlaylistsFragment extends Fragment {
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         playlistList = new StorageUtil(requireContext()).getAllPlaylist();
 
-        if (playlistList != null && !playlistList.isEmpty()) {
+        if (playlistList != null) {
             noPlLayout.setVisibility(View.GONE);
             if (playlistList.isEmpty()) {
                 noPlLayout.setVisibility(View.VISIBLE);
             }
             playlistAdapter = new PlaylistAdapter(getContext(), playlistList);
             recyclerView.setAdapter(playlistAdapter);
+        }else {
+            noPlLayout.setVisibility(View.VISIBLE);
         }
         return view;
     }

@@ -35,6 +35,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -232,7 +233,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         queImg.setOnClickListener(v -> openQue());
         repeatImg.setOnClickListener(v -> repeatFun());
         shuffleImg.setOnClickListener(v -> shuffleList());
-        favoriteImg.setOnClickListener(v -> addFavorite(activeMusic));
+        favoriteImg.setOnClickListener(v -> addFavorite(storageUtil, activeMusic, favoriteImg));
         timerImg.setOnClickListener(v -> setTimer());
         timerTv.setOnClickListener(v -> cancelTimer());
         lyricsImg.setOnClickListener(v -> openLyricsPanel());
@@ -629,7 +630,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     private void optionMenu(MusicDataCapsule activeMusic) {
         //add a bottom sheet to show music options like set to ringtone ,audio details ,add to playlist etc.
         if (activeMusic != null)
-            mainActivity.openOptionMenu(activeMusic);
+            mainActivity.openOptionMenu(activeMusic, "mainList");
     }
 
     //region Timer setup
@@ -724,14 +725,18 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         timerImg.setVisibility(View.VISIBLE);
     }
 
-    private void addFavorite(MusicDataCapsule activeMusic) {
+    public void addFavorite(StorageUtil storageUtil, MusicDataCapsule activeMusic,@Nullable ImageView imageView) {
         if (activeMusic != null) {
             if (storageUtil.checkFavourite(activeMusic).equals(no_favorite)) {
                 storageUtil.saveFavorite(activeMusic);
-                favoriteImg.setImageResource(R.drawable.ic_favorite);
+                if (imageView != null) {
+                    imageView.setImageResource(R.drawable.ic_favorite);
+                }
             } else if (storageUtil.checkFavourite(activeMusic).equals(favorite)) {
                 storageUtil.removeFavorite(activeMusic);
-                favoriteImg.setImageResource(R.drawable.ic_favorite_border);
+                if (imageView != null) {
+                    imageView.setImageResource(R.drawable.ic_favorite_border);
+                }
             }
         }
     }
