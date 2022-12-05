@@ -190,7 +190,6 @@ public class SettingsFragment extends Fragment {
 
         // TODO: 12/4/2022  FEEL FREE TO REMOVE THIS AND IMPLEMENT ALREADY ADDED ITEMS WITH A DIFFERENT APPROACH
         Spinner already_added_dropdown = dialog.findViewById(R.id.blacklist_already_added_list);
-
         // load previous blacklist for spinner dropdown
         ArrayList<String> blacklist = settingsStorage.loadBlackList();
 
@@ -200,7 +199,11 @@ public class SettingsFragment extends Fragment {
         already_added_dropdown.setPrompt("BlackListed Folders");
 
         // start "SELECT FOLDER" activity when we click on directory icon
-        directory_icon.setOnClickListener(view -> mainActivity.startPickFolderActivity());
+        directory_icon.setOnClickListener(view -> {
+            Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+            i.addCategory(Intent.CATEGORY_DEFAULT);
+            requireActivity().startActivityForResult(i, 2020);
+        });
 
         // set listener on okay button
         okay_bt.setOnClickListener(v -> {

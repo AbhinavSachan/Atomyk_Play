@@ -385,7 +385,6 @@ public class StorageUtil {
     public static class SettingsStorage {
 
         private final String SETTINGS_STORAGE = "com.atomykcoder.atomykplay.settings.SETTINGS_STORAGE";
-        private final String BLACK_LIST_STORAGE = "com.atomykcoder.atomykplay.settings.BLACK_LIST_STORAGE";
         private final Context context;
         private SharedPreferences sharedPreferences;
 
@@ -546,7 +545,7 @@ public class StorageUtil {
          * @param path path to be saved in black list storage
          */
         public void saveInBlackList(String path) {
-            sharedPreferences = context.getSharedPreferences(BLACK_LIST_STORAGE, Context.MODE_PRIVATE);
+            sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putString(path, "black_list");
             editor.apply();
@@ -557,7 +556,7 @@ public class StorageUtil {
          * @return returns paths in arraylist<String> format
          */
         public ArrayList<String> loadBlackList() {
-            sharedPreferences = context.getSharedPreferences(BLACK_LIST_STORAGE, Context.MODE_PRIVATE);
+            sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
             Map<String, ?> map = sharedPreferences.getAll();
             ArrayList<String> paths = new ArrayList<>();
             for(Map.Entry<String, ?> entry : map.entrySet()) {
@@ -571,7 +570,7 @@ public class StorageUtil {
          * @param path path to be removed (URI)
          */
         public void removeFromBlackList(String path) {
-            sharedPreferences = context.getSharedPreferences(BLACK_LIST_STORAGE, Context.MODE_PRIVATE);
+            sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.remove(path);
             editor.apply();

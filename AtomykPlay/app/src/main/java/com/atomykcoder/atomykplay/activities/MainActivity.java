@@ -32,6 +32,7 @@ import android.provider.Settings;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -783,7 +784,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void playAudio() {
         //starting service if its not started yet otherwise it will send broadcast msg to service
         storageUtil.clearMusicLastPos();
-
         if (!phone_ringing) {
             if (!service_bound) {
                 bindService();
@@ -1051,18 +1051,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                if(fragment != null) {
                    Uri uri = data.getData();
                    String treePath = uri.getPath();
-                   // this is temporary (only works with internal storage)
-                   treePath = treePath.replace("/tree/primary:", "/storage/emulated/0/");
+                   treePath = convertTreeUriToPathUri(treePath);
                    fragment.directory_path_tv.setText(treePath);
                }
             }
         }
     }
 
-    public void startPickFolderActivity() {
-        Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-        i.addCategory(Intent.CATEGORY_DEFAULT);
-        startActivityForResult(i, 2020);
+    /**
+     * converts tree path uri to usable path uri (WORKS WITH BOTH INTERNAL AND EXTERNAL STORAGE)
+     * @param treePath tree path to be converted
+     * @return returns usable path uri
+     */
+    private String convertTreeUriToPathUri(String treePath) {
+        if(treePath.contains("/tree/primary:")) {
+            treePath = treePath.replace("/tree/primary:", "/storage/emulated/0/");
+        }
+        else {
+            int colonIndex = treePath.indexOf(":");
+            String sdCard = treePath.substring(6, colonIndex);
+            String folders = treePath.substring(colonIndex+1);
+            treePath = "/storage/" + sdCard + "/" + folders;
+        }
+        return treePath;
     }
 
     private void addToNextPlay(MusicDataCapsule optionItemSelected) {

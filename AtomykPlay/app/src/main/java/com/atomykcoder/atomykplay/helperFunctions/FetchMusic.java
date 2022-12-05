@@ -51,11 +51,12 @@ public class FetchMusic {
                 ArrayList<String> blackList = settingsStorage.loadBlackList();
                 do {
                     boolean isSongBlacklisted = false;
-                        for(String path : blackList) {
-                            if (audioCursor.getString(4).contains(path))
-                                isSongBlacklisted = true;
-                                break;
+                    for(String path : blackList) {
+                        if (audioCursor.getString(4).contains(path)) {
+                            isSongBlacklisted = true;
+                            break;
                         }
+                    }
 
                     if(!isSongBlacklisted) {
                         String sTitle = audioCursor.getString(0)
