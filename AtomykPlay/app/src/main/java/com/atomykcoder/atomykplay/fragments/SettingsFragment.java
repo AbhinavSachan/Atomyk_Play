@@ -1,39 +1,33 @@
 package com.atomykcoder.atomykplay.fragments;
 
-import static android.app.Activity.RESULT_OK;
-import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.no_dark;
-
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.Spinner;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.activities.MainActivity;
+import com.atomykcoder.atomykplay.adapters.BlockFolderListAdapter;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 
@@ -49,12 +43,11 @@ public class SettingsFragment extends Fragment {
     private boolean showInfo, showArtist, showOption, showExtra, autoPlay, keepShuffle, lowerVol, selfStop, keepScreenOn, oneClickSkip;
     private StorageUtil.SettingsStorage settingsStorage;
     private MainActivity mainActivity;
-    public TextView directory_path_tv;
+    private Dialog blacklistDialog, filterDurDialog;
 
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
 
@@ -126,7 +119,7 @@ public class SettingsFragment extends Fragment {
         keepScreenOnLl.setOnClickListener(v -> keepScreenOnSwi.setChecked(!keepScreenOnSwi.isChecked()));
         oneClickSkipLl.setOnClickListener(v -> oneClickSkipSwi.setChecked(!oneClickSkipSwi.isChecked()));
         blackListLl.setOnClickListener(v -> openBlackListDialogue());
-        filterDurLl.setOnClickListener(v -> showToast("coming soon!"));
+        filterDurLl.setOnClickListener(v -> openFilterDurationDialog());
 
         songInfoSwi.setOnCheckedChangeListener((buttonView, isChecked) -> {
             songInfoSwi.setChecked(isChecked);
@@ -176,27 +169,88 @@ public class SettingsFragment extends Fragment {
         return view;
     }
 
+    private void openFilterDurationDialog() {
+        filterDurDialog = new Dialog(requireContext());
+        filterDurDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        filterDurDialog.setContentView(R.layout.filter_duration_dialog);
+
+        TextView filter_time_tv =  filterDurDialog.findViewById(R.id.filter_time_textview);
+        SeekBar filter_dur_seekbar = filterDurDialog.findViewById(R.id.filter_dur_seekBar);
+        Button filter_dur_ok_bt = filterDurDialog.findViewById(R.id.filter_dur_ok_bt);
+
+        //set max in seconds
+        filter_dur_seekbar.setMax(120);
+
+        // settings previous data
+        int previousDur = settingsStorage.loadFilterDur();
+        filter_dur_seekbar.setProgress(previousDur);
+        filter_time_tv.setText(String.valueOf(previousDur));
+
+        // seekbar change listener
+        filter_dur_seekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                filter_time_tv.setText(String.valueOf(seekBar.getProgress()));
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
+        filter_dur_ok_bt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                settingsStorage.saveFilterDur(Integer.parseInt(filter_time_tv.getText().toString()));
+                mainActivity.checkForUpdateMusic();
+                filterDurDialog.dismiss();
+            }
+        });
+        filterDurDialog.show();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (blacklistDialog != null) {
+            if (blacklistDialog.isShowing()) {
+                blacklistDialog.dismiss();
+            }
+        }
+        if (filterDurDialog != null) {
+            if (filterDurDialog.isShowing()) {
+                filterDurDialog.dismiss();
+            }
+        }
+    }
+
+    public ArrayList<String> blacklist;
+    public BlockFolderListAdapter adapter;
+
     private void openBlackListDialogue() {
-        //create dialog
-        Dialog dialog = new Dialog(getContext());
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        //create blacklistDialog
+        blacklistDialog = new Dialog(getContext());
+        blacklistDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
 
         // collect references to ui components
-        dialog.setContentView(R.layout.black_list_dialog);
-        directory_path_tv = dialog.findViewById(R.id.blacklist_directory_path);
-        ImageView directory_icon = dialog.findViewById(R.id.blacklist_open_directory_icon);
-        Button okay_bt = dialog.findViewById(R.id.blacklist_confirm_bt);
-        Button cancel_bt = dialog.findViewById(R.id.blacklist_cancel_bt);
+        blacklistDialog.setContentView(R.layout.black_list_dialog);
+        ImageView directory_icon = blacklistDialog.findViewById(R.id.blacklist_open_directory_icon);
+        Button okay_bt = blacklistDialog.findViewById(R.id.blacklist_confirm_bt);
+        RecyclerView recyclerView = blacklistDialog.findViewById(R.id.blacklist_recycler);
 
-        // TODO: 12/4/2022  FEEL FREE TO REMOVE THIS AND IMPLEMENT ALREADY ADDED ITEMS WITH A DIFFERENT APPROACH
-        Spinner already_added_dropdown = dialog.findViewById(R.id.blacklist_already_added_list);
-        // load previous blacklist for spinner dropdown
-        ArrayList<String> blacklist = settingsStorage.loadBlackList();
+        blacklist = settingsStorage.loadBlackList();
 
+        adapter = new BlockFolderListAdapter(blacklist, requireContext());
+
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setAdapter(adapter);
         // adapter to load in spinner dropdown
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), R.layout.blacklist_item, R.id.blacklist_item_tv , blacklist);
-        already_added_dropdown.setAdapter(adapter);
-        already_added_dropdown.setPrompt("BlackListed Folders");
 
         // start "SELECT FOLDER" activity when we click on directory icon
         directory_icon.setOnClickListener(view -> {
@@ -207,26 +261,10 @@ public class SettingsFragment extends Fragment {
 
         // set listener on okay button
         okay_bt.setOnClickListener(v -> {
-            if(!directory_path_tv.getText().toString().equals("")) {
-                //save path in blacklist storage
-                settingsStorage.saveInBlackList(directory_path_tv.getText().toString());
-
-                // null text view to prevent memory leaks
-                directory_path_tv = null;
-                dialog.dismiss();
-            } else {
-                directory_path_tv.setError("Field Required");
-            }
+            blacklistDialog.dismiss();
         });
-
-        // set click listener to cancel button
-        cancel_bt.setOnClickListener(v -> {
-            // null text view to prevent memory leaks
-            directory_path_tv = null;
-            dialog.dismiss();
-        });
-        //finally show the dialog
-        dialog.show();
+        //finally show the blacklistDialog
+        blacklistDialog.show();
     }
 
     private void showToast(String s) {

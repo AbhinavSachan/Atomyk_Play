@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="10dp"
+            android:padding="12dp"
+            android:text="@string/filter_duration"
+            android:textColor="@color/text_color"
+            android:textSize="@dimen/d_24sp"
+            android:textStyle="bold" />
+
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="25dp"
+            android:orientation="horizontal"
+            tools:ignore="HardcodedText">
+
+            <TextView
+                android:id="@+id/filter_time_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="30"
+                android:textColor="@color/heart_red"
+                android:textSize="@dimen/d_18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" sec"
+                android:textColor="@color/text_color"
+                android:textSize="@dimen/d_18sp"
+                android:textStyle="italic" />
+
+        </LinearLayout>
+
+        <SeekBar
+            android:id="@+id/filter_dur_seekBar"
+            android:layout_width="match_parent"
+            android:layout_height="33dp"
+            android:layout_margin="16dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="15dp"
+            android:progressDrawable="@drawable/seekbar_style"
+            android:splitTrack="false"
+            android:thumbTint="@color/accent_color_bg" />
+
+        <Button
+            android:id="@+id/filter_dur_ok_bt"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginHorizontal="8dp"
+            android:backgroundTint="@color/accent_color_bg"
+            android:text="@string/ok"
+            android:textColor="@color/play_icons_bg" />
+
+    </LinearLayout>
+</RelativeLayout>

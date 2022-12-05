@@ -32,7 +32,6 @@ import android.provider.Settings;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -92,7 +91,6 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -309,7 +307,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Dialog renameDialog;
     private View removeFromList;
     private String optionTag;
-    private AlertDialog dialog = null;
+    private AlertDialog ringtoneDialog = null;
 
     public void clearStorage() {
         storageUtil.clearMusicLastPos();
@@ -481,7 +479,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         transaction.replace(R.id.sec_container, playlistFragment, "PlaylistsFragment").addToBackStack(null).commit();
     }
 
-    private void checkForUpdateMusic() {
+    public void checkForUpdateMusic() {
         ExecutorService service = Executors.newSingleThreadExecutor();
         Handler handler = new Handler(Looper.getMainLooper());
 
@@ -727,9 +725,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 addToPlDialog.dismiss();
             }
         }
-        if (dialog != null) {
-            if (dialog.isShowing()) {
-                dialog.dismiss();
+        if (ringtoneDialog != null) {
+            if (ringtoneDialog.isShowing()) {
+                ringtoneDialog.dismiss();
             }
         }
         if (service_bound) {
@@ -910,12 +908,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 });
 
                 try {
-                    dialog = ringtoneDialog.create();
+                    this.ringtoneDialog = ringtoneDialog.create();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                if (dialog != null) {
-                    dialog.show();
+                if (this.ringtoneDialog != null) {
+                    this.ringtoneDialog.show();
                 }
             } else {
                 requestWriteSettingsPermission();
@@ -1025,9 +1023,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        //on delete
         // check for delete item request
         if (resultCode == RESULT_OK && requestCode == DELETE_ITEM) {
             musicMainAdapter.removeItem(optionItemSelected);
@@ -1042,35 +1042,38 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         // check for blacklist folder select request
-        if(resultCode == RESULT_OK && requestCode == 2020) {
-            if(data != null) {
+        if (resultCode == RESULT_OK && requestCode == 2020) {
+            if (data != null) {
                 // find fragment
                 FragmentManager fragmentManager = getSupportFragmentManager();
                 SettingsFragment fragment = (SettingsFragment) fragmentManager.findFragmentByTag("SettingsFragment");
                 // set settings fragment UI here
-               if(fragment != null) {
-                   Uri uri = data.getData();
-                   String treePath = uri.getPath();
-                   treePath = convertTreeUriToPathUri(treePath);
-                   fragment.directory_path_tv.setText(treePath);
-               }
+                if (fragment != null) {
+                    Uri uri = data.getData();
+                    String treePath = uri.getPath();
+                    String pathUri = convertTreeUriToPathUri(treePath);
+                    //save path in blacklist storage
+                    StorageUtil.SettingsStorage settingsStorage = new StorageUtil.SettingsStorage(this);
+                    settingsStorage.saveInBlackList(pathUri);
+                    checkForUpdateMusic();
+                }
             }
         }
     }
 
     /**
      * converts tree path uri to usable path uri (WORKS WITH BOTH INTERNAL AND EXTERNAL STORAGE)
+     *
      * @param treePath tree path to be converted
      * @return returns usable path uri
      */
     private String convertTreeUriToPathUri(String treePath) {
-        if(treePath.contains("/tree/primary:")) {
+        if (treePath.contains("/tree/primary:")) {
             treePath = treePath.replace("/tree/primary:", "/storage/emulated/0/");
-        }
-        else {
+        } else {
             int colonIndex = treePath.indexOf(":");
             String sdCard = treePath.substring(6, colonIndex);
-            String folders = treePath.substring(colonIndex+1);
+            String folders = treePath.substring(colonIndex + 1);
             treePath = "/storage/" + sdCard + "/" + folders;
         }
         return treePath;

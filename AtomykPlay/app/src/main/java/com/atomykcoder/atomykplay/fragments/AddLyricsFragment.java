@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -188,10 +189,11 @@ public class AddLyricsFragment extends Fragment {
                 Bundle finalLyricsItems = lyricsItems;
                 handler.post(() -> {
                     if (view != null) {
-                        if (finalLyricsItems != null) {
-                            ((MainActivity) requireContext()).openBottomSheet(finalLyricsItems);
-                        } else {
+                        if (finalLyricsItems == null ||
+                                finalLyricsItems.getStringArrayList("titles").isEmpty()) {
                             Toast.makeText(requireContext(), "No Lyrics Found", Toast.LENGTH_SHORT).show();
+                        } else {
+                            ((MainActivity) requireContext()).openBottomSheet(finalLyricsItems);
                         }
                         fetchLyrics.onPostExecute(progressBar);
                         btnFind.setVisibility(View.VISIBLE);
@@ -215,7 +217,7 @@ public class AddLyricsFragment extends Fragment {
 
             // pre-execute some code here
             fetchLyrics.onPreExecute(progressBar);
-            btnFind.setVisibility(View.INVISIBLE);
+            btnFind.setVisibility(View.GONE);
 
             // do in background code here
             service.execute(() -> {

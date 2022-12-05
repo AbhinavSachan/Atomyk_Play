@@ -163,7 +163,7 @@ public class FavoriteListAdapter extends RecyclerView.Adapter<FavoriteListAdapte
         return musicArrayList.size();
     }
 
-    public class FavoriteViewHolder extends RecyclerView.ViewHolder {
+    public static class FavoriteViewHolder extends RecyclerView.ViewHolder {
         private final ImageView imageView;
         private final ImageView optBtn;
         private final View cardView;

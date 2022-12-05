@@ -3,7 +3,6 @@ package com.atomykcoder.atomykplay.helperFunctions;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import androidx.annotation.NonNull;
 
 import com.atomykcoder.atomykplay.viewModals.LRCMap;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
@@ -11,7 +10,6 @@ import com.atomykcoder.atomykplay.viewModals.Playlist;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Map;
@@ -528,7 +526,7 @@ public class StorageUtil {
         /**
          * @param dur it should be between 10 to 120 (120 is max duration you can filter)
          */
-        public void filterDur(int dur) {
+        public void saveFilterDur(int dur) {
             sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putInt("filter_dur", dur);
@@ -537,7 +535,7 @@ public class StorageUtil {
 
         public int loadFilterDur() {
             sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
-            return sharedPreferences.getInt("filter_dur", 10);
+            return sharedPreferences.getInt("filter_dur", 0);
         }
 
         /**
