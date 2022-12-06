@@ -6,15 +6,17 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
-import android.util.Log;
 
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 
 import java.io.File;
-import java.lang.reflect.Array;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Locale;
 
 public class FetchMusic {
 
@@ -51,14 +53,14 @@ public class FetchMusic {
                 ArrayList<String> blackList = settingsStorage.loadBlackList();
                 do {
                     boolean isSongBlacklisted = false;
-                    for(String path : blackList) {
+                    for (String path : blackList) {
                         if (audioCursor.getString(4).contains(path)) {
                             isSongBlacklisted = true;
                             break;
                         }
                     }
 
-                    if(!isSongBlacklisted) {
+                    if (!isSongBlacklisted) {
                         String sTitle = audioCursor.getString(0)
                                 .replace("y2mate.com -", "")
                                 .replace("&#039;", "'")
@@ -73,6 +75,7 @@ public class FetchMusic {
                         String sAlbum = audioCursor.getString(5);
                         String sMimeType = audioCursor.getString(6);
                         String sSize = audioCursor.getString(7);
+                        long dateInMillis = audioCursor.getLong(10);
                         String sId = audioCursor.getString(11);
 
                         String sBitrate = "";
@@ -82,13 +85,14 @@ public class FetchMusic {
                             sGenre = audioCursor.getString(9);
                         }
 
+                        String sDateAdded =  convertLongToDate(dateInMillis);
 
                         Uri uri = Uri.parse("content://media/external/audio/albumart");
                         String sAlbumUri = Uri.withAppendedPath(uri, sAlbumId).toString();
 
                         int filter = new StorageUtil.SettingsStorage(context).loadFilterDur() * 1000;
                         MusicDataCapsule music = new MusicDataCapsule(sTitle, sArtist,
-                                sAlbum, sAlbumUri, sLength, sPath, sBitrate, sMimeType, sSize, sGenre, sId);
+                                sAlbum, sAlbumUri, sLength, sPath, sBitrate, sMimeType, sSize, sGenre, sId, sDateAdded);
                         File file = new File(music.getsPath());
                         if (file.exists()) {
                             if (filter <= Integer.parseInt(music.getsLength())) {
@@ -106,4 +110,14 @@ public class FetchMusic {
 
     }
 
+    private static String convertLongToDate(long time) {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            return DateTimeFormatter.ofPattern("dd MMMM yyyy").format(
+                    Instant.ofEpochMilli(time*1000)
+                            .atZone(ZoneId.systemDefault())
+                            .toLocalDate());
+        } else {
+            return new java.text.SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).format(new java.util.Date(time * 1000));
+        }
+    }
 }

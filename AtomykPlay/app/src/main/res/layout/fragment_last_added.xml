@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:clickable="true"
+    android:focusable="true">
+    <RadioGroup
+        android:id="@+id/last_Added_radio_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp">
+
+        <RadioButton
+            android:id="@+id/last_added_rb_1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="8dp"
+            android:text="@string/empty"
+            android:textColor="@color/text_color"
+            android:textSize="16sp" />
+
+        <RadioButton
+            android:id="@+id/last_added_rb_2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="8dp"
+            android:text="@string/empty"
+            android:textColor="@color/text_color"
+            android:textSize="16sp" />
+
+        <RadioButton
+            android:id="@+id/last_added_rb_3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="8dp"
+            android:text="@string/empty"
+            android:textColor="@color/text_color"
+            android:textSize="16sp" />
+
+        <RadioButton
+            android:id="@+id/last_added_rb_4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="8dp"
+            android:text="@string/empty"
+            android:textColor="@color/text_color"
+            android:textSize="16sp" />
+    </RadioGroup>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/last_added_recycle_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/last_Added_radio_group"
+        android:layout_marginTop="20dp"/>
+
+</RelativeLayout>

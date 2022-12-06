@@ -32,6 +32,7 @@ import android.provider.Settings;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -71,6 +72,7 @@ import com.atomykcoder.atomykplay.events.RemoveLyricsHandlerEvent;
 import com.atomykcoder.atomykplay.fragments.AboutFragment;
 import com.atomykcoder.atomykplay.fragments.BottomSheetPlayerFragment;
 import com.atomykcoder.atomykplay.fragments.HelpFragment;
+import com.atomykcoder.atomykplay.fragments.LastAddedFragment;
 import com.atomykcoder.atomykplay.fragments.PlaylistsFragment;
 import com.atomykcoder.atomykplay.fragments.SearchFragment;
 import com.atomykcoder.atomykplay.fragments.SettingsFragment;
@@ -463,7 +465,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void setLastAddFragment() {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        Fragment fragment3 = fragmentManager.findFragmentByTag("LastAddedFragment");
 
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        if (fragment3 != null) {
+            fragmentManager.popBackStackImmediate();
+        }
+        LastAddedFragment lastAddedFragment = new LastAddedFragment();
+        lastAddedFragment.setEnterTransition(TransitionInflater.from(this).inflateTransition(android.R.transition.slide_bottom));
+        transaction.replace(R.id.sec_container, lastAddedFragment, "LastAddedFragment").addToBackStack(null).commit();
     }
 
     private void setPlaylistFragment() {
