@@ -5,7 +5,6 @@
     android:background="@color/primary_bg"
     android:orientation="vertical"
     android:paddingHorizontal="10dp"
-    android:paddingTop="20dp"
     android:paddingBottom="10dp">
 
     <TextView
@@ -14,7 +13,6 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
         android:layout_marginBottom="12dp"
-        android:paddingHorizontal="12dp"
         android:paddingVertical="6dp"
         android:text="@string/blacklist_fol"
         android:textColor="@color/text_color"

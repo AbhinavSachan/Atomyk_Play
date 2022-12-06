@@ -525,6 +525,11 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     @Override
     public void onStop() {
         super.onStop();
+        if (timerDialogue != null) {
+            if (timerDialogue.isShowing()) {
+                timerDialogue.dismiss();
+            }
+        }
     }
 
     public void setLyricsLayout(MusicDataCapsule selectedMusic) {
@@ -948,11 +953,6 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     @Override
     public void onPause() {
         super.onPause();
-        if (timerDialogue != null) {
-            if (timerDialogue.isShowing()) {
-                timerDialogue.dismiss();
-            }
-        }
     }
 
     @Override

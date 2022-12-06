@@ -14,7 +14,6 @@
         <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingBottom="@dimen/most_bottom_padding"
             app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
             <RelativeLayout
@@ -47,6 +46,8 @@
                     android:id="@+id/playlist_recycler_view"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:clipToPadding="false"
+                    android:paddingBottom="@dimen/most_bottom_padding"
                     android:layout_below="@+id/pl_favorites_btn"
                     android:nestedScrollingEnabled="false"/>
 

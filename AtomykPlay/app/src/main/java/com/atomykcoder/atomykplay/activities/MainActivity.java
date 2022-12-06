@@ -716,11 +716,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (service_bound) {
             MainActivity.this.unbindService(service_connection);
         }
-        super.onStop();
-    }
-
-    @Override
-    protected void onPause() {
         if (plDialog != null) {
             if (plDialog.isShowing()) {
                 plDialog.dismiss();
@@ -741,6 +736,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 ringtoneDialog.dismiss();
             }
         }
+        super.onStop();
+    }
+
+    @Override
+    protected void onPause() {
         if (service_bound) {
             if (media_player_service != null)
                 if (media_player_service.seekBarHandler != null) {

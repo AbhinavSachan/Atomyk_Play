@@ -8,7 +8,6 @@
     android:clickable="true"
     android:focusable="true"
     android:paddingTop="@dimen/status_bar_padding"
-    android:paddingBottom="@dimen/most_bottom_padding"
     tools:context=".fragments.SearchFragment"
     tools:ignore="UnusedAttribute">
 
@@ -118,7 +117,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/radio_group"
         android:layout_centerInParent="true"
-        android:layout_margin="12dp"
+        android:layout_margin="8dp"
         android:padding="4dp"
         android:text="@string/song0"
         android:textColor="@color/sub_text_grey"
@@ -128,6 +127,8 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/search_recycler_view"
         android:layout_width="match_parent"
+        android:clipToPadding="false"
+        android:paddingBottom="@dimen/most_bottom_padding"
         android:layout_height="match_parent"
         android:layout_below="@id/searched_song_num" />
 

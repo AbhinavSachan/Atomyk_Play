@@ -21,8 +21,7 @@
             android:background="@color/tertiary_bg"
             android:clickable="true"
             android:focusable="true"
-            android:orientation="vertical"
-            android:paddingBottom="@dimen/most_bottom_padding">
+            android:orientation="vertical">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -572,7 +571,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
-                android:layout_marginBottom="12dp"
+                android:layout_marginBottom="6dp"
                 android:background="@color/secondary_bg"
                 android:orientation="vertical"
                 android:paddingBottom="16dp">
@@ -652,6 +651,14 @@
                 </LinearLayout>
 
             </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="72dp"
+                android:layout_marginTop="6dp"
+                android:layout_marginBottom="12dp"
+                android:background="@color/secondary_bg"
+                android:paddingBottom="16dp"/>
 
         </LinearLayout>
 

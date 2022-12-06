@@ -216,8 +216,8 @@ public class SettingsFragment extends Fragment {
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
+    public void onStop() {
+        super.onStop();
         if (blacklistDialog != null) {
             if (blacklistDialog.isShowing()) {
                 blacklistDialog.dismiss();
@@ -228,6 +228,11 @@ public class SettingsFragment extends Fragment {
                 filterDurDialog.dismiss();
             }
         }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
     }
 
     public ArrayList<String> blacklist;

@@ -94,4 +94,5 @@
     <string name="remove">Remove from list</string>
     <string name="blacklisted_items">BlackListed Folders</string>
     <string name="blacklist_fol">Blacklist folders</string>
+    <string name="last_added_interval">Last added interval</string>
 </resources>

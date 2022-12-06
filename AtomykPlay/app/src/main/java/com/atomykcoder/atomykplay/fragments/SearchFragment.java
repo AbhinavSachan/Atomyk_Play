@@ -40,12 +40,14 @@ public class SearchFragment extends Fragment {
     private RadioButton songButton, albumButton, artistButton, genreButton;
     private TextView textView;
 
+    @SuppressLint("NotifyDataSetChanged")
     public void searchWithFilters(String query, ArrayList<MusicDataCapsule> dataList) {
 
         //Check if any radio button is pressed
         radioGroup.setOnCheckedChangeListener((radioGroup, i) -> {
             //search if any radio button is pressed
             search(query, dataList);
+            adapter.notifyDataSetChanged();
         });
     }
 
@@ -110,9 +112,9 @@ public class SearchFragment extends Fragment {
             fragmentManager.popBackStackImmediate();
         });
 
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(view.getContext());
+        recycler_view.setHasFixedSize(true);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
         recycler_view.setLayoutManager(layoutManager);
-        recycler_view.setItemAnimator(new DefaultItemAnimator());
         setAdapter();
 
         return view;
@@ -199,11 +201,12 @@ public class SearchFragment extends Fragment {
         textView.setText(num);
     }
 
-
+    @SuppressLint("NotifyDataSetChanged")
     public void handleSearchEvent(String query, ArrayList<MusicDataCapsule> dataList) {
         if (dataList!= null) {
             search(query, dataList);
             searchWithFilters(query, dataList);
+            adapter.notifyDataSetChanged();
         }
     }
 
@@ -225,9 +228,7 @@ public class SearchFragment extends Fragment {
 
     //Cleaning up any search results left from last search
     //Refreshing list
-    @SuppressLint("NotifyDataSetChanged")
     private void cleanUp() {
         searchedMusicList.clear();
-        adapter.notifyDataSetChanged();
     }
 }
