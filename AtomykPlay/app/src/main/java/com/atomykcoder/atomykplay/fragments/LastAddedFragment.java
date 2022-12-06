@@ -1,5 +1,6 @@
 package com.atomykcoder.atomykplay.fragments;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -30,7 +31,7 @@ import java.util.concurrent.TimeUnit;
 public class LastAddedFragment extends Fragment {
     private RadioGroup radioGroup;
     private RadioButton firstRadio, secondRadio, thirdRadio, fourthRadio;
-    private RecyclerView recyclerView;
+    private MusicMainAdapter adapter;
     private ArrayList<MusicDataCapsule> lastAddedMusicList;
     private final int firstOptionValue = 30;
     private final int secondOptionValue = 60;
@@ -48,12 +49,12 @@ public class LastAddedFragment extends Fragment {
         secondRadio = view.findViewById(R.id.last_added_rb_2);
         thirdRadio = view.findViewById(R.id.last_added_rb_3);
         fourthRadio = view.findViewById(R.id.last_added_rb_4);
-        recyclerView = view.findViewById(R.id.last_added_recycle_view);
+        RecyclerView recyclerView = view.findViewById(R.id.last_added_recycle_view);
 
-        firstRadio.setText(String.valueOf(firstOptionValue));
-        secondRadio.setText(String.valueOf(secondOptionValue));
-        thirdRadio.setText(String.valueOf(thirdOptionValue));
-        fourthRadio.setText(String.valueOf(fourthOptionValue));
+        firstRadio.setText(String.valueOf(firstOptionValue + " days"));
+        secondRadio.setText(String.valueOf(secondOptionValue + " days"));
+        thirdRadio.setText(String.valueOf(thirdOptionValue + " days"));
+        fourthRadio.setText(String.valueOf(fourthOptionValue + " days"));
 
         // initialize/load music lists
         ArrayList<MusicDataCapsule> initialMusicList = new StorageUtil(getContext()).loadInitialList();
@@ -61,14 +62,13 @@ public class LastAddedFragment extends Fragment {
 
         //radio buttons check change listener
         radioGroup.setOnCheckedChangeListener((radioGroup, i) -> {
-            lastAddedMusicList.clear();
+            cleanUp();
             loadLastAdded(initialMusicList);
         });
 
         //set Adapter
         recyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
-        MusicMainAdapter adapter = new MusicMainAdapter(view.getContext(), lastAddedMusicList);
+        adapter = new MusicMainAdapter(view.getContext(), lastAddedMusicList);
         recyclerView.setAdapter(adapter);
 
         return view;
@@ -84,7 +84,6 @@ public class LastAddedFragment extends Fragment {
             case 1 :
                 for(MusicDataCapsule music : datalist) {
                     boolean isWithinDays = isWithinDaysSelected(music.getsDateAdded(), firstOptionValue);
-                    Log.i("info", music.getsName() + " : " + isWithinDays);
                     if(isWithinDays){
                         lastAddedMusicList.add(music);
                     }
@@ -93,7 +92,6 @@ public class LastAddedFragment extends Fragment {
             case 2:
                 for(MusicDataCapsule music : datalist) {
                     boolean isWithinDays = isWithinDaysSelected(music.getsDateAdded(), secondOptionValue);
-                    Log.i("info", music.getsName() + " : " + isWithinDays);
                     if(isWithinDays){
                         lastAddedMusicList.add(music);
                     }
@@ -102,7 +100,6 @@ public class LastAddedFragment extends Fragment {
             case 3:
                 for(MusicDataCapsule music : datalist) {
                     boolean isWithinDays = isWithinDaysSelected(music.getsDateAdded(), thirdOptionValue);
-                    Log.i("info", music.getsName() + " : " + isWithinDays);
                     if(isWithinDays){
                         lastAddedMusicList.add(music);
                     }
@@ -111,7 +108,6 @@ public class LastAddedFragment extends Fragment {
             case 4:
                 for(MusicDataCapsule music : datalist) {
                     boolean isWithinDays = isWithinDaysSelected(music.getsDateAdded(), fourthOptionValue);
-                    Log.i("info", music.getsName() + " : " + isWithinDays);
                     if(isWithinDays){
                         lastAddedMusicList.add(music);
                     }
@@ -173,5 +169,11 @@ public class LastAddedFragment extends Fragment {
             radioId = 4;
         }
         return radioId;
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private void cleanUp() {
+        lastAddedMusicList.clear();
+        adapter.notifyDataSetChanged();
     }
 }
