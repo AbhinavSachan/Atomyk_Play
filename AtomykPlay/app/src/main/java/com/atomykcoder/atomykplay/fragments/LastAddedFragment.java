@@ -2,6 +2,7 @@ package com.atomykcoder.atomykplay.fragments;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -38,9 +39,9 @@ import java.util.concurrent.TimeUnit;
 
 public class LastAddedFragment extends Fragment {
     private final int firstOptionValue = 30;
-    private final int secondOptionValue = 60;
-    private final int thirdOptionValue = 90;
-    private final int fourthOptionValue = 120;
+    private final int secondOptionValue = 90;
+    private final int thirdOptionValue = 180;
+    private final int fourthOptionValue = 360;
     private RadioGroup radioGroup;
     private RadioButton firstRadio, secondRadio, thirdRadio, fourthRadio;
     private MusicMainAdapter adapter;
@@ -49,6 +50,9 @@ public class LastAddedFragment extends Fragment {
     private TextView textView;
     private StorageUtil.SettingsStorage settingsStorage;
     private ArrayList<MusicDataCapsule> initialMusicList;
+    private RecyclerView recyclerView;
+    private ProgressDialog progressDialog;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -56,21 +60,19 @@ public class LastAddedFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_last_added, container, false);
 
         //get references
-        RecyclerView recyclerView = view.findViewById(R.id.last_added_recycle_view);
+        recyclerView = view.findViewById(R.id.last_added_recycle_view);
         settingsStorage = new StorageUtil.SettingsStorage(requireContext());
         View button = view.findViewById(R.id.filter_last_added_btn);
         ImageView imageView = view.findViewById(R.id.close_filter_btn);
-        ProgressBar progressBar = view.findViewById(R.id.progress_bar_filter);
+        progressDialog = new ProgressDialog(requireContext());
         FragmentManager fragmentManager = ((MainActivity) requireContext()).getSupportFragmentManager();
-
-        progressBar.setVisibility(View.VISIBLE);
 
         imageView.setOnClickListener(v -> {
             fragmentManager.popBackStackImmediate();
         });
         textView = view.findViewById(R.id.count_of_lastAdded);
 
-        button.setOnClickListener(v -> openDialogFilter(progressBar));
+        button.setOnClickListener(v -> openDialogFilter());
 
         initialMusicList = new StorageUtil(getContext()).loadInitialList();
 
@@ -78,31 +80,42 @@ public class LastAddedFragment extends Fragment {
         //set Adapter
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        adapter = new MusicMainAdapter(getContext(), lastAddedMusicList);
 
-        ExecutorService service = Executors.newSingleThreadExecutor();
-        Handler handler = new Handler(Looper.getMainLooper());
+        progressDialog.setMessage("Calculating...");
+        progressDialog.setCancelable(true);
+        progressDialog.show();
 
-        service.execute(() -> {
-            int savedState = settingsStorage.loadLastAddedDur();
-            loadLastAdded(initialMusicList, savedState);
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            ExecutorService service = Executors.newSingleThreadExecutor();
+            Handler handler = new Handler(Looper.getMainLooper());
 
-            // post-execute code here
-            handler.post(() -> {
-                adapter = new MusicMainAdapter(getContext(), lastAddedMusicList);
-                recyclerView.setAdapter(adapter);
-                String num = lastAddedMusicList.size() + " Songs";
-                textView.setText(num);
-                progressBar.setVisibility(View.GONE);
+            service.execute(() -> {
+                int savedState = settingsStorage.loadLastAddedDur();
+                loadLastAdded(initialMusicList, savedState);
+
+                // post-execute code here
+                handler.post(() -> {
+                    recyclerView.setAdapter(adapter);
+                    String num = lastAddedMusicList.size() + " Songs";
+                    textView.setText(num);
+                    progressDialog.dismiss();
+                });
             });
-        });
-        // stopping the background thread (crucial)
-        service.shutdown();
+            // stopping the background thread (crucial)
+            service.shutdown();
+        },200);
 
         return view;
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+    }
+
     @SuppressLint("SetTextI18n")
-    private void openDialogFilter(ProgressBar progressBar) {
+    private void openDialogFilter() {
         filterDialog = new Dialog(requireContext());
         filterDialog.setContentView(R.layout.last_added_filter_dialog);
 
@@ -130,28 +143,32 @@ public class LastAddedFragment extends Fragment {
         }
 
         // initialize/load music lists
-        firstRadio.setText(firstOptionValue + " days");
-        secondRadio.setText(secondOptionValue + " days");
-        thirdRadio.setText(thirdOptionValue + " days");
-        fourthRadio.setText(fourthOptionValue + " days");
+        firstRadio.setText("Last one month");
+        secondRadio.setText("Last three months");
+        thirdRadio.setText("Last six months");
+        fourthRadio.setText("Last year");
 
         //radio buttons check change listener
         radioGroup.setOnCheckedChangeListener((radioGroup, i) -> {
-            progressBar.setVisibility(View.VISIBLE);
-            cleanUp();
+            progressDialog.setMessage("Calculating...");
+            progressDialog.setCancelable(true);
+            progressDialog.show();
+
             ExecutorService service = Executors.newSingleThreadExecutor();
             Handler handler = new Handler(Looper.getMainLooper());
 
             service.execute(() -> {
                 int in = getRadioID();
+                cleanUp();
                 loadLastAdded(initialMusicList, in);
+                settingsStorage.setLastAddedDur(in);
                 // post-execute code here
                 handler.post(() -> {
-                    notifyData();
+                    filterDialog.dismiss();
                     String num = lastAddedMusicList.size() + " Songs";
                     textView.setText(num);
-                    progressBar.setVisibility(View.GONE);
-                    filterDialog.dismiss();
+                    notifyData();
+                    progressDialog.dismiss();
                 });
             });
             // stopping the background thread (crucial)
@@ -211,7 +228,6 @@ public class LastAddedFragment extends Fragment {
                 }
                 break;
         }
-        settingsStorage.setLastAddedDur(i);
     }
 
     /**

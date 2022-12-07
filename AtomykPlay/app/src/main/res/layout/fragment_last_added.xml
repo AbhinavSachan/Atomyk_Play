@@ -17,19 +17,12 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <ProgressBar
-                android:id="@+id/progress_bar_filter"
-                android:layout_width="wrap_content"
-                android:layout_centerInParent="true"
-                android:layout_height="wrap_content"/>
-
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/last_added_recycle_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:clipToPadding="false"
                 android:paddingBottom="@dimen/most_bottom_padding" />
-
         </RelativeLayout>
     </androidx.core.widget.NestedScrollView>
 
@@ -111,5 +104,9 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </com.google.android.material.appbar.AppBarLayout>
-
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:layout_gravity="top"
+        android:background="@color/status_bar_color" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -110,6 +110,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         }
     };
     private StorageUtil.SettingsStorage settingsStorage;
+    private NotificationManager notificationManager;
     //to pause when output device is unplugged
     private final BroadcastReceiver becomingNoisyReceiver = new BroadcastReceiver() {
         @Override
@@ -422,7 +423,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             }
         }
     }
-private NotificationManager notificationManager;
+
     private PendingIntent playbackAction(int actionNumber) {
         Intent playbackIntent = new Intent(getApplicationContext(), MediaPlayerService.class);
         switch (actionNumber) {
@@ -1101,7 +1102,9 @@ private NotificationManager notificationManager;
     public void onDestroy() {
         super.onDestroy();
         removeAudioFocus();
-        notificationManager.cancelAll();
+        if (notificationManager!=null) {
+            notificationManager.cancelAll();
+        }
         if (media_player != null) {
             storage.saveMusicLastPos(media_player.getCurrentPosition());
         }

@@ -8,11 +8,15 @@ import android.widget.ImageView;
 
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.transition.TransitionInflater;
 
 import com.atomykcoder.atomykplay.R;
+import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.adapters.OpenPlayListAdapter;
 import com.atomykcoder.atomykplay.adapters.SimpleTouchCallback;
 import com.atomykcoder.atomykplay.classes.GlideBuilt;
@@ -95,6 +99,5 @@ public class OpenPlayListFragment extends Fragment implements OnDragStartListene
     public void onDestroy() {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
-
     }
 }

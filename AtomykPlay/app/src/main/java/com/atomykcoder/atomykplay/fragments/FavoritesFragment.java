@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
@@ -14,13 +13,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.adapters.FavoriteListAdapter;
-import com.atomykcoder.atomykplay.adapters.OpenPlayListAdapter;
 import com.atomykcoder.atomykplay.adapters.SimpleTouchCallback;
 import com.atomykcoder.atomykplay.events.RemoveFromFavoriteEvent;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
-import com.google.android.material.appbar.CollapsingToolbarLayout;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -30,18 +27,21 @@ import java.util.ArrayList;
 public class FavoritesFragment extends Fragment implements OnDragStartListener {
 
     private ItemTouchHelper itemTouchHelper;
+    private FavoriteListAdapter playListAdapter;
+    private ArrayList<MusicDataCapsule> dataList;
+    private StorageUtil storageUtil;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view =inflater.inflate(R.layout.fragment_favorites, container, false);
+        View view = inflater.inflate(R.layout.fragment_favorites, container, false);
 
         if (!EventBus.getDefault().isRegistered(this)) {
             EventBus.getDefault().register(this);
         }
 
-        StorageUtil storageUtil =new StorageUtil(getContext());
+        storageUtil = new StorageUtil(getContext());
 
         RecyclerView recyclerView = view.findViewById(R.id.favorite_music_recycler);
         View noPlLayout = view.findViewById(R.id.song_not_found_layout_favorite);
@@ -53,7 +53,7 @@ public class FavoritesFragment extends Fragment implements OnDragStartListener {
 
         LinearLayoutManager manager = new LinearLayoutManager(getContext());
 
-        ArrayList<MusicDataCapsule> dataList = storageUtil.getFavouriteList();
+        dataList = storageUtil.getFavouriteList();
 
 
         if (dataList != null) {
@@ -69,21 +69,21 @@ public class FavoritesFragment extends Fragment implements OnDragStartListener {
             ItemTouchHelper.Callback callback = new SimpleTouchCallback(playListAdapter);
             itemTouchHelper = new ItemTouchHelper(callback);
             itemTouchHelper.attachToRecyclerView(recyclerView);
-        }else {
+        } else {
             noPlLayout.setVisibility(View.VISIBLE);
 
         }
 
         return view;
     }
-private FavoriteListAdapter playListAdapter;
+
     @Override
     public void onDragStart(RecyclerView.ViewHolder viewHolder) {
         itemTouchHelper.startDrag(viewHolder);
     }
 
     @Subscribe
-    public void removeFromPlaylist(RemoveFromFavoriteEvent event){
+    public void removeFromPlaylist(RemoveFromFavoriteEvent event) {
         playListAdapter.removeItem(event.music);
     }
 

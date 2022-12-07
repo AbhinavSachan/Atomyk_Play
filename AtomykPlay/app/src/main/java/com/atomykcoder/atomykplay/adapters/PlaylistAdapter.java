@@ -20,14 +20,15 @@ import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.classes.GlideBuilt;
 import com.atomykcoder.atomykplay.fragments.OpenPlayListFragment;
+import com.atomykcoder.atomykplay.fragments.PlaylistsFragment;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import com.atomykcoder.atomykplay.viewModals.Playlist;
 
 import java.util.ArrayList;
 
 public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.PlaylistViewHolder> {
-    private final Context context;
-    private final ArrayList<Playlist> arrayList;
+    private Context context;
+    private ArrayList<Playlist> arrayList;
 
     public PlaylistAdapter(Context context, ArrayList<Playlist> arrayList) {
         this.context = context;
@@ -56,7 +57,6 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
             FragmentManager fragmentManager = ((MainActivity) context).getSupportFragmentManager();
 
             Fragment fragment3 = fragmentManager.findFragmentByTag("OpenPlayListFragment");
-
             FragmentTransaction transaction = fragmentManager.beginTransaction();
 
             Bundle bundle = new Bundle();
@@ -78,7 +78,9 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    public void updateView(){
+    public void updateView(ArrayList<Playlist> _arrayList) {
+        arrayList.clear();
+        arrayList.addAll(_arrayList);
         notifyDataSetChanged();
     }
 
@@ -87,11 +89,11 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
         return arrayList.size();
     }
 
-    public class PlaylistViewHolder extends RecyclerView.ViewHolder {
-        private final TextView playlistName;
-        private final TextView songCount;
-        private final ImageView imageView, optImg;
-        private final View cardView;
+    public static class PlaylistViewHolder extends RecyclerView.ViewHolder {
+        private TextView playlistName;
+        private TextView songCount;
+        private ImageView imageView, optImg;
+        private View cardView;
 
         public PlaylistViewHolder(@NonNull View view) {
             super(view);

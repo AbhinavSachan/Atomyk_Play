@@ -32,7 +32,6 @@ import android.provider.Settings;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -71,7 +70,6 @@ import com.atomykcoder.atomykplay.events.RemoveFromPlaylistEvent;
 import com.atomykcoder.atomykplay.events.RemoveLyricsHandlerEvent;
 import com.atomykcoder.atomykplay.fragments.AboutFragment;
 import com.atomykcoder.atomykplay.fragments.BottomSheetPlayerFragment;
-import com.atomykcoder.atomykplay.fragments.HelpFragment;
 import com.atomykcoder.atomykplay.fragments.LastAddedFragment;
 import com.atomykcoder.atomykplay.fragments.PlaylistsFragment;
 import com.atomykcoder.atomykplay.fragments.SearchFragment;
@@ -1201,7 +1199,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onBackPressed() {
         FragmentManager fragmentManager = getSupportFragmentManager();
         Fragment fragment3 = fragmentManager.findFragmentByTag("SettingsFragment");
-        Fragment fragment4 = fragmentManager.findFragmentByTag("HelpFragment");
+        Fragment fragment4 = fragmentManager.findFragmentByTag("PlaylistsFragment");
         Fragment fragment5 = fragmentManager.findFragmentByTag("AboutFragment");
 
         if (mainPlayerSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED ||
@@ -1238,7 +1236,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         drawer.closeDrawer(GravityCompat.START);
         FragmentManager fragmentManager = getSupportFragmentManager();
         Fragment fragment1 = fragmentManager.findFragmentByTag("SettingsFragment");
-        Fragment fragment2 = fragmentManager.findFragmentByTag("HelpFragment");
+        Fragment fragment2 = fragmentManager.findFragmentByTag("PlaylistsFragment");
         Fragment fragment3 = fragmentManager.findFragmentByTag("AboutFragment");
 
         switch (item.getItemId()) {
@@ -1255,11 +1253,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 replaceFragment(R.id.sec_container, new SettingsFragment(), android.R.transition.slide_right, "SettingsFragment");
                 break;
             }
-            case R.id.navigation_help: {
+            case R.id.navigation_playlist: {
                 if (fragment1 != null || fragment2 != null || fragment3 != null) {
                     fragmentManager.popBackStackImmediate();
                 }
-                replaceFragment(R.id.sec_container, new HelpFragment(), android.R.transition.slide_right, "HelpFragment");
+                replaceFragment(R.id.sec_container, new PlaylistsFragment(), android.R.transition.slide_right, "PlaylistsFragment");
                 break;
             }
             case R.id.navigation_about: {
@@ -1394,6 +1392,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void removeFromList(MusicDataCapsule item, String optionTag) {
         if (optionTag.equals("openPlaylist")) {
             EventBus.getDefault().post(new RemoveFromPlaylistEvent(item));
+
         } else if (optionTag.equals("favoriteList")) {
             EventBus.getDefault().post(new RemoveFromFavoriteEvent(item));
         }
@@ -1436,15 +1435,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void deletePl(Playlist playlist) {
         playlistFragment.playlistList.remove(playlist);
         storageUtil.removePlayList(playlist.getName());
-        playlistFragment.playlistAdapter.updateView();
+        ArrayList<Playlist> arrayList = storageUtil.getAllPlaylist();
+
+        playlistFragment.playlistAdapter.updateView(arrayList);
     }
 
     private void renamePl(Playlist playlist, String newName) {
         storageUtil.replacePlaylist(playlist, newName, playlist.getCoverUri());
         ArrayList<Playlist> arrayList = storageUtil.getAllPlaylist();
-        playlistFragment.playlistList.clear();
-        playlistFragment.playlistList.addAll(arrayList);
-        playlistFragment.playlistAdapter.updateView();
+
+        playlistFragment.playlistAdapter.updateView(arrayList);
     }
 
     private void changeUriPl(Playlist playlist) {

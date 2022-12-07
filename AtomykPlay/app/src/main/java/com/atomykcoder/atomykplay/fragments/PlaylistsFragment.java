@@ -1,10 +1,12 @@
 package com.atomykcoder.atomykplay.fragments;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -25,18 +27,15 @@ import java.util.ArrayList;
 public class PlaylistsFragment extends Fragment {
 
     public View noPlLayout;
-    private RecyclerView recyclerView;
     public ArrayList<Playlist> playlistList;
     public PlaylistAdapter playlistAdapter;
-
-
+    private RecyclerView recyclerView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_playlists, container, false);
-
         recyclerView = view.findViewById(R.id.playlist_recycler_view);
         noPlLayout = view.findViewById(R.id.no_pl_layout);
 
@@ -76,7 +75,7 @@ public class PlaylistsFragment extends Fragment {
             }
             playlistAdapter = new PlaylistAdapter(getContext(), playlistList);
             recyclerView.setAdapter(playlistAdapter);
-        }else {
+        } else {
             noPlLayout.setVisibility(View.VISIBLE);
         }
         return view;
