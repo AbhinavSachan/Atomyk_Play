@@ -4,7 +4,6 @@ import static com.atomykcoder.atomykplay.activities.MainActivity.BROADCAST_PAUSE
 import static com.atomykcoder.atomykplay.activities.MainActivity.BROADCAST_PLAY_NEXT_MUSIC;
 import static com.atomykcoder.atomykplay.activities.MainActivity.BROADCAST_PLAY_PREVIOUS_MUSIC;
 import static com.atomykcoder.atomykplay.activities.MainActivity.BROADCAST_STOP_MUSIC;
-import static com.atomykcoder.atomykplay.activities.MainActivity.activityPaused;
 import static com.atomykcoder.atomykplay.activities.MainActivity.service_bound;
 import static com.atomykcoder.atomykplay.classes.ApplicationClass.CHANNEL_ID;
 
@@ -196,17 +195,10 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             } else {
                 if (media_player.isPlaying()) {
                     pauseMedia();
-                    if (!activityPaused) {
-                        EventBus.getDefault().post(new RemoveLyricsHandlerEvent());
-                    }
+
                 } else {
                     resumeMedia();
-                    if (!activityPaused) {
-                        LRCMap lrcMap = storage.loadLyrics(activeMusic.getsId());
-                        if (lrcMap != null) {
-                            EventBus.getDefault().post(new PrepareRunnableEvent());
-                        }
-                    }
+
                 }
             }
         }
@@ -787,8 +779,12 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             if (media_player != null) {
                 if (!media_player.isPlaying()) {
                     int position = storage.loadMusicLastPos();
-                    if (!activityPaused) {
+                    if (service_bound) {
                         setSeekBar();
+                        LRCMap lrcMap = storage.loadLyrics(activeMusic.getsId());
+                        if (lrcMap != null) {
+                            EventBus.getDefault().post(new PrepareRunnableEvent());
+                        }
                     }
                     is_playing = true;
                     media_player.seekTo(position);
@@ -812,10 +808,12 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     public void pauseMedia() {
         if (media_player != null) {
             if (media_player.isPlaying()) {
-                if (seekBarHandler != null) {
-                    seekBarHandler.removeCallbacks(seekBarRunnable);
+                if (service_bound) {
+                    if (seekBarHandler != null) {
+                        seekBarHandler.removeCallbacks(seekBarRunnable);
+                    }
+                    EventBus.getDefault().post(new RemoveLyricsHandlerEvent());
                 }
-
                 storage.saveMusicLastPos(media_player.getCurrentPosition());
                 media_player.pause();
 
@@ -1102,7 +1100,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     public void onDestroy() {
         super.onDestroy();
         removeAudioFocus();
-        if (notificationManager!=null) {
+        if (notificationManager != null) {
             notificationManager.cancelAll();
         }
         if (media_player != null) {

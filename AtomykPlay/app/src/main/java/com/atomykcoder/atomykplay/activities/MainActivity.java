@@ -108,8 +108,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public static boolean phone_ringing = false;
     public static MediaPlayerService media_player_service;
     public static boolean activityPaused = false;
-    private final int DELETE_ITEM = 200;
-    private final int PICK_IMAGE = 100;
+    private final int CHOOSE_COVER_PL = 3216;
+    private final int DELETE_ITEM = 612;
+    private final int PICK_IMAGE = 152;
     public ServiceConnection service_connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -714,11 +715,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (service_bound) {
             MainActivity.this.unbindService(service_connection);
         }
-        if (plDialog != null) {
-            if (plDialog.isShowing()) {
-                plDialog.dismiss();
-            }
-        }
         if (renameDialog != null) {
             if (renameDialog.isShowing()) {
                 renameDialog.dismiss();
@@ -1047,6 +1043,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (data != null) {
                 playListImageUri = data.getData();
                 playlist_image_View.setImageURI(playListImageUri);
+            }
+        }
+        if (resultCode == RESULT_OK && requestCode == CHOOSE_COVER_PL) {
+            if (data != null) {
+                String playListImageUri1 = data.getData().toString();
+                storageUtil.replacePlaylist(storageUtil.loadPlaylist(pl_name),pl_name, playListImageUri1);
+                playlistFragment.playlistAdapter.updateView(storageUtil.getAllPlaylist());
             }
         }
 
@@ -1392,7 +1395,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void removeFromList(MusicDataCapsule item, String optionTag) {
         if (optionTag.equals("openPlaylist")) {
             EventBus.getDefault().post(new RemoveFromPlaylistEvent(item));
-
+            //solve removed song not loading in playlist adapter
         } else if (optionTag.equals("favoriteList")) {
             EventBus.getDefault().post(new RemoveFromFavoriteEvent(item));
         }
@@ -1447,8 +1450,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         playlistFragment.playlistAdapter.updateView(arrayList);
     }
 
-    private void changeUriPl(Playlist playlist) {
+    private String pl_name;
 
+    private void changeUriPl(Playlist playlist) {
+        pl_name = playlist.getName();
+        Intent gallery = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI);
+        startActivityForResult(gallery, CHOOSE_COVER_PL);
     }
 
     private void addToPlaylistPl(Playlist playlist) {
