@@ -8,15 +8,15 @@
     android:clickable="true"
     android:focusable="true">
 
-    <androidx.core.widget.NestedScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
-
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
-
+            <ProgressBar
+                android:id="@+id/progress_bar_filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true" />
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/last_added_recycle_view"
                 android:layout_width="match_parent"
@@ -24,7 +24,6 @@
                 android:clipToPadding="false"
                 android:paddingBottom="@dimen/most_bottom_padding" />
         </RelativeLayout>
-    </androidx.core.widget.NestedScrollView>
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"

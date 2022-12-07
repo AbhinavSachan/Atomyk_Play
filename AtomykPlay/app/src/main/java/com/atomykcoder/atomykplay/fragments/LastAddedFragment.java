@@ -2,7 +2,6 @@ package com.atomykcoder.atomykplay.fragments;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -39,20 +38,18 @@ import java.util.concurrent.TimeUnit;
 
 public class LastAddedFragment extends Fragment {
     private final int firstOptionValue = 30;
-    private final int secondOptionValue = 90;
-    private final int thirdOptionValue = 180;
-    private final int fourthOptionValue = 360;
+    private final int secondOptionValue = 60;
+    private final int thirdOptionValue = 90;
+    private final int fourthOptionValue = 120;
     private RadioGroup radioGroup;
     private RadioButton firstRadio, secondRadio, thirdRadio, fourthRadio;
     private MusicMainAdapter adapter;
     private ArrayList<MusicDataCapsule> lastAddedMusicList;
     private Dialog filterDialog;
-    private TextView textView;
+    private TextView songCountTv;
     private StorageUtil.SettingsStorage settingsStorage;
     private ArrayList<MusicDataCapsule> initialMusicList;
-    private RecyclerView recyclerView;
-    private ProgressDialog progressDialog;
-
+    private ProgressBar progressBar;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -60,51 +57,37 @@ public class LastAddedFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_last_added, container, false);
 
         //get references
-        recyclerView = view.findViewById(R.id.last_added_recycle_view);
+        RecyclerView recyclerView = view.findViewById(R.id.last_added_recycle_view);
         settingsStorage = new StorageUtil.SettingsStorage(requireContext());
-        View button = view.findViewById(R.id.filter_last_added_btn);
-        ImageView imageView = view.findViewById(R.id.close_filter_btn);
-        progressDialog = new ProgressDialog(requireContext());
+        View filterButton = view.findViewById(R.id.filter_last_added_btn);
+        ImageView backImageView = view.findViewById(R.id.close_filter_btn);
+        progressBar = view.findViewById(R.id.progress_bar_filter);
+        songCountTv = view.findViewById(R.id.count_of_lastAdded);
         FragmentManager fragmentManager = ((MainActivity) requireContext()).getSupportFragmentManager();
 
-        imageView.setOnClickListener(v -> {
-            fragmentManager.popBackStackImmediate();
-        });
-        textView = view.findViewById(R.id.count_of_lastAdded);
-
-        button.setOnClickListener(v -> openDialogFilter());
-
+        // initialize/load music array lists
         initialMusicList = new StorageUtil(getContext()).loadInitialList();
-
         lastAddedMusicList = new ArrayList<>();
-        //set Adapter
+
+        // load previous set data
+        Handler handler = new Handler(Looper.getMainLooper());
+        Runnable runnable = () -> {
+            int i = settingsStorage.loadLastAddedDur();
+            loadLastAddedList(i);
+        };
+        handler.postDelayed(runnable, 200);
+
+        // back button click listener
+        backImageView.setOnClickListener(v -> fragmentManager.popBackStackImmediate());
+
+        // filter click listener
+        filterButton.setOnClickListener(v -> openDialogFilter());
+
+        // set recyclerview and adapter
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new MusicMainAdapter(getContext(), lastAddedMusicList);
-
-        progressDialog.setMessage("Calculating...");
-        progressDialog.setCancelable(true);
-        progressDialog.show();
-
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            ExecutorService service = Executors.newSingleThreadExecutor();
-            Handler handler = new Handler(Looper.getMainLooper());
-
-            service.execute(() -> {
-                int savedState = settingsStorage.loadLastAddedDur();
-                loadLastAdded(initialMusicList, savedState);
-
-                // post-execute code here
-                handler.post(() -> {
-                    recyclerView.setAdapter(adapter);
-                    String num = lastAddedMusicList.size() + " Songs";
-                    textView.setText(num);
-                    progressDialog.dismiss();
-                });
-            });
-            // stopping the background thread (crucial)
-            service.shutdown();
-        },200);
+        recyclerView.setAdapter(adapter);
 
         return view;
     }
@@ -142,41 +125,20 @@ public class LastAddedFragment extends Fragment {
                 break;
         }
 
-        // initialize/load music lists
-        firstRadio.setText("Last one month");
-        secondRadio.setText("Last three months");
-        thirdRadio.setText("Last six months");
-        fourthRadio.setText("Last year");
+        firstRadio.setText(firstOptionValue + " days");
+        secondRadio.setText(secondOptionValue + " days");
+        thirdRadio.setText(thirdOptionValue + " days");
+        fourthRadio.setText(fourthOptionValue + " days");
 
-        //radio buttons check change listener
-        radioGroup.setOnCheckedChangeListener((radioGroup, i) -> {
-            progressDialog.setMessage("Calculating...");
-            progressDialog.setCancelable(true);
-            progressDialog.show();
-
-            ExecutorService service = Executors.newSingleThreadExecutor();
-            Handler handler = new Handler(Looper.getMainLooper());
-
-            service.execute(() -> {
-                int in = getRadioID();
-                cleanUp();
-                loadLastAdded(initialMusicList, in);
-                settingsStorage.setLastAddedDur(in);
-                // post-execute code here
-                handler.post(() -> {
-                    filterDialog.dismiss();
-                    String num = lastAddedMusicList.size() + " Songs";
-                    textView.setText(num);
-                    notifyData();
-                    progressDialog.dismiss();
-                });
-            });
-            // stopping the background thread (crucial)
-            service.shutdown();
-
+        radioGroup.setOnCheckedChangeListener((radioGroup, in) -> {
+            int i = getRadioID();
+            loadLastAddedList(i);
+            filterDialog.dismiss();
         });
         filterDialog.show();
     }
+
+
 
     @Override
     public void onStop() {
@@ -188,62 +150,66 @@ public class LastAddedFragment extends Fragment {
         }
     }
 
+
+
     /**
      * load all last added songs based on selected radio buttons
-     *
-     * @param dataList dataList with all songs available on device
+     * @param i radio id
      */
-    private void loadLastAdded(ArrayList<MusicDataCapsule> dataList, int i) {
+    private void loadLastAddedList(int i) {
         switch (i) {
             case 1:
-                for (MusicDataCapsule music : dataList) {
-                    boolean isWithinDays = isWithinDaysSelected(music.getsDateAdded(), firstOptionValue);
-                    if (isWithinDays) {
-                        lastAddedMusicList.add(music);
-                    }
-                }
+                startThread(firstOptionValue);
                 break;
             case 2:
-                for (MusicDataCapsule music : dataList) {
-                    boolean isWithinDays = isWithinDaysSelected(music.getsDateAdded(), secondOptionValue);
-                    if (isWithinDays) {
-                        lastAddedMusicList.add(music);
-                    }
-                }
+                startThread(secondOptionValue);
                 break;
             case 3:
-                for (MusicDataCapsule music : dataList) {
-                    boolean isWithinDays = isWithinDaysSelected(music.getsDateAdded(), thirdOptionValue);
-                    if (isWithinDays) {
-                        lastAddedMusicList.add(music);
-                    }
-                }
+                startThread(thirdOptionValue);
                 break;
             case 4:
-                for (MusicDataCapsule music : dataList) {
-                    boolean isWithinDays = isWithinDaysSelected(music.getsDateAdded(), fourthOptionValue);
-                    if (isWithinDays) {
-                        lastAddedMusicList.add(music);
-                    }
-                }
+                startThread(fourthOptionValue);
                 break;
         }
+        settingsStorage.setLastAddedDur(i);
     }
+
+    /**
+     * start thread to handle loading music list within range
+     * @param maxValue clamp at max value
+     */
+    private void startThread(int maxValue) {
+        ExecutorService service = Executors.newSingleThreadExecutor();
+        Handler handler = new Handler(Looper.getMainLooper());
+        progressBar.setVisibility(View.VISIBLE);
+        service.execute(() -> {
+                lastAddedMusicList.clear();
+                lastAddedMusicList.addAll(getMusicListWithinRange(maxValue));
+            handler.post(() -> {
+                progressBar.setVisibility(View.GONE);
+                notifyAdapter();
+                String num = lastAddedMusicList.size() + " Songs";
+                songCountTv.setText(num);
+                });
+        });
+        service.shutdown();
+    }
+
+
 
     /**
      * takes the difference between current date and date_added and checks if difference is
      * less than given filter amount
-     *
      * @param dateAdded  music date_added
-     * @param daysFilter filter
+     * @param max maximum value
      * @return returns true if difference between current date and date_added is less than or equal
      * to given days_filter
      */
-    private boolean isWithinDaysSelected(String dateAdded, int daysFilter) {
+    private boolean isWithinDaysSelected(String dateAdded, int max) {
         DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.getDefault());
         String currentDate = dateFormat.format(new Date());
+        // initialize variables
         try {
-            // initialize variables
             Date _currentDate = dateFormat.parse(currentDate);
             Date _dateAdded = dateFormat.parse(dateAdded);
             long diff = 0;
@@ -257,15 +223,28 @@ public class LastAddedFragment extends Fragment {
             long days = TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS);
 
             // finally if days is less or equal to filter then return true else false
-            if (days <= daysFilter) {
+            if (days <= max) {
                 return true;
             }
-
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+        } catch (ParseException e) { e.printStackTrace(); }
 
         return false;
+    }
+
+    /**
+     * get music list within specified range in days
+     * @param max maximum value
+     * @return returns arraylist<musicdatacapsule> within specified range
+     */
+    private ArrayList<MusicDataCapsule> getMusicListWithinRange(int max) {
+        ArrayList<MusicDataCapsule> result = new ArrayList<>();
+        for (MusicDataCapsule music : initialMusicList) {
+            boolean isWithinRange = isWithinDaysSelected(music.getsDateAdded(), max);
+            if(isWithinRange)
+                result.add(music);
+        }
+
+        return result;
     }
 
 
@@ -289,12 +268,9 @@ public class LastAddedFragment extends Fragment {
         return radioId;
     }
 
-    private void cleanUp() {
-        lastAddedMusicList.clear();
-    }
-
     @SuppressLint("NotifyDataSetChanged")
-    private void notifyData() {
+    private void notifyAdapter() {
         adapter.notifyDataSetChanged();
     }
+
 }
