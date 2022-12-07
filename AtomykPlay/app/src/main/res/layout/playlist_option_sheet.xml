@@ -163,33 +163,6 @@
                     android:textStyle="bold" />
             </LinearLayout>
 
-            <LinearLayout
-                android:id="@+id/add_to_playlist_pl_option"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?android:selectableItemBackground"
-                android:orientation="horizontal"
-                android:paddingHorizontal="8dp"
-                android:paddingVertical="4dp">
-
-                <ImageView
-                    android:layout_width="@dimen/option_icon_mea"
-                    android:layout_height="@dimen/option_icon_mea"
-                    android:layout_margin="10dp"
-                    android:src="@drawable/ic_add_to_list" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center_vertical"
-                    android:text="@string/add_playlist"
-                    android:textColor="@color/text_color"
-                    android:textSize="@dimen/d_14sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"

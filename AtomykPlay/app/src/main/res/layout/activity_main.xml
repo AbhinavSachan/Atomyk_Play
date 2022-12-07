@@ -333,11 +333,21 @@
             android:alpha="0"
             android:background="@color/translucent_black"
             android:elevation="25dp" />
+        <View
+            android:id="@+id/outer_sheet_details_shadow"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:alpha="0"
+            android:background="@color/translucent_black"
+            android:elevation="30dp" />
+
         <include layout="@layout/donation_layout" />
 
         <include layout="@layout/playlist_option_sheet" />
 
         <include layout="@layout/option_sheet" />
+
+        <include layout="@layout/music_details_sheet_layout" />
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
     <com.google.android.material.navigation.NavigationView

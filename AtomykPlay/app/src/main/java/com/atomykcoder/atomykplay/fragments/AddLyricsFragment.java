@@ -144,7 +144,7 @@ public class AddLyricsFragment extends Fragment {
                 fetchLyrics();
             }
         });
-        btnCancel.setOnClickListener(v -> dialog.cancel());
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
         dialog.show();
     }
 
@@ -156,7 +156,7 @@ public class AddLyricsFragment extends Fragment {
             nameEditText.setError("Required");
             return false;
         } else {
-            dialog.cancel();
+            dialog.dismiss();
             return true;
         }
 

@@ -107,7 +107,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public static boolean is_granted = false;
     public static boolean phone_ringing = false;
     public static MediaPlayerService media_player_service;
-    public static boolean activityPaused = false;
     private final int CHOOSE_COVER_PL = 3216;
     private final int DELETE_ITEM = 612;
     private final int PICK_IMAGE = 152;
@@ -132,6 +131,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public BottomSheetBehavior<View> lyricsListBehavior;
     public BottomSheetBehavior<View> optionSheetBehavior;
     public BottomSheetBehavior<View> donationSheetBehavior;
+    public BottomSheetBehavior<View> detailsSheetBehavior;
     public MusicDataCapsule optionItemSelected;
     public Playlist plOptionItemSelected;
     public Dialog addToPlDialog;
@@ -140,7 +140,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     FragmentManager searchFragmentManager;
     private Dialog plDialog;
     private View shadowMain;
-    private View shadowLyrFound, shadowOuterSheet, playerPickCover_l;
+    private View shadowLyrFound, shadowOuterSheet,shadowOuterSheet2, playerPickCover_l;
     private final BottomSheetBehavior.BottomSheetCallback lrcFoundCallback = new BottomSheetBehavior.BottomSheetCallback() {
         @Override
         public void onStateChanged(@NonNull View bottomSheet, int newState) {
@@ -190,6 +190,31 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         public void onSlide(@NonNull View bottomSheet, float slideOffset) {
             shadowOuterSheet.setAlpha(0.7f + slideOffset);
+        }
+    };
+    private final BottomSheetBehavior.BottomSheetCallback detailsSheetCallback = new BottomSheetBehavior.BottomSheetCallback() {
+        @Override
+        public void onStateChanged(@NonNull View bottomSheet, int newState) {
+            if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
+                drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+                shadowOuterSheet2.setClickable(true);
+                shadowOuterSheet2.setFocusable(true);
+                shadowOuterSheet2.setAlpha(0.7f);
+            } else if (newState == BottomSheetBehavior.STATE_EXPANDED) {
+                shadowOuterSheet2.setClickable(true);
+                shadowOuterSheet2.setFocusable(true);
+                drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+                shadowOuterSheet2.setAlpha(1f);
+            } else if (newState == BottomSheetBehavior.STATE_HIDDEN) {
+                drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+                shadowOuterSheet2.setClickable(false);
+                shadowOuterSheet2.setFocusable(false);
+            }
+        }
+
+        @Override
+        public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+            shadowOuterSheet2.setAlpha(0.7f + slideOffset);
         }
     };
     private final BottomSheetBehavior.BottomSheetCallback donationCallback = new BottomSheetBehavior.BottomSheetCallback() {
@@ -295,13 +320,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private ImageView optionCover, addToFav;
     private TextView optionName, optionArtist;
     private View optionSheet;
+    private View detailsSheet;
     private View donationSheet;
     private Runnable runnable;
     private View createPlaylistBtnDialog, addFavBtnDialog;
     private PlaylistDialogAdapter playlistDialogAdapter;
     private ArrayList<Playlist> playlistArrayList;
     private RecyclerView plDialogRecyclerView;
-    private View addPlayNextPlBtn, addToQueuePlBtn, addToPlaylistPl, nameEditorBtnPl, chooseCoverPl, deletePlBtn;
+    private View addPlayNextPlBtn, addToQueuePlBtn, nameEditorBtnPl, chooseCoverPl, deletePlBtn;
     private ImageView plOptionCover;
     private TextView plOptionName, optionPlCount;
     private PlaylistsFragment playlistFragment;
@@ -309,6 +335,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private View removeFromList;
     private String optionTag;
     private AlertDialog ringtoneDialog = null;
+    private String pl_name;
 
     public void clearStorage() {
         storageUtil.clearMusicLastPos();
@@ -359,9 +386,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         shadowMain = findViewById(R.id.shadow_main);
         shadowLyrFound = findViewById(R.id.shadow_lyrics_found);
         shadowOuterSheet = findViewById(R.id.outer_sheet_shadow);
+        shadowOuterSheet2 = findViewById(R.id.outer_sheet_details_shadow);
         optionSheet = findViewById(R.id.option_bottom_sheet);
         donationSheet = findViewById(R.id.donation_bottom_sheet);
         plSheet = findViewById(R.id.pl_option_bottom_sheet);
+        detailsSheet = findViewById(R.id.file_details_sheet);
         anchoredShadow = findViewById(R.id.anchored_player_shadow);
 
         mainPlayerSheetBehavior = (CustomBottomSheet<View>) BottomSheetBehavior.from(player_bottom_sheet);
@@ -428,6 +457,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         lyricsListBehavior.addBottomSheetCallback(lrcFoundCallback);
         optionSheetBehavior.addBottomSheetCallback(optionCallback);
+        detailsSheetBehavior.addBottomSheetCallback(detailsSheetCallback);
         plSheetBehavior.addBottomSheetCallback(plSheetCallback);
         donationSheetBehavior.addBottomSheetCallback(donationCallback);
         mainPlayerSheetBehavior.addBottomSheetCallback(bottomSheetCallback);
@@ -442,7 +472,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void setUpPlOptionMenuButtons() {
         addPlayNextPlBtn = findViewById(R.id.add_play_next_pl_option);
         addToQueuePlBtn = findViewById(R.id.add_to_queue_pl_option);
-        addToPlaylistPl = findViewById(R.id.add_to_playlist_pl_option);
         nameEditorBtnPl = findViewById(R.id.rename_pl_option);
         chooseCoverPl = findViewById(R.id.choose_cover_option);
         deletePlBtn = findViewById(R.id.delete_pl_option);
@@ -452,7 +481,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         addPlayNextPlBtn.setOnClickListener(this);
         addToQueuePlBtn.setOnClickListener(this);
-        addToPlaylistPl.setOnClickListener(this);
         nameEditorBtnPl.setOnClickListener(this);
         chooseCoverPl.setOnClickListener(this);
         deletePlBtn.setOnClickListener(this);
@@ -569,6 +597,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         setBottomSheetProperties(optionSheetBehavior, optionPeekHeight, true, true);
 
+        int detailsPeekHeight = (int) (metrics.heightPixels / 1.65f);
+        detailsSheetBehavior = BottomSheetBehavior.from(detailsSheet);
+
+        setBottomSheetProperties(detailsSheetBehavior, detailsPeekHeight, true, true);
+
         int lyricFoundPeekHeight = (int) (metrics.heightPixels / 3.5f);
         View lyricsListView = findViewById(R.id.found_lyrics_fragments);
         lyricsListBehavior = BottomSheetBehavior.from(lyricsListView);
@@ -603,6 +636,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //this function will collapse the option bottom sheet if we click outside of sheet
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
             closeSheetWhenClickOutSide(optionSheetBehavior, optionSheet, event);
+            closeSheetWhenClickOutSide(detailsSheetBehavior, detailsSheet, event);
             closeSheetWhenClickOutSide(donationSheetBehavior, donationSheet, event);
             closeSheetWhenClickOutSide(plSheetBehavior, plSheet, event);
         }
@@ -705,7 +739,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (is_playing) {
                 media_player_service.setSeekBar();
                 EventBus.getDefault().post(new PrepareRunnableEvent());
-                activityPaused = false;
             }
         }
     }
@@ -714,21 +747,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onStop() {
         if (service_bound) {
             MainActivity.this.unbindService(service_connection);
-        }
-        if (renameDialog != null) {
-            if (renameDialog.isShowing()) {
-                renameDialog.dismiss();
-            }
-        }
-        if (addToPlDialog != null) {
-            if (addToPlDialog.isShowing()) {
-                addToPlDialog.dismiss();
-            }
-        }
-        if (ringtoneDialog != null) {
-            if (ringtoneDialog.isShowing()) {
-                ringtoneDialog.dismiss();
-            }
         }
         super.onStop();
     }
@@ -740,7 +758,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if (media_player_service.seekBarHandler != null) {
                     media_player_service.seekBarHandler.removeCallbacks(media_player_service.seekBarRunnable);
                     EventBus.getDefault().post(new RemoveLyricsHandlerEvent());
-                    activityPaused = true;
                 }
         }
         super.onPause();
@@ -1048,7 +1065,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (resultCode == RESULT_OK && requestCode == CHOOSE_COVER_PL) {
             if (data != null) {
                 String playListImageUri1 = data.getData().toString();
-                storageUtil.replacePlaylist(storageUtil.loadPlaylist(pl_name),pl_name, playListImageUri1);
+                storageUtil.replacePlaylist(storageUtil.loadPlaylist(pl_name), pl_name, playListImageUri1);
                 playlistFragment.playlistAdapter.updateView(storageUtil.getAllPlaylist());
             }
         }
@@ -1092,13 +1109,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void addToNextPlay(MusicDataCapsule optionItemSelected) {
-
-        showToast("Added to next");
+        bottomSheetPlayerFragment.queueAdapter.updateItemInserted(optionItemSelected);
     }
 
     private void addToQueue(MusicDataCapsule music) {
-
-        showToast("Added to queue");
+        bottomSheetPlayerFragment.queueAdapter.updateItemInsertedLast(music);
     }
 
     private void closeOptionSheet() {
@@ -1363,11 +1378,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 addToQueuePl(plOptionItemSelected);
                 break;
             }
-            case R.id.add_to_playlist_pl_option: {
-                closePlOptionSheet();
-                addToPlaylistPl(plOptionItemSelected);
-                break;
-            }
             case R.id.rename_pl_option: {
                 closePlOptionSheet();
                 openRenameDialog(plOptionItemSelected);
@@ -1412,6 +1422,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Button btnOk = renameDialog.findViewById(R.id.btn_ok_rename_pl);
         Button btnCancel = renameDialog.findViewById(R.id.btn_cancel_rename_pl);
 
+        editText.setText(playlist.getName());
+
         btnOk.setOnClickListener(v -> {
             String plKey = editText.getText().toString().trim();
 
@@ -1450,24 +1462,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         playlistFragment.playlistAdapter.updateView(arrayList);
     }
 
-    private String pl_name;
-
     private void changeUriPl(Playlist playlist) {
         pl_name = playlist.getName();
         Intent gallery = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI);
         startActivityForResult(gallery, CHOOSE_COVER_PL);
     }
 
-    private void addToPlaylistPl(Playlist playlist) {
-
-    }
-
     private void addToQueuePl(Playlist playlist) {
-
+        bottomSheetPlayerFragment.queueAdapter.updateListInsertedLast(playlist.getMusicArrayList());
     }
 
     private void addToNextPlayPl(Playlist playlist) {
-
+        bottomSheetPlayerFragment.queueAdapter.updateListInserted(playlist.getMusicArrayList());
     }
 
     private void closePlOptionSheet() {
@@ -1579,7 +1585,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void openDetailsBox(MusicDataCapsule optionItemSelected) {
-
+        detailsSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
     }
 
     private void openTagEditor(MusicDataCapsule optionItemSelected) {

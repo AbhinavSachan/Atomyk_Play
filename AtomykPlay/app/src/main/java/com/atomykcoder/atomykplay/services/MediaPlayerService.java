@@ -152,7 +152,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     private final BroadcastReceiver nextMusicReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-
             if (mediaSessionManager == null) {
                 try {
                     initiateMediaSession();
@@ -168,7 +167,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     private final BroadcastReceiver prevMusicReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-
             if (mediaSessionManager == null) {
                 try {
                     initiateMediaSession();
@@ -184,7 +182,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     private final BroadcastReceiver pausePlayMusicReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-
             if (media_player == null) {
                 try {
                     initiateMediaSession();
@@ -852,6 +849,9 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
      * This function skips music to previous index
      */
     public void skipToPrevious() {
+        musicList = storage.loadMusicList();
+        musicIndex = storage.loadMusicIndex();
+
         int lastPos = storage.loadMusicLastPos();
         storage.clearMusicLastPos();
 
@@ -925,6 +925,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
      * This function skips music to next index
      */
     public void skipToNext() {
+        musicList = storage.loadMusicList();
+        musicIndex = storage.loadMusicIndex();
         storage.clearMusicLastPos();
 
         if (musicList != null)

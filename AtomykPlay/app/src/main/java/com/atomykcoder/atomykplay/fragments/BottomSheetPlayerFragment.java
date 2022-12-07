@@ -144,7 +144,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     private StorageUtil.SettingsStorage settingsStorage;
     private LinearLayoutManager linearLayoutManager;
     private MusicLyricsAdapter lyricsAdapter;
-    private ArrayList<MusicDataCapsule> dataList;
+    public ArrayList<MusicDataCapsule> dataList;
     private Dialog timerDialogue;
     private MusicDataCapsule activeMusic;
 
@@ -525,11 +525,6 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     @Override
     public void onStop() {
         super.onStop();
-        if (timerDialogue != null) {
-            if (timerDialogue.isShowing()) {
-                timerDialogue.dismiss();
-            }
-        }
     }
 
     public void setLyricsLayout(MusicDataCapsule selectedMusic) {

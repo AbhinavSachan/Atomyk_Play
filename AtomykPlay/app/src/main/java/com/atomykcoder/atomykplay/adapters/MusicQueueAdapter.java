@@ -34,18 +34,19 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
     ArrayList<MusicDataCapsule> musicArrayList;
     OnDragStartListener onDragStartListener;
     MainActivity mainActivity;
+    StorageUtil storageUtil;
 
     public MusicQueueAdapter(Context context, ArrayList<MusicDataCapsule> musicArrayList, OnDragStartListener onDragStartListener) {
         this.context = context;
         this.musicArrayList = musicArrayList;
         this.onDragStartListener = onDragStartListener;
         mainActivity = (MainActivity) context;
+        storageUtil = new StorageUtil(context);
     }
 
     //when item starts to move it will change positions of every item in real time
     @Override
     public void onItemMove(int fromPos, int toPos) {
-        StorageUtil storageUtil = new StorageUtil(context);
         int savedIndex = storageUtil.loadMusicIndex();
 
         Collections.swap(musicArrayList, fromPos, toPos);
@@ -72,7 +73,6 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
     //removing item on swipe
     @Override
     public void onItemDismiss(int position) {
-        StorageUtil storageUtil = new StorageUtil(context);
         int savedIndex;
         savedIndex = storageUtil.loadMusicIndex();
         //if any item has been removed this will save new list on temp list
@@ -107,9 +107,8 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
             File file = new File(currentItem.getsPath());
             if (file.exists()) {
                 //check is service active
-                StorageUtil storage = new StorageUtil(context);
                 //Store serializable music list to sharedPreference
-                storage.saveMusicIndex(position);
+                storageUtil.saveMusicIndex(position);
                 mainActivity.playAudio();
             } else {
                 Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show();
@@ -141,7 +140,6 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
     }
 
     public void removeItem(MusicDataCapsule item) {
-        StorageUtil storageUtil = new StorageUtil(context);
         int position = musicArrayList.indexOf(item);
         if (musicArrayList.size() != 1 && !musicArrayList.isEmpty()) {
             if (item != null) {
@@ -170,7 +168,37 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
         notifyDataSetChanged();
     }
 
-    public class MusicViewAdapter extends RecyclerView.ViewHolder {
+    public void updateItemInserted(MusicDataCapsule music) {
+        int pos = storageUtil.loadMusicIndex();
+        musicArrayList.add(pos + 1, music);
+        notifyItemInserted(pos + 1);
+        notifyItemRangeChanged(pos + 1, musicArrayList.size() - (pos + 2));
+        storageUtil.saveMusicList(musicArrayList);
+    }
+
+    public void updateListInserted(ArrayList<MusicDataCapsule> list) {
+        int pos = storageUtil.loadMusicIndex();
+        musicArrayList.addAll(pos + 1, list);
+        notifyItemRangeInserted(pos + 1, list.size());
+        notifyItemRangeChanged(pos + list.size() + 1, musicArrayList.size() - (pos + list.size() + 2));
+        storageUtil.saveMusicList(musicArrayList);
+    }
+
+    public void updateListInsertedLast(ArrayList<MusicDataCapsule> list) {
+        musicArrayList.addAll(list);
+        int pos = musicArrayList.lastIndexOf(list.get(0));
+        notifyItemRangeInserted(pos, list.size());
+        storageUtil.saveMusicList(musicArrayList);
+    }
+
+    public void updateItemInsertedLast(MusicDataCapsule music) {
+        musicArrayList.add(music);
+        int pos = musicArrayList.lastIndexOf(music);
+        notifyItemInserted(pos);
+        storageUtil.saveMusicList(musicArrayList);
+    }
+
+    public static class MusicViewAdapter extends RecyclerView.ViewHolder {
         private final ImageView imageView;
         private final ImageView imageButton;
         private final View cardView;
