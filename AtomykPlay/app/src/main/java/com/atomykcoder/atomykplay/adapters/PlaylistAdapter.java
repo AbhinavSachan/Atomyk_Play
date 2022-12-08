@@ -67,7 +67,6 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
             }
             OpenPlayListFragment openPlayListFragment = new OpenPlayListFragment();
             openPlayListFragment.setArguments(bundle);
-            openPlayListFragment.setEnterTransition(TransitionInflater.from(context).inflateTransition(android.R.transition.slide_bottom));
 
             transaction.add(R.id.sec_container, openPlayListFragment, "OpenPlayListFragment").addToBackStack(null).commit();
 

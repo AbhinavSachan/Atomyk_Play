@@ -106,6 +106,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public static boolean service_bound = false;
     public static boolean is_granted = false;
     public static boolean phone_ringing = false;
+    public static boolean service_stopped = false;
     public static MediaPlayerService media_player_service;
     private final int CHOOSE_COVER_PL = 3216;
     private final int DELETE_ITEM = 612;
@@ -467,6 +468,67 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (savedInstanceState == null) {
             navigationView.setCheckedItem(R.id.navigation_home);
         }
+        if (is_granted) {
+            bindService();
+            startService();
+        }
+    }
+
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (service_bound) {
+            if (is_playing) {
+                media_player_service.setSeekBar();
+                EventBus.getDefault().post(new PrepareRunnableEvent());
+            }
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        if (service_bound) {
+            if (media_player_service != null)
+                if (media_player_service.seekBarHandler != null) {
+                    media_player_service.seekBarHandler.removeCallbacks(media_player_service.seekBarRunnable);
+                    EventBus.getDefault().post(new RemoveLyricsHandlerEvent());
+                }
+        }
+        super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (service_bound) {
+            MainActivity.this.unbindService(service_connection);
+            //if media player is not playing it will stop the service
+            if (!is_playing) {
+                stopService(new Intent(MainActivity.this, MediaPlayerService.class));
+                is_playing = false;
+                service_stopped = true;
+            }
+        }
+        MediaPlayerService.ui_visible = false;
+        if (phoneStateListener != null && telephonyManager != null) {
+            telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE);
+        }
+        searchFragmentManager = null;
+    }
+
+    /**
+     * this function starts service and binds to MainActivity
+     */
+    private void bindService() {
+        Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
+        MainActivity.this.bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
+    }
+
+    private void startService() {
+        service_stopped = false;
+        Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
+        startService(playerIntent);
     }
 
     private void setUpPlOptionMenuButtons() {
@@ -570,8 +632,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         removeFromList.setOnClickListener(this);
     }
 
-    private void setBottomSheetProperties(BottomSheetBehavior<View> sheet, int peekHeight, boolean hideable, boolean skipCollapse) {
-        sheet.setHideable(hideable);
+    private void setBottomSheetProperties(BottomSheetBehavior<View> sheet, int peekHeight, boolean skipCollapse) {
+        sheet.setHideable(true);
         sheet.setPeekHeight(peekHeight);
         sheet.setSkipCollapsed(skipCollapse);
         sheet.setState(BottomSheetBehavior.STATE_HIDDEN);
@@ -595,29 +657,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         int optionPeekHeight = (int) (metrics.heightPixels / 1.3f);
         optionSheetBehavior = BottomSheetBehavior.from(optionSheet);
 
-        setBottomSheetProperties(optionSheetBehavior, optionPeekHeight, true, true);
+        setBottomSheetProperties(optionSheetBehavior, optionPeekHeight, true);
 
         int detailsPeekHeight = (int) (metrics.heightPixels / 1.95f);
         detailsSheetBehavior = BottomSheetBehavior.from(detailsSheet);
 
-        setBottomSheetProperties(detailsSheetBehavior, detailsPeekHeight, true, true);
+        setBottomSheetProperties(detailsSheetBehavior, detailsPeekHeight, true);
 
         int lyricFoundPeekHeight = (int) (metrics.heightPixels / 3.5f);
         View lyricsListView = findViewById(R.id.found_lyrics_fragments);
         lyricsListBehavior = BottomSheetBehavior.from(lyricsListView);
 
-        setBottomSheetProperties(lyricsListBehavior, lyricFoundPeekHeight, true, false);
+        setBottomSheetProperties(lyricsListBehavior, lyricFoundPeekHeight, false);
 
 
         int donationPeekHeight = (int) (metrics.heightPixels / 1.4f);
         donationSheetBehavior = BottomSheetBehavior.from(donationSheet);
 
-        setBottomSheetProperties(donationSheetBehavior, donationPeekHeight, true, true);
+        setBottomSheetProperties(donationSheetBehavior, donationPeekHeight, true);
 
         int plOptionPeekHeight = (int) (metrics.heightPixels / 1.8f);
         plSheetBehavior = BottomSheetBehavior.from(plSheet);
 
-        setBottomSheetProperties(plSheetBehavior, plOptionPeekHeight, true, true);
+        setBottomSheetProperties(plSheetBehavior, plOptionPeekHeight, true);
 
     }
 
@@ -694,8 +756,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     public void stopMusic() {
-        if (!service_bound) {
-            bindService();
+        if (service_stopped) {
+            startService();
             new Handler().postDelayed(() -> {
                 //service is active send media with broadcast receiver
                 Intent broadcastIntent = new Intent(BROADCAST_STOP_MUSIC);
@@ -724,72 +786,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         lyricsListBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
     }
 
-    @Override
-    protected void onStart() {
-        if (is_granted) {
-            bindService();
-        }
-        super.onStart();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (service_bound) {
-            if (is_playing) {
-                media_player_service.setSeekBar();
-                EventBus.getDefault().post(new PrepareRunnableEvent());
-            }
-        }
-    }
-
-    @Override
-    protected void onStop() {
-        if (service_bound) {
-            MainActivity.this.unbindService(service_connection);
-        }
-        super.onStop();
-    }
-
-    @Override
-    protected void onPause() {
-        if (service_bound) {
-            if (media_player_service != null)
-                if (media_player_service.seekBarHandler != null) {
-                    media_player_service.seekBarHandler.removeCallbacks(media_player_service.seekBarRunnable);
-                    EventBus.getDefault().post(new RemoveLyricsHandlerEvent());
-                }
-        }
-        super.onPause();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (service_bound) {
-            //if media player is not playing it will stop the service
-            if (!is_playing) {
-                stopService(new Intent(MainActivity.this, MediaPlayerService.class));
-                is_playing = false;
-            }
-        }
-        MediaPlayerService.ui_visible = false;
-        if (phoneStateListener != null && telephonyManager != null) {
-            telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE);
-        }
-        searchFragmentManager = null;
-    }
-
-    /**
-     * this function starts service and binds to MainActivity
-     */
-    private void bindService() {
-        Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
-        MainActivity.this.bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
-        startService(playerIntent);
-
-    }
-
     /**
      * play from start
      */
@@ -797,8 +793,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //starting service if its not started yet otherwise it will send broadcast msg to service
         storageUtil.clearMusicLastPos();
         if (!phone_ringing) {
-            if (!service_bound) {
-                bindService();
+            if (service_stopped) {
+                startService();
                 new Handler().postDelayed(() -> {
                     //service is active send media with broadcast receiver
                     Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEW_MUSIC);
@@ -810,7 +806,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 sendBroadcast(broadcastIntent);
             }
         } else {
-            Toast.makeText(getApplicationContext(), "Can't play while on call", Toast.LENGTH_SHORT).show();
+            showToast("Can't play while on call");
         }
     }
 
@@ -819,8 +815,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      */
     public void pausePlayAudio() {
         if (!phone_ringing) {
-            if (!service_bound) {
-                bindService();
+            if (service_stopped) {
+                startService();
                 new Handler().postDelayed(() -> {
                     //service is active send media with broadcast receiver
                     Intent broadcastIntent = new Intent(BROADCAST_PAUSE_PLAY_MUSIC);
@@ -832,7 +828,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 sendBroadcast(broadcastIntent);
             }
         } else {
-            Toast.makeText(getApplicationContext(), "Can't play while on call", Toast.LENGTH_SHORT).show();
+            showToast("Can't play while on call");
         }
     }
 
@@ -841,8 +837,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      */
     public void playNextAudio() {
         if (!phone_ringing) {
-            if (!service_bound) {
-                bindService();
+            if (service_stopped) {
+                startService();
                 new Handler().postDelayed(() -> {
                     //service is active send media with broadcast receiver
                     Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEXT_MUSIC);
@@ -854,7 +850,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 sendBroadcast(broadcastIntent);
             }
         } else {
-            Toast.makeText(getApplicationContext(), "Can't play while on call", Toast.LENGTH_SHORT).show();
+            showToast("Can't play while on call");
         }
     }
 
@@ -863,8 +859,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      */
     public void playPreviousAudio() {
         if (!phone_ringing) {
-            if (!service_bound) {
-                bindService();
+            if (service_stopped) {
+                startService();
                 new Handler().postDelayed(() -> {
                     //service is active send media with broadcast receiver
                     Intent broadcastIntent = new Intent(BROADCAST_PLAY_PREVIOUS_MUSIC);
@@ -876,7 +872,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 sendBroadcast(broadcastIntent);
             }
         } else {
-            Toast.makeText(getApplicationContext(), "Can't play while on call", Toast.LENGTH_SHORT).show();
+            showToast("Can't play while on call");
         }
     }
 
@@ -1143,7 +1139,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //Checks whether user granted permissions for external storage or not
     //if not then shows dialogue to grant permissions
     private void checkPermission() {
-
         Dexter.withContext(MainActivity.this)
                 .withPermissions(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.READ_PHONE_STATE)
                 .withListener(new MultiplePermissionsListener() {

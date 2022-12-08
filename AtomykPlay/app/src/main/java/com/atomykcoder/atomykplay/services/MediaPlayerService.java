@@ -5,6 +5,7 @@ import static com.atomykcoder.atomykplay.activities.MainActivity.BROADCAST_PLAY_
 import static com.atomykcoder.atomykplay.activities.MainActivity.BROADCAST_PLAY_PREVIOUS_MUSIC;
 import static com.atomykcoder.atomykplay.activities.MainActivity.BROADCAST_STOP_MUSIC;
 import static com.atomykcoder.atomykplay.activities.MainActivity.service_bound;
+import static com.atomykcoder.atomykplay.activities.MainActivity.service_stopped;
 import static com.atomykcoder.atomykplay.classes.ApplicationClass.CHANNEL_ID;
 
 import android.annotation.SuppressLint;
@@ -35,7 +36,6 @@ import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.widget.Toast;
 
@@ -192,10 +192,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             } else {
                 if (media_player.isPlaying()) {
                     pauseMedia();
-
                 } else {
                     resumeMedia();
-
                 }
             }
         }
@@ -336,7 +334,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
      */
     @SuppressLint("NewApi")
     public void buildNotification(PlaybackStatus playbackStatus, float playbackSpeed) {
-        Log.i("notification", String.valueOf(playbackStatus));
         int notificationAction = R.drawable.ic_pause_for_noti;//needs to be initialized
         PendingIntent play_pauseAction = null;
 
@@ -622,11 +619,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             EventBus.getDefault().post(new SetMainLayoutEvent(activeMusic));
             updateMetaData(activeMusic);
         }
-        if (!is_playing) {
-            resumeMedia();
-        }
-        Log.i("service_state", String.valueOf(storage.loadMusicIndex()));
-
+        resumeMedia();
     }
 
     @Override
@@ -709,8 +702,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         try {
             if (activeMusic != null) {
                 media_player.setDataSource(activeMusic.getsPath());
-                //don't use prepare async for offline music's
-                media_player.prepare();
+                media_player.prepareAsync();
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -756,14 +748,16 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
      * This function stops music and removes notification
      */
     public void stoppedByNotification() {
-        stopForeground(true);
         if (media_player != null)
             if (media_player.isPlaying()) {
                 storage.saveMusicLastPos(media_player.getCurrentPosition());
-                media_player.stop();
+                media_player.pause();
                 is_playing = false;
                 setIcon(PlaybackStatus.PAUSED);
+                buildNotification(PlaybackStatus.PAUSED,0f);
             }
+        notificationManager.cancelAll();
+        service_stopped = true;
         stopSelf();
     }
 
@@ -801,7 +795,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         } else {
             Toast.makeText(getApplicationContext(), "Can't play while on call", Toast.LENGTH_SHORT).show();
         }
-        Log.i("service_state", String.valueOf(storage.loadMusicIndex()));
 
     }
 
@@ -1108,7 +1101,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     public void onDestroy() {
         super.onDestroy();
         removeAudioFocus();
-        Log.i("service_state", "destroyed");
+        service_stopped = true;
         if (media_player != null) {
             storage.saveMusicLastPos(media_player.getCurrentPosition());
         }
