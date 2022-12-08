@@ -140,7 +140,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     FragmentManager searchFragmentManager;
     private Dialog plDialog;
     private View shadowMain;
-    private View shadowLyrFound, shadowOuterSheet,shadowOuterSheet2, playerPickCover_l;
+    private View shadowLyrFound, shadowOuterSheet, shadowOuterSheet2, playerPickCover_l;
     private final BottomSheetBehavior.BottomSheetCallback lrcFoundCallback = new BottomSheetBehavior.BottomSheetCallback() {
         @Override
         public void onStateChanged(@NonNull View bottomSheet, int newState) {
@@ -199,7 +199,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
                 shadowOuterSheet2.setClickable(true);
                 shadowOuterSheet2.setFocusable(true);
-                shadowOuterSheet2.setAlpha(0.7f);
+                shadowOuterSheet2.setAlpha(0.45f);
             } else if (newState == BottomSheetBehavior.STATE_EXPANDED) {
                 shadowOuterSheet2.setClickable(true);
                 shadowOuterSheet2.setFocusable(true);
@@ -214,7 +214,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         @Override
         public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-            shadowOuterSheet2.setAlpha(0.7f + slideOffset);
+            shadowOuterSheet2.setAlpha(0.45f + slideOffset);
         }
     };
     private final BottomSheetBehavior.BottomSheetCallback donationCallback = new BottomSheetBehavior.BottomSheetCallback() {
@@ -340,7 +340,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void clearStorage() {
         storageUtil.clearMusicLastPos();
         storageUtil.clearAudioIndex();
-        storageUtil.clearMusicList();
+        storageUtil.clearQueueList();
         storageUtil.clearTempMusicList();
     }
 
@@ -597,7 +597,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         setBottomSheetProperties(optionSheetBehavior, optionPeekHeight, true, true);
 
-        int detailsPeekHeight = (int) (metrics.heightPixels / 1.65f);
+        int detailsPeekHeight = (int) (metrics.heightPixels / 1.95f);
         detailsSheetBehavior = BottomSheetBehavior.from(detailsSheet);
 
         setBottomSheetProperties(detailsSheetBehavior, detailsPeekHeight, true, true);
@@ -657,7 +657,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private MusicDataCapsule getMusic() {
-        ArrayList<MusicDataCapsule> musicList = storageUtil.loadMusicList();
+        ArrayList<MusicDataCapsule> musicList = storageUtil.loadQueueList();
         MusicDataCapsule activeMusic = null;
         int musicIndex;
         musicIndex = storageUtil.loadMusicIndex();
@@ -766,17 +766,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        setSupportActionBar(null);
         if (service_bound) {
             //if media player is not playing it will stop the service
-            if (media_player_service != null)
-                if (media_player_service.media_player != null) {
-                    if (!is_playing) {
-                        stopService(new Intent(MainActivity.this, MediaPlayerService.class));
-                        service_bound = false;
-                        is_playing = false;
-                    }
-                }
+            if (!is_playing) {
+                stopService(new Intent(MainActivity.this, MediaPlayerService.class));
+                is_playing = false;
+            }
         }
         MediaPlayerService.ui_visible = false;
         if (phoneStateListener != null && telephonyManager != null) {
@@ -789,13 +784,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * this function starts service and binds to MainActivity
      */
     private void bindService() {
-        if (!phone_ringing) {
-            Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
-            MainActivity.this.bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
-            startService(playerIntent);
-        } else {
-            Toast.makeText(getApplicationContext(), "Can't play while on call.", Toast.LENGTH_SHORT).show();
-        }
+        Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
+        MainActivity.this.bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
+        startService(playerIntent);
+
     }
 
     /**

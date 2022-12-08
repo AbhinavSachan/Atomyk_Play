@@ -9,7 +9,6 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -17,12 +16,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.core.view.MotionEventCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.activities.MainActivity;
-import com.atomykcoder.atomykplay.classes.GlideBuilt;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.ItemTouchHelperAdapter;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
@@ -107,7 +104,7 @@ public class FavoriteListAdapter extends RecyclerView.Adapter<FavoriteListAdapte
                         //adding the removed item in shuffled list on 0th index
                         shuffleList.add(0, currentItem);
                         //saving list
-                        storage.saveMusicList(shuffleList);
+                        storage.saveQueueList(shuffleList);
                         storage.saveMusicIndex(0);
                         // post-execute code here
                         handler.post(() -> {
@@ -123,7 +120,7 @@ public class FavoriteListAdapter extends RecyclerView.Adapter<FavoriteListAdapte
                     ExecutorService service = Executors.newSingleThreadExecutor();
                     service.execute(() -> {
                         storage.saveShuffle(no_shuffle);
-                        storage.saveMusicList(musicArrayList);
+                        storage.saveQueueList(musicArrayList);
                         storage.saveMusicIndex(position);
                         // post-execute code here
                         handler.post(() -> {

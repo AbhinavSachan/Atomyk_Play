@@ -107,7 +107,7 @@ public class OpenPlayListAdapter extends RecyclerView.Adapter<OpenPlayListAdapte
                         //adding the removed item in shuffled list on 0th index
                         shuffleList.add(0, currentItem);
                         //saving list
-                        storage.saveMusicList(shuffleList);
+                        storage.saveQueueList(shuffleList);
                         storage.saveMusicIndex(0);
                         // post-execute code here
                         handler.post(() -> {
@@ -123,7 +123,7 @@ public class OpenPlayListAdapter extends RecyclerView.Adapter<OpenPlayListAdapte
                     ExecutorService service = Executors.newSingleThreadExecutor();
                     service.execute(() -> {
                         storage.saveShuffle(no_shuffle);
-                        storage.saveMusicList(musicArrayList);
+                        storage.saveQueueList(musicArrayList);
                         storage.saveMusicIndex(position);
                         // post-execute code here
                         handler.post(() -> {

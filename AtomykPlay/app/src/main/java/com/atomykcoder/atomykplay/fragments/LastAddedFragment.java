@@ -2,6 +2,7 @@ package com.atomykcoder.atomykplay.fragments;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -38,10 +39,9 @@ import java.util.concurrent.TimeUnit;
 
 public class LastAddedFragment extends Fragment {
     private final int firstOptionValue = 30;
-    private final int secondOptionValue = 60;
-    private final int thirdOptionValue = 90;
-    private final int fourthOptionValue = 120;
-    private RadioGroup radioGroup;
+    private final int secondOptionValue = 90;
+    private final int thirdOptionValue = 180;
+    private final int fourthOptionValue = 360;
     private RadioButton firstRadio, secondRadio, thirdRadio, fourthRadio;
     private MusicMainAdapter adapter;
     private ArrayList<MusicDataCapsule> lastAddedMusicList;
@@ -49,7 +49,7 @@ public class LastAddedFragment extends Fragment {
     private TextView songCountTv;
     private StorageUtil.SettingsStorage settingsStorage;
     private ArrayList<MusicDataCapsule> initialMusicList;
-    private ProgressBar progressBar;
+    private ProgressDialog progressDialog;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -61,7 +61,7 @@ public class LastAddedFragment extends Fragment {
         settingsStorage = new StorageUtil.SettingsStorage(requireContext());
         View filterButton = view.findViewById(R.id.filter_last_added_btn);
         ImageView backImageView = view.findViewById(R.id.close_filter_btn);
-        progressBar = view.findViewById(R.id.progress_bar_filter);
+        progressDialog = new ProgressDialog(requireContext());
         songCountTv = view.findViewById(R.id.count_of_lastAdded);
         FragmentManager fragmentManager = ((MainActivity) requireContext()).getSupportFragmentManager();
 
@@ -104,7 +104,7 @@ public class LastAddedFragment extends Fragment {
 
         int savedState = settingsStorage.loadLastAddedDur();
 
-        radioGroup = filterDialog.findViewById(R.id.last_Added_radio_group);
+        RadioGroup radioGroup1 = filterDialog.findViewById(R.id.last_Added_radio_group);
         firstRadio = filterDialog.findViewById(R.id.last_added_rb_1);
         secondRadio = filterDialog.findViewById(R.id.last_added_rb_2);
         thirdRadio = filterDialog.findViewById(R.id.last_added_rb_3);
@@ -125,12 +125,12 @@ public class LastAddedFragment extends Fragment {
                 break;
         }
 
-        firstRadio.setText(firstOptionValue + " days");
-        secondRadio.setText(secondOptionValue + " days");
-        thirdRadio.setText(thirdOptionValue + " days");
-        fourthRadio.setText(fourthOptionValue + " days");
+        firstRadio.setText("Last month");
+        secondRadio.setText("Last three months");
+        thirdRadio.setText("Last six months");
+        fourthRadio.setText("Last year");
 
-        radioGroup.setOnCheckedChangeListener((radioGroup, in) -> {
+        radioGroup1.setOnCheckedChangeListener((radioGroup, in) -> {
             int i = getRadioID();
             loadLastAddedList(i);
             filterDialog.dismiss();
@@ -181,12 +181,13 @@ public class LastAddedFragment extends Fragment {
     private void startThread(int maxValue) {
         ExecutorService service = Executors.newSingleThreadExecutor();
         Handler handler = new Handler(Looper.getMainLooper());
-        progressBar.setVisibility(View.VISIBLE);
+        progressDialog.setMessage("Calculating...");
+        progressDialog.show();
         service.execute(() -> {
                 lastAddedMusicList.clear();
                 lastAddedMusicList.addAll(getMusicListWithinRange(maxValue));
             handler.post(() -> {
-                progressBar.setVisibility(View.GONE);
+                progressDialog.dismiss();
                 notifyAdapter();
                 String num = lastAddedMusicList.size() + " Songs";
                 songCountTv.setText(num);
@@ -234,7 +235,7 @@ public class LastAddedFragment extends Fragment {
     /**
      * get music list within specified range in days
      * @param max maximum value
-     * @return returns arraylist<musicdatacapsule> within specified range
+     * @return returns arraylist<MusicDataCapsule> within specified range
      */
     private ArrayList<MusicDataCapsule> getMusicListWithinRange(int max) {
         ArrayList<MusicDataCapsule> result = new ArrayList<>();

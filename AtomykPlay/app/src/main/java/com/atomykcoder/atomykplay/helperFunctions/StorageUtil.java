@@ -50,7 +50,7 @@ public class StorageUtil {
         this.context = context;
     }
 
-    public void saveMusicList(ArrayList<MusicDataCapsule> list) {
+    public void saveQueueList(ArrayList<MusicDataCapsule> list) {
         sharedPreferences = context.getSharedPreferences(MUSIC_LIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         Gson gson = new Gson();
@@ -59,7 +59,7 @@ public class StorageUtil {
         editor.apply();
     }
 
-    public ArrayList<MusicDataCapsule> loadMusicList() {
+    public ArrayList<MusicDataCapsule> loadQueueList() {
         sharedPreferences = context.getSharedPreferences(MUSIC_LIST_STORAGE, Context.MODE_PRIVATE);
         Gson gson = new Gson();
         String json = sharedPreferences.getString(musicList, null);
@@ -78,7 +78,6 @@ public class StorageUtil {
     }
 
     public ArrayList<MusicDataCapsule> loadInitialList() {
-
         sharedPreferences = context.getSharedPreferences(MUSIC_LIST_STORAGE, Context.MODE_PRIVATE);
         Gson gson = new Gson();
         String json = sharedPreferences.getString(initialList, null);
@@ -99,7 +98,7 @@ public class StorageUtil {
         return sharedPreferences.getInt(musicIndex, 0);
     }
 
-    public void clearMusicList() {
+    public void clearQueueList() {
         sharedPreferences = context.getSharedPreferences(MUSIC_LIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.remove(musicList);
@@ -166,7 +165,6 @@ public class StorageUtil {
         String json = gson.toJson(music);
         return sharedPreferences.getString(json, no_favorite);
     }
-
 
     public void removeFavorite(MusicDataCapsule music) {
         sharedPreferences = context.getSharedPreferences(FAVORITE_STORAGE, Context.MODE_PRIVATE);

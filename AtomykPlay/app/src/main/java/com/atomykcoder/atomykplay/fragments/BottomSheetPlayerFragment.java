@@ -550,7 +550,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
     private void setupQueueBottomSheet() {
         queueRecyclerView.setLayoutManager(linearLayoutManager);
-        dataList = storageUtil.loadMusicList();
+        dataList = storageUtil.loadQueueList();
         setQueueAdapter();
 
         queueSheetBehaviour = (CustomBottomSheet<View>) BottomSheetBehavior.from(queueBottomSheet);
@@ -742,7 +742,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     }
 
     private MusicDataCapsule getMusic() {
-        ArrayList<MusicDataCapsule> musicList = storageUtil.loadMusicList();
+        ArrayList<MusicDataCapsule> musicList = storageUtil.loadQueueList();
         MusicDataCapsule activeMusic = null;
         int musicIndex;
         musicIndex = storageUtil.loadMusicIndex();
@@ -770,7 +770,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     }
 
     private void shuffleListAndSave(MusicDataCapsule activeMusic) {
-        ArrayList<MusicDataCapsule> musicList = storageUtil.loadMusicList();
+        ArrayList<MusicDataCapsule> musicList = storageUtil.loadQueueList();
         storageUtil.saveTempMusicList(musicList);
         int musicIndex;
         musicIndex = storageUtil.loadMusicIndex();
@@ -790,7 +790,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
                 //adding the removed item in shuffled list on 0th index
                 musicList.add(0, activeMusic);
                 //saving list
-                storageUtil.saveMusicList(musicList);
+                storageUtil.saveQueueList(musicList);
                 //saving index
                 storageUtil.saveMusicIndex(0);
                 // post-execute code here
@@ -822,7 +822,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
                 if (curIndex[0] != -1) {
                     storageUtil.saveMusicIndex(curIndex[0]);
                 }
-                storageUtil.saveMusicList(tempList);
+                storageUtil.saveQueueList(tempList);
                 // post-execute code here
                 handler.post(() -> {
                     updateQueueAdapter(tempList);

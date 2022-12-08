@@ -7,23 +7,19 @@
     android:background="@color/primary_bg"
     android:clickable="true"
     android:focusable="true">
-    
-        <RelativeLayout
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
+        android:layout_height="match_parent">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/last_added_recycle_view"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
-            <ProgressBar
-                android:id="@+id/progress_bar_filter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:layout_centerVertical="true" />
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/last_added_recycle_view"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:clipToPadding="false"
-                android:paddingBottom="@dimen/most_bottom_padding" />
-        </RelativeLayout>
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingBottom="@dimen/most_bottom_padding" />
+    </RelativeLayout>
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
@@ -41,11 +37,11 @@
                 android:id="@+id/close_filter_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
                 android:contentDescription="@string/empty"
                 android:focusable="true"
-                android:layout_gravity="bottom"
-                android:paddingVertical="8dp"
                 android:paddingHorizontal="8dp"
+                android:paddingVertical="8dp"
                 android:src="@drawable/ic_back"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -103,6 +99,7 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </com.google.android.material.appbar.AppBarLayout>
+
     <View
         android:layout_width="match_parent"
         android:layout_height="30dp"

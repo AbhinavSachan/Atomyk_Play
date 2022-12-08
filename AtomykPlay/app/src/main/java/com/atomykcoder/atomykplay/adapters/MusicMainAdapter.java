@@ -93,7 +93,7 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
                         //adding the removed item in shuffled list on 0th index
                         shuffleList.add(0, currentItem);
                         //saving list
-                        storage.saveMusicList(shuffleList);
+                        storage.saveQueueList(shuffleList);
                         storage.saveMusicIndex(0);
                         // post-execute code here
                         handler.post(() -> {
@@ -109,7 +109,7 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
                     Handler handler = new Handler(Looper.getMainLooper());
                     service.execute(() -> {
                         storage.saveShuffle(no_shuffle);
-                        storage.saveMusicList(musicArrayList);
+                        storage.saveQueueList(musicArrayList);
                         storage.saveMusicIndex(position);
                         // post-execute code here
                         handler.post(() -> {

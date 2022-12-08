@@ -16,9 +16,16 @@
         android:layout_height="wrap_content"
         android:src="@drawable/ic_horizontal_rule" />
 
+    <View
+        android:layout_width="match_parent"
+        android:background="#797E7E7E"
+        android:layout_below="@+id/dragHandle_image"
+        android:layout_height="1dp"/>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginTop="12dp"
         android:layout_below="@+id/dragHandle_image"
         android:orientation="vertical">
 
@@ -26,13 +33,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="12dp">
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="6dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/file_path"
-                android:textColor="@color/sub_text_grey"
+                android:textColor="@color/text_color"
                 android:textSize="@dimen/d_15sp" />
 
             <TextView
@@ -41,8 +49,8 @@
                 android:layout_height="wrap_content"
                 android:paddingVertical="2dp"
                 android:text="/storage/8001-1DE9/Music/English/y2mate.com - Ari Abdul BABYDOLL Lyrics.mp3"
-                android:textColor="@color/text_color"
-                android:textSize="@dimen/d_17sp" />
+                android:textColor="@color/sub_text_grey"
+                android:textSize="@dimen/d_16sp" />
 
         </LinearLayout>
 
@@ -50,13 +58,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="12dp">
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="6dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/file_name"
-                android:textColor="@color/sub_text_grey"
+                android:textColor="@color/text_color"
                 android:textSize="@dimen/d_15sp" />
 
             <TextView
@@ -65,8 +74,8 @@
                 android:layout_height="wrap_content"
                 android:paddingVertical="2dp"
                 android:text="y2mate.com - Ari Abdul BABYDOLL Lyrics.mp3"
-                android:textColor="@color/text_color"
-                android:textSize="@dimen/d_17sp" />
+                android:textColor="@color/sub_text_grey"
+                android:textSize="@dimen/d_16sp" />
 
         </LinearLayout>
 
@@ -74,13 +83,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="12dp">
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="6dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/file_artist"
-                android:textColor="@color/sub_text_grey"
+                android:textColor="@color/text_color"
                 android:textSize="@dimen/d_15sp" />
 
             <TextView
@@ -89,8 +99,8 @@
                 android:layout_height="wrap_content"
                 android:paddingVertical="2dp"
                 android:text="Ari Abdul"
-                android:textColor="@color/text_color"
-                android:textSize="@dimen/d_17sp" />
+                android:textColor="@color/sub_text_grey"
+                android:textSize="@dimen/d_16sp" />
 
         </LinearLayout>
 
@@ -98,20 +108,21 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="6dp"
             android:weightSum="2">
 
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:orientation="vertical"
-                android:padding="12dp">
+                android:orientation="vertical">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/file_size"
-                    android:textColor="@color/sub_text_grey"
+                    android:textColor="@color/text_color"
                     android:textSize="@dimen/d_15sp" />
 
                 <TextView
@@ -120,8 +131,8 @@
                     android:layout_height="wrap_content"
                     android:paddingVertical="2dp"
                     android:text="2.9 MB"
-                    android:textColor="@color/text_color"
-                    android:textSize="@dimen/d_17sp" />
+                    android:textColor="@color/sub_text_grey"
+                    android:textSize="@dimen/d_16sp" />
 
             </LinearLayout>
 
@@ -129,14 +140,13 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:orientation="vertical"
-                android:padding="12dp">
+                android:orientation="vertical">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/file_bit"
-                    android:textColor="@color/sub_text_grey"
+                    android:textColor="@color/text_color"
                     android:textSize="@dimen/d_15sp" />
 
                 <TextView
@@ -145,8 +155,8 @@
                     android:layout_height="wrap_content"
                     android:paddingVertical="2dp"
                     android:text="128 kb/s"
-                    android:textColor="@color/text_color"
-                    android:textSize="@dimen/d_17sp" />
+                    android:textColor="@color/sub_text_grey"
+                    android:textSize="@dimen/d_16sp" />
 
             </LinearLayout>
         </LinearLayout>
@@ -155,20 +165,21 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="6dp"
             android:weightSum="2">
 
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:orientation="vertical"
-                android:padding="12dp">
+                android:orientation="vertical">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/file_length"
-                    android:textColor="@color/sub_text_grey"
+                    android:textColor="@color/text_color"
                     android:textSize="@dimen/d_15sp" />
 
                 <TextView
@@ -177,8 +188,8 @@
                     android:layout_height="wrap_content"
                     android:paddingVertical="2dp"
                     android:text="3:11"
-                    android:textColor="@color/text_color"
-                    android:textSize="@dimen/d_17sp" />
+                    android:textColor="@color/sub_text_grey"
+                    android:textSize="@dimen/d_16sp" />
 
             </LinearLayout>
 
@@ -186,14 +197,13 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:orientation="vertical"
-                android:padding="12dp">
+                android:orientation="vertical">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/file_genre"
-                    android:textColor="@color/sub_text_grey"
+                    android:textColor="@color/text_color"
                     android:textSize="@dimen/d_15sp" />
 
                 <TextView
@@ -202,8 +212,8 @@
                     android:layout_height="wrap_content"
                     android:paddingVertical="2dp"
                     android:text="Pop"
-                    android:textColor="@color/text_color"
-                    android:textSize="@dimen/d_17sp" />
+                    android:textColor="@color/sub_text_grey"
+                    android:textSize="@dimen/d_16sp" />
 
             </LinearLayout>
         </LinearLayout>

@@ -116,12 +116,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/tertiary_bg"
-            app:collapsedTitleGravity="center_vertical"
             app:contentScrim="@color/primary_bg"
-            app:expandedTitleGravity="bottom|center_horizontal"
-            app:expandedTitleTextAppearance="@style/App.Custom.Title"
-            app:layout_scrollFlags="scroll|snap|exitUntilCollapsed"
-            app:title="@string/about">
+            app:layout_scrollFlags="scroll|snap|exitUntilCollapsed">
 
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/toolbar_add_lyric"
@@ -129,6 +125,7 @@
                 android:layout_height="?actionBarSize"
                 android:layout_marginTop="@dimen/status_bar_padding"
                 app:layout_collapseMode="pin" />
+
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 
     </com.google.android.material.appbar.AppBarLayout>

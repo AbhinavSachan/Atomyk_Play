@@ -203,7 +203,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     private final BroadcastReceiver playNewMusicReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            musicList = storage.loadMusicList();
+            musicList = storage.loadQueueList();
             musicIndex = storage.loadMusicIndex();
 
             if (musicList != null)
@@ -280,7 +280,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
      * this function updates new music data in notification
      */
     private void updateMetaData(MusicDataCapsule activeMusic) {
-        musicList = storage.loadMusicList();
+        musicList = storage.loadQueueList();
         musicIndex = storage.loadMusicIndex();
         String songName = null;
         String artistName = null;
@@ -622,13 +622,17 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             EventBus.getDefault().post(new SetMainLayoutEvent(activeMusic));
             updateMetaData(activeMusic);
         }
-        resumeMedia();
+        if (!is_playing) {
+            resumeMedia();
+        }
+        Log.i("service_state", String.valueOf(storage.loadMusicIndex()));
+
     }
 
     @Override
     public void onCompletion(MediaPlayer mp) {
         storage.clearMusicLastPos();
-        musicList = storage.loadMusicList();
+        musicList = storage.loadQueueList();
         musicIndex = storage.loadMusicIndex();
 
         if (storage.loadRepeatStatus().equals("no_repeat")) {
@@ -746,13 +750,13 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             media_player.stop();
             is_playing = false;
         }
-
     }
 
     /**
      * This function stops music and removes notification
      */
     public void stoppedByNotification() {
+        stopForeground(true);
         if (media_player != null)
             if (media_player.isPlaying()) {
                 storage.saveMusicLastPos(media_player.getCurrentPosition());
@@ -760,6 +764,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 is_playing = false;
                 setIcon(PlaybackStatus.PAUSED);
             }
+        stopSelf();
     }
 
     /**
@@ -786,7 +791,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                     is_playing = true;
                     media_player.seekTo(position);
                     media_player.start();
-                    storage.clearMusicLastPos();
                     setIcon(PlaybackStatus.PLAYING);
                     buildNotification(PlaybackStatus.PLAYING, 1f);
                 }
@@ -797,6 +801,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         } else {
             Toast.makeText(getApplicationContext(), "Can't play while on call", Toast.LENGTH_SHORT).show();
         }
+        Log.i("service_state", String.valueOf(storage.loadMusicIndex()));
+
     }
 
     /**
@@ -849,7 +855,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
      * This function skips music to previous index
      */
     public void skipToPrevious() {
-        musicList = storage.loadMusicList();
+        musicList = storage.loadQueueList();
         musicIndex = storage.loadMusicIndex();
 
         int lastPos = storage.loadMusicLastPos();
@@ -925,7 +931,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
      * This function skips music to next index
      */
     public void skipToNext() {
-        musicList = storage.loadMusicList();
+        musicList = storage.loadQueueList();
         musicIndex = storage.loadMusicIndex();
         storage.clearMusicLastPos();
 
@@ -1085,7 +1091,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
         storage = new StorageUtil(getApplicationContext());
         settingsStorage = new StorageUtil.SettingsStorage(getApplicationContext());
-        musicList = storage.loadMusicList();
+        musicList = storage.loadQueueList();
         musicIndex = storage.loadMusicIndex();
 
         if (musicList != null)
@@ -1102,9 +1108,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     public void onDestroy() {
         super.onDestroy();
         removeAudioFocus();
-        if (notificationManager != null) {
-            notificationManager.cancelAll();
-        }
+        Log.i("service_state", "destroyed");
         if (media_player != null) {
             storage.saveMusicLastPos(media_player.getCurrentPosition());
         }

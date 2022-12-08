@@ -22,14 +22,13 @@ import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.events.RunnableSyncLyricsEvent;
 import com.atomykcoder.atomykplay.helperFunctions.FetchLyrics;
-import com.atomykcoder.atomykplay.viewModals.LRCMap;
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
+import com.atomykcoder.atomykplay.viewModals.LRCMap;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 
 import org.greenrobot.eventbus.EventBus;
 
-import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -44,7 +43,7 @@ public class AddLyricsFragment extends Fragment {
     private StorageUtil storageUtil;
     private Button btnFind;
     private Dialog dialog;
-    private String name, artist,musicId;
+    private String name, artist, musicId;
     private View view;
 
     @Override
@@ -91,7 +90,6 @@ public class AddLyricsFragment extends Fragment {
         return view;
     }
 
-
     private void saveMusic() {
         if (lrcMap.isEmpty()) {
             if (!editTextLyrics.getText().toString().trim().equals("")) {
@@ -113,9 +111,9 @@ public class AddLyricsFragment extends Fragment {
 
 
     private void saveLyrics() {
-        if (storageUtil.loadLyrics(musicId) == null)
+        if (storageUtil.loadLyrics(musicId) == null) {
             storageUtil.saveLyrics(musicId, lrcMap);
-        else {
+        } else {
             storageUtil.removeLyrics(musicId);
             storageUtil.saveLyrics(musicId, lrcMap);
         }
@@ -228,6 +226,7 @@ public class AddLyricsFragment extends Fragment {
 
                     String filteredLyrics = MusicHelper.splitLyricsByNewLine(unfilteredLyrics);
                     editTextLyrics.setText(filteredLyrics);
+                    lrcMap.clear();
                     lrcMap.addAll(MusicHelper.getLrcMap(filteredLyrics));
                 });
             });
