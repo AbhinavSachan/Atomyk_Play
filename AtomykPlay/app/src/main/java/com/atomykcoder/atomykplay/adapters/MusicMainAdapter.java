@@ -8,6 +8,8 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemClock;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,6 +40,10 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
     Context context;
     ArrayList<MusicDataCapsule> musicArrayList;
     MainActivity mainActivity;
+    long lastClickTime;
+    // value in milliseconds
+    int delay = 1000;
+
 
     public MusicMainAdapter(Context context, ArrayList<MusicDataCapsule> musicArrayList) {
         this.context = context;
@@ -70,6 +76,15 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
         //playing song
         int position = holder.getAbsoluteAdapterPosition();
         holder.cardView.setOnClickListener(v -> {
+
+            //region timer to stop extra clicks
+            if(SystemClock.elapsedRealtime() < (lastClickTime + delay)) {
+                Log.i("info", "too fast");
+                return;
+            }
+            lastClickTime = SystemClock.elapsedRealtime();
+            //endregion
+
             File file = new File(currentItem.getsPath());
             if (file.exists()) {
                 //check is service active
@@ -121,7 +136,6 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
                 Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show();
                 removeItem(currentItem);
             }
-
         });
 
 
