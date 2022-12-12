@@ -4,6 +4,8 @@ import static com.atomykcoder.atomykplay.helperFunctions.MusicHelper.convertDura
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.os.SystemClock;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -35,6 +37,9 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
     OnDragStartListener onDragStartListener;
     MainActivity mainActivity;
     StorageUtil storageUtil;
+    long lastClickTime;
+    // value in milliseconds
+    int delay = 1000;
 
     public MusicQueueAdapter(Context context, ArrayList<MusicDataCapsule> musicArrayList, OnDragStartListener onDragStartListener) {
         this.context = context;
@@ -104,6 +109,16 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
         GlideBuilt.glide(context, currentItem.getsAlbumUri(), R.drawable.ic_music, holder.imageView, 128);
         //playing song
         holder.cardView.setOnClickListener(v -> {
+
+            //region timer to stop extra clicks
+            if(SystemClock.elapsedRealtime() < (lastClickTime + delay)) {
+                Log.i("info", "too fast");
+                return;
+            }
+            lastClickTime = SystemClock.elapsedRealtime();
+            //endregion
+
+
             File file = new File(currentItem.getsPath());
             if (file.exists()) {
                 //check is service active

@@ -8,6 +8,8 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemClock;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,6 +38,9 @@ public class FavoriteListAdapter extends RecyclerView.Adapter<FavoriteListAdapte
     MainActivity mainActivity;
     ArrayList<MusicDataCapsule> musicArrayList;
     OnDragStartListener onDragStartListener;
+    long lastClickTime;
+    // value in milliseconds
+    int delay = 1000;
 
     public FavoriteListAdapter(Context context, ArrayList<MusicDataCapsule> musicArrayList, OnDragStartListener onDragStartListener) {
         this.context = context;
@@ -84,6 +89,16 @@ public class FavoriteListAdapter extends RecyclerView.Adapter<FavoriteListAdapte
 
 
         holder.cardView.setOnClickListener(v -> {
+
+            //region timer to stop extra clicks
+            if(SystemClock.elapsedRealtime() < (lastClickTime + delay)) {
+                Log.i("info", "too fast");
+                return;
+            }
+            lastClickTime = SystemClock.elapsedRealtime();
+            //endregion
+
+
             File file = new File(currentItem.getsPath());
             if (file.exists()) {
                 //check is service active
