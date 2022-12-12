@@ -110,7 +110,6 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
 
             //region timer to stop extra clicks
             if(SystemClock.elapsedRealtime() < (lastClickTime + delay)) {
-                Log.i("info", "too fast");
                 return;
             }
             lastClickTime = SystemClock.elapsedRealtime();

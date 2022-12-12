@@ -9,7 +9,6 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,6 +39,7 @@ public class OpenPlayListAdapter extends RecyclerView.Adapter<OpenPlayListAdapte
     String playlistName;
     ArrayList<MusicDataCapsule> musicArrayList;
     OnDragStartListener onDragStartListener;
+    StorageUtil storageUtil;
     long lastClickTime;
     // value in milliseconds
     int delay = 1000;
@@ -50,6 +50,7 @@ public class OpenPlayListAdapter extends RecyclerView.Adapter<OpenPlayListAdapte
         this.musicArrayList = musicArrayList;
         this.onDragStartListener = onDragStartListener;
         mainActivity = (MainActivity) context;
+        storageUtil = new StorageUtil(context);
     }
 
     //when item starts to move it will change positions of every item in real time
@@ -78,10 +79,9 @@ public class OpenPlayListAdapter extends RecyclerView.Adapter<OpenPlayListAdapte
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
-    public void onBindViewHolder(@NonNull OpenPlayListAdapter.OpenItemViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull OpenItemViewHolder holder, int position) {
         MusicDataCapsule currentItem = musicArrayList.get(position);
 
-        StorageUtil storage = new StorageUtil(context);
         StorageUtil.SettingsStorage settingsStorage = new StorageUtil.SettingsStorage(context);
         Handler handler = new Handler(Looper.getMainLooper());
 
@@ -94,8 +94,7 @@ public class OpenPlayListAdapter extends RecyclerView.Adapter<OpenPlayListAdapte
         holder.cardView.setOnClickListener(v -> {
 
             //region timer to stop extra clicks
-            if(SystemClock.elapsedRealtime() < (lastClickTime + delay)) {
-                Log.i("info", "too fast");
+            if (SystemClock.elapsedRealtime() < (lastClickTime + delay)) {
                 return;
             }
             lastClickTime = SystemClock.elapsedRealtime();
@@ -106,13 +105,13 @@ public class OpenPlayListAdapter extends RecyclerView.Adapter<OpenPlayListAdapte
                 //check is service active
 
                 //if shuffle button is already on it will shuffle it from start
+                ExecutorService service = Executors.newSingleThreadExecutor();
                 if (settingsStorage.loadKeepShuffle()) {
                     ArrayList<MusicDataCapsule> shuffleList = new ArrayList<>(musicArrayList);
                     //saving list in temp for restore function in player fragment
-                    storage.saveTempMusicList(musicArrayList);
-                    storage.saveShuffle(shuffle);
+                    storageUtil.saveTempMusicList(musicArrayList);
+                    storageUtil.saveShuffle(shuffle);
 
-                    ExecutorService service = Executors.newSingleThreadExecutor();
                     service.execute(() -> {
                         //removing current item from list
                         shuffleList.remove(position);
@@ -121,29 +120,28 @@ public class OpenPlayListAdapter extends RecyclerView.Adapter<OpenPlayListAdapte
                         //adding the removed item in shuffled list on 0th index
                         shuffleList.add(0, currentItem);
                         //saving list
-                        storage.saveQueueList(shuffleList);
-                        storage.saveMusicIndex(0);
+                        storageUtil.saveQueueList(shuffleList);
+                        storageUtil.saveMusicIndex(0);
                         // post-execute code here
                         handler.post(() -> {
                             mainActivity.playAudio();
-                            mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(shuffleList);
                             mainActivity.openBottomPlayer();
+                            mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(shuffleList);
                         });
                     });
                     service.shutdown();
 
                 } else if (!settingsStorage.loadKeepShuffle()) {
                     //Store serializable music list to sharedPreference
-                    ExecutorService service = Executors.newSingleThreadExecutor();
                     service.execute(() -> {
-                        storage.saveShuffle(no_shuffle);
-                        storage.saveQueueList(musicArrayList);
-                        storage.saveMusicIndex(position);
+                        storageUtil.saveShuffle(no_shuffle);
+                        storageUtil.saveQueueList(musicArrayList);
+                        storageUtil.saveMusicIndex(position);
                         // post-execute code here
                         handler.post(() -> {
                             mainActivity.playAudio();
-                            mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(musicArrayList);
                             mainActivity.openBottomPlayer();
+                            mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(musicArrayList);
                         });
                     });
                     service.shutdown();
@@ -154,12 +152,11 @@ public class OpenPlayListAdapter extends RecyclerView.Adapter<OpenPlayListAdapte
             }
         });
 
-        holder.optBtn.setOnClickListener(v -> mainActivity.openOptionMenu(currentItem,"openPlaylist"));
+        holder.optBtn.setOnClickListener(v -> mainActivity.openOptionMenu(currentItem, "openPlaylist"));
 
     }
 
     public void removeItem(MusicDataCapsule item) {
-        StorageUtil storageUtil = new StorageUtil(context);
         int position = musicArrayList.indexOf(item);
 
         if (position != -1) {

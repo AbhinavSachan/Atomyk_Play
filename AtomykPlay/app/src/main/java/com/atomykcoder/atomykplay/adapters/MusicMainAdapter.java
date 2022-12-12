@@ -40,6 +40,7 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
     Context context;
     ArrayList<MusicDataCapsule> musicArrayList;
     MainActivity mainActivity;
+    StorageUtil storageUtil;
     long lastClickTime;
     // value in milliseconds
     int delay = 1000;
@@ -49,6 +50,7 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
         this.context = context;
         this.musicArrayList = musicArrayList;
         mainActivity = (MainActivity) context;
+        storageUtil = new StorageUtil(context);
     }
 
     public void updateMusicListItems(ArrayList<MusicDataCapsule> musicArrayList) {
@@ -75,11 +77,11 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
         GlideBuilt.glide(context, currentItem.getsAlbumUri(), R.drawable.ic_music, holder.imageView, 128);
         //playing song
         int position = holder.getAbsoluteAdapterPosition();
+        Handler handler = new Handler(Looper.getMainLooper());
         holder.cardView.setOnClickListener(v -> {
 
             //region timer to stop extra clicks
             if(SystemClock.elapsedRealtime() < (lastClickTime + delay)) {
-                Log.i("info", "too fast");
                 return;
             }
             lastClickTime = SystemClock.elapsedRealtime();
@@ -89,17 +91,16 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
             if (file.exists()) {
                 //check is service active
 
-                StorageUtil storage = new StorageUtil(context);
                 StorageUtil.SettingsStorage settingsStorage = new StorageUtil.SettingsStorage(context);
                 ExecutorService service = Executors.newSingleThreadExecutor();
-                Handler handler = new Handler(Looper.getMainLooper());
+
                 //if shuffle button is already on it will shuffle it from start
                 if (settingsStorage.loadKeepShuffle()) {
                     ArrayList<MusicDataCapsule> shuffleList = new ArrayList<>(musicArrayList);
                     //saving list in temp for restore function in player fragment
                     service.execute(() -> {
-                        storage.saveTempMusicList(musicArrayList);
-                        storage.saveShuffle(shuffle);
+                        storageUtil.saveTempMusicList(musicArrayList);
+                        storageUtil.saveShuffle(shuffle);
                         //removing current item from list
                         shuffleList.remove(position);
                         //shuffling list
@@ -107,27 +108,27 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
                         //adding the removed item in shuffled list on 0th index
                         shuffleList.add(0, currentItem);
                         //saving list
-                        storage.saveQueueList(shuffleList);
-                        storage.saveMusicIndex(0);
+                        storageUtil.saveQueueList(shuffleList);
+                        storageUtil.saveMusicIndex(0);
                         // post-execute code here
                         handler.post(() -> {
                             mainActivity.playAudio();
-                            mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(shuffleList);
                             mainActivity.openBottomPlayer();
+                            mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(shuffleList);
                         });
                     });
                     service.shutdown();
                 } else if (!settingsStorage.loadKeepShuffle()) {
                     //Store serializable music list to sharedPreference
                     service.execute(() -> {
-                        storage.saveShuffle(no_shuffle);
-                        storage.saveQueueList(musicArrayList);
-                        storage.saveMusicIndex(position);
+                        storageUtil.saveShuffle(no_shuffle);
+                        storageUtil.saveQueueList(musicArrayList);
+                        storageUtil.saveMusicIndex(position);
                         // post-execute code here
                         handler.post(() -> {
                             mainActivity.playAudio();
-                            mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(musicArrayList);
                             mainActivity.openBottomPlayer();
+                            mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(musicArrayList);
                         });
                     });
                     service.shutdown();
@@ -172,7 +173,7 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
      * @param item selected delete item
      */
     public void removeItem(MusicDataCapsule item) {
-        StorageUtil storageUtil = new StorageUtil(context);
+
         int position = musicArrayList.indexOf(item);
         int savedIndex = storageUtil.loadMusicIndex();
 
