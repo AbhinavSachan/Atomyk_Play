@@ -55,7 +55,6 @@ public class PlaylistsFragment extends Fragment {
                 fragmentManager.popBackStackImmediate();
             }
             FavoritesFragment fragment = new FavoritesFragment();
-            fragment.setEnterTransition(TransitionInflater.from(requireContext()).inflateTransition(android.R.transition.slide_bottom));
 
             transaction.add(R.id.sec_container, fragment, "FavoritesFragment").addToBackStack(null).commit();
         });

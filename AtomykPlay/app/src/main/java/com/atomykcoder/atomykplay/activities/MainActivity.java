@@ -488,6 +488,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     protected void onStop() {
+        super.onStop();
         if (service_bound) {
             if (media_player_service != null)
                 if (media_player_service.seekBarHandler != null) {
@@ -495,7 +496,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     EventBus.getDefault().post(new RemoveLyricsHandlerEvent());
                 }
         }
-        super.onStop();
     }
 
     @Override
@@ -1242,6 +1242,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         FragmentManager fragmentManager = getSupportFragmentManager();
         Fragment fragment1 = fragmentManager.findFragmentByTag("SettingsFragment");
         Fragment fragment2 = fragmentManager.findFragmentByTag("PlaylistsFragment");
+        Fragment fragment4 = fragmentManager.findFragmentByTag("FavoritesFragment");
         Fragment fragment3 = fragmentManager.findFragmentByTag("AboutFragment");
 
         switch (item.getItemId()) {
@@ -1259,8 +1260,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             }
             case R.id.navigation_playlist: {
-                if (fragment1 != null || fragment2 != null || fragment3 != null) {
+                if (fragment1 != null || fragment2 != null || fragment3 != null || fragment4 != null) {
                     fragmentManager.popBackStackImmediate();
+                    if (fragment2 != null) {
+                        fragmentManager.popBackStackImmediate();
+                    }
                 }
                 replaceFragment(R.id.sec_container, new PlaylistsFragment(), android.R.transition.slide_right, "PlaylistsFragment");
                 break;
