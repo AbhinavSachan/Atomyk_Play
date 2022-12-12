@@ -47,14 +47,13 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
     //when item starts to move it will change positions of every item in real time
     @Override
     public void onItemMove(int fromPos, int toPos) {
-        int savedIndex = storageUtil.loadMusicIndex();
-
         Collections.swap(musicArrayList, fromPos, toPos);
         notifyItemMoved(fromPos, toPos);
 
         notifyItemRangeChanged(fromPos, 1, null);
         notifyItemChanged(toPos, null);
 
+        int savedIndex = storageUtil.loadMusicIndex();
         if (fromPos < savedIndex) {
             if (toPos == savedIndex || toPos > savedIndex) {
                 storageUtil.saveMusicIndex(savedIndex - 1);
@@ -67,7 +66,6 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
             storageUtil.saveMusicIndex(toPos);
         }
         storageUtil.saveQueueList(musicArrayList);
-
     }
 
     //removing item on swipe
@@ -121,7 +119,6 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
         holder.imageButton.setOnTouchListener((v, event) -> {
             File file = new File(currentItem.getsPath());
             if (file.exists()) {
-                //noinspection deprecation
                 if (MotionEventCompat.getActionMasked(event) == MotionEvent.ACTION_DOWN) {
                     onDragStartListener.onDragStart(holder);
                 }
@@ -141,13 +138,16 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
 
     public void removeItem(MusicDataCapsule item) {
         int position = musicArrayList.indexOf(item);
+        ArrayList<MusicDataCapsule> arrayList = storageUtil.loadTempMusicList();
         if (musicArrayList.size() != 1 && !musicArrayList.isEmpty()) {
             if (item != null) {
                 musicArrayList.remove(item);
+                arrayList.remove(item);
             }
             notifyItemRangeChanged(position, musicArrayList.size() - (position + 1));
             notifyItemRemoved(position);
             storageUtil.saveQueueList(musicArrayList);
+            storageUtil.saveTempMusicList(arrayList);
         } else if (musicArrayList.size() == 1) {
             mainActivity.bottomSheetPlayerFragment.queueSheetBehaviour.setState(BottomSheetBehavior.STATE_HIDDEN);
             mainActivity.clearStorage();

@@ -27,8 +27,8 @@ import com.atomykcoder.atomykplay.viewModals.Playlist;
 import java.util.ArrayList;
 
 public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.PlaylistViewHolder> {
-    private Context context;
-    private ArrayList<Playlist> arrayList;
+    private final Context context;
+    private final ArrayList<Playlist> arrayList;
 
     public PlaylistAdapter(Context context, ArrayList<Playlist> arrayList) {
         this.context = context;
@@ -52,12 +52,12 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
         holder.playlistName.setText(currentItem.getName());
         holder.songCount.setText(count);
 
-        holder.cardView.setOnClickListener(v -> {
-            //opening fragment when clicked on playlist
-            FragmentManager fragmentManager = ((MainActivity) context).getSupportFragmentManager();
+        //opening fragment when clicked on playlist
+        FragmentManager fragmentManager = ((MainActivity) context).getSupportFragmentManager();
+        Fragment fragment3 = fragmentManager.findFragmentByTag("OpenPlayListFragment");
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
 
-            Fragment fragment3 = fragmentManager.findFragmentByTag("OpenPlayListFragment");
-            FragmentTransaction transaction = fragmentManager.beginTransaction();
+        holder.cardView.setOnClickListener(v -> {
 
             Bundle bundle = new Bundle();
             bundle.putSerializable("currentPlaylist", currentItem);
@@ -89,10 +89,11 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
     }
 
     public static class PlaylistViewHolder extends RecyclerView.ViewHolder {
-        private TextView playlistName;
-        private TextView songCount;
-        private ImageView imageView, optImg;
-        private View cardView;
+        private final TextView playlistName;
+        private final TextView songCount;
+        private final ImageView imageView;
+        private final ImageView optImg;
+        private final View cardView;
 
         public PlaylistViewHolder(@NonNull View view) {
             super(view);

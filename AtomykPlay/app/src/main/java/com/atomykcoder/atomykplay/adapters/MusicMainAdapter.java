@@ -76,16 +76,15 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
 
                 StorageUtil storage = new StorageUtil(context);
                 StorageUtil.SettingsStorage settingsStorage = new StorageUtil.SettingsStorage(context);
+                ExecutorService service = Executors.newSingleThreadExecutor();
+                Handler handler = new Handler(Looper.getMainLooper());
                 //if shuffle button is already on it will shuffle it from start
                 if (settingsStorage.loadKeepShuffle()) {
                     ArrayList<MusicDataCapsule> shuffleList = new ArrayList<>(musicArrayList);
                     //saving list in temp for restore function in player fragment
-                    storage.saveTempMusicList(musicArrayList);
-                    storage.saveShuffle(shuffle);
-
-                    ExecutorService service = Executors.newSingleThreadExecutor();
-                    Handler handler = new Handler(Looper.getMainLooper());
                     service.execute(() -> {
+                        storage.saveTempMusicList(musicArrayList);
+                        storage.saveShuffle(shuffle);
                         //removing current item from list
                         shuffleList.remove(position);
                         //shuffling list
@@ -105,8 +104,6 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
                     service.shutdown();
                 } else if (!settingsStorage.loadKeepShuffle()) {
                     //Store serializable music list to sharedPreference
-                    ExecutorService service = Executors.newSingleThreadExecutor();
-                    Handler handler = new Handler(Looper.getMainLooper());
                     service.execute(() -> {
                         storage.saveShuffle(no_shuffle);
                         storage.saveQueueList(musicArrayList);

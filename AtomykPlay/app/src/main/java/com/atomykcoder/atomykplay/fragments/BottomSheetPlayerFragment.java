@@ -65,7 +65,6 @@ import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
 import com.atomykcoder.atomykplay.viewModals.LRCMap;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
-import com.bumptech.glide.Glide;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
@@ -319,7 +318,20 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         }
     }
 
-    // Don't Remove This Event Bus is using this method (It might look unused still DON'T REMOVE
+    private Bitmap imageDecoder(String songPath){
+        //image decoder
+        MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
+        mediaMetadataRetriever.setDataSource(songPath);
+        byte[] art = mediaMetadataRetriever.getEmbeddedPicture();
+        Bitmap image;
+        try {
+            image = BitmapFactory.decodeByteArray(art, 0, art.length);
+        } catch (Exception e) {
+            image = null;
+        }
+        return image;
+    }
+
     @Subscribe
     public void setMainPlayerLayout(SetMainLayoutEvent event) {
         activeMusic = event.activeMusic;
@@ -334,16 +346,8 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
             String convertedDur = convertDuration(duration);
 
-            //image decoder
-            MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
-            mediaMetadataRetriever.setDataSource(activeMusic.getsPath());
-            byte[] art = mediaMetadataRetriever.getEmbeddedPicture();
-            Bitmap image;
-            try {
-                image = BitmapFactory.decodeByteArray(art, 0, art.length);
-            } catch (Exception e) {
-                image = null;
-            }
+            Bitmap image = imageDecoder(activeMusic.getsPath());
+
             int bitrateInNum = Integer.parseInt(bitrate) / 1000;
             String finalBitrate = bitrateInNum + " KBPS";
 
@@ -577,14 +581,14 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         });
 
     }
-
     /**
      * Setting adapter in queue list
      */
     private void setQueueAdapter() {
         if (dataList != null) {
-            queueAdapter = new MusicQueueAdapter(getActivity(), dataList, this);
+            queueAdapter = new MusicQueueAdapter(context, dataList, this);
             queueRecyclerView.setAdapter(queueAdapter);
+
             ItemTouchHelper.Callback callback = new SimpleTouchCallback(queueAdapter);
             itemTouchHelper = new ItemTouchHelper(callback);
             itemTouchHelper.attachToRecyclerView(queueRecyclerView);
