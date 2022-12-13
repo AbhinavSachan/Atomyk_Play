@@ -21,6 +21,7 @@ import com.atomykcoder.atomykplay.adapters.OpenPlayListAdapter;
 import com.atomykcoder.atomykplay.adapters.SimpleTouchCallback;
 import com.atomykcoder.atomykplay.classes.GlideBuilt;
 import com.atomykcoder.atomykplay.events.RemoveFromPlaylistEvent;
+import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import com.atomykcoder.atomykplay.viewModals.Playlist;
@@ -29,6 +30,7 @@ import com.google.android.material.appbar.CollapsingToolbarLayout;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 
@@ -60,7 +62,12 @@ public class OpenPlayListFragment extends Fragment implements OnDragStartListene
         recyclerView.setHasFixedSize(true);
         LinearLayoutManager manager = new LinearLayoutManager(getContext());
 
-        musicList = playlist != null ? playlist.getMusicArrayList() : null;
+        StorageUtil storageUtil = new StorageUtil(getContext());
+
+        if(playlist != null) {
+            ArrayList<String> idList = playlist.getMusicIDList();
+            musicList = storageUtil.getItemListFromInitialList(idList);
+        }
 
         if (playlist != null) {
             collapsingToolbarLayout.setTitle(playlist.getName());

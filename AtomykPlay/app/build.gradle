@@ -1,5 +1,6 @@
 plugins {
     id 'com.android.application'
+    id "com.google.protobuf" version "0.8.17"
 }
 
 android {
@@ -52,6 +53,11 @@ dependencies {
     //event bus implementations
     implementation 'org.greenrobot:eventbus:3.3.1'
 
+    // proto data store and protobuf buffers
+    implementation  "androidx.datastore:datastore:1.0.0"
+    // Starting from Protobuf 3.8.0, use the lite runtime library
+    implementation  "com.google.protobuf:protobuf-javalite:3.18.0"
+
     //legacy implementations
     implementation 'androidx.appcompat:appcompat:1.5.1'
     implementation 'com.google.android.material:material:1.7.0'
@@ -76,4 +82,25 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
     implementation 'org.jsoup:jsoup:1.13.1'
 
+}
+
+protobuf {
+    // Configures the Protobuf compilation and the protoc executable
+    protoc {
+        // Downloads from the repositories
+        artifact = "com.google.protobuf:protoc:3.14.0"
+    }
+
+    // Generates the java Protobuf-lite code for the Protobufs in this project
+    generateProtoTasks {
+        all().each { task ->
+            task.builtins {
+                // Configures the task output type
+                java {
+                    // Java Lite has smaller code size and is recommended for Android
+                    option 'lite'
+                }
+            }
+        }
+    }
 }

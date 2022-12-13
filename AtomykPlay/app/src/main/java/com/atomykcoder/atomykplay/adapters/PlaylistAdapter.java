@@ -45,10 +45,10 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
     @Override
     public void onBindViewHolder(@NonNull PlaylistAdapter.PlaylistViewHolder holder, int position) {
         Playlist currentItem = arrayList.get(position);
-        ArrayList<MusicDataCapsule> musicList = currentItem.getMusicArrayList();
+        ArrayList<String> musicIDList = currentItem.getMusicIDList();
 
         GlideBuilt.glide(context, currentItem.getCoverUri(), R.drawable.ic_music_list, holder.imageView, 300);
-        String count = musicList.size() + " Songs";
+        String count = musicIDList.size() + " Songs";
         holder.playlistName.setText(currentItem.getName());
         holder.songCount.setText(count);
 

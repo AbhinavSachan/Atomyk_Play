@@ -39,6 +39,7 @@ public class OpenPlayListAdapter extends RecyclerView.Adapter<OpenPlayListAdapte
     private final MainActivity mainActivity;
     String playlistName;
     ArrayList<MusicDataCapsule> musicArrayList;
+    ArrayList<String> musicIdList = new ArrayList<>();
     OnDragStartListener onDragStartListener;
     long lastClickTime;
     // value in milliseconds
@@ -48,6 +49,11 @@ public class OpenPlayListAdapter extends RecyclerView.Adapter<OpenPlayListAdapte
         this.context = context;
         this.playlistName = playlistName;
         this.musicArrayList = musicArrayList;
+
+        for(MusicDataCapsule music : musicArrayList) {
+            musicIdList.add(music.getsId());
+        }
+
         this.onDragStartListener = onDragStartListener;
         mainActivity = (MainActivity) context;
     }
@@ -109,7 +115,8 @@ public class OpenPlayListAdapter extends RecyclerView.Adapter<OpenPlayListAdapte
                 if (settingsStorage.loadKeepShuffle()) {
                     ArrayList<MusicDataCapsule> shuffleList = new ArrayList<>(musicArrayList);
                     //saving list in temp for restore function in player fragment
-                    storage.saveTempMusicList(musicArrayList);
+
+                    storage.saveTempMusicList(musicIdList);
                     storage.saveShuffle(shuffle);
 
                     ExecutorService service = Executors.newSingleThreadExecutor();
@@ -121,12 +128,12 @@ public class OpenPlayListAdapter extends RecyclerView.Adapter<OpenPlayListAdapte
                         //adding the removed item in shuffled list on 0th index
                         shuffleList.add(0, currentItem);
                         //saving list
-                        storage.saveQueueList(shuffleList);
+                        storage.saveQueueList(musicIdList);
                         storage.saveMusicIndex(0);
                         // post-execute code here
                         handler.post(() -> {
                             mainActivity.playAudio();
-                            mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(shuffleList);
+                            mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(musicIdList);
                             mainActivity.openBottomPlayer();
                         });
                     });
@@ -137,12 +144,12 @@ public class OpenPlayListAdapter extends RecyclerView.Adapter<OpenPlayListAdapte
                     ExecutorService service = Executors.newSingleThreadExecutor();
                     service.execute(() -> {
                         storage.saveShuffle(no_shuffle);
-                        storage.saveQueueList(musicArrayList);
+                        storage.saveQueueList(musicIdList);
                         storage.saveMusicIndex(position);
                         // post-execute code here
                         handler.post(() -> {
                             mainActivity.playAudio();
-                            mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(musicArrayList);
+                            mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(musicIdList);
                             mainActivity.openBottomPlayer();
                         });
                     });
@@ -164,7 +171,7 @@ public class OpenPlayListAdapter extends RecyclerView.Adapter<OpenPlayListAdapte
 
         if (position != -1) {
             musicArrayList.remove(position);
-            storageUtil.removeItemInPlaylist(item, playlistName);
+            storageUtil.removeItemInPlaylist(item.getsId(), playlistName);
         }
 
         notifyItemRangeChanged(position, musicArrayList.size() - (position + 1));

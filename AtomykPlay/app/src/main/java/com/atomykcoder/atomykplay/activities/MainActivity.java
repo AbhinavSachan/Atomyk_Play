@@ -50,6 +50,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.view.GravityCompat;
+import androidx.datastore.core.DataStore;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -59,6 +60,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.transition.TransitionInflater;
 
 import com.atomykcoder.atomykplay.R;
+import com.atomykcoder.atomykplay.UserPreferences;
 import com.atomykcoder.atomykplay.adapters.FoundLyricsAdapter;
 import com.atomykcoder.atomykplay.adapters.MusicMainAdapter;
 import com.atomykcoder.atomykplay.adapters.PlaylistDialogAdapter;
@@ -96,7 +98,13 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import kotlin.coroutines.Continuation;
+import kotlin.jvm.functions.Function2;
+import kotlinx.coroutines.flow.Flow;
+
+
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, NavigationView.OnNavigationItemSelectedListener {
+
 
     public static final String BROADCAST_PLAY_NEW_MUSIC = "com.atomykcoder.atomykplay.PlayNewMusic";
     public static final String BROADCAST_PAUSE_PLAY_MUSIC = "com.atomykcoder.atomykplay.PausePlayMusic";
@@ -719,16 +727,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private MusicDataCapsule getMusic() {
-        ArrayList<MusicDataCapsule> musicList = storageUtil.loadQueueList();
+        ArrayList<String> musicIdList = storageUtil.loadQueueList();
         MusicDataCapsule activeMusic = null;
         int musicIndex;
         musicIndex = storageUtil.loadMusicIndex();
 
-        if (musicList != null && musicList.size() != 0)
-            if (musicIndex != -1 && musicIndex < musicList.size()) {
-                activeMusic = musicList.get(musicIndex);
+        if (musicIdList != null && musicIdList.size() != 0)
+            if (musicIndex != -1 && musicIndex < musicIdList.size()) {
+                activeMusic = storageUtil.getItemFromInitialList(musicIdList.get(musicIndex));
             } else {
-                activeMusic = musicList.get(0);
+                activeMusic = storageUtil.getItemFromInitialList(musicIdList.get(0));
             }
         return activeMusic;
     }
@@ -948,9 +956,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         removeFromList.setVisibility(View.GONE);
         deleteBtn.setVisibility(View.GONE);
 
-        if (storageUtil.checkFavourite(currentItem).equals(no_favorite)) {
+        if (storageUtil.checkFavourite(currentItem.getsId()).equals(no_favorite)) {
             addToFav.setImageResource(R.drawable.ic_favorite_border);
-        } else if (storageUtil.checkFavourite(currentItem).equals(favorite)) {
+        } else if (storageUtil.checkFavourite(currentItem.getsId()).equals(favorite)) {
             addToFav.setImageResource(R.drawable.ic_favorite);
         }
 
@@ -974,7 +982,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public void openPlOptionMenu(Playlist currentItem) {
         plOptionItemSelected = currentItem;
-        String count = currentItem.getMusicArrayList().size() + " Songs";
+        String count = currentItem.getMusicIDList().size() + " Songs";
         plSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         plOptionName.setText(currentItem.getName());
         optionPlCount.setText(count);
@@ -1460,11 +1468,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void addToQueuePl(Playlist playlist) {
-        bottomSheetPlayerFragment.queueAdapter.updateListInsertedLast(playlist.getMusicArrayList());
+        ArrayList<MusicDataCapsule> list = storageUtil.getItemListFromInitialList(playlist.getMusicIDList());
+        bottomSheetPlayerFragment.queueAdapter.updateListInsertedLast(list);
     }
 
     private void addToNextPlayPl(Playlist playlist) {
-        bottomSheetPlayerFragment.queueAdapter.updateListInserted(playlist.getMusicArrayList());
+        ArrayList<MusicDataCapsule> list = storageUtil.getItemListFromInitialList(playlist.getMusicIDList());
+        bottomSheetPlayerFragment.queueAdapter.updateListInserted(list);
     }
 
     private void closePlOptionSheet() {
@@ -1484,9 +1494,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //Initialize Dialogue Box UI Items
         playlistArrayList = storageUtil.getAllPlaylist();
         ImageView image = addToPlDialog.findViewById(R.id.add_to_fav_dialog_box_img);
-        if (storageUtil.checkFavourite(optionItemSelected).equals(no_favorite)) {
+        if (storageUtil.checkFavourite(optionItemSelected.getsId()).equals(no_favorite)) {
             image.setImageResource(R.drawable.ic_favorite_border);
-        } else if (storageUtil.checkFavourite(optionItemSelected).equals(favorite)) {
+        } else if (storageUtil.checkFavourite(optionItemSelected.getsId()).equals(favorite)) {
             image.setImageResource(R.drawable.ic_favorite);
         }
         plDialogRecyclerView = addToPlDialog.findViewById(R.id.playlist_dialog_recycler);
@@ -1511,7 +1521,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void addToFavorite(MusicDataCapsule optionItemSelected) {
-        storageUtil.saveFavorite(optionItemSelected);
+        storageUtil.saveFavorite(optionItemSelected.getsId());
     }
 
     @SuppressLint("NotifyDataSetChanged")

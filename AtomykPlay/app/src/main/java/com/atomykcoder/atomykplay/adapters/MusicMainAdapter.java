@@ -40,6 +40,7 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
     Context context;
     ArrayList<MusicDataCapsule> musicArrayList;
     MainActivity mainActivity;
+    ArrayList<String> favIDList = new ArrayList<>();
     long lastClickTime;
     // value in milliseconds
     int delay = 1000;
@@ -48,6 +49,11 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
     public MusicMainAdapter(Context context, ArrayList<MusicDataCapsule> musicArrayList) {
         this.context = context;
         this.musicArrayList = musicArrayList;
+
+        for(MusicDataCapsule music : musicArrayList){
+            favIDList.add(music.getsId());
+        }
+
         mainActivity = (MainActivity) context;
     }
 
@@ -95,7 +101,10 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
                 if (settingsStorage.loadKeepShuffle()) {
                     ArrayList<MusicDataCapsule> shuffleList = new ArrayList<>(musicArrayList);
                     //saving list in temp for restore function in player fragment
-                    storage.saveTempMusicList(musicArrayList);
+
+
+
+                    storage.saveTempMusicList(favIDList);
                     storage.saveShuffle(shuffle);
 
                     ExecutorService service = Executors.newSingleThreadExecutor();
@@ -108,12 +117,12 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
                         //adding the removed item in shuffled list on 0th index
                         shuffleList.add(0, currentItem);
                         //saving list
-                        storage.saveQueueList(shuffleList);
+                        storage.saveQueueList(favIDList);
                         storage.saveMusicIndex(0);
                         // post-execute code here
                         handler.post(() -> {
                             mainActivity.playAudio();
-                            mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(shuffleList);
+                            mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(favIDList);
                             mainActivity.openBottomPlayer();
                         });
                     });
@@ -124,12 +133,12 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
                     Handler handler = new Handler(Looper.getMainLooper());
                     service.execute(() -> {
                         storage.saveShuffle(no_shuffle);
-                        storage.saveQueueList(musicArrayList);
+                        storage.saveQueueList(favIDList);
                         storage.saveMusicIndex(position);
                         // post-execute code here
                         handler.post(() -> {
                             mainActivity.playAudio();
-                            mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(musicArrayList);
+                            mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(favIDList);
                             mainActivity.openBottomPlayer();
                         });
                     });

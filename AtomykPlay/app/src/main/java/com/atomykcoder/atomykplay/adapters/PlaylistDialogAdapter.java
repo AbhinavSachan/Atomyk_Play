@@ -43,7 +43,7 @@ public class PlaylistDialogAdapter extends RecyclerView.Adapter<PlaylistDialogAd
         StorageUtil storageUtil = new StorageUtil(context);
         holder.textView.setText(playlist.getName());
         holder.view.setOnClickListener(v -> {
-            storageUtil.saveItemInPlayList(selectedMusic,playlist.getName());
+            storageUtil.saveItemInPlayList(selectedMusic.getsId(),playlist.getName());
             mainActivity.addToPlDialog.dismiss();
             Toast.makeText(context,"added to "+playlist.getName(),Toast.LENGTH_SHORT).show();
         });

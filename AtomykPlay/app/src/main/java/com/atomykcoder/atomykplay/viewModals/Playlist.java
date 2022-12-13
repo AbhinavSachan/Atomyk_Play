@@ -10,24 +10,24 @@ import java.util.Map;
 public class Playlist implements Serializable {
     private final String name;
     private final String coverUri;
-    private final Map<String, MusicDataCapsule> musicMap;
+    private final ArrayList<String> musicIDList;
 
-    public Playlist(String _name, String _coverUri , Map<String, MusicDataCapsule> _musicMap) {
+    public Playlist(String _name, String _coverUri , ArrayList<String> _musicIDList) {
         name = _name;
         coverUri = _coverUri;
-        musicMap = _musicMap;
+        musicIDList = _musicIDList;
     }
 
     public Playlist(String _name) {
         name = _name;
         coverUri = null;
-        musicMap = new HashMap<>();
+        musicIDList = new ArrayList<>();
     }
 
     public Playlist(String _name, String _coverUri) {
         name = _name;
         coverUri = _coverUri;
-        musicMap = new HashMap<>();
+        musicIDList = new ArrayList<>();
     }
 
     public String getCoverUri() {
@@ -37,44 +37,37 @@ public class Playlist implements Serializable {
     public String getName() {
         return name;
     }
-    
-    public Map<String, MusicDataCapsule> getMusicMapList() {
-        return musicMap;
-    }
+
 
     /**
      * get music list in arraylist format with no keys
      * @return returns arraylist<MusicDataCapsule>
      */
-    public ArrayList<MusicDataCapsule> getMusicArrayList() {
-        ArrayList<MusicDataCapsule> playlistItems = new ArrayList<>();
-        for(Map.Entry<String, MusicDataCapsule> entry : musicMap.entrySet()) {
-            playlistItems.add(entry.getValue());
-        }
-        return playlistItems;
+    public ArrayList<String> getMusicIDList() {
+        return musicIDList;
     }
 
     /**
      * add music in playlist
      * @param music music to be added
      */
-    public void addMusic(MusicDataCapsule music) {
-        musicMap.put(music.getsId(), music);
+    public void addMusic(String musicID) {
+       musicIDList.add(musicID);
     }
 
     /**
      * remove music from playlist
      * @param music music to be removed
      */
-    public void removeMusic(MusicDataCapsule music) {
-        musicMap.remove(music.getsId());
+    public void removeMusic(String musicID) {
+        musicIDList.remove(musicID);
     }
 
     /**
      * clear all songs from playlist
      */
     public void clearPlaylist() {
-        musicMap.clear();
+        musicIDList.clear();
     }
 
 
