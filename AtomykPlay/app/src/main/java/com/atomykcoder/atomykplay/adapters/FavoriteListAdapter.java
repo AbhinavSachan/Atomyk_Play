@@ -87,7 +87,7 @@ public class FavoriteListAdapter extends RecyclerView.Adapter<FavoriteListAdapte
 
         holder.nameText.setText(currentItem.getsName());
         holder.artistText.setText(currentItem.getsArtist());
-        holder.durationText.setText(convertDuration(currentItem.getsLength()));
+        holder.durationText.setText(convertDuration(currentItem.getsDuration()));
 
 
         holder.cardView.setOnClickListener(v -> {

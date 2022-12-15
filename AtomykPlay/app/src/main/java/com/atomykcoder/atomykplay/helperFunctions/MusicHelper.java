@@ -76,6 +76,11 @@ public class MusicHelper {
         return result;
     }
 
+    /**
+     * converts millis to readable time
+     * @param duration duration in millis
+     * @return readable duration
+     */
     //converting duration from millis to readable time
     @SuppressLint("DefaultLocale")
     public static String convertDuration(String duration) {

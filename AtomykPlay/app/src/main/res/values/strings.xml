@@ -96,10 +96,12 @@
     <string name="blacklist_fol">Blacklist folders</string>
     <string name="last_added_interval">Last added interval</string>
     <string name="file_path">File path</string>
-    <string name="file_name">File name</string>
+    <string name="file_name">Song name</string>
     <string name="file_size">File size</string>
     <string name="file_bit">Bitrate</string>
-    <string name="file_length">Length</string>
+    <string name="file_length">Duration</string>
     <string name="file_artist">Artist name</string>
     <string name="file_genre">Genre</string>
+    <string name="song_name">Song name</string>
+    <string name="song_artist_name">Artist name</string>
 </resources>

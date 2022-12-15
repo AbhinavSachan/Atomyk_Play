@@ -89,7 +89,7 @@ public class OpenPlayListAdapter extends RecyclerView.Adapter<OpenPlayListAdapte
 
         holder.nameText.setText(currentItem.getsName());
         holder.artistText.setText(currentItem.getsArtist());
-        holder.durationText.setText(convertDuration(currentItem.getsLength()));
+        holder.durationText.setText(convertDuration(currentItem.getsDuration()));
 
         GlideBuilt.glide(context, currentItem.getsAlbumUri(), R.drawable.ic_music, holder.imageView, 128);
 

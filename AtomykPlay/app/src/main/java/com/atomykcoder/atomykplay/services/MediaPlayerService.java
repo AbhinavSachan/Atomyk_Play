@@ -289,7 +289,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         String albumUri = null;
         String dur = null;
         if (activeMusic != null) {
-            dur = activeMusic.getsLength();
+            dur = activeMusic.getsDuration();
             songName = activeMusic.getsName();
             artistName = activeMusic.getsArtist();
             album = activeMusic.getsAlbum();

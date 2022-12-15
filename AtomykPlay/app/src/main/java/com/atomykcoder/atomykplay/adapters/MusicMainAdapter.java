@@ -9,7 +9,6 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -167,7 +166,7 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
 
         holder.nameText.setText(currentItem.getsName());
         holder.artistText.setText(currentItem.getsArtist());
-        holder.durationText.setText(convertDuration(currentItem.getsLength()));
+        holder.durationText.setText(convertDuration(currentItem.getsDuration()));
     }
 
     @Override

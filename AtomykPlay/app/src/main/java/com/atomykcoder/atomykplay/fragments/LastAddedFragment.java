@@ -101,7 +101,7 @@ public class LastAddedFragment extends Fragment {
         loadLastAddedList(settingsStorage.loadLastAddedDur());
 
         // back button click listener
-        backImageView.setOnClickListener(v -> fragmentManager.popBackStackImmediate());
+        backImageView.setOnClickListener(v -> requireActivity().onBackPressed());
 
         // filter click listener
         filterButton.setOnClickListener(v -> openDialogFilter());

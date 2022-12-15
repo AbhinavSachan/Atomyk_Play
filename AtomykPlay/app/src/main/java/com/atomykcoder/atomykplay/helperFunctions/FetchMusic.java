@@ -14,7 +14,6 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Locale;
@@ -71,7 +70,7 @@ public class FetchMusic {
                         String sArtist = audioCursor.getString(1).trim();
                         String sAlbumId = audioCursor.getString(2);
                         //converting duration in readable format
-                        String sLength = audioCursor.getString(3);
+                        String sDuration = audioCursor.getString(3);
                         String sPath = audioCursor.getString(4);
                         String sAlbum = audioCursor.getString(5);
                         String sMimeType = audioCursor.getString(6);
@@ -93,10 +92,10 @@ public class FetchMusic {
 
                         int filter = new StorageUtil.SettingsStorage(context).loadFilterDur() * 1000;
                         MusicDataCapsule music = new MusicDataCapsule(sTitle, sArtist,
-                                sAlbum, sAlbumUri, sLength, sPath, sBitrate, sMimeType, sSize, sGenre, sId, sDateAdded);
+                                sAlbum, sAlbumUri, sDuration, sPath, sBitrate, sMimeType, sSize, sGenre, sId, sDateAdded);
                         File file = new File(music.getsPath());
                         if (file.exists()) {
-                            if (filter <= Integer.parseInt(music.getsLength())) {
+                            if (filter <= Integer.parseInt(music.getsDuration())) {
                                 dataList.add(music);
                             }
                         }

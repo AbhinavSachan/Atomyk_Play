@@ -5,7 +5,6 @@ import static com.atomykcoder.atomykplay.helperFunctions.MusicHelper.convertDura
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.SystemClock;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -153,7 +152,7 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
         String index = String.valueOf(position + 1);
         holder.musicIndex.setText(index);
         holder.artistText.setText(currentItem.getsArtist());
-        holder.durationText.setText(convertDuration(currentItem.getsLength()));
+        holder.durationText.setText(convertDuration(currentItem.getsDuration()));
     }
 
     public void removeItem(String itemID) {
