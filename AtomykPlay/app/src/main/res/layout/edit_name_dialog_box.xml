@@ -44,7 +44,6 @@
             android:hint="@string/song_name_e"
             android:imeOptions="actionNext"
             android:inputType="text"
-            android:maxLength="120"
             android:maxLines="1"
             android:textColor="@color/text_color"
             android:textColorHint="@color/hint_color" />
@@ -73,7 +72,6 @@
             android:hint="@string/song_artist_e"
             android:imeOptions="actionDone"
             android:inputType="text"
-            android:maxLength="75"
             android:maxLines="1"
             android:textColor="@color/text_color"
             android:textColorHint="@color/hint_color" />
