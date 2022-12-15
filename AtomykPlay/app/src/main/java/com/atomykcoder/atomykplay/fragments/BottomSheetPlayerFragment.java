@@ -233,13 +233,13 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         queImg.setOnClickListener(v -> openQue());
         repeatImg.setOnClickListener(v -> repeatFun());
         shuffleImg.setOnClickListener(v -> shuffleList());
-        favoriteImg.setOnClickListener(v -> addFavorite(storageUtil, activeMusic, favoriteImg));
+        favoriteImg.setOnClickListener(v -> addFavorite(storageUtil, activeMusic.getsId(), favoriteImg));
         timerImg.setOnClickListener(v -> setTimer());
         timerTv.setOnClickListener(v -> cancelTimer());
         lyricsImg.setOnClickListener(v -> openLyricsPanel());
         queueItem.setOnClickListener(v -> scrollToCurSong());
         lyricsImg.setOnLongClickListener(view1 -> {
-            setLyricsLayout(activeMusic);
+            setLyricsLayout(activeMusic.getsId());
             return false;
         });
 //        top right option button
@@ -255,7 +255,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         lyricsRecyclerView = view.findViewById(R.id.lyrics_recycler_view);
         noLyricsLayout = view.findViewById(R.id.no_lyrics_layout);
         lyricsRecyclerView.addOnScrollListener(onScrollListener);
-        button.setOnClickListener(v -> setLyricsLayout(activeMusic));
+        button.setOnClickListener(v -> setLyricsLayout(activeMusic.getsId()));
 
         seekBarMain.setOnSeekBarChangeListener(this);
 
@@ -322,6 +322,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     @Subscribe
     public void setMainPlayerLayout(SetMainLayoutEvent event) {
         activeMusic = event.activeMusic;
+
 
         if (activeMusic != null) {
             songName = activeMusic.getsName();
@@ -527,16 +528,17 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         super.onStop();
     }
 
-    public void setLyricsLayout(MusicDataCapsule selectedMusic) {
+    public void setLyricsLayout(String musicID) {
         FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
         Fragment fragment = fragmentManager.findFragmentByTag("AddLyricsFragment");
         if (fragment != null) {
             fragmentManager.popBackStackImmediate();
         }
-        Bundle music = new Bundle();
-        music.putSerializable("selectedMusic", selectedMusic);
+        Bundle bundle = new Bundle();
+        MusicDataCapsule music = storageUtil.getItemFromInitialList(musicID);
+        bundle.putSerializable("selectedMusic", music);
         AddLyricsFragment addLyricsFragment = new AddLyricsFragment();
-        addLyricsFragment.setArguments(music);
+        addLyricsFragment.setArguments(bundle);
         addLyricsFragment.setEnterTransition(TransitionInflater.from(requireContext()).inflateTransition(android.R.transition.slide_top));
 
         if (mainActivity.mainPlayerSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
@@ -582,8 +584,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
      */
     private void setQueueAdapter() {
         if (idList != null) {
-            ArrayList<MusicDataCapsule> list = storageUtil.getItemListFromInitialList(idList);
-            queueAdapter = new MusicQueueAdapter(getActivity(), list, this);
+            queueAdapter = new MusicQueueAdapter(getActivity(), idList, this);
             queueRecyclerView.setAdapter(queueAdapter);
             ItemTouchHelper.Callback callback = new SimpleTouchCallback(queueAdapter);
             itemTouchHelper = new ItemTouchHelper(callback);
@@ -595,21 +596,16 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
      * Updating adapter in queue list
      */
     public void updateQueueAdapter(ArrayList<String> _idsList) {
-        if (idList != null) {
-            idList.clear();
-            idList.addAll(_idsList);
-            queueAdapter.updateView();
-        } else {
-            idList = new ArrayList<>();
-            idList.addAll(_idsList);
 
-            ArrayList<MusicDataCapsule> list = storageUtil.getItemListFromInitialList(idList);
-            queueAdapter = new MusicQueueAdapter(getActivity(), list, this);
-            queueRecyclerView.setAdapter(queueAdapter);
-            ItemTouchHelper.Callback callback = new SimpleTouchCallback(queueAdapter);
-            itemTouchHelper = new ItemTouchHelper(callback);
-            itemTouchHelper.attachToRecyclerView(queueRecyclerView);
-        }
+        // assign class member id list to new updated _id-list
+        idList = new ArrayList<>(_idsList);
+
+        ArrayList<MusicDataCapsule> list = storageUtil.getItemListFromInitialList(_idsList);
+        queueAdapter = new MusicQueueAdapter(getActivity(), _idsList, this);
+        queueRecyclerView.setAdapter(queueAdapter);
+        ItemTouchHelper.Callback callback = new SimpleTouchCallback(queueAdapter);
+        itemTouchHelper = new ItemTouchHelper(callback);
+        itemTouchHelper.attachToRecyclerView(queueRecyclerView);
     }
 
     /**
@@ -629,10 +625,10 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         }
     }
 
-    private void optionMenu(MusicDataCapsule activeMusic) {
+    private void optionMenu(MusicDataCapsule music) {
         //add a bottom sheet to show music options like set to ringtone ,audio details ,add to playlist etc.
-        if (activeMusic != null)
-            mainActivity.openOptionMenu(activeMusic, "mainList");
+        if (music != null)
+            mainActivity.openOptionMenu(music, "mainList");
     }
 
     //region Timer setup
@@ -727,15 +723,15 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         timerImg.setVisibility(View.VISIBLE);
     }
 
-    public void addFavorite(StorageUtil storageUtil, MusicDataCapsule activeMusic,@Nullable ImageView imageView) {
-        if (activeMusic != null) {
-            if (storageUtil.checkFavourite(activeMusic.getsId()).equals(no_favorite)) {
-                storageUtil.saveFavorite(activeMusic.getsId());
+    public void addFavorite(StorageUtil storageUtil, String musicID, @Nullable ImageView imageView) {
+        if (musicID != null) {
+            if (storageUtil.checkFavourite(musicID).equals(no_favorite)) {
+                storageUtil.saveFavorite(musicID);
                 if (imageView != null) {
                     imageView.setImageResource(R.drawable.ic_favorite);
                 }
-            } else if (storageUtil.checkFavourite(activeMusic.getsId()).equals(favorite)) {
-                storageUtil.removeFavorite(activeMusic.getsId());
+            } else if (storageUtil.checkFavourite(musicID).equals(favorite)) {
+                storageUtil.removeFavorite(musicID);
                 if (imageView != null) {
                     imageView.setImageResource(R.drawable.ic_favorite_border);
                 }

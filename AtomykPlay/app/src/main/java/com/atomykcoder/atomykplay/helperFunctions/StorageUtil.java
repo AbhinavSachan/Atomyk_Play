@@ -2,6 +2,7 @@ package com.atomykcoder.atomykplay.helperFunctions;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.util.Log;
 
 
@@ -13,7 +14,11 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class StorageUtil {
     //values
@@ -81,7 +86,6 @@ public class StorageUtil {
         sharedPreferences = context.getSharedPreferences(INITIAL_LIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         Gson gson = new Gson();
-
         for(MusicDataCapsule music : list) {
             String json = gson.toJson(music);
             editor.putString(music.getsId(), json);
@@ -138,9 +142,11 @@ public class StorageUtil {
             MusicDataCapsule music = gson.fromJson(json, type);
             musicList.add(music);
         }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            Collections.sort(musicList, Comparator.comparing(MusicDataCapsule::getsName));
+        }
         return musicList;
     }
-
     public void saveMusicIndex(int index) {
         sharedPreferences = context.getSharedPreferences(MUSIC_LIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();

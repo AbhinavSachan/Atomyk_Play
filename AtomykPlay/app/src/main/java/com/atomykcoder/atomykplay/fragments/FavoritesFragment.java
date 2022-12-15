@@ -28,7 +28,6 @@ public class FavoritesFragment extends Fragment implements OnDragStartListener {
 
     private ItemTouchHelper itemTouchHelper;
     private FavoriteListAdapter playListAdapter;
-    private ArrayList<MusicDataCapsule> dataList;
     private StorageUtil storageUtil;
 
     @Override
@@ -84,7 +83,7 @@ public class FavoritesFragment extends Fragment implements OnDragStartListener {
 
     @Subscribe
     public void removeFromPlaylist(RemoveFromFavoriteEvent event) {
-        playListAdapter.removeItem(event.music.getsId());
+        playListAdapter.removeItem(event.musicID);
     }
 
     @Override

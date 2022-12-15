@@ -38,7 +38,6 @@ public class OpenPlayListFragment extends Fragment implements OnDragStartListene
 
     private ItemTouchHelper itemTouchHelper;
     private OpenPlayListAdapter openPlayListAdapter;
-    private ArrayList<MusicDataCapsule> musicList;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -62,11 +61,10 @@ public class OpenPlayListFragment extends Fragment implements OnDragStartListene
         recyclerView.setHasFixedSize(true);
         LinearLayoutManager manager = new LinearLayoutManager(getContext());
 
-        StorageUtil storageUtil = new StorageUtil(getContext());
+        ArrayList<String> musicIDList = null;
 
         if(playlist != null) {
-            ArrayList<String> idList = playlist.getMusicIDList();
-            musicList = storageUtil.getItemListFromInitialList(idList);
+            musicIDList = playlist.getMusicIDList();
         }
 
         if (playlist != null) {
@@ -74,12 +72,12 @@ public class OpenPlayListFragment extends Fragment implements OnDragStartListene
             GlideBuilt.glide(getContext(), playlist.getCoverUri(), 0, imageView, 512);
         }
 
-        if (musicList != null) {
-            openPlayListAdapter = new OpenPlayListAdapter(getContext(), playlist.getName(), musicList, this);
+        if (musicIDList != null) {
+            openPlayListAdapter = new OpenPlayListAdapter(getContext(), playlist.getName(), musicIDList, this);
             recyclerView.setLayoutManager(manager);
             recyclerView.setAdapter(openPlayListAdapter);
             noPlLayout.setVisibility(View.GONE);
-            if (musicList.isEmpty()) {
+            if (musicIDList.isEmpty()) {
                 noPlLayout.setVisibility(View.VISIBLE);
             }
             ItemTouchHelper.Callback callback = new SimpleTouchCallback(openPlayListAdapter);
@@ -94,7 +92,7 @@ public class OpenPlayListFragment extends Fragment implements OnDragStartListene
 
     @Subscribe
     public void removeMusicFromList(RemoveFromPlaylistEvent event) {
-        openPlayListAdapter.removeItem(event.music);
+        openPlayListAdapter.removeItem(event.musicID);
     }
 
     @Override

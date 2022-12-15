@@ -41,7 +41,7 @@ public class FavoriteListAdapter extends RecyclerView.Adapter<FavoriteListAdapte
     StorageUtil storageUtil;
     long lastClickTime;
     // value in milliseconds
-    int delay = 1000;
+    int delay = 500;
 
     public FavoriteListAdapter(Context context, ArrayList<String> _musicIdList, OnDragStartListener onDragStartListener) {
         this.context = context;
@@ -126,7 +126,7 @@ public class FavoriteListAdapter extends RecyclerView.Adapter<FavoriteListAdapte
                         storage.saveMusicIndex(0);
                         // post-execute code here
                         handler.post(() -> {
-                            mainActivity.playAudio();
+                            mainActivity.playAudio(currentItem.getsId());
                             mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(shuffleIDList);
                             mainActivity.openBottomPlayer();
                         });
@@ -142,7 +142,7 @@ public class FavoriteListAdapter extends RecyclerView.Adapter<FavoriteListAdapte
                         storage.saveMusicIndex(position);
                         // post-execute code here
                         handler.post(() -> {
-                            mainActivity.playAudio();
+                            mainActivity.playAudio(currentItem.getsId());
                             mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(musicIdList);
                             mainActivity.openBottomPlayer();
                         });

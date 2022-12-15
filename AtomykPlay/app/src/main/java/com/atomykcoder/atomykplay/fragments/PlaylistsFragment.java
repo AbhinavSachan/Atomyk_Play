@@ -1,12 +1,10 @@
 package com.atomykcoder.atomykplay.fragments;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -14,7 +12,6 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.transition.TransitionInflater;
 
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.adapters.PlaylistAdapter;
@@ -29,14 +26,13 @@ public class PlaylistsFragment extends Fragment {
     public View noPlLayout;
     public ArrayList<Playlist> playlistList;
     public PlaylistAdapter playlistAdapter;
-    private RecyclerView recyclerView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_playlists, container, false);
-        recyclerView = view.findViewById(R.id.playlist_recycler_view);
+        RecyclerView recyclerView = view.findViewById(R.id.playlist_recycler_view);
         noPlLayout = view.findViewById(R.id.no_pl_layout);
 
         View favBtn = view.findViewById(R.id.pl_favorites_btn);
@@ -83,6 +79,8 @@ public class PlaylistsFragment extends Fragment {
     @Override
     public void onDestroyView() {
         noPlLayout = null;
+        playlistList = null;
+        playlistAdapter = null;
         super.onDestroyView();
     }
 }

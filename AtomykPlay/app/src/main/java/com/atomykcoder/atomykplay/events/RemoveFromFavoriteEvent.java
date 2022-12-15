@@ -1,11 +1,10 @@
 package com.atomykcoder.atomykplay.events;
 
-import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 
 public class RemoveFromFavoriteEvent {
-    public MusicDataCapsule music;
+    public String musicID;
 
-    public RemoveFromFavoriteEvent(MusicDataCapsule music) {
-        this.music = music;
+    public RemoveFromFavoriteEvent(String _musicID) {
+        musicID = _musicID;
     }
 }

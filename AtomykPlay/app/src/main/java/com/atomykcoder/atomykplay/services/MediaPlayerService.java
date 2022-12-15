@@ -36,6 +36,7 @@ import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.widget.Toast;
 
@@ -201,15 +202,17 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     private final BroadcastReceiver playNewMusicReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            musicIdList = storage.loadQueueList();
-            musicIndex = storage.loadMusicIndex();
 
-            if (musicIdList != null)
-                if (musicIndex != -1 && musicIndex < musicIdList.size()) {
-                    activeMusic = storage.getItemFromInitialList(musicIdList.get(musicIndex));
-                } else {
-                    stopSelf();
-                }
+            String musicID =  intent.getStringExtra("music");
+
+            Log.i("info", musicID);
+            if (musicID != null) {
+                activeMusic = storage.getItemFromInitialList(musicID);
+                Log.i("info", activeMusic.getsName());
+            } else {
+                Log.i("info", "music is null");
+            }
+
             if (mediaSessionManager == null) {
                 try {
                     initiateMediaSession();
