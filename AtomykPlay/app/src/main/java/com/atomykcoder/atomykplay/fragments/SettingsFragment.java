@@ -55,12 +55,7 @@ public class SettingsFragment extends Fragment {
         mainActivity = (MainActivity) requireContext();
         Toolbar toolbar = view.findViewById(R.id.toolbar_settings);
         toolbar.setNavigationIcon(R.drawable.ic_back);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                requireActivity().onBackPressed();
-            }
-        });
+        toolbar.setNavigationOnClickListener(v -> requireActivity().onBackPressed());
         //saved values
         dark = settingsStorage.loadTheme();
         showInfo = settingsStorage.loadShowInfo();

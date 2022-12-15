@@ -5,6 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/primary_bg"
+    android:clickable="true"
+    android:focusable="true"
     tools:context=".fragments.TagEditorFragment">
 
     <androidx.core.widget.NestedScrollView
@@ -15,7 +17,44 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:overScrollMode="ifContentScrolls"
+            android:paddingVertical="8dp">
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_song_album_tag"
+                android:layout_width="165dp"
+                android:layout_height="165dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginHorizontal="12dp"
+                android:layout_marginVertical="6dp"
+                app:cardBackgroundColor="@color/secondary_bg"
+                app:cardCornerRadius="12dp">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <ImageView
+                        android:id="@+id/song_image_view_tag"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/ic_choose_artwork" />
+
+                    <ImageView
+                        android:id="@+id/pick_cover_tag"
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
+                        android:layout_centerInParent="true"
+                        android:layout_margin="6dp"
+                        android:background="@drawable/round_bg_for_pl"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:padding="12dp"
+                        android:src="@drawable/ic_tag_edit" />
+
+                </RelativeLayout>
+            </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -37,7 +76,7 @@
                     android:layout_height="match_parent"
                     android:focusable="true"
                     android:hint="@string/song_name"
-                    android:imeOptions="actionDone"
+                    android:imeOptions="actionNext"
                     android:inputType="text"
                     android:maxLines="1"
                     android:textColor="@color/text_color"
@@ -64,7 +103,7 @@
                     android:layout_height="match_parent"
                     android:focusable="true"
                     android:hint="@string/song_artist_name"
-                    android:imeOptions="actionDone"
+                    android:imeOptions="actionNext"
                     android:inputType="text"
                     android:maxLines="1"
                     android:textColor="@color/text_color"
@@ -91,7 +130,7 @@
                     android:layout_height="match_parent"
                     android:focusable="true"
                     android:hint="@string/album"
-                    android:imeOptions="actionDone"
+                    android:imeOptions="actionNext"
                     android:inputType="text"
                     android:maxLines="1"
                     android:textColor="@color/text_color"
@@ -132,6 +171,31 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-    </com.google.android.material.appbar.AppBarLayout>
+        <com.google.android.material.appbar.CollapsingToolbarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/primary_bg"
+            app:collapsedTitleGravity="center_vertical"
+            app:contentScrim="@color/player_bg"
+            app:expandedTitleGravity="bottom|center_horizontal"
+            app:expandedTitleTextAppearance="@style/App.Custom.Title"
+            app:layout_scrollFlags="scroll|snap|exitUntilCollapsed"
+            app:title="@string/tag">
 
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                app:layout_collapseMode="parallax"
+                app:layout_collapseParallaxMultiplier="0.7" />
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar_tag_editor"
+                android:layout_width="match_parent"
+                android:layout_height="?actionBarSize"
+                android:layout_marginTop="@dimen/status_bar_padding"
+                app:layout_collapseMode="pin" />
+
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+    </com.google.android.material.appbar.AppBarLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

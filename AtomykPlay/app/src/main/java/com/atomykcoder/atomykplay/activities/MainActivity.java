@@ -1632,15 +1632,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void openTagEditor(MusicDataCapsule optionItemSelected) {
         FragmentManager fragmentManager = getSupportFragmentManager();
-        Fragment fragment1 = fragmentManager.findFragmentByTag("SettingsFragment");
-        Fragment fragment2 = fragmentManager.findFragmentByTag("PlaylistsFragment");
-        Fragment fragment4 = fragmentManager.findFragmentByTag("FavoritesFragment");
-        Fragment fragment3 = fragmentManager.findFragmentByTag("AboutFragment");
+        Fragment fragment1 = fragmentManager.findFragmentByTag("SearchResultsFragment");
+        Fragment fragment2 = fragmentManager.findFragmentByTag("TagEditorFragment");
 
-        if (fragment1 != null || fragment2 != null || fragment3 != null) {
+        if (fragment1 != null) {
             fragmentManager.popBackStackImmediate();
         }
-        replaceFragment(R.id.sec_container, new TagEditorFragment(), android.R.transition.slide_right, "TagEditorFragment");
+
+        if (fragment2 == null) {
+            TagEditorFragment fragment = new TagEditorFragment();
+            Bundle bundle = new Bundle();
+            bundle.putSerializable("currentMusic",optionItemSelected);
+            fragment.setArguments(bundle);
+            replaceFragment(R.id.sec_container,fragment , android.R.transition.slide_right, "TagEditorFragment");
+        }
     }
 
     /**

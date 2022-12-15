@@ -115,7 +115,7 @@
             android:layout_height="wrap_content"
             android:background="@color/tertiary_bg"
             app:contentScrim="@color/primary_bg"
-            app:layout_scrollFlags="scroll|snap|exitUntilCollapsed">
+            app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/toolbar_add_lyric"
