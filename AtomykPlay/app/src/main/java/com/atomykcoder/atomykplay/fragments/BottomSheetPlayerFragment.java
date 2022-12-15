@@ -341,7 +341,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
             bitrate = activeMusic.getsBitrate();
             artistName = activeMusic.getsArtist();
             mimeType = getMime(activeMusic.getsMimeType()).toUpperCase();
-            duration = activeMusic.getsLength();
+            duration = activeMusic.getsDuration();
             albumUri = activeMusic.getsAlbumUri();
 
             String convertedDur = convertDuration(duration);
@@ -776,7 +776,6 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
     private void shuffleListAndSave(MusicDataCapsule activeMusic) {
         ArrayList<MusicDataCapsule> musicList = storageUtil.loadQueueList();
-        storageUtil.saveTempMusicList(musicList);
         int musicIndex;
         musicIndex = storageUtil.loadMusicIndex();
 
@@ -788,6 +787,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
             Handler handler = new Handler(Looper.getMainLooper());
 
             service.execute(() -> {
+                storageUtil.saveTempMusicList(musicList);
                 //removing current item from list
                 musicList.remove(musicIndex);
                 //shuffling list
@@ -842,7 +842,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         int index;
 
         for (index = 0; index < list.size(); ++index) {
-            if (list.get(index).getsName().equals(activeMusic.getsName()) && list.get(index).getsLength().equals(activeMusic.getsLength())) {
+            if (list.get(index).getsName().equals(activeMusic.getsName()) && list.get(index).getsDuration().equals(activeMusic.getsDuration())) {
                 return index;
             }
         }
@@ -1039,9 +1039,9 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         EventBus.getDefault().post(new SetMainLayoutEvent(activeMusic));
 
         if (activeMusic != null) {
-            seekBarMain.setMax(Integer.parseInt(activeMusic.getsLength()));
-            mini_progress.setMax(Integer.parseInt(activeMusic.getsLength()));
-            durationTv.setText(convertDuration(activeMusic.getsLength()));
+            seekBarMain.setMax(Integer.parseInt(activeMusic.getsDuration()));
+            mini_progress.setMax(Integer.parseInt(activeMusic.getsDuration()));
+            durationTv.setText(convertDuration(activeMusic.getsDuration()));
 
             int resumePosition = storageUtil.loadMusicLastPos();
             if (resumePosition != -1) {

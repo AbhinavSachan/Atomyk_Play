@@ -51,12 +51,11 @@ public class PlaylistsFragment extends Fragment {
             Fragment fragment1 = fragmentManager.findFragmentByTag("FavoritesFragment");
             FragmentTransaction transaction = fragmentManager.beginTransaction();
 
-            if (fragment1 != null) {
-                fragmentManager.popBackStackImmediate();
+            if (fragment1 == null) {
+                FavoritesFragment fragment = new FavoritesFragment();
+                fragment.setEnterTransition(TransitionInflater.from(requireContext()).inflateTransition(android.R.transition.slide_right));
+                transaction.add(R.id.sec_container, fragment, "FavoritesFragment").addToBackStack(null).commit();
             }
-            FavoritesFragment fragment = new FavoritesFragment();
-
-            transaction.add(R.id.sec_container, fragment, "FavoritesFragment").addToBackStack(null).commit();
         });
 
         recyclerView.setHasFixedSize(true);

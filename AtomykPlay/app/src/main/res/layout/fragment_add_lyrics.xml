@@ -41,11 +41,10 @@
                 android:fitsSystemWindows="true"
                 app:boxBackgroundColor="@color/tertiary_bg"
                 app:boxCornerRadiusBottomEnd="8dp"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 app:boxCornerRadiusBottomStart="8dp"
                 app:boxCornerRadiusTopEnd="8dp"
                 app:boxCornerRadiusTopStart="8dp"
-                app:boxStrokeWidth="0dp"
-                app:boxStrokeWidthFocused="0dp"
                 app:errorEnabled="false"
                 app:hintTextColor="@color/accent_color_bg"
                 app:placeholderTextColor="@color/hint_color">
@@ -59,7 +58,6 @@
                     android:imeOptions="normal"
                     android:includeFontPadding="true"
                     android:lines="15"
-                    android:paddingTop="30dp"
                     android:textAlignment="gravity"
                     android:textColor="@color/text_color"
                     android:textColorHint="@color/hint_color" />

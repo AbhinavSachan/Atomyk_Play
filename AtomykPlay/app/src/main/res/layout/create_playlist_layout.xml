@@ -74,7 +74,7 @@
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/edit_playlist_name_l"
-            style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/playlist_cover_pick"
@@ -85,8 +85,6 @@
             app:boxCornerRadiusBottomStart="8dp"
             app:boxCornerRadiusTopEnd="8dp"
             app:boxCornerRadiusTopStart="8dp"
-            app:boxStrokeWidth="0dp"
-            app:boxStrokeWidthFocused="0dp"
             app:hintTextColor="@color/accent_color_bg"
             app:placeholderTextColor="@color/hint_color">
 
@@ -96,11 +94,10 @@
                 android:layout_height="match_parent"
                 android:focusable="true"
                 android:hint="@string/pl_name"
-                android:imeOptions="actionNext"
+                android:imeOptions="actionDone"
                 android:inputType="text"
                 android:maxLength="120"
                 android:maxLines="1"
-                android:paddingTop="25dp"
                 android:textColor="@color/text_color"
                 android:textColorHint="@color/hint_color" />
         </com.google.android.material.textfield.TextInputLayout>

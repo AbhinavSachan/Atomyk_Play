@@ -1,5 +1,6 @@
 package com.atomykcoder.atomykplay.activities;
 
+import static com.atomykcoder.atomykplay.helperFunctions.MusicHelper.convertDuration;
 import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.favorite;
 import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.no_favorite;
 import static com.atomykcoder.atomykplay.services.MediaPlayerService.is_playing;
@@ -74,6 +75,7 @@ import com.atomykcoder.atomykplay.fragments.LastAddedFragment;
 import com.atomykcoder.atomykplay.fragments.PlaylistsFragment;
 import com.atomykcoder.atomykplay.fragments.SearchFragment;
 import com.atomykcoder.atomykplay.fragments.SettingsFragment;
+import com.atomykcoder.atomykplay.fragments.TagEditorFragment;
 import com.atomykcoder.atomykplay.helperFunctions.FetchMusic;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.services.MediaPlayerService;
@@ -337,6 +339,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private String optionTag;
     private AlertDialog ringtoneDialog = null;
     private String pl_name;
+    private TextView songPathTv, songNameTv, songArtistTv, songSizeTv, songGenreTv, songBitrateTv, songDurationTv;
 
     public void clearStorage() {
         storageUtil.clearMusicLastPos();
@@ -447,6 +450,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setBottomSheets();
 
         setUpOptionMenuButtons();
+        setDetailsMenuButtons();
         setUpPlOptionMenuButtons();
 
         if (is_granted) {
@@ -472,6 +476,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             bindService();
             startService();
         }
+    }
+
+    private void setDetailsMenuButtons() {
+        songPathTv = findViewById(R.id.file_path_detail);
+        songNameTv = findViewById(R.id.file_name_detail);
+        songArtistTv = findViewById(R.id.file_artist_detail);
+        songSizeTv = findViewById(R.id.file_size_detail);
+        songGenreTv = findViewById(R.id.file_genre_detail);
+        songBitrateTv = findViewById(R.id.file_bitrate_detail);
+        songDurationTv = findViewById(R.id.file_duration_detail);
     }
 
 
@@ -558,12 +572,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Fragment fragment3 = fragmentManager.findFragmentByTag("LastAddedFragment");
 
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        if (fragment3 != null) {
-            fragmentManager.popBackStackImmediate();
-        }
         LastAddedFragment lastAddedFragment = new LastAddedFragment();
-        lastAddedFragment.setEnterTransition(TransitionInflater.from(this).inflateTransition(android.R.transition.slide_bottom));
-        transaction.replace(R.id.sec_container, lastAddedFragment, "LastAddedFragment").addToBackStack(null).commit();
+        if (fragment3 == null) {
+            lastAddedFragment.setEnterTransition(TransitionInflater.from(this).inflateTransition(android.R.transition.slide_bottom));
+            transaction.replace(R.id.sec_container, lastAddedFragment, "LastAddedFragment").addToBackStack(null).commit();
+            navigationView.setCheckedItem(R.id.navigation_last_added);
+        }
     }
 
     private void setPlaylistFragment() {
@@ -571,12 +585,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Fragment fragment3 = fragmentManager.findFragmentByTag("PlaylistsFragment");
 
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        if (fragment3 != null) {
-            fragmentManager.popBackStackImmediate();
-        }
+
         playlistFragment = new PlaylistsFragment();
-        playlistFragment.setEnterTransition(TransitionInflater.from(this).inflateTransition(android.R.transition.slide_bottom));
-        transaction.replace(R.id.sec_container, playlistFragment, "PlaylistsFragment").addToBackStack(null).commit();
+        if (fragment3 == null) {
+            playlistFragment.setEnterTransition(TransitionInflater.from(this).inflateTransition(android.R.transition.slide_right));
+            transaction.replace(R.id.sec_container, playlistFragment, "PlaylistsFragment").addToBackStack(null).commit();
+            navigationView.setCheckedItem(R.id.navigation_playlist);
+        }
     }
 
     public void checkForUpdateMusic() {
@@ -1203,9 +1218,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onBackPressed() {
         FragmentManager fragmentManager = getSupportFragmentManager();
-        Fragment fragment3 = fragmentManager.findFragmentByTag("SettingsFragment");
-        Fragment fragment4 = fragmentManager.findFragmentByTag("PlaylistsFragment");
-        Fragment fragment5 = fragmentManager.findFragmentByTag("AboutFragment");
+        Fragment fragment1 = fragmentManager.findFragmentByTag("SettingsFragment");
+        Fragment fragment2 = fragmentManager.findFragmentByTag("PlaylistsFragment");
+        Fragment fragment3 = fragmentManager.findFragmentByTag("AboutFragment");
+        Fragment fragment6 = fragmentManager.findFragmentByTag("LastAddedFragment");
 
         if (mainPlayerSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED ||
                 mainPlayerSheetBehavior.getState() == BottomSheetBehavior.STATE_HIDDEN) {
@@ -1217,7 +1233,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         lyricsListBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
                     lyricsListBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
                 } else {
-                    if (fragment3 != null || fragment4 != null || fragment5 != null) {
+                    if (fragment1 != null || fragment2 != null || fragment3 != null || fragment6 != null) {
                         navigationView.setCheckedItem(R.id.navigation_home);
                     }
                     super.onBackPressed();
@@ -1242,38 +1258,52 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         FragmentManager fragmentManager = getSupportFragmentManager();
         Fragment fragment1 = fragmentManager.findFragmentByTag("SettingsFragment");
         Fragment fragment2 = fragmentManager.findFragmentByTag("PlaylistsFragment");
-        Fragment fragment4 = fragmentManager.findFragmentByTag("FavoritesFragment");
         Fragment fragment3 = fragmentManager.findFragmentByTag("AboutFragment");
+        Fragment fragment4 = fragmentManager.findFragmentByTag("FavoritesFragment");
+        Fragment fragment5 = fragmentManager.findFragmentByTag("SearchResultsFragment");
+        Fragment fragment6 = fragmentManager.findFragmentByTag("LastAddedFragment");
 
         switch (item.getItemId()) {
             case R.id.navigation_home: {
-                if (fragment1 != null || fragment2 != null || fragment3 != null) {
+                if (fragment1 != null || fragment2 != null || fragment3 != null || fragment6 != null) {
                     fragmentManager.popBackStackImmediate();
                 }
                 break;
             }
             case R.id.navigation_setting: {
-                if (fragment1 != null || fragment2 != null || fragment3 != null) {
+                if (fragment2 != null || fragment3 != null || fragment5 != null || fragment6 != null) {
                     fragmentManager.popBackStackImmediate();
                 }
-                replaceFragment(R.id.sec_container, new SettingsFragment(), android.R.transition.slide_right, "SettingsFragment");
+                if (fragment1 == null) {
+                    replaceFragment(R.id.sec_container, new SettingsFragment(), android.R.transition.slide_right, "SettingsFragment");
+                }
                 break;
             }
             case R.id.navigation_playlist: {
-                if (fragment1 != null || fragment2 != null || fragment3 != null || fragment4 != null) {
+                if (fragment1 != null || fragment3 != null || fragment4 != null || fragment5 != null || fragment6 != null) {
                     fragmentManager.popBackStackImmediate();
-                    if (fragment2 != null) {
-                        fragmentManager.popBackStackImmediate();
-                    }
                 }
-                replaceFragment(R.id.sec_container, new PlaylistsFragment(), android.R.transition.slide_right, "PlaylistsFragment");
+                if (fragment2 == null) {
+                    replaceFragment(R.id.sec_container, new PlaylistsFragment(), android.R.transition.slide_right, "PlaylistsFragment");
+                }
                 break;
             }
             case R.id.navigation_about: {
-                if (fragment1 != null || fragment2 != null || fragment3 != null) {
+                if (fragment1 != null || fragment2 != null || fragment5 != null || fragment6 != null) {
                     fragmentManager.popBackStackImmediate();
                 }
-                replaceFragment(R.id.sec_container, new AboutFragment(), android.R.transition.slide_right, "AboutFragment");
+                if (fragment3 == null) {
+                    replaceFragment(R.id.sec_container, new AboutFragment(), android.R.transition.slide_right, "AboutFragment");
+                }
+                break;
+            }
+            case R.id.navigation_last_added: {
+                if (fragment1 != null || fragment2 != null || fragment5 != null || fragment3 != null) {
+                    fragmentManager.popBackStackImmediate();
+                }
+                if (fragment6 == null) {
+                    replaceFragment(R.id.sec_container, new LastAddedFragment(), android.R.transition.slide_right, "LastAddedFragment");
+                }
                 break;
             }
             case R.id.navigation_donate: {
@@ -1577,10 +1607,40 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void openDetailsBox(MusicDataCapsule optionItemSelected) {
         detailsSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+
+        int bitrateInNum = Integer.parseInt(optionItemSelected.getsBitrate()) / 1000;
+
+        float size = Float.parseFloat(optionItemSelected.getsSize()) / (1024 * 1024);
+
+        int pos = String.valueOf(size).indexOf(".");
+
+        String beforeDot = String.valueOf(size).substring(0, pos);
+        String afterDot = String.valueOf(size).substring(pos, pos + 3);
+
+        String finalBitrate = bitrateInNum + " KBPS";
+        String finalSize = beforeDot + afterDot + " mb";
+
+        songPathTv.setText(optionItemSelected.getsPath());
+        songNameTv.setText(optionItemSelected.getsName());
+        songArtistTv.setText(optionItemSelected.getsArtist());
+        songSizeTv.setText(finalSize);
+        songBitrateTv.setText(finalBitrate);
+        songDurationTv.setText(convertDuration(optionItemSelected.getsDuration()));
+        songGenreTv.setText(optionItemSelected.getsGenre());
+
     }
 
     private void openTagEditor(MusicDataCapsule optionItemSelected) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        Fragment fragment1 = fragmentManager.findFragmentByTag("SettingsFragment");
+        Fragment fragment2 = fragmentManager.findFragmentByTag("PlaylistsFragment");
+        Fragment fragment4 = fragmentManager.findFragmentByTag("FavoritesFragment");
+        Fragment fragment3 = fragmentManager.findFragmentByTag("AboutFragment");
 
+        if (fragment1 != null || fragment2 != null || fragment3 != null) {
+            fragmentManager.popBackStackImmediate();
+        }
+        replaceFragment(R.id.sec_container, new TagEditorFragment(), android.R.transition.slide_right, "TagEditorFragment");
     }
 
     /**

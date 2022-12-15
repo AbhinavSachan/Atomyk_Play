@@ -36,7 +36,7 @@ public class MusicDiffCallback extends Callback {
     public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
         MusicDataCapsule oldMusic = oldMusicList.get(oldItemPosition);
         MusicDataCapsule newMusic = newMusicList.get(newItemPosition);
-        return oldMusic.getsName().equals(newMusic.getsName()) && oldMusic.getsLength().equals(newMusic.getsLength()) && oldMusic.getsArtist().equals(newMusic.getsArtist());
+        return oldMusic.getsName().equals(newMusic.getsName()) && oldMusic.getsDuration().equals(newMusic.getsDuration()) && oldMusic.getsArtist().equals(newMusic.getsArtist());
     }
 
 }

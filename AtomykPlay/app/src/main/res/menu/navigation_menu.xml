@@ -12,6 +12,10 @@
             android:icon="@drawable/ic_music_list"
             android:title="@string/playLists" />
         <item
+            android:id="@+id/navigation_last_added"
+            android:icon="@drawable/ic_last_added"
+            android:title="@string/last_added" />
+        <item
             android:id="@+id/navigation_setting"
             android:icon="@drawable/settings"
             android:title="@string/settings" />

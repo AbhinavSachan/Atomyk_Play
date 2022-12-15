@@ -23,7 +23,6 @@
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/edit_song_name_l"
-        style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/textView_search_lyric"
@@ -33,8 +32,7 @@
         app:boxCornerRadiusBottomStart="8dp"
         app:boxCornerRadiusTopEnd="8dp"
         app:boxCornerRadiusTopStart="8dp"
-        app:boxStrokeWidth="0dp"
-        app:boxStrokeWidthFocused="0dp"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         app:hintTextColor="@color/accent_color_bg"
         app:placeholderTextColor="@color/hint_color">
 
@@ -48,14 +46,13 @@
             android:inputType="text"
             android:maxLength="120"
             android:maxLines="1"
-            android:paddingTop="25dp"
             android:textColor="@color/text_color"
             android:textColorHint="@color/hint_color" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/edit_artist_name_l"
-        style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/edit_song_name_l"
@@ -65,8 +62,6 @@
         app:boxCornerRadiusBottomStart="8dp"
         app:boxCornerRadiusTopEnd="8dp"
         app:boxCornerRadiusTopStart="8dp"
-        app:boxStrokeWidth="0dp"
-        app:boxStrokeWidthFocused="0dp"
         app:endIconMode="clear_text"
         app:hintTextColor="@color/accent_color_bg"
         app:placeholderTextColor="@color/hint_color">
@@ -80,7 +75,6 @@
             android:inputType="text"
             android:maxLength="75"
             android:maxLines="1"
-            android:paddingTop="25dp"
             android:textColor="@color/text_color"
             android:textColorHint="@color/hint_color" />
     </com.google.android.material.textfield.TextInputLayout>

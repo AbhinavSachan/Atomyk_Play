@@ -48,7 +48,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingVertical="2dp"
-                android:text="/storage/8001-1DE9/Music/English/y2mate.com - Ari Abdul BABYDOLL Lyrics.mp3"
+                android:text="@string/empty"
                 android:textColor="@color/sub_text_grey"
                 android:textSize="@dimen/d_16sp" />
 
@@ -73,7 +73,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingVertical="2dp"
-                android:text="y2mate.com - Ari Abdul BABYDOLL Lyrics.mp3"
+                android:text="@string/empty"
                 android:textColor="@color/sub_text_grey"
                 android:textSize="@dimen/d_16sp" />
 
@@ -98,7 +98,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingVertical="2dp"
-                android:text="Ari Abdul"
+                android:text="@string/empty"
                 android:textColor="@color/sub_text_grey"
                 android:textSize="@dimen/d_16sp" />
 
@@ -130,7 +130,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingVertical="2dp"
-                    android:text="2.9 MB"
+                    android:text="@string/empty"
                     android:textColor="@color/sub_text_grey"
                     android:textSize="@dimen/d_16sp" />
 
@@ -154,7 +154,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingVertical="2dp"
-                    android:text="128 kb/s"
+                    android:text="@string/empty"
                     android:textColor="@color/sub_text_grey"
                     android:textSize="@dimen/d_16sp" />
 
@@ -183,11 +183,11 @@
                     android:textSize="@dimen/d_15sp" />
 
                 <TextView
-                    android:id="@+id/file_length_detail"
+                    android:id="@+id/file_duration_detail"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingVertical="2dp"
-                    android:text="3:11"
+                    android:text="@string/empty"
                     android:textColor="@color/sub_text_grey"
                     android:textSize="@dimen/d_16sp" />
 
@@ -211,7 +211,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingVertical="2dp"
-                    android:text="Pop"
+                    android:text="@string/empty"
                     android:textColor="@color/sub_text_grey"
                     android:textSize="@dimen/d_16sp" />
 

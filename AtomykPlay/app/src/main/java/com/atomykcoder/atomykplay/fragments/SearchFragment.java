@@ -73,7 +73,6 @@ public class SearchFragment extends Fragment {
         radioGroup = view.findViewById(R.id.radio_group);
         textView = view.findViewById(R.id.searched_song_num);
         ArrayList<MusicDataCapsule> dataList = new StorageUtil(getContext()).loadInitialList();
-        FragmentManager fragmentManager = ((MainActivity) requireContext()).getSupportFragmentManager();
 
         InputMethodManager manager = (InputMethodManager) requireContext().getSystemService(Context.INPUT_METHOD_SERVICE);
 
@@ -82,7 +81,7 @@ public class SearchFragment extends Fragment {
         ImageView closeSearch = view.findViewById(R.id.close_search_btn);
         searchView.requestFocus();
         try {
-            manager.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT,InputMethodManager.HIDE_IMPLICIT_ONLY);
+            manager.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT,InputMethodManager.HIDE_NOT_ALWAYS);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -105,17 +104,19 @@ public class SearchFragment extends Fragment {
         closeSearch.setOnClickListener(v ->{
             searchView.clearFocus();
             try {
-                manager.hideSoftInputFromWindow(searchView.getWindowToken(),InputMethodManager.HIDE_IMPLICIT_ONLY);
+                manager.hideSoftInputFromWindow(searchView.getWindowToken(),InputMethodManager.HIDE_NOT_ALWAYS);
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            fragmentManager.popBackStackImmediate();
+            requireActivity().onBackPressed();
         });
 
         recycler_view.setHasFixedSize(true);
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(requireContext());
         recycler_view.setLayoutManager(layoutManager);
-        setAdapter();
+
+        adapter = new MusicMainAdapter(getContext(), searchedMusicList);
+        recycler_view.setAdapter(adapter);
 
         return view;
     }
@@ -125,12 +126,6 @@ public class SearchFragment extends Fragment {
     public void onResume() {
         super.onResume();
         songButton.setChecked(true);
-    }
-
-    //Initializing And setting an adapter
-    private void setAdapter() {
-        adapter = new MusicMainAdapter(getContext(), searchedMusicList);
-        recycler_view.setAdapter(adapter);
     }
 
     //Function that adds music to an arraylist which is being used to show music in recycler view

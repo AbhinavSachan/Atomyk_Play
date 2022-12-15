@@ -78,7 +78,7 @@ public class LastAddedFragment extends Fragment {
         handler.postDelayed(runnable, 350);
 
         // back button click listener
-        backImageView.setOnClickListener(v -> fragmentManager.popBackStackImmediate());
+        backImageView.setOnClickListener(v -> requireActivity().onBackPressed());
 
         // filter click listener
         filterButton.setOnClickListener(v -> openDialogFilter());

@@ -21,28 +21,25 @@
             android:id="@+id/close_search_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
             android:contentDescription="@string/empty"
             android:focusable="true"
-            android:layout_gravity="bottom"
-            android:paddingVertical="8dp"
             android:paddingHorizontal="8dp"
+            android:paddingVertical="8dp"
             android:src="@drawable/ic_back" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:gravity="center_vertical"
             app:boxBackgroundColor="@color/primary_bg"
             app:boxCornerRadiusBottomEnd="0dp"
             app:boxCornerRadiusBottomStart="0dp"
             app:boxCornerRadiusTopEnd="0dp"
-            app:boxBackgroundMode="outline"
             app:boxCornerRadiusTopStart="0dp"
             app:boxStrokeWidth="0dp"
-            app:endIconMode="clear_text"
-            app:endIconDrawable="@drawable/ic_close"
             app:boxStrokeWidthFocused="0dp"
+            app:endIconDrawable="@drawable/ic_close"
+            app:endIconMode="clear_text"
             app:hintEnabled="false">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -50,7 +47,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:hint="@string/search_here"
-                android:imeOptions="actionNext"
+                android:imeOptions="actionDone"
                 android:inputType="text"
                 android:maxLength="200"
                 android:maxLines="1"
@@ -127,9 +124,10 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/search_recycler_view"
         android:layout_width="match_parent"
-        android:clipToPadding="false"
-        android:paddingBottom="@dimen/most_bottom_padding"
         android:layout_height="match_parent"
-        android:layout_below="@id/searched_song_num" />
+        android:layout_below="@id/searched_song_num"
+        android:clipToPadding="false"
+        android:nestedScrollingEnabled="false"
+        android:paddingBottom="@dimen/most_bottom_padding" />
 
 </RelativeLayout>
