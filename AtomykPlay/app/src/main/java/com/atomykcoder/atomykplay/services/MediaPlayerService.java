@@ -855,6 +855,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         musicIndex = storage.loadMusicIndex();
 
         int lastPos = storage.loadMusicLastPos();
+
         storage.clearMusicLastPos();
 
         if (settingsStorage.loadOneClickSkip()) {
@@ -887,7 +888,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                             activeMusic = storage.getItemFromInitialList(musicIdList.get(musicIndex));
 
                         } else {
-                            activeMusic = storage.getItemFromInitialList(musicIdList.get(musicIndex));
+                            activeMusic = storage.getItemFromInitialList(musicIdList.get(--musicIndex));
 
                         }
                     if (activeMusic != null) {

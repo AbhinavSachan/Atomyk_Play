@@ -1345,49 +1345,49 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @SuppressLint("NonConstantResourceId")
     @Override
     public void onClick(View v) {
+        closeOptionSheet();
+        closePlOptionSheet();
         switch (v.getId()) {
             case R.id.add_play_next_option: {
-                closeOptionSheet();
+
                 addToNextPlay(selectedItem.getsId());
                 break;
             }
             case R.id.add_to_queue_option: {
-                closeOptionSheet();
+
                 addToQueue(selectedItem.getsId());
                 break;
             }
             case R.id.add_to_playlist_option: {
-                closeOptionSheet();
+
                 addToPlaylist(selectedItem.getsId());
                 break;
             }
             case R.id.set_ringtone_option: {
-                closeOptionSheet();
+
                 setRingtone(selectedItem.getsId());
                 break;
             }
             case R.id.delete_music_option: {
-                closeOptionSheet();
+
                 deleteFromDevice(selectedItem.getsId());
                 break;
             }
             case R.id.tagEditor_option: {
-                closeOptionSheet();
+
                 openTagEditor(selectedItem);
                 break;
             }
             case R.id.addLyrics_option: {
-                closeOptionSheet();
+
                 bottomSheetPlayerFragment.setLyricsLayout(selectedItem.getsId());
                 break;
             }
             case R.id.details_option: {
-                closeOptionSheet();
                 openDetailsBox(selectedItem);
                 break;
             }
             case R.id.share_music_option: {
-                closeOptionSheet();
                 openShare(selectedItem.getsId());
                 break;
             }
@@ -1396,32 +1396,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             }
             case R.id.add_play_next_pl_option: {
-                closePlOptionSheet();
                 addToNextPlayPl(plitemSelected);
                 break;
             }
             case R.id.add_to_queue_pl_option: {
-                closePlOptionSheet();
+
                 addToQueuePl(plitemSelected);
                 break;
             }
             case R.id.rename_pl_option: {
-                closePlOptionSheet();
                 openRenameDialog(plitemSelected);
                 break;
             }
             case R.id.choose_cover_option: {
-                closePlOptionSheet();
+
                 changeUriPl(plitemSelected);
                 break;
             }
             case R.id.delete_pl_option: {
-                closePlOptionSheet();
+
                 deletePl(plitemSelected);
                 break;
             }
             case R.id.remove_music_option: {
-                closeOptionSheet();
+
                 removeFromList(selectedItem.getsId(), optionTag);
                 break;
             }
@@ -1648,13 +1646,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (fragment1 != null) {
             fragmentManager.popBackStackImmediate();
         }
-
+        if (mainPlayerSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+            mainPlayerSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        }
         if (fragment2 == null) {
             TagEditorFragment fragment = new TagEditorFragment();
             Bundle bundle = new Bundle();
-            bundle.putSerializable("currentMusic",optionItemSelected);
+            bundle.putSerializable("currentMusic",itemSelected);
             fragment.setArguments(bundle);
-            replaceFragment(R.id.sec_container,fragment , android.R.transition.slide_right, "TagEditorFragment");
+            replaceFragment(R.id.sec_container,fragment , android.R.transition.slide_top, "TagEditorFragment");
         }
     }
 
