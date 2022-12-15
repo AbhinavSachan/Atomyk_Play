@@ -5,6 +5,7 @@ import static com.atomykcoder.atomykplay.helperFunctions.MusicHelper.convertDura
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.SystemClock;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
