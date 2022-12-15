@@ -14,7 +14,6 @@ import android.app.RecoverableSecurityException;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.ServiceConnection;
@@ -925,20 +924,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 ringtoneDialog.setTitle("Confirmation");
                 ringtoneDialog.setMessage(music.getsName() + " - Set as ringtone");
                 ringtoneDialog.setCancelable(true);
-                ringtoneDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        RingtoneManager.setActualDefaultRingtoneUri(MainActivity.this, RingtoneManager.TYPE_RINGTONE, newUri);
-                        showToast("Ringtone set successfully");
-                    }
-
+                ringtoneDialog.setPositiveButton("OK", (dialog, which) -> {
+                    RingtoneManager.setActualDefaultRingtoneUri(MainActivity.this, RingtoneManager.TYPE_RINGTONE, newUri);
+                    showToast("Ringtone set successfully");
                 });
-                ringtoneDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
+                ringtoneDialog.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
 
                 try {
                     this.ringtoneDialog = ringtoneDialog.create();
@@ -1579,7 +1569,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             if (!plKey.equals("")) {
                 if (!playlistNames.contains(plKey)) {
-                    storageUtil.savePlayList(plKey, plCoverUri);
+                    storageUtil.createPlaylist(plKey, plCoverUri);
                     ArrayList<Playlist> allList = storageUtil.getAllPlaylist();
                     if (playlistArrayList != null) {
                         playlistArrayList.clear();
