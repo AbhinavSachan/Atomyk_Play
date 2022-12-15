@@ -27,8 +27,8 @@ import com.atomykcoder.atomykplay.viewModals.Playlist;
 import java.util.ArrayList;
 
 public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.PlaylistViewHolder> {
-    private final Context context;
-    private final ArrayList<Playlist> arrayList;
+    private Context context;
+    private ArrayList<Playlist> arrayList;
 
     public PlaylistAdapter(Context context, ArrayList<Playlist> arrayList) {
         this.context = context;
@@ -45,19 +45,19 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
     @Override
     public void onBindViewHolder(@NonNull PlaylistAdapter.PlaylistViewHolder holder, int position) {
         Playlist currentItem = arrayList.get(position);
-        ArrayList<MusicDataCapsule> musicList = currentItem.getMusicArrayList();
+        ArrayList<String> musicIDList = currentItem.getMusicIDList();
 
         GlideBuilt.glide(context, currentItem.getCoverUri(), R.drawable.ic_music_list, holder.imageView, 300);
-        String count = musicList.size() + " Songs";
+        String count = musicIDList.size() + " Songs";
         holder.playlistName.setText(currentItem.getName());
         holder.songCount.setText(count);
 
-        //opening fragment when clicked on playlist
-        FragmentManager fragmentManager = ((MainActivity) context).getSupportFragmentManager();
-        Fragment fragment3 = fragmentManager.findFragmentByTag("OpenPlayListFragment");
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-
         holder.cardView.setOnClickListener(v -> {
+            //opening fragment when clicked on playlist
+            FragmentManager fragmentManager = ((MainActivity) context).getSupportFragmentManager();
+
+            Fragment fragment3 = fragmentManager.findFragmentByTag("OpenPlayListFragment");
+            FragmentTransaction transaction = fragmentManager.beginTransaction();
 
             Bundle bundle = new Bundle();
             bundle.putSerializable("currentPlaylist", currentItem);
@@ -89,11 +89,10 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
     }
 
     public static class PlaylistViewHolder extends RecyclerView.ViewHolder {
-        private final TextView playlistName;
-        private final TextView songCount;
-        private final ImageView imageView;
-        private final ImageView optImg;
-        private final View cardView;
+        private TextView playlistName;
+        private TextView songCount;
+        private ImageView imageView, optImg;
+        private View cardView;
 
         public PlaylistViewHolder(@NonNull View view) {
             super(view);

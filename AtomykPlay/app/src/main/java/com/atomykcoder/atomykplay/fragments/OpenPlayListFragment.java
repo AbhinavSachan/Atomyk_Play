@@ -21,6 +21,7 @@ import com.atomykcoder.atomykplay.adapters.OpenPlayListAdapter;
 import com.atomykcoder.atomykplay.adapters.SimpleTouchCallback;
 import com.atomykcoder.atomykplay.classes.GlideBuilt;
 import com.atomykcoder.atomykplay.events.RemoveFromPlaylistEvent;
+import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import com.atomykcoder.atomykplay.viewModals.Playlist;
@@ -29,6 +30,7 @@ import com.google.android.material.appbar.CollapsingToolbarLayout;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 
@@ -36,7 +38,6 @@ public class OpenPlayListFragment extends Fragment implements OnDragStartListene
 
     private ItemTouchHelper itemTouchHelper;
     private OpenPlayListAdapter openPlayListAdapter;
-    private ArrayList<MusicDataCapsule> musicList;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -60,19 +61,23 @@ public class OpenPlayListFragment extends Fragment implements OnDragStartListene
         recyclerView.setHasFixedSize(true);
         LinearLayoutManager manager = new LinearLayoutManager(getContext());
 
-        musicList = playlist != null ? playlist.getMusicArrayList() : null;
+        ArrayList<String> musicIDList = null;
+
+        if(playlist != null) {
+            musicIDList = playlist.getMusicIDList();
+        }
 
         if (playlist != null) {
             collapsingToolbarLayout.setTitle(playlist.getName());
             GlideBuilt.glide(getContext(), playlist.getCoverUri(), 0, imageView, 512);
         }
 
-        if (musicList != null) {
-            openPlayListAdapter = new OpenPlayListAdapter(getContext(), playlist.getName(), musicList, this);
+        if (musicIDList != null) {
+            openPlayListAdapter = new OpenPlayListAdapter(getContext(), playlist.getName(), musicIDList, this);
             recyclerView.setLayoutManager(manager);
             recyclerView.setAdapter(openPlayListAdapter);
             noPlLayout.setVisibility(View.GONE);
-            if (musicList.isEmpty()) {
+            if (musicIDList.isEmpty()) {
                 noPlLayout.setVisibility(View.VISIBLE);
             }
             ItemTouchHelper.Callback callback = new SimpleTouchCallback(openPlayListAdapter);
@@ -87,7 +92,7 @@ public class OpenPlayListFragment extends Fragment implements OnDragStartListene
 
     @Subscribe
     public void removeMusicFromList(RemoveFromPlaylistEvent event) {
-        openPlayListAdapter.removeItem(event.music);
+        openPlayListAdapter.removeItem(event.musicID);
     }
 
     @Override

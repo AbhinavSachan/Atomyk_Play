@@ -21,12 +21,12 @@ import java.util.ArrayList;
 public class PlaylistDialogAdapter extends RecyclerView.Adapter<PlaylistDialogAdapter.PlaylistViewHolder> {
     private Context context;
     private ArrayList<Playlist> playlists;
-    private MusicDataCapsule selectedMusic;
+    private String musicID;
 
-    public PlaylistDialogAdapter(Context context, ArrayList<Playlist> playlists, MusicDataCapsule selectedMusic) {
-        this.context = context;
-        this.playlists = playlists;
-        this.selectedMusic = selectedMusic;
+    public PlaylistDialogAdapter(Context _context, ArrayList<Playlist> _playlists, String _musicID) {
+        context = _context;
+        playlists = _playlists;
+        musicID = _musicID;
     }
 
     @NonNull
@@ -43,7 +43,7 @@ public class PlaylistDialogAdapter extends RecyclerView.Adapter<PlaylistDialogAd
         StorageUtil storageUtil = new StorageUtil(context);
         holder.textView.setText(playlist.getName());
         holder.view.setOnClickListener(v -> {
-            storageUtil.saveItemInPlayList(selectedMusic,playlist.getName());
+            storageUtil.saveItemInPlayList(musicID, playlist.getName());
             mainActivity.addToPlDialog.dismiss();
             Toast.makeText(context,"added to "+playlist.getName(),Toast.LENGTH_SHORT).show();
         });
@@ -54,7 +54,7 @@ public class PlaylistDialogAdapter extends RecyclerView.Adapter<PlaylistDialogAd
         return playlists.size();
     }
 
-    public class PlaylistViewHolder extends RecyclerView.ViewHolder {
+    public static class PlaylistViewHolder extends RecyclerView.ViewHolder {
         private final TextView textView;
         private final View view;
         public PlaylistViewHolder(@NonNull View itemView) {

@@ -3,9 +3,11 @@ package com.atomykcoder.atomykplay.fragments;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,15 +28,22 @@ import com.atomykcoder.atomykplay.adapters.MusicMainAdapter;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 
+import java.lang.reflect.Array;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 
 public class LastAddedFragment extends Fragment {
@@ -50,6 +59,7 @@ public class LastAddedFragment extends Fragment {
     private StorageUtil.SettingsStorage settingsStorage;
     private ArrayList<MusicDataCapsule> initialMusicList;
     private ProgressDialog progressDialog;
+    private RecyclerView recyclerView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -57,7 +67,7 @@ public class LastAddedFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_last_added, container, false);
 
         //get references
-        RecyclerView recyclerView = view.findViewById(R.id.last_added_recycle_view);
+        recyclerView = view.findViewById(R.id.last_added_recycle_view);
         settingsStorage = new StorageUtil.SettingsStorage(requireContext());
         View filterButton = view.findViewById(R.id.filter_last_added_btn);
         ImageView backImageView = view.findViewById(R.id.close_filter_btn);
@@ -69,25 +79,32 @@ public class LastAddedFragment extends Fragment {
         initialMusicList = new StorageUtil(getContext()).loadInitialList();
         lastAddedMusicList = new ArrayList<>();
 
-        // load previous set data
-        Handler handler = new Handler(Looper.getMainLooper());
-        Runnable runnable = () -> {
-            int i = settingsStorage.loadLastAddedDur();
-            loadLastAddedList(i);
-        };
-        handler.postDelayed(runnable, 350);
+
+
+        //sort initial music list by date in reverse order
+        Collections.sort(initialMusicList, new Comparator<MusicDataCapsule>() {
+            final DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.getDefault());
+            @Override
+            public int compare(MusicDataCapsule t1, MusicDataCapsule t2) {
+                try {
+                    Date d1 = dateFormat.parse(t1.getsDateAdded());
+                    Date d2 = dateFormat.parse(t2.getsDateAdded());
+                    int i = d1.compareTo(d2);
+                    if(i != 0) return -i;
+                } catch (ParseException e) {
+                    throw new IllegalArgumentException();
+                }
+                return 0;
+            }
+        });
+
+        loadLastAddedList(settingsStorage.loadLastAddedDur());
 
         // back button click listener
         backImageView.setOnClickListener(v -> requireActivity().onBackPressed());
 
         // filter click listener
         filterButton.setOnClickListener(v -> openDialogFilter());
-
-        // set recyclerview and adapter
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new MusicMainAdapter(getContext(), lastAddedMusicList);
-        recyclerView.setAdapter(adapter);
 
         return view;
     }
@@ -181,70 +198,61 @@ public class LastAddedFragment extends Fragment {
     private void startThread(int maxValue) {
         ExecutorService service = Executors.newSingleThreadExecutor();
         Handler handler = new Handler(Looper.getMainLooper());
+
         progressDialog.setMessage("Calculating...");
         progressDialog.show();
+
         service.execute(() -> {
+
                 lastAddedMusicList.clear();
-                lastAddedMusicList.addAll(getMusicListWithinRange(maxValue));
+            try {
+                lastAddedMusicList.addAll(getLastAddedMusicList(maxValue));
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+
             handler.post(() -> {
+
                 progressDialog.dismiss();
-                notifyAdapter();
                 String num = lastAddedMusicList.size() + " Songs";
                 songCountTv.setText(num);
+
+                // set recyclerview and adapter
+                recyclerView.setHasFixedSize(true);
+                recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
+                adapter = new MusicMainAdapter(getContext(), lastAddedMusicList);
+                recyclerView.setAdapter(adapter);
                 });
         });
         service.shutdown();
     }
 
 
-
-    /**
-     * takes the difference between current date and date_added and checks if difference is
-     * less than given filter amount
-     * @param dateAdded  music date_added
-     * @param max maximum value
-     * @return returns true if difference between current date and date_added is less than or equal
-     * to given days_filter
-     */
-    private boolean isWithinDaysSelected(String dateAdded, int max) {
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.getDefault());
-        String currentDate = dateFormat.format(new Date());
-        // initialize variables
-        try {
-            Date _currentDate = dateFormat.parse(currentDate);
-            Date _dateAdded = dateFormat.parse(dateAdded);
-            long diff = 0;
-
-            //gets Difference
-            if (_currentDate != null && _dateAdded != null) {
-                diff = _currentDate.getTime() - _dateAdded.getTime();
-            }
-
-            // get days between two days
-            long days = TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS);
-
-            // finally if days is less or equal to filter then return true else false
-            if (days <= max) {
-                return true;
-            }
-        } catch (ParseException e) { e.printStackTrace(); }
-
-        return false;
-    }
-
-    /**
-     * get music list within specified range in days
-     * @param max maximum value
-     * @return returns arraylist<MusicDataCapsule> within specified range
-     */
-    private ArrayList<MusicDataCapsule> getMusicListWithinRange(int max) {
+    private ArrayList<MusicDataCapsule> getLastAddedMusicList (long max) throws ParseException {
         ArrayList<MusicDataCapsule> result = new ArrayList<>();
+
+        // dtf for parsing string to date
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.getDefault());
+
+        //get "current" date
+        Date previousDate = dateFormat.parse(dateFormat.format(new Date()));
+
+        // subtract days from current date and turn it into an older date
+        if (previousDate != null) {
+            previousDate.setTime(previousDate.getTime() - (max * 86400) * 1000);
+        }
+
+        //loop through music list and if a music date is older than given date, then break;
         for (MusicDataCapsule music : initialMusicList) {
-            boolean isWithinRange = isWithinDaysSelected(music.getsDateAdded(), max);
-            if(isWithinRange)
+            Date musicDate = dateFormat.parse(music.getsDateAdded());
+            if(musicDate.compareTo(previousDate) < 0) {
+                break;
+            }
                 result.add(music);
         }
 
+        //return music ranging between current date and given older date
         return result;
     }
 

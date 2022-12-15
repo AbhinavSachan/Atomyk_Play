@@ -33,7 +33,7 @@
 
     <application
         android:name=".classes.ApplicationClass"
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:configChanges="locale|layoutDirection"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"

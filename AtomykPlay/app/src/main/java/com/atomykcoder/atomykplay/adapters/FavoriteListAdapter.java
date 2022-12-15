@@ -36,17 +36,19 @@ import java.util.concurrent.Executors;
 public class FavoriteListAdapter extends RecyclerView.Adapter<FavoriteListAdapter.FavoriteViewHolder> implements ItemTouchHelperAdapter {
     private final Context context;
     MainActivity mainActivity;
-    ArrayList<MusicDataCapsule> musicArrayList;
+    ArrayList<String> musicIdList;
     OnDragStartListener onDragStartListener;
+    StorageUtil storageUtil;
     long lastClickTime;
     // value in milliseconds
-    int delay = 1000;
+    int delay = 500;
 
-    public FavoriteListAdapter(Context context, ArrayList<MusicDataCapsule> musicArrayList, OnDragStartListener onDragStartListener) {
+    public FavoriteListAdapter(Context context, ArrayList<String> _musicIdList, OnDragStartListener onDragStartListener) {
         this.context = context;
-        this.musicArrayList = musicArrayList;
+        musicIdList = _musicIdList;
         this.onDragStartListener = onDragStartListener;
         mainActivity = (MainActivity) context;
+        storageUtil = new StorageUtil(context);
     }
 
     //when item starts to move it will change positions of every item in real time
@@ -59,10 +61,9 @@ public class FavoriteListAdapter extends RecyclerView.Adapter<FavoriteListAdapte
     @Override
     public void onItemDismiss(int position) {
         //if any item has been removed this will save new list on temp list
-        if (musicArrayList != null) {
-            if (position != -1 && position < musicArrayList.size()) {
-                MusicDataCapsule currentItem = musicArrayList.get(position);
-                removeItem(currentItem);
+        if (musicIdList != null) {
+            if (position != -1 && position < musicIdList.size()) {
+                removeItem(musicIdList.get(position));
             }
         }
     }
@@ -77,7 +78,8 @@ public class FavoriteListAdapter extends RecyclerView.Adapter<FavoriteListAdapte
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public void onBindViewHolder(@NonNull FavoriteListAdapter.FavoriteViewHolder holder, int position) {
-        MusicDataCapsule currentItem = musicArrayList.get(position);
+
+        MusicDataCapsule currentItem = storageUtil.getItemFromInitialList(musicIdList.get(position));
 
         StorageUtil storage = new StorageUtil(context);
         StorageUtil.SettingsStorage settingsStorage = new StorageUtil.SettingsStorage(context);
@@ -105,26 +107,27 @@ public class FavoriteListAdapter extends RecyclerView.Adapter<FavoriteListAdapte
 
                 //if shuffle button is already on it will shuffle it from start
                 if (settingsStorage.loadKeepShuffle()) {
-                    ArrayList<MusicDataCapsule> shuffleList = new ArrayList<>(musicArrayList);
                     //saving list in temp for restore function in player fragment
-                    storage.saveTempMusicList(musicArrayList);
+                    ArrayList<String> shuffleIDList = new ArrayList<>(musicIdList);
+
+                    storage.saveTempMusicList(musicIdList);
                     storage.saveShuffle(shuffle);
 
                     ExecutorService service = Executors.newSingleThreadExecutor();
                     service.execute(() -> {
                         //removing current item from list
-                        shuffleList.remove(position);
+                        shuffleIDList.remove(position);
                         //shuffling list
-                        Collections.shuffle(shuffleList);
+                        Collections.shuffle(shuffleIDList);
                         //adding the removed item in shuffled list on 0th index
-                        shuffleList.add(0, currentItem);
+                        shuffleIDList.add(0, currentItem.getsId());
                         //saving list
-                        storage.saveQueueList(shuffleList);
+                        storage.saveQueueList(shuffleIDList);
                         storage.saveMusicIndex(0);
                         // post-execute code here
                         handler.post(() -> {
-                            mainActivity.playAudio();
-                            mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(shuffleList);
+                            mainActivity.playAudio(currentItem.getsId());
+                            mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(shuffleIDList);
                             mainActivity.openBottomPlayer();
                         });
                     });
@@ -135,12 +138,12 @@ public class FavoriteListAdapter extends RecyclerView.Adapter<FavoriteListAdapte
                     ExecutorService service = Executors.newSingleThreadExecutor();
                     service.execute(() -> {
                         storage.saveShuffle(no_shuffle);
-                        storage.saveQueueList(musicArrayList);
+                        storage.saveQueueList(musicIdList);
                         storage.saveMusicIndex(position);
                         // post-execute code here
                         handler.post(() -> {
-                            mainActivity.playAudio();
-                            mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(musicArrayList);
+                            mainActivity.playAudio(currentItem.getsId());
+                            mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(musicIdList);
                             mainActivity.openBottomPlayer();
                         });
                     });
@@ -148,7 +151,7 @@ public class FavoriteListAdapter extends RecyclerView.Adapter<FavoriteListAdapte
                 }
             } else {
                 Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show();
-                removeItem(currentItem);
+                removeItem(currentItem.getsId());
             }
         });
 
@@ -156,23 +159,23 @@ public class FavoriteListAdapter extends RecyclerView.Adapter<FavoriteListAdapte
 
     }
 
-    public void removeItem(MusicDataCapsule item) {
+    public void removeItem(String item) {
         StorageUtil storageUtil = new StorageUtil(context);
-        int position = musicArrayList.indexOf(item);
+        int position = musicIdList.indexOf(item);
 
         if (position != -1) {
-            musicArrayList.remove(position);
+            musicIdList.remove(position);
             storageUtil.removeFavorite(item);
         }
 
-        notifyItemRangeChanged(position, musicArrayList.size() - (position + 1));
+        notifyItemRangeChanged(position, musicIdList.size() - (position + 1));
         notifyItemRemoved(position);
 
     }
 
     @Override
     public int getItemCount() {
-        return musicArrayList.size();
+        return musicIdList.size();
     }
 
     public static class FavoriteViewHolder extends RecyclerView.ViewHolder {

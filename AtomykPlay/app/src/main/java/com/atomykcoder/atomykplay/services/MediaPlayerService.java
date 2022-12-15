@@ -36,6 +36,7 @@ import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.widget.Toast;
 
@@ -92,7 +93,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     private MediaSessionCompat mediaSession;
     private MediaControllerCompat.TransportControls transportControls;
     //list of available music
-    private ArrayList<MusicDataCapsule> musicList;
+    private ArrayList<String> musicIdList;
     private int musicIndex = -1;
     private MusicDataCapsule activeMusic = null;//object of currently playing audio
     //
@@ -201,15 +202,17 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     private final BroadcastReceiver playNewMusicReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            musicList = storage.loadQueueList();
-            musicIndex = storage.loadMusicIndex();
 
-            if (musicList != null)
-                if (musicIndex != -1 && musicIndex < musicList.size()) {
-                    activeMusic = musicList.get(musicIndex);
-                } else {
-                    stopSelf();
-                }
+            String musicID =  intent.getStringExtra("music");
+
+            Log.i("info", musicID);
+            if (musicID != null) {
+                activeMusic = storage.getItemFromInitialList(musicID);
+                Log.i("info", activeMusic.getsName());
+            } else {
+                Log.i("info", "music is null");
+            }
+
             if (mediaSessionManager == null) {
                 try {
                     initiateMediaSession();
@@ -228,7 +231,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
      * this function updates play icon according to media playback status
      */
     public void setIcon(PlaybackStatus playbackStatus) {
-        if (musicList != null) {
+        if (musicIdList != null) {
             if (playbackStatus == PlaybackStatus.PLAYING) {
                 EventBus.getDefault().post(new UpdateMusicImageEvent(false));
             } else if (playbackStatus == PlaybackStatus.PAUSED) {
@@ -278,7 +281,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
      * this function updates new music data in notification
      */
     private void updateMetaData(MusicDataCapsule activeMusic) {
-        musicList = storage.loadQueueList();
+        musicIdList = storage.loadQueueList();
         musicIndex = storage.loadMusicIndex();
         String songName = null;
         String artistName = null;
@@ -316,7 +319,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             int dimension = Math.min(artwork.getWidth(), artwork.getHeight());
             finalArtWork = ThumbnailUtils.extractThumbnail(artwork, dimension - (dimension / 5), dimension - (dimension / 5), ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
         }
-        if (musicList != null)
+        if (musicIdList != null)
             mediaSession.setMetadata(new MediaMetadataCompat.Builder()
                     .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, finalArtWork)
                     .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artistName)
@@ -348,7 +351,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         Notification notificationBuilder = null;
 
         //building notification for player
-        if (musicList != null)
+        if (musicIdList != null)
             notificationBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
                     .setShowWhen(false).setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
                             .setMediaSession(mediaSession.getSessionToken())
@@ -625,12 +628,12 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     @Override
     public void onCompletion(MediaPlayer mp) {
         storage.clearMusicLastPos();
-        musicList = storage.loadQueueList();
+        musicIdList = storage.loadQueueList();
         musicIndex = storage.loadMusicIndex();
 
         if (storage.loadRepeatStatus().equals("no_repeat")) {
-            if (musicList != null)
-                if (musicIndex == musicList.size() - 1) {
+            if (musicIdList != null)
+                if (musicIndex == musicIdList.size() - 1) {
                     pauseMedia();
                 } else {
                     skipToNext();
@@ -848,19 +851,19 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
      * This function skips music to previous index
      */
     public void skipToPrevious() {
-        musicList = storage.loadQueueList();
+        musicIdList = storage.loadQueueList();
         musicIndex = storage.loadMusicIndex();
 
         int lastPos = storage.loadMusicLastPos();
         storage.clearMusicLastPos();
 
         if (settingsStorage.loadOneClickSkip()) {
-            if (musicList != null)
+            if (musicIdList != null)
                 if (musicIndex == 0) {
-                    musicIndex = musicList.size() - 1;
-                    activeMusic = musicList.get(musicIndex);
+                    musicIndex = musicIdList.size() - 1;
+                    activeMusic = storage.getItemFromInitialList(musicIdList.get(musicIndex));
                 } else {
-                    activeMusic = musicList.get(--musicIndex);
+                    activeMusic = storage.getItemFromInitialList(musicIdList.get(--musicIndex));
                 }
             if (activeMusic != null) {
                 //update stored index
@@ -872,18 +875,20 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         } else {
             if (media_player != null) {
                 if (media_player.getCurrentPosition() >= 3000) {
-                    activeMusic = musicList.get(musicIndex);
+                    activeMusic = storage.getItemFromInitialList(musicIdList.get(musicIndex));
                     if (activeMusic != null) {
                         stopMedia();
                         initiateMediaPlayer();
                     }
                 } else {
-                    if (musicList != null)
+                    if (musicIdList != null)
                         if (musicIndex == 0) {
-                            musicIndex = musicList.size() - 1;
-                            activeMusic = musicList.get(musicIndex);
+                            musicIndex = musicIdList.size() - 1;
+                            activeMusic = storage.getItemFromInitialList(musicIdList.get(musicIndex));
+
                         } else {
-                            activeMusic = musicList.get(--musicIndex);
+                            activeMusic = storage.getItemFromInitialList(musicIdList.get(musicIndex));
+
                         }
                     if (activeMusic != null) {
                         //update stored index
@@ -895,18 +900,20 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 }
             } else {
                 if (lastPos >= 3000) {
-                    activeMusic = musicList.get(musicIndex);
+                    activeMusic = storage.getItemFromInitialList(musicIdList.get(musicIndex));
                     if (activeMusic != null) {
                         stopMedia();
                         initiateMediaPlayer();
                     }
                 } else {
-                    if (musicList != null)
+                    if (musicIdList != null)
                         if (musicIndex == 0) {
-                            musicIndex = musicList.size() - 1;
-                            activeMusic = musicList.get(musicIndex);
+                            musicIndex = musicIdList.size() - 1;
+                            activeMusic = storage.getItemFromInitialList(musicIdList.get(musicIndex));
+
                         } else {
-                            activeMusic = musicList.get(--musicIndex);
+                            activeMusic = storage.getItemFromInitialList(musicIdList.get(--musicIndex));
+
                         }
                     if (activeMusic != null) {
                         //update stored index
@@ -924,18 +931,20 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
      * This function skips music to next index
      */
     public void skipToNext() {
-        musicList = storage.loadQueueList();
+        musicIdList = storage.loadQueueList();
         musicIndex = storage.loadMusicIndex();
         storage.clearMusicLastPos();
 
-        if (musicList != null)
-            if (musicIndex == musicList.size() - 1) {
+        if (musicIdList != null)
+            if (musicIndex == musicIdList.size() - 1) {
                 //if last in list
                 musicIndex = 0;
-                activeMusic = musicList.get(musicIndex);
+                activeMusic = storage.getItemFromInitialList(musicIdList.get(musicIndex));
+
             } else {
                 //get next in playlist
-                activeMusic = musicList.get(++musicIndex);
+                activeMusic = storage.getItemFromInitialList(musicIdList.get(++musicIndex));
+
             }
         if (activeMusic != null) {
             //update stored index
@@ -1084,12 +1093,12 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
         storage = new StorageUtil(getApplicationContext());
         settingsStorage = new StorageUtil.SettingsStorage(getApplicationContext());
-        musicList = storage.loadQueueList();
+        musicIdList = storage.loadQueueList();
         musicIndex = storage.loadMusicIndex();
 
-        if (musicList != null)
-            if (musicIndex != -1 && musicIndex < musicList.size()) {
-                activeMusic = musicList.get(musicIndex);
+        if (musicIdList != null)
+            if (musicIndex != -1 && musicIndex < musicIdList.size()) {
+                activeMusic = storage.getItemFromInitialList(musicIdList.get(musicIndex));
             } else {
                 stopSelf();
             }

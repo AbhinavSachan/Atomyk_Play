@@ -28,7 +28,6 @@ public class FavoritesFragment extends Fragment implements OnDragStartListener {
 
     private ItemTouchHelper itemTouchHelper;
     private FavoriteListAdapter playListAdapter;
-    private ArrayList<MusicDataCapsule> dataList;
     private StorageUtil storageUtil;
 
     @Override
@@ -53,16 +52,16 @@ public class FavoritesFragment extends Fragment implements OnDragStartListener {
 
         LinearLayoutManager manager = new LinearLayoutManager(getContext());
 
-        dataList = storageUtil.getFavouriteList();
+        ArrayList<String> favIdList = storageUtil.getFavouriteList();
 
 
-        if (dataList != null) {
-            playListAdapter = new FavoriteListAdapter(getContext(), dataList, this);
+        if (favIdList != null) {
+            playListAdapter = new FavoriteListAdapter(getContext(), favIdList, this);
             recyclerView.setLayoutManager(manager);
             recyclerView.setAdapter(playListAdapter);
             noPlLayout.setVisibility(View.GONE);
 
-            if (dataList.isEmpty()) {
+            if (favIdList.isEmpty()) {
                 noPlLayout.setVisibility(View.VISIBLE);
             }
 
@@ -84,7 +83,7 @@ public class FavoritesFragment extends Fragment implements OnDragStartListener {
 
     @Subscribe
     public void removeFromPlaylist(RemoveFromFavoriteEvent event) {
-        playListAdapter.removeItem(event.music);
+        playListAdapter.removeItem(event.musicID);
     }
 
     @Override

@@ -49,8 +49,15 @@ android {
 
 dependencies {
 //    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.10'
+
     //event bus implementations
     implementation 'org.greenrobot:eventbus:3.3.1'
+
+
+//    // proto data store and protobuf buffers
+//    implementation  "androidx.datastore:datastore:1.0.0"
+//    // Starting from Protobuf 3.8.0, use the lite runtime library
+//    implementation  "com.google.protobuf:protobuf-javalite:3.18.0"
 
     //legacy implementations
     implementation 'androidx.appcompat:appcompat:1.5.1'
