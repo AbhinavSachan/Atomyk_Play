@@ -60,7 +60,7 @@ public class StorageUtil {
 
     //region music queue list code here
     /**
-     * save music queue idlist in arraylist of strings
+     * save music queue idList in arraylist of strings
      * @param idList music id list needed to be saved
      */
     public void saveQueueList(ArrayList<String> idList) {
@@ -174,7 +174,6 @@ public class StorageUtil {
 
     /**
      * add given music to initial list
-     *
      * @param music music to be saved in initial list
      */
     public void addToInitialList(MusicDataCapsule music) {

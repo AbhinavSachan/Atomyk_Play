@@ -459,8 +459,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         donationSheetBehavior.addBottomSheetCallback(donationCallback);
         mainPlayerSheetBehavior.addBottomSheetCallback(bottomSheetCallback);
 
-        player_bottom_sheet.setClickable(true);
-
         if (savedInstanceState == null) {
             navigationView.setCheckedItem(R.id.navigation_home);
         }
@@ -482,8 +480,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onStart();
         if (service_bound) {
             if (is_playing) {
-                media_player_service.setSeekBar();
-                EventBus.getDefault().post(new PrepareRunnableEvent());
+                    media_player_service.setSeekBar();
+                    EventBus.getDefault().post(new PrepareRunnableEvent());
             }
         }
     }
@@ -1639,7 +1637,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Bundle bundle = new Bundle();
             bundle.putSerializable("currentMusic", itemSelected);
             fragment.setArguments(bundle);
-            replaceFragment(R.id.sec_container, fragment, android.R.transition.slide_top, "TagEditorFragment");
+            replaceFragment(R.id.sec_container, fragment, android.R.transition.no_transition, "TagEditorFragment");
         }
     }
 

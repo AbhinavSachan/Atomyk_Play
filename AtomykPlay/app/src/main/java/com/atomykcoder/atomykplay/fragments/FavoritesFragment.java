@@ -56,7 +56,7 @@ public class FavoritesFragment extends Fragment implements OnDragStartListener {
 
 
         if (favIdList != null) {
-            playListAdapter = new FavoriteListAdapter(getContext(), favIdList, this);
+            playListAdapter = new FavoriteListAdapter(requireContext(), favIdList, this);
             recyclerView.setLayoutManager(manager);
             recyclerView.setAdapter(playListAdapter);
             noPlLayout.setVisibility(View.GONE);
