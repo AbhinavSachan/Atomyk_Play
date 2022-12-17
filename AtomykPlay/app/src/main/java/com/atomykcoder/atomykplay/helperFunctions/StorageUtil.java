@@ -49,11 +49,20 @@ public class StorageUtil {
     private SharedPreferences sharedPreferences;
 
 
-    //to save the list of audio
+    /**
+     * constructor of storage util
+     * @param context context of activity or application is valid
+     */
     public StorageUtil(Context context) {
         this.context = context;
     }
 
+
+    //region music queue list code here
+    /**
+     * save music queue idlist in arraylist of strings
+     * @param idList music id list needed to be saved
+     */
     public void saveQueueList(ArrayList<String> idList) {
         sharedPreferences = context.getSharedPreferences(MUSIC_LIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -63,6 +72,11 @@ public class StorageUtil {
         editor.apply();
     }
 
+    /**
+     * load saved music queue list (IDS) from storage
+     *
+     * @return returns saved music queue list (IDS) in an arraylist of strings
+     */
     public ArrayList<String> loadQueueList() {
         sharedPreferences = context.getSharedPreferences(MUSIC_LIST_STORAGE, Context.MODE_PRIVATE);
         Gson gson = new Gson();
@@ -72,13 +86,25 @@ public class StorageUtil {
         return gson.fromJson(json, type);
     }
 
+    /**
+     * clear saved music queue list
+     */
     public void clearQueueList() {
         sharedPreferences = context.getSharedPreferences(MUSIC_LIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.remove(musicList);
         editor.apply();
     }
+    //endregion
 
+
+    //region initial list code here
+
+    /**
+     * save initial music list in storage
+     *
+     * @param list initial list of musicDataCapsule
+     */
     public void saveInitialList(ArrayList<MusicDataCapsule> list) {
         sharedPreferences = context.getSharedPreferences(INITIAL_LIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -90,43 +116,11 @@ public class StorageUtil {
         editor.apply();
     }
 
-    public MusicDataCapsule getItemFromInitialList(String musicID) {
-        sharedPreferences = context.getSharedPreferences(INITIAL_LIST_STORAGE, Context.MODE_PRIVATE);
-        Gson gson = new Gson();
-        String json = sharedPreferences.getString(musicID, null);
-        Type type = new TypeToken<MusicDataCapsule>(){}.getType();
-        return gson.fromJson(json, type);
-    }
-
-    public ArrayList<MusicDataCapsule> getItemListFromInitialList(ArrayList<String> idList) {
-        sharedPreferences = context.getSharedPreferences(INITIAL_LIST_STORAGE, Context.MODE_PRIVATE);
-        Gson gson = new Gson();
-        ArrayList<MusicDataCapsule> musicList = new ArrayList<>();
-        for (String id : idList) {
-            String json = sharedPreferences.getString(id, null);
-            Type type = new TypeToken<MusicDataCapsule>(){}.getType();
-            MusicDataCapsule music = gson.fromJson(json, type);
-            musicList.add(music);
-        }
-        return musicList;
-    }
-
-    public void addToInitialList(MusicDataCapsule music) {
-        sharedPreferences = context.getSharedPreferences(INITIAL_LIST_STORAGE, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        Gson gson = new Gson();
-        String json = gson.toJson(music);
-        editor.putString(music.getsId(), json);
-        editor.apply();
-    }
-
-    public void removeFromInitialList(String musicID) {
-        sharedPreferences = context.getSharedPreferences(INITIAL_LIST_STORAGE, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.remove(musicID);
-        editor.apply();
-    }
-
+    /**
+     * load inital music list from storage
+     *
+     * @return returns arraylist of musicDataCapsule
+     */
     public ArrayList<MusicDataCapsule> loadInitialList() {
         sharedPreferences = context.getSharedPreferences(INITIAL_LIST_STORAGE, Context.MODE_PRIVATE);
         Gson gson = new Gson();
@@ -144,6 +138,98 @@ public class StorageUtil {
         }
         return musicList;
     }
+
+    /**
+     * get a certain music from initial list
+     *
+     * @param musicID music-id of the music which to be returned
+     * @return returns music of the given music-id
+     */
+    public MusicDataCapsule getItemFromInitialList(String musicID) {
+        sharedPreferences = context.getSharedPreferences(INITIAL_LIST_STORAGE, Context.MODE_PRIVATE);
+        Gson gson = new Gson();
+        String json = sharedPreferences.getString(musicID, null);
+        Type type = new TypeToken<MusicDataCapsule>(){}.getType();
+        return gson.fromJson(json, type);
+    }
+
+    /**
+     * get a list of musicDataCapsule in particular range
+     *
+     * @param idList music-id list
+     * @return returns arraylist of musicDataCapsule of given music-id list
+     */
+    public ArrayList<MusicDataCapsule> getItemListFromInitialList(ArrayList<String> idList) {
+        sharedPreferences = context.getSharedPreferences(INITIAL_LIST_STORAGE, Context.MODE_PRIVATE);
+        Gson gson = new Gson();
+        ArrayList<MusicDataCapsule> musicList = new ArrayList<>();
+        for (String id : idList) {
+            String json = sharedPreferences.getString(id, null);
+            Type type = new TypeToken<MusicDataCapsule>(){}.getType();
+            MusicDataCapsule music = gson.fromJson(json, type);
+            musicList.add(music);
+        }
+        return musicList;
+    }
+
+    /**
+     * add given music to initial list
+     *
+     * @param music music to be saved in initial list
+     */
+    public void addToInitialList(MusicDataCapsule music) {
+        sharedPreferences = context.getSharedPreferences(INITIAL_LIST_STORAGE, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(music);
+        editor.putString(music.getsId(), json);
+        editor.apply();
+    }
+
+    /**
+     * remove music of given music-id from storage
+     *
+     * @param musicID music-id whose music to be removed
+     */
+    public void removeItemFromInitialList(String musicID) {
+        sharedPreferences = context.getSharedPreferences(INITIAL_LIST_STORAGE, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.remove(musicID);
+        editor.apply();
+    }
+
+    /**
+     * remove multiple music from storage
+     *
+     * @param musicIds id-list of the music to be removed
+     */
+    public void removeItemListFromInitialList(ArrayList<String> musicIds) {
+        sharedPreferences = context.getSharedPreferences(INITIAL_LIST_STORAGE, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        for(String id : musicIds) {
+            editor.remove(id);
+        }
+        editor.apply();
+    }
+
+    /**
+     * clear initial list from storage
+     */
+    public void clearInitialList() {
+        sharedPreferences = context.getSharedPreferences(MUSIC_LIST_STORAGE, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.remove(initialList);
+        editor.apply();
+    }
+    //endregion
+
+
+    //region music index code here
+
+    /**
+     * save Music index of queue array list
+     * @param index index of queue array list
+     */
     public void saveMusicIndex(int index) {
         sharedPreferences = context.getSharedPreferences(MUSIC_LIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -151,6 +237,9 @@ public class StorageUtil {
         editor.apply();
     }
 
+    /**
+     * load Music index of queue array list
+     */
     public int loadMusicIndex() {
         sharedPreferences = context.getSharedPreferences(MUSIC_LIST_STORAGE, Context.MODE_PRIVATE);
         return sharedPreferences.getInt(musicIndex, -1);
@@ -162,12 +251,14 @@ public class StorageUtil {
         editor.remove(musicIndex);
         editor.apply();
     }
+    //endregion
 
-    public int loadMusicLastPos() {
-        sharedPreferences = context.getSharedPreferences(POSITION_STORAGE, Context.MODE_PRIVATE);
-        return sharedPreferences.getInt(musicPosition, 0);
-    }
 
+    //region music last position code here
+    /**
+     * save music last played position on seekbar
+     * @param position last played position on seekbar
+     */
     public void saveMusicLastPos(int position) {
         sharedPreferences = context.getSharedPreferences(POSITION_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -175,25 +266,56 @@ public class StorageUtil {
         editor.apply();
     }
 
+    /**
+     * load last saved position of music on seekbar
+     * @return returns last saved position of music on seekbar
+     */
+    public int loadMusicLastPos() {
+        sharedPreferences = context.getSharedPreferences(POSITION_STORAGE, Context.MODE_PRIVATE);
+        return sharedPreferences.getInt(musicPosition, 0);
+    }
+
+    /**
+     * clear last saved position of music on seekbar
+     */
     public void clearMusicLastPos() {
         sharedPreferences = context.getSharedPreferences(POSITION_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.remove(musicPosition);
         editor.apply();
     }
+    //endregion
 
+
+    //region player repeat status code here
+    /**
+     * save player repeat status
+     * @param status player status = (repeat, repeat_one, no_repeat)
+     */
+    public void saveRepeatStatus(String status) {
+        sharedPreferences = context.getSharedPreferences(REPEAT_STATUS_STORAGE, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(repeatStatus, status);
+        editor.apply();
+    }
+
+    /**
+     * get player repeat status
+     * @return string => (repeat, repeat_one, no_repeat)
+     */
     public String loadRepeatStatus() {
         sharedPreferences = context.getSharedPreferences(REPEAT_STATUS_STORAGE, Context.MODE_PRIVATE);
         return sharedPreferences.getString(repeatStatus, no_repeat);
     }
+    //endregion
 
-    public void saveRepeatStatus(String name) {
-        sharedPreferences = context.getSharedPreferences(REPEAT_STATUS_STORAGE, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(repeatStatus, name);
-        editor.apply();
-    }
 
+    //region favourite music-id related code here
+
+    /**
+     * save favourite music id to storage
+     * @param musicID music id to be saved
+     */
     public void saveFavorite(String musicID) {
         sharedPreferences = context.getSharedPreferences(FAVORITE_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -201,11 +323,20 @@ public class StorageUtil {
         editor.apply();
     }
 
+    /**
+     * check if given music id exist in favourite storage
+     * @param musicID music id to be searched
+     * @return returns either "favorite" or "no_favorite" string
+     */
     public String checkFavourite(String musicID) {
         sharedPreferences = context.getSharedPreferences(FAVORITE_STORAGE, Context.MODE_PRIVATE);
         return sharedPreferences.getString(musicID, no_favorite);
     }
 
+    /**
+     * remove given music id from favourite storage
+     * @param musicID music id to be removed
+     */
     public void removeFavorite(String musicID) {
         sharedPreferences = context.getSharedPreferences(FAVORITE_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -213,6 +344,10 @@ public class StorageUtil {
         editor.apply();
     }
 
+    /**
+     * get favourite music id list in an arraylist of strings
+     * @return returns arraylist of music ids (string)
+     */
     public ArrayList<String> getFavouriteList() {
         sharedPreferences = context.getSharedPreferences(FAVORITE_STORAGE, Context.MODE_PRIVATE);
 
@@ -225,18 +360,40 @@ public class StorageUtil {
         return favouriteIDList;
     }
 
+    //endregion
+
+
+    //region player shuffle status code here
+
+    /**
+     * save player shuffle status
+     * @param status status => (shuffle OR no_shuffle)
+     */
+    public void saveShuffle(String status) {
+        sharedPreferences = context.getSharedPreferences(SHUFFLE_STORAGE, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(shuffleStatus, status);
+        editor.apply();
+    }
+
+    /**
+     * load player shuffle status from storage
+     * @return returns string => (shuffle OR no_shuffle)
+     */
     public String loadShuffle() {
         sharedPreferences = context.getSharedPreferences(SHUFFLE_STORAGE, Context.MODE_PRIVATE);
         return sharedPreferences.getString(shuffleStatus, no_shuffle);
     }
 
-    public void saveShuffle(String name) {
-        sharedPreferences = context.getSharedPreferences(SHUFFLE_STORAGE, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(shuffleStatus, name);
-        editor.apply();
-    }
+    //endregion
 
+
+    //region temporary music-id list code here
+
+    /**
+     * save temporary music-id list in storage
+     * @param idList temporary music-id list to be saved
+     */
     public void saveTempMusicList(ArrayList<String> idList) {
         sharedPreferences = context.getSharedPreferences(MUSIC_LIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -246,6 +403,10 @@ public class StorageUtil {
         editor.apply();
     }
 
+    /**
+     * load temporary music-id list from storage
+     * @return returns arraylist of music-ids (String)
+     */
     public ArrayList<String> loadTempMusicList() {
         sharedPreferences = context.getSharedPreferences(MUSIC_LIST_STORAGE, Context.MODE_PRIVATE);
         Gson gson = new Gson();
@@ -255,6 +416,9 @@ public class StorageUtil {
         return gson.fromJson(json, type);
     }
 
+    /**
+     * clear temporary music-id list from storage
+     */
     public void clearTempMusicList() {
         sharedPreferences = context.getSharedPreferences(MUSIC_LIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -262,6 +426,16 @@ public class StorageUtil {
         editor.apply();
     }
 
+    //endregion
+
+
+    //region music-lyrics code here
+
+    /**
+     * save lyrics of given music in storage
+     * @param musicId music-id (string) as key
+     * @param _lrcMap LRC-MAP object as value
+     */
     public void saveLyrics(String musicId, LRCMap _lrcMap) {
         sharedPreferences = context.getSharedPreferences(LYRICS_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -271,6 +445,11 @@ public class StorageUtil {
         editor.apply();
     }
 
+    /**
+     * load lyrics of given music-id from storage
+     * @param musicId to get lyrics of
+     * @return returns LRC-MAP of given music id
+     */
     public LRCMap loadLyrics(String musicId) {
         sharedPreferences = context.getSharedPreferences(LYRICS_STORAGE, Context.MODE_PRIVATE);
         Gson gson = new Gson();
@@ -280,6 +459,10 @@ public class StorageUtil {
         return gson.fromJson(json, type);
     }
 
+    /**
+     * remove LRC-MAP or lyrics of given music-id
+     * @param musicId music-id of a music
+     */
     public void removeLyrics(String musicId) {
         sharedPreferences = context.getSharedPreferences(LYRICS_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -287,7 +470,18 @@ public class StorageUtil {
         editor.apply();
     }
 
-    public void savePlayList(String playlistName, String coverUri) {
+    //endregion
+
+
+    //region playlist code here
+
+    /**
+     * create and save playlist in storage
+     *
+     * @param playlistName playlist name
+     * @param coverUri cover uri for playlist
+     */
+    public void createPlaylist(String playlistName, String coverUri) {
         sharedPreferences = context.getSharedPreferences(PLAYLIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         Gson gson = new Gson();
@@ -297,13 +491,13 @@ public class StorageUtil {
     }
 
     /**
-     * overloaded create playlist
+     * create and save playlist in storage
      *
      * @param playlistName playlist name
-     * @param coverUri     cover uri for playlist
-     * @param musicIds     songs ids in arraylist<string> format
+     * @param coverUri cover uri for playlist
+     * @param musicIds songs ids in arraylist<string> format
      */
-    public void createPlayList(String playlistName, String coverUri, ArrayList<String> musicIds) {
+    public void createPlaylist(String playlistName, String coverUri, ArrayList<String> musicIds) {
         sharedPreferences = context.getSharedPreferences(PLAYLIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         Gson gson = new Gson();
@@ -314,7 +508,7 @@ public class StorageUtil {
 
 
     /**
-     * replaces old playlist with new playlist without losing music list
+     * replaces old playlist with new playlist without losing music-id list
      *
      * @param oldPlaylist  old playlist
      * @param playlistName new playlist name (use Empty string for optional use)
@@ -322,10 +516,14 @@ public class StorageUtil {
      */
     public void replacePlaylist(Playlist oldPlaylist, String playlistName, String coverUri) {
         removePlayList(oldPlaylist.getName());
-        createPlayList(playlistName, coverUri, oldPlaylist.getMusicIDList());
+        createPlaylist(playlistName, coverUri, oldPlaylist.getMusicIDList());
     }
 
-
+    /**
+     * remove given playlist from storage
+     *
+     * @param playlistName name of the playlist which is to be removed
+     */
     public void removePlayList(String playlistName) {
         sharedPreferences = context.getSharedPreferences(PLAYLIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -333,7 +531,12 @@ public class StorageUtil {
         editor.apply();
     }
 
-
+    /**
+     * load a playlist with given name
+     *
+     * @param playlistName name of the playlist which to be returned
+     * @return returns a playlist with given name
+     */
     public Playlist loadPlaylist(String playlistName) {
         sharedPreferences = context.getSharedPreferences(PLAYLIST_STORAGE, Context.MODE_PRIVATE);
         Gson gson = new Gson();
@@ -343,6 +546,11 @@ public class StorageUtil {
         return gson.fromJson(json, type);
     }
 
+    /**
+     * get all available playlist from storage
+     *
+     * @return returns an arraylist of available playlist from storage
+     */
     public ArrayList<Playlist> getAllPlaylist() {
         sharedPreferences = context.getSharedPreferences(PLAYLIST_STORAGE, Context.MODE_PRIVATE);
         Gson gson = new Gson();
@@ -387,6 +595,11 @@ public class StorageUtil {
         editor.apply();
     }
 
+    /**
+     * remove a music from playlist
+     * @param musicID music id of the music which to be removed
+     * @param playlistName name of the playlist that music belongs to
+     */
     public void removeItemInPlaylist(String musicID, String playlistName) {
         //Shared Preferences Stuff
         sharedPreferences = context.getSharedPreferences(PLAYLIST_STORAGE, Context.MODE_PRIVATE);
@@ -409,6 +622,8 @@ public class StorageUtil {
         // apply editor
         editor.apply();
     }
+
+    //endregion
 
 
     /**

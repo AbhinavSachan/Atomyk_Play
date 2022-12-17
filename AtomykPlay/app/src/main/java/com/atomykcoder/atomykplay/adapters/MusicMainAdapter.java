@@ -207,7 +207,7 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
             storageUtil.saveMusicIndex(savedIndex - 1);
         }
         if (position != -1) {
-            storageUtil.removeFromInitialList(musicIDList.get(position));
+            storageUtil.removeItemFromInitialList(musicIDList.get(position));
             musicArrayList.remove(position);
             musicIDList.remove(position);
         }
