@@ -6,6 +6,9 @@ import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.shuffle;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.MediaMetadataRetriever;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
@@ -22,6 +25,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.activities.MainActivity;
+import com.atomykcoder.atomykplay.classes.GlideBuilt;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.ItemTouchHelperAdapter;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
@@ -78,17 +82,31 @@ public class FavoriteListAdapter extends RecyclerView.Adapter<FavoriteListAdapte
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public void onBindViewHolder(@NonNull FavoriteListAdapter.FavoriteViewHolder holder, int position) {
-
         MusicDataCapsule currentItem = storageUtil.getItemFromInitialList(musicIdList.get(position));
 
         StorageUtil storage = new StorageUtil(context);
         StorageUtil.SettingsStorage settingsStorage = new StorageUtil.SettingsStorage(context);
-        Handler handler = new Handler(Looper.getMainLooper());
 
         holder.nameText.setText(currentItem.getsName());
         holder.artistText.setText(currentItem.getsArtist());
         holder.durationText.setText(convertDuration(currentItem.getsDuration()));
+        final Bitmap[] image = {null};
+        ExecutorService service1 = Executors.newSingleThreadExecutor();
+        Handler handler = new Handler();
+        service1.execute(() -> {
 
+            //image decoder
+            MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
+            mediaMetadataRetriever.setDataSource(currentItem.getsPath());
+            byte[] art = mediaMetadataRetriever.getEmbeddedPicture();
+
+            try {
+                image[0] = BitmapFactory.decodeByteArray(art, 0, art.length);
+            } catch (Exception ignored) {
+            }
+            handler.post(() -> GlideBuilt.glideBitmap(context, image[0], R.drawable.ic_music, holder.imageView, 128));
+        });
+        service1.shutdown();
 
         holder.cardView.setOnClickListener(v -> {
 
@@ -126,7 +144,7 @@ public class FavoriteListAdapter extends RecyclerView.Adapter<FavoriteListAdapte
                         storage.saveMusicIndex(0);
                         // post-execute code here
                         handler.post(() -> {
-                            mainActivity.playAudio(currentItem.getsId());
+                            mainActivity.playAudio(currentItem);
                             mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(shuffleIDList);
                             mainActivity.openBottomPlayer();
                         });
@@ -142,7 +160,7 @@ public class FavoriteListAdapter extends RecyclerView.Adapter<FavoriteListAdapte
                         storage.saveMusicIndex(position);
                         // post-execute code here
                         handler.post(() -> {
-                            mainActivity.playAudio(currentItem.getsId());
+                            mainActivity.playAudio(currentItem);
                             mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(musicIdList);
                             mainActivity.openBottomPlayer();
                         });

@@ -6,6 +6,9 @@ import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.shuffle;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.MediaMetadataRetriever;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
@@ -39,7 +42,7 @@ import java.util.concurrent.Executors;
 public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.MusicViewAdapter> implements INameableAdapter {
     Context context;
     ArrayList<MusicDataCapsule> musicArrayList;
-    ArrayList<String> musicIDList = new ArrayList<>();
+    ArrayList<String> musicIDList;
     MainActivity mainActivity;
     StorageUtil storage;
     long lastClickTime;
@@ -47,14 +50,12 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
     int delay = 500;
 
 
-    public MusicMainAdapter(Context _context, ArrayList<MusicDataCapsule> _musicArrayList) {
+    public MusicMainAdapter(Context _context, ArrayList<MusicDataCapsule> _musicArrayList,ArrayList<String> _musicIDList) {
         context = _context;
         musicArrayList = _musicArrayList;
+        musicIDList = _musicIDList;
         mainActivity = (MainActivity) context;
         storage = new StorageUtil(context);
-        for(MusicDataCapsule music : musicArrayList) {
-            musicIDList.add(music.getsId());
-        }
     }
 
     public void updateMusicListItems(ArrayList<MusicDataCapsule> newMusicArrayList) {
@@ -77,8 +78,23 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
     @Override
     public void onBindViewHolder(@NonNull MusicViewAdapter holder, @SuppressLint("RecyclerView") int pos) {
         MusicDataCapsule currentItem =  musicArrayList.get(pos);
+        final Bitmap[] image = {null};
+        ExecutorService service1 = Executors.newSingleThreadExecutor();
+        Handler handler = new Handler();
+        service1.execute(() -> {
 
-        GlideBuilt.glide(context, currentItem.getsAlbumUri(), R.drawable.ic_music, holder.imageView, 128);
+            //image decoder
+            MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
+            mediaMetadataRetriever.setDataSource(currentItem.getsPath());
+            byte[] art = mediaMetadataRetriever.getEmbeddedPicture();
+
+            try {
+                image[0] = BitmapFactory.decodeByteArray(art, 0, art.length);
+            } catch (Exception ignored) {
+            }
+            handler.post(() -> GlideBuilt.glideBitmap(context, image[0], R.drawable.ic_music, holder.imageView, 128));
+        });
+        service1.shutdown();
 
         int position = holder.getAbsoluteAdapterPosition();
         holder.cardView.setOnClickListener(v -> {
@@ -98,32 +114,30 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
 
                 //if shuffle button is already on it will shuffle it from start
                 if (settingsStorage.loadKeepShuffle()) {
-                    ArrayList<String> shuffleList = new ArrayList<>(musicIDList);
 
-                    storage.saveTempMusicList(shuffleList);
+                    storage.saveTempMusicList(musicIDList);
                     storage.saveShuffle(shuffle);
 
                     ExecutorService service = Executors.newSingleThreadExecutor();
-                    Handler handler = new Handler(Looper.getMainLooper());
                     service.execute(() -> {
 
                         //removing current item from list
-                        shuffleList.remove(position);
+                        musicIDList.remove(position);
 
                         //shuffling list
-                        Collections.shuffle(shuffleList);
+                        Collections.shuffle(musicIDList);
 
                         //adding the removed item in shuffled list on 0th index
-                        shuffleList.add(0, currentItem.getsId());
+                        musicIDList.add(0, currentItem.getsId());
 
                         //saving list
-                        storage.saveQueueList(shuffleList);
+                        storage.saveQueueList(musicIDList);
                         storage.saveMusicIndex(0);
 
                         // post-execute code here
                         handler.post(() -> {
-                            mainActivity.playAudio(currentItem.getsId());
-                            mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(shuffleList);
+                            mainActivity.playAudio(currentItem);
+                            mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(musicIDList);
                             mainActivity.openBottomPlayer();
                         });
                     });
@@ -132,7 +146,6 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
 
                     //Store serializable music list to sharedPreference
                     ExecutorService service = Executors.newSingleThreadExecutor();
-                    Handler handler = new Handler(Looper.getMainLooper());
                     service.execute(() -> {
                         storage.saveShuffle(no_shuffle);
                         storage.saveQueueList(musicIDList);
@@ -140,7 +153,7 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
 
                         // post-execute code here
                         handler.post(() -> {
-                            mainActivity.playAudio(currentItem.getsId());
+                            mainActivity.playAudio(currentItem);
                             mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(musicIDList);
                             mainActivity.openBottomPlayer();
                         });
@@ -203,7 +216,7 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
         notifyItemRemoved(position);
 
         if (position == savedIndex) {
-            mainActivity.playAudio(itemID);
+            mainActivity.playAudio(storageUtil.getItemFromInitialList(itemID));
         }
         mainActivity.bottomSheetPlayerFragment.queueAdapter.removeItem(itemID);
 

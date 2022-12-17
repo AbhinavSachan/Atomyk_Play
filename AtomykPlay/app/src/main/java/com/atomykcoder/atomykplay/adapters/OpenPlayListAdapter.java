@@ -6,10 +6,12 @@ import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.shuffle;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.MediaMetadataRetriever;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -85,19 +87,33 @@ public class OpenPlayListAdapter extends RecyclerView.Adapter<OpenPlayListAdapte
         MusicDataCapsule currentItem = storage.getItemFromInitialList(musicIDList.get(position));
 
         StorageUtil.SettingsStorage settingsStorage = new StorageUtil.SettingsStorage(context);
-        Handler handler = new Handler(Looper.getMainLooper());
 
         holder.nameText.setText(currentItem.getsName());
         holder.artistText.setText(currentItem.getsArtist());
         holder.durationText.setText(convertDuration(currentItem.getsDuration()));
 
-        GlideBuilt.glide(context, currentItem.getsAlbumUri(), R.drawable.ic_music, holder.imageView, 128);
+        final Bitmap[] image = {null};
+        ExecutorService service1 = Executors.newSingleThreadExecutor();
+        Handler handler = new Handler();
+        service1.execute(() -> {
+
+            //image decoder
+            MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
+            mediaMetadataRetriever.setDataSource(currentItem.getsPath());
+            byte[] art = mediaMetadataRetriever.getEmbeddedPicture();
+
+            try {
+                image[0] = BitmapFactory.decodeByteArray(art, 0, art.length);
+            } catch (Exception ignored) {
+            }
+            handler.post(() -> GlideBuilt.glideBitmap(context, image[0], R.drawable.ic_music, holder.imageView, 128));
+        });
+        service1.shutdown();
 
         holder.cardView.setOnClickListener(v -> {
 
             //region timer to stop extra clicks
-            if(SystemClock.elapsedRealtime() < (lastClickTime + delay)) {
-                Log.i("info", "too fast");
+            if (SystemClock.elapsedRealtime() < (lastClickTime + delay)) {
                 return;
             }
             lastClickTime = SystemClock.elapsedRealtime();
@@ -108,6 +124,7 @@ public class OpenPlayListAdapter extends RecyclerView.Adapter<OpenPlayListAdapte
             if (file.exists()) {
                 //check is service active
                 //if shuffle button is already on it will shuffle it from start
+                ExecutorService service = Executors.newSingleThreadExecutor();
                 if (settingsStorage.loadKeepShuffle()) {
                     ArrayList<String> shuffleIDList = new ArrayList<>(musicIDList);
                     //saving list in temp for restore function in player fragment
@@ -115,7 +132,6 @@ public class OpenPlayListAdapter extends RecyclerView.Adapter<OpenPlayListAdapte
                     storage.saveTempMusicList(musicIDList);
                     storage.saveShuffle(shuffle);
 
-                    ExecutorService service = Executors.newSingleThreadExecutor();
                     service.execute(() -> {
                         //removing current item from list
                         shuffleIDList.remove(position);
@@ -128,7 +144,7 @@ public class OpenPlayListAdapter extends RecyclerView.Adapter<OpenPlayListAdapte
                         storage.saveMusicIndex(0);
                         // post-execute code here
                         handler.post(() -> {
-                            mainActivity.playAudio(currentItem.getsId());
+                            mainActivity.playAudio(currentItem);
                             mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(musicIDList);
                             mainActivity.openBottomPlayer();
                         });
@@ -137,14 +153,13 @@ public class OpenPlayListAdapter extends RecyclerView.Adapter<OpenPlayListAdapte
 
                 } else if (!settingsStorage.loadKeepShuffle()) {
                     //Store serializable music list to sharedPreference
-                    ExecutorService service = Executors.newSingleThreadExecutor();
                     service.execute(() -> {
                         storage.saveShuffle(no_shuffle);
                         storage.saveQueueList(musicIDList);
                         storage.saveMusicIndex(position);
                         // post-execute code here
                         handler.post(() -> {
-                            mainActivity.playAudio(currentItem.getsId());
+                            mainActivity.playAudio(currentItem);
                             mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(musicIDList);
                             mainActivity.openBottomPlayer();
                         });
@@ -157,7 +172,7 @@ public class OpenPlayListAdapter extends RecyclerView.Adapter<OpenPlayListAdapte
             }
         });
 
-        holder.optBtn.setOnClickListener(v -> mainActivity.openOptionMenu(currentItem,"openPlaylist"));
+        holder.optBtn.setOnClickListener(v -> mainActivity.openOptionMenu(currentItem, "openPlaylist"));
 
     }
 

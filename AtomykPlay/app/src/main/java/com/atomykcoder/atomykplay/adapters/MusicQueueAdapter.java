@@ -4,6 +4,10 @@ import static com.atomykcoder.atomykplay.helperFunctions.MusicHelper.convertDura
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.MediaMetadataRetriever;
+import android.os.Handler;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -30,6 +34,8 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.MusicViewAdapter> implements ItemTouchHelperAdapter {
     Context context;
@@ -90,7 +96,7 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
             }
         }
         if (position == savedIndex) {
-            mainActivity.playAudio(currentID);
+            mainActivity.playAudio(storageUtil.getItemFromInitialList(currentID));
         } else if (position < savedIndex) {
             storageUtil.saveMusicIndex(savedIndex - 1);
         }
@@ -107,14 +113,28 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
     @Override
     public void onBindViewHolder(@NonNull MusicQueueAdapter.MusicViewAdapter holder, @SuppressLint("RecyclerView") int position) {
         MusicDataCapsule currentItem = storageUtil.getItemFromInitialList(musicIDList.get(position));
+        final Bitmap[] image = {null};
+        ExecutorService service1 = Executors.newSingleThreadExecutor();
+        Handler handler = new Handler();
+        service1.execute(() -> {
 
-        GlideBuilt.glide(context, currentItem.getsAlbumUri(), R.drawable.ic_music, holder.imageView, 128);
+            //image decoder
+            MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
+            mediaMetadataRetriever.setDataSource(currentItem.getsPath());
+            byte[] art = mediaMetadataRetriever.getEmbeddedPicture();
+
+            try {
+                image[0] = BitmapFactory.decodeByteArray(art, 0, art.length);
+            } catch (Exception ignored) {
+            }
+            handler.post(() -> GlideBuilt.glideBitmap(context, image[0], R.drawable.ic_music, holder.imageView, 128));
+        });
+        service1.shutdown();
         //playing song
         holder.cardView.setOnClickListener(v -> {
 
             //region timer to stop extra clicks
             if(SystemClock.elapsedRealtime() < (lastClickTime + delay)) {
-                Log.i("info", "too fast");
                 return;
             }
             lastClickTime = SystemClock.elapsedRealtime();
@@ -126,7 +146,7 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
                 //check is service active
                 //Store serializable music list to sharedPreference
                 storageUtil.saveMusicIndex(position);
-                mainActivity.playAudio(currentItem.getsId());
+                mainActivity.playAudio(currentItem);
             } else {
                 Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show();
                 removeItem(currentItem.getsId());
@@ -178,11 +198,6 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
     @Override
     public int getItemCount() {
         return musicIDList.size();
-    }
-
-    @SuppressLint("NotifyDataSetChanged")
-    public void updateView() {
-        notifyDataSetChanged();
     }
 
     public void updateItemInserted(String musicID) {

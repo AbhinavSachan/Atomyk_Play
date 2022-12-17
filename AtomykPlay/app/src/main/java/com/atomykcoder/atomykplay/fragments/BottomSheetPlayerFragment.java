@@ -213,10 +213,6 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         coverCardView = view.findViewById(R.id.card_view_for_cover);
         lyricsRelativeLayout = view.findViewById(R.id.lyrics_relative_layout);
 
-        playerSongNameTv.setSelected(true);
-        mini_name_text.setSelected(true);
-        songNameQueueItem.setSelected(true);
-
         setAccorToSettings();
 
         //click listeners on mini player
@@ -239,7 +235,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         lyricsImg.setOnClickListener(v -> openLyricsPanel());
         queueItem.setOnClickListener(v -> scrollToCurSong());
         lyricsImg.setOnLongClickListener(view1 -> {
-            setLyricsLayout(activeMusic.getsId());
+            setLyricsLayout(activeMusic);
             return false;
         });
 //        top right option button
@@ -255,7 +251,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         lyricsRecyclerView = view.findViewById(R.id.lyrics_recycler_view);
         noLyricsLayout = view.findViewById(R.id.no_lyrics_layout);
         lyricsRecyclerView.addOnScrollListener(onScrollListener);
-        button.setOnClickListener(v -> setLyricsLayout(activeMusic.getsId()));
+        button.setOnClickListener(v -> setLyricsLayout(activeMusic));
 
         seekBarMain.setOnSeekBarChangeListener(this);
 
@@ -334,16 +330,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
             String convertedDur = convertDuration(duration);
 
-            //image decoder
-            MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
-            mediaMetadataRetriever.setDataSource(activeMusic.getsPath());
-            byte[] art = mediaMetadataRetriever.getEmbeddedPicture();
-            Bitmap image;
-            try {
-                image = BitmapFactory.decodeByteArray(art, 0, art.length);
-            } catch (Exception e) {
-                image = null;
-            }
+
             int bitrateInNum = Integer.parseInt(bitrate) / 1000;
             String finalBitrate = bitrateInNum + " KBPS";
 
@@ -352,6 +339,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
             } else if (storageUtil.checkFavourite(activeMusic.getsId()).equals(favorite)) {
                 favoriteImg.setImageResource(R.drawable.ic_favorite);
             }
+
 
             if (storageUtil.loadShuffle().equals(no_shuffle)) {
                 shuffleImg.setImageResource(R.drawable.ic_shuffle_empty);
@@ -371,12 +359,29 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
                 seekBarMain.setMax(Integer.parseInt(duration));
                 mini_progress.setMax(Integer.parseInt(duration));
                 bitrateTv.setText(finalBitrate);
+//image decoder
+                final Bitmap[] image = {null};
+                ExecutorService service1 = Executors.newSingleThreadExecutor();
+                Handler handler = new Handler();
+                service1.execute(() -> {
+                    MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
+                    mediaMetadataRetriever.setDataSource(activeMusic.getsPath());
+                    byte[] art = mediaMetadataRetriever.getEmbeddedPicture();
+                    try {
+                        image[0] = BitmapFactory.decodeByteArray(art, 0, art.length);
+                    } catch (Exception e) {
+                        image[0] = null;
+                    }
+                    handler.post(() -> {
+                        GlideBuilt.glideBitmap(requireContext(), image[0], R.drawable.ic_music, playerCoverImage, 512);
+                        GlideBuilt.glideBitmap(requireContext(), image[0], R.drawable.ic_music, mini_cover, 128);
+                        GlideBuilt.glideBitmap(requireContext(), image[0], R.drawable.ic_music, queueCoverImg, 128);
+                    });
+                });
+                service1.shutdown();
 
-                GlideBuilt.glideBitmap(requireContext(), image, R.drawable.ic_music, playerCoverImage, 512);
-                GlideBuilt.glide(requireContext(), albumUri, R.drawable.ic_music, mini_cover, 128);
-                GlideBuilt.glide(requireContext(), albumUri, R.drawable.ic_music, queueCoverImg, 128);
 
-                ((MainActivity) context).setDataInNavigation(songName, artistName, image);
+                ((MainActivity) context).setDataInNavigation(songName, artistName, image[0]);
 
             } catch (NumberFormatException e) {
                 e.printStackTrace();
@@ -399,8 +404,8 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         mini_progress.setMax(0);
         seekBarMain.setProgress(0);
         mini_progress.setProgress(0);
-        GlideBuilt.glide(requireContext(), null, R.drawable.ic_music, playerCoverImage, 512);
-        GlideBuilt.glide(requireContext(), null, R.drawable.ic_music, mini_cover, 128);
+        GlideBuilt.glideBitmap(requireContext(), null, R.drawable.ic_music, playerCoverImage, 512);
+        GlideBuilt.glideBitmap(requireContext(), null, R.drawable.ic_music, mini_cover, 128);
 
     }
 
@@ -528,14 +533,13 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         super.onStop();
     }
 
-    public void setLyricsLayout(String musicID) {
+    public void setLyricsLayout(MusicDataCapsule music) {
         FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
         Fragment fragment = fragmentManager.findFragmentByTag("AddLyricsFragment");
         if (fragment != null) {
             fragmentManager.popBackStackImmediate();
         }
         Bundle bundle = new Bundle();
-        MusicDataCapsule music = storageUtil.getItemFromInitialList(musicID);
         bundle.putSerializable("selectedMusic", music);
         AddLyricsFragment addLyricsFragment = new AddLyricsFragment();
         addLyricsFragment.setArguments(bundle);
@@ -910,7 +914,9 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         super.onResume();
         //On Start Favourite Code Moved Here
         //for favorite
-
+        playerSongNameTv.setSelected(true);
+        mini_name_text.setSelected(true);
+        songNameQueueItem.setSelected(true);
         //layout setup ☺
         if (service_bound) {
             if (media_player_service != null)
@@ -951,6 +957,9 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     @Override
     public void onPause() {
         super.onPause();
+        playerSongNameTv.setSelected(false);
+        mini_name_text.setSelected(false);
+        songNameQueueItem.setSelected(false);
     }
 
     @Override

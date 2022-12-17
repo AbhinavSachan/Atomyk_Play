@@ -2,7 +2,6 @@ package com.atomykcoder.atomykplay.fragments;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.hardware.input.InputManager;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -17,13 +16,10 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.R;
-import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.adapters.MusicMainAdapter;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
@@ -35,6 +31,7 @@ public class SearchFragment extends Fragment {
 
     private RecyclerView recycler_view;
     private RadioGroup radioGroup;
+    private ArrayList<String> idList;
     private ArrayList<MusicDataCapsule> searchedMusicList;
     private MusicMainAdapter adapter;
     private RadioButton songButton, albumButton, artistButton, genreButton;
@@ -81,7 +78,7 @@ public class SearchFragment extends Fragment {
         ImageView closeSearch = view.findViewById(R.id.close_search_btn);
         searchView.requestFocus();
         try {
-            manager.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT,InputMethodManager.HIDE_NOT_ALWAYS);
+            manager.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, InputMethodManager.HIDE_NOT_ALWAYS);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -101,10 +98,10 @@ public class SearchFragment extends Fragment {
             public void afterTextChanged(Editable s) {
             }
         });
-        closeSearch.setOnClickListener(v ->{
+        closeSearch.setOnClickListener(v -> {
             searchView.clearFocus();
             try {
-                manager.hideSoftInputFromWindow(searchView.getWindowToken(),InputMethodManager.HIDE_NOT_ALWAYS);
+                manager.hideSoftInputFromWindow(searchView.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -114,8 +111,11 @@ public class SearchFragment extends Fragment {
         recycler_view.setHasFixedSize(true);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(requireContext());
         recycler_view.setLayoutManager(layoutManager);
-
-        adapter = new MusicMainAdapter(getContext(), searchedMusicList);
+        idList = new ArrayList<>();
+        for (MusicDataCapsule music : searchedMusicList) {
+            idList.add(music.getsId());
+        }
+        adapter = new MusicMainAdapter(getContext(), searchedMusicList, idList);
         recycler_view.setAdapter(adapter);
 
         return view;
@@ -131,6 +131,7 @@ public class SearchFragment extends Fragment {
     //Function that adds music to an arraylist which is being used to show music in recycler view
     private void addMusic(MusicDataCapsule song) {
         searchedMusicList.add(song);
+        idList.add(song.getsId());
     }
 
 
@@ -198,7 +199,7 @@ public class SearchFragment extends Fragment {
 
     @SuppressLint("NotifyDataSetChanged")
     public void handleSearchEvent(String query, ArrayList<MusicDataCapsule> dataList) {
-        if (dataList!= null) {
+        if (dataList != null) {
             search(query, dataList);
             searchWithFilters(query, dataList);
             adapter.notifyDataSetChanged();
@@ -225,5 +226,6 @@ public class SearchFragment extends Fragment {
     //Refreshing list
     private void cleanUp() {
         searchedMusicList.clear();
+        idList.clear();
     }
 }

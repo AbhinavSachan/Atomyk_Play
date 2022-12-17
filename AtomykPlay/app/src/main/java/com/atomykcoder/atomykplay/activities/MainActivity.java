@@ -19,8 +19,10 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.ServiceConnection;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.media.MediaMetadataRetriever;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
@@ -139,25 +141,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public BottomSheetBehavior<View> donationSheetBehavior;
     public BottomSheetBehavior<View> detailsSheetBehavior;
     public BottomSheetBehavior<View> plSheetBehavior;
-    private FragmentManager searchFragmentManager;
-    private Dialog plDialog;
     public Dialog addToPlDialog;
     public View plSheet, player_bottom_sheet;
-    private View shadowLyrFound, shadowOuterSheet, shadowOuterSheet2, playerPickCover_l, shadowMain, anchoredShadow;
-    public Playlist plitemSelected;
+    public Playlist plItemSelected;
     public MusicDataCapsule selectedItem;
-
-    private ImageView playlist_image_View, navCover;
-    private Uri playListImageUri;
-    private ArrayList<MusicDataCapsule> dataList;
-    private MusicMainAdapter musicMainAdapter;
-    private LinearLayout linearLayout;
-    private RecyclerView musicRecyclerView;
-    private TelephonyManager telephonyManager;
-    private PhoneStateListener phoneStateListener;
-    private ProgressBar progressBar;
-    private StorageUtil storageUtil;
-    private DrawerLayout drawer;
+    private Dialog plDialog;
+    private View shadowLyrFound;
     private final BottomSheetBehavior.BottomSheetCallback lrcFoundCallback = new BottomSheetBehavior.BottomSheetCallback() {
         @Override
         public void onStateChanged(@NonNull View bottomSheet, int newState) {
@@ -173,6 +162,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             shadowLyrFound.setAlpha(0.2f + slideOffset);
         }
     };
+    private View shadowOuterSheet;
+    private View shadowOuterSheet2;
+    private View shadowMain;
+    private View anchoredShadow;
+    private ImageView playlist_image_View, navCover;
+    private Uri playListImageUri;
+    private ArrayList<MusicDataCapsule> dataList;
+    private MusicMainAdapter musicMainAdapter;
+    private LinearLayout linearLayout;
+    private RecyclerView musicRecyclerView;
+    private TelephonyManager telephonyManager;
+    private PhoneStateListener phoneStateListener;
+    private ProgressBar progressBar;
+    private StorageUtil storageUtil;
+    private DrawerLayout drawer;
     private final BottomSheetBehavior.BottomSheetCallback optionCallback = new BottomSheetBehavior.BottomSheetCallback() {
         @Override
         public void onStateChanged(@NonNull View bottomSheet, int newState) {
@@ -273,6 +277,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             shadowOuterSheet.setAlpha(0.6f + slideOffset);
         }
     };
+    private NavigationView navigationView;
+    private TextView navSongName, navArtistName;
     public BottomSheetBehavior.BottomSheetCallback bottomSheetCallback = new BottomSheetBehavior.BottomSheetCallback() {
         @Override
         public void onStateChanged(@NonNull View bottomSheet, int newState) {
@@ -317,19 +323,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             shadowMain.setAlpha(0 + slideOffset);
         }
     };
-    private NavigationView navigationView;
-    private TextView navSongName, navArtistName;
-
-    //option menu buttons
-    private View addPlayNextBtn, addToQueueBtn, addToPlaylist, setAsRingBtn, tagEditorBtn, addLyricsBtn, detailsBtn, shareBtn, deleteBtn;
-    private View addPlayNextPlBtn, addToQueuePlBtn, nameEditorBtnPl, chooseCoverPl, deletePlBtn;
+    private View deleteBtn;
     private View optionSheet, detailsSheet, donationSheet;
-    private View createPlaylistBtnDialog, addFavBtnDialog;
     private View removeFromList;
     private ImageView optionCover, plOptionCover, addToFav;
     private TextView optionName, optionArtist;
     private TextView plOptionName, optionPlCount;
-    private Runnable runnable;
     private PlaylistDialogAdapter playlistDialogAdapter;
     private ArrayList<Playlist> playlistArrayList;
     private RecyclerView plDialogRecyclerView;
@@ -341,7 +340,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public void clearStorage() {
         storageUtil.clearMusicLastPos();
-        storageUtil.clearAudioIndex();
+        storageUtil.clearMusicIndex();
         storageUtil.clearQueueList();
         storageUtil.clearTempMusicList();
     }
@@ -383,7 +382,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         //initializations
         storageUtil = new StorageUtil(MainActivity.this);
-        searchFragmentManager = getSupportFragmentManager();
         dataList = storageUtil.loadInitialList();
 
         linearLayout = findViewById(R.id.song_not_found_layout);
@@ -433,6 +431,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 drawer.openDrawer(GravityCompat.START);
             }
         });
+
         searchBar.setOnClickListener(v -> setSearchFragment());
         plCard.setOnClickListener(v -> setPlaylistFragment());
         lastAddCard.setOnClickListener(v -> setLastAddFragment());
@@ -446,9 +445,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         //Checking storage & other permissions before activity creation (method somewhere down in the script)
         checkPermission();
-        if (is_granted) {
-            callStateListener();
-        }
 
         setFragmentInSlider();
         setBottomSheets();
@@ -456,14 +452,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setUpOptionMenuButtons();
         setDetailsMenuButtons();
         setUpPlOptionMenuButtons();
-
-        if (is_granted) {
-            if (dataList != null) {
-                Handler handler = new Handler();
-                runnable = this::checkForUpdateMusic;
-                handler.postDelayed(runnable, 5000);
-            }
-        }
 
         lyricsListBehavior.addBottomSheetCallback(lrcFoundCallback);
         optionSheetBehavior.addBottomSheetCallback(optionCallback);
@@ -476,11 +464,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         if (savedInstanceState == null) {
             navigationView.setCheckedItem(R.id.navigation_home);
-        }
-
-        if (is_granted) {
-            bindService();
-            startService();
         }
     }
 
@@ -535,7 +518,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE);
         }
         playlistFragment = null;
-        searchFragmentManager = null;
     }
 
     /**
@@ -547,17 +529,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void startService() {
-        service_stopped = false;
         Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
         startService(playerIntent);
+        service_stopped = false;
     }
 
     private void setUpPlOptionMenuButtons() {
-        addPlayNextPlBtn = findViewById(R.id.add_play_next_pl_option);
-        addToQueuePlBtn = findViewById(R.id.add_to_queue_pl_option);
-        nameEditorBtnPl = findViewById(R.id.rename_pl_option);
-        chooseCoverPl = findViewById(R.id.choose_cover_option);
-        deletePlBtn = findViewById(R.id.delete_pl_option);
+        View addPlayNextPlBtn = findViewById(R.id.add_play_next_pl_option);
+        View addToQueuePlBtn = findViewById(R.id.add_to_queue_pl_option);
+        View nameEditorBtnPl = findViewById(R.id.rename_pl_option);
+        View chooseCoverPl = findViewById(R.id.choose_cover_option);
+        View deletePlBtn = findViewById(R.id.delete_pl_option);
         plOptionCover = findViewById(R.id.playlist_cover_option);
         plOptionName = findViewById(R.id.playlist_name_option);
         optionPlCount = findViewById(R.id.playlist_count_name_option);
@@ -626,14 +608,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void setUpOptionMenuButtons() {
-        addPlayNextBtn = findViewById(R.id.add_play_next_option);
-        addToQueueBtn = findViewById(R.id.add_to_queue_option);
-        addToPlaylist = findViewById(R.id.add_to_playlist_option);
-        setAsRingBtn = findViewById(R.id.set_ringtone_option);
-        tagEditorBtn = findViewById(R.id.tagEditor_option);
-        addLyricsBtn = findViewById(R.id.addLyrics_option);
-        detailsBtn = findViewById(R.id.details_option);
-        shareBtn = findViewById(R.id.share_music_option);
+        //option menu buttons
+        View addPlayNextBtn = findViewById(R.id.add_play_next_option);
+        View addToQueueBtn = findViewById(R.id.add_to_queue_option);
+        View addToPlaylist = findViewById(R.id.add_to_playlist_option);
+        View setAsRingBtn = findViewById(R.id.set_ringtone_option);
+        View tagEditorBtn = findViewById(R.id.tagEditor_option);
+        View addLyricsBtn = findViewById(R.id.addLyrics_option);
+        View detailsBtn = findViewById(R.id.details_option);
+        View shareBtn = findViewById(R.id.share_music_option);
         deleteBtn = findViewById(R.id.delete_music_option);
         optionCover = findViewById(R.id.song_album_cover_option);
         optionArtist = findViewById(R.id.song_artist_name_option);
@@ -731,7 +714,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void resetDataInNavigation() {
         navSongName.setText("Song Name");
         navArtistName.setText("Artist");
-        GlideBuilt.glide(this, null, R.drawable.placeholder_nav, navCover, 300);
+        GlideBuilt.glideBitmap(this, null, R.drawable.placeholder_nav, navCover, 300);
     }
 
     public void setDataInNavigation(String song_name, String artist_name, Bitmap album_uri) {
@@ -764,9 +747,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     public void setLyricListAdapter(Bundle bundle) {
-       ArrayList<String> titles = bundle.getStringArrayList("titles");
-       ArrayList<String> sampleLyrics = bundle.getStringArrayList("sampleLyrics");
-       ArrayList<String> urls = bundle.getStringArrayList("urls");
+        ArrayList<String> titles = bundle.getStringArrayList("titles");
+        ArrayList<String> sampleLyrics = bundle.getStringArrayList("sampleLyrics");
+        ArrayList<String> urls = bundle.getStringArrayList("urls");
 
         RecyclerView recyclerView = findViewById(R.id.found_lyrics_recycler_view);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
@@ -808,8 +791,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     /**
      * play from start
+     * @param music
      */
-    public void playAudio(String musicID) {
+    public void playAudio(MusicDataCapsule music) {
         //starting service if its not started yet otherwise it will send broadcast msg to service
         storageUtil.clearMusicLastPos();
         if (!phone_ringing) {
@@ -818,13 +802,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 new Handler().postDelayed(() -> {
                     //service is active send media with broadcast receiver
                     Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEW_MUSIC);
-                    broadcastIntent.putExtra("music", musicID);
+                    broadcastIntent.putExtra("music", music);
                     sendBroadcast(broadcastIntent);
                 }, 0);
             } else {
                 //service is active send media with broadcast receiver
                 Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEW_MUSIC);
-                broadcastIntent.putExtra("music", musicID);
+                broadcastIntent.putExtra("music", music);
                 sendBroadcast(broadcastIntent);
             }
         } else {
@@ -913,13 +897,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         replaceFragment(R.id.sec_container, new SearchFragment(), android.R.transition.fade, "SearchResultsFragment");
     }
 
-    private void setRingtone(String musicID) {
+    private void setRingtone(MusicDataCapsule music) {
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
             boolean canWrite = Settings.System.canWrite(this);
 
             if (canWrite) {
-                MusicDataCapsule music = storageUtil.getItemFromInitialList(musicID);
                 Uri newUri = Uri.fromFile(new File(music.getsPath()));
                 AlertDialog.Builder ringtoneDialog = new AlertDialog.Builder(MainActivity.this);
                 ringtoneDialog.setTitle("Confirmation");
@@ -989,16 +972,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 deleteBtn.setVisibility(View.VISIBLE);
                 break;
         }
+        Bitmap image = null;
+        //image decoder
+        MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
+        mediaMetadataRetriever.setDataSource(music.getsPath());
+        byte[] art = mediaMetadataRetriever.getEmbeddedPicture();
 
+        try {
+            image = BitmapFactory.decodeByteArray(art, 0, art.length);
+        } catch (Exception ignored) {
+        }
         optionSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-        MusicDataCapsule currentItem = storageUtil.getItemFromInitialList(musicID);
-        optionName.setText(currentItem.getsName());
-        optionArtist.setText(currentItem.getsArtist());
-        GlideBuilt.glide(this, currentItem.getsAlbumUri(), R.drawable.ic_music, optionCover, 65);
+        optionName.setText(music.getsName());
+        optionArtist.setText(music.getsArtist());
+        GlideBuilt.glideBitmap(this, image, R.drawable.ic_music, optionCover, 65);
     }
 
     public void openPlOptionMenu(Playlist currentItem) {
-        plitemSelected = currentItem;
+        plItemSelected = currentItem;
         String count = currentItem.getMusicIDList().size() + " Songs";
         plSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         plOptionName.setText(currentItem.getName());
@@ -1009,13 +1000,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     /**
      * delete song permanently from device *USE WITH CAUTION*
      *
-     * @param musicID music to be deleted
+     * @param music music to be deleted
      */
-    private void deleteFromDevice(String musicID) {
-        MusicDataCapsule currentItem = storageUtil.getItemFromInitialList(musicID);
-        Uri contentUri = getContentUri(currentItem);
+    private void deleteFromDevice(MusicDataCapsule music) {
+        Uri contentUri = getContentUri(music);
         ContentResolver contentResolver = getContentResolver();
-        Uri normalUri = Uri.fromFile(new File(musicID));
+        Uri normalUri = Uri.fromFile(new File(music.getsId()));
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             // for android 11 and above
@@ -1171,6 +1161,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     @Override
                     public void onPermissionsChecked(MultiplePermissionsReport multiplePermissionsReport) {
                         scanAndSetMusicAdapter();
+                        callStateListener();
+                        if (dataList != null) {
+                            Handler handler = new Handler();
+                            Runnable runnable = MainActivity.this::checkForUpdateMusic;
+                            handler.postDelayed(runnable, 5000);
+                        }
+                        bindService();
+                        startService();
                         is_granted = true;
                     }
 
@@ -1189,12 +1187,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Handler handler = new Handler(Looper.getMainLooper());
         progressBar.setVisibility(View.VISIBLE);
         LinearLayoutManager manager = new LinearLayoutManager(MainActivity.this);
+        ArrayList<String> idList = new ArrayList<>();
+        for(MusicDataCapsule music : dataList) {
+            idList.add(music.getsId());
+        }
 
         if (!dataList.isEmpty()) {
             //Setting up adapter
             linearLayout.setVisibility(View.GONE);
             progressBar.setVisibility(View.GONE);
-            musicMainAdapter = new MusicMainAdapter(MainActivity.this, dataList);
+            musicMainAdapter = new MusicMainAdapter(MainActivity.this, dataList,idList);
             musicRecyclerView.setAdapter(musicMainAdapter);
             musicRecyclerView.setLayoutManager(manager);
         } else {
@@ -1211,7 +1213,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         storageUtil.saveInitialList(dataList);
                     }
                     progressBar.setVisibility(View.GONE);
-                    musicMainAdapter = new MusicMainAdapter(MainActivity.this, dataList);
+                    musicMainAdapter = new MusicMainAdapter(MainActivity.this, dataList,idList);
                     musicRecyclerView.setAdapter(musicMainAdapter);
                     musicRecyclerView.setLayoutManager(manager);
                 });
@@ -1349,28 +1351,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         closePlOptionSheet();
         switch (v.getId()) {
             case R.id.add_play_next_option: {
-
                 addToNextPlay(selectedItem.getsId());
                 break;
             }
             case R.id.add_to_queue_option: {
-
                 addToQueue(selectedItem.getsId());
                 break;
             }
             case R.id.add_to_playlist_option: {
-
                 addToPlaylist(selectedItem.getsId());
                 break;
             }
             case R.id.set_ringtone_option: {
-
-                setRingtone(selectedItem.getsId());
+                setRingtone(selectedItem);
                 break;
             }
             case R.id.delete_music_option: {
-
-                deleteFromDevice(selectedItem.getsId());
+                deleteFromDevice(selectedItem);
                 break;
             }
             case R.id.tagEditor_option: {
@@ -1380,7 +1377,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
             case R.id.addLyrics_option: {
 
-                bottomSheetPlayerFragment.setLyricsLayout(selectedItem.getsId());
+                bottomSheetPlayerFragment.setLyricsLayout(selectedItem);
                 break;
             }
             case R.id.details_option: {
@@ -1388,7 +1385,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             }
             case R.id.share_music_option: {
-                openShare(selectedItem.getsId());
+                openShare(selectedItem);
                 break;
             }
             case R.id.add_to_favourites_option: {
@@ -1396,26 +1393,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             }
             case R.id.add_play_next_pl_option: {
-                addToNextPlayPl(plitemSelected);
+                addToNextPlayPl(plItemSelected);
                 break;
             }
             case R.id.add_to_queue_pl_option: {
 
-                addToQueuePl(plitemSelected);
+                addToQueuePl(plItemSelected);
                 break;
             }
             case R.id.rename_pl_option: {
-                openRenameDialog(plitemSelected);
+                openRenameDialog(plItemSelected);
                 break;
             }
             case R.id.choose_cover_option: {
 
-                changeUriPl(plitemSelected);
+                changeUriPl(plItemSelected);
                 break;
             }
             case R.id.delete_pl_option: {
 
-                deletePl(plitemSelected);
+                deletePl(plItemSelected);
                 break;
             }
             case R.id.remove_music_option: {
@@ -1526,8 +1523,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             image.setImageResource(R.drawable.ic_favorite);
         }
         plDialogRecyclerView = addToPlDialog.findViewById(R.id.playlist_dialog_recycler);
-        createPlaylistBtnDialog = addToPlDialog.findViewById(R.id.create_playlist);
-        addFavBtnDialog = addToPlDialog.findViewById(R.id.add_to_fav_dialog_box);
+        View createPlaylistBtnDialog = addToPlDialog.findViewById(R.id.create_playlist);
+        View addFavBtnDialog = addToPlDialog.findViewById(R.id.add_to_fav_dialog_box);
 
         createPlaylistBtnDialog.setOnClickListener(v -> openCreatePlaylistDialog(musicID));
 
@@ -1560,7 +1557,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Button btnOk = plDialog.findViewById(R.id.btn_ok_pl);
         Button btnCancel = plDialog.findViewById(R.id.btn_cancel_pl);
         playlist_image_View = plDialog.findViewById(R.id.playlist_image_view);
-        playerPickCover_l = plDialog.findViewById(R.id.playlist_cover_pick);
+        View playerPickCover_l = plDialog.findViewById(R.id.playlist_cover_pick);
 
         playerPickCover_l.setOnClickListener(v -> {
             Intent gallery = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI);
@@ -1603,9 +1600,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
-    private void openShare(String musicID) {
-
-        MusicDataCapsule music = storageUtil.getItemFromInitialList(musicID);
+    private void openShare(MusicDataCapsule music) {
         Uri uri = Uri.parse(music.getsPath());
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("audio/*");
@@ -1652,9 +1647,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (fragment2 == null) {
             TagEditorFragment fragment = new TagEditorFragment();
             Bundle bundle = new Bundle();
-            bundle.putSerializable("currentMusic",itemSelected);
+            bundle.putSerializable("currentMusic", itemSelected);
             fragment.setArguments(bundle);
-            replaceFragment(R.id.sec_container,fragment , android.R.transition.slide_top, "TagEditorFragment");
+            replaceFragment(R.id.sec_container, fragment, android.R.transition.slide_top, "TagEditorFragment");
         }
     }
 

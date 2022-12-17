@@ -20,10 +20,10 @@ import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.AudioManager;
+import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.media.ThumbnailUtils;
 import android.media.session.MediaSessionManager;
-import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
@@ -36,7 +36,6 @@ import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.widget.Toast;
 
@@ -58,8 +57,9 @@ import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MediaPlayerService extends Service implements MediaPlayer.OnCompletionListener,
         MediaPlayer.OnBufferingUpdateListener, MediaPlayer.OnErrorListener,
@@ -103,14 +103,14 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     //broadcast receivers
     //playing new song
     private StorageUtil storage;
+    private StorageUtil.SettingsStorage settingsStorage;
+    private NotificationManager notificationManager;
     private final BroadcastReceiver stopMusicReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             stoppedByNotification();
         }
     };
-    private StorageUtil.SettingsStorage settingsStorage;
-    private NotificationManager notificationManager;
     //to pause when output device is unplugged
     private final BroadcastReceiver becomingNoisyReceiver = new BroadcastReceiver() {
         @Override
@@ -125,26 +125,19 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 int state = intent.getIntExtra("state", -1);
 
                 if (settingsStorage.loadAutoPlay()) {
-                    switch (state) {
-                        case 0:
-                            if (is_playing) {
-                                pauseMedia();
-                            }
-                            break;
-                        case 1:
-                            if (!is_playing) {
-                                if (media_player != null) {
-                                    resumeMedia();
-                                } else {
-                                    try {
-                                        initiateMediaSession();
-                                    } catch (RemoteException e) {
-                                        e.printStackTrace();
-                                    }
-                                    initiateMediaPlayer();
+                    if (state == 1) {
+                        if (!is_playing) {
+                            if (media_player != null) {
+                                resumeMedia();
+                            } else {
+                                try {
+                                    initiateMediaSession();
+                                } catch (RemoteException e) {
+                                    e.printStackTrace();
                                 }
+                                initiateMediaPlayer();
                             }
-                            break;
+                        }
                     }
                 }
             }
@@ -203,14 +196,10 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            String musicID =  intent.getStringExtra("music");
+            MusicDataCapsule music = (MusicDataCapsule) intent.getSerializableExtra("music");
 
-            Log.i("info", musicID);
-            if (musicID != null) {
-                activeMusic = storage.getItemFromInitialList(musicID);
-                Log.i("info", activeMusic.getsName());
-            } else {
-                Log.i("info", "music is null");
+            if (music != null) {
+                activeMusic = music;
             }
 
             if (mediaSessionManager == null) {
@@ -283,50 +272,53 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     private void updateMetaData(MusicDataCapsule activeMusic) {
         musicIdList = storage.loadQueueList();
         musicIndex = storage.loadMusicIndex();
-        String songName = null;
-        String artistName = null;
-        String album = null;
-        String albumUri = null;
-        String dur = null;
+        String songName;
+        String artistName;
+        String album;
+        String dur;
+        Handler handler = new Handler();
+        final Bitmap[] finalArtWork = new Bitmap[1];
         if (activeMusic != null) {
             dur = activeMusic.getsDuration();
             songName = activeMusic.getsName();
             artistName = activeMusic.getsArtist();
             album = activeMusic.getsAlbum();
 
-            albumUri = activeMusic.getsAlbumUri();
-        }
-        InputStream input;
-        Bitmap artwork = null;
-        Bitmap finalArtWork;
-        try {
-            if (albumUri != null) {
-                input = getApplicationContext().getContentResolver().openInputStream(Uri.parse(albumUri));
-                artwork = BitmapFactory.decodeStream(input);
-                if (input != null) {
-                    input.close();
-                }
-            }
+            ExecutorService service = Executors.newSingleThreadExecutor();
+            service.execute(() -> {
+                //image decoder
+                Bitmap image = null;
+                MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
+                mediaMetadataRetriever.setDataSource(activeMusic.getsPath());
+                byte[] art = mediaMetadataRetriever.getEmbeddedPicture();
 
-        } catch (IOException e) {
-            e.printStackTrace();
+                try {
+                    image = BitmapFactory.decodeByteArray(art, 0, art.length);
+                } catch (Exception ignored) {
+                }
+
+                if (image != null) {
+                    int dimension = Math.min(image.getWidth(), image.getHeight());
+                    finalArtWork[0] = ThumbnailUtils.extractThumbnail(image, dimension - (dimension / 5), dimension - (dimension / 5), ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+                } else {
+                    image = BitmapFactory.decodeResource(getResources(), R.drawable.placeholder_art);
+                    int dimension = Math.min(image.getWidth(), image.getHeight());
+                    finalArtWork[0] = ThumbnailUtils.extractThumbnail(image, dimension - (dimension / 5), dimension - (dimension / 5), ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+                }
+                handler.post(() -> {
+                    if (musicIdList != null)
+                        mediaSession.setMetadata(new MediaMetadataCompat.Builder()
+                                .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, finalArtWork[0])
+                                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artistName)
+                                .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, album)
+                                .putString(MediaMetadataCompat.METADATA_KEY_TITLE, songName)
+                                .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, Long.parseLong(dur))
+                                .build());
+                });
+            });
+            service.shutdown();
+
         }
-        if (artwork != null) {
-            int dimension = Math.min(artwork.getWidth(), artwork.getHeight());
-            finalArtWork = ThumbnailUtils.extractThumbnail(artwork, dimension - (dimension / 5), dimension - (dimension / 5), ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
-        } else {
-            artwork = BitmapFactory.decodeResource(getResources(), R.drawable.placeholder_art);
-            int dimension = Math.min(artwork.getWidth(), artwork.getHeight());
-            finalArtWork = ThumbnailUtils.extractThumbnail(artwork, dimension - (dimension / 5), dimension - (dimension / 5), ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
-        }
-        if (musicIdList != null)
-            mediaSession.setMetadata(new MediaMetadataCompat.Builder()
-                    .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, finalArtWork)
-                    .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artistName)
-                    .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, album)
-                    .putString(MediaMetadataCompat.METADATA_KEY_TITLE, songName)
-                    .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, Long.parseLong(dur))
-                    .build());
     }
 
     /**
@@ -632,7 +624,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         musicIndex = storage.loadMusicIndex();
 
         if (storage.loadRepeatStatus().equals("no_repeat")) {
-            if (musicIdList != null)
+            if (musicIndex != -1 && musicIdList != null)
                 if (musicIndex == musicIdList.size() - 1) {
                     pauseMedia();
                 } else {
@@ -757,7 +749,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 media_player.pause();
                 is_playing = false;
                 setIcon(PlaybackStatus.PAUSED);
-                buildNotification(PlaybackStatus.PAUSED,0f);
+                buildNotification(PlaybackStatus.PAUSED, 0f);
             }
         notificationManager.cancelAll();
         service_stopped = true;
@@ -859,7 +851,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         storage.clearMusicLastPos();
 
         if (settingsStorage.loadOneClickSkip()) {
-            if (musicIdList != null)
+            if (musicIndex != -1 && musicIdList != null)
                 if (musicIndex == 0) {
                     musicIndex = musicIdList.size() - 1;
                     activeMusic = storage.getItemFromInitialList(musicIdList.get(musicIndex));
@@ -882,7 +874,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                         initiateMediaPlayer();
                     }
                 } else {
-                    if (musicIdList != null)
+                    if (musicIndex != -1 && musicIdList != null)
                         if (musicIndex == 0) {
                             musicIndex = musicIdList.size() - 1;
                             activeMusic = storage.getItemFromInitialList(musicIdList.get(musicIndex));
@@ -907,7 +899,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                         initiateMediaPlayer();
                     }
                 } else {
-                    if (musicIdList != null)
+                    if (musicIndex != -1 && musicIdList != null)
                         if (musicIndex == 0) {
                             musicIndex = musicIdList.size() - 1;
                             activeMusic = storage.getItemFromInitialList(musicIdList.get(musicIndex));
@@ -936,7 +928,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         musicIndex = storage.loadMusicIndex();
         storage.clearMusicLastPos();
 
-        if (musicIdList != null)
+
+        if (musicIndex != -1 && musicIdList != null)
             if (musicIndex == musicIdList.size() - 1) {
                 //if last in list
                 musicIndex = 0;
@@ -944,7 +937,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
             } else {
                 //get next in playlist
-                activeMusic = storage.getItemFromInitialList(musicIdList.get(++musicIndex));
+                musicIndex = musicIndex + 1;
+                activeMusic = storage.getItemFromInitialList(musicIdList.get(musicIndex));
 
             }
         if (activeMusic != null) {

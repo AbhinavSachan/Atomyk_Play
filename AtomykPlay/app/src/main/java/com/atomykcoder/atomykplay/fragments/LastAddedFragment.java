@@ -73,8 +73,6 @@ public class LastAddedFragment extends Fragment {
         ImageView backImageView = view.findViewById(R.id.close_filter_btn);
         progressDialog = new ProgressDialog(requireContext());
         songCountTv = view.findViewById(R.id.count_of_lastAdded);
-        FragmentManager fragmentManager = ((MainActivity) requireContext()).getSupportFragmentManager();
-
         // initialize/load music array lists
         initialMusicList = new StorageUtil(getContext()).loadInitialList();
         lastAddedMusicList = new ArrayList<>();
@@ -89,7 +87,10 @@ public class LastAddedFragment extends Fragment {
                 try {
                     Date d1 = dateFormat.parse(t1.getsDateAdded());
                     Date d2 = dateFormat.parse(t2.getsDateAdded());
-                    int i = d1.compareTo(d2);
+                    int i = 0;
+                    if (d1 != null) {
+                        i = d1.compareTo(d2);
+                    }
                     if(i != 0) return -i;
                 } catch (ParseException e) {
                     throw new IllegalArgumentException();
@@ -220,8 +221,11 @@ public class LastAddedFragment extends Fragment {
                 // set recyclerview and adapter
                 recyclerView.setHasFixedSize(true);
                 recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-
-                adapter = new MusicMainAdapter(getContext(), lastAddedMusicList);
+                ArrayList<String> idList = new ArrayList<>();
+                for (MusicDataCapsule music : lastAddedMusicList) {
+                    idList.add(music.getsId());
+                }
+                adapter = new MusicMainAdapter(getContext(), lastAddedMusicList,idList);
                 recyclerView.setAdapter(adapter);
                 });
         });
