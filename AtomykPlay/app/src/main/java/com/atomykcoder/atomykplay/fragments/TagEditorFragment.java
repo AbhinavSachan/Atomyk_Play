@@ -1,35 +1,63 @@
 package com.atomykcoder.atomykplay.fragments;
 
+import android.content.ContentValues;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.provider.Settings;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Toast;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 
+import com.atomykcoder.atomykplay.BuildConfig;
 import com.atomykcoder.atomykplay.R;
-import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.classes.GlideBuilt;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import org.jaudiotagger.audio.AudioFile;
+import org.jaudiotagger.audio.AudioFileIO;
+import org.jaudiotagger.audio.exceptions.CannotReadException;
+import org.jaudiotagger.audio.exceptions.CannotWriteException;
+import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
+import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
+import org.jaudiotagger.audio.mp3.MP3File;
+import org.jaudiotagger.tag.FieldKey;
+import org.jaudiotagger.tag.Tag;
+import org.jaudiotagger.tag.TagException;
+import org.jaudiotagger.tag.datatype.Artwork;
+import org.jaudiotagger.tag.id3.AbstractID3v2Tag;
+import org.jaudiotagger.tag.id3.ID3v24Tag;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class TagEditorFragment extends Fragment {
 
-    public static final int PICK_IMAGE_COVER = 6542;
-    private MainActivity mainActivity;
+    private static final int TAG_EDITOR_COVER = 6542;
     private EditText editName, editArtist, editAlbum, editGenre;
-    private ImageView imageViewShow, imageViewPick;
+    private ImageView pickImageView;
+    public ImageView coverImageView;
+    private FloatingActionButton saveButton;
+    private MusicDataCapsule music;
+    private ContentValues cv;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -37,9 +65,8 @@ public class TagEditorFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_tag_editor, container, false);
 
-        MusicDataCapsule music = (MusicDataCapsule) (getArguments() != null ? getArguments().getSerializable("currentMusic") : null);
+         music = (MusicDataCapsule) (getArguments() != null ? getArguments().getSerializable("currentMusic") : null);
 
-        mainActivity = (MainActivity) requireContext();
         Toolbar toolbar = view.findViewById(R.id.toolbar_tag_editor);
         toolbar.setNavigationIcon(R.drawable.ic_back);
         toolbar.setNavigationOnClickListener(v -> requireActivity().onBackPressed());
@@ -48,8 +75,9 @@ public class TagEditorFragment extends Fragment {
         editArtist = view.findViewById(R.id.edit_song_artist_tag);
         editAlbum = view.findViewById(R.id.edit_song_album_tag);
         editGenre = view.findViewById(R.id.edit_song_genre_tag);
-        imageViewPick = view.findViewById(R.id.pick_cover_tag);
-        imageViewShow = view.findViewById(R.id.song_image_view_tag);
+        pickImageView = view.findViewById(R.id.pick_cover_tag);
+        coverImageView = view.findViewById(R.id.song_image_view_tag);
+        saveButton = view.findViewById(R.id.tag_editor_save_button);
 
         if (music != null) {
             editName.setText(music.getsName());
@@ -70,16 +98,74 @@ public class TagEditorFragment extends Fragment {
                     image[0] = BitmapFactory.decodeByteArray(art, 0, art.length);
                 } catch (Exception ignored) {
                 }
-                handler.post(() -> GlideBuilt.glideBitmap(requireContext(), image[0], R.drawable.ic_music, imageViewShow, 412));
+                handler.post(() -> {
+                    GlideBuilt.glideBitmap(requireContext(), image[0], R.drawable.ic_music, coverImageView, 412);
+                });
             });
             service1.shutdown();
         }
-        imageViewPick.setOnClickListener(v -> {
+        pickImageView.setOnClickListener(v -> {
             Intent gallery = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI);
-            requireActivity().startActivityForResult(gallery, PICK_IMAGE_COVER);
+            requireActivity().startActivityForResult(gallery, TAG_EDITOR_COVER);
+        });
+
+        saveButton.setOnClickListener(v -> {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                if(!Environment.isExternalStorageManager()) {
+                    requestPermissionAndroid11AndAbove();
+                } else {
+                    saveMusicChanges(music);
+                }
+            }
         });
 
         return view;
     }
 
+
+    @RequiresApi(api = Build.VERSION_CODES.R)
+    private void requestPermissionAndroid11AndAbove() {
+        try {
+            Uri uri = Uri.parse("package:" + BuildConfig.APPLICATION_ID);
+            Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, uri);
+            startActivity(intent);
+        } catch (Exception ex){
+            Intent intent = new Intent();
+            intent.setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+            startActivity(intent);
+        }
+    }
+
+    private void saveMusicChanges(MusicDataCapsule music) {
+        String newTitle = editName.getText().toString().trim();
+        String newArtist = editArtist.getText().toString().trim();
+        String newAlbum = editAlbum.getText().toString().trim();
+        String newGenre = editGenre.getText().toString().trim();
+
+        try {
+            AudioFile f = AudioFileIO.read(new File(music.getsPath()));
+            Tag tag = f.getTag();
+
+            Uri imageUri = (Uri) coverImageView.getTag();
+
+            tag.setField(FieldKey.TITLE, newTitle);
+            tag.setField(FieldKey.ARTIST, newArtist);
+            tag.setField(FieldKey.ALBUM, newAlbum);
+            tag.setField(FieldKey.GENRE, newGenre);
+
+            if(imageUri != null) {
+                File file = new File(imageUri.getPath().replace("/raw/", ""));
+                Artwork artwork = Artwork.createArtworkFromFile(file);
+                tag.addField(artwork);
+                tag.setField(artwork);
+            }
+            AudioFileIO.write(f);
+
+            Toast.makeText(requireContext(), "Changes Made Successfully", Toast.LENGTH_SHORT).show();
+
+        } catch (CannotReadException | InvalidAudioFrameException | ReadOnlyFileException | TagException | IOException | CannotWriteException e) {
+            e.printStackTrace();
+        }
+
+    }
 }

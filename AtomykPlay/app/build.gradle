@@ -59,6 +59,9 @@ dependencies {
 //    // Starting from Protobuf 3.8.0, use the lite runtime library
 //    implementation  "com.google.protobuf:protobuf-javalite:3.18.0"
 
+    // https://mvnrepository.com/artifact/org/jaudiotagger
+    implementation group: 'org', name: 'jaudiotagger', version: '2.0.3'
+
     //legacy implementations
     implementation 'androidx.appcompat:appcompat:1.5.1'
     implementation 'com.google.android.material:material:1.7.0'
