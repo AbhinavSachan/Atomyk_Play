@@ -1,5 +1,6 @@
 package com.atomykcoder.atomykplay.fragments;
 
+import android.Manifest;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -12,7 +13,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.provider.Settings;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,8 +29,12 @@ import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.classes.GlideBuilt;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.karumi.dexter.Dexter;
+import com.karumi.dexter.MultiplePermissionsReport;
+import com.karumi.dexter.PermissionToken;
+import com.karumi.dexter.listener.PermissionRequest;
+import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 
-import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.audio.exceptions.CannotReadException;
 import org.jaudiotagger.audio.exceptions.CannotWriteException;
@@ -38,14 +42,13 @@ import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
 import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
 import org.jaudiotagger.audio.mp3.MP3File;
 import org.jaudiotagger.tag.FieldKey;
-import org.jaudiotagger.tag.Tag;
 import org.jaudiotagger.tag.TagException;
 import org.jaudiotagger.tag.datatype.Artwork;
-import org.jaudiotagger.tag.id3.AbstractID3v2Tag;
 import org.jaudiotagger.tag.id3.ID3v24Tag;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -116,6 +119,8 @@ public class TagEditorFragment extends Fragment {
                 } else {
                     saveMusicChanges(music);
                 }
+            } else {
+                requestPermissionAndroidBelow11();
             }
         });
 
@@ -136,6 +141,23 @@ public class TagEditorFragment extends Fragment {
         }
     }
 
+    private void requestPermissionAndroidBelow11() {
+        Dexter.withContext(getContext())
+                .withPermissions(Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                .withListener(new MultiplePermissionsListener() {
+                    @Override
+                    public void onPermissionsChecked(MultiplePermissionsReport multiplePermissionsReport) {
+                        saveMusicChanges(music);
+                    }
+
+                    @Override
+                    public void onPermissionRationaleShouldBeShown(List<PermissionRequest> list, PermissionToken permissionToken) {
+                        permissionToken.continuePermissionRequest();
+                    }
+                }).check();
+    }
+
     private void saveMusicChanges(MusicDataCapsule music) {
         String newTitle = editName.getText().toString().trim();
         String newArtist = editArtist.getText().toString().trim();
@@ -143,8 +165,8 @@ public class TagEditorFragment extends Fragment {
         String newGenre = editGenre.getText().toString().trim();
 
         try {
-            AudioFile f = AudioFileIO.read(new File(music.getsPath()));
-            Tag tag = f.getTag();
+            MP3File f = (MP3File) AudioFileIO.read(new File(music.getsPath()));
+            ID3v24Tag tag = f.getID3v2TagAsv24();
 
             Uri imageUri = (Uri) coverImageView.getTag();
 
