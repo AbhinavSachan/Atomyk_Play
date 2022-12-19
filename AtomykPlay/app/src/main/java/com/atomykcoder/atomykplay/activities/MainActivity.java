@@ -113,9 +113,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public static boolean phone_ringing = false;
     public static boolean service_stopped = false;
     public static MediaPlayerService media_player_service;
-    private final int CHOOSE_COVER_PL = 3216;
-    private final int DELETE_ITEM = 612;
-    private final int PICK_IMAGE = 152;
+    private static final int CHOOSE_COVER_PL = 3216;
+    private static final int DELETE_ITEM = 612;
+    private static final int PICK_IMAGE = 152;
+    private static final int TAG_EDITOR_COVER = 6542;
 
     public ServiceConnection service_connection = new ServiceConnection() {
         @Override
@@ -598,6 +599,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 } else {
                     linearLayout.setVisibility(View.GONE);
                 }
+
+
                 musicMainAdapter.updateMusicListItems(updatedList);
                 storageUtil.saveInitialList(updatedList);
             });
@@ -938,6 +941,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+
     public void openOptionMenu(MusicDataCapsule music, String tag) {
         selectedItem = music;
         String musicID = music.getsId();
@@ -1043,44 +1047,62 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        //on delete
-        // check for delete item request
-        if (resultCode == RESULT_OK && requestCode == DELETE_ITEM) {
-            musicMainAdapter.removeItem(selectedItem.getsId());
-        }
+        if(requestCode == RESULT_CANCELED) return;
 
-        // check for new playlist image request
-        if (resultCode == RESULT_OK && requestCode == PICK_IMAGE) {
-            if (data != null) {
-                playListImageUri = data.getData();
-                playlist_image_View.setImageURI(playListImageUri);
-            }
-        }
-        if (resultCode == RESULT_OK && requestCode == CHOOSE_COVER_PL) {
-            if (data != null) {
-                String playListImageUri1 = data.getData().toString();
-                storageUtil.replacePlaylist(storageUtil.loadPlaylist(pl_name), pl_name, playListImageUri1);
-                playlistFragment.playlistAdapter.updateView(storageUtil.getAllPlaylist());
-            }
-        }
+        switch(requestCode) {
 
-        // check for blacklist folder select request
-        if (resultCode == RESULT_OK && requestCode == 2020) {
-            if (data != null) {
-                // find fragment
-                FragmentManager fragmentManager = getSupportFragmentManager();
-                SettingsFragment fragment = (SettingsFragment) fragmentManager.findFragmentByTag("SettingsFragment");
-                // set settings fragment UI here
-                if (fragment != null) {
-                    Uri uri = data.getData();
-                    String treePath = uri.getPath();
-                    String pathUri = convertTreeUriToPathUri(treePath);
-                    //save path in blacklist storage
-                    StorageUtil.SettingsStorage settingsStorage = new StorageUtil.SettingsStorage(this);
-                    settingsStorage.saveInBlackList(pathUri);
-                    checkForUpdateMusic();
+           // check for delete item request
+            case DELETE_ITEM:
+                musicMainAdapter.removeItem(selectedItem.getsId());
+                break;
+
+            // check for new playlist image request
+            case PICK_IMAGE:
+                if (data != null) {
+                    playListImageUri = data.getData();
+                    playlist_image_View.setImageURI(playListImageUri);
                 }
-            }
+                break;
+
+                // check for cover image request
+            case CHOOSE_COVER_PL:
+                if (data != null) {
+                    String coverImageUri = data.getData().toString();
+                    storageUtil.replacePlaylist(storageUtil.loadPlaylist(pl_name), pl_name, coverImageUri);
+                    playlistFragment.playlistAdapter.updateView(storageUtil.getAllPlaylist());
+                }
+                break;
+
+                // check for tag editor cover image request
+            case TAG_EDITOR_COVER:
+                if(data != null) {
+                    FragmentManager fragmentManager = getSupportFragmentManager();
+                    TagEditorFragment fragment = (TagEditorFragment) fragmentManager.findFragmentByTag("TagEditorFragment");
+
+                    if (fragment != null) {
+                        fragment.coverImageView.setImageURI(data.getData());
+                        fragment.coverImageView.setTag(data.getData());
+                    }
+                }
+
+            // check for blacklist folder select request
+            case 2020:
+                if (data != null) {
+                    // find fragment
+                    FragmentManager fragmentManager = getSupportFragmentManager();
+                    SettingsFragment fragment = (SettingsFragment) fragmentManager.findFragmentByTag("SettingsFragment");
+                    // set settings fragment UI here
+                    if (fragment != null) {
+                        Uri uri = data.getData();
+                        String treePath = uri.getPath();
+                        String pathUri = convertTreeUriToPathUri(treePath);
+                        //save path in blacklist storage
+                        StorageUtil.SettingsStorage settingsStorage = new StorageUtil.SettingsStorage(this);
+                        settingsStorage.saveInBlackList(pathUri);
+                        checkForUpdateMusic();
+                    }
+                }
+                break;
         }
     }
 

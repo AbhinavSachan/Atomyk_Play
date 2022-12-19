@@ -199,6 +199,7 @@
 
     </com.google.android.material.appbar.AppBarLayout>
     <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/tag_editor_save_button"
         android:layout_width="wrap_content"
         android:layout_gravity="end|bottom"
         app:fabSize="normal"
