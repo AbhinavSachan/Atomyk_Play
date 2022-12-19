@@ -84,6 +84,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     public static boolean ui_visible = false;
     //binder
     private final IBinder iBinder = new LocalBinder();
+    private final Handler handler = new Handler();
     public MediaPlayer media_player;
     public Runnable seekBarRunnable;
     public Handler seekBarHandler;
@@ -269,7 +270,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     /**
      * this function updates new music data in notification
      */
-    private void updateMetaData(MusicDataCapsule activeMusic) {
+    private void updateMetaData(MusicDataCapsule activeMusic, Bitmap finalImage) {
         musicIdList = storage.loadQueueList();
         musicIndex = storage.loadMusicIndex();
         String songName;
@@ -284,26 +285,18 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             artistName = activeMusic.getsArtist();
             album = activeMusic.getsAlbum();
 
+            final Bitmap[] finalImage1 = {finalImage};
+
             ExecutorService service = Executors.newSingleThreadExecutor();
             service.execute(() -> {
-                //image decoder
-                Bitmap image = null;
-                MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
-                mediaMetadataRetriever.setDataSource(activeMusic.getsPath());
-                byte[] art = mediaMetadataRetriever.getEmbeddedPicture();
 
-                try {
-                    image = BitmapFactory.decodeByteArray(art, 0, art.length);
-                } catch (Exception ignored) {
-                }
-
-                if (image != null) {
-                    int dimension = Math.min(image.getWidth(), image.getHeight());
-                    finalArtWork[0] = ThumbnailUtils.extractThumbnail(image, dimension - (dimension / 5), dimension - (dimension / 5), ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+                if (finalImage1[0] != null) {
+                    int dimension = Math.min(finalImage1[0].getWidth(), finalImage1[0].getHeight());
+                    finalArtWork[0] = ThumbnailUtils.extractThumbnail(finalImage1[0], dimension - (dimension / 5), dimension - (dimension / 5), ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
                 } else {
-                    image = BitmapFactory.decodeResource(getResources(), R.drawable.placeholder_art);
-                    int dimension = Math.min(image.getWidth(), image.getHeight());
-                    finalArtWork[0] = ThumbnailUtils.extractThumbnail(image, dimension - (dimension / 5), dimension - (dimension / 5), ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+                    finalImage1[0] = BitmapFactory.decodeResource(getResources(), R.drawable.placeholder_art);
+                    int dimension = Math.min(finalImage1[0].getWidth(), finalImage1[0].getHeight());
+                    finalArtWork[0] = ThumbnailUtils.extractThumbnail(finalImage1[0], dimension - (dimension / 5), dimension - (dimension / 5), ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
                 }
                 handler.post(() -> {
                     if (musicIdList != null)
@@ -607,14 +600,33 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         return iBinder;
     }
 
-
     @Override
     public void onPrepared(MediaPlayer mp) {
-        if (service_bound) {
-            EventBus.getDefault().post(new SetMainLayoutEvent(activeMusic));
-            updateMetaData(activeMusic);
-        }
-        resumeMedia();
+        ExecutorService service = Executors.newSingleThreadExecutor();
+        service.execute(() -> {
+            //image decoder
+            Bitmap image = null;
+            storage.saveMusicIndex(musicIndex);
+            MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
+            mediaMetadataRetriever.setDataSource(activeMusic.getsPath());
+            byte[] art = mediaMetadataRetriever.getEmbeddedPicture();
+
+            try {
+                image = BitmapFactory.decodeByteArray(art, 0, art.length);
+            } catch (Exception ignored) {
+            }
+
+            Bitmap finalImage = image;
+            handler.post(() -> {
+                if (service_bound) {
+                    EventBus.getDefault().post(new SetMainLayoutEvent(activeMusic, finalImage));
+                    updateMetaData(activeMusic, finalImage);
+                }
+                resumeMedia();
+            });
+        });
+        service.shutdown();
+
     }
 
     @Override
@@ -860,7 +872,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 }
             if (activeMusic != null) {
                 //update stored index
-                storage.saveMusicIndex(musicIndex);
+//                storage.saveMusicIndex(musicIndex);
 
                 stopMedia();
                 initiateMediaPlayer();
@@ -885,7 +897,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                         }
                     if (activeMusic != null) {
                         //update stored index
-                        storage.saveMusicIndex(musicIndex);
+//                        storage.saveMusicIndex(musicIndex);
 
                         stopMedia();
                         initiateMediaPlayer();
@@ -910,7 +922,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                         }
                     if (activeMusic != null) {
                         //update stored index
-                        storage.saveMusicIndex(musicIndex);
+//                        storage.saveMusicIndex(musicIndex);
 
                         stopMedia();
                         initiateMediaPlayer();
@@ -937,13 +949,12 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
             } else {
                 //get next in playlist
-                musicIndex = musicIndex + 1;
-                activeMusic = storage.getItemFromInitialList(musicIdList.get(musicIndex));
+                activeMusic = storage.getItemFromInitialList(musicIdList.get(++musicIndex));
 
             }
         if (activeMusic != null) {
             //update stored index
-            storage.saveMusicIndex(musicIndex);
+//            storage.saveMusicIndex(musicIndex);
 
             stopMedia();
             initiateMediaPlayer();

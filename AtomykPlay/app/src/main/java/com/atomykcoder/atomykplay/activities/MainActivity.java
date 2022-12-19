@@ -335,7 +335,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Dialog renameDialog;
     private AlertDialog ringtoneDialog = null;
     private String pl_name, optionTag;
-    private TextView songPathTv, songNameTv, songArtistTv, songSizeTv, songGenreTv, songBitrateTv, songDurationTv;
+    private TextView songPathTv, songNameTv, songArtistTv, songSizeTv, songGenreTv, songBitrateTv, songAlbumTv;
 
     public void clearStorage() {
         storageUtil.clearMusicLastPos();
@@ -471,7 +471,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         songSizeTv = findViewById(R.id.file_size_detail);
         songGenreTv = findViewById(R.id.file_genre_detail);
         songBitrateTv = findViewById(R.id.file_bitrate_detail);
-        songDurationTv = findViewById(R.id.file_duration_detail);
+        songAlbumTv = findViewById(R.id.file_album_detail);
     }
 
 
@@ -480,8 +480,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onStart();
         if (service_bound) {
             if (is_playing) {
+                
                     media_player_service.setSeekBar();
                     EventBus.getDefault().post(new PrepareRunnableEvent());
+               
             }
         }
     }
@@ -711,7 +713,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void resetDataInNavigation() {
         navSongName.setText("Song Name");
         navArtistName.setText("Artist");
-        GlideBuilt.glideBitmap(this, null, R.drawable.placeholder_nav, navCover, 300);
+        GlideBuilt.glideBitmap(this, null, R.drawable.ic_music, navCover, 300);
     }
 
     public void setDataInNavigation(String song_name, String artist_name, Bitmap album_uri) {
@@ -1596,10 +1598,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         startActivity(Intent.createChooser(intent, "Share Via ..."));
     }
 
+    @SuppressLint("SetTextI18n")
     private void openDetailsBox(MusicDataCapsule music) {
         detailsSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
 
-        int bitrateInNum = Integer.parseInt(music.getsBitrate()) / 1000;
+        String bitrate = music.getsBitrate();
+        int bitrateInNum = 0;
+        if (!bitrate.equals("")) {
+            bitrateInNum = Integer.parseInt(bitrate) / 1000;
+        }
 
         float size = Float.parseFloat(music.getsSize()) / (1024 * 1024);
 
@@ -1610,14 +1617,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         String finalBitrate = bitrateInNum + " KBPS";
         String finalSize = beforeDot + afterDot + " mb";
+        String genre = music.getsGenre();
 
         songPathTv.setText(music.getsPath());
         songNameTv.setText(music.getsName());
         songArtistTv.setText(music.getsArtist());
         songSizeTv.setText(finalSize);
         songBitrateTv.setText(finalBitrate);
-        songDurationTv.setText(convertDuration(music.getsDuration()));
-        songGenreTv.setText(music.getsGenre());
+        songAlbumTv.setText(music.getsAlbum());
+        if (genre!=null) {
+            if (!genre.equals("")) {
+                songGenreTv.setText(genre);
+            }else {
+                songGenreTv.setText("Unknown genre");
+            }
+        }
 
     }
 

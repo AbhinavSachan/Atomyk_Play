@@ -97,6 +97,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     public ImageView optionImg;
     public View info_layout;
     public MusicQueueAdapter queueAdapter;
+    public ArrayList<String> idList;
     private boolean userScrolling = false;
     RecyclerView.OnScrollListener onScrollListener = new RecyclerView.OnScrollListener() {
         @Override
@@ -124,7 +125,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     private RecyclerView lyricsRecyclerView;
     private LRCMap lrcMap;
     private RecyclerView.LayoutManager lm;
-    private String songName, artistName, mimeType, duration, bitrate, albumUri;
+    private String songName, artistName, mimeType, duration, bitrate;
     private View queueBottomSheet;
     private ImageView repeatImg;
     private ImageView shuffleImg;
@@ -144,7 +145,6 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     private StorageUtil.SettingsStorage settingsStorage;
     private LinearLayoutManager linearLayoutManager;
     private MusicLyricsAdapter lyricsAdapter;
-    public ArrayList<String> idList;
     private Dialog timerDialogue;
     private MusicDataCapsule activeMusic;
 
@@ -250,6 +250,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         TextView button = view.findViewById(R.id.btn_add_lyrics);
         lyricsRecyclerView = view.findViewById(R.id.lyrics_recycler_view);
         noLyricsLayout = view.findViewById(R.id.no_lyrics_layout);
+
         lyricsRecyclerView.addOnScrollListener(onScrollListener);
         button.setOnClickListener(v -> setLyricsLayout(activeMusic));
 
@@ -305,7 +306,8 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     private boolean getPlayerState() {
         if (media_player_service.media_player != null)
             return media_player_service.media_player.isPlaying();
-        else return false;
+        else
+            return false;
     }
 
     @Subscribe
@@ -319,7 +321,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     @Subscribe
     public void setMainPlayerLayout(SetMainLayoutEvent event) {
         activeMusic = event.activeMusic;
-
+        Bitmap image = event.image;
 
         if (activeMusic != null) {
             songName = activeMusic.getsName();
@@ -327,12 +329,13 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
             artistName = activeMusic.getsArtist();
             mimeType = getMime(activeMusic.getsMimeType()).toUpperCase();
             duration = activeMusic.getsDuration();
-            albumUri = activeMusic.getsAlbumUri();
 
             String convertedDur = convertDuration(duration);
 
-
-            int bitrateInNum = Integer.parseInt(bitrate) / 1000;
+            int bitrateInNum = 0;
+            if (!bitrate.equals("")) {
+                bitrateInNum = Integer.parseInt(bitrate) / 1000;
+            }
             String finalBitrate = bitrateInNum + " KBPS";
 
             if (storageUtil.checkFavourite(activeMusic.getsId()).equals(no_favorite)) {
@@ -360,32 +363,13 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
                 seekBarMain.setMax(Integer.parseInt(duration));
                 mini_progress.setMax(Integer.parseInt(duration));
                 bitrateTv.setText(finalBitrate);
-//image decoder
-                final Bitmap[] image = {null};
-                ExecutorService service1 = Executors.newSingleThreadExecutor();
-                Handler handler = new Handler();
-                service1.execute(() -> {
-                    MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
-                    mediaMetadataRetriever.setDataSource(activeMusic.getsPath());
-                    byte[] art = mediaMetadataRetriever.getEmbeddedPicture();
-                    try {
-                        image[0] = BitmapFactory.decodeByteArray(art, 0, art.length);
-                    } catch (Exception e) {
-                        image[0] = null;
-                    }
-                    handler.post(() -> {
-                        GlideBuilt.glideBitmap(requireContext(), image[0], R.drawable.ic_music, playerCoverImage, 512);
-                        GlideBuilt.glideBitmap(requireContext(), image[0], R.drawable.ic_music, mini_cover, 128);
-                        GlideBuilt.glideBitmap(requireContext(), image[0], R.drawable.ic_music, queueCoverImg, 128);
-                    });
-                });
-                service1.shutdown();
 
+                GlideBuilt.glideBitmap(requireContext(), image, R.drawable.ic_music, playerCoverImage, 512);
+                GlideBuilt.glideBitmap(requireContext(), image, R.drawable.ic_music, mini_cover, 128);
+                GlideBuilt.glideBitmap(requireContext(), image, R.drawable.ic_music, queueCoverImg, 128);
+                ((MainActivity) context).setDataInNavigation(songName, artistName, image);
 
-                ((MainActivity) context).setDataInNavigation(songName, artistName, image[0]);
-
-            } catch (NumberFormatException e) {
-                e.printStackTrace();
+            } catch (NumberFormatException ignored) {
             }
         }
         EventBus.getDefault().post(new RunnableSyncLyricsEvent());
@@ -1025,8 +1009,25 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     }
 
     public void setPreviousData(MusicDataCapsule activeMusic) {
+        Handler handler = new Handler();
 
-        EventBus.getDefault().post(new SetMainLayoutEvent(activeMusic));
+        ExecutorService service = Executors.newSingleThreadExecutor();
+        service.execute(() -> {
+            //image decoder
+            Bitmap image = null;
+            MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
+            mediaMetadataRetriever.setDataSource(activeMusic.getsPath());
+            byte[] art = mediaMetadataRetriever.getEmbeddedPicture();
+
+            try {
+                image = BitmapFactory.decodeByteArray(art, 0, art.length);
+            } catch (Exception ignored) {
+            }
+
+            Bitmap finalImage = image;
+            handler.post(() -> EventBus.getDefault().post(new SetMainLayoutEvent(activeMusic, finalImage)));
+        });
+        service.shutdown();
 
         if (activeMusic != null) {
             seekBarMain.setMax(Integer.parseInt(activeMusic.getsDuration()));

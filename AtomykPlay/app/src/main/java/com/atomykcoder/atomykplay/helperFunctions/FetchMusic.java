@@ -87,12 +87,9 @@ public class FetchMusic {
 
                         String sDateAdded =  convertLongToDate(dateInMillis);
 
-                        Uri uri = Uri.parse("content://media/external/audio/albumart");
-                        String sAlbumUri = Uri.withAppendedPath(uri, sAlbumId).toString();
-
                         int filter = new StorageUtil.SettingsStorage(context).loadFilterDur() * 1000;
                         MusicDataCapsule music = new MusicDataCapsule(sTitle, sArtist,
-                                sAlbum, sAlbumUri, sDuration, sPath, sBitrate, sMimeType, sSize, sGenre, sId, sDateAdded);
+                                sAlbum, sAlbumId, sDuration, sPath, sBitrate, sMimeType, sSize, sGenre, sId, sDateAdded);
                         File file = new File(music.getsPath());
                         if (file.exists()) {
                             if (filter <= Integer.parseInt(music.getsDuration())) {
