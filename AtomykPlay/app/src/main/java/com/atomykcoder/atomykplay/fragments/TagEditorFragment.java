@@ -13,6 +13,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +36,7 @@ import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 
+import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.audio.exceptions.CannotReadException;
 import org.jaudiotagger.audio.exceptions.CannotWriteException;
@@ -42,12 +44,15 @@ import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
 import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
 import org.jaudiotagger.audio.mp3.MP3File;
 import org.jaudiotagger.tag.FieldKey;
+import org.jaudiotagger.tag.Tag;
 import org.jaudiotagger.tag.TagException;
+import org.jaudiotagger.tag.TagField;
 import org.jaudiotagger.tag.datatype.Artwork;
 import org.jaudiotagger.tag.id3.ID3v24Tag;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -165,8 +170,8 @@ public class TagEditorFragment extends Fragment {
         String newGenre = editGenre.getText().toString().trim();
 
         try {
-            MP3File f = (MP3File) AudioFileIO.read(new File(music.getsPath()));
-            ID3v24Tag tag = f.getID3v2TagAsv24();
+            AudioFile f = AudioFileIO.read(new File(music.getsPath()));
+            Tag tag = f.getTag();
 
             Uri imageUri = (Uri) coverImageView.getTag();
 
@@ -181,13 +186,16 @@ public class TagEditorFragment extends Fragment {
                 tag.addField(artwork);
                 tag.setField(artwork);
             }
-            AudioFileIO.write(f);
-
+            f.commit();
             Toast.makeText(requireContext(), "Changes Made Successfully", Toast.LENGTH_SHORT).show();
 
         } catch (CannotReadException | InvalidAudioFrameException | ReadOnlyFileException | TagException | IOException | CannotWriteException e) {
             e.printStackTrace();
         }
 
+    }
+
+    private void print(String message) {
+        System.out.println("message : " + message);
     }
 }
