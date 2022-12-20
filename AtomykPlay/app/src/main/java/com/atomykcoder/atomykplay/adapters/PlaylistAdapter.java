@@ -14,13 +14,11 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.transition.TransitionInflater;
 
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.classes.GlideBuilt;
 import com.atomykcoder.atomykplay.fragments.OpenPlayListFragment;
-import com.atomykcoder.atomykplay.fragments.PlaylistsFragment;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import com.atomykcoder.atomykplay.viewModals.Playlist;
 
@@ -45,10 +43,10 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
     @Override
     public void onBindViewHolder(@NonNull PlaylistAdapter.PlaylistViewHolder holder, int position) {
         Playlist currentItem = arrayList.get(position);
-        ArrayList<String> musicIDList = currentItem.getMusicIDList();
+        ArrayList<MusicDataCapsule> musicList = currentItem.getMusicList();
 
         GlideBuilt.glide(context, currentItem.getCoverUri(), R.drawable.ic_music_list, holder.imageView, 300);
-        String count = musicIDList.size() + " Songs";
+        String count = musicList.size() + " Songs";
         holder.playlistName.setText(currentItem.getName());
         holder.songCount.setText(count);
 

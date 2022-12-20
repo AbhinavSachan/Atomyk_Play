@@ -1,10 +1,12 @@
 package com.atomykcoder.atomykplay.events;
 
 
-public class RemoveFromPlaylistEvent {
-    public String musicID;
+import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 
-    public RemoveFromPlaylistEvent(String _musicID) {
-       musicID = _musicID;
+public class RemoveFromPlaylistEvent {
+    public MusicDataCapsule music;
+
+    public RemoveFromPlaylistEvent(MusicDataCapsule _music) {
+        music = _music;
     }
 }

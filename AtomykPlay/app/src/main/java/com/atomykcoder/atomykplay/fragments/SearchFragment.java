@@ -115,7 +115,7 @@ public class SearchFragment extends Fragment {
         for (MusicDataCapsule music : searchedMusicList) {
             idList.add(music.getsId());
         }
-        adapter = new MusicMainAdapter(getContext(), searchedMusicList, idList);
+        adapter = new MusicMainAdapter(getContext(), searchedMusicList);
         recycler_view.setAdapter(adapter);
 
         return view;

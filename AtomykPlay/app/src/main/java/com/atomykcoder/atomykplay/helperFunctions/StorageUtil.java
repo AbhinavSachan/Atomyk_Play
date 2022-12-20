@@ -2,8 +2,6 @@ package com.atomykcoder.atomykplay.helperFunctions;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Build;
-
 
 import com.atomykcoder.atomykplay.viewModals.LRCMap;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
@@ -13,8 +11,6 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Map;
 
 public class StorageUtil {
@@ -61,13 +57,13 @@ public class StorageUtil {
     //region music queue list code here
     /**
      * save music queue idList in arraylist of strings
-     * @param idList music id list needed to be saved
+     * @param list music list needed to be saved
      */
-    public void saveQueueList(ArrayList<String> idList) {
+    public void saveQueueList(ArrayList<MusicDataCapsule> list) {
         sharedPreferences = context.getSharedPreferences(MUSIC_LIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         Gson gson = new Gson();
-        String json = gson.toJson(idList);
+        String json = gson.toJson(list);
         editor.putString(musicList, json);
         editor.apply();
     }
@@ -77,11 +73,11 @@ public class StorageUtil {
      *
      * @return returns saved music queue list (IDS) in an arraylist of strings
      */
-    public ArrayList<String> loadQueueList() {
+    public ArrayList<MusicDataCapsule> loadQueueList() {
         sharedPreferences = context.getSharedPreferences(MUSIC_LIST_STORAGE, Context.MODE_PRIVATE);
         Gson gson = new Gson();
         String json = sharedPreferences.getString(musicList, null);
-        Type type = new TypeToken<ArrayList<String>>() {
+        Type type = new TypeToken<ArrayList<MusicDataCapsule>>() {
         }.getType();
         return gson.fromJson(json, type);
     }
@@ -109,119 +105,24 @@ public class StorageUtil {
         sharedPreferences = context.getSharedPreferences(INITIAL_LIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         Gson gson = new Gson();
-        for(MusicDataCapsule music : list) {
-            String json = gson.toJson(music);
-            editor.putString(music.getsId(), json);
-        }
+        String json = gson.toJson(list);
+        editor.putString(initialList, json);
         editor.apply();
     }
 
     /**
-     * load inital music list from storage
+     * load initial music list from storage
      *
      * @return returns arraylist of musicDataCapsule
      */
     public ArrayList<MusicDataCapsule> loadInitialList() {
         sharedPreferences = context.getSharedPreferences(INITIAL_LIST_STORAGE, Context.MODE_PRIVATE);
         Gson gson = new Gson();
-        Map<String, ?> map = sharedPreferences.getAll();
-        ArrayList<MusicDataCapsule> musicList = new ArrayList<>();
-        Type type = new TypeToken<MusicDataCapsule>() {
+        Type type = new TypeToken<ArrayList<MusicDataCapsule>>() {
         }.getType();
-        for(Map.Entry<String, ?> entry : map.entrySet()) {
-            String json = sharedPreferences.getString(entry.getKey(), null);
-            MusicDataCapsule music = gson.fromJson(json, type);
-            musicList.add(music);
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            Collections.sort(musicList, Comparator.comparing(MusicDataCapsule::getsName));
-        }
-        return musicList;
-    }
-
-    /**
-     * get a certain music from initial list
-     *
-     * @param musicID music-id of the music which to be returned
-     * @return returns music of the given music-id
-     */
-    public MusicDataCapsule getItemFromInitialList(String musicID) {
-        sharedPreferences = context.getSharedPreferences(INITIAL_LIST_STORAGE, Context.MODE_PRIVATE);
-        Gson gson = new Gson();
-        String json = sharedPreferences.getString(musicID, null);
-        Type type = new TypeToken<MusicDataCapsule>(){}.getType();
+        String json = sharedPreferences.getString(initialList, null);
         return gson.fromJson(json, type);
     }
-
-    /**
-     * get a list of musicDataCapsule in particular range
-     *
-     * @param idList music-id list
-     * @return returns arraylist of musicDataCapsule of given music-id list
-     */
-    public ArrayList<MusicDataCapsule> getItemListFromInitialList(ArrayList<String> idList) {
-        sharedPreferences = context.getSharedPreferences(INITIAL_LIST_STORAGE, Context.MODE_PRIVATE);
-        Gson gson = new Gson();
-        ArrayList<MusicDataCapsule> musicList = new ArrayList<>();
-        for (String id : idList) {
-            String json = sharedPreferences.getString(id, null);
-            Type type = new TypeToken<MusicDataCapsule>(){}.getType();
-            MusicDataCapsule music = gson.fromJson(json, type);
-            musicList.add(music);
-        }
-        return musicList;
-    }
-
-    /**
-     * add given music to initial list
-     * @param music music to be saved in initial list
-     */
-    public void addToInitialList(MusicDataCapsule music) {
-        sharedPreferences = context.getSharedPreferences(INITIAL_LIST_STORAGE, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        Gson gson = new Gson();
-        String json = gson.toJson(music);
-        editor.putString(music.getsId(), json);
-        editor.apply();
-    }
-
-    /**
-     * remove music of given music-id from storage
-     *
-     * @param musicID music-id whose music to be removed
-     */
-    public void removeItemFromInitialList(String musicID) {
-        sharedPreferences = context.getSharedPreferences(INITIAL_LIST_STORAGE, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.remove(musicID);
-        editor.apply();
-    }
-
-    /**
-     * remove multiple music from storage
-     *
-     * @param musicIds id-list of the music to be removed
-     */
-    public void removeItemListFromInitialList(ArrayList<String> musicIds) {
-        sharedPreferences = context.getSharedPreferences(INITIAL_LIST_STORAGE, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        for(String id : musicIds) {
-            editor.remove(id);
-        }
-        editor.apply();
-    }
-
-    /**
-     * clear initial list from storage
-     */
-    public void clearInitialList() {
-        sharedPreferences = context.getSharedPreferences(MUSIC_LIST_STORAGE, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.remove(initialList);
-        editor.apply();
-    }
-    //endregion
-
 
     //region music index code here
 
@@ -309,54 +210,61 @@ public class StorageUtil {
     //endregion
 
 
-    //region favourite music-id related code here
+    //region favourite music related code here
 
     /**
-     * save favourite music id to storage
-     * @param musicID music id to be saved
+     * save favourite music to storage
+     * @param music music to be saved
      */
-    public void saveFavorite(String musicID) {
+    public void saveFavorite(MusicDataCapsule music) {
         sharedPreferences = context.getSharedPreferences(FAVORITE_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(musicID, favorite);
+        Gson gson = new Gson();
+        String json = gson.toJson(music);
+        editor.putString(json, favorite);
         editor.apply();
     }
 
     /**
-     * check if given music id exist in favourite storage
-     * @param musicID music id to be searched
+     * check if given music exist in favourite storage
+     * @param music music to be searched
      * @return returns either "favorite" or "no_favorite" string
      */
-    public String checkFavourite(String musicID) {
+    public String checkFavourite(MusicDataCapsule music) {
         sharedPreferences = context.getSharedPreferences(FAVORITE_STORAGE, Context.MODE_PRIVATE);
-        return sharedPreferences.getString(musicID, no_favorite);
+        Gson gson = new Gson();
+        String json = gson.toJson(music);
+        return sharedPreferences.getString(json, no_favorite);
     }
 
     /**
-     * remove given music id from favourite storage
-     * @param musicID music id to be removed
+     * remove given music from favourite storage
+     * @param music music to be removed
      */
-    public void removeFavorite(String musicID) {
+    public void removeFavorite(MusicDataCapsule music) {
         sharedPreferences = context.getSharedPreferences(FAVORITE_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.remove(musicID);
+        String json = new Gson().toJson(music);
+        editor.remove(json);
         editor.apply();
     }
 
     /**
-     * get favourite music id list in an arraylist of strings
-     * @return returns arraylist of music ids (string)
+     * get favourite music list in an arraylist of strings
+     * @return returns arraylist of music
      */
-    public ArrayList<String> getFavouriteList() {
+    public ArrayList<MusicDataCapsule> getFavouriteList() {
         sharedPreferences = context.getSharedPreferences(FAVORITE_STORAGE, Context.MODE_PRIVATE);
 
-        ArrayList<String> favouriteIDList = new ArrayList<>();
+        ArrayList<MusicDataCapsule> favouriteList = new ArrayList<>();
 
         Map<String, ?> keys = sharedPreferences.getAll();
         for (Map.Entry<String, ?> entry : keys.entrySet()) {
-            favouriteIDList.add(entry.getKey());
+            Type type = new TypeToken<MusicDataCapsule>(){}.getType();
+            MusicDataCapsule music = new Gson().fromJson(entry.getKey(), type);
+            favouriteList.add(music);
         }
-        return favouriteIDList;
+        return favouriteList;
     }
 
     //endregion
@@ -387,17 +295,17 @@ public class StorageUtil {
     //endregion
 
 
-    //region temporary music-id list code here
+    //region temporary music list code here
 
     /**
-     * save temporary music-id list in storage
-     * @param idList temporary music-id list to be saved
+     * save temporary music list in storage
+     * @param list temporary music list to be saved
      */
-    public void saveTempMusicList(ArrayList<String> idList) {
+    public void saveTempMusicList(ArrayList<MusicDataCapsule> list) {
         sharedPreferences = context.getSharedPreferences(MUSIC_LIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         Gson gson = new Gson();
-        String json = gson.toJson(idList);
+        String json = gson.toJson(list);
         editor.putString(tempList, json);
         editor.apply();
     }
@@ -406,11 +314,11 @@ public class StorageUtil {
      * load temporary music-id list from storage
      * @return returns arraylist of music-ids (String)
      */
-    public ArrayList<String> loadTempMusicList() {
+    public ArrayList<MusicDataCapsule> loadTempMusicList() {
         sharedPreferences = context.getSharedPreferences(MUSIC_LIST_STORAGE, Context.MODE_PRIVATE);
         Gson gson = new Gson();
         String json = sharedPreferences.getString(tempList, null);
-        Type type = new TypeToken<ArrayList<String>>() {
+        Type type = new TypeToken<ArrayList<MusicDataCapsule>>() {
         }.getType();
         return gson.fromJson(json, type);
     }
@@ -447,7 +355,7 @@ public class StorageUtil {
     /**
      * load lyrics of given music-id from storage
      * @param musicId to get lyrics of
-     * @return returns LRC-MAP of given music id
+     * @return returns LRC-MAP of given music
      */
     public LRCMap loadLyrics(String musicId) {
         sharedPreferences = context.getSharedPreferences(LYRICS_STORAGE, Context.MODE_PRIVATE);
@@ -494,13 +402,13 @@ public class StorageUtil {
      *
      * @param playlistName playlist name
      * @param coverUri cover uri for playlist
-     * @param musicIds songs ids in arraylist<string> format
+     * @param musicList songs in arraylist<string> format
      */
-    public void createPlaylist(String playlistName, String coverUri, ArrayList<String> musicIds) {
+    public void createPlaylist(String playlistName, String coverUri, ArrayList<MusicDataCapsule> musicList) {
         sharedPreferences = context.getSharedPreferences(PLAYLIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         Gson gson = new Gson();
-        String json = gson.toJson(new Playlist(playlistName, coverUri, musicIds));
+        String json = gson.toJson(new Playlist(playlistName, coverUri, musicList));
         editor.putString(playlistName, json);
         editor.apply();
     }
@@ -515,7 +423,7 @@ public class StorageUtil {
      */
     public void replacePlaylist(Playlist oldPlaylist, String playlistName, String coverUri) {
         removePlayList(oldPlaylist.getName());
-        createPlaylist(playlistName, coverUri, oldPlaylist.getMusicIDList());
+        createPlaylist(playlistName, coverUri, oldPlaylist.getMusicList());
     }
 
     /**
@@ -568,10 +476,10 @@ public class StorageUtil {
     /**
      * add Item in playlist
      *
-     * @param musicID music id to be added
+     * @param music music to be added
      * @param playlistName playlist in which, music is to be added
      */
-    public void saveItemInPlayList(String musicID, String playlistName) {
+    public void saveItemInPlayList(MusicDataCapsule music, String playlistName) {
         //Shared Preferences Stuff
         sharedPreferences = context.getSharedPreferences(PLAYLIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -584,8 +492,8 @@ public class StorageUtil {
         }.getType();
         // converting json to gson then to playlist object
         Playlist playlist = gson.fromJson(json, type);
-        //adding music id to playlist object
-        playlist.addMusic(musicID);
+        //adding music to playlist object
+        playlist.addMusic(music);
         // creating new json to save updated playlist
         String newJson = gson.toJson(playlist);
         // assign new json to given playlist key
@@ -596,10 +504,10 @@ public class StorageUtil {
 
     /**
      * remove a music from playlist
-     * @param musicID music id of the music which to be removed
+     * @param music music of the music which to be removed
      * @param playlistName name of the playlist that music belongs to
      */
-    public void removeItemInPlaylist(String musicID, String playlistName) {
+    public void removeItemInPlaylist(MusicDataCapsule music, String playlistName) {
         //Shared Preferences Stuff
         sharedPreferences = context.getSharedPreferences(PLAYLIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -612,8 +520,8 @@ public class StorageUtil {
         }.getType();
         // converting json to gson then to playlist object
         Playlist playlist = gson.fromJson(json, type);
-        //removing music id from playlist object
-        playlist.removeMusic(musicID);
+        //removing music from playlist object
+        playlist.removeMusic(music);
         // creating new json to save updated playlist
         String newJson = gson.toJson(playlist);
         // assign new json to given playlist key

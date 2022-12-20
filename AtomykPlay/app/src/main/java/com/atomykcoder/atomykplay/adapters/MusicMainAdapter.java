@@ -10,7 +10,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -42,7 +41,6 @@ import java.util.concurrent.Executors;
 public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.MusicViewAdapter> implements INameableAdapter {
     Context context;
     ArrayList<MusicDataCapsule> musicArrayList;
-    ArrayList<String> musicIDList;
     MainActivity mainActivity;
     StorageUtil storage;
     long lastClickTime;
@@ -50,10 +48,9 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
     int delay = 500;
 
 
-    public MusicMainAdapter(Context _context, ArrayList<MusicDataCapsule> _musicArrayList,ArrayList<String> _musicIDList) {
+    public MusicMainAdapter(Context _context, ArrayList<MusicDataCapsule> _musicArrayList) {
         context = _context;
         musicArrayList = _musicArrayList;
-        musicIDList = _musicIDList;
         mainActivity = (MainActivity) context;
         storage = new StorageUtil(context);
     }
@@ -115,29 +112,29 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
                 //if shuffle button is already on it will shuffle it from start
                 if (settingsStorage.loadKeepShuffle()) {
 
-                    storage.saveTempMusicList(musicIDList);
+                    storage.saveTempMusicList(musicArrayList);
                     storage.saveShuffle(shuffle);
 
                     ExecutorService service = Executors.newSingleThreadExecutor();
                     service.execute(() -> {
 
                         //removing current item from list
-                        musicIDList.remove(position);
+                        musicArrayList.remove(position);
 
                         //shuffling list
-                        Collections.shuffle(musicIDList);
+                        Collections.shuffle(musicArrayList);
 
                         //adding the removed item in shuffled list on 0th index
-                        musicIDList.add(0, currentItem.getsId());
+                        musicArrayList.add(0, currentItem);
 
                         //saving list
-                        storage.saveQueueList(musicIDList);
+                        storage.saveQueueList(musicArrayList);
                         storage.saveMusicIndex(0);
 
                         // post-execute code here
                         handler.post(() -> {
                             mainActivity.playAudio(currentItem);
-                            mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(musicIDList);
+                            mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(musicArrayList);
                             mainActivity.openBottomPlayer();
                         });
                     });
@@ -148,13 +145,13 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
                     ExecutorService service = Executors.newSingleThreadExecutor();
                     service.execute(() -> {
                         storage.saveShuffle(no_shuffle);
-                        storage.saveQueueList(musicIDList);
+                        storage.saveQueueList(musicArrayList);
                         storage.saveMusicIndex(position);
 
                         // post-execute code here
                         handler.post(() -> {
                             mainActivity.playAudio(currentItem);
-                            mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(musicIDList);
+                            mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(musicArrayList);
                             mainActivity.openBottomPlayer();
                         });
                     });
@@ -162,7 +159,7 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
                 }
             } else {
                 Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show();
-                removeItem(currentItem.getsId());
+                removeItem(currentItem);
             }
         });
 
@@ -173,7 +170,7 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
                 mainActivity.openOptionMenu(currentItem, "mainList");
             } else {
                 Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show();
-                removeItem(currentItem.getsId());
+                removeItem(currentItem);
             }
         });
 
@@ -196,29 +193,28 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
     /**
      * remove item from list after deleting it from device
      *
-     * @param itemID selected delete item
+     * @param item selected delete item
      */
-    public void removeItem(String itemID) {
+    public void removeItem(MusicDataCapsule item) {
         StorageUtil storageUtil = new StorageUtil(context);
-        int position = musicIDList.indexOf(itemID);
+        int position = musicArrayList.indexOf(item);
         int savedIndex = storageUtil.loadMusicIndex();
 
         if (position < savedIndex) {
             storageUtil.saveMusicIndex(savedIndex - 1);
         }
         if (position != -1) {
-            storageUtil.removeItemFromInitialList(musicIDList.get(position));
+            storageUtil.saveInitialList(musicArrayList);
             musicArrayList.remove(position);
-            musicIDList.remove(position);
         }
 
         notifyItemRangeChanged(position, musicArrayList.size() - (position + 1));
         notifyItemRemoved(position);
 
         if (position == savedIndex) {
-            mainActivity.playAudio(storageUtil.getItemFromInitialList(itemID));
+            mainActivity.playAudio(item);
         }
-        mainActivity.bottomSheetPlayerFragment.queueAdapter.removeItem(itemID);
+        mainActivity.bottomSheetPlayerFragment.queueAdapter.removeItem(item);
 
     }
 

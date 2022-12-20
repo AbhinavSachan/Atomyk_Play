@@ -216,7 +216,7 @@ public class LastAddedFragment extends Fragment {
                 for (MusicDataCapsule music : lastAddedMusicList) {
                     idList.add(music.getsId());
                 }
-                adapter = new MusicMainAdapter(getContext(), lastAddedMusicList,idList);
+                adapter = new MusicMainAdapter(getContext(), lastAddedMusicList);
                 recyclerView.setAdapter(adapter);
                 });
         });
