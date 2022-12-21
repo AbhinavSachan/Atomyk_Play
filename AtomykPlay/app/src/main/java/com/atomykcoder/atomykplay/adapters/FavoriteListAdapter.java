@@ -25,6 +25,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.classes.GlideBuilt;
+import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.ItemTouchHelperAdapter;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
@@ -39,14 +40,14 @@ import java.util.concurrent.Executors;
 public class FavoriteListAdapter extends RecyclerView.Adapter<FavoriteListAdapter.FavoriteViewHolder> implements ItemTouchHelperAdapter {
     private final Context context;
     MainActivity mainActivity;
-    ArrayList<MusicDataCapsule> musicList;
+    ArrayList<Music> musicList;
     OnDragStartListener onDragStartListener;
     StorageUtil storageUtil;
     long lastClickTime;
     // value in milliseconds
     int delay = 500;
 
-    public FavoriteListAdapter(Context context, ArrayList<MusicDataCapsule> _musicList, OnDragStartListener onDragStartListener) {
+    public FavoriteListAdapter(Context context, ArrayList<Music> _musicList, OnDragStartListener onDragStartListener) {
         this.context = context;
         musicList = _musicList;
         this.onDragStartListener = onDragStartListener;
@@ -81,14 +82,14 @@ public class FavoriteListAdapter extends RecyclerView.Adapter<FavoriteListAdapte
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public void onBindViewHolder(@NonNull FavoriteListAdapter.FavoriteViewHolder holder, int position) {
-        MusicDataCapsule currentItem = musicList.get(position);
+        Music currentItem = musicList.get(position);
 
         StorageUtil storage = new StorageUtil(context);
         StorageUtil.SettingsStorage settingsStorage = new StorageUtil.SettingsStorage(context);
 
-        holder.nameText.setText(currentItem.getsName());
-        holder.artistText.setText(currentItem.getsArtist());
-        holder.durationText.setText(convertDuration(currentItem.getsDuration()));
+        holder.nameText.setText(currentItem.getName());
+        holder.artistText.setText(currentItem.getArtist());
+        holder.durationText.setText(convertDuration(currentItem.getDuration()));
         final Bitmap[] image = {null};
         ExecutorService service1 = Executors.newSingleThreadExecutor();
         Handler handler = new Handler();
@@ -96,7 +97,7 @@ public class FavoriteListAdapter extends RecyclerView.Adapter<FavoriteListAdapte
 
             //image decoder
             MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
-            mediaMetadataRetriever.setDataSource(currentItem.getsPath());
+            mediaMetadataRetriever.setDataSource(currentItem.getPath());
             byte[] art = mediaMetadataRetriever.getEmbeddedPicture();
 
             try {
@@ -118,14 +119,14 @@ public class FavoriteListAdapter extends RecyclerView.Adapter<FavoriteListAdapte
             //endregion
 
 
-            File file = new File(currentItem.getsPath());
+            File file = new File(currentItem.getPath());
             if (file.exists()) {
                 //check is service active
 
                 //if shuffle button is already on it will shuffle it from start
                 if (settingsStorage.loadKeepShuffle()) {
                     //saving list in temp for restore function in player fragment
-                    ArrayList<MusicDataCapsule> shuffleList = new ArrayList<>(musicList);
+                    ArrayList<Music> shuffleList = new ArrayList<>(musicList);
 
                     storage.saveTempMusicList(musicList);
                     storage.saveShuffle(shuffle);
@@ -176,7 +177,7 @@ public class FavoriteListAdapter extends RecyclerView.Adapter<FavoriteListAdapte
 
     }
 
-    public void removeItem(MusicDataCapsule item) {
+    public void removeItem(Music item) {
         StorageUtil storageUtil = new StorageUtil(context);
         int position = musicList.indexOf(item);
 

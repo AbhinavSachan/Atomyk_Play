@@ -33,6 +33,7 @@ import android.provider.MediaStore;
 import android.provider.Settings;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
+import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -66,6 +67,7 @@ import com.atomykcoder.atomykplay.adapters.MusicMainAdapter;
 import com.atomykcoder.atomykplay.adapters.PlaylistDialogAdapter;
 import com.atomykcoder.atomykplay.classes.GlideBuilt;
 import com.atomykcoder.atomykplay.customScripts.CustomBottomSheet;
+import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.events.PrepareRunnableEvent;
 import com.atomykcoder.atomykplay.events.RemoveFromFavoriteEvent;
 import com.atomykcoder.atomykplay.events.RemoveFromPlaylistEvent;
@@ -78,9 +80,9 @@ import com.atomykcoder.atomykplay.fragments.SearchFragment;
 import com.atomykcoder.atomykplay.fragments.SettingsFragment;
 import com.atomykcoder.atomykplay.fragments.TagEditorFragment;
 import com.atomykcoder.atomykplay.helperFunctions.FetchMusic;
+import com.atomykcoder.atomykplay.helperFunctions.MusicHelper;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.services.MediaPlayerService;
-import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import com.atomykcoder.atomykplay.viewModals.Playlist;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.card.MaterialCardView;
@@ -144,7 +146,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public Dialog addToPlDialog;
     public View plSheet, player_bottom_sheet;
     public Playlist plItemSelected;
-    public MusicDataCapsule selectedItem;
+    public Music selectedItem;
     private Dialog plDialog;
     private View shadowLyrFound;
     private final BottomSheetBehavior.BottomSheetCallback lrcFoundCallback = new BottomSheetBehavior.BottomSheetCallback() {
@@ -168,7 +170,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private View anchoredShadow;
     private ImageView playlist_image_View, navCover;
     private Uri playListImageUri;
-    private ArrayList<MusicDataCapsule> dataList;
+    private ArrayList<Music> dataList;
     private MusicMainAdapter musicMainAdapter;
     private LinearLayout linearLayout;
     private RecyclerView musicRecyclerView;
@@ -590,7 +592,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         // do in background code here
         service.execute(() -> {
-            ArrayList<MusicDataCapsule> updatedList = new ArrayList<>();
+            ArrayList<Music> updatedList = new ArrayList<>();
             FetchMusic.fetchMusic(updatedList, MainActivity.this);
             // post-execute code here
             handler.post(() -> {
@@ -726,9 +728,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         GlideBuilt.glideBitmap(this, album_uri, R.drawable.ic_music, navCover, 300);
     }
 
-    private MusicDataCapsule getMusic() {
-        ArrayList<MusicDataCapsule> musicList = storageUtil.loadQueueList();
-        MusicDataCapsule activeMusic = null;
+    private Music getMusic() {
+        ArrayList<Music> musicList = storageUtil.loadQueueList();
+        Music activeMusic = null;
         int musicIndex;
         musicIndex = storageUtil.loadMusicIndex();
 
@@ -796,22 +798,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * play from start
      * @param music
      */
-    public void playAudio(MusicDataCapsule music) {
+    public void playAudio(Music music) {
         //starting service if its not started yet otherwise it will send broadcast msg to service
         storageUtil.clearMusicLastPos();
+
+        String encodedMessage = MusicHelper.encode(music);
+
         if (!phone_ringing) {
             if (service_stopped) {
                 startService();
                 new Handler().postDelayed(() -> {
                     //service is active send media with broadcast receiver
+
+
                     Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEW_MUSIC);
-                    broadcastIntent.putExtra("music", music);
+                    broadcastIntent.putExtra("music", encodedMessage);
                     sendBroadcast(broadcastIntent);
                 }, 0);
             } else {
                 //service is active send media with broadcast receiver
                 Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEW_MUSIC);
-                broadcastIntent.putExtra("music", music);
+                broadcastIntent.putExtra("music", encodedMessage);
                 sendBroadcast(broadcastIntent);
             }
         } else {
@@ -900,16 +907,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         replaceFragment(R.id.sec_container, new SearchFragment(), android.R.transition.fade, "SearchResultsFragment");
     }
 
-    private void setRingtone(MusicDataCapsule music) {
+    private void setRingtone(Music music) {
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
             boolean canWrite = Settings.System.canWrite(this);
 
             if (canWrite) {
-                Uri newUri = Uri.fromFile(new File(music.getsPath()));
+                Uri newUri = Uri.fromFile(new File(music.getPath()));
                 AlertDialog.Builder ringtoneDialog = new AlertDialog.Builder(MainActivity.this);
                 ringtoneDialog.setTitle("Confirmation");
-                ringtoneDialog.setMessage(music.getsName() + " - Set as ringtone");
+                ringtoneDialog.setMessage(music.getName() + " - Set as ringtone");
                 ringtoneDialog.setCancelable(true);
                 ringtoneDialog.setPositiveButton("OK", (dialog, which) -> {
                     RingtoneManager.setActualDefaultRingtoneUri(MainActivity.this, RingtoneManager.TYPE_RINGTONE, newUri);
@@ -943,7 +950,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
-    public void openOptionMenu(MusicDataCapsule music, String tag) {
+    public void openOptionMenu(Music music, String tag) {
         selectedItem = music;
         optionTag = tag;
         removeFromList.setVisibility(View.GONE);
@@ -970,7 +977,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Bitmap image = null;
         //image decoder
         MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
-        mediaMetadataRetriever.setDataSource(music.getsPath());
+        mediaMetadataRetriever.setDataSource(music.getPath());
         byte[] art = mediaMetadataRetriever.getEmbeddedPicture();
 
         try {
@@ -978,8 +985,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } catch (Exception ignored) {
         }
         optionSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-        optionName.setText(music.getsName());
-        optionArtist.setText(music.getsArtist());
+        optionName.setText(music.getName());
+        optionArtist.setText(music.getArtist());
         GlideBuilt.glideBitmap(this, image, R.drawable.ic_music, optionCover, 65);
     }
 
@@ -997,10 +1004,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      *
      * @param music music to be deleted
      */
-    private void deleteFromDevice(MusicDataCapsule music) {
+    private void deleteFromDevice(Music music) {
         Uri contentUri = getContentUri(music);
         ContentResolver contentResolver = getContentResolver();
-        Uri normalUri = Uri.fromFile(new File(music.getsId()));
+        Uri normalUri = Uri.fromFile(new File(music.getId()));
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             // for android 11 and above
@@ -1125,11 +1132,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return treePath;
     }
 
-    private void addToNextPlay(MusicDataCapsule music) {
+    private void addToNextPlay(Music music) {
         bottomSheetPlayerFragment.queueAdapter.updateItemInserted(music);
     }
 
-    private void addToQueue(MusicDataCapsule music) {
+    private void addToQueue(Music music) {
         bottomSheetPlayerFragment.queueAdapter.updateItemInsertedLast(music);
     }
 
@@ -1432,7 +1439,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    private void removeFromList(MusicDataCapsule music, String optionTag) {
+    private void removeFromList(Music music, String optionTag) {
         if (optionTag.equals("openPlaylist")) {
             EventBus.getDefault().post(new RemoveFromPlaylistEvent(music));
             //solve removed song not loading in playlist adapter
@@ -1499,12 +1506,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void addToQueuePl(Playlist playlist) {
-        ArrayList<MusicDataCapsule> list = playlist.getMusicList();
+        ArrayList<Music> list = playlist.getMusicList();
         bottomSheetPlayerFragment.queueAdapter.updateListInsertedLast(list);
     }
 
     private void addToNextPlayPl(Playlist playlist) {
-        ArrayList<MusicDataCapsule> list = playlist.getMusicList();
+        ArrayList<Music> list = playlist.getMusicList();
         bottomSheetPlayerFragment.queueAdapter.updateListInserted(list);
     }
 
@@ -1512,11 +1519,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         plSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
     }
 
-    private void addToPlaylist(MusicDataCapsule music) {
+    private void addToPlaylist(Music music) {
         openPlaylistDialog(music);
     }
 
-    private void openPlaylistDialog(MusicDataCapsule music) {
+    private void openPlaylistDialog(Music music) {
         addToPlDialog = new Dialog(MainActivity.this);
 
         addToPlDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -1551,12 +1558,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         addToPlDialog.show();
     }
 
-    private void addToFavorite(MusicDataCapsule music) {
+    private void addToFavorite(Music music) {
         storageUtil.saveFavorite(music);
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    private void openCreatePlaylistDialog(MusicDataCapsule music) {
+    private void openCreatePlaylistDialog(Music music) {
         plDialog = new Dialog(MainActivity.this);
         plDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         plDialog.setContentView(R.layout.create_playlist_layout);
@@ -1608,20 +1615,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
-    private void openShare(MusicDataCapsule music) {
-        Uri uri = Uri.parse(music.getsPath());
+    private void openShare(Music music) {
+        Uri uri = Uri.parse(music.getPath());
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("audio/*");
         intent.putExtra(Intent.EXTRA_STREAM, uri);
         startActivity(Intent.createChooser(intent, "Share Via ..."));
     }
 
-    private void openDetailsBox(MusicDataCapsule music) {
+    private void openDetailsBox(Music music) {
         detailsSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
 
-        int bitrateInNum = Integer.parseInt(music.getsBitrate()) / 1000;
+        int bitrateInNum = Integer.parseInt(music.getBitrate()) / 1000;
 
-        float size = Float.parseFloat(music.getsSize()) / (1024 * 1024);
+        float size = Float.parseFloat(music.getSize()) / (1024 * 1024);
 
         int pos = String.valueOf(size).indexOf(".");
 
@@ -1631,17 +1638,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         String finalBitrate = bitrateInNum + " KBPS";
         String finalSize = beforeDot + afterDot + " mb";
 
-        songPathTv.setText(music.getsPath());
-        songNameTv.setText(music.getsName());
-        songArtistTv.setText(music.getsArtist());
+        songPathTv.setText(music.getPath());
+        songNameTv.setText(music.getName());
+        songArtistTv.setText(music.getArtist());
         songSizeTv.setText(finalSize);
         songBitrateTv.setText(finalBitrate);
-        songDurationTv.setText(convertDuration(music.getsDuration()));
-        songGenreTv.setText(music.getsGenre());
+        songDurationTv.setText(convertDuration(music.getDuration()));
+        songGenreTv.setText(music.getGenre());
 
     }
 
-    private void openTagEditor(MusicDataCapsule itemSelected) {
+    private void openTagEditor(Music itemSelected) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         Fragment fragment1 = fragmentManager.findFragmentByTag("SearchResultsFragment");
         Fragment fragment2 = fragmentManager.findFragmentByTag("TagEditorFragment");
@@ -1652,10 +1659,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (mainPlayerSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
             mainPlayerSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         }
+
+        String encodedMessage = MusicHelper.encode(itemSelected);
+
+
         if (fragment2 == null) {
             TagEditorFragment fragment = new TagEditorFragment();
             Bundle bundle = new Bundle();
-            bundle.putSerializable("currentMusic", itemSelected);
+            bundle.putSerializable("currentMusic", encodedMessage);
             fragment.setArguments(bundle);
             replaceFragment(R.id.sec_container, fragment, android.R.transition.no_transition, "TagEditorFragment");
         }
@@ -1667,8 +1678,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * @param music music
      * @return returns content uri of given music
      */
-    private Uri getContentUri(MusicDataCapsule music) {
-        int id = Integer.parseInt(music.getsId());
+    private Uri getContentUri(Music music) {
+        int id = Integer.parseInt(music.getId());
         Uri baseUri = Uri.parse("content://media/external/audio/media");
         return Uri.withAppendedPath(baseUri, "" + id);
 

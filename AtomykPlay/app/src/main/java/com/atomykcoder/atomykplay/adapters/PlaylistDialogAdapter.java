@@ -12,8 +12,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.activities.MainActivity;
+import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
-import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import com.atomykcoder.atomykplay.viewModals.Playlist;
 
 import java.util.ArrayList;
@@ -21,9 +21,9 @@ import java.util.ArrayList;
 public class PlaylistDialogAdapter extends RecyclerView.Adapter<PlaylistDialogAdapter.PlaylistViewHolder> {
     private Context context;
     private ArrayList<Playlist> playlists;
-    private MusicDataCapsule music;
+    private Music music;
 
-    public PlaylistDialogAdapter(Context _context, ArrayList<Playlist> _playlists, MusicDataCapsule _music) {
+    public PlaylistDialogAdapter(Context _context, ArrayList<Playlist> _playlists, Music _music) {
         context = _context;
         playlists = _playlists;
         music = _music;

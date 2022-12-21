@@ -14,10 +14,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.adapters.FavoriteListAdapter;
 import com.atomykcoder.atomykplay.adapters.SimpleTouchCallback;
+import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.events.RemoveFromFavoriteEvent;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
-import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -52,7 +52,7 @@ public class FavoritesFragment extends Fragment implements OnDragStartListener {
 
         LinearLayoutManager manager = new LinearLayoutManager(getContext());
 
-        ArrayList<MusicDataCapsule> favList = storageUtil.getFavouriteList();
+        ArrayList<Music> favList = storageUtil.getFavouriteList();
 
 
         if (favList != null) {

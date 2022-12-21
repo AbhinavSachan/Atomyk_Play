@@ -2,17 +2,17 @@ package com.atomykcoder.atomykplay.helperFunctions;
 
 import androidx.recyclerview.widget.DiffUtil.Callback;
 
-import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
+import com.atomykcoder.atomykplay.data.Music;
 
 import java.util.ArrayList;
 import java.util.Objects;
 
 public class MusicDiffCallback extends Callback {
 
-    private final ArrayList<MusicDataCapsule> oldMusicList;
-    private final ArrayList<MusicDataCapsule> newMusicList;
+    private final ArrayList<Music> oldMusicList;
+    private final ArrayList<Music> newMusicList;
 
-    public MusicDiffCallback(ArrayList<MusicDataCapsule> oldMusicList, ArrayList<MusicDataCapsule> newMusicList) {
+    public MusicDiffCallback(ArrayList<Music> oldMusicList, ArrayList<Music> newMusicList) {
         this.oldMusicList = oldMusicList;
         this.newMusicList = newMusicList;
     }
@@ -29,14 +29,16 @@ public class MusicDiffCallback extends Callback {
 
     @Override
     public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-        return Objects.equals(oldMusicList.get(oldItemPosition).getsId(), newMusicList.get(newItemPosition).getsId());
+        return Objects.equals(oldMusicList.get(oldItemPosition).getId(), newMusicList.get(newItemPosition).getId());
     }
 
     @Override
     public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-        MusicDataCapsule oldMusic = oldMusicList.get(oldItemPosition);
-        MusicDataCapsule newMusic = newMusicList.get(newItemPosition);
-        return oldMusic.getsName().equals(newMusic.getsName()) && oldMusic.getsDuration().equals(newMusic.getsDuration()) && oldMusic.getsArtist().equals(newMusic.getsArtist());
+        Music oldMusic = oldMusicList.get(oldItemPosition);
+        Music newMusic = newMusicList.get(newItemPosition);
+        return oldMusic.getName().equals(newMusic.getName())
+                && oldMusic.getDuration().equals(newMusic.getDuration())
+                && oldMusic.getArtist().equals(newMusic.getArtist());
     }
 
 }

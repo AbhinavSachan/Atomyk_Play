@@ -24,10 +24,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.classes.GlideBuilt;
+import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.ItemTouchHelperAdapter;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
-import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 import java.io.File;
@@ -38,7 +38,7 @@ import java.util.concurrent.Executors;
 
 public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.MusicViewAdapter> implements ItemTouchHelperAdapter {
     Context context;
-    ArrayList<MusicDataCapsule> musicList;
+    ArrayList<Music> musicList;
     OnDragStartListener onDragStartListener;
     MainActivity mainActivity;
     StorageUtil storageUtil;
@@ -46,7 +46,7 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
     // value in milliseconds
     int delay = 500;
 
-    public MusicQueueAdapter(Context _context, ArrayList<MusicDataCapsule> _musicList, OnDragStartListener onDragStartListener) {
+    public MusicQueueAdapter(Context _context, ArrayList<Music> _musicList, OnDragStartListener onDragStartListener) {
         context = _context;
         musicList = _musicList;
 
@@ -109,7 +109,7 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public void onBindViewHolder(@NonNull MusicQueueAdapter.MusicViewAdapter holder, @SuppressLint("RecyclerView") int position) {
-        MusicDataCapsule currentItem = musicList.get(position);
+        Music currentItem = musicList.get(position);
         final Bitmap[] image = {null};
         ExecutorService service1 = Executors.newSingleThreadExecutor();
         Handler handler = new Handler();
@@ -117,7 +117,7 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
 
             //image decoder
             MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
-            mediaMetadataRetriever.setDataSource(currentItem.getsPath());
+            mediaMetadataRetriever.setDataSource(currentItem.getPath());
             byte[] art = mediaMetadataRetriever.getEmbeddedPicture();
 
             try {
@@ -138,7 +138,7 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
             //endregion
 
 
-            File file = new File(currentItem.getsPath());
+            File file = new File(currentItem.getPath());
             if (file.exists()) {
                 //check is service active
                 //Store serializable music list to sharedPreference
@@ -153,7 +153,7 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
 
         //add bottom sheet functions in three dot click
         holder.imageButton.setOnTouchListener((v, event) -> {
-            File file = new File(currentItem.getsPath());
+            File file = new File(currentItem.getPath());
             if (file.exists()) {
                 //noinspection deprecation
                 if (MotionEventCompat.getActionMasked(event) == MotionEvent.ACTION_DOWN) {
@@ -166,14 +166,14 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
             return false;
         });
 
-        holder.nameText.setText(currentItem.getsName());
+        holder.nameText.setText(currentItem.getName());
         String index = String.valueOf(position + 1);
         holder.musicIndex.setText(index);
-        holder.artistText.setText(currentItem.getsArtist());
-        holder.durationText.setText(convertDuration(currentItem.getsDuration()));
+        holder.artistText.setText(currentItem.getArtist());
+        holder.durationText.setText(convertDuration(currentItem.getDuration()));
     }
 
-    public void removeItem(MusicDataCapsule item) {
+    public void removeItem(Music item) {
         int position = musicList.indexOf(item);
         if (musicList.size() != 1 && !musicList.isEmpty()) {
             if (item != null) {
@@ -197,7 +197,7 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
         return musicList.size();
     }
 
-    public void updateItemInserted(MusicDataCapsule music) {
+    public void updateItemInserted(Music music) {
         int pos = storageUtil.loadMusicIndex();
         musicList.add(pos + 1, music);
         notifyItemInserted(pos + 1);
@@ -205,7 +205,7 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
         storageUtil.saveQueueList(musicList);
     }
 
-    public void updateListInserted(ArrayList<MusicDataCapsule> list) {
+    public void updateListInserted(ArrayList<Music> list) {
         int pos = storageUtil.loadMusicIndex();
         musicList.addAll(pos + 1, list);
         notifyItemRangeInserted(pos + 1, list.size());
@@ -213,14 +213,14 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
         storageUtil.saveQueueList(musicList);
     }
 
-    public void updateListInsertedLast(ArrayList<MusicDataCapsule> list) {
+    public void updateListInsertedLast(ArrayList<Music> list) {
         musicList.addAll(list);
         int pos = musicList.lastIndexOf(list.get(0));
         notifyItemRangeInserted(pos, list.size());
         storageUtil.saveQueueList(musicList);
     }
 
-    public void updateItemInsertedLast(MusicDataCapsule music) {
+    public void updateItemInsertedLast(Music music) {
         musicList.add(music);
         int pos = musicList.lastIndexOf(music);
         notifyItemInserted(pos);

@@ -17,6 +17,7 @@ import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.adapters.OpenPlayListAdapter;
 import com.atomykcoder.atomykplay.adapters.SimpleTouchCallback;
 import com.atomykcoder.atomykplay.classes.GlideBuilt;
+import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.events.RemoveFromPlaylistEvent;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
@@ -56,7 +57,7 @@ public class OpenPlayListFragment extends Fragment implements OnDragStartListene
         recyclerView.setHasFixedSize(true);
         LinearLayoutManager manager = new LinearLayoutManager(getContext());
 
-        ArrayList<MusicDataCapsule> musicList = null;
+        ArrayList<Music> musicList = null;
 
         if(playlist != null) {
             musicList = playlist.getMusicList();

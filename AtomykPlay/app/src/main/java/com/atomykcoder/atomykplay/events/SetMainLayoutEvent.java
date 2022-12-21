@@ -1,12 +1,12 @@
 package com.atomykcoder.atomykplay.events;
 
-import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
+import com.atomykcoder.atomykplay.data.Music;
 
 public class SetMainLayoutEvent {
 
-    public MusicDataCapsule activeMusic;
+    public Music activeMusic;
 
-    public SetMainLayoutEvent(MusicDataCapsule activeMusic) {
+    public SetMainLayoutEvent(Music activeMusic) {
         this.activeMusic = activeMusic;
     }
 }

@@ -1,8 +1,11 @@
 package com.atomykcoder.atomykplay.helperFunctions;
 
 import android.annotation.SuppressLint;
+import android.util.Base64;
 
+import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.viewModals.LRCMap;
+import com.google.protobuf.InvalidProtocolBufferException;
 
 import java.util.ArrayList;
 import java.util.regex.Matcher;
@@ -111,5 +114,20 @@ public class MusicHelper {
         second = second * 1000;
         out = min + second;
         return out;
+    }
+
+    public static String encode(Music music) {
+        byte[] serializedMessage = music.toByteArray();
+        return Base64.encodeToString(serializedMessage, Base64.DEFAULT);
+    }
+
+    public static Music decode(String encoded) {
+        byte[] serializedMessage = Base64.decode(encoded, Base64.DEFAULT);
+        try {
+            return Music.parseFrom(serializedMessage);
+        } catch (InvalidProtocolBufferException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

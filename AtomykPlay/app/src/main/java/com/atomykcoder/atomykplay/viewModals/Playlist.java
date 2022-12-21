@@ -1,14 +1,16 @@
 package com.atomykcoder.atomykplay.viewModals;
 
+import com.atomykcoder.atomykplay.data.Music;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 
 public class Playlist implements Serializable {
     private final String name;
     private final String coverUri;
-    private final ArrayList<MusicDataCapsule> musicList;
+    private final ArrayList<Music> musicList;
 
-    public Playlist(String _name, String _coverUri , ArrayList<MusicDataCapsule> _musicList) {
+    public Playlist(String _name, String _coverUri , ArrayList<Music> _musicList) {
         name = _name;
         coverUri = _coverUri;
         musicList = _musicList;
@@ -39,7 +41,7 @@ public class Playlist implements Serializable {
      * get music list in arraylist format with no keys
      * @return returns arraylist<MusicDataCapsule>
      */
-    public ArrayList<MusicDataCapsule> getMusicList() {
+    public ArrayList<Music> getMusicList() {
         return musicList;
     }
 
@@ -47,7 +49,7 @@ public class Playlist implements Serializable {
      * add music in playlist
      * @param music music to be added
      */
-    public void addMusic(MusicDataCapsule music) {
+    public void addMusic(Music music) {
        musicList.add(music);
     }
 
@@ -55,7 +57,7 @@ public class Playlist implements Serializable {
      * remove music from playlist
      * @param music music to be removed
      */
-    public void removeMusic(MusicDataCapsule music) {
+    public void removeMusic(Music music) {
         musicList.remove(music);
     }
 

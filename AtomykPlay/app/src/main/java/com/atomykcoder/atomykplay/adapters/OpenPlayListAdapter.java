@@ -25,6 +25,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.classes.GlideBuilt;
+import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.ItemTouchHelperAdapter;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
@@ -40,14 +41,14 @@ public class OpenPlayListAdapter extends RecyclerView.Adapter<OpenPlayListAdapte
     private final Context context;
     private final MainActivity mainActivity;
     String playlistName;
-    ArrayList<MusicDataCapsule> musicList;
+    ArrayList<Music> musicList;
     OnDragStartListener onDragStartListener;
     StorageUtil storage;
     long lastClickTime;
     // value in milliseconds
     int delay = 500;
 
-    public OpenPlayListAdapter(Context _context, String _playlistName, ArrayList<MusicDataCapsule> _musicList, OnDragStartListener onDragStartListener) {
+    public OpenPlayListAdapter(Context _context, String _playlistName, ArrayList<Music> _musicList, OnDragStartListener onDragStartListener) {
         context = _context;
         playlistName = _playlistName;
         musicList = _musicList;
@@ -68,7 +69,7 @@ public class OpenPlayListAdapter extends RecyclerView.Adapter<OpenPlayListAdapte
         //if any item has been removed this will save new list on temp list
         if (musicList != null) {
             if (position != -1 && position < musicList.size()) {
-                MusicDataCapsule item = musicList.get(position);
+                Music item = musicList.get(position);
                 removeItem(item);
             }
         }
@@ -84,12 +85,12 @@ public class OpenPlayListAdapter extends RecyclerView.Adapter<OpenPlayListAdapte
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public void onBindViewHolder(@NonNull OpenPlayListAdapter.OpenItemViewHolder holder, int position) {
-        MusicDataCapsule currentItem = musicList.get(position);
+        Music currentItem = musicList.get(position);
         StorageUtil.SettingsStorage settingsStorage = new StorageUtil.SettingsStorage(context);
 
-        holder.nameText.setText(currentItem.getsName());
-        holder.artistText.setText(currentItem.getsArtist());
-        holder.durationText.setText(convertDuration(currentItem.getsDuration()));
+        holder.nameText.setText(currentItem.getName());
+        holder.artistText.setText(currentItem.getArtist());
+        holder.durationText.setText(convertDuration(currentItem.getDuration()));
 
         final Bitmap[] image = {null};
         ExecutorService service1 = Executors.newSingleThreadExecutor();
@@ -98,7 +99,7 @@ public class OpenPlayListAdapter extends RecyclerView.Adapter<OpenPlayListAdapte
 
             //image decoder
             MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
-            mediaMetadataRetriever.setDataSource(currentItem.getsPath());
+            mediaMetadataRetriever.setDataSource(currentItem.getPath());
             byte[] art = mediaMetadataRetriever.getEmbeddedPicture();
 
             try {
@@ -118,14 +119,14 @@ public class OpenPlayListAdapter extends RecyclerView.Adapter<OpenPlayListAdapte
             lastClickTime = SystemClock.elapsedRealtime();
             //endregion
 
-            File file = new File(currentItem.getsPath());
+            File file = new File(currentItem.getPath());
 
             if (file.exists()) {
                 //check is service active
                 //if shuffle button is already on it will shuffle it from start
                 ExecutorService service = Executors.newSingleThreadExecutor();
                 if (settingsStorage.loadKeepShuffle()) {
-                    ArrayList<MusicDataCapsule> shuffleList = new ArrayList<>(musicList);
+                    ArrayList<Music> shuffleList = new ArrayList<>(musicList);
                     //saving list in temp for restore function in player fragment
 
                     storage.saveTempMusicList(musicList);
@@ -175,7 +176,7 @@ public class OpenPlayListAdapter extends RecyclerView.Adapter<OpenPlayListAdapte
 
     }
 
-    public void removeItem(MusicDataCapsule music) {
+    public void removeItem(Music music) {
         StorageUtil storageUtil = new StorageUtil(context);
         int position = musicList.indexOf(music);
 

@@ -1,12 +1,12 @@
 package com.atomykcoder.atomykplay.events;
 
 
-import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
+import com.atomykcoder.atomykplay.data.Music;
 
 public class RemoveFromPlaylistEvent {
-    public MusicDataCapsule music;
+    public Music music;
 
-    public RemoveFromPlaylistEvent(MusicDataCapsule _music) {
+    public RemoveFromPlaylistEvent(Music _music) {
         music = _music;
     }
 }

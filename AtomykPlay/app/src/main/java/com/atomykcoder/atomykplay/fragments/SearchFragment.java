@@ -21,8 +21,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.adapters.MusicMainAdapter;
+import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
-import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 
 import java.util.ArrayList;
 
@@ -32,13 +32,13 @@ public class SearchFragment extends Fragment {
     private RecyclerView recycler_view;
     private RadioGroup radioGroup;
     private ArrayList<String> idList;
-    private ArrayList<MusicDataCapsule> searchedMusicList;
+    private ArrayList<Music> searchedMusicList;
     private MusicMainAdapter adapter;
     private RadioButton songButton, albumButton, artistButton, genreButton;
     private TextView textView;
 
     @SuppressLint("NotifyDataSetChanged")
-    public void searchWithFilters(String query, ArrayList<MusicDataCapsule> dataList) {
+    public void searchWithFilters(String query, ArrayList<Music> dataList) {
 
         //Check if any radio button is pressed
         radioGroup.setOnCheckedChangeListener((radioGroup, i) -> {
@@ -69,7 +69,7 @@ public class SearchFragment extends Fragment {
         genreButton = view.findViewById(R.id.genre_button);
         radioGroup = view.findViewById(R.id.radio_group);
         textView = view.findViewById(R.id.searched_song_num);
-        ArrayList<MusicDataCapsule> dataList = new StorageUtil(getContext()).loadInitialList();
+        ArrayList<Music> dataList = new StorageUtil(getContext()).loadInitialList();
 
         InputMethodManager manager = (InputMethodManager) requireContext().getSystemService(Context.INPUT_METHOD_SERVICE);
 
@@ -112,8 +112,8 @@ public class SearchFragment extends Fragment {
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(requireContext());
         recycler_view.setLayoutManager(layoutManager);
         idList = new ArrayList<>();
-        for (MusicDataCapsule music : searchedMusicList) {
-            idList.add(music.getsId());
+        for (Music music : searchedMusicList) {
+            idList.add(music.getId());
         }
         adapter = new MusicMainAdapter(getContext(), searchedMusicList);
         recycler_view.setAdapter(adapter);
@@ -129,16 +129,16 @@ public class SearchFragment extends Fragment {
     }
 
     //Function that adds music to an arraylist which is being used to show music in recycler view
-    private void addMusic(MusicDataCapsule song) {
+    private void addMusic(Music song) {
         searchedMusicList.add(song);
-        idList.add(song.getsId());
+        idList.add(song.getId());
     }
 
 
     //Function that performs searches and if it finds a match we add that song to our arraylist
     //Function also do cleanup from previous search
     //Function also searches based on filters selected
-    public void search(String query, ArrayList<MusicDataCapsule> dataList) {
+    public void search(String query, ArrayList<Music> dataList) {
         cleanUp();
 
         //get id from selected button
@@ -148,8 +148,8 @@ public class SearchFragment extends Fragment {
         switch (id) {
             case 1:
                 if (!query.isEmpty()) {
-                    for (MusicDataCapsule song : dataList) {
-                        if (song.getsName().toLowerCase().contains(query)) {
+                    for (Music song : dataList) {
+                        if (song.getName().toLowerCase().contains(query)) {
                             addMusic(song);
                         }
                     }
@@ -157,8 +157,8 @@ public class SearchFragment extends Fragment {
                 break;
             case 2:
                 if (!query.isEmpty()) {
-                    for (MusicDataCapsule song : dataList) {
-                        if (song.getsAlbum().toLowerCase().contains(query)) {
+                    for (Music song : dataList) {
+                        if (song.getAlbum().toLowerCase().contains(query)) {
                             addMusic(song);
                         }
                     }
@@ -166,8 +166,8 @@ public class SearchFragment extends Fragment {
                 break;
             case 3:
                 if (!query.isEmpty()) {
-                    for (MusicDataCapsule song : dataList) {
-                        if (song.getsArtist().toLowerCase().contains(query)) {
+                    for (Music song : dataList) {
+                        if (song.getArtist().toLowerCase().contains(query)) {
                             addMusic(song);
                         }
                     }
@@ -175,9 +175,9 @@ public class SearchFragment extends Fragment {
                 break;
             case 4:
                 if (!query.isEmpty()) {
-                    for (MusicDataCapsule song : dataList) {
-                        if (song.getsGenre() != null)
-                            if (song.getsGenre().toLowerCase().contains(query)) {
+                    for (Music song : dataList) {
+                        if (song.getGenre() != null)
+                            if (song.getGenre().toLowerCase().contains(query)) {
                                 addMusic(song);
                             }
                     }
@@ -185,8 +185,8 @@ public class SearchFragment extends Fragment {
                 break;
             default:
                 if (!query.isEmpty()) {
-                    for (MusicDataCapsule song : dataList) {
-                        if (song.getsName().toLowerCase().contains(query) || (song.getsArtist().toLowerCase().contains(query))) {
+                    for (Music song : dataList) {
+                        if (song.getName().toLowerCase().contains(query) || (song.getArtist().toLowerCase().contains(query))) {
                             addMusic(song);
                         }
                     }
@@ -198,7 +198,7 @@ public class SearchFragment extends Fragment {
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    public void handleSearchEvent(String query, ArrayList<MusicDataCapsule> dataList) {
+    public void handleSearchEvent(String query, ArrayList<Music> dataList) {
         if (dataList != null) {
             search(query, dataList);
             searchWithFilters(query, dataList);

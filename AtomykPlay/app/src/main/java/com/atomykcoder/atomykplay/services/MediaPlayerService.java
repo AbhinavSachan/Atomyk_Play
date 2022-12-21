@@ -36,6 +36,7 @@ import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
+import android.util.Base64;
 import android.view.KeyEvent;
 import android.widget.Toast;
 
@@ -44,15 +45,17 @@ import androidx.core.app.NotificationCompat;
 
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.activities.MainActivity;
+import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.enums.PlaybackStatus;
 import com.atomykcoder.atomykplay.events.PrepareRunnableEvent;
 import com.atomykcoder.atomykplay.events.RemoveLyricsHandlerEvent;
 import com.atomykcoder.atomykplay.events.SetMainLayoutEvent;
 import com.atomykcoder.atomykplay.events.UpdateMusicImageEvent;
 import com.atomykcoder.atomykplay.events.UpdateMusicProgressEvent;
+import com.atomykcoder.atomykplay.helperFunctions.MusicHelper;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.viewModals.LRCMap;
-import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
+import com.google.protobuf.InvalidProtocolBufferException;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -93,9 +96,9 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     private MediaSessionCompat mediaSession;
     private MediaControllerCompat.TransportControls transportControls;
     //list of available music
-    private ArrayList<MusicDataCapsule> musicList;
+    private ArrayList<Music> musicList;
     private int musicIndex = -1;
-    private MusicDataCapsule activeMusic = null;//object of currently playing audio
+    private Music activeMusic = null;//object of currently playing audio
     //
     private PhoneStateListener phoneStateListener;
     private TelephonyManager telephonyManager;
@@ -196,7 +199,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            MusicDataCapsule music = (MusicDataCapsule) intent.getSerializableExtra("music");
+            String encodedMessage =  intent.getStringExtra("music");
+            Music music = MusicHelper.decode(encodedMessage);
 
             if (music != null) {
                 activeMusic = music;
@@ -269,7 +273,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     /**
      * this function updates new music data in notification
      */
-    private void updateMetaData(MusicDataCapsule activeMusic) {
+    private void updateMetaData(Music activeMusic) {
         musicList = storage.loadQueueList();
         musicIndex = storage.loadMusicIndex();
         String songName;
@@ -279,17 +283,17 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         Handler handler = new Handler();
         final Bitmap[] finalArtWork = new Bitmap[1];
         if (activeMusic != null) {
-            dur = activeMusic.getsDuration();
-            songName = activeMusic.getsName();
-            artistName = activeMusic.getsArtist();
-            album = activeMusic.getsAlbum();
+            dur = activeMusic.getDuration();
+            songName = activeMusic.getName();
+            artistName = activeMusic.getArtist();
+            album = activeMusic.getAlbum();
 
             ExecutorService service = Executors.newSingleThreadExecutor();
             service.execute(() -> {
                 //image decoder
                 Bitmap image = null;
                 MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
-                mediaMetadataRetriever.setDataSource(activeMusic.getsPath());
+                mediaMetadataRetriever.setDataSource(activeMusic.getPath());
                 byte[] art = mediaMetadataRetriever.getEmbeddedPicture();
 
                 try {
@@ -352,9 +356,9 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                     .setColorized(true)
                     .setSmallIcon(R.drawable.ic_headset)
                     //set content
-                    .setContentText(activeMusic.getsArtist())
-                    .setContentTitle(activeMusic.getsAlbum())
-                    .setContentInfo(activeMusic.getsName())
+                    .setContentText(activeMusic.getArtist())
+                    .setContentTitle(activeMusic.getAlbum())
+                    .setContentInfo(activeMusic.getName())
                     .setDeleteIntent(playbackAction(4))
                     .setChannelId(CHANNEL_ID)
                     //set control
@@ -696,7 +700,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
         try {
             if (activeMusic != null) {
-                media_player.setDataSource(activeMusic.getsPath());
+                media_player.setDataSource(activeMusic.getPath());
                 media_player.prepareAsync();
             }
         } catch (IOException e) {
@@ -772,7 +776,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                     int position = storage.loadMusicLastPos();
                     if (service_bound) {
                         setSeekBar();
-                        LRCMap lrcMap = storage.loadLyrics(activeMusic.getsId());
+                        LRCMap lrcMap = storage.loadLyrics(activeMusic.getId());
                         if (lrcMap != null) {
                             EventBus.getDefault().post(new PrepareRunnableEvent());
                         }

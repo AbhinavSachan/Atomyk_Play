@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
 
+import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 
 import java.io.File;
@@ -20,7 +21,7 @@ import java.util.Locale;
 
 public class FetchMusic {
 
-    public static void fetchMusic(ArrayList<MusicDataCapsule> dataList, Context context) {
+    public static void fetchMusic(ArrayList<Music> dataList, Context context) {
         String selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0";
         @SuppressLint("InlinedApi")
         String[] proj = {
@@ -91,11 +92,14 @@ public class FetchMusic {
                         String sAlbumUri = Uri.withAppendedPath(uri, sAlbumId).toString();
 
                         int filter = new StorageUtil.SettingsStorage(context).loadFilterDur() * 1000;
-                        MusicDataCapsule music = new MusicDataCapsule(sTitle, sArtist,
-                                sAlbum, sAlbumUri, sDuration, sPath, sBitrate, sMimeType, sSize, sGenre, sId, sDateAdded);
-                        File file = new File(music.getsPath());
+                        Music music = Music.newBuilder().setName(sTitle).setArtist(sArtist)
+                                .setAlbum(sAlbum).setAlbumUri(sAlbumUri).setDuration(sDuration)
+                                .setPath(sPath).setBitrate(sBitrate).setMimeType(sMimeType)
+                                .setSize(sSize).setGenre(sGenre != null ? sGenre : "").setId(sId).setDateAdded(sDateAdded)
+                                .build();
+                        File file = new File(music.getPath());
                         if (file.exists()) {
-                            if (filter <= Integer.parseInt(music.getsDuration())) {
+                            if (filter <= Integer.parseInt(music.getDuration())) {
                                 dataList.add(music);
                             }
                         }
@@ -103,7 +107,7 @@ public class FetchMusic {
                 } while (audioCursor.moveToNext());
                 audioCursor.close();
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    Collections.sort(dataList, Comparator.comparing(MusicDataCapsule::getsName));
+                    Collections.sort(dataList, Comparator.comparing(Music::getName));
                 }
             }
         }
