@@ -1,5 +1,7 @@
 package com.atomykcoder.atomykplay.fragments;
 
+import static com.atomykcoder.atomykplay.activities.MainActivity.TAG_BLOCK_LIST;
+
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Intent;
@@ -256,7 +258,7 @@ public class SettingsFragment extends Fragment {
         directory_icon.setOnClickListener(view -> {
             Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
             i.addCategory(Intent.CATEGORY_DEFAULT);
-            requireActivity().startActivityForResult(i, 2020);
+            requireActivity().startActivityForResult(i, TAG_BLOCK_LIST);
         });
 
         // set listener on okay button

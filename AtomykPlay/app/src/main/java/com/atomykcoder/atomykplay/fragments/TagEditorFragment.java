@@ -1,5 +1,7 @@
 package com.atomykcoder.atomykplay.fragments;
 
+import static com.atomykcoder.atomykplay.activities.MainActivity.TAG_EDITOR_COVER;
+
 import android.Manifest;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -35,6 +37,7 @@ import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 
+import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.audio.exceptions.CannotReadException;
 import org.jaudiotagger.audio.exceptions.CannotWriteException;
@@ -42,6 +45,7 @@ import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
 import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
 import org.jaudiotagger.audio.mp3.MP3File;
 import org.jaudiotagger.tag.FieldKey;
+import org.jaudiotagger.tag.Tag;
 import org.jaudiotagger.tag.TagException;
 import org.jaudiotagger.tag.datatype.Artwork;
 import org.jaudiotagger.tag.id3.ID3v24Tag;
@@ -54,10 +58,9 @@ import java.util.concurrent.Executors;
 
 public class TagEditorFragment extends Fragment {
 
-    private static final int TAG_EDITOR_COVER = 6542;
+    public ImageView coverImageView;
     private EditText editName, editArtist, editAlbum, editGenre;
     private ImageView pickImageView;
-    public ImageView coverImageView;
     private FloatingActionButton saveButton;
     private MusicDataCapsule music;
     private ContentValues cv;
@@ -68,7 +71,7 @@ public class TagEditorFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_tag_editor, container, false);
 
-         music = (MusicDataCapsule) (getArguments() != null ? getArguments().getSerializable("currentMusic") : null);
+        music = (MusicDataCapsule) (getArguments() != null ? getArguments().getSerializable("currentMusic") : null);
 
         Toolbar toolbar = view.findViewById(R.id.toolbar_tag_editor);
         toolbar.setNavigationIcon(R.drawable.ic_back);
@@ -114,7 +117,7 @@ public class TagEditorFragment extends Fragment {
 
         saveButton.setOnClickListener(v -> {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                if(!Environment.isExternalStorageManager()) {
+                if (!Environment.isExternalStorageManager()) {
                     requestPermissionAndroid11AndAbove();
                 } else {
                     saveMusicChanges(music);
@@ -134,7 +137,7 @@ public class TagEditorFragment extends Fragment {
             Uri uri = Uri.parse("package:" + BuildConfig.APPLICATION_ID);
             Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, uri);
             startActivity(intent);
-        } catch (Exception ex){
+        } catch (Exception ex) {
             Intent intent = new Intent();
             intent.setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
             startActivity(intent);
@@ -157,7 +160,7 @@ public class TagEditorFragment extends Fragment {
                     }
                 }).check();
     }
-
+private Uri imageUri;
     private void saveMusicChanges(MusicDataCapsule music) {
         String newTitle = editName.getText().toString().trim();
         String newArtist = editArtist.getText().toString().trim();
@@ -168,15 +171,14 @@ public class TagEditorFragment extends Fragment {
             MP3File f = (MP3File) AudioFileIO.read(new File(music.getsPath()));
             ID3v24Tag tag = f.getID3v2TagAsv24();
 
-            Uri imageUri = (Uri) coverImageView.getTag();
 
             tag.setField(FieldKey.TITLE, newTitle);
             tag.setField(FieldKey.ARTIST, newArtist);
             tag.setField(FieldKey.ALBUM, newAlbum);
             tag.setField(FieldKey.GENRE, newGenre);
 
-            if(imageUri != null) {
-                File file = new File(imageUri.getPath().replace("/raw/", ""));
+            if (imageUri != null) {
+                File file = new File(imageUri.getPath());
                 Artwork artwork = Artwork.createArtworkFromFile(file);
                 tag.addField(artwork);
                 tag.setField(artwork);
@@ -187,7 +189,13 @@ public class TagEditorFragment extends Fragment {
 
         } catch (CannotReadException | InvalidAudioFrameException | ReadOnlyFileException | TagException | IOException | CannotWriteException e) {
             e.printStackTrace();
+            Toast.makeText(requireContext(), "Something went wrong", Toast.LENGTH_SHORT).show();
         }
 
+    }
+
+    public void setImageUri(Uri album_uri) {
+        imageUri = album_uri;
+        GlideBuilt.glide(requireContext(),String.valueOf(imageUri),0,coverImageView,412);
     }
 }

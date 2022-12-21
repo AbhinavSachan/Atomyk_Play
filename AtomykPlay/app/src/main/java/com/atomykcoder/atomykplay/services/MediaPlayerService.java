@@ -763,7 +763,9 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 setIcon(PlaybackStatus.PAUSED);
                 buildNotification(PlaybackStatus.PAUSED, 0f);
             }
-        notificationManager.cancelAll();
+        if (notificationManager != null) {
+            notificationManager.cancelAll();
+        }
         service_stopped = true;
         stopSelf();
     }

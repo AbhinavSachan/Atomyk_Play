@@ -39,6 +39,7 @@
                         android:id="@+id/song_image_view_tag"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
                         android:src="@drawable/ic_choose_artwork" />
 
                     <ImageView

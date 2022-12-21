@@ -1011,23 +1011,25 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     public void setPreviousData(MusicDataCapsule activeMusic) {
         Handler handler = new Handler();
 
-        ExecutorService service = Executors.newSingleThreadExecutor();
-        service.execute(() -> {
-            //image decoder
-            Bitmap image = null;
-            MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
-            mediaMetadataRetriever.setDataSource(activeMusic.getsPath());
-            byte[] art = mediaMetadataRetriever.getEmbeddedPicture();
+        if (activeMusic != null) {
+            ExecutorService service = Executors.newSingleThreadExecutor();
+            service.execute(() -> {
+                //image decoder
+                Bitmap image = null;
+                MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
+                mediaMetadataRetriever.setDataSource(activeMusic.getsPath());
+                byte[] art = mediaMetadataRetriever.getEmbeddedPicture();
 
-            try {
-                image = BitmapFactory.decodeByteArray(art, 0, art.length);
-            } catch (Exception ignored) {
-            }
+                try {
+                    image = BitmapFactory.decodeByteArray(art, 0, art.length);
+                } catch (Exception ignored) {
+                }
 
-            Bitmap finalImage = image;
-            handler.post(() -> EventBus.getDefault().post(new SetMainLayoutEvent(activeMusic, finalImage)));
-        });
-        service.shutdown();
+                Bitmap finalImage = image;
+                handler.post(() -> EventBus.getDefault().post(new SetMainLayoutEvent(activeMusic, finalImage)));
+            });
+            service.shutdown();
+        }
 
         if (activeMusic != null) {
             seekBarMain.setMax(Integer.parseInt(activeMusic.getsDuration()));
