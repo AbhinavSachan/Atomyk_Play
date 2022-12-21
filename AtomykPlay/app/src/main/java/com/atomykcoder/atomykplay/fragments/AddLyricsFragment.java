@@ -4,7 +4,6 @@ import android.app.Dialog;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,12 +19,12 @@ import androidx.fragment.app.Fragment;
 
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.activities.MainActivity;
+import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.events.RunnableSyncLyricsEvent;
 import com.atomykcoder.atomykplay.helperFunctions.FetchLyrics;
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.viewModals.LRCMap;
-import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -60,7 +59,9 @@ public class AddLyricsFragment extends Fragment {
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_add_lyrics, container, false);
 
-        MusicDataCapsule selectedMusic = (MusicDataCapsule) (getArguments() != null ? getArguments().getSerializable("selectedMusic") : null);
+        String decodeMessage = (String) (getArguments() != null ? getArguments().getSerializable("selectedMusic") : null);
+
+        Music selectedMusic = MusicHelper.decode(decodeMessage);
 
         editTextLyrics = view.findViewById(R.id.edit_lyrics);
         Button saveBtn = view.findViewById(R.id.btn_save);
@@ -77,9 +78,9 @@ public class AddLyricsFragment extends Fragment {
             }
         });
 
-        name = selectedMusic != null ? selectedMusic.getsName() : "";
-        artist = selectedMusic != null ? selectedMusic.getsArtist() : "";
-        musicId = selectedMusic != null ? selectedMusic.getsId() : "";
+        name = selectedMusic != null ? selectedMusic.getName() : "";
+        artist = selectedMusic != null ? selectedMusic.getArtist() : "";
+        musicId = selectedMusic != null ? selectedMusic.getId() : "";
 
         TextView nameText = view.findViewById(R.id.song_name_tv);
         nameText.setText(name);

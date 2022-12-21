@@ -10,7 +10,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.SystemClock;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,10 +24,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.classes.GlideBuilt;
+import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.ItemTouchHelperAdapter;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
-import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -40,17 +39,17 @@ public class OpenPlayListAdapter extends RecyclerView.Adapter<OpenPlayListAdapte
     private final Context context;
     private final MainActivity mainActivity;
     String playlistName;
-    ArrayList<String> musicIDList;
+    ArrayList<Music> musicList;
     OnDragStartListener onDragStartListener;
     StorageUtil storage;
     long lastClickTime;
     // value in milliseconds
     int delay = 500;
 
-    public OpenPlayListAdapter(Context _context, String _playlistName, ArrayList<String> _musicIDList, OnDragStartListener onDragStartListener) {
+    public OpenPlayListAdapter(Context _context, String _playlistName, ArrayList<Music> _musicList, OnDragStartListener onDragStartListener) {
         context = _context;
         playlistName = _playlistName;
-        musicIDList = _musicIDList;
+        musicList = _musicList;
 
         this.onDragStartListener = onDragStartListener;
         mainActivity = (MainActivity) context;
@@ -66,10 +65,10 @@ public class OpenPlayListAdapter extends RecyclerView.Adapter<OpenPlayListAdapte
     @Override
     public void onItemDismiss(int position) {
         //if any item has been removed this will save new list on temp list
-        if (musicIDList != null) {
-            if (position != -1 && position < musicIDList.size()) {
-                String currentID = musicIDList.get(position);
-                removeItem(currentID);
+        if (musicList != null) {
+            if (position != -1 && position < musicList.size()) {
+                Music item = musicList.get(position);
+                removeItem(item);
             }
         }
     }
@@ -84,13 +83,12 @@ public class OpenPlayListAdapter extends RecyclerView.Adapter<OpenPlayListAdapte
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public void onBindViewHolder(@NonNull OpenPlayListAdapter.OpenItemViewHolder holder, int position) {
-        MusicDataCapsule currentItem = storage.getItemFromInitialList(musicIDList.get(position));
-
+        Music currentItem = musicList.get(position);
         StorageUtil.SettingsStorage settingsStorage = new StorageUtil.SettingsStorage(context);
 
-        holder.nameText.setText(currentItem.getsName());
-        holder.artistText.setText(currentItem.getsArtist());
-        holder.durationText.setText(convertDuration(currentItem.getsDuration()));
+        holder.nameText.setText(currentItem.getName());
+        holder.artistText.setText(currentItem.getArtist());
+        holder.durationText.setText(convertDuration(currentItem.getDuration()));
 
         final Bitmap[] image = {null};
         ExecutorService service1 = Executors.newSingleThreadExecutor();
@@ -99,7 +97,7 @@ public class OpenPlayListAdapter extends RecyclerView.Adapter<OpenPlayListAdapte
 
             //image decoder
             MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
-            mediaMetadataRetriever.setDataSource(currentItem.getsPath());
+            mediaMetadataRetriever.setDataSource(currentItem.getPath());
             byte[] art = mediaMetadataRetriever.getEmbeddedPicture();
 
             try {
@@ -119,33 +117,33 @@ public class OpenPlayListAdapter extends RecyclerView.Adapter<OpenPlayListAdapte
             lastClickTime = SystemClock.elapsedRealtime();
             //endregion
 
-            File file = new File(currentItem.getsPath());
+            File file = new File(currentItem.getPath());
 
             if (file.exists()) {
                 //check is service active
                 //if shuffle button is already on it will shuffle it from start
                 ExecutorService service = Executors.newSingleThreadExecutor();
                 if (settingsStorage.loadKeepShuffle()) {
-                    ArrayList<String> shuffleIDList = new ArrayList<>(musicIDList);
+                    ArrayList<Music> shuffleList = new ArrayList<>(musicList);
                     //saving list in temp for restore function in player fragment
 
-                    storage.saveTempMusicList(musicIDList);
+                    storage.saveTempMusicList(musicList);
                     storage.saveShuffle(shuffle);
 
                     service.execute(() -> {
                         //removing current item from list
-                        shuffleIDList.remove(position);
+                        shuffleList.remove(position);
                         //shuffling list
-                        Collections.shuffle(shuffleIDList);
+                        Collections.shuffle(shuffleList);
                         //adding the removed item in shuffled list on 0th index
-                        shuffleIDList.add(0, currentItem.getsId());
+                        shuffleList.add(0, currentItem);
                         //saving list
-                        storage.saveQueueList(musicIDList);
+                        storage.saveQueueList(musicList);
                         storage.saveMusicIndex(0);
                         // post-execute code here
                         handler.post(() -> {
                             mainActivity.playAudio(currentItem);
-                            mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(musicIDList);
+                            mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(musicList);
                             mainActivity.openBottomPlayer();
                         });
                     });
@@ -155,12 +153,12 @@ public class OpenPlayListAdapter extends RecyclerView.Adapter<OpenPlayListAdapte
                     //Store serializable music list to sharedPreference
                     service.execute(() -> {
                         storage.saveShuffle(no_shuffle);
-                        storage.saveQueueList(musicIDList);
+                        storage.saveQueueList(musicList);
                         storage.saveMusicIndex(position);
                         // post-execute code here
                         handler.post(() -> {
                             mainActivity.playAudio(currentItem);
-                            mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(musicIDList);
+                            mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(musicList);
                             mainActivity.openBottomPlayer();
                         });
                     });
@@ -168,7 +166,7 @@ public class OpenPlayListAdapter extends RecyclerView.Adapter<OpenPlayListAdapte
                 }
             } else {
                 Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show();
-                removeItem(currentItem.getsId());
+                removeItem(currentItem);
             }
         });
 
@@ -176,22 +174,22 @@ public class OpenPlayListAdapter extends RecyclerView.Adapter<OpenPlayListAdapte
 
     }
 
-    public void removeItem(String musicID) {
+    public void removeItem(Music music) {
         StorageUtil storageUtil = new StorageUtil(context);
-        int position = musicIDList.indexOf(musicID);
+        int position = musicList.indexOf(music);
 
         if (position != -1) {
-            musicIDList.remove(position);
-            storageUtil.removeItemInPlaylist(musicID, playlistName);
+            musicList.remove(position);
+            storageUtil.removeItemInPlaylist(music, playlistName);
         }
 
-        notifyItemRangeChanged(position, musicIDList.size() - (position + 1));
+        notifyItemRangeChanged(position, musicList.size() - (position + 1));
         notifyItemRemoved(position);
     }
 
     @Override
     public int getItemCount() {
-        return musicIDList.size();
+        return musicList.size();
     }
 
     public static class OpenItemViewHolder extends RecyclerView.ViewHolder {

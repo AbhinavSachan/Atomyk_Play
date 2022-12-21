@@ -53,6 +53,7 @@ import com.atomykcoder.atomykplay.adapters.SimpleTouchCallback;
 import com.atomykcoder.atomykplay.classes.GlideBuilt;
 import com.atomykcoder.atomykplay.customScripts.CenterSmoothScrollScript;
 import com.atomykcoder.atomykplay.customScripts.CustomBottomSheet;
+import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.enums.PlaybackStatus;
 import com.atomykcoder.atomykplay.events.PrepareRunnableEvent;
 import com.atomykcoder.atomykplay.events.RemoveLyricsHandlerEvent;
@@ -64,7 +65,6 @@ import com.atomykcoder.atomykplay.helperFunctions.MusicHelper;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
 import com.atomykcoder.atomykplay.viewModals.LRCMap;
-import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
@@ -98,6 +98,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     public View info_layout;
     public MusicQueueAdapter queueAdapter;
     public ArrayList<String> idList;
+    public ArrayList<Music> musicArrayList;
     private boolean userScrolling = false;
     RecyclerView.OnScrollListener onScrollListener = new RecyclerView.OnScrollListener() {
         @Override
@@ -146,7 +147,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     private LinearLayoutManager linearLayoutManager;
     private MusicLyricsAdapter lyricsAdapter;
     private Dialog timerDialogue;
-    private MusicDataCapsule activeMusic;
+    private Music activeMusic;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -166,7 +167,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
             activeMusic = getMusic();
         }
         if (activeMusic != null) {
-            lrcMap = storageUtil.loadLyrics(activeMusic.getsId());
+            lrcMap = storageUtil.loadLyrics(activeMusic.getId());
         }
         settingsStorage = new StorageUtil.SettingsStorage(requireContext());
         mainActivity = (MainActivity) requireContext();
@@ -229,7 +230,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         queImg.setOnClickListener(v -> openQue());
         repeatImg.setOnClickListener(v -> repeatFun());
         shuffleImg.setOnClickListener(v -> shuffleList());
-        favoriteImg.setOnClickListener(v -> addFavorite(storageUtil, activeMusic.getsId(), favoriteImg));
+        favoriteImg.setOnClickListener(v -> addFavorite(storageUtil, activeMusic, favoriteImg));
         timerImg.setOnClickListener(v -> setTimer());
         timerTv.setOnClickListener(v -> cancelTimer());
         lyricsImg.setOnClickListener(v -> openLyricsPanel());
@@ -324,12 +325,11 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         Bitmap image = event.image;
 
         if (activeMusic != null) {
-            songName = activeMusic.getsName();
-            bitrate = activeMusic.getsBitrate();
-            artistName = activeMusic.getsArtist();
-            mimeType = getMime(activeMusic.getsMimeType()).toUpperCase();
-            duration = activeMusic.getsDuration();
-
+            songName = activeMusic.getName();
+            bitrate = activeMusic.getBitrate();
+            artistName = activeMusic.getArtist();
+            mimeType = getMime(activeMusic.getMimeType()).toUpperCase();
+            duration = activeMusic.getDuration();
             String convertedDur = convertDuration(duration);
 
             int bitrateInNum = 0;
@@ -338,9 +338,9 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
             }
             String finalBitrate = bitrateInNum + " KBPS";
 
-            if (storageUtil.checkFavourite(activeMusic.getsId()).equals(no_favorite)) {
+            if (storageUtil.checkFavourite(activeMusic).equals(no_favorite)) {
                 favoriteImg.setImageResource(R.drawable.ic_favorite_border);
-            } else if (storageUtil.checkFavourite(activeMusic.getsId()).equals(favorite)) {
+            } else if (storageUtil.checkFavourite(activeMusic).equals(favorite)) {
                 favoriteImg.setImageResource(R.drawable.ic_favorite);
             }
 
@@ -397,7 +397,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     @Subscribe
     public void runnableSyncLyrics(RunnableSyncLyricsEvent event) {
         if (activeMusic != null) {
-            lrcMap = storageUtil.loadLyrics(activeMusic.getsId());
+            lrcMap = storageUtil.loadLyrics(activeMusic.getId());
             if (lrcMap != null) {
                 noLyricsLayout.setVisibility(View.GONE);
                 lyricsRecyclerView.setVisibility(View.VISIBLE);
@@ -513,14 +513,18 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
     }
 
-    public void setLyricsLayout(MusicDataCapsule music) {
+    public void setLyricsLayout(Music music) {
         FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
         Fragment fragment = fragmentManager.findFragmentByTag("AddLyricsFragment");
         if (fragment != null) {
             fragmentManager.popBackStackImmediate();
         }
         Bundle bundle = new Bundle();
-        bundle.putSerializable("selectedMusic", music);
+
+        //encode music
+        String encodedMessage = MusicHelper.encode(music);
+
+        bundle.putSerializable("selectedMusic", encodedMessage);
         AddLyricsFragment addLyricsFragment = new AddLyricsFragment();
         addLyricsFragment.setArguments(bundle);
         addLyricsFragment.setEnterTransition(TransitionInflater.from(requireContext()).inflateTransition(android.R.transition.slide_top));
@@ -536,7 +540,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
     private void setupQueueBottomSheet() {
         queueRecyclerView.setLayoutManager(linearLayoutManager);
-        idList = storageUtil.loadQueueList();
+        musicArrayList = storageUtil.loadQueueList();
         setQueueAdapter();
 
         queueSheetBehaviour = (CustomBottomSheet<View>) BottomSheetBehavior.from(queueBottomSheet);
@@ -567,8 +571,8 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
      * Setting adapter in queue list
      */
     private void setQueueAdapter() {
-        if (idList != null) {
-            queueAdapter = new MusicQueueAdapter(requireContext(), idList, this);
+        if (musicArrayList != null) {
+            queueAdapter = new MusicQueueAdapter(requireContext(), musicArrayList, this);
             queueRecyclerView.setAdapter(queueAdapter);
             ItemTouchHelper.Callback callback = new SimpleTouchCallback(queueAdapter);
             itemTouchHelper = new ItemTouchHelper(callback);
@@ -579,12 +583,12 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     /**
      * Updating adapter in queue list
      */
-    public void updateQueueAdapter(ArrayList<String> _idsList) {
+    public void updateQueueAdapter(ArrayList<Music> list) {
 
         // assign class member id list to new updated _id-list
-        idList = new ArrayList<>(_idsList);
+        musicArrayList = new ArrayList<>(list);
 
-        queueAdapter = new MusicQueueAdapter(requireContext(), _idsList, this);
+        queueAdapter = new MusicQueueAdapter(requireContext(), list, this);
         queueRecyclerView.setAdapter(queueAdapter);
         ItemTouchHelper.Callback callback = new SimpleTouchCallback(queueAdapter);
         itemTouchHelper = new ItemTouchHelper(callback);
@@ -608,7 +612,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         }
     }
 
-    private void optionMenu(MusicDataCapsule music) {
+    private void optionMenu(Music music) {
         //add a bottom sheet to show music options like set to ringtone ,audio details ,add to playlist etc.
         if (music != null)
             mainActivity.openOptionMenu(music, "mainList");
@@ -706,15 +710,15 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         timerImg.setVisibility(View.VISIBLE);
     }
 
-    public void addFavorite(StorageUtil storageUtil, String musicID, @Nullable ImageView imageView) {
-        if (musicID != null) {
-            if (storageUtil.checkFavourite(musicID).equals(no_favorite)) {
-                storageUtil.saveFavorite(musicID);
+    public void addFavorite(StorageUtil storageUtil, Music music, @Nullable ImageView imageView) {
+        if (music != null) {
+            if (storageUtil.checkFavourite(music).equals(no_favorite)) {
+                storageUtil.saveFavorite(music);
                 if (imageView != null) {
                     imageView.setImageResource(R.drawable.ic_favorite);
                 }
-            } else if (storageUtil.checkFavourite(musicID).equals(favorite)) {
-                storageUtil.removeFavorite(musicID);
+            } else if (storageUtil.checkFavourite(music).equals(favorite)) {
+                storageUtil.removeFavorite(music);
                 if (imageView != null) {
                     imageView.setImageResource(R.drawable.ic_favorite_border);
                 }
@@ -722,18 +726,17 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         }
     }
 
-    private MusicDataCapsule getMusic() {
-        ArrayList<String> musicList = storageUtil.loadQueueList();
-        MusicDataCapsule activeMusic = null;
+    private Music getMusic() {
+        ArrayList<Music> musicList = storageUtil.loadQueueList();
+        Music activeMusic = null;
         int musicIndex;
         musicIndex = storageUtil.loadMusicIndex();
 
-        if (musicList != null && musicList.size() != 0)
+        if (musicList != null && !musicList.isEmpty())
             if (musicIndex != -1 && musicIndex < musicList.size()) {
-                String id = musicList.get(musicIndex);
-                activeMusic = storageUtil.getItemFromInitialList(id);
+                activeMusic = musicList.get(musicIndex);
             } else {
-                activeMusic = storageUtil.getItemFromInitialList(musicList.get(0));
+                activeMusic = musicList.get(0);
             }
         return activeMusic;
     }
@@ -751,35 +754,35 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         }
     }
 
-    private void shuffleListAndSave(MusicDataCapsule activeMusic) {
-        ArrayList<String> musicIDList = storageUtil.loadQueueList();
-        storageUtil.saveTempMusicList(musicIDList);
+    private void shuffleListAndSave(Music activeMusic) {
+        ArrayList<Music> musicList = storageUtil.loadQueueList();
+        storageUtil.saveTempMusicList(musicList);
 
         int musicIndex;
         musicIndex = storageUtil.loadMusicIndex();
 
         // do in background code here
-        if (musicIDList != null) {
+        if (musicList != null) {
             shuffleImg.setClickable(false);
 
             ExecutorService service = Executors.newSingleThreadExecutor();
             Handler handler = new Handler(Looper.getMainLooper());
 
             service.execute(() -> {
-                storageUtil.saveTempMusicList(musicIDList);
+                storageUtil.saveTempMusicList(musicList);
                 //removing current item from list
-                musicIDList.remove(musicIndex);
+                musicList.remove(musicIndex);
                 //shuffling list
-                Collections.shuffle(musicIDList);
+                Collections.shuffle(musicList);
                 //adding the removed item in shuffled list on 0th index
-                musicIDList.add(0, activeMusic.getsId());
+                musicList.add(0, activeMusic);
                 //saving list
-                storageUtil.saveQueueList(musicIDList);
+                storageUtil.saveQueueList(musicList);
                 //saving index
                 storageUtil.saveMusicIndex(0);
                 // post-execute code here
                 handler.post(() -> {
-                    updateQueueAdapter(musicIDList);
+                    updateQueueAdapter(musicList);
                     shuffleImg.setClickable(true);
 
                 });
@@ -791,11 +794,10 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
     }
 
-    private void restoreLastListAndPos(MusicDataCapsule activeMusic) {
-        ArrayList<String> tempIdList = storageUtil.loadTempMusicList();
+    private void restoreLastListAndPos(Music activeMusic) {
+        ArrayList<Music> tempList = storageUtil.loadTempMusicList();
 
-
-        if (tempIdList != null) {
+        if (tempList != null) {
             shuffleImg.setClickable(false);
 
             ExecutorService service = Executors.newSingleThreadExecutor();
@@ -804,14 +806,14 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
             // do in background code here
             service.execute(() -> {
                 int index;
-                index = idList.indexOf(activeMusic.getsId());
+                index = musicArrayList.indexOf(activeMusic.getId());
                 if (index != -1) {
                     storageUtil.saveMusicIndex(index);
                 }
-                storageUtil.saveQueueList(tempIdList);
+                storageUtil.saveQueueList(tempList);
                 // post-execute code here
                 handler.post(() -> {
-                    updateQueueAdapter(tempIdList);
+                    updateQueueAdapter(tempList);
                     shuffleImg.setClickable(true);
                 });
             });
@@ -886,7 +888,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
      *
      * @param activeMusic active music
      */
-    private void setButton(MusicDataCapsule activeMusic) {
+    private void setButton(Music activeMusic) {
         //setting all buttons state from storage on startup
         //for repeat button
         if (storageUtil.loadRepeatStatus().equals(no_repeat)) {
@@ -905,9 +907,9 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         }
 
         if (activeMusic != null) {
-            if (storageUtil.checkFavourite(activeMusic.getsId()).equals(no_favorite)) {
+            if (storageUtil.checkFavourite(activeMusic).equals(no_favorite)) {
                 favoriteImg.setImageResource(R.drawable.ic_favorite_border);
-            } else if (storageUtil.checkFavourite(activeMusic.getsId()).equals(favorite)) {
+            } else if (storageUtil.checkFavourite(activeMusic).equals(favorite)) {
                 favoriteImg.setImageResource(R.drawable.ic_favorite);
             }
         }
@@ -1008,16 +1010,15 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         }
     }
 
-    public void setPreviousData(MusicDataCapsule activeMusic) {
+    public void setPreviousData(Music activeMusic) {
         Handler handler = new Handler();
-
         if (activeMusic != null) {
             ExecutorService service = Executors.newSingleThreadExecutor();
             service.execute(() -> {
                 //image decoder
                 Bitmap image = null;
                 MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
-                mediaMetadataRetriever.setDataSource(activeMusic.getsPath());
+                mediaMetadataRetriever.setDataSource(activeMusic.getPath());
                 byte[] art = mediaMetadataRetriever.getEmbeddedPicture();
 
                 try {
@@ -1032,9 +1033,9 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         }
 
         if (activeMusic != null) {
-            seekBarMain.setMax(Integer.parseInt(activeMusic.getsDuration()));
-            mini_progress.setMax(Integer.parseInt(activeMusic.getsDuration()));
-            durationTv.setText(convertDuration(activeMusic.getsDuration()));
+            seekBarMain.setMax(Integer.parseInt(activeMusic.getDuration()));
+            mini_progress.setMax(Integer.parseInt(activeMusic.getDuration()));
+            durationTv.setText(convertDuration(activeMusic.getDuration()));
 
             int resumePosition = storageUtil.loadMusicLastPos();
             if (resumePosition != -1) {
@@ -1052,7 +1053,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
     @Override
     public void onDragStart(RecyclerView.ViewHolder viewHolder) {
-        if (idList != null) {
+        if (musicArrayList != null) {
             itemTouchHelper.startDrag(viewHolder);
         }
     }

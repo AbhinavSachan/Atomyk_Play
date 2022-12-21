@@ -15,15 +15,13 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.R;
-import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.adapters.MusicMainAdapter;
+import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
-import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -44,11 +42,11 @@ public class LastAddedFragment extends Fragment {
     private final int fourthOptionValue = 360;
     private RadioButton firstRadio, secondRadio, thirdRadio, fourthRadio;
     private MusicMainAdapter adapter;
-    private ArrayList<MusicDataCapsule> lastAddedMusicList;
+    private ArrayList<Music> lastAddedMusicList;
     private Dialog filterDialog;
     private TextView songCountTv;
     private StorageUtil.SettingsStorage settingsStorage;
-    private ArrayList<MusicDataCapsule> initialMusicList;
+    private ArrayList<Music> initialMusicList;
     private ProgressDialog progressDialog;
     private RecyclerView recyclerView;
 
@@ -69,20 +67,20 @@ public class LastAddedFragment extends Fragment {
         lastAddedMusicList = new ArrayList<>();
 
 
-
         //sort initial music list by date in reverse order
-        Collections.sort(initialMusicList, new Comparator<MusicDataCapsule>() {
+        Collections.sort(initialMusicList, new Comparator<Music>() {
             final DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.getDefault());
+
             @Override
-            public int compare(MusicDataCapsule t1, MusicDataCapsule t2) {
+            public int compare(Music t1, Music t2) {
                 try {
-                    Date d1 = dateFormat.parse(t1.getsDateAdded());
-                    Date d2 = dateFormat.parse(t2.getsDateAdded());
+                    Date d1 = dateFormat.parse(t1.getDateAdded());
+                    Date d2 = dateFormat.parse(t2.getDateAdded());
                     int i = 0;
                     if (d1 != null) {
                         i = d1.compareTo(d2);
                     }
-                    if(i != 0) return -i;
+                    if (i != 0) return -i;
                 } catch (ParseException e) {
                     throw new IllegalArgumentException();
                 }
@@ -148,7 +146,6 @@ public class LastAddedFragment extends Fragment {
     }
 
 
-
     @Override
     public void onStop() {
         super.onStop();
@@ -160,9 +157,9 @@ public class LastAddedFragment extends Fragment {
     }
 
 
-
     /**
      * load all last added songs based on selected radio buttons
+     *
      * @param i radio id
      */
     private void loadLastAddedList(int i) {
@@ -185,6 +182,7 @@ public class LastAddedFragment extends Fragment {
 
     /**
      * start thread to handle loading music list within range
+     *
      * @param maxValue clamp at max value
      */
     private void startThread(int maxValue) {
@@ -196,7 +194,7 @@ public class LastAddedFragment extends Fragment {
 
         service.execute(() -> {
 
-                lastAddedMusicList.clear();
+            lastAddedMusicList.clear();
             try {
                 lastAddedMusicList.addAll(getLastAddedMusicList(maxValue));
             } catch (ParseException e) {
@@ -213,19 +211,19 @@ public class LastAddedFragment extends Fragment {
                 recyclerView.setHasFixedSize(true);
                 recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
                 ArrayList<String> idList = new ArrayList<>();
-                for (MusicDataCapsule music : lastAddedMusicList) {
-                    idList.add(music.getsId());
+                for (Music music : lastAddedMusicList) {
+                    idList.add(music.getId());
                 }
-                adapter = new MusicMainAdapter(getContext(), lastAddedMusicList,idList);
+                adapter = new MusicMainAdapter(getContext(), lastAddedMusicList);
                 recyclerView.setAdapter(adapter);
-                });
+            });
         });
         service.shutdown();
     }
 
 
-    private ArrayList<MusicDataCapsule> getLastAddedMusicList (long max) throws ParseException {
-        ArrayList<MusicDataCapsule> result = new ArrayList<>();
+    private ArrayList<Music> getLastAddedMusicList(long max) throws ParseException {
+        ArrayList<Music> result = new ArrayList<>();
 
         // dtf for parsing string to date
         DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.getDefault());
@@ -239,12 +237,12 @@ public class LastAddedFragment extends Fragment {
         }
 
         //loop through music list and if a music date is older than given date, then break;
-        for (MusicDataCapsule music : initialMusicList) {
-            Date musicDate = dateFormat.parse(music.getsDateAdded());
-            if(musicDate.compareTo(previousDate) < 0) {
+        for (Music music : initialMusicList) {
+            Date musicDate = dateFormat.parse(music.getDateAdded());
+            if (musicDate.compareTo(previousDate) < 0) {
                 break;
             }
-                result.add(music);
+            result.add(music);
         }
 
         //return music ranging between current date and given older date

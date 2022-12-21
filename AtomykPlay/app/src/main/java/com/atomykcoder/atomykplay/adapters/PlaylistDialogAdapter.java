@@ -12,8 +12,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.activities.MainActivity;
+import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
-import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import com.atomykcoder.atomykplay.viewModals.Playlist;
 
 import java.util.ArrayList;
@@ -21,12 +21,12 @@ import java.util.ArrayList;
 public class PlaylistDialogAdapter extends RecyclerView.Adapter<PlaylistDialogAdapter.PlaylistViewHolder> {
     private Context context;
     private ArrayList<Playlist> playlists;
-    private String musicID;
+    private Music music;
 
-    public PlaylistDialogAdapter(Context _context, ArrayList<Playlist> _playlists, String _musicID) {
+    public PlaylistDialogAdapter(Context _context, ArrayList<Playlist> _playlists, Music _music) {
         context = _context;
         playlists = _playlists;
-        musicID = _musicID;
+        music = _music;
     }
 
     @NonNull
@@ -43,9 +43,9 @@ public class PlaylistDialogAdapter extends RecyclerView.Adapter<PlaylistDialogAd
         StorageUtil storageUtil = new StorageUtil(context);
         holder.textView.setText(playlist.getName());
         holder.view.setOnClickListener(v -> {
-            storageUtil.saveItemInPlayList(musicID, playlist.getName());
+            storageUtil.saveItemInPlayList(music, playlist.getName());
             mainActivity.addToPlDialog.dismiss();
-            Toast.makeText(context,"added to "+playlist.getName(),Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "added to " + playlist.getName(), Toast.LENGTH_SHORT).show();
         });
     }
 
@@ -57,10 +57,11 @@ public class PlaylistDialogAdapter extends RecyclerView.Adapter<PlaylistDialogAd
     public static class PlaylistViewHolder extends RecyclerView.ViewHolder {
         private final TextView textView;
         private final View view;
+
         public PlaylistViewHolder(@NonNull View itemView) {
             super(itemView);
-            textView  =itemView.findViewById(R.id.playlist_name_dialog_tv);
-            view  =itemView.findViewById(R.id.playlist_name_dialog_ll);
+            textView = itemView.findViewById(R.id.playlist_name_dialog_tv);
+            view = itemView.findViewById(R.id.playlist_name_dialog_ll);
         }
     }
 }

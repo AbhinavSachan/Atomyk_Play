@@ -1,10 +1,12 @@
 package com.atomykcoder.atomykplay.events;
 
 
-public class RemoveFromPlaylistEvent {
-    public String musicID;
+import com.atomykcoder.atomykplay.data.Music;
 
-    public RemoveFromPlaylistEvent(String _musicID) {
-       musicID = _musicID;
+public class RemoveFromPlaylistEvent {
+    public Music music;
+
+    public RemoveFromPlaylistEvent(Music _music) {
+        music = _music;
     }
 }

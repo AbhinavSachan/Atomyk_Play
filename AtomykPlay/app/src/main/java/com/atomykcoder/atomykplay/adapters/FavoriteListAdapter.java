@@ -10,7 +10,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -26,10 +25,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.classes.GlideBuilt;
+import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.ItemTouchHelperAdapter;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
-import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -40,16 +39,16 @@ import java.util.concurrent.Executors;
 public class FavoriteListAdapter extends RecyclerView.Adapter<FavoriteListAdapter.FavoriteViewHolder> implements ItemTouchHelperAdapter {
     private final Context context;
     MainActivity mainActivity;
-    ArrayList<String> musicIdList;
+    ArrayList<Music> musicList;
     OnDragStartListener onDragStartListener;
     StorageUtil storageUtil;
     long lastClickTime;
     // value in milliseconds
     int delay = 500;
 
-    public FavoriteListAdapter(Context context, ArrayList<String> _musicIdList, OnDragStartListener onDragStartListener) {
+    public FavoriteListAdapter(Context context, ArrayList<Music> _musicList, OnDragStartListener onDragStartListener) {
         this.context = context;
-        musicIdList = _musicIdList;
+        musicList = _musicList;
         this.onDragStartListener = onDragStartListener;
         mainActivity = (MainActivity) context;
         storageUtil = new StorageUtil(context);
@@ -65,9 +64,9 @@ public class FavoriteListAdapter extends RecyclerView.Adapter<FavoriteListAdapte
     @Override
     public void onItemDismiss(int position) {
         //if any item has been removed this will save new list on temp list
-        if (musicIdList != null) {
-            if (position != -1 && position < musicIdList.size()) {
-                removeItem(musicIdList.get(position));
+        if (musicList != null) {
+            if (position != -1 && position < musicList.size()) {
+                removeItem(musicList.get(position));
             }
         }
     }
@@ -82,14 +81,14 @@ public class FavoriteListAdapter extends RecyclerView.Adapter<FavoriteListAdapte
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public void onBindViewHolder(@NonNull FavoriteListAdapter.FavoriteViewHolder holder, int position) {
-        MusicDataCapsule currentItem = storageUtil.getItemFromInitialList(musicIdList.get(position));
+        Music currentItem = musicList.get(position);
 
         StorageUtil storage = new StorageUtil(context);
         StorageUtil.SettingsStorage settingsStorage = new StorageUtil.SettingsStorage(context);
 
-        holder.nameText.setText(currentItem.getsName());
-        holder.artistText.setText(currentItem.getsArtist());
-        holder.durationText.setText(convertDuration(currentItem.getsDuration()));
+        holder.nameText.setText(currentItem.getName());
+        holder.artistText.setText(currentItem.getArtist());
+        holder.durationText.setText(convertDuration(currentItem.getDuration()));
         final Bitmap[] image = {null};
         ExecutorService service1 = Executors.newSingleThreadExecutor();
         Handler handler = new Handler();
@@ -97,7 +96,7 @@ public class FavoriteListAdapter extends RecyclerView.Adapter<FavoriteListAdapte
 
             //image decoder
             MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
-            mediaMetadataRetriever.setDataSource(currentItem.getsPath());
+            mediaMetadataRetriever.setDataSource(currentItem.getPath());
             byte[] art = mediaMetadataRetriever.getEmbeddedPicture();
 
             try {
@@ -111,7 +110,7 @@ public class FavoriteListAdapter extends RecyclerView.Adapter<FavoriteListAdapte
         holder.cardView.setOnClickListener(v -> {
 
             //region timer to stop extra clicks
-            if(SystemClock.elapsedRealtime() < (lastClickTime + delay)) {
+            if (SystemClock.elapsedRealtime() < (lastClickTime + delay)) {
                 Log.i("info", "too fast");
                 return;
             }
@@ -119,33 +118,33 @@ public class FavoriteListAdapter extends RecyclerView.Adapter<FavoriteListAdapte
             //endregion
 
 
-            File file = new File(currentItem.getsPath());
+            File file = new File(currentItem.getPath());
             if (file.exists()) {
                 //check is service active
 
                 //if shuffle button is already on it will shuffle it from start
                 if (settingsStorage.loadKeepShuffle()) {
                     //saving list in temp for restore function in player fragment
-                    ArrayList<String> shuffleIDList = new ArrayList<>(musicIdList);
+                    ArrayList<Music> shuffleList = new ArrayList<>(musicList);
 
-                    storage.saveTempMusicList(musicIdList);
+                    storage.saveTempMusicList(musicList);
                     storage.saveShuffle(shuffle);
 
                     ExecutorService service = Executors.newSingleThreadExecutor();
                     service.execute(() -> {
                         //removing current item from list
-                        shuffleIDList.remove(position);
+                        shuffleList.remove(position);
                         //shuffling list
-                        Collections.shuffle(shuffleIDList);
+                        Collections.shuffle(shuffleList);
                         //adding the removed item in shuffled list on 0th index
-                        shuffleIDList.add(0, currentItem.getsId());
+                        shuffleList.add(0, currentItem);
                         //saving list
-                        storage.saveQueueList(shuffleIDList);
+                        storage.saveQueueList(shuffleList);
                         storage.saveMusicIndex(0);
                         // post-execute code here
                         handler.post(() -> {
                             mainActivity.playAudio(currentItem);
-                            mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(shuffleIDList);
+                            mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(shuffleList);
                             mainActivity.openBottomPlayer();
                         });
                     });
@@ -156,12 +155,12 @@ public class FavoriteListAdapter extends RecyclerView.Adapter<FavoriteListAdapte
                     ExecutorService service = Executors.newSingleThreadExecutor();
                     service.execute(() -> {
                         storage.saveShuffle(no_shuffle);
-                        storage.saveQueueList(musicIdList);
+                        storage.saveQueueList(musicList);
                         storage.saveMusicIndex(position);
                         // post-execute code here
                         handler.post(() -> {
                             mainActivity.playAudio(currentItem);
-                            mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(musicIdList);
+                            mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(musicList);
                             mainActivity.openBottomPlayer();
                         });
                     });
@@ -169,31 +168,31 @@ public class FavoriteListAdapter extends RecyclerView.Adapter<FavoriteListAdapte
                 }
             } else {
                 Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show();
-                removeItem(currentItem.getsId());
+                removeItem(currentItem);
             }
         });
 
-        holder.optBtn.setOnClickListener(v->mainActivity.openOptionMenu(currentItem,"favoriteList"));
+        holder.optBtn.setOnClickListener(v -> mainActivity.openOptionMenu(currentItem, "favoriteList"));
 
     }
 
-    public void removeItem(String item) {
+    public void removeItem(Music item) {
         StorageUtil storageUtil = new StorageUtil(context);
-        int position = musicIdList.indexOf(item);
+        int position = musicList.indexOf(item);
 
         if (position != -1) {
-            musicIdList.remove(position);
+            musicList.remove(position);
             storageUtil.removeFavorite(item);
         }
 
-        notifyItemRangeChanged(position, musicIdList.size() - (position + 1));
+        notifyItemRangeChanged(position, musicList.size() - (position + 1));
         notifyItemRemoved(position);
 
     }
 
     @Override
     public int getItemCount() {
-        return musicIdList.size();
+        return musicList.size();
     }
 
     public static class FavoriteViewHolder extends RecyclerView.ViewHolder {

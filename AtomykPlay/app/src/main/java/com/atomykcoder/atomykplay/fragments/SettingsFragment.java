@@ -35,18 +35,17 @@ import java.util.ArrayList;
 
 public class SettingsFragment extends Fragment {
 
+    public ArrayList<String> blacklist;
+    public BlockFolderListAdapter adapter;
     private RadioGroup radioGroup;
     private RadioButton light_theme_btn, dark_theme_btn;
     private SwitchCompat songInfoSwi, artistSwi, extraSwi, autoPlaySwi, keepShuffleSwi, lowerVolSwi, selfStopSwi, keepScreenOnSwi, oneClickSkipSwi;
     private View songInfoLl, artistLl, extraLl, autoPlayLl, keepShuffleLl, lowerVolLl, blackListLl, filterDurLl, selfStopLl, keepScreenOnLl, oneClickSkipLl;
-
-
     private boolean dark;
     private boolean showInfo, showArtist, showOption, showExtra, autoPlay, keepShuffle, lowerVol, selfStop, keepScreenOn, oneClickSkip;
     private StorageUtil.SettingsStorage settingsStorage;
     private MainActivity mainActivity;
     private Dialog blacklistDialog, filterDurDialog;
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -171,7 +170,7 @@ public class SettingsFragment extends Fragment {
         filterDurDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         filterDurDialog.setContentView(R.layout.filter_duration_dialog);
 
-        TextView filter_time_tv =  filterDurDialog.findViewById(R.id.filter_time_textview);
+        TextView filter_time_tv = filterDurDialog.findViewById(R.id.filter_time_textview);
         SeekBar filter_dur_seekbar = filterDurDialog.findViewById(R.id.filter_dur_seekBar);
         Button filter_dur_ok_bt = filterDurDialog.findViewById(R.id.filter_dur_ok_bt);
 
@@ -231,9 +230,6 @@ public class SettingsFragment extends Fragment {
     public void onPause() {
         super.onPause();
     }
-
-    public ArrayList<String> blacklist;
-    public BlockFolderListAdapter adapter;
 
     private void openBlackListDialogue() {
         //create blacklistDialog

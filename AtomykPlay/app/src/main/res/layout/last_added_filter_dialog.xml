@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:background="@color/primary_bg"
-    android:paddingHorizontal="12dp"
-    android:layout_height="match_parent">
+    android:paddingHorizontal="12dp">
 
     <TextView
         android:id="@+id/textView_search_lyric3232"
@@ -15,7 +15,7 @@
         android:text="@string/last_added_interval"
         android:textColor="@color/text_color"
         android:textSize="@dimen/d_24sp"
-        android:textStyle="bold"/>
+        android:textStyle="bold" />
 
     <RadioGroup
         android:id="@+id/last_Added_radio_group"

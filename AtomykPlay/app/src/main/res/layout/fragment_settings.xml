@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:clickable="true"
     android:background="@color/primary_bg"
+    android:clickable="true"
     android:focusable="true"
     tools:context=".fragments.SettingsFragment"
     tools:ignore="UnusedAttribute">
@@ -658,7 +658,7 @@
                 android:layout_marginTop="6dp"
                 android:layout_marginBottom="12dp"
                 android:background="@color/secondary_bg"
-                android:paddingBottom="16dp"/>
+                android:paddingBottom="16dp" />
 
         </LinearLayout>
 

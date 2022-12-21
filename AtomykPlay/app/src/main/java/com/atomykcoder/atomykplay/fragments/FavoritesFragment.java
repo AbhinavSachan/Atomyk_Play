@@ -14,10 +14,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.adapters.FavoriteListAdapter;
 import com.atomykcoder.atomykplay.adapters.SimpleTouchCallback;
+import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.events.RemoveFromFavoriteEvent;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
-import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -52,16 +52,16 @@ public class FavoritesFragment extends Fragment implements OnDragStartListener {
 
         LinearLayoutManager manager = new LinearLayoutManager(getContext());
 
-        ArrayList<String> favIdList = storageUtil.getFavouriteList();
+        ArrayList<Music> favList = storageUtil.getFavouriteList();
 
 
-        if (favIdList != null) {
-            playListAdapter = new FavoriteListAdapter(requireContext(), favIdList, this);
+        if (favList != null) {
+            playListAdapter = new FavoriteListAdapter(requireContext(), favList, this);
             recyclerView.setLayoutManager(manager);
             recyclerView.setAdapter(playListAdapter);
             noPlLayout.setVisibility(View.GONE);
 
-            if (favIdList.isEmpty()) {
+            if (favList.isEmpty()) {
                 noPlLayout.setVisibility(View.VISIBLE);
             }
 
@@ -83,7 +83,7 @@ public class FavoritesFragment extends Fragment implements OnDragStartListener {
 
     @Subscribe
     public void removeFromPlaylist(RemoveFromFavoriteEvent event) {
-        playListAdapter.removeItem(event.musicID);
+        playListAdapter.removeItem(event.music);
     }
 
     @Override

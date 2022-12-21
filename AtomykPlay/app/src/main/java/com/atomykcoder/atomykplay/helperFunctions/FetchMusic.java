@@ -3,11 +3,10 @@ package com.atomykcoder.atomykplay.helperFunctions;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
 
-import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
+import com.atomykcoder.atomykplay.data.Music;
 
 import java.io.File;
 import java.time.Instant;
@@ -20,7 +19,7 @@ import java.util.Locale;
 
 public class FetchMusic {
 
-    public static void fetchMusic(ArrayList<MusicDataCapsule> dataList, Context context) {
+    public static void fetchMusic(ArrayList<Music> dataList, Context context) {
         String selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0";
         @SuppressLint("InlinedApi")
         String[] proj = {
@@ -85,14 +84,17 @@ public class FetchMusic {
                             sGenre = audioCursor.getString(9);
                         }
 
-                        String sDateAdded =  convertLongToDate(dateInMillis);
+                        String sDateAdded = convertLongToDate(dateInMillis);
 
                         int filter = new StorageUtil.SettingsStorage(context).loadFilterDur() * 1000;
-                        MusicDataCapsule music = new MusicDataCapsule(sTitle, sArtist,
-                                sAlbum, sAlbumId, sDuration, sPath, sBitrate, sMimeType, sSize, sGenre, sId, sDateAdded);
-                        File file = new File(music.getsPath());
+                        Music music = Music.newBuilder().setName(sTitle).setArtist(sArtist)
+                                .setAlbum(sAlbum).setAlbumUri("").setDuration(sDuration)
+                                .setPath(sPath).setBitrate(sBitrate).setMimeType(sMimeType)
+                                .setSize(sSize).setGenre(sGenre != null ? sGenre : "").setId(sId).setDateAdded(sDateAdded)
+                                .build();
+                        File file = new File(music.getPath());
                         if (file.exists()) {
-                            if (filter <= Integer.parseInt(music.getsDuration())) {
+                            if (filter <= Integer.parseInt(music.getDuration())) {
                                 dataList.add(music);
                             }
                         }
@@ -100,7 +102,7 @@ public class FetchMusic {
                 } while (audioCursor.moveToNext());
                 audioCursor.close();
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    Collections.sort(dataList, Comparator.comparing(MusicDataCapsule::getsName));
+                    Collections.sort(dataList, Comparator.comparing(Music::getName));
                 }
             }
         }
@@ -109,7 +111,7 @@ public class FetchMusic {
     private static String convertLongToDate(long time) {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             return DateTimeFormatter.ofPattern("dd MMMM yyyy").format(
-                    Instant.ofEpochMilli(time*1000)
+                    Instant.ofEpochMilli(time * 1000)
                             .atZone(ZoneId.systemDefault())
                             .toLocalDate());
         } else {

@@ -317,10 +317,10 @@
             android:id="@+id/player_main_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:clickable="true"
-            android:focusable="true"
             android:background="@drawable/rounded_bottom_sheet"
+            android:clickable="true"
             android:elevation="20dp"
+            android:focusable="true"
             app:layout_behavior=".customScripts.CustomBottomSheet" />
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
@@ -335,6 +335,7 @@
             android:alpha="0"
             android:background="@color/translucent_black"
             android:elevation="25dp" />
+
         <View
             android:id="@+id/outer_sheet_details_shadow"
             android:layout_width="match_parent"

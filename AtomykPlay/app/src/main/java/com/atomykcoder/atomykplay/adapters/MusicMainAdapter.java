@@ -10,7 +10,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -28,9 +27,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.classes.GlideBuilt;
+import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.helperFunctions.MusicDiffCallback;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
-import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import com.turingtechnologies.materialscrollbar.INameableAdapter;
 
 import java.io.File;
@@ -41,8 +40,7 @@ import java.util.concurrent.Executors;
 
 public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.MusicViewAdapter> implements INameableAdapter {
     Context context;
-    ArrayList<MusicDataCapsule> musicArrayList;
-    ArrayList<String> musicIDList;
+    ArrayList<Music> musicArrayList;
     MainActivity mainActivity;
     StorageUtil storage;
     long lastClickTime;
@@ -50,15 +48,14 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
     int delay = 500;
 
 
-    public MusicMainAdapter(Context _context, ArrayList<MusicDataCapsule> _musicArrayList,ArrayList<String> _musicIDList) {
+    public MusicMainAdapter(Context _context, ArrayList<Music> _musicArrayList) {
         context = _context;
         musicArrayList = _musicArrayList;
-        musicIDList = _musicIDList;
         mainActivity = (MainActivity) context;
         storage = new StorageUtil(context);
     }
 
-    public void updateMusicListItems(ArrayList<MusicDataCapsule> newMusicArrayList) {
+    public void updateMusicListItems(ArrayList<Music> newMusicArrayList) {
         final MusicDiffCallback diffCallback = new MusicDiffCallback(musicArrayList, newMusicArrayList);
         final DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
 
@@ -77,7 +74,8 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public void onBindViewHolder(@NonNull MusicViewAdapter holder, @SuppressLint("RecyclerView") int pos) {
-        MusicDataCapsule currentItem =  musicArrayList.get(pos);
+        Music currentItem = musicArrayList.get(pos);
+        StorageUtil storage = new StorageUtil(context);
         final Bitmap[] image = {null};
         ExecutorService service1 = Executors.newSingleThreadExecutor();
         Handler handler = new Handler();
@@ -85,7 +83,7 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
 
             //image decoder
             MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
-            mediaMetadataRetriever.setDataSource(currentItem.getsPath());
+            mediaMetadataRetriever.setDataSource(currentItem.getPath());
             byte[] art = mediaMetadataRetriever.getEmbeddedPicture();
 
             try {
@@ -96,48 +94,47 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
         });
         service1.shutdown();
 
-        int position = holder.getAbsoluteAdapterPosition();
         holder.cardView.setOnClickListener(v -> {
+            int position = holder.getAbsoluteAdapterPosition();
 
             //region timer to stop extra clicks
-            if(SystemClock.elapsedRealtime() < (lastClickTime + delay)) {
-                Log.i("info", "too fast");
+            if (SystemClock.elapsedRealtime() < (lastClickTime + delay)) {
                 return;
             }
             lastClickTime = SystemClock.elapsedRealtime();
             //endregion
 
-            File file = new File(currentItem.getsPath());
+            File file = new File(currentItem.getPath());
             if (file.exists()) {
 
                 StorageUtil.SettingsStorage settingsStorage = new StorageUtil.SettingsStorage(context);
 
                 //if shuffle button is already on it will shuffle it from start
                 if (settingsStorage.loadKeepShuffle()) {
-
-                    storage.saveTempMusicList(musicIDList);
+                    ArrayList<Music> shuffleList = new ArrayList<>(musicArrayList);
+                    storage.saveTempMusicList(shuffleList);
                     storage.saveShuffle(shuffle);
 
                     ExecutorService service = Executors.newSingleThreadExecutor();
                     service.execute(() -> {
 
                         //removing current item from list
-                        musicIDList.remove(position);
+                        shuffleList.remove(position);
 
                         //shuffling list
-                        Collections.shuffle(musicIDList);
+                        Collections.shuffle(shuffleList);
 
                         //adding the removed item in shuffled list on 0th index
-                        musicIDList.add(0, currentItem.getsId());
+                        shuffleList.add(0, currentItem);
 
                         //saving list
-                        storage.saveQueueList(musicIDList);
+                        storage.saveQueueList(shuffleList);
                         storage.saveMusicIndex(0);
 
                         // post-execute code here
                         handler.post(() -> {
                             mainActivity.playAudio(currentItem);
-                            mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(musicIDList);
+                            mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(shuffleList);
                             mainActivity.openBottomPlayer();
                         });
                     });
@@ -148,39 +145,42 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
                     ExecutorService service = Executors.newSingleThreadExecutor();
                     service.execute(() -> {
                         storage.saveShuffle(no_shuffle);
-                        storage.saveQueueList(musicIDList);
+                        storage.saveQueueList(musicArrayList);
                         storage.saveMusicIndex(position);
 
                         // post-execute code here
                         handler.post(() -> {
                             mainActivity.playAudio(currentItem);
-                            mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(musicIDList);
+                            mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(musicArrayList);
                             mainActivity.openBottomPlayer();
                         });
                     });
                     service.shutdown();
                 }
+                Log.i("info", String.valueOf(storage.loadMusicIndex()));
+                Log.i("info", String.valueOf(position));
+
             } else {
                 Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show();
-                removeItem(currentItem.getsId());
+                removeItem(currentItem);
             }
         });
 
         //add bottom sheet functions in three dot click
         holder.imageButton.setOnClickListener(view -> {
-            File file = new File(currentItem.getsPath());
+            File file = new File(currentItem.getPath());
             if (file.exists()) {
                 mainActivity.openOptionMenu(currentItem, "mainList");
             } else {
                 Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show();
-                removeItem(currentItem.getsId());
+                removeItem(currentItem);
             }
         });
 
 
-        holder.nameText.setText(currentItem.getsName());
-        holder.artistText.setText(currentItem.getsArtist());
-        holder.durationText.setText(convertDuration(currentItem.getsDuration()));
+        holder.nameText.setText(currentItem.getName());
+        holder.artistText.setText(currentItem.getArtist());
+        holder.durationText.setText(convertDuration(currentItem.getDuration()));
     }
 
     @Override
@@ -196,29 +196,28 @@ public class MusicMainAdapter extends RecyclerView.Adapter<MusicMainAdapter.Musi
     /**
      * remove item from list after deleting it from device
      *
-     * @param itemID selected delete item
+     * @param item selected delete item
      */
-    public void removeItem(String itemID) {
+    public void removeItem(Music item) {
         StorageUtil storageUtil = new StorageUtil(context);
-        int position = musicIDList.indexOf(itemID);
+        int position = musicArrayList.indexOf(item);
         int savedIndex = storageUtil.loadMusicIndex();
 
         if (position < savedIndex) {
             storageUtil.saveMusicIndex(savedIndex - 1);
         }
         if (position != -1) {
-            storageUtil.removeItemFromInitialList(musicIDList.get(position));
+            storageUtil.removeFromInitialList(item);
             musicArrayList.remove(position);
-            musicIDList.remove(position);
         }
 
         notifyItemRangeChanged(position, musicArrayList.size() - (position + 1));
         notifyItemRemoved(position);
 
         if (position == savedIndex) {
-            mainActivity.playAudio(storageUtil.getItemFromInitialList(itemID));
+            mainActivity.playAudio(item);
         }
-        mainActivity.bottomSheetPlayerFragment.queueAdapter.removeItem(itemID);
+        mainActivity.bottomSheetPlayerFragment.queueAdapter.removeItem(item);
 
     }
 
