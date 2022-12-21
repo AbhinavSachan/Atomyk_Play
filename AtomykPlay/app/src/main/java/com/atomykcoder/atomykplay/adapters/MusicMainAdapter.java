@@ -67,18 +67,16 @@ public class MusicMainAdapter extends MusicAdapter {
         MusicMainViewHolder holder = (MusicMainViewHolder) _holder;
         Music currentItem = super.items.get(position);
 
-        loadImage(context.getApplicationContext(), currentItem, position, holder.albumCoverIV);
-        
-        holder.cardView.setOnClickListener(v -> {
+        loadImage(context, currentItem, position, holder.albumCoverIV);
 
             if(shouldIgnoreClick()) return;
 
             if(!doesMusicExists(currentItem)) {
                 Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show();
                 removeItem(currentItem);
-                return;
             }
 
+            //region timer to stop extra clicks
             if(settingsStorage.loadKeepShuffle())
                 handleShuffle(storage, position, super.items);
             else
@@ -86,7 +84,6 @@ public class MusicMainAdapter extends MusicAdapter {
 
             handlePlayMusic(mainActivity, currentItem);
 
-        });
 
         holder.optionButton.setOnClickListener(v -> {
             if(!doesMusicExists(currentItem)) {
@@ -96,7 +93,6 @@ public class MusicMainAdapter extends MusicAdapter {
             }
             mainActivity.openOptionMenu(currentItem, "mainList");
         });
-
     }
 
     @Override

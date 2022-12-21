@@ -10,7 +10,7 @@ public class Playlist implements Serializable {
     private final String coverUri;
     private final ArrayList<Music> musicList;
 
-    public Playlist(String _name, String _coverUri , ArrayList<Music> _musicList) {
+    public Playlist(String _name, String _coverUri, ArrayList<Music> _musicList) {
         name = _name;
         coverUri = _coverUri;
         musicList = _musicList;
@@ -39,6 +39,7 @@ public class Playlist implements Serializable {
 
     /**
      * get music list in arraylist format with no keys
+     *
      * @return returns arraylist<MusicDataCapsule>
      */
     public ArrayList<Music> getMusicList() {
@@ -47,14 +48,16 @@ public class Playlist implements Serializable {
 
     /**
      * add music in playlist
+     *
      * @param music music to be added
      */
     public void addMusic(Music music) {
-       musicList.add(music);
+        musicList.add(music);
     }
 
     /**
      * remove music from playlist
+     *
      * @param music music to be removed
      */
     public void removeMusic(Music music) {

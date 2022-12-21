@@ -20,7 +20,6 @@ import com.atomykcoder.atomykplay.classes.GlideBuilt;
 import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.events.RemoveFromPlaylistEvent;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
-import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import com.atomykcoder.atomykplay.viewModals.Playlist;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 
@@ -59,7 +58,7 @@ public class OpenPlayListFragment extends Fragment implements OnDragStartListene
 
         ArrayList<Music> musicList = null;
 
-        if(playlist != null) {
+        if (playlist != null) {
             musicList = playlist.getMusicList();
 
             collapsingToolbarLayout.setTitle(playlist.getName());

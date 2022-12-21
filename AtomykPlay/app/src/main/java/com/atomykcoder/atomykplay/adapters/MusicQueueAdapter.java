@@ -131,7 +131,7 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
         holder.cardView.setOnClickListener(v -> {
 
             //region timer to stop extra clicks
-            if(SystemClock.elapsedRealtime() < (lastClickTime + delay)) {
+            if (SystemClock.elapsedRealtime() < (lastClickTime + delay)) {
                 return;
             }
             lastClickTime = SystemClock.elapsedRealtime();

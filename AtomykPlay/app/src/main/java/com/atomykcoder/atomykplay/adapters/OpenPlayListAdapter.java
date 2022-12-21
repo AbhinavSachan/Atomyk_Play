@@ -11,7 +11,6 @@ import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,7 +28,6 @@ import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.ItemTouchHelperAdapter;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
-import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 
 import java.io.File;
 import java.util.ArrayList;

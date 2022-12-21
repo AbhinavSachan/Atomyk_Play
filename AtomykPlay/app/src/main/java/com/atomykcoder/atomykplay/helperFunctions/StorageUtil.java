@@ -55,6 +55,7 @@ public class StorageUtil {
 
     /**
      * constructor of storage util
+     *
      * @param context context of activity or application is valid
      */
     public StorageUtil(Context context) {
@@ -63,8 +64,10 @@ public class StorageUtil {
 
 
     //region music queue list code here
+
     /**
      * save music queue idList in arraylist of strings
+     *
      * @param list music list needed to be saved
      */
     public void saveQueueList(ArrayList<Music> list) {
@@ -72,7 +75,7 @@ public class StorageUtil {
         sharedPreferences = context.getSharedPreferences(MUSIC_LIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         int i = 0;
-        for(Music music : list) {
+        for (Music music : list) {
             String encodedMessage = encode(music);
             editor.putString(String.valueOf(i), encodedMessage);
             i++;
@@ -90,7 +93,7 @@ public class StorageUtil {
         ArrayList<Music> musicList = new ArrayList<>();
         Map<String, ?> map = sharedPreferences.getAll();
 
-        for(int i = 0; i < map.size(); i++) {
+        for (int i = 0; i < map.size(); i++) {
             String encodedData = sharedPreferences.getString(String.valueOf(i), null);
             Music music = decode(encodedData);
             musicList.add(music);
@@ -122,7 +125,7 @@ public class StorageUtil {
         sharedPreferences = context.getSharedPreferences(INITIAL_LIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
-        for(Music music : list) {
+        for (Music music : list) {
             String encodedMessage = encode(music);
             editor.putString(music.getId(), encodedMessage);
         }
@@ -140,7 +143,7 @@ public class StorageUtil {
 
         ArrayList<Music> musicList = new ArrayList<>();
 
-        for(Map.Entry<String, ?> entry : map.entrySet()) {
+        for (Map.Entry<String, ?> entry : map.entrySet()) {
             String encodedMessage = sharedPreferences.getString(entry.getKey(), null);
             Music music = decode(encodedMessage);
             musicList.add(music);
@@ -163,6 +166,7 @@ public class StorageUtil {
 
     /**
      * save Music index of queue array list
+     *
      * @param index index of queue array list
      */
     public void saveMusicIndex(int index) {
@@ -177,7 +181,7 @@ public class StorageUtil {
      */
     public int loadMusicIndex() {
         sharedPreferences = context.getSharedPreferences(MUSIC_INDEX_STORAGE, Context.MODE_PRIVATE);
-        return sharedPreferences.getInt(musicIndex, -1);
+        return sharedPreferences.getInt(musicIndex, 0);
     }
 
     public void clearMusicIndex() {
@@ -190,8 +194,10 @@ public class StorageUtil {
 
 
     //region music last position code here
+
     /**
      * save music last played position on seekbar
+     *
      * @param position last played position on seekbar
      */
     public void saveMusicLastPos(int position) {
@@ -203,6 +209,7 @@ public class StorageUtil {
 
     /**
      * load last saved position of music on seekbar
+     *
      * @return returns last saved position of music on seekbar
      */
     public int loadMusicLastPos() {
@@ -223,8 +230,10 @@ public class StorageUtil {
 
 
     //region player repeat status code here
+
     /**
      * save player repeat status
+     *
      * @param status player status = (repeat, repeat_one, no_repeat)
      */
     public void saveRepeatStatus(String status) {
@@ -236,6 +245,7 @@ public class StorageUtil {
 
     /**
      * get player repeat status
+     *
      * @return string => (repeat, repeat_one, no_repeat)
      */
     public String loadRepeatStatus() {
@@ -249,6 +259,7 @@ public class StorageUtil {
 
     /**
      * save favourite music to storage
+     *
      * @param music music to be saved
      */
     public void saveFavorite(Music music) {
@@ -261,6 +272,7 @@ public class StorageUtil {
 
     /**
      * check if given music exist in favourite storage
+     *
      * @param music music to be searched
      * @return returns either "favorite" or "no_favorite" string
      */
@@ -272,6 +284,7 @@ public class StorageUtil {
 
     /**
      * remove given music from favourite storage
+     *
      * @param music music to be removed
      */
     public void removeFavorite(Music music) {
@@ -284,6 +297,7 @@ public class StorageUtil {
 
     /**
      * get favourite music list in an arraylist of strings
+     *
      * @return returns arraylist of music
      */
     public ArrayList<Music> getFavouriteList() {
@@ -306,6 +320,7 @@ public class StorageUtil {
 
     /**
      * save player shuffle status
+     *
      * @param status status => (shuffle OR no_shuffle)
      */
     public void saveShuffle(String status) {
@@ -317,6 +332,7 @@ public class StorageUtil {
 
     /**
      * load player shuffle status from storage
+     *
      * @return returns string => (shuffle OR no_shuffle)
      */
     public String loadShuffle() {
@@ -331,6 +347,7 @@ public class StorageUtil {
 
     /**
      * save temporary music list in storage
+     *
      * @param list temporary music list to be saved
      */
     public void saveTempMusicList(ArrayList<Music> list) {
@@ -339,7 +356,7 @@ public class StorageUtil {
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
         int i = 0;
-        for(Music music : list) {
+        for (Music music : list) {
             String encodedMessage = encode(music);
             editor.putString(String.valueOf(i), encodedMessage);
             i++;
@@ -349,6 +366,7 @@ public class StorageUtil {
 
     /**
      * load temporary music-id list from storage
+     *
      * @return returns arraylist of music-ids (String)
      */
     public ArrayList<Music> loadTempMusicList() {
@@ -356,7 +374,7 @@ public class StorageUtil {
         ArrayList<Music> list = new ArrayList<>();
         Map<String, ?> map = sharedPreferences.getAll();
 
-        for(int i = 0; i < map.size(); i++) {
+        for (int i = 0; i < map.size(); i++) {
             String encodedMessage = sharedPreferences.getString(String.valueOf(i), null);
             Music music = decode(encodedMessage);
             list.add(music);
@@ -381,6 +399,7 @@ public class StorageUtil {
 
     /**
      * save lyrics of given music in storage
+     *
      * @param musicId music-id (string) as key
      * @param _lrcMap LRC-MAP object as value
      */
@@ -395,6 +414,7 @@ public class StorageUtil {
 
     /**
      * load lyrics of given music-id from storage
+     *
      * @param musicId to get lyrics of
      * @return returns LRC-MAP of given music
      */
@@ -409,6 +429,7 @@ public class StorageUtil {
 
     /**
      * remove LRC-MAP or lyrics of given music-id
+     *
      * @param musicId music-id of a music
      */
     public void removeLyrics(String musicId) {
@@ -427,7 +448,7 @@ public class StorageUtil {
      * create and save playlist in storage
      *
      * @param playlistName playlist name
-     * @param coverUri cover uri for playlist
+     * @param coverUri     cover uri for playlist
      */
     public void createPlaylist(String playlistName, String coverUri) {
         sharedPreferences = context.getSharedPreferences(PLAYLIST_STORAGE, Context.MODE_PRIVATE);
@@ -442,8 +463,8 @@ public class StorageUtil {
      * create and save playlist in storage
      *
      * @param playlistName playlist name
-     * @param coverUri cover uri for playlist
-     * @param musicList songs in arraylist<string> format
+     * @param coverUri     cover uri for playlist
+     * @param musicList    songs in arraylist<string> format
      */
     public void createPlaylist(String playlistName, String coverUri, ArrayList<Music> musicList) {
         sharedPreferences = context.getSharedPreferences(PLAYLIST_STORAGE, Context.MODE_PRIVATE);
@@ -517,7 +538,7 @@ public class StorageUtil {
     /**
      * add Item in playlist
      *
-     * @param music music to be added
+     * @param music        music to be added
      * @param playlistName playlist in which, music is to be added
      */
     public void saveItemInPlayList(Music music, String playlistName) {
@@ -545,7 +566,8 @@ public class StorageUtil {
 
     /**
      * remove a music from playlist
-     * @param music music of the music which to be removed
+     *
+     * @param music        music of the music which to be removed
      * @param playlistName name of the playlist that music belongs to
      */
     public void removeItemInPlaylist(Music music, String playlistName) {
@@ -695,6 +717,7 @@ public class StorageUtil {
             sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
             return sharedPreferences.getBoolean("self_stop", true);
         }
+
         public void setLastAddedDur(int i) {
             sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -749,6 +772,7 @@ public class StorageUtil {
 
         /**
          * save given path in black list storage
+         *
          * @param path path to be saved in black list storage
          */
         public void saveInBlackList(String path) {
@@ -760,13 +784,14 @@ public class StorageUtil {
 
         /**
          * get all paths in arraylist<String> format from black list storage
+         *
          * @return returns paths in arraylist<String> format
          */
         public ArrayList<String> loadBlackList() {
             sharedPreferences = context.getSharedPreferences(BLACKLIST_STORAGE, Context.MODE_PRIVATE);
             Map<String, ?> map = sharedPreferences.getAll();
             ArrayList<String> paths = new ArrayList<>();
-            for(Map.Entry<String, ?> entry : map.entrySet()) {
+            for (Map.Entry<String, ?> entry : map.entrySet()) {
                 paths.add(entry.getKey());
             }
             return paths;
@@ -774,6 +799,7 @@ public class StorageUtil {
 
         /**
          * remove given path from black list storage
+         *
          * @param path path to be removed (URI)
          */
         public void removeFromBlackList(String path) {

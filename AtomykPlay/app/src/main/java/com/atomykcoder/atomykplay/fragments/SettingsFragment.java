@@ -1,5 +1,7 @@
 package com.atomykcoder.atomykplay.fragments;
 
+import static com.atomykcoder.atomykplay.activities.MainActivity.TAG_BLOCK_LIST;
+
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Intent;
@@ -33,18 +35,17 @@ import java.util.ArrayList;
 
 public class SettingsFragment extends Fragment {
 
+    public ArrayList<String> blacklist;
+    public BlockFolderListAdapter adapter;
     private RadioGroup radioGroup;
     private RadioButton light_theme_btn, dark_theme_btn;
     private SwitchCompat songInfoSwi, artistSwi, extraSwi, autoPlaySwi, keepShuffleSwi, lowerVolSwi, selfStopSwi, keepScreenOnSwi, oneClickSkipSwi;
     private View songInfoLl, artistLl, extraLl, autoPlayLl, keepShuffleLl, lowerVolLl, blackListLl, filterDurLl, selfStopLl, keepScreenOnLl, oneClickSkipLl;
-
-
     private boolean dark;
     private boolean showInfo, showArtist, showOption, showExtra, autoPlay, keepShuffle, lowerVol, selfStop, keepScreenOn, oneClickSkip;
     private StorageUtil.SettingsStorage settingsStorage;
     private MainActivity mainActivity;
     private Dialog blacklistDialog, filterDurDialog;
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -169,7 +170,7 @@ public class SettingsFragment extends Fragment {
         filterDurDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         filterDurDialog.setContentView(R.layout.filter_duration_dialog);
 
-        TextView filter_time_tv =  filterDurDialog.findViewById(R.id.filter_time_textview);
+        TextView filter_time_tv = filterDurDialog.findViewById(R.id.filter_time_textview);
         SeekBar filter_dur_seekbar = filterDurDialog.findViewById(R.id.filter_dur_seekBar);
         Button filter_dur_ok_bt = filterDurDialog.findViewById(R.id.filter_dur_ok_bt);
 
@@ -230,9 +231,6 @@ public class SettingsFragment extends Fragment {
         super.onPause();
     }
 
-    public ArrayList<String> blacklist;
-    public BlockFolderListAdapter adapter;
-
     private void openBlackListDialogue() {
         //create blacklistDialog
         blacklistDialog = new Dialog(getContext());
@@ -256,7 +254,7 @@ public class SettingsFragment extends Fragment {
         directory_icon.setOnClickListener(view -> {
             Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
             i.addCategory(Intent.CATEGORY_DEFAULT);
-            requireActivity().startActivityForResult(i, 2020);
+            requireActivity().startActivityForResult(i, TAG_BLOCK_LIST);
         });
 
         // set listener on okay button

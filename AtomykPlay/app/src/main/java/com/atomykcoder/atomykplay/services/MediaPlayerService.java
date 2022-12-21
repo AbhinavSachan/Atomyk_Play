@@ -36,7 +36,6 @@ import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
-import android.util.Base64;
 import android.view.KeyEvent;
 import android.widget.Toast;
 
@@ -55,7 +54,6 @@ import com.atomykcoder.atomykplay.events.UpdateMusicProgressEvent;
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.viewModals.LRCMap;
-import com.google.protobuf.InvalidProtocolBufferException;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -87,6 +85,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     public static boolean ui_visible = false;
     //binder
     private final IBinder iBinder = new LocalBinder();
+    private final Handler handler = new Handler();
     public MediaPlayer media_player;
     public Runnable seekBarRunnable;
     public Handler seekBarHandler;
@@ -199,7 +198,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            String encodedMessage =  intent.getStringExtra("music");
+            String encodedMessage = intent.getStringExtra("music");
             Music music = MusicHelper.decode(encodedMessage);
 
             if (music != null) {
@@ -273,7 +272,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     /**
      * this function updates new music data in notification
      */
-    private void updateMetaData(Music activeMusic) {
+    private void updateMetaData(Music activeMusic, Bitmap finalImage) {
         musicList = storage.loadQueueList();
         musicIndex = storage.loadMusicIndex();
         String songName;
@@ -288,6 +287,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             artistName = activeMusic.getArtist();
             album = activeMusic.getAlbum();
 
+            final Bitmap[] finalImage1 = {finalImage};
+
             ExecutorService service = Executors.newSingleThreadExecutor();
             service.execute(() -> {
                 //image decoder
@@ -296,18 +297,13 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 mediaMetadataRetriever.setDataSource(activeMusic.getPath());
                 byte[] art = mediaMetadataRetriever.getEmbeddedPicture();
 
-                try {
-                    image = BitmapFactory.decodeByteArray(art, 0, art.length);
-                } catch (Exception ignored) {
-                }
-
-                if (image != null) {
-                    int dimension = Math.min(image.getWidth(), image.getHeight());
-                    finalArtWork[0] = ThumbnailUtils.extractThumbnail(image, dimension - (dimension / 5), dimension - (dimension / 5), ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+                if (finalImage1[0] != null) {
+                    int dimension = Math.min(finalImage1[0].getWidth(), finalImage1[0].getHeight());
+                    finalArtWork[0] = ThumbnailUtils.extractThumbnail(finalImage1[0], dimension - (dimension / 5), dimension - (dimension / 5), ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
                 } else {
-                    image = BitmapFactory.decodeResource(getResources(), R.drawable.placeholder_art);
-                    int dimension = Math.min(image.getWidth(), image.getHeight());
-                    finalArtWork[0] = ThumbnailUtils.extractThumbnail(image, dimension - (dimension / 5), dimension - (dimension / 5), ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+                    finalImage1[0] = BitmapFactory.decodeResource(getResources(), R.drawable.placeholder_art);
+                    int dimension = Math.min(finalImage1[0].getWidth(), finalImage1[0].getHeight());
+                    finalArtWork[0] = ThumbnailUtils.extractThumbnail(finalImage1[0], dimension - (dimension / 5), dimension - (dimension / 5), ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
                 }
                 handler.post(() -> {
                     if (musicList != null)
@@ -611,14 +607,32 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         return iBinder;
     }
 
-
     @Override
     public void onPrepared(MediaPlayer mp) {
-        if (service_bound) {
-            EventBus.getDefault().post(new SetMainLayoutEvent(activeMusic));
-            updateMetaData(activeMusic);
-        }
-        resumeMedia();
+        ExecutorService service = Executors.newSingleThreadExecutor();
+        service.execute(() -> {
+            //image decoder
+            Bitmap image = null;
+            MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
+            mediaMetadataRetriever.setDataSource(activeMusic.getPath());
+            byte[] art = mediaMetadataRetriever.getEmbeddedPicture();
+
+            try {
+                image = BitmapFactory.decodeByteArray(art, 0, art.length);
+            } catch (Exception ignored) {
+            }
+
+            Bitmap finalImage = image;
+            handler.post(() -> {
+                if (service_bound) {
+                    EventBus.getDefault().post(new SetMainLayoutEvent(activeMusic, finalImage));
+                    updateMetaData(activeMusic, finalImage);
+                }
+                resumeMedia();
+            });
+        });
+        service.shutdown();
+
     }
 
     @Override
@@ -755,7 +769,9 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 setIcon(PlaybackStatus.PAUSED);
                 buildNotification(PlaybackStatus.PAUSED, 0f);
             }
-        notificationManager.cancelAll();
+        if (notificationManager != null) {
+            notificationManager.cancelAll();
+        }
         service_stopped = true;
         stopSelf();
     }
@@ -862,21 +878,10 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 } else {
                     activeMusic = musicList.get(--musicIndex);
                 }
-            if (activeMusic != null) {
-                //update stored index
-                storage.saveMusicIndex(musicIndex);
-
-                stopMedia();
-                initiateMediaPlayer();
-            }
         } else {
             if (media_player != null) {
                 if (media_player.getCurrentPosition() >= 3000) {
                     activeMusic = musicList.get(musicIndex);
-                    if (activeMusic != null) {
-                        stopMedia();
-                        initiateMediaPlayer();
-                    }
                 } else {
                     if (musicIndex != -1 && musicList != null)
                         if (musicIndex == 0) {
@@ -885,23 +890,11 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
                         } else {
                             activeMusic = musicList.get(--musicIndex);
-
                         }
-                    if (activeMusic != null) {
-                        //update stored index
-                        storage.saveMusicIndex(musicIndex);
-
-                        stopMedia();
-                        initiateMediaPlayer();
-                    }
                 }
             } else {
                 if (lastPos >= 3000) {
                     activeMusic = musicList.get(musicIndex);
-                    if (activeMusic != null) {
-                        stopMedia();
-                        initiateMediaPlayer();
-                    }
                 } else {
                     if (musicIndex != -1 && musicList != null)
                         if (musicIndex == 0) {
@@ -912,15 +905,13 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                             activeMusic = musicList.get(--musicIndex);
 
                         }
-                    if (activeMusic != null) {
-                        //update stored index
-                        storage.saveMusicIndex(musicIndex);
-
-                        stopMedia();
-                        initiateMediaPlayer();
-                    }
                 }
             }
+        }
+        if (activeMusic != null) {
+            storage.saveMusicIndex(musicIndex);
+            stopMedia();
+            initiateMediaPlayer();
         }
     }
 
@@ -940,15 +931,10 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 activeMusic = musicList.get(musicIndex);
 
             } else {
-                //get next in playlist
-                musicIndex = musicIndex + 1;
-                activeMusic = musicList.get(musicIndex);
-
+                activeMusic = musicList.get(++musicIndex);
             }
         if (activeMusic != null) {
-            //update stored index
             storage.saveMusicIndex(musicIndex);
-
             stopMedia();
             initiateMediaPlayer();
         }

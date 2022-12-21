@@ -23,6 +23,7 @@
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/edit_song_name_l"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/textView_search_lyric"
@@ -32,7 +33,6 @@
         app:boxCornerRadiusBottomStart="8dp"
         app:boxCornerRadiusTopEnd="8dp"
         app:boxCornerRadiusTopStart="8dp"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         app:hintTextColor="@color/accent_color_bg"
         app:placeholderTextColor="@color/hint_color">
 

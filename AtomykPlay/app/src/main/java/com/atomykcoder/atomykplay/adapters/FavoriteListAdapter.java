@@ -29,7 +29,6 @@ import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.ItemTouchHelperAdapter;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
-import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -111,7 +110,7 @@ public class FavoriteListAdapter extends RecyclerView.Adapter<FavoriteListAdapte
         holder.cardView.setOnClickListener(v -> {
 
             //region timer to stop extra clicks
-            if(SystemClock.elapsedRealtime() < (lastClickTime + delay)) {
+            if (SystemClock.elapsedRealtime() < (lastClickTime + delay)) {
                 Log.i("info", "too fast");
                 return;
             }
@@ -173,7 +172,7 @@ public class FavoriteListAdapter extends RecyclerView.Adapter<FavoriteListAdapte
             }
         });
 
-        holder.optBtn.setOnClickListener(v->mainActivity.openOptionMenu(currentItem,"favoriteList"));
+        holder.optBtn.setOnClickListener(v -> mainActivity.openOptionMenu(currentItem, "favoriteList"));
 
     }
 

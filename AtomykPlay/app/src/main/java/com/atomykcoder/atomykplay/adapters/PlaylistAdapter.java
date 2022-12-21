@@ -20,7 +20,6 @@ import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.classes.GlideBuilt;
 import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.fragments.OpenPlayListFragment;
-import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 import com.atomykcoder.atomykplay.viewModals.Playlist;
 
 import java.util.ArrayList;

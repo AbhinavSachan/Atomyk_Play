@@ -45,7 +45,7 @@ public class PlaylistDialogAdapter extends RecyclerView.Adapter<PlaylistDialogAd
         holder.view.setOnClickListener(v -> {
             storageUtil.saveItemInPlayList(music, playlist.getName());
             mainActivity.addToPlDialog.dismiss();
-            Toast.makeText(context,"added to "+playlist.getName(),Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "added to " + playlist.getName(), Toast.LENGTH_SHORT).show();
         });
     }
 
@@ -57,10 +57,11 @@ public class PlaylistDialogAdapter extends RecyclerView.Adapter<PlaylistDialogAd
     public static class PlaylistViewHolder extends RecyclerView.ViewHolder {
         private final TextView textView;
         private final View view;
+
         public PlaylistViewHolder(@NonNull View itemView) {
             super(itemView);
-            textView  =itemView.findViewById(R.id.playlist_name_dialog_tv);
-            view  =itemView.findViewById(R.id.playlist_name_dialog_ll);
+            textView = itemView.findViewById(R.id.playlist_name_dialog_tv);
+            view = itemView.findViewById(R.id.playlist_name_dialog_ll);
         }
     }
 }

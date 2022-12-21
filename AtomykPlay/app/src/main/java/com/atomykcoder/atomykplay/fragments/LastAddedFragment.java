@@ -67,10 +67,10 @@ public class LastAddedFragment extends Fragment {
         lastAddedMusicList = new ArrayList<>();
 
 
-
         //sort initial music list by date in reverse order
         Collections.sort(initialMusicList, new Comparator<Music>() {
             final DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.getDefault());
+
             @Override
             public int compare(Music t1, Music t2) {
                 try {
@@ -80,7 +80,7 @@ public class LastAddedFragment extends Fragment {
                     if (d1 != null) {
                         i = d1.compareTo(d2);
                     }
-                    if(i != 0) return -i;
+                    if (i != 0) return -i;
                 } catch (ParseException e) {
                     throw new IllegalArgumentException();
                 }
@@ -146,7 +146,6 @@ public class LastAddedFragment extends Fragment {
     }
 
 
-
     @Override
     public void onStop() {
         super.onStop();
@@ -158,9 +157,9 @@ public class LastAddedFragment extends Fragment {
     }
 
 
-
     /**
      * load all last added songs based on selected radio buttons
+     *
      * @param i radio id
      */
     private void loadLastAddedList(int i) {
@@ -183,6 +182,7 @@ public class LastAddedFragment extends Fragment {
 
     /**
      * start thread to handle loading music list within range
+     *
      * @param maxValue clamp at max value
      */
     private void startThread(int maxValue) {
@@ -194,7 +194,7 @@ public class LastAddedFragment extends Fragment {
 
         service.execute(() -> {
 
-                lastAddedMusicList.clear();
+            lastAddedMusicList.clear();
             try {
                 lastAddedMusicList.addAll(getLastAddedMusicList(maxValue));
             } catch (ParseException e) {
@@ -212,13 +212,13 @@ public class LastAddedFragment extends Fragment {
                 recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
                 adapter = new MusicMainAdapter(getContext(), lastAddedMusicList);
                 recyclerView.setAdapter(adapter);
-                });
+            });
         });
         service.shutdown();
     }
 
 
-    private ArrayList<Music> getLastAddedMusicList (long max) throws ParseException {
+    private ArrayList<Music> getLastAddedMusicList(long max) throws ParseException {
         ArrayList<Music> result = new ArrayList<>();
 
         // dtf for parsing string to date
@@ -235,10 +235,10 @@ public class LastAddedFragment extends Fragment {
         //loop through music list and if a music date is older than given date, then break;
         for (Music music : initialMusicList) {
             Date musicDate = dateFormat.parse(music.getDateAdded());
-            if(musicDate.compareTo(previousDate) < 0) {
+            if (musicDate.compareTo(previousDate) < 0) {
                 break;
             }
-                result.add(music);
+            result.add(music);
         }
 
         //return music ranging between current date and given older date

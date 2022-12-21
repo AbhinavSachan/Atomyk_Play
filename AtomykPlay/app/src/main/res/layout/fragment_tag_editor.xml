@@ -39,6 +39,7 @@
                         android:id="@+id/song_image_view_tag"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
                         android:src="@drawable/ic_choose_artwork" />
 
                     <ImageView
@@ -198,12 +199,13 @@
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 
     </com.google.android.material.appbar.AppBarLayout>
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/tag_editor_save_button"
         android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_gravity="end|bottom"
-        app:fabSize="normal"
-        android:src="@drawable/ic_save"
         android:layout_margin="24dp"
-        android:layout_height="wrap_content"/>
+        android:src="@drawable/ic_save"
+        app:fabSize="normal" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

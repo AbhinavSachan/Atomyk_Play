@@ -6,7 +6,7 @@ public class MusicDataCapsule implements Serializable {
     String sName;
     String sArtist;
     String sAlbum;
-    String sAlbumUri;
+    String sAlbumId;
     String sDuration;
     String sPath;
     String sBitrate;
@@ -16,11 +16,11 @@ public class MusicDataCapsule implements Serializable {
     String sId;
     String sDateAdded;
 
-    public MusicDataCapsule(String sName, String sArtist, String sAlbum, String sAlbumUri, String sDuration, String sPath, String sBitrate, String sMimeType, String sSize, String sGenre, String sId, String sDateAdded) {
+    public MusicDataCapsule(String sName, String sArtist, String sAlbum, String sAlbumId, String sDuration, String sPath, String sBitrate, String sMimeType, String sSize, String sGenre, String sId, String sDateAdded) {
         this.sName = sName;
         this.sArtist = sArtist;
         this.sAlbum = sAlbum;
-        this.sAlbumUri = sAlbumUri;
+        this.sAlbumId = sAlbumId;
         this.sDuration = sDuration;
         this.sPath = sPath;
         this.sBitrate = sBitrate;
@@ -59,8 +59,8 @@ public class MusicDataCapsule implements Serializable {
         return sAlbum;
     }
 
-    public String getsAlbumUri() {
-        return sAlbumUri;
+    public String getsAlbumId() {
+        return sAlbumId;
     }
 
     public String getsDuration() {

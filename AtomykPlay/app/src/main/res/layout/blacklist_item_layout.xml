@@ -15,10 +15,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
-        android:ellipsize="start"
-        android:paddingVertical="@dimen/dialog_btn_ver_pad"
-        android:paddingHorizontal="12dp"
         android:layout_marginEnd="25dp"
+        android:ellipsize="start"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="@dimen/dialog_btn_ver_pad"
         android:singleLine="true"
         android:text="@string/empty"
         android:textColor="@color/text_color"
@@ -30,8 +30,8 @@
         android:layout_width="25dp"
         android:layout_height="25dp"
         android:layout_alignParentEnd="true"
-        android:layout_marginHorizontal="12dp"
         android:layout_centerVertical="true"
+        android:layout_marginHorizontal="12dp"
         android:src="@drawable/ic_close" />
 
 

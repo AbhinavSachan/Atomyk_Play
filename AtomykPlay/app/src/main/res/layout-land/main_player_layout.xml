@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/rounded_bottom_sheet"
     tools:context=".fragments.BottomSheetPlayerFragment"
     tools:ignore="UnusedAttribute">
 
@@ -347,11 +346,12 @@
                 android:textColor="@color/light_slate_gray_blue" />
 
         </LinearLayout>
+
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:gravity="center_horizontal|bottom"
             android:layout_marginBottom="4dp"
+            android:gravity="center_horizontal|bottom"
             android:orientation="horizontal"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

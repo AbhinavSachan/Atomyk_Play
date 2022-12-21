@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/playlist_name_dialog_ll"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:id="@+id/playlist_name_dialog_ll"
+    android:layout_below="@+id/string_text"
     android:clickable="true"
     android:focusable="true"
     android:foreground="?selectableItemBackground"
-    android:layout_below="@+id/string_text"
     android:orientation="horizontal"
     android:paddingHorizontal="12dp"
     tools:ignore="UnusedAttribute">
@@ -20,9 +20,9 @@
         android:src="@drawable/ic_music_list" />
 
     <TextView
+        android:id="@+id/playlist_name_dialog_tv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/playlist_name_dialog_tv"
         android:paddingVertical="@dimen/dialog_btn_ver_pad"
         android:paddingStart="12dp"
         android:paddingEnd="12dp"

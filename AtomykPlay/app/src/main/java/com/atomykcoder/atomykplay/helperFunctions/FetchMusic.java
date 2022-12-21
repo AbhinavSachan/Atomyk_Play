@@ -3,12 +3,10 @@ package com.atomykcoder.atomykplay.helperFunctions;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
 
 import com.atomykcoder.atomykplay.data.Music;
-import com.atomykcoder.atomykplay.viewModals.MusicDataCapsule;
 
 import java.io.File;
 import java.time.Instant;
@@ -86,14 +84,11 @@ public class FetchMusic {
                             sGenre = audioCursor.getString(9);
                         }
 
-                        String sDateAdded =  convertLongToDate(dateInMillis);
-
-                        Uri uri = Uri.parse("content://media/external/audio/albumart");
-                        String sAlbumUri = Uri.withAppendedPath(uri, sAlbumId).toString();
+                        String sDateAdded = convertLongToDate(dateInMillis);
 
                         int filter = new StorageUtil.SettingsStorage(context).loadFilterDur() * 1000;
                         Music music = Music.newBuilder().setName(sTitle).setArtist(sArtist)
-                                .setAlbum(sAlbum).setAlbumUri(sAlbumUri).setDuration(sDuration)
+                                .setAlbum(sAlbum).setAlbumUri("").setDuration(sDuration)
                                 .setPath(sPath).setBitrate(sBitrate).setMimeType(sMimeType)
                                 .setSize(sSize).setGenre(sGenre != null ? sGenre : "").setId(sId).setDateAdded(sDateAdded)
                                 .build();
@@ -116,7 +111,7 @@ public class FetchMusic {
     private static String convertLongToDate(long time) {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             return DateTimeFormatter.ofPattern("dd MMMM yyyy").format(
-                    Instant.ofEpochMilli(time*1000)
+                    Instant.ofEpochMilli(time * 1000)
                             .atZone(ZoneId.systemDefault())
                             .toLocalDate());
         } else {
