@@ -210,10 +210,6 @@ public class LastAddedFragment extends Fragment {
                 // set recyclerview and adapter
                 recyclerView.setHasFixedSize(true);
                 recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-                ArrayList<String> idList = new ArrayList<>();
-                for (Music music : lastAddedMusicList) {
-                    idList.add(music.getId());
-                }
                 adapter = new MusicMainAdapter(getContext(), lastAddedMusicList);
                 recyclerView.setAdapter(adapter);
                 });

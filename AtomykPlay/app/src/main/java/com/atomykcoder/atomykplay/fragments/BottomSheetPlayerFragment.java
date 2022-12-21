@@ -18,6 +18,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -406,9 +407,13 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         mini_progress.setMax(0);
         seekBarMain.setProgress(0);
         mini_progress.setProgress(0);
-        GlideBuilt.glideBitmap(requireContext(), null, R.drawable.ic_music, playerCoverImage, 512);
-        GlideBuilt.glideBitmap(requireContext(), null, R.drawable.ic_music, mini_cover, 128);
 
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.execute(() -> {
+            GlideBuilt.glideBitmap(requireContext(), null, R.drawable.ic_music, playerCoverImage, 512);
+            GlideBuilt.glideBitmap(requireContext(), null, R.drawable.ic_music, mini_cover, 128);
+        });
+        executor.shutdown();
     }
 
     @Subscribe
