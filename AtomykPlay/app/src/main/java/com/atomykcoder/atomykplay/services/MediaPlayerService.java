@@ -282,28 +282,35 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         musicList = storage.loadQueueList();
         musicIndex = storage.loadMusicIndex();
 
-        Bitmap thumbnail;
-        MediaMetadataCompat metadata = DEFAULT_METADATA;
+        ExecutorService service = Executors.newSingleThreadExecutor();
+        service.execute(() -> {
+            Bitmap thumbnail;
+            MediaMetadataCompat metadata = DEFAULT_METADATA;
 
-        if(activeMusic != null) {
-            String dur = activeMusic.getDuration();
-            String songName = activeMusic.getName();
-            String artistName = activeMusic.getArtist();
-            String album = activeMusic.getAlbum();
+            if(activeMusic != null) {
+                String dur = activeMusic.getDuration();
+                String songName = activeMusic.getName();
+                String artistName = activeMusic.getArtist();
+                String album = activeMusic.getAlbum();
 
-            thumbnail = finalImage != null ? Bitmap.createScaledBitmap(finalImage,
-                    ARTWORK_DIMENSION, ARTWORK_DIMENSION, false) : DEFAULT_THUMBNAIL;
+                thumbnail = finalImage != null ? ThumbnailUtils.extractThumbnail(
+                        finalImage,
+                        ARTWORK_DIMENSION - (ARTWORK_DIMENSION / 5),
+                        ARTWORK_DIMENSION - (ARTWORK_DIMENSION / 5),
+                        ThumbnailUtils.OPTIONS_RECYCLE_INPUT) : DEFAULT_THUMBNAIL;
 
-            metadata = new MediaMetadataCompat.Builder()
-                    .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, thumbnail)
-                    .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artistName)
-                    .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, album)
-                    .putString(MediaMetadataCompat.METADATA_KEY_TITLE, songName)
-                    .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, Long.parseLong(dur))
-                    .build();
-        }
-
-        mediaSession.setMetadata(metadata);
+                metadata = new MediaMetadataCompat.Builder()
+                        .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, thumbnail)
+                        .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artistName)
+                        .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, album)
+                        .putString(MediaMetadataCompat.METADATA_KEY_TITLE, songName)
+                        .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, Long.parseLong(dur))
+                        .build();
+            }
+            MediaMetadataCompat finalMetadata = metadata;
+            handler.post(() -> mediaSession.setMetadata(finalMetadata));
+        });
+        service.shutdown();
     }
 
     /**
@@ -935,7 +942,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         mediaSession.setActive(true);
         mediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_QUEUE_COMMANDS);
 
-//        updateMetaData(activeMusic);
 
         mediaSession.setCallback(new MediaSessionCompat.Callback() {
             @Override
@@ -1075,7 +1081,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
 
         DEFAULT_THUMBNAIL = ThumbnailUtils.extractThumbnail(DEFAULT_ARTWORK,
-                ARTWORK_DIMENSION / 5, ARTWORK_DIMENSION / 5, ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+                ARTWORK_DIMENSION - (ARTWORK_DIMENSION / 5), ARTWORK_DIMENSION - (ARTWORK_DIMENSION / 5), ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
 
         DEFAULT_METADATA = new MediaMetadataCompat.Builder()
                 .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, DEFAULT_THUMBNAIL)
