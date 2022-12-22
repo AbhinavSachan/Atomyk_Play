@@ -62,6 +62,8 @@ import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import kotlin.Metadata;
+
 public class MediaPlayerService extends Service implements MediaPlayer.OnCompletionListener,
         MediaPlayer.OnBufferingUpdateListener, MediaPlayer.OnErrorListener,
         MediaPlayer.OnInfoListener, MediaPlayer.OnPreparedListener, MediaPlayer.OnSeekCompleteListener,
@@ -269,56 +271,39 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         registerReceiver(pluggedInDevice, i);
     }
 
+    private int ARTWORK_DIMENSION;
+    private Bitmap DEFAULT_THUMBNAIL;
+    private MediaMetadataCompat DEFAULT_METADATA;
+
     /**
      * this function updates new music data in notification
      */
     private void updateMetaData(Music activeMusic, Bitmap finalImage) {
         musicList = storage.loadQueueList();
         musicIndex = storage.loadMusicIndex();
-        String songName;
-        String artistName;
-        String album;
-        String dur;
-        Handler handler = new Handler();
-        final Bitmap[] finalArtWork = new Bitmap[1];
-        if (activeMusic != null) {
-            dur = activeMusic.getDuration();
-            songName = activeMusic.getName();
-            artistName = activeMusic.getArtist();
-            album = activeMusic.getAlbum();
 
-            final Bitmap[] finalImage1 = {finalImage};
+        Bitmap thumbnail;
+        MediaMetadataCompat metadata = DEFAULT_METADATA;
 
-            ExecutorService service = Executors.newSingleThreadExecutor();
-            service.execute(() -> {
-                //image decoder
-                Bitmap image = null;
-                MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
-                mediaMetadataRetriever.setDataSource(activeMusic.getPath());
-                byte[] art = mediaMetadataRetriever.getEmbeddedPicture();
+        if(activeMusic != null) {
+            String dur = activeMusic.getDuration();
+            String songName = activeMusic.getName();
+            String artistName = activeMusic.getArtist();
+            String album = activeMusic.getAlbum();
 
-                if (finalImage1[0] != null) {
-                    int dimension = Math.min(finalImage1[0].getWidth(), finalImage1[0].getHeight());
-                    finalArtWork[0] = ThumbnailUtils.extractThumbnail(finalImage1[0], dimension - (dimension / 5), dimension - (dimension / 5), ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
-                } else {
-                    finalImage1[0] = BitmapFactory.decodeResource(getResources(), R.drawable.placeholder_art);
-                    int dimension = Math.min(finalImage1[0].getWidth(), finalImage1[0].getHeight());
-                    finalArtWork[0] = ThumbnailUtils.extractThumbnail(finalImage1[0], dimension - (dimension / 5), dimension - (dimension / 5), ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
-                }
-                handler.post(() -> {
-                    if (musicList != null)
-                        mediaSession.setMetadata(new MediaMetadataCompat.Builder()
-                                .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, finalArtWork[0])
-                                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artistName)
-                                .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, album)
-                                .putString(MediaMetadataCompat.METADATA_KEY_TITLE, songName)
-                                .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, Long.parseLong(dur))
-                                .build());
-                });
-            });
-            service.shutdown();
+            thumbnail = finalImage != null ? Bitmap.createScaledBitmap(finalImage,
+                    ARTWORK_DIMENSION, ARTWORK_DIMENSION, false) : DEFAULT_THUMBNAIL;
 
+            metadata = new MediaMetadataCompat.Builder()
+                    .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, thumbnail)
+                    .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artistName)
+                    .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, album)
+                    .putString(MediaMetadataCompat.METADATA_KEY_TITLE, songName)
+                    .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, Long.parseLong(dur))
+                    .build();
         }
+
+        mediaSession.setMetadata(metadata);
     }
 
     /**
@@ -612,21 +597,20 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         ExecutorService service = Executors.newSingleThreadExecutor();
         service.execute(() -> {
             //image decoder
-            Bitmap image = null;
+            Bitmap[] image = {null};
             MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
             mediaMetadataRetriever.setDataSource(activeMusic.getPath());
             byte[] art = mediaMetadataRetriever.getEmbeddedPicture();
 
             try {
-                image = BitmapFactory.decodeByteArray(art, 0, art.length);
+                image[0] = BitmapFactory.decodeByteArray(art, 0, art.length);
             } catch (Exception ignored) {
             }
 
-            Bitmap finalImage = image;
             handler.post(() -> {
                 if (service_bound) {
-                    EventBus.getDefault().post(new SetMainLayoutEvent(activeMusic, finalImage));
-                    updateMetaData(activeMusic, finalImage);
+                    EventBus.getDefault().post(new SetMainLayoutEvent(activeMusic, image[0]));
+                    updateMetaData(activeMusic, image[0]);
                 }
                 resumeMedia();
             });
@@ -1071,6 +1055,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         }
     }
 
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         //Handle Intent action from MediaSession.TransportControls
@@ -1080,6 +1065,26 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         settingsStorage = new StorageUtil.SettingsStorage(getApplicationContext());
         musicList = storage.loadQueueList();
         musicIndex = storage.loadMusicIndex();
+
+        Bitmap DEFAULT_ARTWORK = BitmapFactory.decodeResource(MediaPlayerService.this.getApplicationContext()
+                .getResources(), R.drawable.placeholder_art);
+
+
+        ARTWORK_DIMENSION =
+                Math.min(DEFAULT_ARTWORK.getWidth(), DEFAULT_ARTWORK.getHeight());
+
+
+        DEFAULT_THUMBNAIL = ThumbnailUtils.extractThumbnail(DEFAULT_ARTWORK,
+                ARTWORK_DIMENSION / 5, ARTWORK_DIMENSION / 5, ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+
+        DEFAULT_METADATA = new MediaMetadataCompat.Builder()
+                .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, DEFAULT_THUMBNAIL)
+                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, "")
+                .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, "")
+                .putString(MediaMetadataCompat.METADATA_KEY_TITLE, "")
+                .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, 0)
+                .build();
+
 
         if (musicList != null)
             if (musicIndex != -1 && musicIndex < musicList.size()) {
