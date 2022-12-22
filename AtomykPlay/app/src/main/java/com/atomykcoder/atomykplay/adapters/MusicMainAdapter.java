@@ -1,12 +1,6 @@
 package com.atomykcoder.atomykplay.adapters;
 
 import android.content.Context;
-import android.content.ContextWrapper;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.media.MediaMetadataRetriever;
-import android.os.Handler;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,15 +13,11 @@ import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.adapters.Generics.GenericViewHolder;
 import com.atomykcoder.atomykplay.adapters.ViewHolders.MusicMainViewHolder;
-import com.atomykcoder.atomykplay.classes.GlideBuilt;
 import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.helperFunctions.MusicDiffCallback;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class MusicMainAdapter extends MusicAdapter {
     Context context;
@@ -69,6 +59,7 @@ public class MusicMainAdapter extends MusicAdapter {
 
         loadImage(context, currentItem, position, holder.albumCoverIV);
 
+        holder.cardView.setOnClickListener(view -> {
             if(shouldIgnoreClick()) return;
 
             if(!doesMusicExists(currentItem)) {
@@ -83,7 +74,7 @@ public class MusicMainAdapter extends MusicAdapter {
                 handleNoShuffle(storage, position, super.items);
 
             handlePlayMusic(mainActivity, currentItem);
-
+        });
 
         holder.optionButton.setOnClickListener(v -> {
             if(!doesMusicExists(currentItem)) {
@@ -97,15 +88,14 @@ public class MusicMainAdapter extends MusicAdapter {
 
     @Override
     public void removeItem(Music item) {
-        StorageUtil storageUtil = new StorageUtil(context);
         int position = super.items.indexOf(item);
-        int savedIndex = storageUtil.loadMusicIndex();
+        int savedIndex = storage.loadMusicIndex();
 
         if (position < savedIndex) {
-            storageUtil.saveMusicIndex(savedIndex - 1);
+            storage.saveMusicIndex(savedIndex - 1);
         }
         if (position != -1) {
-            storageUtil.removeFromInitialList(item);
+            storage.removeFromInitialList(item);
             super.items.remove(position);
         }
 
