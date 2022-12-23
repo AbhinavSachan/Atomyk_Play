@@ -1,8 +1,6 @@
 package com.atomykcoder.atomykplay.adapters;
 
 import static com.atomykcoder.atomykplay.helperFunctions.MusicHelper.convertDuration;
-import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.no_shuffle;
-import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.shuffle;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -128,7 +126,7 @@ public class FavoriteListAdapter extends RecyclerView.Adapter<FavoriteListAdapte
                     ArrayList<Music> shuffleList = new ArrayList<>(musicList);
 
                     storage.saveTempMusicList(musicList);
-                    storage.saveShuffle(shuffle);
+                    storage.saveShuffle(true);
 
                     ExecutorService service = Executors.newSingleThreadExecutor();
                     service.execute(() -> {
@@ -154,7 +152,7 @@ public class FavoriteListAdapter extends RecyclerView.Adapter<FavoriteListAdapte
                     //Store serializable music list to sharedPreference
                     ExecutorService service = Executors.newSingleThreadExecutor();
                     service.execute(() -> {
-                        storage.saveShuffle(no_shuffle);
+                        storage.saveShuffle(false);
                         storage.saveQueueList(musicList);
                         storage.saveMusicIndex(position);
                         // post-execute code here

@@ -1,8 +1,5 @@
 package com.atomykcoder.atomykplay.adapters;
 
-import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.no_shuffle;
-import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.shuffle;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -24,7 +21,7 @@ import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class MusicAdapter extends GenericRecyclerAdapter<Music>{
+public class MusicAdapter extends GenericRecyclerAdapter<Music> {
 
     private ArrayList<Music> musicList;
     private HashMap<Integer, Bitmap> map = new HashMap<>();
@@ -35,10 +32,10 @@ public class MusicAdapter extends GenericRecyclerAdapter<Music>{
         mainActivity.openBottomPlayer();
     }
 
-    protected void loadImage(Context context, Music item, int position, ImageView albumCoverIV){
+    protected void loadImage(Context context, Music item, int position, ImageView albumCoverIV) {
         Handler handler = new Handler();
-        if(map.containsKey(position)){
-            handler.post(() -> GlideBuilt.glideBitmap(context, map.get(position), R.drawable.ic_music, albumCoverIV, 50));
+        if (map.containsKey(position)) {
+            handler.post(() -> GlideBuilt.glideBitmap(context, map.get(position), R.drawable.ic_music, albumCoverIV, 128));
             return;
         }
 
@@ -54,9 +51,10 @@ public class MusicAdapter extends GenericRecyclerAdapter<Music>{
             try {
                 image[0] = BitmapFactory.decodeByteArray(art, 0, art.length);
                 map.put(position, image[0]);
-            } catch (Exception ignored){}
+            } catch (Exception ignored) {
+            }
 
-            handler.post(() -> GlideBuilt.glideBitmap(context, image[0], R.drawable.ic_music, albumCoverIV, 50));
+            handler.post(() -> GlideBuilt.glideBitmap(context, image[0], R.drawable.ic_music, albumCoverIV, 128));
         });
         service.shutdown();
     }
@@ -64,7 +62,7 @@ public class MusicAdapter extends GenericRecyclerAdapter<Music>{
     protected void handleShuffle(StorageUtil storage, int position, ArrayList<Music> musicList) {
 
         ArrayList<Music> shuffleList = new ArrayList<>(musicList);
-        storage.saveShuffle(shuffle);
+        storage.saveShuffle(true);
 
         storage.saveTempMusicList(shuffleList);
 
@@ -82,24 +80,23 @@ public class MusicAdapter extends GenericRecyclerAdapter<Music>{
         storage.saveQueueList(shuffleList);
         storage.saveMusicIndex(0);
 
-        this.musicList =  shuffleList;
+        this.musicList = shuffleList;
 
 
     }
 
-    protected void handleNoShuffle(StorageUtil storage, int position,  ArrayList<Music> musicList) {
-
-        storage.saveShuffle(no_shuffle);
+    protected void handleNoShuffle(StorageUtil storage, int position, ArrayList<Music> musicList) {
+        storage.saveShuffle(false);
         storage.saveQueueList(musicList);
         storage.saveMusicIndex(position);
-
         this.musicList = musicList;
     }
 
     protected boolean doesMusicExists(Music music) {
         File file = new File(music.getPath());
-        return file.exists();
+        return !file.exists();
     }
 
-    public void removeItem(Music item) {}
+    public void removeItem(Music item) {
+    }
 }

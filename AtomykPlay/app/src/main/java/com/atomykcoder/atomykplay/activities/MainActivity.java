@@ -1,7 +1,5 @@
 package com.atomykcoder.atomykplay.activities;
 
-import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.favorite;
-import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.no_favorite;
 import static com.atomykcoder.atomykplay.services.MediaPlayerService.is_playing;
 
 import android.Manifest;
@@ -484,7 +482,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onStart();
         if (service_bound) {
             if (is_playing) {
-
+                if (is_granted) {
+                    if (!isChecking) {
+                        checkForUpdateMusic();
+                        showToast("checking");
+                    }
+                }
                 media_player_service.setSeekBar();
                 EventBus.getDefault().post(new PrepareRunnableEvent());
 
@@ -585,8 +588,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             navigationView.setCheckedItem(R.id.navigation_playlist);
         }
     }
-
+private boolean isChecking = false;
     public void checkForUpdateMusic() {
+        isChecking = true;
         ExecutorService service = Executors.newSingleThreadExecutor();
         Handler handler = new Handler(Looper.getMainLooper());
 
@@ -604,6 +608,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
                 musicMainAdapter.updateMusicListItems(updatedList);
                 storageUtil.saveInitialList(updatedList);
+                isChecking = false;
             });
         });
         service.shutdown();
@@ -762,14 +767,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     public void stopMusic() {
-        if (service_stopped) {
-            startService();
-            new Handler().postDelayed(() -> {
-                //service is active send media with broadcast receiver
-                Intent broadcastIntent = new Intent(BROADCAST_STOP_MUSIC);
-                sendBroadcast(broadcastIntent);
-            }, 0);
-        } else {
+        if (!service_stopped) {
             //service is active send media with broadcast receiver
             Intent broadcastIntent = new Intent(BROADCAST_STOP_MUSIC);
             sendBroadcast(broadcastIntent);
@@ -955,9 +953,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         removeFromList.setVisibility(View.GONE);
         deleteBtn.setVisibility(View.GONE);
 
-        if (storageUtil.checkFavourite(music).equals(no_favorite)) {
+        if (!storageUtil.checkFavourite(music)) {
             addToFav.setImageResource(R.drawable.ic_favorite_border);
-        } else if (storageUtil.checkFavourite(music).equals(favorite)) {
+        } else if (storageUtil.checkFavourite(music)) {
             addToFav.setImageResource(R.drawable.ic_favorite);
         }
 
@@ -1185,7 +1183,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         if (dataList != null) {
                             Handler handler = new Handler();
                             Runnable runnable = MainActivity.this::checkForUpdateMusic;
-                            handler.postDelayed(runnable, 5000);
+                            handler.postDelayed(runnable, 1000);
                         }
                         bindService();
                         startService();
@@ -1529,9 +1527,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //Initialize Dialogue Box UI Items
         playlistArrayList = storageUtil.getAllPlaylist();
         ImageView image = addToPlDialog.findViewById(R.id.add_to_fav_dialog_box_img);
-        if (storageUtil.checkFavourite(music).equals(no_favorite)) {
+        if (!storageUtil.checkFavourite(music)) {
             image.setImageResource(R.drawable.ic_favorite_border);
-        } else if (storageUtil.checkFavourite(music).equals(favorite)) {
+        } else if (storageUtil.checkFavourite(music)) {
             image.setImageResource(R.drawable.ic_favorite);
         }
         plDialogRecyclerView = addToPlDialog.findViewById(R.id.playlist_dialog_recycler);

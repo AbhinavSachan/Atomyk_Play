@@ -1,8 +1,6 @@
 package com.atomykcoder.atomykplay.adapters;
 
 import static com.atomykcoder.atomykplay.helperFunctions.MusicHelper.convertDuration;
-import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.no_shuffle;
-import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.shuffle;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -128,7 +126,7 @@ public class OpenPlayListAdapter extends RecyclerView.Adapter<OpenPlayListAdapte
                     //saving list in temp for restore function in player fragment
 
                     storage.saveTempMusicList(musicList);
-                    storage.saveShuffle(shuffle);
+                    storage.saveShuffle(true);
 
                     service.execute(() -> {
                         //removing current item from list
@@ -152,7 +150,7 @@ public class OpenPlayListAdapter extends RecyclerView.Adapter<OpenPlayListAdapte
                 } else if (!settingsStorage.loadKeepShuffle()) {
                     //Store serializable music list to sharedPreference
                     service.execute(() -> {
-                        storage.saveShuffle(no_shuffle);
+                        storage.saveShuffle(false);
                         storage.saveQueueList(musicList);
                         storage.saveMusicIndex(position);
                         // post-execute code here

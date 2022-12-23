@@ -24,12 +24,6 @@ public class StorageUtil {
     public static final String no_repeat = "no_repeat";
     public static final String repeat = "repeat";
     public static final String repeat_one = "repeat_one";
-    public static final String no_favorite = "no_favorite";
-    public static final String favorite = "favorite";
-    public static final String shuffle = "shuffle";
-    public static final String no_shuffle = "no_shuffle";
-    public static final String dark = "dark";
-    public static final String no_dark = "no_dark";
     //Storage Locations
     private final String MUSIC_LIST_STORAGE = "com.atomykcoder.atomykplay.MUSIC_LIST_STORAGE";
     private final String POSITION_STORAGE = "com.atomykcoder.atomykplay.STORAGE_POSITION";
@@ -41,14 +35,11 @@ public class StorageUtil {
     private final String INITIAL_LIST_STORAGE = "com.atomykcoder.atomykplay.INITIAL_LIST_STORAGE";
     private final String MUSIC_INDEX_STORAGE = "com.atomykcoder.atomykplay.MUSIC_INDEX_STORAGE";
     private final String TEMP_MUSIC_LIST_STORAGE = "com.atomykcoder.atomykplay.TEMP_MUSIC_LIST_STORAGE";
-    //Keys
-    private final String musicList = "musicList";
-    private final String initialList = "initialList";
+
     private final String musicIndex = "musicIndex";
     private final String musicPosition = "musicPosition";
     private final String repeatStatus = "repeatStatus";
     private final String shuffleStatus = "shuffleStatus";
-    private final String tempList = "tempList";
     private final Context context;
     private SharedPreferences sharedPreferences;
 
@@ -266,7 +257,7 @@ public class StorageUtil {
         sharedPreferences = context.getSharedPreferences(FAVORITE_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         String encodedMessage = encode(music);
-        editor.putString(encodedMessage, favorite);
+        editor.putBoolean(encodedMessage, true);
         editor.apply();
     }
 
@@ -276,10 +267,10 @@ public class StorageUtil {
      * @param music music to be searched
      * @return returns either "favorite" or "no_favorite" string
      */
-    public String checkFavourite(Music music) {
+    public boolean checkFavourite(Music music) {
         sharedPreferences = context.getSharedPreferences(FAVORITE_STORAGE, Context.MODE_PRIVATE);
         String encodedMessage = encode(music);
-        return sharedPreferences.getString(encodedMessage, no_favorite);
+        return sharedPreferences.getBoolean(encodedMessage, false);
     }
 
     /**
@@ -323,10 +314,10 @@ public class StorageUtil {
      *
      * @param status status => (shuffle OR no_shuffle)
      */
-    public void saveShuffle(String status) {
+    public void saveShuffle(boolean status) {
         sharedPreferences = context.getSharedPreferences(SHUFFLE_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(shuffleStatus, status);
+        editor.putBoolean(shuffleStatus, status);
         editor.apply();
     }
 
@@ -335,9 +326,9 @@ public class StorageUtil {
      *
      * @return returns string => (shuffle OR no_shuffle)
      */
-    public String loadShuffle() {
+    public boolean loadShuffle() {
         sharedPreferences = context.getSharedPreferences(SHUFFLE_STORAGE, Context.MODE_PRIVATE);
-        return sharedPreferences.getString(shuffleStatus, no_shuffle);
+        return sharedPreferences.getBoolean(shuffleStatus, false);
     }
 
     //endregion

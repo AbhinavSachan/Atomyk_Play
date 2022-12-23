@@ -4,13 +4,9 @@ import static com.atomykcoder.atomykplay.activities.MainActivity.media_player_se
 import static com.atomykcoder.atomykplay.activities.MainActivity.service_bound;
 import static com.atomykcoder.atomykplay.helperFunctions.MusicHelper.convertDuration;
 import static com.atomykcoder.atomykplay.helperFunctions.MusicHelper.convertToMillis;
-import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.favorite;
-import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.no_favorite;
 import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.no_repeat;
-import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.no_shuffle;
 import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.repeat;
 import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.repeat_one;
-import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.shuffle;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
@@ -18,7 +14,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -339,16 +334,16 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
             }
             String finalBitrate = bitrateInNum + " KBPS";
 
-            if (storageUtil.checkFavourite(activeMusic).equals(no_favorite)) {
+            if (!storageUtil.checkFavourite(activeMusic)) {
                 favoriteImg.setImageResource(R.drawable.ic_favorite_border);
-            } else if (storageUtil.checkFavourite(activeMusic).equals(favorite)) {
+            } else if (storageUtil.checkFavourite(activeMusic)) {
                 favoriteImg.setImageResource(R.drawable.ic_favorite);
             }
 
 
-            if (storageUtil.loadShuffle().equals(no_shuffle)) {
+            if (!storageUtil.loadShuffle()) {
                 shuffleImg.setImageResource(R.drawable.ic_shuffle_empty);
-            } else if (storageUtil.loadShuffle().equals(shuffle)) {
+            } else if (storageUtil.loadShuffle()) {
                 shuffleImg.setImageResource(R.drawable.ic_shuffle);
             }
 
@@ -368,7 +363,8 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
                 GlideBuilt.glideBitmap(requireContext(), image, R.drawable.ic_music, playerCoverImage, 512);
                 GlideBuilt.glideBitmap(requireContext(), image, R.drawable.ic_music, mini_cover, 128);
                 GlideBuilt.glideBitmap(requireContext(), image, R.drawable.ic_music, queueCoverImg, 128);
-                ((MainActivity) context).setDataInNavigation(songName, artistName, image);
+                mainActivity.setDataInNavigation(songName, artistName, image);
+
 
             } catch (NumberFormatException ignored) {
             }
@@ -713,12 +709,12 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
     public void addFavorite(StorageUtil storageUtil, Music music, @Nullable ImageView imageView) {
         if (music != null) {
-            if (storageUtil.checkFavourite(music).equals(no_favorite)) {
+            if (!storageUtil.checkFavourite(music)) {
                 storageUtil.saveFavorite(music);
                 if (imageView != null) {
                     imageView.setImageResource(R.drawable.ic_favorite);
                 }
-            } else if (storageUtil.checkFavourite(music).equals(favorite)) {
+            } else if (storageUtil.checkFavourite(music)) {
                 storageUtil.removeFavorite(music);
                 if (imageView != null) {
                     imageView.setImageResource(R.drawable.ic_favorite_border);
@@ -744,20 +740,19 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
     private void shuffleList() {
         //shuffle list program
-        if (storageUtil.loadShuffle().equals(no_shuffle)) {
+        if (!storageUtil.loadShuffle()) {
             shuffleImg.setImageResource(R.drawable.ic_shuffle);
-            storageUtil.saveShuffle(shuffle);
+            storageUtil.saveShuffle(true);
             shuffleListAndSave(activeMusic);
-        } else if (storageUtil.loadShuffle().equals(shuffle)) {
+        } else if (storageUtil.loadShuffle()) {
             shuffleImg.setImageResource(R.drawable.ic_shuffle_empty);
-            storageUtil.saveShuffle(no_shuffle);
+            storageUtil.saveShuffle(false);
             restoreLastListAndPos(activeMusic);
         }
     }
 
     private void shuffleListAndSave(Music activeMusic) {
         ArrayList<Music> musicList = storageUtil.loadQueueList();
-        storageUtil.saveTempMusicList(musicList);
 
         int musicIndex;
         musicIndex = storageUtil.loadMusicIndex();
@@ -807,7 +802,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
             // do in background code here
             service.execute(() -> {
                 int index;
-                index = musicArrayList.indexOf(activeMusic.getId());
+                index = musicArrayList.indexOf(activeMusic);
                 if (index != -1) {
                     storageUtil.saveMusicIndex(index);
                 }
@@ -901,16 +896,16 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         }
 
         //for shuffle button
-        if (storageUtil.loadShuffle().equals(no_shuffle)) {
+        if (!storageUtil.loadShuffle()) {
             shuffleImg.setImageResource(R.drawable.ic_shuffle_empty);
-        } else if (storageUtil.loadShuffle().equals(shuffle)) {
+        } else if (storageUtil.loadShuffle()) {
             shuffleImg.setImageResource(R.drawable.ic_shuffle);
         }
 
         if (activeMusic != null) {
-            if (storageUtil.checkFavourite(activeMusic).equals(no_favorite)) {
+            if (!storageUtil.checkFavourite(activeMusic)) {
                 favoriteImg.setImageResource(R.drawable.ic_favorite_border);
-            } else if (storageUtil.checkFavourite(activeMusic).equals(favorite)) {
+            } else if (storageUtil.checkFavourite(activeMusic)) {
                 favoriteImg.setImageResource(R.drawable.ic_favorite);
             }
         }

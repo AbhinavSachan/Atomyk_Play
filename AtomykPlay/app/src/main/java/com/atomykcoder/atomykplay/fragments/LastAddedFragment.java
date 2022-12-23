@@ -202,7 +202,6 @@ public class LastAddedFragment extends Fragment {
             }
 
             handler.post(() -> {
-
                 progressDialog.dismiss();
                 String num = lastAddedMusicList.size() + " Songs";
                 songCountTv.setText(num);
@@ -235,7 +234,7 @@ public class LastAddedFragment extends Fragment {
         //loop through music list and if a music date is older than given date, then break;
         for (Music music : initialMusicList) {
             Date musicDate = dateFormat.parse(music.getDateAdded());
-            if (musicDate.compareTo(previousDate) < 0) {
+            if (musicDate != null && musicDate.compareTo(previousDate) < 0) {
                 break;
             }
             result.add(music);
