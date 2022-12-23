@@ -51,8 +51,7 @@ public class MusicAdapter extends GenericRecyclerAdapter<Music> {
             try {
                 image[0] = BitmapFactory.decodeByteArray(art, 0, art.length);
                 map.put(position, image[0]);
-            } catch (Exception ignored) {
-            }
+            } catch (Exception ignored) {}
 
             handler.post(() -> GlideBuilt.glideBitmap(context, image[0], R.drawable.ic_music, albumCoverIV, 128));
         });
@@ -94,9 +93,8 @@ public class MusicAdapter extends GenericRecyclerAdapter<Music> {
 
     protected boolean doesMusicExists(Music music) {
         File file = new File(music.getPath());
-        return !file.exists();
+        return file.exists();
     }
 
-    public void removeItem(Music item) {
-    }
+    public void removeItem(Music item) {}
 }

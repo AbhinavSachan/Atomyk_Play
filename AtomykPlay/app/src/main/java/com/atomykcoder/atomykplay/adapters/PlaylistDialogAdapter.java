@@ -4,41 +4,43 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.activities.MainActivity;
+import com.atomykcoder.atomykplay.adapters.Generics.GenericRecyclerAdapter;
+import com.atomykcoder.atomykplay.adapters.Generics.GenericViewHolder;
+import com.atomykcoder.atomykplay.adapters.ViewHolders.PlayListDialogViewHolder;
 import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.viewModals.Playlist;
 
 import java.util.ArrayList;
 
-public class PlaylistDialogAdapter extends RecyclerView.Adapter<PlaylistDialogAdapter.PlaylistViewHolder> {
-    private Context context;
-    private ArrayList<Playlist> playlists;
-    private Music music;
+public class PlaylistDialogAdapter extends GenericRecyclerAdapter<Playlist> {
+    private final Context context;
+    private final Music music;
 
     public PlaylistDialogAdapter(Context _context, ArrayList<Playlist> _playlists, Music _music) {
         context = _context;
-        playlists = _playlists;
+        super.items = _playlists;
         music = _music;
     }
 
     @NonNull
     @Override
-    public PlaylistDialogAdapter.PlaylistViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public GenericViewHolder<Playlist> onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.playlist_dialog_item_layout, parent, false);
-        return new PlaylistViewHolder(view);
+        return new PlayListDialogViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull PlaylistDialogAdapter.PlaylistViewHolder holder, int position) {
-        Playlist playlist = playlists.get(position);
+    public void onBindViewHolder(@NonNull GenericViewHolder<Playlist> _holder, int position) {
+        PlayListDialogViewHolder holder = (PlayListDialogViewHolder) _holder;
+
+        Playlist playlist = super.items.get(position);
         MainActivity mainActivity = (MainActivity) context;
         StorageUtil storageUtil = new StorageUtil(context);
         holder.textView.setText(playlist.getName());
@@ -51,17 +53,8 @@ public class PlaylistDialogAdapter extends RecyclerView.Adapter<PlaylistDialogAd
 
     @Override
     public int getItemCount() {
-        return playlists.size();
+        return super.items.size();
     }
 
-    public static class PlaylistViewHolder extends RecyclerView.ViewHolder {
-        private final TextView textView;
-        private final View view;
-
-        public PlaylistViewHolder(@NonNull View itemView) {
-            super(itemView);
-            textView = itemView.findViewById(R.id.playlist_name_dialog_tv);
-            view = itemView.findViewById(R.id.playlist_name_dialog_ll);
-        }
-    }
 }
+

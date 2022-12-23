@@ -58,16 +58,15 @@ public class MusicMainAdapter extends MusicAdapter {
 
         loadImage(context, currentItem, position, holder.albumCoverIV);
 
-
         holder.cardView.setOnClickListener(view -> {
             if (shouldIgnoreClick(context)) return;
 
-            if (doesMusicExists(currentItem)) {
+            if (!doesMusicExists(currentItem)) {
                 Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show();
                 removeItem(currentItem);
+                return;
             }
 
-            //region timer to stop extra clicks
             if (settingsStorage.loadKeepShuffle())
                 handleShuffle(storage, position, super.items);
             else
@@ -77,7 +76,7 @@ public class MusicMainAdapter extends MusicAdapter {
         });
 
         holder.optionButton.setOnClickListener(v -> {
-            if (doesMusicExists(currentItem)) {
+            if (!doesMusicExists(currentItem)) {
                 Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show();
                 removeItem(currentItem);
                 return;

@@ -4,19 +4,18 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.activities.MainActivity;
+import com.atomykcoder.atomykplay.adapters.ViewHolders.FoundLyricsViewHolder;
 import com.atomykcoder.atomykplay.fragments.AddLyricsFragment;
 
 import java.util.ArrayList;
 
-
-public class FoundLyricsAdapter extends RecyclerView.Adapter<FoundLyricsAdapter.FoundLyricsViewHolder> {
+public class FoundLyricsAdapter extends RecyclerView.Adapter<FoundLyricsViewHolder> {
     private final ArrayList<String> titles;
     private final ArrayList<String> sampleLyrics;
     private final ArrayList<String> urls;
@@ -54,17 +53,6 @@ public class FoundLyricsAdapter extends RecyclerView.Adapter<FoundLyricsAdapter.
     @Override
     public int getItemCount() {
         return titles.size();
-    }
-
-    public class FoundLyricsViewHolder extends RecyclerView.ViewHolder {
-        public TextView song_title;
-        public TextView song_sampleLyrics;
-
-        public FoundLyricsViewHolder(@NonNull View itemView) {
-            super(itemView);
-            song_title = itemView.findViewById(R.id.found_song_title);
-            song_sampleLyrics = itemView.findViewById(R.id.found_song_lyrics_sample);
-        }
     }
 }
 

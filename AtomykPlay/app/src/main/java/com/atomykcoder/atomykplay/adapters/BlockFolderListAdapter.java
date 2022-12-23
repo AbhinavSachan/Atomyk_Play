@@ -4,67 +4,60 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.activities.MainActivity;
+import com.atomykcoder.atomykplay.adapters.Generics.GenericRecyclerAdapter;
+import com.atomykcoder.atomykplay.adapters.Generics.GenericViewHolder;
+import com.atomykcoder.atomykplay.adapters.ViewHolders.BlackListViewHolder;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 
 import java.util.ArrayList;
 
-public class BlockFolderListAdapter extends RecyclerView.Adapter<BlockFolderListAdapter.BlackListViewHolder> {
-    private ArrayList<String> arrayList;
-    private Context context;
+public class BlockFolderListAdapter extends GenericRecyclerAdapter<String> {
+    private final Context context;
+    StorageUtil.SettingsStorage settingsStorage;
 
     public BlockFolderListAdapter(ArrayList<String> arrayList, Context context) {
-        this.arrayList = arrayList;
+        super.items = arrayList;
         this.context = context;
+        settingsStorage = new StorageUtil.SettingsStorage(context);
     }
 
     @NonNull
     @Override
-    public BlackListViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public GenericViewHolder<String> onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.blacklist_item_layout, parent, false);
         return new BlackListViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull BlackListViewHolder holder, int position) {
-        String curItem = arrayList.get(position);
+    public void onBindViewHolder(@NonNull GenericViewHolder<String> _holder, int position) {
+        super.onBindViewHolder(_holder, position);
 
-        holder.textView.setText(curItem);
-        holder.imageView.setOnClickListener(v -> removeFromList(curItem));
+        BlackListViewHolder holder = (BlackListViewHolder) _holder;
+
+        holder.imageView.setOnClickListener(v -> removeFromList(super.items.get(position)));
     }
 
     private void removeFromList(String name) {
-        int pos = arrayList.indexOf(name);
+        int pos = super.items.indexOf(name);
         MainActivity mainActivity = (MainActivity) context;
-        StorageUtil.SettingsStorage settingsStorage = new StorageUtil.SettingsStorage(context);
         settingsStorage.removeFromBlackList(name);
-        arrayList.remove(name);
+        super.items.remove(name);
+
         notifyItemRemoved(pos);
-        notifyItemRangeChanged(pos, arrayList.size() - (pos + 1));
+        notifyItemRangeChanged(pos, super.items.size() - (pos + 1));
         mainActivity.checkForUpdateMusic();
     }
 
     @Override
     public int getItemCount() {
-        return arrayList.size();
+        return super.items.size();
     }
 
-    public static class BlackListViewHolder extends RecyclerView.ViewHolder {
-        private final TextView textView;
-        private final ImageView imageView;
 
-        public BlackListViewHolder(@NonNull View itemView) {
-            super(itemView);
-            textView = itemView.findViewById(R.id.blacklist_directory_path);
-            imageView = itemView.findViewById(R.id.delete_from_blacklist);
-
-        }
-    }
 }
+
