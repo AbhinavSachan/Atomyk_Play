@@ -143,6 +143,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public View plSheet, player_bottom_sheet;
     public Playlist plItemSelected;
     public Music selectedItem;
+    public boolean isChecking = false;
     private Dialog plDialog;
     private View shadowLyrFound;
     private final BottomSheetBehavior.BottomSheetCallback lrcFoundCallback = new BottomSheetBehavior.BottomSheetCallback() {
@@ -476,7 +477,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         songAlbumTv = findViewById(R.id.file_album_detail);
     }
 
-
     @Override
     protected void onStart() {
         super.onStart();
@@ -588,7 +588,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             navigationView.setCheckedItem(R.id.navigation_playlist);
         }
     }
-private boolean isChecking = false;
+
+    public void checkUpdatesAfterMilli() {
+        Handler handler = new Handler();
+        Runnable runnable = MainActivity.this::checkForUpdateMusic;
+        handler.postDelayed(runnable, 100);
+    }
+
     public void checkForUpdateMusic() {
         isChecking = true;
         ExecutorService service = Executors.newSingleThreadExecutor();
@@ -606,6 +612,7 @@ private boolean isChecking = false;
                 } else {
                     linearLayout.setVisibility(View.GONE);
                 }
+
                 musicMainAdapter.updateMusicListItems(updatedList);
                 storageUtil.saveInitialList(updatedList);
                 isChecking = false;
@@ -722,7 +729,7 @@ private boolean isChecking = false;
     public void resetDataInNavigation() {
         navSongName.setText("Song Name");
         navArtistName.setText("Artist");
-        GlideBuilt.glideBitmap(this, null, R.drawable.ic_music, navCover, 300);
+        GlideBuilt.glide(this, null, R.drawable.ic_music, navCover, 300);
     }
 
     public void setDataInNavigation(String song_name, String artist_name, Bitmap album_uri) {
@@ -1183,7 +1190,7 @@ private boolean isChecking = false;
                         if (dataList != null) {
                             Handler handler = new Handler();
                             Runnable runnable = MainActivity.this::checkForUpdateMusic;
-                            handler.postDelayed(runnable, 1000);
+                            handler.postDelayed(runnable, 100);
                         }
                         bindService();
                         startService();

@@ -115,6 +115,7 @@ public class StorageUtil {
     public void saveInitialList(ArrayList<Music> list) {
         sharedPreferences = context.getSharedPreferences(INITIAL_LIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.clear();
 
         for (Music music : list) {
             String encodedMessage = encode(music);

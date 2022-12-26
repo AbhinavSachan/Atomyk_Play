@@ -7,7 +7,9 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.MediaMetadata;
 import android.media.MediaMetadataRetriever;
+import android.media.RemoteController;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -28,6 +30,7 @@ import androidx.fragment.app.Fragment;
 
 import com.atomykcoder.atomykplay.BuildConfig;
 import com.atomykcoder.atomykplay.R;
+import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.classes.GlideBuilt;
 import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper;
@@ -61,6 +64,7 @@ public class TagEditorFragment extends Fragment {
     private EditText editName, editArtist, editAlbum, editGenre;
     private ImageView pickImageView;
     private FloatingActionButton saveButton;
+    private MainActivity mainActivity;
     private Music music;
     private ContentValues cv;
     private Uri imageUri;
@@ -86,6 +90,7 @@ public class TagEditorFragment extends Fragment {
         pickImageView = view.findViewById(R.id.pick_cover_tag);
         coverImageView = view.findViewById(R.id.song_image_view_tag);
         saveButton = view.findViewById(R.id.tag_editor_save_button);
+        mainActivity = (MainActivity) getContext();
 
         if (music != null) {
             editName.setText(music.getName());
@@ -167,30 +172,47 @@ public class TagEditorFragment extends Fragment {
         String newArtist = editArtist.getText().toString().trim();
         String newAlbum = editAlbum.getText().toString().trim();
         String newGenre = editGenre.getText().toString().trim();
+        ExecutorService service = Executors.newSingleThreadExecutor();
+        Handler handler = new Handler();
+        service.execute(() -> {
 
-        try {
-            AudioFile f = AudioFileIO.read(new File(music.getPath()));
-            Tag tag = f.getTag();
+            try {
+                File musicFile = new File(music.getPath());
+                AudioFile f = AudioFileIO.read(musicFile);
+                Tag tag = f.getTag();
 
 
-            tag.setField(FieldKey.TITLE, newTitle);
-            tag.setField(FieldKey.ARTIST, newArtist);
-            tag.setField(FieldKey.ALBUM, newAlbum);
-            tag.setField(FieldKey.GENRE, newGenre);
+                tag.setField(FieldKey.TITLE, newTitle);
+                tag.setField(FieldKey.ARTIST, newArtist);
+                tag.setField(FieldKey.ALBUM, newAlbum);
+                tag.setField(FieldKey.GENRE, newGenre);
 
-            if (imageUri != null) {
-                File file = new File(imageUri.getPath());
-                Artwork artwork = Artwork.createArtworkFromFile(file);
-                tag.addField(artwork);
-                tag.setField(artwork);
+                if (imageUri != null) {
+                    File imageFile = new File(imageUri.toString());
+                    if (imageFile.exists()) {
+                        Artwork artwork = Artwork.createArtworkFromFile(imageFile);
+                        tag.addField(artwork);
+                        tag.setField(artwork);
+                    }
+                }
+
+                f.setTag(tag);
+                f.commit();
+
+                handler.post(() -> {
+                    Toast.makeText(getContext(), "Changes will be applied after restart", Toast.LENGTH_SHORT).show();
+                    requireContext().sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(musicFile)));
+                    requireActivity().onBackPressed();
+                });
+            } catch (CannotReadException | InvalidAudioFrameException | ReadOnlyFileException | TagException | IOException | CannotWriteException e) {
+                e.printStackTrace();
+                handler.post(() -> {
+                    Toast.makeText(requireContext(), "Something went wrong", Toast.LENGTH_SHORT).show();
+                    requireActivity().onBackPressed();
+                });
             }
-            f.commit();
-            Toast.makeText(requireContext(), "Changes Made Successfully", Toast.LENGTH_SHORT).show();
-
-        } catch (CannotReadException | InvalidAudioFrameException | ReadOnlyFileException | TagException | IOException | CannotWriteException e) {
-            e.printStackTrace();
-            Toast.makeText(requireContext(), "Something went wrong", Toast.LENGTH_SHORT).show();
-        }
+        });
+        service.shutdown();
 
     }
 

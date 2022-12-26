@@ -124,11 +124,12 @@ public class MusicQueueAdapter extends MusicAdapter implements ItemTouchHelperAd
                 removeItem(currentItem);
                 return false;
             }
-            if (MotionEventCompat.getActionMasked(event) == MotionEvent.ACTION_DOWN) {
+            if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
                 onDragStartListener.onDragStart(holder);
             }
             return false;
         });
+
     }
 
     @Override

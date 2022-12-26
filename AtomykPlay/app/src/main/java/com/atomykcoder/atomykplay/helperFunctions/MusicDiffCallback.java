@@ -37,6 +37,8 @@ public class MusicDiffCallback extends Callback {
         Music oldMusic = oldMusicList.get(oldItemPosition);
         Music newMusic = newMusicList.get(newItemPosition);
         return oldMusic.getName().equals(newMusic.getName())
+                && oldMusic.getAlbum().equals(newMusic.getAlbum())
+                && oldMusic.getDateAdded().equals(newMusic.getDateAdded())
                 && oldMusic.getDuration().equals(newMusic.getDuration())
                 && oldMusic.getArtist().equals(newMusic.getArtist());
     }

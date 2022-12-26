@@ -74,7 +74,6 @@ public class MusicAdapter extends GenericRecyclerAdapter<Music> {
         //adding the removed item in shuffled list on 0th index
         shuffleList.add(0, item);
 
-
         //saving list
         storage.saveQueueList(shuffleList);
         storage.saveMusicIndex(0);

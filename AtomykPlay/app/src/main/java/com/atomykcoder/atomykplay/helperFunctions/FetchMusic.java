@@ -2,7 +2,9 @@ package com.atomykcoder.atomykplay.helperFunctions;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
 
@@ -34,7 +36,8 @@ public class FetchMusic {
                 MediaStore.Audio.Media.BITRATE,
                 MediaStore.Audio.Media.GENRE,
                 MediaStore.Audio.Media.DATE_ADDED,
-                MediaStore.Audio.Media._ID
+                MediaStore.Audio.Media._ID,
+                MediaStore.Audio.Media.YEAR
         };
         //Creating a cursor to store all data of a song
         Cursor audioCursor = context.getContentResolver().query(
@@ -59,13 +62,14 @@ public class FetchMusic {
                         }
                     }
 
+
                     if (!isSongBlacklisted) {
-                        String sTitle = audioCursor.getString(0)
-                                .replace("y2mate.com -", "")
-                                .replace("&#039;", "'")
-                                .replace("%20", " ")
-                                .replace("_", " ")
-                                .replace("&amp;", ",").trim();
+                        String sTitle = audioCursor.getString(0).trim();
+//                                .replace("y2mate.com -", "")
+//                                .replace("&#039;", "'")
+//                                .replace("%20", " ")
+//                                .replace("_", " ")
+//                                .replace("&amp;", ",").trim();
                         String sArtist = audioCursor.getString(1).trim();
                         String sAlbumId = audioCursor.getString(2);
                         //converting duration in readable format
@@ -76,6 +80,7 @@ public class FetchMusic {
                         String sSize = audioCursor.getString(7);
                         long dateInMillis = audioCursor.getLong(10);
                         String sId = audioCursor.getString(11);
+                        String sYear = audioCursor.getString(12);
 
                         String sBitrate = "";
                         String sGenre = "";
@@ -85,16 +90,17 @@ public class FetchMusic {
                         }
 
                         String sDateAdded = convertLongToDate(dateInMillis);
-
+                        File file = new File(sPath);
                         int filter = new StorageUtil.SettingsStorage(context).loadFilterDur() * 1000;
-                        Music music = Music.newBuilder().setName(sTitle).setArtist(sArtist)
-                                .setAlbum(sAlbum).setAlbumUri("").setDuration(sDuration)
-                                .setPath(sPath).setBitrate(sBitrate).setMimeType(sMimeType)
-                                .setSize(sSize).setGenre(sGenre != null ? sGenre : "").setId(sId).setDateAdded(sDateAdded)
-                                .build();
-                        File file = new File(music.getPath());
                         if (file.exists()) {
-                            if (filter <= Integer.parseInt(music.getDuration())) {
+                            context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
+                            if (filter <= Integer.parseInt(sDuration)) {
+                                Music music = Music.newBuilder().setName(sTitle).setArtist(sArtist)
+                                        .setAlbum(sAlbum).setAlbumUri("").setDuration(sDuration)
+                                        .setPath(sPath).setBitrate(sBitrate).setMimeType(sMimeType)
+                                        .setSize(sSize).setGenre(sGenre != null ? sGenre : "").setId(sId).setDateAdded(sDateAdded)
+                                        .build();
+
                                 dataList.add(music);
                             }
                         }

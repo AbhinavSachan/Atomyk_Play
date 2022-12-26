@@ -786,8 +786,6 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
             // stopping the background thread (crucial)
             service.shutdown();
         }
-
-
     }
 
     private void restoreLastListAndPos(Music activeMusic) {
