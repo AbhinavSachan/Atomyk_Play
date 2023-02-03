@@ -16,8 +16,8 @@ import java.util.ArrayList;
 public class GenericRecyclerAdapter<T> extends RecyclerView.Adapter<GenericViewHolder<T>> {
 
     protected ArrayList<T> items;
-    long lastClickTime;
     protected int delay = 500;
+    long lastClickTime;
 
     @SuppressLint("NotifyDataSetChanged")
     public void addItems(ArrayList<T> _items) {
@@ -44,7 +44,7 @@ public class GenericRecyclerAdapter<T> extends RecyclerView.Adapter<GenericViewH
     }
 
     protected boolean shouldIgnoreClick(Context context) {
-        if(SystemClock.elapsedRealtime() < (lastClickTime + delay)) {
+        if (SystemClock.elapsedRealtime() < (lastClickTime + delay)) {
             Toast.makeText(context, "already playing...", Toast.LENGTH_SHORT).show();
             return true;
         }

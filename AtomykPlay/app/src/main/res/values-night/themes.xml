@@ -13,6 +13,9 @@
         <item name="android:navigationBarColor">?colorPrimaryVariant</item>
 
         <!-- Customize your theme here. -->
+        <item name="android:windowContentTransitions">true</item>
+        <item name="android:windowEnterTransition">@android:transition/fade</item>
+        <item name="android:windowReturnTransition">@android:transition/fade</item>
 
     </style> <!-- Base application theme. -->
 

@@ -332,5 +332,4 @@ public class SettingsFragment extends Fragment {
         }
         settingsStorage.saveTheme(dark);
     }
-
 }

@@ -70,6 +70,7 @@ import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -146,8 +147,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     private Music activeMusic;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_player, container, false);
 
         context = requireContext();
@@ -158,6 +158,8 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
         //StorageUtil initialization
         storageUtil = new StorageUtil(requireContext());
+        executorService = Executors.newFixedThreadPool(1);
+        handler = new Handler(Looper.getMainLooper());
 
         if (activeMusic == null) {
             activeMusic = getMusic();
@@ -241,6 +243,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         queueRecyclerView = view.findViewById(R.id.queue_music_recycler);
         linearLayoutManager = new LinearLayoutManager(getContext());
 
+        musicArrayList = storageUtil.loadQueueList();
         queueBottomSheet = view.findViewById(R.id.queue_bottom_sheet);
 
         //lyrics layout related initializations
@@ -252,6 +255,10 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         button.setOnClickListener(v -> setLyricsLayout(activeMusic));
 
         seekBarMain.setOnSeekBarChangeListener(this);
+        //for animation
+        playerSongNameTv.setSelected(true);
+        mini_name_text.setSelected(true);
+        songNameQueueItem.setSelected(true);
 
         mini_play_view.setOnClickListener(v -> {
             BottomSheetBehavior<View> sheet = mainActivity.mainPlayerSheetBehavior;
@@ -303,8 +310,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     private boolean getPlayerState() {
         if (media_player_service.media_player != null)
             return media_player_service.media_player.isPlaying();
-        else
-            return false;
+        else return false;
     }
 
     @Subscribe
@@ -429,10 +435,9 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
                 }
                 if (lrcMap != null) {
                     if (lyricsRecyclerView.getVisibility() == View.VISIBLE) {
-                        if (!userScrolling)
-                            if (lrcMap.containsStamp(getCurrentStamp())) {
-                                scrollToPosition(lrcMap.getIndexAtStamp(getCurrentStamp()));
-                            }
+                        if (!userScrolling) if (lrcMap.containsStamp(getCurrentStamp())) {
+                            scrollToPosition(lrcMap.getIndexAtStamp(getCurrentStamp()));
+                        }
                     }
                 }
                 lyricsHandler.postDelayed(lyricsRunnable, nextStampInMillis - currPosInMillis);
@@ -537,7 +542,6 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
     private void setupQueueBottomSheet() {
         queueRecyclerView.setLayoutManager(linearLayoutManager);
-        musicArrayList = storageUtil.loadQueueList();
         setQueueAdapter();
 
         queueSheetBehaviour = (CustomBottomSheet<View>) BottomSheetBehavior.from(queueBottomSheet);
@@ -611,8 +615,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
     private void optionMenu(Music music) {
         //add a bottom sheet to show music options like set to ringtone ,audio details ,add to playlist etc.
-        if (music != null)
-            mainActivity.openOptionMenu(music, "mainList");
+        if (music != null) mainActivity.openOptionMenu(music, "mainList");
     }
 
     //region Timer setup
@@ -751,56 +754,46 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         }
     }
 
+    private ExecutorService executorService;
+    private Handler handler;
+
     private void shuffleListAndSave(Music activeMusic) {
         ArrayList<Music> musicList = storageUtil.loadQueueList();
+        int musicIndex = storageUtil.loadMusicIndex();
 
-        int musicIndex;
-        musicIndex = storageUtil.loadMusicIndex();
-
-        // do in background code here
         if (musicList != null) {
             shuffleImg.setClickable(false);
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    CompletableFuture.supplyAsync(() -> {
+                        storageUtil.saveTempMusicList(musicList);
+                        musicList.remove(musicIndex);
+                        Collections.shuffle(musicList);
+                        musicList.add(0, activeMusic);
+                        storageUtil.saveQueueList(musicList);
+                        storageUtil.saveMusicIndex(0);
+                        return musicList;
+                    }, executorService).thenAcceptAsync(result -> {
+                        handler.post(() -> {
+                            updateQueueAdapter(musicList);
+                            shuffleImg.setClickable(true);
 
-            ExecutorService service = Executors.newSingleThreadExecutor();
-            Handler handler = new Handler(Looper.getMainLooper());
-
-            service.execute(() -> {
-                storageUtil.saveTempMusicList(musicList);
-                //removing current item from list
-                musicList.remove(musicIndex);
-                //shuffling list
-                Collections.shuffle(musicList);
-                //adding the removed item in shuffled list on 0th index
-                musicList.add(0, activeMusic);
-                //saving list
-                storageUtil.saveQueueList(musicList);
-                //saving index
-                storageUtil.saveMusicIndex(0);
-                // post-execute code here
-                handler.post(() -> {
-                    updateQueueAdapter(musicList);
-                    shuffleImg.setClickable(true);
-
-                });
-            });
-            // stopping the background thread (crucial)
-            service.shutdown();
+                        });
+                    });
+                }
+            } catch (Exception ignored) {
+            }
         }
     }
 
     private void restoreLastListAndPos(Music activeMusic) {
         ArrayList<Music> tempList = storageUtil.loadTempMusicList();
-
         if (tempList != null) {
             shuffleImg.setClickable(false);
-
-            ExecutorService service = Executors.newSingleThreadExecutor();
-            Handler handler = new Handler(Looper.getMainLooper());
-
             // do in background code here
-            service.execute(() -> {
+            executorService.execute(() -> {
                 int index;
-                index = musicArrayList.indexOf(activeMusic);
+                index = tempList.indexOf(activeMusic);
                 if (index != -1) {
                     storageUtil.saveMusicIndex(index);
                 }
@@ -811,7 +804,6 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
                     shuffleImg.setClickable(true);
                 });
             });
-            service.shutdown();
         }
     }
 
@@ -846,18 +838,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
             player_layout.setAlpha(0);
             player_layout.setVisibility(View.INVISIBLE);
         }
-        //for favorite
-        playerSongNameTv.setSelected(true);
-        mini_name_text.setSelected(true);
-        songNameQueueItem.setSelected(true);
-    }
 
-    @Override
-    public void onStop() {
-        super.onStop();
-        playerSongNameTv.setSelected(false);
-        mini_name_text.setSelected(false);
-        songNameQueueItem.setSelected(false);
     }
 
     @Override
@@ -865,6 +846,9 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         super.onDestroy();
         EventBus.getDefault().unregister(this);
         lyricsRecyclerView.clearOnScrollListeners();
+        if (executorService != null) {
+            executorService.shutdown();
+        }
     }
 
     @Override
@@ -909,14 +893,13 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         }
         //layout setup ☺
         if (service_bound) {
-            if (media_player_service != null)
-                if (media_player_service.media_player != null) {
-                    if (media_player_service.media_player.isPlaying()) {
-                        media_player_service.setIcon(PlaybackStatus.PLAYING);
-                    } else {
-                        media_player_service.setIcon(PlaybackStatus.PAUSED);
-                    }
+            if (media_player_service != null) if (media_player_service.media_player != null) {
+                if (media_player_service.media_player.isPlaying()) {
+                    media_player_service.setIcon(PlaybackStatus.PLAYING);
+                } else {
+                    media_player_service.setIcon(PlaybackStatus.PAUSED);
                 }
+            }
         }
     }
 

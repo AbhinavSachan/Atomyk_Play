@@ -5,14 +5,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.adapters.Generics.GenericViewHolder;
 
 public class BlackListViewHolder extends GenericViewHolder<String> {
-    private final TextView textView;
     public final ImageView imageView;
+    private final TextView textView;
 
     public BlackListViewHolder(@NonNull View itemView) {
         super(itemView);

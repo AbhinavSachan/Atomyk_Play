@@ -94,8 +94,10 @@ import org.greenrobot.eventbus.EventBus;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, NavigationView.OnNavigationItemSelectedListener {
@@ -381,6 +383,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         //initializations
         storageUtil = new StorageUtil(MainActivity.this);
+        executorService = Executors.newFixedThreadPool(1);
+
         dataList = storageUtil.loadInitialList();
         if (dataList == null) {
             dataList = new ArrayList<>();
@@ -445,7 +449,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //        scrollBar.setRecyclerView(musicRecyclerView);
 //        scrollBar.setIndicator(new AlphabetIndicator(MainActivity.this), false);
 
-        //Checking storage & other permissions before activity creation (method somewhere down in the script)
+        //Checking storage & other permissions
         checkPermission();
 
         setFragmentInSlider();
@@ -485,7 +489,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if (is_granted) {
                     if (!isChecking) {
                         checkForUpdateMusic();
-                        showToast("checking");
                     }
                 }
                 media_player_service.setSeekBar();
@@ -510,6 +513,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (executorService != null) {
+            executorService.shutdown();
+        }
         if (service_bound) {
             MainActivity.this.unbindService(service_connection);
             //if media player is not playing it will stop the service
@@ -594,31 +600,40 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Runnable runnable = MainActivity.this::checkForUpdateMusic;
         handler.postDelayed(runnable, 100);
     }
-
+    private ExecutorService executorService;
+    private Future future;
     public void checkForUpdateMusic() {
+        if (isChecking) {
+            return;
+        }
         isChecking = true;
-        ExecutorService service = Executors.newSingleThreadExecutor();
-        Handler handler = new Handler(Looper.getMainLooper());
+        future = executorService.submit(() -> {
+            try {
+                ArrayList<Music> updatedList = new ArrayList<>();
+                FetchMusic.fetchMusic(updatedList, MainActivity.this);
+                runOnUiThread(() -> {
+                    if (updatedList.isEmpty()) {
+                        linearLayout.setVisibility(View.VISIBLE);
+                    } else {
+                        linearLayout.setVisibility(View.GONE);
+                    }
 
-        // do in background code here
-        service.execute(() -> {
-            ArrayList<Music> updatedList = new ArrayList<>();
-            FetchMusic.fetchMusic(updatedList, MainActivity.this);
-            // post-execute code here
-            handler.post(() -> {
-                //Setting up adapter
-                if (updatedList.isEmpty()) {
-                    linearLayout.setVisibility(View.VISIBLE);
-                } else {
-                    linearLayout.setVisibility(View.GONE);
-                }
-
-                musicMainAdapter.updateMusicListItems(updatedList);
-                storageUtil.saveInitialList(updatedList);
+                    musicMainAdapter.updateMusicListItems(updatedList);
+                    storageUtil.saveInitialList(updatedList);
+                    isChecking = false;
+                });
+            } catch (Exception e) {
+                // handle exception
                 isChecking = false;
-            });
+            }
         });
-        service.shutdown();
+        executorService.execute(()->{
+            try {
+                future.get();
+            } catch (ExecutionException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
     }
 

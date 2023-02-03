@@ -12,5 +12,6 @@ public class GenericViewHolder<T> extends RecyclerView.ViewHolder implements IBi
     }
 
     @Override
-    public void onBind(T item) {}
+    public void onBind(T item) {
+    }
 }

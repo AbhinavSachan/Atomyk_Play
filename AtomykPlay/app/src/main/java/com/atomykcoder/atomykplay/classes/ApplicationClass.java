@@ -9,7 +9,6 @@ public class ApplicationClass extends Application {
 
     public static final String CHANNEL_ID = "MUSIC_NOTIFICATION";
 
-
     @Override
     public void onCreate() {
         super.onCreate();

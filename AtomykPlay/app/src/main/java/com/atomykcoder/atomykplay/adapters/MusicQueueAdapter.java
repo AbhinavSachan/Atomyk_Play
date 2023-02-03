@@ -1,10 +1,7 @@
 package com.atomykcoder.atomykplay.adapters;
 
-import static com.atomykcoder.atomykplay.helperFunctions.MusicHelper.convertDuration;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.os.SystemClock;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -12,7 +9,6 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.core.view.MotionEventCompat;
 
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.activities.MainActivity;
@@ -24,7 +20,6 @@ import com.atomykcoder.atomykplay.interfaces.ItemTouchHelperAdapter;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -92,6 +87,7 @@ public class MusicQueueAdapter extends MusicAdapter implements ItemTouchHelperAd
         View view = LayoutInflater.from(context).inflate(R.layout.queue_music_item_layout, parent, false);
         return new MusicQueueViewHolder(view);
     }
+
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public void onBindViewHolder(@NonNull GenericViewHolder<Music> _holder, int position) {
@@ -108,7 +104,7 @@ public class MusicQueueAdapter extends MusicAdapter implements ItemTouchHelperAd
         holder.cardView.setOnClickListener(v -> {
             if (shouldIgnoreClick(context)) return;
 
-            if(!doesMusicExists(currentItem)) {
+            if (!doesMusicExists(currentItem)) {
                 Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show();
                 removeItem(currentItem);
                 return;

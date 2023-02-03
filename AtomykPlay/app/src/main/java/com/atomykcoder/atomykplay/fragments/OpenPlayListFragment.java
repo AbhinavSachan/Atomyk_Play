@@ -33,7 +33,7 @@ public class OpenPlayListFragment extends Fragment implements OnDragStartListene
 
     private ItemTouchHelper itemTouchHelper;
     private OpenPlayListAdapter openPlayListAdapter;
-    
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {

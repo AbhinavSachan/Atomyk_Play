@@ -44,14 +44,19 @@ public class MusicAdapter extends GenericRecyclerAdapter<Music> {
 
         service.execute(() -> {
             //image decoder
-            MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
-            mediaMetadataRetriever.setDataSource(item.getPath());
-            byte[] art = mediaMetadataRetriever.getEmbeddedPicture();
-
             try {
-                image[0] = BitmapFactory.decodeByteArray(art, 0, art.length);
-                map.put(position, image[0]);
-            } catch (Exception ignored) {}
+                MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
+                mediaMetadataRetriever.setDataSource(item.getPath());
+                byte[] art = mediaMetadataRetriever.getEmbeddedPicture();
+
+                try {
+                    image[0] = BitmapFactory.decodeByteArray(art, 0, art.length);
+                    map.put(position, image[0]);
+                } catch (Exception ignored) {
+                }
+            } catch (IllegalArgumentException e) {
+                e.printStackTrace();
+            }
 
             handler.post(() -> GlideBuilt.glideBitmap(context, image[0], R.drawable.ic_music, albumCoverIV, 128));
         });
@@ -95,5 +100,6 @@ public class MusicAdapter extends GenericRecyclerAdapter<Music> {
         return file.exists();
     }
 
-    public void removeItem(Music item) {}
+    public void removeItem(Music item) {
+    }
 }

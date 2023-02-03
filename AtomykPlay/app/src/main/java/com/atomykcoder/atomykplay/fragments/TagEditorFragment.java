@@ -7,9 +7,7 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.MediaMetadata;
 import android.media.MediaMetadataRetriever;
-import android.media.RemoteController;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -204,7 +202,8 @@ public class TagEditorFragment extends Fragment {
                     requireContext().sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(musicFile)));
                     requireActivity().onBackPressed();
                 });
-            } catch (CannotReadException | InvalidAudioFrameException | ReadOnlyFileException | TagException | IOException | CannotWriteException e) {
+            } catch (CannotReadException | InvalidAudioFrameException | ReadOnlyFileException |
+                     TagException | IOException | CannotWriteException e) {
                 e.printStackTrace();
                 handler.post(() -> {
                     Toast.makeText(requireContext(), "Something went wrong", Toast.LENGTH_SHORT).show();

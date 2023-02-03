@@ -39,7 +39,8 @@ public class FavoriteListAdapter extends MusicAdapter implements ItemTouchHelper
 
     //when item starts to move it will change positions of every item in real time
     @Override
-    public void onItemMove(int fromPos, int toPos) {}
+    public void onItemMove(int fromPos, int toPos) {
+    }
 
     //removing item on swipe
     @Override
