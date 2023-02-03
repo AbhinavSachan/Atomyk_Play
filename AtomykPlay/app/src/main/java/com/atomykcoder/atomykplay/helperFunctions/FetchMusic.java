@@ -99,7 +99,7 @@ public class FetchMusic {
                                         .setAlbum(sAlbum).setAlbumUri("").setDuration(sDuration)
                                         .setPath(sPath).setBitrate(sBitrate).setMimeType(sMimeType)
                                         .setSize(sSize).setGenre(sGenre != null ? sGenre : "").setId(sId).setDateAdded(sDateAdded)
-                                        .build();
+                                                .setYear(sYear).build();
 
                                 dataList.add(music);
                             }
