@@ -81,173 +81,175 @@
             android:layout_height="wrap_content"
             android:background="@null"
             app:elevation="0dp">
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/searchBar_card"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:layout_marginHorizontal="12dp"
-                android:layout_marginTop="42dp"
-                android:layout_marginBottom="6dp"
-                app:cardBackgroundColor="@color/secondary_bg"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="6dp"
-                app:layout_scrollFlags="scroll|enterAlways">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingHorizontal="8dp">
-
-                    <ImageView
-                        android:id="@+id/open_drawer_btn"
-                        android:layout_width="50dp"
-                        android:layout_height="match_parent"
-                        android:clickable="true"
-                        android:contentDescription="@string/empty"
-                        android:focusable="true"
-                        android:padding="10dp"
-                        android:src="@drawable/ic_ham_opt"
-                        tools:ignore="DuplicateSpeakableTextCheck" />
-
-                    <TextView
-                        android:id="@+id/text_view_transition"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:padding="10dp"
-                        android:text="@string/search_here"
-                        android:textAppearance="@android:style/TextAppearance.DeviceDefault.SearchResult.Subtitle"
-                        android:textColor="@color/greyForTool" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-            <!-- add buttons here -->
-            <LinearLayout
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="3"
-                android:orientation="horizontal"
                 app:layout_scrollFlags="scroll|enterAlways">
-
-                <LinearLayout
-                    android:id="@+id/playlist_card_view_ma"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/searchBar_card"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
                     android:layout_marginHorizontal="12dp"
-                    android:layout_marginTop="6dp"
-                    android:layout_marginBottom="12dp"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:orientation="vertical"
-                    android:paddingHorizontal="8dp">
+                    android:layout_marginTop="42dp"
+                    android:layout_marginBottom="6dp"
+                    app:cardBackgroundColor="@color/secondary_bg"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="6dp">
 
-                    <RelativeLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/round_bg_for_pl"
-                        android:padding="5dp">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="8dp">
 
                         <ImageView
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:layout_gravity="center"
+                            android:id="@+id/open_drawer_btn"
+                            android:layout_width="50dp"
+                            android:layout_height="match_parent"
+                            android:clickable="true"
                             android:contentDescription="@string/empty"
-                            android:padding="8dp"
-                            android:src="@drawable/ic_music_list"
-                            app:tint="@color/accent_color_bg"
+                            android:focusable="true"
+                            android:padding="10dp"
+                            android:src="@drawable/ic_ham_opt"
                             tools:ignore="DuplicateSpeakableTextCheck" />
 
-                    </RelativeLayout>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:paddingBottom="6dp"
-                        android:text="@string/playLists"
-                        android:textColor="@color/text_color" />
-                </LinearLayout>
-
+                        <TextView
+                            android:id="@+id/text_view_transition"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:padding="10dp"
+                            android:text="@string/search_here"
+                            android:textAppearance="@android:style/TextAppearance.DeviceDefault.SearchResult.Subtitle"
+                            android:textColor="@color/greyForTool" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+                <!-- add buttons here -->
                 <LinearLayout
-                    android:id="@+id/last_added_card_view"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginHorizontal="12dp"
-                    android:layout_marginTop="6dp"
-                    android:layout_marginBottom="12dp"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:orientation="vertical"
-                    android:paddingHorizontal="8dp">
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/searchBar_card"
+                    android:orientation="horizontal">
 
-                    <RelativeLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/round_bg_for_pl"
-                        android:padding="5dp">
+                    <LinearLayout
+                        android:id="@+id/playlist_card_view_ma"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginHorizontal="12dp"
+                        android:layout_marginTop="6dp"
+                        android:layout_marginBottom="12dp"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:paddingHorizontal="8dp">
 
-                        <ImageView
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
+                        <RelativeLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/round_bg_for_pl"
+                            android:padding="5dp">
+
+                            <ImageView
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                android:layout_gravity="center"
+                                android:contentDescription="@string/empty"
+                                android:padding="8dp"
+                                android:src="@drawable/ic_music_list"
+                                app:tint="@color/accent_color_bg"
+                                tools:ignore="DuplicateSpeakableTextCheck" />
+
+                        </RelativeLayout>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
                             android:layout_gravity="center"
-                            android:contentDescription="@string/empty"
-                            android:padding="8dp"
-                            android:src="@drawable/ic_last_added"
-                            app:tint="@color/accent_color_bg"
-                            tools:ignore="DuplicateSpeakableTextCheck" />
+                            android:paddingBottom="6dp"
+                            android:text="@string/playLists"
+                            android:textColor="@color/text_color" />
+                    </LinearLayout>
 
-                    </RelativeLayout>
+                    <LinearLayout
+                        android:id="@+id/last_added_card_view"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginHorizontal="12dp"
+                        android:layout_marginTop="6dp"
+                        android:layout_marginBottom="12dp"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:paddingHorizontal="8dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:paddingBottom="6dp"
-                        android:text="@string/last_added"
-                        android:textColor="@color/text_color" />
-                </LinearLayout>
+                        <RelativeLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/round_bg_for_pl"
+                            android:padding="5dp">
 
-                <LinearLayout
-                    android:id="@+id/shuffle_play_card_view"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginHorizontal="12dp"
-                    android:layout_marginTop="6dp"
-                    android:layout_marginBottom="12dp"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:orientation="vertical"
-                    android:paddingHorizontal="8dp">
+                            <ImageView
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                android:layout_gravity="center"
+                                android:contentDescription="@string/empty"
+                                android:padding="8dp"
+                                android:src="@drawable/ic_last_added"
+                                app:tint="@color/accent_color_bg"
+                                tools:ignore="DuplicateSpeakableTextCheck" />
 
-                    <RelativeLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/round_bg_for_pl"
-                        android:padding="5dp">
+                        </RelativeLayout>
 
-                        <ImageView
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
                             android:layout_gravity="center"
-                            android:contentDescription="@string/empty"
-                            android:padding="8dp"
-                            android:src="@drawable/ic_shuffle"
-                            app:tint="@color/accent_color_bg"
-                            tools:ignore="DuplicateSpeakableTextCheck" />
+                            android:paddingBottom="6dp"
+                            android:text="@string/last_added"
+                            android:textColor="@color/text_color" />
+                    </LinearLayout>
 
-                    </RelativeLayout>
+                    <LinearLayout
+                        android:id="@+id/shuffle_play_card_view"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginHorizontal="12dp"
+                        android:layout_marginTop="6dp"
+                        android:layout_marginBottom="12dp"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:paddingHorizontal="8dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:paddingBottom="6dp"
-                        android:text="@string/shuffle_play"
-                        android:textColor="@color/text_color" />
+                        <RelativeLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/round_bg_for_pl"
+                            android:padding="5dp">
+
+                            <ImageView
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                android:layout_gravity="center"
+                                android:contentDescription="@string/empty"
+                                android:padding="8dp"
+                                android:src="@drawable/ic_shuffle"
+                                app:tint="@color/accent_color_bg"
+                                tools:ignore="DuplicateSpeakableTextCheck" />
+
+                        </RelativeLayout>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:paddingBottom="6dp"
+                            android:text="@string/shuffle_play"
+                            android:textColor="@color/text_color" />
+                    </LinearLayout>
+
                 </LinearLayout>
-
-            </LinearLayout>
+            </RelativeLayout>
         </com.google.android.material.appbar.AppBarLayout>
 
         <View

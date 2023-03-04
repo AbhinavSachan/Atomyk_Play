@@ -45,7 +45,6 @@ public class GenericRecyclerAdapter<T> extends RecyclerView.Adapter<GenericViewH
 
     protected boolean shouldIgnoreClick(Context context) {
         if (SystemClock.elapsedRealtime() < (lastClickTime + delay)) {
-            Toast.makeText(context, "already playing...", Toast.LENGTH_SHORT).show();
             return true;
         }
         lastClickTime = SystemClock.elapsedRealtime();

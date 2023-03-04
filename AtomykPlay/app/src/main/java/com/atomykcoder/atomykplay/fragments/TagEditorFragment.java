@@ -4,7 +4,9 @@ import static com.atomykcoder.atomykplay.activities.MainActivity.TAG_EDITOR_COVE
 
 import android.Manifest;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
@@ -15,6 +17,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -179,19 +182,20 @@ public class TagEditorFragment extends Fragment {
                 AudioFile f = AudioFileIO.read(musicFile);
                 Tag tag = f.getTag();
 
-
                 tag.setField(FieldKey.TITLE, newTitle);
                 tag.setField(FieldKey.ARTIST, newArtist);
                 tag.setField(FieldKey.ALBUM, newAlbum);
                 tag.setField(FieldKey.GENRE, newGenre);
 
                 if (imageUri != null) {
-                    File imageFile = new File(imageUri.toString());
-                    if (imageFile.exists()) {
-                        Artwork artwork = Artwork.createArtworkFromFile(imageFile);
-                        tag.addField(artwork);
-                        tag.setField(artwork);
-                    }
+                    String filePath = getRealPathFromURI(requireContext(), imageUri);
+                    File imageFile = new File(filePath);
+
+                    Artwork artwork = Artwork.createArtworkFromFile(imageFile);
+
+                    tag.addField(artwork);
+                    tag.setField(artwork);
+
                 }
 
                 f.setTag(tag);
@@ -219,4 +223,19 @@ public class TagEditorFragment extends Fragment {
         imageUri = album_uri;
         GlideBuilt.glide(requireContext(), String.valueOf(imageUri), 0, coverImageView, 412);
     }
+
+    public static String getRealPathFromURI(Context context, Uri contentUri) {
+    		  Cursor cursor = null;
+            try {
+                String[] proj = { MediaStore.Images.Media.DATA };
+                cursor = context.getContentResolver().query(contentUri, proj, null, null, null);
+                cursor.moveToFirst();
+               int column_index = cursor.getColumnIndex(proj[0]);
+                return cursor.getString(column_index);
+            } finally {
+                if (cursor != null) {
+                    cursor.close();
+                }
+            }
+    	}
 }

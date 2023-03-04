@@ -169,7 +169,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private View anchoredShadow;
     private ImageView playlist_image_View, navCover;
     private Uri playListImageUri;
-    private ArrayList<Music> dataList;
+    private ArrayList<Music> dataList = new ArrayList<>();
     private MusicMainAdapter musicMainAdapter;
     private LinearLayout linearLayout;
     private RecyclerView musicRecyclerView;
@@ -338,6 +338,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private AlertDialog ringtoneDialog = null;
     private String pl_name, optionTag;
     private TextView songPathTv, songNameTv, songArtistTv, songSizeTv, songGenreTv, songBitrateTv, songAlbumTv;
+    private Handler handler;
 
     public void clearStorage() {
         storageUtil.clearMusicLastPos();
@@ -383,7 +384,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         //initializations
         storageUtil = new StorageUtil(MainActivity.this);
-        executorService = Executors.newFixedThreadPool(1);
+        executorService = Executors.newFixedThreadPool(10);
+        handler = new Handler(Looper.getMainLooper());
 
         dataList = storageUtil.loadInitialList();
         if (dataList == null) {
@@ -444,6 +446,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         shuffleCard.setOnClickListener(v -> playShuffleSong());
 
         musicRecyclerView.setHasFixedSize(true);
+        musicRecyclerView.setNestedScrollingEnabled(false);
 
 //        DragScrollBar scrollBar = findViewById(R.id.dragScrollBar);
 //        scrollBar.setRecyclerView(musicRecyclerView);
@@ -596,7 +599,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     public void checkUpdatesAfterMilli() {
-        Handler handler = new Handler();
         Runnable runnable = MainActivity.this::checkForUpdateMusic;
         handler.postDelayed(runnable, 100);
     }
@@ -750,7 +752,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void setDataInNavigation(String song_name, String artist_name, Bitmap album_uri) {
         navSongName.setText(song_name);
         navArtistName.setText(artist_name);
-        GlideBuilt.glideBitmap(this, album_uri, R.drawable.ic_music, navCover, 300);
+        try {
+            GlideBuilt.glideBitmap(this, album_uri, R.drawable.ic_music, navCover, 300);
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+        }
     }
 
     private Music getMusic() {
@@ -814,8 +820,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     /**
      * play from start
-     *
-     * @param music
      */
     public void playAudio(Music music) {
         //starting service if its not started yet otherwise it will send broadcast msg to service
@@ -826,10 +830,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (!phone_ringing) {
             if (service_stopped) {
                 startService();
-                new Handler().postDelayed(() -> {
+                handler.postDelayed(() -> {
                     //service is active send media with broadcast receiver
-
-
                     Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEW_MUSIC);
                     broadcastIntent.putExtra("music", encodedMessage);
                     sendBroadcast(broadcastIntent);
@@ -852,7 +854,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (!phone_ringing) {
             if (service_stopped) {
                 startService();
-                new Handler().postDelayed(() -> {
+                handler.postDelayed(() -> {
                     //service is active send media with broadcast receiver
                     Intent broadcastIntent = new Intent(BROADCAST_PAUSE_PLAY_MUSIC);
                     sendBroadcast(broadcastIntent);
@@ -874,7 +876,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (!phone_ringing) {
             if (service_stopped) {
                 startService();
-                new Handler().postDelayed(() -> {
+                handler.postDelayed(() -> {
                     //service is active send media with broadcast receiver
                     Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEXT_MUSIC);
                     sendBroadcast(broadcastIntent);
@@ -896,7 +898,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (!phone_ringing) {
             if (service_stopped) {
                 startService();
-                new Handler().postDelayed(() -> {
+                handler.postDelayed(() -> {
                     //service is active send media with broadcast receiver
                     Intent broadcastIntent = new Intent(BROADCAST_PLAY_PREVIOUS_MUSIC);
                     sendBroadcast(broadcastIntent);
@@ -1203,7 +1205,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         scanAndSetMusicAdapter();
                         callStateListener();
                         if (dataList != null) {
-                            Handler handler = new Handler();
                             Runnable runnable = MainActivity.this::checkForUpdateMusic;
                             handler.postDelayed(runnable, 100);
                         }
@@ -1223,8 +1224,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void scanAndSetMusicAdapter() {
         //Fetch Music List along with it's metadata and save it in "dataList"
-        ExecutorService service = Executors.newSingleThreadExecutor();
-        Handler handler = new Handler(Looper.getMainLooper());
         progressBar.setVisibility(View.VISIBLE);
         LinearLayoutManager manager = new LinearLayoutManager(MainActivity.this);
 
@@ -1238,7 +1237,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             musicRecyclerView.setLayoutManager(manager);
         } else {
             // do in background code here
-            service.execute(() -> {
+            executorService.execute(() -> {
                 FetchMusic.fetchMusic(dataList, MainActivity.this);
                 // post-execute code here
                 handler.post(() -> {

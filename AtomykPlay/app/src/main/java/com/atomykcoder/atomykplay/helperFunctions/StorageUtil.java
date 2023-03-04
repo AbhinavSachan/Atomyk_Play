@@ -270,7 +270,10 @@ public class StorageUtil {
      */
     public boolean checkFavourite(Music music) {
         sharedPreferences = context.getSharedPreferences(FAVORITE_STORAGE, Context.MODE_PRIVATE);
-        String encodedMessage = encode(music);
+        String encodedMessage = null;
+        if (music != null) {
+            encodedMessage = encode(music);
+        }
         return sharedPreferences.getBoolean(encodedMessage, false);
     }
 
@@ -313,7 +316,7 @@ public class StorageUtil {
     /**
      * save player shuffle status
      *
-     * @param status status => (shuffle OR no_shuffle)
+     * @param status boolean
      */
     public void saveShuffle(boolean status) {
         sharedPreferences = context.getSharedPreferences(SHUFFLE_STORAGE, Context.MODE_PRIVATE);
@@ -325,7 +328,7 @@ public class StorageUtil {
     /**
      * load player shuffle status from storage
      *
-     * @return returns string => (shuffle OR no_shuffle)
+     * @return returns boolean
      */
     public boolean loadShuffle() {
         sharedPreferences = context.getSharedPreferences(SHUFFLE_STORAGE, Context.MODE_PRIVATE);

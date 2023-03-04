@@ -49,7 +49,7 @@ import com.atomykcoder.atomykplay.events.UpdateMusicImageEvent;
 import com.atomykcoder.atomykplay.events.UpdateMusicProgressEvent;
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
-import com.atomykcoder.atomykplay.viewModals.LRCMap;
+import com.atomykcoder.atomykplay.dataModals.LRCMap;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -562,8 +562,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     @Override
     public void onCompletion(MediaPlayer mp) {
         storage.clearMusicLastPos();
-        musicList = storage.loadQueueList();
-        musicIndex = storage.loadMusicIndex();
+        loadList();
 
         if (musicIndex == -1 || musicList == null) return;
 
@@ -591,6 +590,11 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             buildNotification(PlaybackStatus.PAUSED, 0f);
         }
 
+    }
+
+    private void loadList() {
+        musicList = storage.loadQueueList();
+        musicIndex = storage.loadMusicIndex();
     }
 
     @Override
@@ -800,8 +804,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
      * This function skips music to previous index
      */
     public void skipToPrevious() {
-        musicList = storage.loadQueueList();
-        musicIndex = storage.loadMusicIndex();
+        loadList();
         int lastPos = storage.loadMusicLastPos();
 
         storage.clearMusicLastPos();
@@ -836,10 +839,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
      * This function skips music to next index
      */
     public void skipToNext() {
-        musicList = storage.loadQueueList();
-        musicIndex = storage.loadMusicIndex();
+        loadList();
         storage.clearMusicLastPos();
-
 
         if (musicIndex != -1 && musicList != null)
             if (musicIndex == musicList.size() - 1) {
@@ -999,8 +1000,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
         storage = new StorageUtil(getApplicationContext());
         settingsStorage = new StorageUtil.SettingsStorage(getApplicationContext());
-        musicList = storage.loadQueueList();
-        musicIndex = storage.loadMusicIndex();
+        loadList();
 
         Bitmap DEFAULT_ARTWORK = BitmapFactory.decodeResource(MediaPlayerService.this.getApplicationContext()
                 .getResources(), R.drawable.placeholder_art);

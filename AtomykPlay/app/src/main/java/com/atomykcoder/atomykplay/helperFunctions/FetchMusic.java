@@ -82,6 +82,9 @@ public class FetchMusic {
                         String sId = audioCursor.getString(11);
                         String sYear = audioCursor.getString(12);
 
+                        Uri uri = Uri.parse("content://media/external/audio/albumart");
+                        String sAlbumUri = Uri.withAppendedPath(uri, sAlbumId).toString();
+                        
                         String sBitrate = "";
                         String sGenre = "";
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -96,10 +99,10 @@ public class FetchMusic {
                             context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
                             if (filter <= Integer.parseInt(sDuration)) {
                                 Music music = Music.newBuilder().setName(sTitle).setArtist(sArtist)
-                                        .setAlbum(sAlbum).setAlbumUri("").setDuration(sDuration)
+                                        .setAlbum(sAlbum).setAlbumUri(sAlbumUri).setDuration(sDuration)
                                         .setPath(sPath).setBitrate(sBitrate).setMimeType(sMimeType)
                                         .setSize(sSize).setGenre(sGenre != null ? sGenre : "").setId(sId).setDateAdded(sDateAdded)
-                                                .setYear(sYear).build();
+                                                .setYear(sYear != null ? sYear : "").build();
 
                                 dataList.add(music);
                             }
@@ -113,7 +116,6 @@ public class FetchMusic {
             }
         }
     }
-
     private static String convertLongToDate(long time) {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             return DateTimeFormatter.ofPattern("dd MMMM yyyy").format(

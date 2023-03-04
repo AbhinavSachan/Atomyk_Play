@@ -158,7 +158,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
         //StorageUtil initialization
         storageUtil = new StorageUtil(requireContext());
-        executorService = Executors.newFixedThreadPool(1);
+        executorService = Executors.newFixedThreadPool(10);
         handler = new Handler(Looper.getMainLooper());
 
         if (activeMusic == null) {
@@ -777,7 +777,19 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
                         handler.post(() -> {
                             updateQueueAdapter(musicList);
                             shuffleImg.setClickable(true);
-
+                        });
+                    });
+                } else {
+                    executorService.execute(() -> {
+                        storageUtil.saveTempMusicList(musicList);
+                        musicList.remove(musicIndex);
+                        Collections.shuffle(musicList);
+                        musicList.add(0, activeMusic);
+                        storageUtil.saveQueueList(musicList);
+                        storageUtil.saveMusicIndex(0);
+                        handler.post(() -> {
+                            updateQueueAdapter(musicList);
+                            shuffleImg.setClickable(true);
                         });
                     });
                 }
@@ -990,23 +1002,26 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     public void setPreviousData(Music activeMusic) {
         Handler handler = new Handler();
         if (activeMusic != null) {
-            ExecutorService service = Executors.newSingleThreadExecutor();
-            service.execute(() -> {
+
+            executorService.execute(() -> {
                 //image decoder
                 Bitmap image = null;
-                MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
-                mediaMetadataRetriever.setDataSource(activeMusic.getPath());
-                byte[] art = mediaMetadataRetriever.getEmbeddedPicture();
+                try (MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever()) {
 
-                try {
-                    image = BitmapFactory.decodeByteArray(art, 0, art.length);
-                } catch (Exception ignored) {
+                    mediaMetadataRetriever.setDataSource(activeMusic.getPath());
+                    byte[] art = mediaMetadataRetriever.getEmbeddedPicture();
+
+                    try {
+                        image = BitmapFactory.decodeByteArray(art, 0, art.length);
+                    } catch (Exception ignored) {
+                    }
+                } catch (IllegalArgumentException | IOException e) {
+                    e.printStackTrace();
                 }
 
                 Bitmap finalImage = image;
                 handler.post(() -> EventBus.getDefault().post(new SetMainLayoutEvent(activeMusic, finalImage)));
             });
-            service.shutdown();
         }
 
         if (activeMusic != null) {

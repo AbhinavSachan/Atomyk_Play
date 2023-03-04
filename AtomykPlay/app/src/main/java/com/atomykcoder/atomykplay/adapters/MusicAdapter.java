@@ -15,6 +15,7 @@ import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -25,6 +26,7 @@ public class MusicAdapter extends GenericRecyclerAdapter<Music> {
 
     private ArrayList<Music> musicList;
     private HashMap<Integer, Bitmap> map = new HashMap<>();
+    ExecutorService service = Executors.newFixedThreadPool(10);
 
     protected void handlePlayMusic(MainActivity mainActivity, Music item) {
         mainActivity.playAudio(item);
@@ -40,12 +42,11 @@ public class MusicAdapter extends GenericRecyclerAdapter<Music> {
         }
 
         final Bitmap[] image = {null};
-        ExecutorService service = Executors.newSingleThreadExecutor();
 
         service.execute(() -> {
             //image decoder
-            try {
-                MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
+            try (MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever()){
+
                 mediaMetadataRetriever.setDataSource(item.getPath());
                 byte[] art = mediaMetadataRetriever.getEmbeddedPicture();
 
@@ -54,7 +55,7 @@ public class MusicAdapter extends GenericRecyclerAdapter<Music> {
                     map.put(position, image[0]);
                 } catch (Exception ignored) {
                 }
-            } catch (IllegalArgumentException e) {
+            } catch (IllegalArgumentException | IOException e) {
                 e.printStackTrace();
             }
 

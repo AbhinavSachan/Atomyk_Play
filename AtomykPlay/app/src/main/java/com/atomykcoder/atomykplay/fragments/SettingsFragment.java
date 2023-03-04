@@ -200,13 +200,10 @@ public class SettingsFragment extends Fragment {
             }
         });
 
-        filter_dur_ok_bt.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                settingsStorage.saveFilterDur(Integer.parseInt(filter_time_tv.getText().toString()));
-                mainActivity.checkForUpdateMusic();
-                filterDurDialog.dismiss();
-            }
+        filter_dur_ok_bt.setOnClickListener(view -> {
+            settingsStorage.saveFilterDur(Integer.parseInt(filter_time_tv.getText().toString()));
+            mainActivity.checkForUpdateMusic();
+            filterDurDialog.dismiss();
         });
         filterDurDialog.show();
     }
