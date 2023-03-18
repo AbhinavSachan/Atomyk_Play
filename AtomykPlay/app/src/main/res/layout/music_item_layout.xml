@@ -38,6 +38,7 @@
                 android:layout_margin="3dp"
                 app:cardBackgroundColor="@color/cover_black"
                 app:cardCornerRadius="6dp"
+                app:strokeWidth="0dp"
                 app:cardElevation="4dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
