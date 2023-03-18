@@ -16,6 +16,7 @@ import com.atomykcoder.atomykplay.adapters.ViewHolders.MusicMainViewHolder;
 import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.helperFunctions.MusicDiffCallback;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
+import com.atomykcoder.atomykplay.repository.MusicUtils;
 
 import java.util.ArrayList;
 
@@ -24,12 +25,14 @@ public class MusicMainAdapter extends MusicAdapter {
     MainActivity mainActivity;
     StorageUtil storage;
     StorageUtil.SettingsStorage settingsStorage;
+    MusicUtils musicUtils;
 
     public MusicMainAdapter(Context _context, ArrayList<Music> musicList) {
         context = _context;
         mainActivity = (MainActivity) context;
         storage = new StorageUtil(context);
         settingsStorage = new StorageUtil.SettingsStorage(context);
+        musicUtils = MusicUtils.getInstance();
         super.items = musicList;
     }
 
@@ -61,9 +64,7 @@ public class MusicMainAdapter extends MusicAdapter {
         holder.cardView.setOnClickListener(view -> {
             if (shouldIgnoreClick(context)) return;
 
-            if (!doesMusicExists(currentItem)) {
-                Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show();
-                removeItem(currentItem);
+            if (!isMusicAvailable(currentItem)){
                 return;
             }
 
@@ -76,15 +77,20 @@ public class MusicMainAdapter extends MusicAdapter {
         });
 
         holder.optionButton.setOnClickListener(v -> {
-            if (!doesMusicExists(currentItem)) {
-                Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show();
-                removeItem(currentItem);
+            if (!isMusicAvailable(currentItem)){
                 return;
             }
             mainActivity.openOptionMenu(currentItem, "mainList");
         });
     }
-
+    private boolean isMusicAvailable(Music currentItem){
+        if (!doesMusicExists(currentItem)) {
+            Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show();
+            removeItem(currentItem);
+            return false;
+        }
+        return true;
+    }
     @Override
     public void removeItem(Music item) {
         int position = super.items.indexOf(item);

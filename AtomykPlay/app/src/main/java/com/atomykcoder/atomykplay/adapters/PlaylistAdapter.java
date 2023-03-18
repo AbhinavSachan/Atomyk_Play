@@ -19,17 +19,19 @@ import com.atomykcoder.atomykplay.adapters.Generics.GenericViewHolder;
 import com.atomykcoder.atomykplay.adapters.ViewHolders.PlaylistViewHolder;
 import com.atomykcoder.atomykplay.classes.GlideBuilt;
 import com.atomykcoder.atomykplay.data.Music;
+import com.atomykcoder.atomykplay.dataModels.Playlist;
 import com.atomykcoder.atomykplay.fragments.OpenPlayListFragment;
-import com.atomykcoder.atomykplay.viewModals.Playlist;
 
 import java.util.ArrayList;
 
 public class PlaylistAdapter extends GenericRecyclerAdapter<Playlist> {
     private final Context context;
+    private final GlideBuilt glideBuilt;
 
     public PlaylistAdapter(Context context, ArrayList<Playlist> arrayList) {
         this.context = context;
         super.items = arrayList;
+        glideBuilt = new GlideBuilt(context);
     }
 
     @NonNull
@@ -48,7 +50,7 @@ public class PlaylistAdapter extends GenericRecyclerAdapter<Playlist> {
 
         ArrayList<Music> musicList = currentItem.getMusicList();
 
-        GlideBuilt.glide(context, currentItem.getCoverUri(), R.drawable.ic_music_list, holder.coverIV, 300);
+        glideBuilt.glide( currentItem.getCoverUri(), R.drawable.ic_music_list, holder.coverIV, 300);
         String count = musicList.size() + " Songs";
         holder.playlistName.setText(currentItem.getName());
         holder.songCount.setText(count);

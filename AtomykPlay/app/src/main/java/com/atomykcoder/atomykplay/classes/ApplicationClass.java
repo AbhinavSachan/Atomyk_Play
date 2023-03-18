@@ -4,6 +4,7 @@ import android.app.Application;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.os.Build;
+import android.widget.Toast;
 
 public class ApplicationClass extends Application {
 
@@ -27,5 +28,9 @@ public class ApplicationClass extends Application {
 
         }
 
+    }
+
+    public void showToast(String s){
+        Toast.makeText(getApplicationContext(),s,Toast.LENGTH_SHORT).show();
     }
 }

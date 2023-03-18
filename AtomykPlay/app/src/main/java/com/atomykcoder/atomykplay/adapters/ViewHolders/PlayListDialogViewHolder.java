@@ -7,7 +7,7 @@ import androidx.annotation.NonNull;
 
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.adapters.Generics.GenericViewHolder;
-import com.atomykcoder.atomykplay.viewModals.Playlist;
+import com.atomykcoder.atomykplay.dataModels.Playlist;
 
 public class PlayListDialogViewHolder extends GenericViewHolder<Playlist> {
     public final TextView textView;

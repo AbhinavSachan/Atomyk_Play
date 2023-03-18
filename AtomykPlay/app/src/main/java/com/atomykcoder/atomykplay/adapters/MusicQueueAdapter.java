@@ -104,9 +104,7 @@ public class MusicQueueAdapter extends MusicAdapter implements ItemTouchHelperAd
         holder.cardView.setOnClickListener(v -> {
             if (shouldIgnoreClick(context)) return;
 
-            if (!doesMusicExists(currentItem)) {
-                Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show();
-                removeItem(currentItem);
+            if (!isMusicAvailable(currentItem)) {
                 return;
             }
 
@@ -115,9 +113,7 @@ public class MusicQueueAdapter extends MusicAdapter implements ItemTouchHelperAd
         });
 
         holder.dragButton.setOnTouchListener((v, event) -> {
-            if (!doesMusicExists(currentItem)) {
-                Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show();
-                removeItem(currentItem);
+            if (!isMusicAvailable(currentItem)) {
                 return false;
             }
             if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
@@ -127,7 +123,14 @@ public class MusicQueueAdapter extends MusicAdapter implements ItemTouchHelperAd
         });
 
     }
-
+    private boolean isMusicAvailable(Music currentItem){
+        if (!doesMusicExists(currentItem)) {
+            Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show();
+            removeItem(currentItem);
+            return false;
+        }
+        return true;
+    }
     @Override
     public void removeItem(Music item) {
         int position = super.items.indexOf(item);

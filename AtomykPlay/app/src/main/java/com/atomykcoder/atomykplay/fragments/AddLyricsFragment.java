@@ -24,7 +24,7 @@ import com.atomykcoder.atomykplay.events.RunnableSyncLyricsEvent;
 import com.atomykcoder.atomykplay.helperFunctions.FetchLyrics;
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
-import com.atomykcoder.atomykplay.viewModals.LRCMap;
+import com.atomykcoder.atomykplay.dataModels.LRCMap;
 
 import org.greenrobot.eventbus.EventBus;
 

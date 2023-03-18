@@ -202,7 +202,7 @@ public class SettingsFragment extends Fragment {
 
         filter_dur_ok_bt.setOnClickListener(view -> {
             settingsStorage.saveFilterDur(Integer.parseInt(filter_time_tv.getText().toString()));
-            mainActivity.checkForUpdateMusic();
+            mainActivity.checkForUpdateList(true);
             filterDurDialog.dismiss();
         });
         filterDurDialog.show();

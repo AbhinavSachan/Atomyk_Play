@@ -50,7 +50,7 @@ public class BlockFolderListAdapter extends GenericRecyclerAdapter<String> {
 
         notifyItemRemoved(pos);
         notifyItemRangeChanged(pos, super.items.size() - (pos + 1));
-        mainActivity.checkForUpdateMusic();
+        mainActivity.checkForUpdateList(true);
     }
 
     @Override

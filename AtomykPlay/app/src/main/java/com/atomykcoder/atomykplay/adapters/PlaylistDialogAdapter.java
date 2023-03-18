@@ -15,7 +15,7 @@ import com.atomykcoder.atomykplay.adapters.Generics.GenericViewHolder;
 import com.atomykcoder.atomykplay.adapters.ViewHolders.PlayListDialogViewHolder;
 import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
-import com.atomykcoder.atomykplay.viewModals.Playlist;
+import com.atomykcoder.atomykplay.dataModels.Playlist;
 
 import java.util.ArrayList;
 

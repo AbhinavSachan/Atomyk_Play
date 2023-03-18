@@ -49,7 +49,7 @@ import com.atomykcoder.atomykplay.events.UpdateMusicImageEvent;
 import com.atomykcoder.atomykplay.events.UpdateMusicProgressEvent;
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
-import com.atomykcoder.atomykplay.dataModals.LRCMap;
+import com.atomykcoder.atomykplay.dataModels.LRCMap;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -396,37 +396,27 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             case 0:
                 //play
                 playbackIntent.setAction(ACTION_PLAY);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    return PendingIntent.getService(this, actionNumber, playbackIntent, PendingIntent.FLAG_IMMUTABLE);
-                }
+                return PendingIntent.getService(this, actionNumber, playbackIntent, PendingIntent.FLAG_IMMUTABLE);
 
             case 1:
                 //pause
                 playbackIntent.setAction(ACTION_PAUSE);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    return PendingIntent.getService(this, actionNumber, playbackIntent, PendingIntent.FLAG_IMMUTABLE);
-                }
+                return PendingIntent.getService(this, actionNumber, playbackIntent, PendingIntent.FLAG_IMMUTABLE);
 
             case 2:
                 //next
                 playbackIntent.setAction(ACTION_NEXT);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    return PendingIntent.getService(this, actionNumber, playbackIntent, PendingIntent.FLAG_IMMUTABLE);
-                }
+                return PendingIntent.getService(this, actionNumber, playbackIntent, PendingIntent.FLAG_IMMUTABLE);
 
             case 3:
                 //previous
                 playbackIntent.setAction(ACTION_PREVIOUS);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    return PendingIntent.getService(this, actionNumber, playbackIntent, PendingIntent.FLAG_IMMUTABLE);
-                }
+                return PendingIntent.getService(this, actionNumber, playbackIntent, PendingIntent.FLAG_IMMUTABLE);
 
             case 4:
                 //stop
                 playbackIntent.setAction(ACTION_STOP);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    return PendingIntent.getService(this, actionNumber, playbackIntent, PendingIntent.FLAG_IMMUTABLE);
-                }
+                return PendingIntent.getService(this, actionNumber, playbackIntent, PendingIntent.FLAG_IMMUTABLE);
 
             default:
                 break;
@@ -464,7 +454,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 if (media_player == null)
                     onPreviousReceived();
                 else
-                    transportControls.skipToNext();
+                    transportControls.skipToPrevious();
                 break;
             case ACTION_STOP:
                 if (media_player == null)
@@ -534,13 +524,17 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
     @Override
     public void onPrepared(MediaPlayer mp) {
-        ExecutorService service = Executors.newSingleThreadExecutor();
+        ExecutorService service = Executors.newFixedThreadPool(1);
         service.execute(() -> {
             //image decoder
             Bitmap[] image = {null};
-            MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
-            mediaMetadataRetriever.setDataSource(activeMusic.getPath());
-            byte[] art = mediaMetadataRetriever.getEmbeddedPicture();
+            byte[] art = new byte[0];
+            try (MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever()) {
+                mediaMetadataRetriever.setDataSource(activeMusic.getPath());
+                art = mediaMetadataRetriever.getEmbeddedPicture();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
             try {
                 image[0] = BitmapFactory.decodeByteArray(art, 0, art.length);
@@ -808,11 +802,13 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         int lastPos = storage.loadMusicLastPos();
 
         storage.clearMusicLastPos();
-
+        if (musicIndex == -1 || musicList == null){
+            return;
+        }
         if (settingsStorage.loadOneClickSkip()) {
             setActiveMusic();
         } else {
-            if (media_player.getCurrentPosition() >= 3000 || lastPos >= 3000)
+            if ((media_player != null && media_player.getCurrentPosition() >= 3000)|| lastPos >= 3000)
                 activeMusic = musicList.get(musicIndex);
             else
                 setActiveMusic();
@@ -825,11 +821,9 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     }
 
     private void setActiveMusic() {
-        if (musicIndex == -1 || musicList == null) return;
         if (musicIndex == 0) {
             musicIndex = musicList.size() - 1;
             activeMusic = musicList.get(musicIndex);
-
         } else {
             activeMusic = musicList.get(--musicIndex);
         }

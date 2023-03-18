@@ -20,7 +20,7 @@ import com.atomykcoder.atomykplay.classes.GlideBuilt;
 import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.events.RemoveFromPlaylistEvent;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
-import com.atomykcoder.atomykplay.viewModals.Playlist;
+import com.atomykcoder.atomykplay.dataModels.Playlist;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 
 import org.greenrobot.eventbus.EventBus;
@@ -33,6 +33,7 @@ public class OpenPlayListFragment extends Fragment implements OnDragStartListene
 
     private ItemTouchHelper itemTouchHelper;
     private OpenPlayListAdapter openPlayListAdapter;
+    private GlideBuilt glideBuilt;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -42,9 +43,8 @@ public class OpenPlayListFragment extends Fragment implements OnDragStartListene
         if (!EventBus.getDefault().isRegistered(this)) {
             EventBus.getDefault().register(this);
         }
-        Log.i("info", "open playlist fragment created");
         Playlist playlist = (Playlist) (getArguments() != null ? getArguments().getSerializable("currentPlaylist") : null);
-
+        glideBuilt = new GlideBuilt(requireContext());
         RecyclerView recyclerView = view.findViewById(R.id.open_pl_music_recycler);
         View noPlLayout = view.findViewById(R.id.song_not_found_layout_opl);
         CollapsingToolbarLayout collapsingToolbarLayout = view.findViewById(R.id.collapse_toolbar_opl);
@@ -62,7 +62,7 @@ public class OpenPlayListFragment extends Fragment implements OnDragStartListene
             musicList = playlist.getMusicList();
 
             collapsingToolbarLayout.setTitle(playlist.getName());
-            GlideBuilt.glide(getContext(), playlist.getCoverUri(), 0, imageView, 512);
+            glideBuilt.glide(playlist.getCoverUri(), 0, imageView, 512);
         }
 
         if (musicList != null) {

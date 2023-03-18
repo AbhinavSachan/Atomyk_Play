@@ -1,6 +1,6 @@
 <resources>
     <!-- Base application theme. -->
-    <style name="Theme.AtomykPlay" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+    <style name="Theme.AtomykPlay" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/accent_color_bg</item>
         <item name="colorPrimaryVariant">@color/primary_bg</item>
@@ -19,7 +19,7 @@
 
     </style> <!-- Base application theme. -->
 
-    <style name="Theme.Splash" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+    <style name="Theme.Splash" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/tertiary_bg</item>
         <item name="colorPrimaryVariant">@color/primary_bg</item>

@@ -206,6 +206,7 @@ public class SearchFragment extends Fragment {
         }
     }
 
+
     //get radio get based on which radio button is selected
     private int getRadioID() {
         int radioId = 0;

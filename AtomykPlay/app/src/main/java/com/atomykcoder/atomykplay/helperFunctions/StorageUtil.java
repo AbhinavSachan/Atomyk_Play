@@ -8,8 +8,8 @@ import android.content.SharedPreferences;
 import android.os.Build;
 
 import com.atomykcoder.atomykplay.data.Music;
-import com.atomykcoder.atomykplay.viewModals.LRCMap;
-import com.atomykcoder.atomykplay.viewModals.Playlist;
+import com.atomykcoder.atomykplay.dataModels.LRCMap;
+import com.atomykcoder.atomykplay.dataModels.Playlist;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 

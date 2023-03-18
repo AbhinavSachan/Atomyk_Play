@@ -1,9 +1,9 @@
 package com.atomykcoder.atomykplay.fragments;
 
-import static com.atomykcoder.atomykplay.activities.MainActivity.TAG_EDITOR_COVER;
+import static com.atomykcoder.atomykplay.helperFunctions.CustomMethods.pickImage;
 
 import android.Manifest;
-import android.content.ContentValues;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -17,7 +17,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.provider.Settings;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,13 +24,15 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.PickVisualMediaRequest;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 
 import com.atomykcoder.atomykplay.BuildConfig;
 import com.atomykcoder.atomykplay.R;
-import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.classes.GlideBuilt;
 import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper;
@@ -63,12 +64,27 @@ public class TagEditorFragment extends Fragment {
 
     public ImageView coverImageView;
     private EditText editName, editArtist, editAlbum, editGenre;
-    private ImageView pickImageView;
-    private FloatingActionButton saveButton;
-    private MainActivity mainActivity;
     private Music music;
-    private ContentValues cv;
     private Uri imageUri;
+    ExecutorService service = Executors.newFixedThreadPool(1);
+    Handler handler = new Handler();
+    GlideBuilt glideBuilt;
+    // Registers a photo picker activity launcher in single-select mode.
+    private final ActivityResultLauncher<PickVisualMediaRequest> mediaPicker = registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), uri -> {
+        // Callback is invoked after the user selects a media item or closes the
+        // photo picker.
+        if (uri != null) {
+            setImageUri(uri);
+        }
+    });
+
+    private final ActivityResultLauncher<Intent> pickIntent = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+        if (result.getResultCode() == Activity.RESULT_OK) {
+            if (result.getData() != null) {
+                setImageUri(result.getData().getData());
+            }
+        }
+    });
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -88,10 +104,10 @@ public class TagEditorFragment extends Fragment {
         editArtist = view.findViewById(R.id.edit_song_artist_tag);
         editAlbum = view.findViewById(R.id.edit_song_album_tag);
         editGenre = view.findViewById(R.id.edit_song_genre_tag);
-        pickImageView = view.findViewById(R.id.pick_cover_tag);
+        ImageView pickImageView = view.findViewById(R.id.pick_cover_tag);
         coverImageView = view.findViewById(R.id.song_image_view_tag);
-        saveButton = view.findViewById(R.id.tag_editor_save_button);
-        mainActivity = (MainActivity) getContext();
+        FloatingActionButton saveButton = view.findViewById(R.id.tag_editor_save_button);
+        glideBuilt = new GlideBuilt(requireContext());
 
         if (music != null) {
             editName.setText(music.getName());
@@ -99,29 +115,29 @@ public class TagEditorFragment extends Fragment {
             editAlbum.setText(music.getAlbum());
             editGenre.setText(music.getGenre());
             final Bitmap[] image = {null};
-            ExecutorService service1 = Executors.newSingleThreadExecutor();
-            Handler handler = new Handler();
-            service1.execute(() -> {
+
+
+            service.execute(() -> {
 
                 //image decoder
-                MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
-                mediaMetadataRetriever.setDataSource(music.getPath());
-                byte[] art = mediaMetadataRetriever.getEmbeddedPicture();
+                byte[] art = new byte[0];
+                try (MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever()) {
+                    mediaMetadataRetriever.setDataSource(music.getPath());
+                    art = mediaMetadataRetriever.getEmbeddedPicture();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
 
                 try {
                     image[0] = BitmapFactory.decodeByteArray(art, 0, art.length);
                 } catch (Exception ignored) {
                 }
                 handler.post(() -> {
-                    GlideBuilt.glideBitmap(requireContext(), image[0], R.drawable.ic_music, coverImageView, 412);
+                    glideBuilt.glideBitmap(image[0], R.drawable.ic_music, coverImageView, 412);
                 });
             });
-            service1.shutdown();
         }
-        pickImageView.setOnClickListener(v -> {
-            Intent gallery = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI);
-            requireActivity().startActivityForResult(gallery, TAG_EDITOR_COVER);
-        });
+        pickImageView.setOnClickListener(v -> pickImage(pickIntent, mediaPicker));
 
         saveButton.setOnClickListener(v -> {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -173,8 +189,6 @@ public class TagEditorFragment extends Fragment {
         String newArtist = editArtist.getText().toString().trim();
         String newAlbum = editAlbum.getText().toString().trim();
         String newGenre = editGenre.getText().toString().trim();
-        ExecutorService service = Executors.newSingleThreadExecutor();
-        Handler handler = new Handler();
         service.execute(() -> {
 
             try {
@@ -215,27 +229,32 @@ public class TagEditorFragment extends Fragment {
                 });
             }
         });
-        service.shutdown();
 
     }
 
-    public void setImageUri(Uri album_uri) {
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        service.shutdown();
+    }
+
+    private void setImageUri(Uri album_uri) {
         imageUri = album_uri;
-        GlideBuilt.glide(requireContext(), String.valueOf(imageUri), 0, coverImageView, 412);
+        glideBuilt.glide(String.valueOf(imageUri), 0, coverImageView, 412);
     }
 
     public static String getRealPathFromURI(Context context, Uri contentUri) {
-    		  Cursor cursor = null;
-            try {
-                String[] proj = { MediaStore.Images.Media.DATA };
-                cursor = context.getContentResolver().query(contentUri, proj, null, null, null);
-                cursor.moveToFirst();
-               int column_index = cursor.getColumnIndex(proj[0]);
-                return cursor.getString(column_index);
-            } finally {
-                if (cursor != null) {
-                    cursor.close();
-                }
+        Cursor cursor = null;
+        try {
+            String[] proj = {MediaStore.Images.Media.DATA};
+            cursor = context.getContentResolver().query(contentUri, proj, null, null, null);
+            cursor.moveToFirst();
+            int column_index = cursor.getColumnIndex(proj[0]);
+            return cursor.getString(column_index);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
             }
-    	}
+        }
+    }
 }

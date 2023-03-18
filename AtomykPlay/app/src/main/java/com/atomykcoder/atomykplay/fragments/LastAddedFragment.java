@@ -216,6 +216,10 @@ public class LastAddedFragment extends Fragment {
         service.shutdown();
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
 
     private ArrayList<Music> getLastAddedMusicList(long max) throws ParseException {
         ArrayList<Music> result = new ArrayList<>();

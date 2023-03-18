@@ -1,10 +1,6 @@
 package com.atomykcoder.atomykplay.adapters;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.media.MediaMetadataRetriever;
-import android.os.Handler;
 import android.widget.ImageView;
 
 import com.atomykcoder.atomykplay.R;
@@ -13,20 +9,16 @@ import com.atomykcoder.atomykplay.adapters.Generics.GenericRecyclerAdapter;
 import com.atomykcoder.atomykplay.classes.GlideBuilt;
 import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
+import com.atomykcoder.atomykplay.repository.MusicUtils;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class MusicAdapter extends GenericRecyclerAdapter<Music> {
 
     private ArrayList<Music> musicList;
-    private HashMap<Integer, Bitmap> map = new HashMap<>();
-    ExecutorService service = Executors.newFixedThreadPool(10);
+    private GlideBuilt glideBuilt;
 
     protected void handlePlayMusic(MainActivity mainActivity, Music item) {
         mainActivity.playAudio(item);
@@ -34,40 +26,18 @@ public class MusicAdapter extends GenericRecyclerAdapter<Music> {
         mainActivity.openBottomPlayer();
     }
 
+
     protected void loadImage(Context context, Music item, int position, ImageView albumCoverIV) {
-        Handler handler = new Handler();
-        if (map.containsKey(position)) {
-            handler.post(() -> GlideBuilt.glideBitmap(context, map.get(position), R.drawable.ic_music, albumCoverIV, 128));
-            return;
-        }
-
-        final Bitmap[] image = {null};
-
-        service.execute(() -> {
-            //image decoder
-            try (MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever()){
-
-                mediaMetadataRetriever.setDataSource(item.getPath());
-                byte[] art = mediaMetadataRetriever.getEmbeddedPicture();
-
-                try {
-                    image[0] = BitmapFactory.decodeByteArray(art, 0, art.length);
-                    map.put(position, image[0]);
-                } catch (Exception ignored) {
-                }
-            } catch (IllegalArgumentException | IOException e) {
-                e.printStackTrace();
-            }
-
-            handler.post(() -> GlideBuilt.glideBitmap(context, image[0], R.drawable.ic_music, albumCoverIV, 128));
-        });
-        service.shutdown();
+        glideBuilt = new GlideBuilt(context);
+        glideBuilt.glide(item.getAlbumUri(), R.drawable.ic_music, albumCoverIV, 128);
     }
 
     protected void handleShuffle(StorageUtil storage, int position, ArrayList<Music> musicList) {
 
         ArrayList<Music> shuffleList = new ArrayList<>(musicList);
-        storage.saveShuffle(true);
+        if (MusicUtils.getInstance().shouldChangeShuffleMode()) {
+            storage.saveShuffle(true);
+        }
 
         storage.saveTempMusicList(shuffleList);
 
@@ -85,12 +55,12 @@ public class MusicAdapter extends GenericRecyclerAdapter<Music> {
         storage.saveMusicIndex(0);
 
         this.musicList = shuffleList;
-
-
     }
 
     protected void handleNoShuffle(StorageUtil storage, int position, ArrayList<Music> musicList) {
-        storage.saveShuffle(false);
+        if (MusicUtils.getInstance().shouldChangeShuffleMode()) {
+            storage.saveShuffle(false);
+        }
         storage.saveQueueList(musicList);
         storage.saveMusicIndex(position);
         this.musicList = musicList;
