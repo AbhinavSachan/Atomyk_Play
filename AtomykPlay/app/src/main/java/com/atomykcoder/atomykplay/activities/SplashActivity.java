@@ -18,7 +18,7 @@ public class SplashActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         StorageUtil.SettingsStorage settingsStorage = new StorageUtil.SettingsStorage(this);
-        boolean switch1 = settingsStorage.loadTheme();
+        boolean switch1 = settingsStorage.loadIsThemeDark();
         if (!switch1) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         } else {

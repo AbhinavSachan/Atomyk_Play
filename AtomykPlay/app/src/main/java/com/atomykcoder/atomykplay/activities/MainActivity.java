@@ -3,6 +3,8 @@ package com.atomykcoder.atomykplay.activities;
 import static com.atomykcoder.atomykplay.helperFunctions.CustomMethods.pickImage;
 import static com.atomykcoder.atomykplay.services.MediaPlayerService.is_playing;
 
+import static org.greenrobot.eventbus.EventBus.TAG;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -33,6 +35,7 @@ import android.provider.Settings;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -398,7 +401,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         StorageUtil.SettingsStorage settingsStorage = new StorageUtil.SettingsStorage(this);
 
-        boolean switch1 = settingsStorage.loadTheme();
+        boolean switch1 = settingsStorage.loadIsThemeDark();
 
         if (!switch1) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
@@ -409,7 +412,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Window window = getWindow();
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
 
-        if (!settingsStorage.loadTheme()) {
+        if (!settingsStorage.loadIsThemeDark()) {
             window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                     | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
         } else {
@@ -515,6 +518,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onStart() {
         super.onStart();
+        if (is_granted){
+            if (!isChecking){
+                checkForUpdateList(false);
+            }
+        }
         if (service_bound) {
             if (is_playing) {
                 media_player_service.setSeekBar();
@@ -1157,20 +1165,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     @Override
                     public void onPermissionsChecked(MultiplePermissionsReport multiplePermissionsReport) {
                         if (multiplePermissionsReport.areAllPermissionsGranted()) {
+                            is_granted = true;
                             setUpMusicScanner();
                             callStateListener();
                             bindService();
                             startService();
-                            is_granted = true;
                         } else {
+                            is_granted = false;
                             ((ApplicationClass) getApplication()).showToast("Permissions denied!");
                         }
                     }
 
                     @Override
                     public void onPermissionRationaleShouldBeShown(List<PermissionRequest> list, PermissionToken permissionToken) {
-                        permissionToken.continuePermissionRequest();
                         is_granted = false;
+                        permissionToken.continuePermissionRequest();
                     }
                 }).check();
 
@@ -1182,10 +1191,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (enableLoading) {
             setObserver();
         }
+        isChecking = true;
         service.execute(() -> musicUtils.fetchMusic(this).thenAccept(it -> {
             setMusicAdapter(musicUtils.getInitialMusicList());
+            isChecking = false;
         }).exceptionally(it -> {
             ((ApplicationClass) getApplication()).showToast(it.getMessage());
+            isChecking = false;
             return null;
         }));
         service.shutdown();
@@ -1197,17 +1209,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 case LOADING:
                     progressBar.setVisibility(View.VISIBLE);
                     linearLayout.setVisibility(View.GONE);
-                    isChecking = true;
                     break;
                 case SUCCESS:
                     storageUtil.saveInitialList(musicUtils.getInitialMusicList());
                     progressBar.setVisibility(View.GONE);
-                    isChecking = false;
                     break;
                 case FAILURE:
                     linearLayout.setVisibility(View.VISIBLE);
                     progressBar.setVisibility(View.GONE);
-                    isChecking = false;
                     break;
             }
         });

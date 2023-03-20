@@ -605,14 +605,14 @@ public class StorageUtil {
             this.context = context;
         }
 
-        public void saveTheme(boolean theme) {
+        public void saveThemeDark(boolean theme) {
             sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putBoolean("theme_name", theme);
             editor.apply();
         }
 
-        public boolean loadTheme() {
+        public boolean loadIsThemeDark() {
             sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
             return sharedPreferences.getBoolean("theme_name", false);
         }

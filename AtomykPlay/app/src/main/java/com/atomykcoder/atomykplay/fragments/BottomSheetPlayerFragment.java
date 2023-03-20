@@ -11,8 +11,10 @@ import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.repeat_one;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.BlurMaskFilter;
 import android.media.MediaMetadataRetriever;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -35,6 +37,7 @@ import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.palette.graphics.Palette;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -310,7 +313,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     @Override
     public void onResume() {
         super.onResume();
-        if (queueSheetBehaviour.getState() == BottomSheetBehavior.STATE_EXPANDED){
+        if (queueSheetBehaviour.getState() == BottomSheetBehavior.STATE_EXPANDED) {
             queueRecyclerView.setVisibility(View.VISIBLE);
         }
         app_paused = false;
@@ -319,7 +322,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     @Override
     public void onPause() {
         super.onPause();
-        if (queueSheetBehaviour.getState() == BottomSheetBehavior.STATE_EXPANDED){
+        if (queueSheetBehaviour.getState() == BottomSheetBehavior.STATE_EXPANDED) {
             queueRecyclerView.setVisibility(View.GONE);
         }
         app_paused = true;
@@ -374,12 +377,31 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     }
 
     // Don't Remove This Event Bus is using this method (It might look unused still DON'T REMOVE
+    private int generateThemeColor(Bitmap image) {
+        Palette palette = new Palette.Builder(image).generate();
+        if (settingsStorage.loadIsThemeDark()) {
+            return palette.getDarkMutedColor(getResources().getColor(R.color.player_bg, Resources.getSystem().newTheme()));
+        } else {
+            return palette.getLightMutedColor(getResources().getColor(R.color.player_bg, Resources.getSystem().newTheme()));
+        }
+    }
+
+    private void setThemeColorInPlayer(int color) {
+        player_layout.setBackgroundColor(color);
+    }
+
     @Subscribe
     public void setMainPlayerLayout(SetMainLayoutEvent event) {
         activeMusic = event.activeMusic;
         if (!app_paused) {
             if (activeMusic != null) {
                 Bitmap image = event.image;
+                if (image != null) {
+                    int themeColor = generateThemeColor(image);
+                    setThemeColorInPlayer(themeColor);
+                } else {
+                    setThemeColorInPlayer(getResources().getColor(R.color.player_bg, Resources.getSystem().newTheme()));
+                }
                 songName = activeMusic.getName();
                 bitrate = activeMusic.getBitrate();
                 artistName = activeMusic.getArtist();

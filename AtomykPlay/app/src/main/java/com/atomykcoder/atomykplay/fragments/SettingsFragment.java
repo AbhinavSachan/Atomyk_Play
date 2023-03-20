@@ -58,7 +58,7 @@ public class SettingsFragment extends Fragment {
         toolbar.setNavigationIcon(R.drawable.ic_back);
         toolbar.setNavigationOnClickListener(v -> requireActivity().onBackPressed());
         //saved values
-        dark = settingsStorage.loadTheme();
+        dark = settingsStorage.loadIsThemeDark();
         showInfo = settingsStorage.loadShowInfo();
         showArtist = settingsStorage.loadShowArtist();
         showExtra = settingsStorage.loadExtraCon();
@@ -327,6 +327,6 @@ public class SettingsFragment extends Fragment {
                 break;
 
         }
-        settingsStorage.saveTheme(dark);
+        settingsStorage.saveThemeDark(dark);
     }
 }
