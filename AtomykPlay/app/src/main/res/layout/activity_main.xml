@@ -223,7 +223,7 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_scrollFlags="scroll|enterAlways|enterAlwaysCollapsed">
+                app:layout_scrollFlags="scroll|enterAlways">
 
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/searchBar_card"

@@ -552,9 +552,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (service_bound) {
             MainActivity.this.unbindService(service_connection);
             //if media player is not playing it will stop the service
-            stopService(new Intent(MainActivity.this, MediaPlayerService.class));
-            is_playing = false;
-            service_stopped = true;
+            if (!is_playing) {
+                stopService(new Intent(MainActivity.this, MediaPlayerService.class));
+                service_stopped = true;
+            }
         }
         MediaPlayerService.ui_visible = false;
         if (phoneStateListener != null && telephonyManager != null) {

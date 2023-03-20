@@ -381,7 +381,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             // is not running in background and player is not playing
             if (settingsStorage.loadSelfStop()) {
                 mainThreadHandler.postDelayed(() -> {
-                    if (!is_playing && ui_visible) {
+                    if (!is_playing && !ui_visible) {
                         stopSelf();
                     }
                 }, 300000); // 30 minutes
@@ -1023,7 +1023,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 stopSelf();
             }
 
-        return START_NOT_STICKY;
+        return START_STICKY;
     }
 
     @Override
