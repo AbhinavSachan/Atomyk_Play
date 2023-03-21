@@ -116,9 +116,9 @@ public class MusicDaoImpl implements MusicDaoI {
                 } while (audioCursor.moveToNext());
                 audioCursor.close();
                 dataList.sort(Comparator.comparing(Music::getName));
-                if (!dataList.isEmpty()){
+                if (!dataList.isEmpty()) {
                     future.complete(dataList);
-                }else {
+                } else {
                     future.completeExceptionally(new Throwable("Music's unavailable"));
                 }
             }

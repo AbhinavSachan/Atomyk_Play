@@ -59,12 +59,14 @@
                     android:paddingVertical="130dp" />
 
                 <View
+                    android:id="@+id/gradient_top"
                     android:layout_width="match_parent"
                     android:layout_height="165dp"
                     android:layout_alignParentTop="true"
                     android:background="@drawable/fade_edge_start" />
 
                 <View
+                    android:id="@+id/gradient_bottom"
                     android:layout_width="match_parent"
                     android:layout_height="165dp"
                     android:layout_alignParentBottom="true"
@@ -553,7 +555,7 @@
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/queue_music_recycler"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:visibility="gone"
                     android:layout_below="@+id/queue_music_item" />
 

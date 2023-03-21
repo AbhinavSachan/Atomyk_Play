@@ -3,8 +3,6 @@ package com.atomykcoder.atomykplay.activities;
 import static com.atomykcoder.atomykplay.helperFunctions.CustomMethods.pickImage;
 import static com.atomykcoder.atomykplay.services.MediaPlayerService.is_playing;
 
-import static org.greenrobot.eventbus.EventBus.TAG;
-
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -35,7 +33,6 @@ import android.provider.Settings;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -55,7 +52,6 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
@@ -103,7 +99,9 @@ import org.greenrobot.eventbus.EventBus;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -389,6 +387,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         }
     });
+
     public void clearStorage() {
         storageUtil.clearMusicLastPos();
         storageUtil.clearMusicIndex();
@@ -400,25 +399,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         StorageUtil.SettingsStorage settingsStorage = new StorageUtil.SettingsStorage(this);
-
-        boolean switch1 = settingsStorage.loadIsThemeDark();
-
-        if (!switch1) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-        } else {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-        }
-
         Window window = getWindow();
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-
         if (!settingsStorage.loadIsThemeDark()) {
             window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                     | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
         } else {
             window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
         }
-
         window.setStatusBarColor(Color.TRANSPARENT);
         setContentView(R.layout.activity_main);
 
@@ -518,8 +506,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onStart() {
         super.onStart();
-        if (is_granted){
-            if (!isChecking){
+        if (is_granted) {
+            if (!isChecking) {
                 checkForUpdateList(false);
             }
         }
@@ -597,7 +585,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void playShuffleSong() {
-
+        ArrayList<Music> list = storageUtil.loadInitialList();
+        if (list == null){
+            showToast("No Songs");
+            return;
+        }
+        if (list.isEmpty()){
+            showToast("No Songs");
+            return;
+        }
+        playRandomSong(list);
     }
 
     private void setLastAddFragment() {
@@ -835,6 +832,35 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else {
             showToast("Can't play while on call");
         }
+    }
+
+
+    public void playRandomSong(ArrayList<Music> songs) {
+        if (MusicUtils.getInstance().shouldChangeShuffleMode()) {
+            storageUtil.saveShuffle(true);
+        }
+        storageUtil.saveTempMusicList(songs);
+        /*
+         * Plays a random song from the given list of songs by sending a broadcast message
+         */
+        Random rand = new Random();
+        Music music = songs.get(rand.nextInt(songs.size()));
+        System.out.println("Now playing: " + music.getName());
+        //removing current item from list
+        songs.remove(music);
+
+        //shuffling list
+        Collections.shuffle(songs);
+
+        //adding the removed item in shuffled list on 0th index
+        songs.add(0, music);
+
+        //saving list
+        storageUtil.saveQueueList(songs);
+        storageUtil.saveMusicIndex(0);
+        bottomSheetPlayerFragment.updateQueueAdapter(songs);
+        playAudio(music);
+        openBottomPlayer();
     }
 
     /**
@@ -1078,7 +1104,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 musicMainAdapter.removeItem(selectedItem);
                 bottomSheetPlayerFragment.queueAdapter.removeItem(selectedItem);
                 break;
-                // check for blacklist folder select request
+            // check for blacklist folder select request
             case TAG_BLOCK_LIST:
                 if (data != null) {
                     // find fragment
@@ -1243,7 +1269,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 LinearLayoutManager manager = new LinearLayoutManager(MainActivity.this);
                 musicMainAdapter = new MusicMainAdapter(MainActivity.this, musicArrayList);
                 musicRecyclerView.setHasFixedSize(true);
-                musicRecyclerView.setNestedScrollingEnabled(false);
                 musicRecyclerView.setLayoutManager(manager);
                 musicRecyclerView.setAdapter(musicMainAdapter);
             } else {
@@ -1510,7 +1535,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void changeUriPl(Playlist playlist) {
         pl_name = playlist.getName();
-        pickImage(pickIntentForPLCoverChange,mediaPickerForPLCoverChange);
+        pickImage(pickIntentForPLCoverChange, mediaPickerForPLCoverChange);
     }
 
     private void addToQueuePl(Playlist playlist) {
@@ -1548,6 +1573,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         plDialogRecyclerView = addToPlDialog.findViewById(R.id.playlist_dialog_recycler);
         View createPlaylistBtnDialog = addToPlDialog.findViewById(R.id.create_playlist);
         View addFavBtnDialog = addToPlDialog.findViewById(R.id.add_to_fav_dialog_box);
+        TextView textView = addToPlDialog.findViewById(R.id.text_no_pl);
 
         createPlaylistBtnDialog.setOnClickListener(v -> openCreatePlaylistDialog(music));
 
@@ -1561,7 +1587,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         if (playlistArrayList != null) {
             playlistDialogAdapter = new PlaylistDialogAdapter(this, playlistArrayList, music);
+            if (playlistArrayList.isEmpty()) {
+                textView.setVisibility(View.VISIBLE);
+            }
+
             plDialogRecyclerView.setAdapter(playlistDialogAdapter);
+        } else {
+            textView.setVisibility(View.VISIBLE);
         }
         addToPlDialog.show();
     }

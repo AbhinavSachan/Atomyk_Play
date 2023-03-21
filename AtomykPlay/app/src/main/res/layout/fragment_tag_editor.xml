@@ -205,7 +205,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end|bottom"
-        android:layout_margin="24dp"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginBottom="112dp"
+        android:contentDescription="save button"
         android:src="@drawable/ic_save"
-        app:fabSize="normal" />
+        app:fabSize="normal"
+        tools:ignore="HardcodedText" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

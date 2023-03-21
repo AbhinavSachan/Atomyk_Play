@@ -673,7 +673,7 @@
             android:layout_height="wrap_content"
             android:background="@color/secondary_bg"
             app:collapsedTitleGravity="center_vertical"
-            app:contentScrim="@color/player_bg"
+            app:contentScrim="@color/collapsed_appbar_color"
             app:expandedTitleGravity="bottom|center_horizontal"
             app:expandedTitleTextAppearance="@style/App.Custom.Title"
             app:layout_scrollFlags="scroll|snap|exitUntilCollapsed"

@@ -238,11 +238,20 @@ public class SettingsFragment extends Fragment {
         ImageView directory_icon = blacklistDialog.findViewById(R.id.blacklist_open_directory_icon);
         Button okay_bt = blacklistDialog.findViewById(R.id.blacklist_confirm_bt);
         RecyclerView recyclerView = blacklistDialog.findViewById(R.id.blacklist_recycler);
+        TextView textView = blacklistDialog.findViewById(R.id.text_no_folders);
 
         blacklist = settingsStorage.loadBlackList();
 
         adapter = new BlockFolderListAdapter(blacklist, requireContext());
 
+
+        if (blacklist != null) {
+            if (blacklist.isEmpty()) {
+                textView.setVisibility(View.VISIBLE);
+            }
+        }else {
+            textView.setVisibility(View.VISIBLE);
+        }
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);
         // adapter to load in spinner dropdown

@@ -68,7 +68,7 @@ public class LastAddedFragment extends Fragment {
 
 
         //sort initial music list by date in reverse order
-        Collections.sort(initialMusicList, new Comparator<Music>() {
+        initialMusicList.sort(new Comparator<Music>() {
             final DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.getDefault());
 
             @Override

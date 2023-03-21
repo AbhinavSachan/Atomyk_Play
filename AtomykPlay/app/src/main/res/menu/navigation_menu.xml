@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="HardcodedText"
     tools:showIn="navigation_view">
     <group android:checkableBehavior="single">
         <item
@@ -27,6 +28,7 @@
     </group>
     <item
         android:id="@+id/navigation_donate"
+        android:visible="false"
         android:icon="@drawable/ic_donate"
         android:title="@string/donate" />
 </menu>

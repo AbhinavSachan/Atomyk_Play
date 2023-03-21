@@ -1,9 +1,13 @@
 package com.atomykcoder.atomykplay.fragments;
 
+import static android.provider.MediaStore.Images.Media.insertImage;
 import static com.atomykcoder.atomykplay.helperFunctions.CustomMethods.pickImage;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.ContentResolver;
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -55,6 +59,7 @@ import org.jaudiotagger.tag.TagException;
 import org.jaudiotagger.tag.datatype.Artwork;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -190,7 +195,6 @@ public class TagEditorFragment extends Fragment {
         String newAlbum = editAlbum.getText().toString().trim();
         String newGenre = editGenre.getText().toString().trim();
         service.execute(() -> {
-
             try {
                 File musicFile = new File(music.getPath());
                 AudioFile f = AudioFileIO.read(musicFile);
@@ -209,7 +213,6 @@ public class TagEditorFragment extends Fragment {
 
                     tag.addField(artwork);
                     tag.setField(artwork);
-
                 }
 
                 f.setTag(tag);
@@ -231,7 +234,6 @@ public class TagEditorFragment extends Fragment {
         });
 
     }
-
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -240,7 +242,7 @@ public class TagEditorFragment extends Fragment {
 
     private void setImageUri(Uri album_uri) {
         imageUri = album_uri;
-        glideBuilt.glide(String.valueOf(imageUri), 0, coverImageView, 412);
+        glideBuilt.glide(String.valueOf(imageUri), 0, coverImageView, 512);
     }
 
     public static String getRealPathFromURI(Context context, Uri contentUri) {

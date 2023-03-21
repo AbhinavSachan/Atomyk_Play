@@ -37,6 +37,7 @@
     <color name="cover_black_player">#191919</color>
     <color name="player_bg">#F6F6F6</color>
     <color name="red_layer">#0FDC2525</color>
+    <color name="collapsed_appbar_color">#CDE9F6</color>
 
 
 </resources>

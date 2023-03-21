@@ -25,7 +25,7 @@
     <string name="save">Save</string>
     <string name="find">Find</string>
     <string name="no_lyrics_found">No embedded lyrics found</string>
-    <string name="add_lyrics">Add lyrics</string>
+    <string name="add_lyrics"><u>Add lyrics</u></string>
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>
     <string name="search_lyrics">Search Lyrics</string>
@@ -61,7 +61,7 @@
     <string name="show_extra_con">Extra Controls</string>
     <string name="ext_con_des">Add forward button in the mini player</string>
     <string name="self_break">Self Break</string>
-    <string name="self_stop_des">Background service will stop after being idle for 5 minutes</string>
+    <string name="self_stop_des">Background music service will stop after being idle for 5 minutes</string>
     <string name="set_as_ringtone">Set as ringtone</string>
     <string name="delete">Delete from device</string>
     <string name="add_queue">Add to queue</string>
@@ -105,4 +105,10 @@
     <string name="song_name">Song name</string>
     <string name="song_artist_name">Artist name</string>
     <string name="file_album">Album</string>
+    <string name="developers_info">Developers info</string>
+    <string name="akash_des">Hi, I\'m Akash Goyal, I\'m a self-learned game developer. I\'ve been making small indie games for 6 years now. I also worked on this music player app with my friend Abhinav Sachan. I was the lead programmer in this project while my friend handled the UI/UX design.</string>
+    <string name="abhinav_des">I had the pleasure of working with Akash Goyal on this music player app project, where I served as the UI/UX designer. Akash\'s programming skills were truly impressive, and he was an excellent lead programmer. My role in the project was to design an intuitive and visually appealing interface for the app, and I\'m proud to say that we were able to achieve our goals. Akash\'s expertise and guidance helped me understand the technical aspects of the project, and I was able to incorporate his programming into my design. Together, we were able to create a high-quality product that we could both be proud of. It was a great experience working with Akash, and I look forward to collaborating with him on future projects.</string>
+    <string name="app_info">App info</string>
+    <string name="copyright_text">Copyright © 2023 Atomyk Music.All Rights Reserved</string>
+    <string name="pri_pol"><u>Privacy Policy</u></string>
 </resources>

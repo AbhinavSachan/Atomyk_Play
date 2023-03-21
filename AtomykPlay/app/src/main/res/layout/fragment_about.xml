@@ -4,13 +4,264 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/secondary_bg"
-    tools:context=".fragments.AboutFragment">
+    android:background="@color/primary_bg"
+    android:clickable="true"
+    android:focusable="true"
+    tools:context=".fragments.AboutFragment"
+    tools:ignore="HardcodedText">
 
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/sl"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/tertiary_bg"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/secondary_bg"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="16dp"
+                    android:paddingHorizontal="16dp"
+                    android:text="@string/app_info"
+                    android:textColor="@color/text_color"
+                    android:textSize="@dimen/d_20sp"
+                    android:textStyle="bold" />
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clipToPadding="false"
+                    android:paddingBottom="16dp">
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="16dp"
+                        android:layout_marginTop="60dp"
+                        app:cardBackgroundColor="@color/secondary_bg"
+                        app:cardElevation="4dp"
+                        app:strokeWidth="0dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_marginTop="40dp"
+                            android:orientation="vertical"
+                            android:paddingVertical="4dp"
+                            android:paddingBottom="16dp">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:paddingHorizontal="16dp">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center_vertical"
+                                    android:text="Version : "
+                                    android:textColor="@color/text_color"
+                                    android:textSize="@dimen/d_16sp"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center_vertical"
+                                    android:gravity="center_vertical"
+                                    android:text="1.2.0"
+                                    android:textColor="@color/sub_text_grey"
+                                    android:textSize="@dimen/d_15sp"
+                                    android:textStyle="bold" />
+
+
+                            </LinearLayout>
+
+                            <TextView
+                                android:id="@+id/privacy_policy"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:paddingHorizontal="16dp"
+                                android:paddingVertical="4dp"
+                                android:foreground="?selectableItemBackgroundBorderless"
+                                android:text="@string/pri_pol"
+                                android:textColor="@color/text_color"
+                                android:textSize="@dimen/d_16sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:paddingHorizontal="16dp"
+                                android:paddingVertical="4dp"
+                                android:text="@string/copyright_text"
+                                android:textColor="@color/sub_text_grey"
+                                android:textSize="@dimen/d_11sp" />
+
+
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <de.hdodenhof.circleimageview.CircleImageView
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        android:layout_centerHorizontal="true"
+                        android:contentDescription="profile image"
+                        android:elevation="6dp"
+                        android:scaleType="centerCrop"
+                        android:src="@mipmap/ic_launcher_round" />
+
+                </RelativeLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/secondary_bg"
+                android:orientation="vertical"
+                android:paddingBottom="112dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="16dp"
+                    android:paddingHorizontal="16dp"
+                    android:text="@string/developers_info"
+                    android:textColor="@color/text_color"
+                    android:textSize="@dimen/d_20sp"
+                    android:textStyle="bold" />
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clipToPadding="false"
+                    android:paddingBottom="16dp">
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/abhinav_card"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="16dp"
+                        android:layout_marginTop="60dp"
+                        app:cardBackgroundColor="@color/secondary_bg"
+                        app:cardElevation="4dp"
+                        app:strokeWidth="0dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_marginTop="40dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_horizontal"
+                                android:padding="8dp"
+                                android:text="Abhinav Sachan"
+                                android:textColor="@color/text_color"
+                                android:textSize="@dimen/d_14sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:lineSpacingMultiplier="1.2"
+                                android:paddingHorizontal="16dp"
+                                android:paddingBottom="16dp"
+                                android:text="@string/abhinav_des"
+                                android:textColor="@color/text_color"
+                                android:textSize="@dimen/d_14sp" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <de.hdodenhof.circleimageview.CircleImageView
+                        android:id="@+id/abhinav_profile"
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        android:layout_centerHorizontal="true"
+                        android:contentDescription="profile image"
+                        android:elevation="6dp"
+                        android:scaleType="centerCrop" />
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+
+                    android:clipToPadding="false"
+                    android:paddingBottom="16dp">
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/akash_card"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="16dp"
+                        android:layout_marginTop="60dp"
+                        app:cardBackgroundColor="@color/secondary_bg"
+                        app:cardElevation="4dp"
+                        app:strokeWidth="0dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_marginTop="40dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_horizontal"
+                                android:padding="8dp"
+                                android:text="Akash Goyal"
+                                android:textColor="@color/text_color"
+                                android:textSize="@dimen/d_14sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:lineSpacingMultiplier="1.2"
+                                android:paddingHorizontal="16dp"
+                                android:paddingBottom="16dp"
+                                android:text="@string/akash_des"
+                                android:textColor="@color/text_color"
+                                android:textSize="@dimen/d_14sp" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <de.hdodenhof.circleimageview.CircleImageView
+                        android:id="@+id/akash_profile"
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        android:layout_centerHorizontal="true"
+                        android:contentDescription="profile image"
+                        android:elevation="6dp"
+                        android:scaleType="centerCrop" />
+
+                </RelativeLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>
 
@@ -24,7 +275,7 @@
             android:layout_height="wrap_content"
             android:background="@color/secondary_bg"
             app:collapsedTitleGravity="center_vertical"
-            app:contentScrim="@color/player_bg"
+            app:contentScrim="@color/collapsed_appbar_color"
             app:expandedTitleGravity="bottom|center_horizontal"
             app:expandedTitleTextAppearance="@style/App.Custom.Title"
             app:layout_scrollFlags="scroll|snap|exitUntilCollapsed"

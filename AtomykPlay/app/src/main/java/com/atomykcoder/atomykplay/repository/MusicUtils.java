@@ -13,7 +13,7 @@ import java.util.concurrent.CompletableFuture;
 public class MusicUtils {
     private static MusicUtils instance;
     private final ArrayList<Music> initialMusicList = new ArrayList<>();
-    private boolean shouldChangeShuffleMode = false;
+    private boolean shouldChangeShuffleMode = true;
     private final MutableLiveData<LoadingStatus> status = new MutableLiveData<>();
 
     public static MusicUtils getInstance() {

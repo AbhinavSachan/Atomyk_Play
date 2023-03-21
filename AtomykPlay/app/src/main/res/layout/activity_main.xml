@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:background="@color/primary_bg"
     tools:context=".activities.MainActivity"
-    tools:ignore="UnusedAttribute">
+    tools:ignore="UnusedAttribute,UseCompoundDrawables">
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/sec_container"
@@ -16,7 +16,6 @@
         android:background="@color/primary_bg">
 
         <RelativeLayout
-            android:id="@+id/third_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
@@ -26,9 +25,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
+                android:layout_gravity="center"
                 android:orientation="vertical"
-                android:visibility="gone"
-                tools:ignore="UseCompoundDrawables">
+                android:visibility="gone">
 
                 <ImageView
                     android:layout_width="250dp"
@@ -48,179 +47,31 @@
 
             </LinearLayout>
 
+            <ProgressBar
+                android:id="@+id/progress_bar_main_activity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_gravity="center"
+                android:indeterminateTint="@color/text_color"
+                android:visibility="gone" />
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/music_recycler"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:clipToPadding="false"
                 android:paddingBottom="@dimen/most_bottom_padding" />
-
         </RelativeLayout>
-
-        <ProgressBar
-            android:id="@+id/progress_bar_main_activity"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:indeterminateTint="@color/text_color"
-            android:visibility="gone" />
-        <!--        <com.google.android.material.appbar.AppBarLayout-->
-        <!--            android:id="@+id/appBar_layout"-->
-        <!--            android:layout_width="match_parent"-->
-        <!--            android:layout_height="wrap_content"-->
-        <!--            android:paddingTop="@dimen/status_bar_padding">-->
-
-        <!--            <com.google.android.material.search.SearchBar-->
-        <!--                android:id="@+id/search_bar"-->
-        <!--                android:layout_width="match_parent"-->
-        <!--                android:layout_height="wrap_content"-->
-        <!--                android:hint="@string/search_here"-->
-        <!--                app:layout_scrollFlags="scroll|enterAlways"-->
-        <!--                app:navigationIcon="@drawable/ic_ham_opt" />-->
-
-        <!--            <LinearLayout-->
-        <!--                android:layout_width="match_parent"-->
-        <!--                android:layout_height="wrap_content"-->
-        <!--                android:baselineAligned="false"-->
-        <!--                android:orientation="horizontal"-->
-        <!--                app:layout_scrollFlags="scroll|enterAlways">-->
-
-        <!--                <LinearLayout-->
-        <!--                    android:id="@+id/playlist_card_view_ma"-->
-        <!--                    android:layout_width="0dp"-->
-        <!--                    android:layout_height="match_parent"-->
-        <!--                    android:layout_marginHorizontal="12dp"-->
-        <!--                    android:layout_marginTop="6dp"-->
-        <!--                    android:layout_marginBottom="12dp"-->
-        <!--                    android:layout_weight="1"-->
-        <!--                    android:gravity="center"-->
-        <!--                    android:orientation="vertical"-->
-        <!--                    android:paddingHorizontal="8dp">-->
-
-        <!--                    <RelativeLayout-->
-        <!--                        android:layout_width="wrap_content"-->
-        <!--                        android:layout_height="wrap_content"-->
-        <!--                        android:background="@drawable/round_bg_for_pl"-->
-        <!--                        android:padding="5dp">-->
-
-        <!--                        <ImageView-->
-        <!--                            android:layout_width="40dp"-->
-        <!--                            android:layout_height="40dp"-->
-        <!--                            android:layout_gravity="center"-->
-        <!--                            android:contentDescription="@string/empty"-->
-        <!--                            android:padding="8dp"-->
-        <!--                            android:src="@drawable/ic_music_list"-->
-        <!--                            app:tint="@color/accent_color_bg"-->
-        <!--                            tools:ignore="DuplicateSpeakableTextCheck" />-->
-
-        <!--                    </RelativeLayout>-->
-
-        <!--                    <TextView-->
-        <!--                        android:layout_width="wrap_content"-->
-        <!--                        android:layout_height="wrap_content"-->
-        <!--                        android:layout_gravity="center"-->
-        <!--                        android:paddingBottom="6dp"-->
-        <!--                        android:text="@string/playLists"-->
-        <!--                        android:textColor="@color/text_color" />-->
-        <!--                </LinearLayout>-->
-
-        <!--                <LinearLayout-->
-        <!--                    android:id="@+id/last_added_card_view"-->
-        <!--                    android:layout_width="0dp"-->
-        <!--                    android:layout_height="match_parent"-->
-        <!--                    android:layout_marginHorizontal="12dp"-->
-        <!--                    android:layout_marginTop="6dp"-->
-        <!--                    android:layout_marginBottom="12dp"-->
-        <!--                    android:layout_weight="1"-->
-        <!--                    android:gravity="center"-->
-        <!--                    android:orientation="vertical"-->
-        <!--                    android:paddingHorizontal="8dp">-->
-
-        <!--                    <RelativeLayout-->
-        <!--                        android:layout_width="wrap_content"-->
-        <!--                        android:layout_height="wrap_content"-->
-        <!--                        android:background="@drawable/round_bg_for_pl"-->
-        <!--                        android:padding="5dp">-->
-
-        <!--                        <ImageView-->
-        <!--                            android:layout_width="40dp"-->
-        <!--                            android:layout_height="40dp"-->
-        <!--                            android:layout_gravity="center"-->
-        <!--                            android:contentDescription="@string/empty"-->
-        <!--                            android:padding="8dp"-->
-        <!--                            android:src="@drawable/ic_last_added"-->
-        <!--                            app:tint="@color/accent_color_bg"-->
-        <!--                            tools:ignore="DuplicateSpeakableTextCheck" />-->
-
-        <!--                    </RelativeLayout>-->
-
-        <!--                    <TextView-->
-        <!--                        android:layout_width="wrap_content"-->
-        <!--                        android:layout_height="wrap_content"-->
-        <!--                        android:layout_gravity="center"-->
-        <!--                        android:paddingBottom="6dp"-->
-        <!--                        android:text="@string/last_added"-->
-        <!--                        android:textColor="@color/text_color" />-->
-        <!--                </LinearLayout>-->
-
-        <!--                <LinearLayout-->
-        <!--                    android:id="@+id/shuffle_play_card_view"-->
-        <!--                    android:layout_width="0dp"-->
-        <!--                    android:layout_height="match_parent"-->
-        <!--                    android:layout_marginHorizontal="12dp"-->
-        <!--                    android:layout_marginTop="6dp"-->
-        <!--                    android:layout_marginBottom="12dp"-->
-        <!--                    android:layout_weight="1"-->
-        <!--                    android:gravity="center"-->
-        <!--                    android:orientation="vertical"-->
-        <!--                    android:paddingHorizontal="8dp">-->
-
-        <!--                    <RelativeLayout-->
-        <!--                        android:layout_width="wrap_content"-->
-        <!--                        android:layout_height="wrap_content"-->
-        <!--                        android:background="@drawable/round_bg_for_pl"-->
-        <!--                        android:padding="5dp">-->
-
-        <!--                        <ImageView-->
-        <!--                            android:layout_width="40dp"-->
-        <!--                            android:layout_height="40dp"-->
-        <!--                            android:layout_gravity="center"-->
-        <!--                            android:contentDescription="@string/empty"-->
-        <!--                            android:padding="8dp"-->
-        <!--                            android:src="@drawable/ic_shuffle"-->
-        <!--                            app:tint="@color/accent_color_bg"-->
-        <!--                            tools:ignore="DuplicateSpeakableTextCheck" />-->
-
-        <!--                    </RelativeLayout>-->
-
-        <!--                    <TextView-->
-        <!--                        android:layout_width="wrap_content"-->
-        <!--                        android:layout_height="wrap_content"-->
-        <!--                        android:layout_gravity="center"-->
-        <!--                        android:paddingBottom="6dp"-->
-        <!--                        android:text="@string/shuffle_play"-->
-        <!--                        android:textColor="@color/text_color" />-->
-        <!--                </LinearLayout>-->
-
-        <!--            </LinearLayout>-->
-        <!--        </com.google.android.material.appbar.AppBarLayout>-->
-
-        <!--        <com.google.android.material.search.SearchView-->
-        <!--            android:layout_width="match_parent"-->
-        <!--            android:layout_height="match_parent"-->
-        <!--            android:hint="@string/search_here"-->
-        <!--            app:layout_anchor="@id/search_bar">-->
-        <!--            &lt;!&ndash; Search suggestions/results go here (ScrollView, RecyclerView, etc.). &ndash;&gt;-->
-        <!--        </com.google.android.material.search.SearchView>-->
 
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/appBar_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@null"
-            app:elevation="0dp">
+            android:background="@color/primary_bg"
+            android:elevation="4dp">
 
-            <RelativeLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:layout_scrollFlags="scroll|enterAlways">
@@ -234,7 +85,9 @@
                     android:layout_marginBottom="6dp"
                     app:cardBackgroundColor="@color/secondary_bg"
                     app:cardCornerRadius="16dp"
-                    app:cardElevation="6dp">
+                    app:cardElevation="6dp"
+                    app:layout_constraintBottom_toTopOf="@id/ll2"
+                    app:layout_constraintTop_toTopOf="parent">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -266,11 +119,13 @@
                 </com.google.android.material.card.MaterialCardView>
                 <!-- add buttons here -->
                 <LinearLayout
+                    android:id="@+id/ll2"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/searchBar_card"
                     android:baselineAligned="false"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/searchBar_card">
 
                     <LinearLayout
                         android:id="@+id/playlist_card_view_ma"
@@ -390,7 +245,7 @@
                     </LinearLayout>
 
                 </LinearLayout>
-            </RelativeLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
         </com.google.android.material.appbar.AppBarLayout>
 
         <View
@@ -398,7 +253,6 @@
             android:layout_height="30dp"
             android:layout_gravity="top"
             android:background="@color/status_bar_color" />
-
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -470,7 +324,6 @@
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-
         <View
             android:id="@+id/outer_sheet_shadow"
             android:layout_width="match_parent"

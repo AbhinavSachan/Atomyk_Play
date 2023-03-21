@@ -14,7 +14,8 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.BlurMaskFilter;
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.media.MediaMetadataRetriever;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -29,7 +30,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -100,6 +100,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     public MusicQueueAdapter queueAdapter;
     public ArrayList<Music> musicArrayList;
     private GlideBuilt glideBuilt;
+    private GradientDrawable gradientTop, gradientBottom;
     private boolean userScrolling = false;
     RecyclerView.OnScrollListener onScrollListener = new RecyclerView.OnScrollListener() {
         @Override
@@ -218,7 +219,11 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
         coverCardView = view.findViewById(R.id.card_view_for_cover);
         lyricsRelativeLayout = view.findViewById(R.id.lyrics_relative_layout);
+        View grad_view_top = view.findViewById(R.id.gradient_top);
+        View grad_view_bot = view.findViewById(R.id.gradient_bottom);
 
+        gradientTop = (GradientDrawable) grad_view_top.getBackground();
+        gradientBottom = (GradientDrawable) grad_view_bot.getBackground();
         setAccorToSettings();
 
         //click listeners on mini player
@@ -390,6 +395,13 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         player_layout.setBackgroundColor(color);
     }
 
+    private void setThemeColorLyricView(int color) {
+        gradientTop.mutate();
+        gradientBottom.mutate();
+        gradientTop.setColors(new int[]{Color.TRANSPARENT, color});
+        gradientBottom.setColors(new int[]{color, Color.TRANSPARENT});
+    }
+
     @Subscribe
     public void setMainPlayerLayout(SetMainLayoutEvent event) {
         activeMusic = event.activeMusic;
@@ -399,8 +411,10 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
                 if (image != null) {
                     int themeColor = generateThemeColor(image);
                     setThemeColorInPlayer(themeColor);
+                    setThemeColorLyricView(themeColor);
                 } else {
                     setThemeColorInPlayer(getResources().getColor(R.color.player_bg, Resources.getSystem().newTheme()));
+                    setThemeColorLyricView(getResources().getColor(R.color.player_bg, Resources.getSystem().newTheme()));
                 }
                 songName = activeMusic.getName();
                 bitrate = activeMusic.getBitrate();
@@ -574,10 +588,6 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     public String getMime(String filePath) {
         MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
         return mimeTypeMap.getExtensionFromMimeType(filePath);
-    }
-
-    public void showToast(String text) {
-        Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
     }
 
     public int getCurrentPos() {

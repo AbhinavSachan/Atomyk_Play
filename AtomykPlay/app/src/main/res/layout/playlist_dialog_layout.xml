@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     style="@style/Theme.MaterialComponents.Dialog"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="350dp"
     android:background="@color/primary_bg"
     tools:ignore="UnusedAttribute">
 
@@ -30,7 +30,8 @@
         android:focusable="true"
         android:foreground="?selectableItemBackground"
         android:orientation="horizontal"
-        android:paddingHorizontal="12dp">
+        android:paddingHorizontal="12dp"
+        tools:ignore="UseCompoundDrawables">
 
         <ImageView
             android:layout_width="20dp"
@@ -49,6 +50,18 @@
             android:textStyle="bold" />
 
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/text_no_pl"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:paddingTop="50dp"
+        android:gravity="center"
+        android:text="No Playlists Added"
+        android:textSize="@dimen/d_18sp"
+        android:textStyle="bold"
+        tools:ignore="HardcodedText" />
 
     <LinearLayout
         android:id="@+id/add_to_fav_dialog_box"
@@ -84,7 +97,7 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/playlist_dialog_recycler"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_below="@id/add_to_fav_dialog_box" />
 
 </RelativeLayout>

@@ -18,7 +18,6 @@ import java.util.Collections;
 public class MusicAdapter extends GenericRecyclerAdapter<Music> {
 
     private ArrayList<Music> musicList;
-    private GlideBuilt glideBuilt;
 
     protected void handlePlayMusic(MainActivity mainActivity, Music item) {
         mainActivity.playAudio(item);
@@ -28,7 +27,7 @@ public class MusicAdapter extends GenericRecyclerAdapter<Music> {
 
 
     protected void loadImage(Context context, Music item, int position, ImageView albumCoverIV) {
-        glideBuilt = new GlideBuilt(context);
+        GlideBuilt glideBuilt = new GlideBuilt(context);
         glideBuilt.glide(item.getAlbumUri(), R.drawable.ic_music, albumCoverIV, 128);
     }
 
@@ -37,6 +36,7 @@ public class MusicAdapter extends GenericRecyclerAdapter<Music> {
         ArrayList<Music> shuffleList = new ArrayList<>(musicList);
         if (MusicUtils.getInstance().shouldChangeShuffleMode()) {
             storage.saveShuffle(true);
+            MusicUtils.getInstance().setShouldChangeShuffleMode(false);
         }
 
         storage.saveTempMusicList(shuffleList);
@@ -60,6 +60,7 @@ public class MusicAdapter extends GenericRecyclerAdapter<Music> {
     protected void handleNoShuffle(StorageUtil storage, int position, ArrayList<Music> musicList) {
         if (MusicUtils.getInstance().shouldChangeShuffleMode()) {
             storage.saveShuffle(false);
+            MusicUtils.getInstance().setShouldChangeShuffleMode(false);
         }
         storage.saveQueueList(musicList);
         storage.saveMusicIndex(position);
