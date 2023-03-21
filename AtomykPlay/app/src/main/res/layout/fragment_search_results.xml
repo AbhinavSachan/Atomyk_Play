@@ -14,6 +14,8 @@
     <LinearLayout
         android:id="@+id/search_layout_view"
         android:layout_width="match_parent"
+        android:clickable="true"
+        android:focusable="true"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
@@ -23,6 +25,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
             android:contentDescription="@string/empty"
+            android:clickable="true"
             android:focusable="true"
             android:paddingHorizontal="8dp"
             android:paddingVertical="8dp"
@@ -35,6 +38,8 @@
             app:boxCornerRadiusBottomEnd="0dp"
             app:boxCornerRadiusBottomStart="0dp"
             app:boxCornerRadiusTopEnd="0dp"
+            android:clickable="true"
+            android:focusable="true"
             app:boxCornerRadiusTopStart="0dp"
             app:boxStrokeWidth="0dp"
             app:boxStrokeWidthFocused="0dp"
@@ -64,57 +69,73 @@
         android:layout_below="@+id/search_layout_view"
         android:background="@color/accent_color_bg" />
 
-    <RadioGroup
-        android:id="@+id/radio_group"
-        android:layout_width="wrap_content"
+    <HorizontalScrollView
+        android:id="@+id/scv"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/view_line"
-        android:orientation="horizontal">
+        android:layout_below="@+id/view_line">
 
-        <RadioButton
-            android:id="@+id/song_button"
+        <RadioGroup
+            android:id="@+id/radio_group"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingHorizontal="8dp"
-            android:text="@string/song"
-            android:textColor="@color/text_color"
-            android:textSize="16sp" />
+            android:orientation="horizontal">
 
-        <RadioButton
-            android:id="@+id/album_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingHorizontal="8dp"
-            android:text="@string/album"
-            android:textColor="@color/text_color"
-            android:textSize="16sp" />
+            <RadioButton
+                android:id="@+id/song_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:text="@string/song"
+                android:textColor="@color/text_color"
+                android:textSize="16sp" />
 
-        <RadioButton
-            android:id="@+id/artist_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingHorizontal="8dp"
-            android:text="@string/artist"
-            android:textColor="@color/text_color"
-            android:textSize="16sp" />
+            <RadioButton
+                android:id="@+id/album_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:text="@string/album"
+                android:textColor="@color/text_color"
+                android:textSize="16sp" />
 
-        <RadioButton
-            android:id="@+id/genre_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingHorizontal="8dp"
-            android:text="@string/genre"
-            android:textColor="@color/text_color"
-            android:textSize="16sp" />
-    </RadioGroup>
+            <RadioButton
+                android:id="@+id/artist_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:text="@string/artist"
+                android:textColor="@color/text_color"
+                android:textSize="16sp" />
+
+            <RadioButton
+                android:id="@+id/genre_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true"
+                android:paddingHorizontal="8dp"
+                android:text="@string/genre"
+                android:textColor="@color/text_color"
+                android:textSize="16sp" />
+        </RadioGroup>
+    </HorizontalScrollView>
 
     <TextView
         android:id="@+id/searched_song_num"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/radio_group"
+        android:layout_below="@+id/scv"
         android:layout_centerInParent="true"
-        android:layout_margin="8dp"
+        android:layout_margin="2dp"
+        android:clickable="true"
+        android:focusable="true"
         android:padding="4dp"
         android:text="@string/song0"
         android:textColor="@color/sub_text_grey"

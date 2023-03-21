@@ -32,11 +32,11 @@ public class MusicUtils {
                 initialMusicList.clear();
             }
             initialMusicList.addAll(it);
-            future.complete(null);
             activity.runOnUiThread(() -> status.setValue(LoadingStatus.SUCCESS));
+            future.complete(null);
         }).exceptionally(it -> {
-            future.completeExceptionally(it);
             activity.runOnUiThread(() -> status.setValue(LoadingStatus.FAILURE));
+            future.completeExceptionally(it);
             return null;
         });
         return future;

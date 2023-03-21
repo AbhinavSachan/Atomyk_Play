@@ -30,6 +30,7 @@
     <color name="status_bar_color">#B40E0F12</color>
     <color name="cover_black_player">#1A1D1E</color>
     <color name="player_bg">#16161A</color>
+    <color name="collapsed_appbar_color">#021118</color>
 
 
 </resources>

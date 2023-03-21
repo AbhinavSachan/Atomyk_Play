@@ -287,9 +287,6 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     public void onStart() {
         super.onStart();
         setButton(activeMusic);
-        if (should_refresh_layout) {
-            setPreviousData(activeMusic);
-        }
         if (mainActivity.mainPlayerSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
             mini_play_view.setAlpha(0);
             mini_play_view.setVisibility(View.INVISIBLE);
@@ -318,6 +315,9 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     @Override
     public void onResume() {
         super.onResume();
+        if (should_refresh_layout) {
+            setPreviousData(activeMusic);
+        }
         if (queueSheetBehaviour.getState() == BottomSheetBehavior.STATE_EXPANDED) {
             queueRecyclerView.setVisibility(View.VISIBLE);
         }

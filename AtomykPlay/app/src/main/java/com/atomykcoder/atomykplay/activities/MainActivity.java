@@ -52,6 +52,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
@@ -399,6 +400,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         StorageUtil.SettingsStorage settingsStorage = new StorageUtil.SettingsStorage(this);
+        boolean switch1 = settingsStorage.loadIsThemeDark();
+        if (!switch1) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+        }
         Window window = getWindow();
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         if (!settingsStorage.loadIsThemeDark()) {
@@ -528,6 +535,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     media_player_service.seekBarHandler.removeCallbacks(media_player_service.seekBarRunnable);
                     EventBus.getDefault().post(new RemoveLyricsHandlerEvent());
                 }
+        }
+    }
+
+    @Override
+    public void recreate() {
+        super.recreate();
+        if (!service_bound) {
+            checkPermission();
         }
     }
 
@@ -1239,6 +1254,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     break;
                 case SUCCESS:
                     storageUtil.saveInitialList(musicUtils.getInitialMusicList());
+                    try {
+                        if (musicUtils.getInitialMusicList().isEmpty()){
+                            linearLayout.setVisibility(View.VISIBLE);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                     progressBar.setVisibility(View.GONE);
                     break;
                 case FAILURE:
