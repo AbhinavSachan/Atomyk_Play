@@ -102,7 +102,7 @@ public class MusicDaoImpl implements MusicDaoI {
                         int filter = new StorageUtil.SettingsStorage(context).loadFilterDur() * 1000;
                         if (file.exists()) {
                             context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
-                            if (filter <= Integer.parseInt(sDuration)) {
+                            if (sDuration != null && filter <= Integer.parseInt(sDuration)) {
                                 Music music = Music.newBuilder().setName(sTitle).setArtist(sArtist)
                                         .setAlbum(sAlbum).setAlbumUri(sAlbumUri).setDuration(sDuration)
                                         .setPath(sPath).setBitrate(sBitrate).setMimeType(sMimeType)
