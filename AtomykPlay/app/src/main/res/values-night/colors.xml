@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="accent_color_bg">#245EA5</color>
-    <color name="primary_bg">#101213</color>
+    <color name="primary_bg">#151819</color>
     <color name="black">#FFFFFF</color>
     <color name="secondary_bg">#1D1E22</color>
-    <color name="nav_center_shadow">#640E0F12</color>
-    <color name="tertiary_bg">#181A1E</color>
-    <color name="icons_bg">#EEEEEE</color>
-    <color name="play_icons_bg">#EEEEEE</color>
-    <color name="text_color">#EEEEEE</color>
+    <color name="nav_center_shadow">#6416171C</color>
+    <color name="tertiary_bg">#1E2025</color>
+    <color name="icons_bg">#DACFCF</color>
+    <color name="play_icons_bg">#DACFCF</color>
+    <color name="text_color">#DACFCF</color>
     <color name="sub_text_grey">#BFB4B4</color>
     <color name="cover_image_grey">#555555</color>
     <color name="soft_black">#BDBDBD</color>
@@ -29,8 +29,8 @@
     <color name="switch_track_off">#8FE3D8D8</color>
     <color name="status_bar_color">#B40E0F12</color>
     <color name="cover_black_player">#1A1D1E</color>
-    <color name="player_bg">#16161A</color>
-    <color name="collapsed_appbar_color">#021118</color>
+    <color name="player_bg">#222227</color>
+    <color name="collapsed_appbar_color">#1B282E</color>
 
 
 </resources>

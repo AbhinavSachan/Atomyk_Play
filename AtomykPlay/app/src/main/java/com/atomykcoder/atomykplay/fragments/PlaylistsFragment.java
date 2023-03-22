@@ -1,5 +1,7 @@
 package com.atomykcoder.atomykplay.fragments;
 
+import static com.atomykcoder.atomykplay.activities.MainActivity.FAVORITE_FRAGMENT_TAG;
+
 import android.os.Bundle;
 import android.transition.TransitionInflater;
 import android.view.LayoutInflater;
@@ -15,10 +17,12 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.R;
+import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.adapters.PlaylistAdapter;
 import com.atomykcoder.atomykplay.customScripts.GridSpacing;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.dataModels.Playlist;
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 
 import java.util.ArrayList;
 
@@ -45,13 +49,13 @@ public class PlaylistsFragment extends Fragment {
 
         favBtn.setOnClickListener(v -> {
             FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
-            Fragment fragment1 = fragmentManager.findFragmentByTag("FavoritesFragment");
+            Fragment fragment1 = fragmentManager.findFragmentByTag(FAVORITE_FRAGMENT_TAG);
             FragmentTransaction transaction = fragmentManager.beginTransaction();
 
             if (fragment1 == null) {
                 FavoritesFragment fragment = new FavoritesFragment();
                 fragment.setEnterTransition(TransitionInflater.from(requireContext()).inflateTransition(android.R.transition.slide_right));
-                transaction.add(R.id.sec_container, fragment, "FavoritesFragment").addToBackStack(null).commit();
+                transaction.add(R.id.sec_container, fragment, FAVORITE_FRAGMENT_TAG).addToBackStack(null).commit();
             }
         });
 

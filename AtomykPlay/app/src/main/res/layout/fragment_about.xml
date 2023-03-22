@@ -14,12 +14,13 @@
         android:id="@+id/sl"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:paddingBottom="@dimen/most_bottom_padding"
+        android:clipToPadding="false"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingBottom="112dp"
             android:background="@color/tertiary_bg"
             android:orientation="vertical">
 

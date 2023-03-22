@@ -13,6 +13,8 @@
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingBottom="@dimen/most_bottom_padding"
+        android:clipToPadding="false"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
         <LinearLayout
@@ -651,14 +653,6 @@
                 </LinearLayout>
 
             </LinearLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="72dp"
-                android:layout_marginTop="6dp"
-                android:layout_marginBottom="12dp"
-                android:background="@color/secondary_bg"
-                android:paddingBottom="16dp" />
 
         </LinearLayout>
 

@@ -33,7 +33,6 @@ public class OpenPlayListFragment extends Fragment implements OnDragStartListene
 
     private ItemTouchHelper itemTouchHelper;
     private OpenPlayListAdapter openPlayListAdapter;
-    private GlideBuilt glideBuilt;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -44,7 +43,7 @@ public class OpenPlayListFragment extends Fragment implements OnDragStartListene
             EventBus.getDefault().register(this);
         }
         Playlist playlist = (Playlist) (getArguments() != null ? getArguments().getSerializable("currentPlaylist") : null);
-        glideBuilt = new GlideBuilt(requireContext());
+        GlideBuilt glideBuilt = new GlideBuilt(requireContext());
         RecyclerView recyclerView = view.findViewById(R.id.open_pl_music_recycler);
         View noPlLayout = view.findViewById(R.id.song_not_found_layout_opl);
         CollapsingToolbarLayout collapsingToolbarLayout = view.findViewById(R.id.collapse_toolbar_opl);

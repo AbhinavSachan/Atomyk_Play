@@ -1,9 +1,12 @@
 package com.atomykcoder.atomykplay.activities;
 
+import static com.atomykcoder.atomykplay.enums.OptionSheetEnum.FAVORITE_LIST;
+import static com.atomykcoder.atomykplay.enums.OptionSheetEnum.OPEN_PLAYLIST;
 import static com.atomykcoder.atomykplay.helperFunctions.CustomMethods.pickImage;
 import static com.atomykcoder.atomykplay.services.MediaPlayerService.is_playing;
 
 import android.Manifest;
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -16,6 +19,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -36,6 +40,7 @@ import android.util.DisplayMetrics;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -53,6 +58,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
@@ -71,6 +77,7 @@ import com.atomykcoder.atomykplay.classes.GlideBuilt;
 import com.atomykcoder.atomykplay.customScripts.CustomBottomSheet;
 import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.dataModels.Playlist;
+import com.atomykcoder.atomykplay.enums.OptionSheetEnum;
 import com.atomykcoder.atomykplay.events.PrepareRunnableEvent;
 import com.atomykcoder.atomykplay.events.RemoveFromFavoriteEvent;
 import com.atomykcoder.atomykplay.events.RemoveFromPlaylistEvent;
@@ -88,6 +95,7 @@ import com.atomykcoder.atomykplay.repository.MusicUtils;
 import com.atomykcoder.atomykplay.services.MediaPlayerService;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.navigation.NavigationView;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
@@ -115,7 +123,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public static final String BROADCAST_STOP_MUSIC = "com.atomykcoder.atomykplay.StopMusic";
     public static final String BROADCAST_PLAY_NEXT_MUSIC = "com.atomykcoder.atomykplay.PlayNextMusic";
     public static final String BROADCAST_PLAY_PREVIOUS_MUSIC = "com.atomykcoder.atomykplay.PlayPreviousMusic";
-    public static final int TAG_EDITOR_COVER = 4212;
     public static final int TAG_BLOCK_LIST = 2153;
     private static final int DELETE_ITEM = 7461;
     public static boolean service_bound = false;
@@ -139,6 +146,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             media_player_service = null;
         }
     };
+    public static final String SETTINGS_FRAGMENT_TAG = "SettingsFragment";
+    public static final String ADD_LYRICS_FRAGMENT_TAG = "AddLyricsFragment";
+    public static final String SEARCH_FRAGMENT_TAG = "SearchFragment";
+    public static final String FAVORITE_FRAGMENT_TAG = "FavoritesFragment";
+    public static final String TAG_EDITOR_FRAGMENT_TAG = "TagEditorFragment";
+    public static final String PLAYLISTS_FRAGMENT_TAG = "PlaylistsFragment";
+    public static final String ABOUT_FRAGMENT_TAG = "AboutFragment";
+    public static final String OPEN_PLAYLIST_FRAGMENT_TAG = "OpenPlayListFragment";
+    public static final String LAST_ADDED_FRAGMENT_TAG = "LastAddedFragment";
 
     public CustomBottomSheet<View> mainPlayerSheetBehavior;
     public BottomSheetPlayerFragment bottomSheetPlayerFragment;
@@ -285,6 +301,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     };
     private NavigationView navigationView;
+    private int tempThemeColor;
     private TextView navSongName, navArtistName;
     public BottomSheetBehavior.BottomSheetCallback bottomSheetCallback = new BottomSheetBehavior.BottomSheetCallback() {
         @Override
@@ -299,6 +316,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 shadowMain.setAlpha(0);
                 anchoredShadow.setAlpha(1);
                 mainPlayer.setAlpha(0);
+                changeNavigationColor(tempThemeColor, getResources().getColor(R.color.player_bg, null));
+                tempThemeColor = getResources().getColor(R.color.player_bg, null);
             } else if (newState == BottomSheetBehavior.STATE_EXPANDED) {
                 View miniPlayer = bottomSheetPlayerFragment.mini_play_view;
                 View mainPlayer = bottomSheetPlayerFragment.player_layout;
@@ -309,6 +328,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 mainPlayer.setAlpha(1);
                 anchoredShadow.setAlpha(1);
                 shadowMain.setAlpha(1);
+                bottomSheetPlayerFragment.getThemeColor().observe(MainActivity.this, it -> {
+                    changeNavigationColor(tempThemeColor, it);
+                    tempThemeColor = it;
+                });
             } else if (newState == BottomSheetBehavior.STATE_HIDDEN) {
                 anchoredShadow.setAlpha(0);
                 drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
@@ -342,7 +365,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private PlaylistsFragment playlistFragment;
     private Dialog renameDialog;
     private AlertDialog ringtoneDialog = null;
-    private String pl_name, optionTag;
+    private String pl_name;
+    private OptionSheetEnum optionTag;
     private TextView songPathTv, songNameTv, songArtistTv, songSizeTv, songGenreTv, songBitrateTv, songAlbumTv;
     private Handler handler;
     private MusicUtils musicUtils;
@@ -409,8 +433,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Window window = getWindow();
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         if (!settingsStorage.loadIsThemeDark()) {
-            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                    | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
         } else {
             window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
         }
@@ -423,6 +446,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         handler = new Handler(Looper.getMainLooper());
         musicUtils = MusicUtils.getInstance();
         glideBuilt = new GlideBuilt(this);
+        tempThemeColor = getResources().getColor(R.color.player_bg, null);
 
         linearLayout = findViewById(R.id.song_not_found_layout);
         musicRecyclerView = findViewById(R.id.music_recycler);
@@ -478,7 +502,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         shuffleCard.setOnClickListener(v -> playShuffleSong());
 
         //Checking storage & other permissions
-        checkPermission();
+        checkForPermission();
 
         setFragmentInSlider();
         setBottomSheets();
@@ -497,8 +521,31 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (savedInstanceState == null) {
             navigationView.setCheckedItem(R.id.navigation_home);
         }
-
     }
+
+    private void checkForPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+            is_granted = false;
+            showRequestDialog();
+        } else {
+            is_granted = true;
+            setUpServiceAndScanner();
+        }
+    }
+
+    private void showRequestDialog() {
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
+        View customLayout = getLayoutInflater().inflate(R.layout.permission_request_dialog_layout, null);
+        builder.setView(customLayout);
+        builder.setPositiveButton("OK", (dialogInterface, i) -> {
+            requestPermission();
+        });
+        builder.setNegativeButton("Cancel", null);
+        androidx.appcompat.app.AlertDialog dialog;
+        dialog = builder.create();
+        dialog.show();
+    }
+
 
     private void setDetailsMenuButtons() {
         songPathTv = findViewById(R.id.file_path_detail);
@@ -530,20 +577,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onStop() {
         super.onStop();
         if (service_bound) {
-            if (media_player_service != null)
-                if (media_player_service.seekBarHandler != null) {
-                    media_player_service.seekBarHandler.removeCallbacks(media_player_service.seekBarRunnable);
-                    EventBus.getDefault().post(new RemoveLyricsHandlerEvent());
-                }
+            if (media_player_service != null) if (media_player_service.seekBarHandler != null) {
+                media_player_service.seekBarHandler.removeCallbacks(media_player_service.seekBarRunnable);
+                EventBus.getDefault().post(new RemoveLyricsHandlerEvent());
+            }
         }
     }
 
-    @Override
-    public void recreate() {
-        super.recreate();
-        if (!service_bound) {
-            checkPermission();
-        }
+    public void changeNavigationColor(int animateFrom, int animateTo) {
+        Window window = getWindow();
+        ValueAnimator colorAnimation = ValueAnimator.ofArgb(animateFrom, animateTo);
+        colorAnimation.setDuration(200);
+        colorAnimation.addUpdateListener(animator -> window.setNavigationBarColor((int) animator.getAnimatedValue()));
+        colorAnimation.start();
     }
 
     @Override
@@ -601,11 +647,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void playShuffleSong() {
         ArrayList<Music> list = storageUtil.loadInitialList();
-        if (list == null){
+        if (list == null) {
             showToast("No Songs");
             return;
         }
-        if (list.isEmpty()){
+        if (list.isEmpty()) {
             showToast("No Songs");
             return;
         }
@@ -614,27 +660,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void setLastAddFragment() {
         FragmentManager fragmentManager = getSupportFragmentManager();
-        Fragment fragment3 = fragmentManager.findFragmentByTag("LastAddedFragment");
+        Fragment fragment3 = fragmentManager.findFragmentByTag(LAST_ADDED_FRAGMENT_TAG);
 
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         LastAddedFragment lastAddedFragment = new LastAddedFragment();
         if (fragment3 == null) {
             lastAddedFragment.setEnterTransition(TransitionInflater.from(this).inflateTransition(android.R.transition.slide_bottom));
-            transaction.replace(R.id.sec_container, lastAddedFragment, "LastAddedFragment").addToBackStack(null).commit();
+            transaction.replace(R.id.sec_container, lastAddedFragment, LAST_ADDED_FRAGMENT_TAG).addToBackStack(null).commit();
             navigationView.setCheckedItem(R.id.navigation_last_added);
         }
     }
 
     private void setPlaylistFragment() {
         FragmentManager fragmentManager = getSupportFragmentManager();
-        Fragment fragment3 = fragmentManager.findFragmentByTag("PlaylistsFragment");
+        Fragment fragment3 = fragmentManager.findFragmentByTag(PLAYLISTS_FRAGMENT_TAG);
 
         FragmentTransaction transaction = fragmentManager.beginTransaction();
 
         playlistFragment = new PlaylistsFragment();
         if (fragment3 == null) {
             playlistFragment.setEnterTransition(TransitionInflater.from(this).inflateTransition(android.R.transition.slide_right));
-            transaction.replace(R.id.sec_container, playlistFragment, "PlaylistsFragment").addToBackStack(null).commit();
+            transaction.replace(R.id.sec_container, playlistFragment, PLAYLISTS_FRAGMENT_TAG).addToBackStack(null).commit();
             navigationView.setCheckedItem(R.id.navigation_playlist);
         }
     }
@@ -860,7 +906,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
          */
         Random rand = new Random();
         Music music = songs.get(rand.nextInt(songs.size()));
-        System.out.println("Now playing: " + music.getName());
         //removing current item from list
         songs.remove(music);
 
@@ -956,7 +1001,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void setSearchFragment() {
-        replaceFragment(R.id.sec_container, new SearchFragment(), android.R.transition.fade, "SearchResultsFragment");
+        replaceFragment(R.id.sec_container, new SearchFragment(), android.R.transition.fade, SEARCH_FRAGMENT_TAG);
     }
 
     private void setRingtone(Music music) {
@@ -998,7 +1043,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
-    public void openOptionMenu(Music music, String tag) {
+    public void openOptionMenu(Music music, OptionSheetEnum tag) {
         selectedItem = music;
         optionTag = tag;
         removeFromList.setVisibility(View.GONE);
@@ -1011,35 +1056,40 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         switch (tag) {
-            case "openPlaylist":
-                break;
-            case "favoriteList":
+            case OPEN_PLAYLIST:
                 removeFromList.setVisibility(View.VISIBLE);
                 deleteBtn.setVisibility(View.GONE);
                 break;
-            case "mainList":
+            case FAVORITE_LIST:
+                break;
+            case MAIN_LIST:
                 removeFromList.setVisibility(View.GONE);
                 deleteBtn.setVisibility(View.VISIBLE);
                 break;
         }
-        Bitmap image = null;
-        //image decoder
-        try (MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever()) {
-            mediaMetadataRetriever.setDataSource(music.getPath());
-            byte[] art = mediaMetadataRetriever.getEmbeddedPicture();
+        executorService.execute(() -> {
+            Bitmap image = null;
+            //image decoder
+            try (MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever()) {
+                mediaMetadataRetriever.setDataSource(music.getPath());
+                byte[] art = mediaMetadataRetriever.getEmbeddedPicture();
 
-            try {
-                image = BitmapFactory.decodeByteArray(art, 0, art.length);
-            } catch (Exception ignored) {
+                try {
+                    image = BitmapFactory.decodeByteArray(art, 0, art.length);
+                } catch (Exception ignored) {
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            Bitmap finalImage = image;
+            runOnUiThread(() -> {
+                optionSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                optionName.setText(music.getName());
+                optionArtist.setText(music.getArtist());
+                glideBuilt.glideBitmap(finalImage, R.drawable.ic_music, optionCover, 65);
+            });
+        });
 
-        optionSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-        optionName.setText(music.getName());
-        optionArtist.setText(music.getArtist());
-        glideBuilt.glideBitmap(image, R.drawable.ic_music, optionCover, 65);
     }
 
     public void openPlOptionMenu(Playlist currentItem) {
@@ -1069,9 +1119,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 PendingIntent pendingIntent = MediaStore.createDeleteRequest(contentResolver, uris);
                 try {
                     //noinspection deprecation
-                    startIntentSenderForResult(pendingIntent.getIntentSender(),
-                            DELETE_ITEM, null, 0, 0,
-                            0, null);
+                    startIntentSenderForResult(pendingIntent.getIntentSender(), DELETE_ITEM, null, 0, 0, 0, null);
                 } catch (IntentSender.SendIntentException e) {
                     e.printStackTrace();
                 }
@@ -1087,8 +1135,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     final IntentSender intent = e.getUserAction().getActionIntent().getIntentSender();
                     try {
                         //noinspection deprecation
-                        startIntentSenderForResult(intent, DELETE_ITEM, null, 0,
-                                0, 0, null);
+                        startIntentSenderForResult(intent, DELETE_ITEM, null, 0, 0, 0, null);
                     } catch (IntentSender.SendIntentException ex) {
                         ex.printStackTrace();
                     }
@@ -1124,7 +1171,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if (data != null) {
                     // find fragment
                     FragmentManager fragmentManager = getSupportFragmentManager();
-                    SettingsFragment fragment = (SettingsFragment) fragmentManager.findFragmentByTag("SettingsFragment");
+                    SettingsFragment fragment = (SettingsFragment) fragmentManager.findFragmentByTag(SETTINGS_FRAGMENT_TAG);
                     // set settings fragment UI here
                     if (fragment != null) {
                         Uri uri = data.getData();
@@ -1200,31 +1247,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     //Checks whether user granted permissions for external storage or not
     //if not then shows dialogue to grant permissions
-    private void checkPermission() {
-        Dexter.withContext(MainActivity.this)
-                .withPermissions(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.READ_PHONE_STATE)
-                .withListener(new MultiplePermissionsListener() {
-                    @Override
-                    public void onPermissionsChecked(MultiplePermissionsReport multiplePermissionsReport) {
-                        if (multiplePermissionsReport.areAllPermissionsGranted()) {
-                            is_granted = true;
-                            setUpMusicScanner();
-                            callStateListener();
-                            bindService();
-                            startService();
-                        } else {
-                            is_granted = false;
-                            ((ApplicationClass) getApplication()).showToast("Permissions denied!");
-                        }
-                    }
+    private void requestPermission() {
+        Dexter.withContext(MainActivity.this).withPermissions(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.READ_PHONE_STATE).withListener(new MultiplePermissionsListener() {
+            @Override
+            public void onPermissionsChecked(MultiplePermissionsReport multiplePermissionsReport) {
+                if (multiplePermissionsReport.areAllPermissionsGranted()) {
+                    is_granted = true;
+                    setUpServiceAndScanner();
+                } else {
+                    is_granted = false;
+                    ((ApplicationClass) getApplication()).showToast("Permissions denied!");
+                }
+            }
 
-                    @Override
-                    public void onPermissionRationaleShouldBeShown(List<PermissionRequest> list, PermissionToken permissionToken) {
-                        is_granted = false;
-                        permissionToken.continuePermissionRequest();
-                    }
-                }).check();
+            @Override
+            public void onPermissionRationaleShouldBeShown(List<PermissionRequest> list, PermissionToken permissionToken) {
+                is_granted = false;
+                permissionToken.continuePermissionRequest();
+            }
+        }).check();
 
+    }
+
+    private void setUpServiceAndScanner() {
+        setUpMusicScanner();
+        callStateListener();
+        bindService();
+        startService();
     }
 
     public void checkForUpdateList(boolean enableLoading) {
@@ -1255,7 +1304,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 case SUCCESS:
                     storageUtil.saveInitialList(musicUtils.getInitialMusicList());
                     try {
-                        if (musicUtils.getInitialMusicList().isEmpty()){
+                        if (musicUtils.getInitialMusicList().isEmpty()) {
                             linearLayout.setVisibility(View.VISIBLE);
                         }
                     } catch (Exception e) {
@@ -1300,13 +1349,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
+    @SuppressLint("SwitchIntDef")
     @Override
     public void onBackPressed() {
         FragmentManager fragmentManager = getSupportFragmentManager();
-        Fragment fragment1 = fragmentManager.findFragmentByTag("SettingsFragment");
-        Fragment fragment2 = fragmentManager.findFragmentByTag("PlaylistsFragment");
-        Fragment fragment3 = fragmentManager.findFragmentByTag("AboutFragment");
-        Fragment fragment6 = fragmentManager.findFragmentByTag("LastAddedFragment");
+        Fragment fragment1 = fragmentManager.findFragmentByTag(SETTINGS_FRAGMENT_TAG);
+        Fragment fragment2 = fragmentManager.findFragmentByTag(PLAYLISTS_FRAGMENT_TAG);
+        Fragment fragment3 = fragmentManager.findFragmentByTag(ABOUT_FRAGMENT_TAG);
+        Fragment fragment4 = fragmentManager.findFragmentByTag(LAST_ADDED_FRAGMENT_TAG);
 
         if (mainPlayerSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED ||
                 mainPlayerSheetBehavior.getState() == BottomSheetBehavior.STATE_HIDDEN) {
@@ -1314,14 +1364,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 drawer.closeDrawer(GravityCompat.START);
             } else {
                 if (lyricsListBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED ||
-                        lyricsListBehavior.getState() == BottomSheetBehavior.STATE_HALF_EXPANDED ||
                         lyricsListBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
                     lyricsListBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
                 } else {
-                    if (fragment1 != null || fragment2 != null || fragment3 != null || fragment6 != null) {
-                        navigationView.setCheckedItem(R.id.navigation_home);
+                    if (optionSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED ||
+                            optionSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+                        optionSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+                    } else {
+                        if (fragment1 != null || fragment2 != null || fragment3 != null || fragment4 != null) {
+                            navigationView.setCheckedItem(R.id.navigation_home);
+                        }
+                        super.onBackPressed();
                     }
-                    super.onBackPressed();
                 }
             }
 
@@ -1341,12 +1395,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         drawer.closeDrawer(GravityCompat.START);
         FragmentManager fragmentManager = getSupportFragmentManager();
-        Fragment fragment1 = fragmentManager.findFragmentByTag("SettingsFragment");
-        Fragment fragment2 = fragmentManager.findFragmentByTag("PlaylistsFragment");
-        Fragment fragment3 = fragmentManager.findFragmentByTag("AboutFragment");
-        Fragment fragment4 = fragmentManager.findFragmentByTag("FavoritesFragment");
-        Fragment fragment5 = fragmentManager.findFragmentByTag("SearchResultsFragment");
-        Fragment fragment6 = fragmentManager.findFragmentByTag("LastAddedFragment");
+        Fragment fragment1 = fragmentManager.findFragmentByTag(SETTINGS_FRAGMENT_TAG);
+        Fragment fragment2 = fragmentManager.findFragmentByTag(PLAYLISTS_FRAGMENT_TAG);
+        Fragment fragment3 = fragmentManager.findFragmentByTag(ABOUT_FRAGMENT_TAG);
+        Fragment fragment4 = fragmentManager.findFragmentByTag(FAVORITE_FRAGMENT_TAG);
+        Fragment fragment5 = fragmentManager.findFragmentByTag(SEARCH_FRAGMENT_TAG);
+        Fragment fragment6 = fragmentManager.findFragmentByTag(LAST_ADDED_FRAGMENT_TAG);
 
         switch (item.getItemId()) {
             case R.id.navigation_home: {
@@ -1360,7 +1414,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     fragmentManager.popBackStackImmediate();
                 }
                 if (fragment1 == null) {
-                    replaceFragment(R.id.sec_container, new SettingsFragment(), android.R.transition.slide_right, "SettingsFragment");
+                    replaceFragment(R.id.sec_container, new SettingsFragment(), android.R.transition.slide_right, SETTINGS_FRAGMENT_TAG);
                 }
                 break;
             }
@@ -1369,7 +1423,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     fragmentManager.popBackStackImmediate();
                 }
                 if (fragment2 == null) {
-                    replaceFragment(R.id.sec_container, new PlaylistsFragment(), android.R.transition.slide_right, "PlaylistsFragment");
+                    replaceFragment(R.id.sec_container, new PlaylistsFragment(), android.R.transition.slide_right, PLAYLISTS_FRAGMENT_TAG);
                 }
                 break;
             }
@@ -1378,7 +1432,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     fragmentManager.popBackStackImmediate();
                 }
                 if (fragment3 == null) {
-                    replaceFragment(R.id.sec_container, new AboutFragment(), android.R.transition.slide_right, "AboutFragment");
+                    replaceFragment(R.id.sec_container, new AboutFragment(), android.R.transition.slide_right, ABOUT_FRAGMENT_TAG);
                 }
                 break;
             }
@@ -1387,7 +1441,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     fragmentManager.popBackStackImmediate();
                 }
                 if (fragment6 == null) {
-                    replaceFragment(R.id.sec_container, new LastAddedFragment(), android.R.transition.slide_right, "LastAddedFragment");
+                    replaceFragment(R.id.sec_container, new LastAddedFragment(), android.R.transition.slide_right, LAST_ADDED_FRAGMENT_TAG);
                 }
                 break;
             }
@@ -1495,11 +1549,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    private void removeFromList(Music music, String optionTag) {
-        if (optionTag.equals("openPlaylist")) {
+    private void removeFromList(Music music, OptionSheetEnum optionTag) {
+        if (optionTag == OPEN_PLAYLIST) {
             EventBus.getDefault().post(new RemoveFromPlaylistEvent(music));
             //solve removed song not loading in playlist adapter
-        } else if (optionTag.equals("favoriteList")) {
+        } else if (optionTag == FAVORITE_LIST) {
             EventBus.getDefault().post(new RemoveFromFavoriteEvent(music));
         }
     }
@@ -1578,6 +1632,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         openPlaylistDialog(music);
     }
 
+    private TextView noPl_tv;
+
     private void openPlaylistDialog(Music music) {
         addToPlDialog = new Dialog(MainActivity.this);
 
@@ -1595,7 +1651,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         plDialogRecyclerView = addToPlDialog.findViewById(R.id.playlist_dialog_recycler);
         View createPlaylistBtnDialog = addToPlDialog.findViewById(R.id.create_playlist);
         View addFavBtnDialog = addToPlDialog.findViewById(R.id.add_to_fav_dialog_box);
-        TextView textView = addToPlDialog.findViewById(R.id.text_no_pl);
+        noPl_tv = addToPlDialog.findViewById(R.id.text_no_pl);
 
         createPlaylistBtnDialog.setOnClickListener(v -> openCreatePlaylistDialog(music));
 
@@ -1610,12 +1666,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (playlistArrayList != null) {
             playlistDialogAdapter = new PlaylistDialogAdapter(this, playlistArrayList, music);
             if (playlistArrayList.isEmpty()) {
-                textView.setVisibility(View.VISIBLE);
+                noPl_tv.setVisibility(View.VISIBLE);
+            } else {
+                noPl_tv.setVisibility(View.GONE);
             }
 
             plDialogRecyclerView.setAdapter(playlistDialogAdapter);
         } else {
-            textView.setVisibility(View.VISIBLE);
+            noPl_tv.setVisibility(View.VISIBLE);
         }
         addToPlDialog.show();
     }
@@ -1636,9 +1694,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         playlist_image_View = plDialog.findViewById(R.id.playlist_image_view);
         View playerPickCover_l = plDialog.findViewById(R.id.playlist_cover_pick);
 
-        playerPickCover_l.setOnClickListener(v -> {
-            pickImage(pickIntentForPLCover, mediaPickerForPLCover);
-        });
+        playerPickCover_l.setOnClickListener(v -> pickImage(pickIntentForPLCover, mediaPickerForPLCover));
 
         //check if previous list contains the same name as we are saving
         btnOk.setOnClickListener(v -> {
@@ -1657,6 +1713,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     if (playlistArrayList != null) {
                         playlistArrayList.clear();
                         playlistArrayList.addAll(allList);
+                        if (noPl_tv != null && noPl_tv.getVisibility() == View.VISIBLE) {
+                            noPl_tv.setVisibility(View.GONE);
+                        }
                         playlistDialogAdapter.notifyDataSetChanged();
                         playListImageUri = null;
                     } else {
@@ -1712,8 +1771,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void openTagEditor(Music itemSelected) {
         FragmentManager fragmentManager = getSupportFragmentManager();
-        Fragment fragment1 = fragmentManager.findFragmentByTag("SearchResultsFragment");
-        Fragment fragment2 = fragmentManager.findFragmentByTag("TagEditorFragment");
+        Fragment fragment1 = fragmentManager.findFragmentByTag(SEARCH_FRAGMENT_TAG);
+        Fragment fragment2 = fragmentManager.findFragmentByTag(TAG_EDITOR_FRAGMENT_TAG);
 
         if (fragment1 != null) {
             fragmentManager.popBackStackImmediate();
@@ -1730,7 +1789,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Bundle bundle = new Bundle();
             bundle.putSerializable("currentMusic", encodedMessage);
             fragment.setArguments(bundle);
-            replaceFragment(R.id.sec_container, fragment, android.R.transition.no_transition, "TagEditorFragment");
+            replaceFragment(R.id.sec_container, fragment, android.R.transition.no_transition, TAG_EDITOR_FRAGMENT_TAG);
         }
     }
 

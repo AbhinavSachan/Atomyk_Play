@@ -248,6 +248,8 @@ public class SettingsFragment extends Fragment {
         if (blacklist != null) {
             if (blacklist.isEmpty()) {
                 textView.setVisibility(View.VISIBLE);
+            }else {
+                textView.setVisibility(View.GONE);
             }
         }else {
             textView.setVisibility(View.VISIBLE);

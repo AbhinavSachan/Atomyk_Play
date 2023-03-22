@@ -13,6 +13,7 @@ import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.adapters.Generics.GenericViewHolder;
 import com.atomykcoder.atomykplay.adapters.ViewHolders.OpenPlayListViewHolder;
 import com.atomykcoder.atomykplay.data.Music;
+import com.atomykcoder.atomykplay.enums.OptionSheetEnum;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.ItemTouchHelperAdapter;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
@@ -90,7 +91,7 @@ public class OpenPlayListAdapter extends MusicAdapter implements ItemTouchHelper
             if (!isMusicAvailable(currentItem)){
                 return;
             }
-            mainActivity.openOptionMenu(currentItem, "openPlaylist");
+            mainActivity.openOptionMenu(currentItem, OptionSheetEnum.OPEN_PLAYLIST);
         });
     }
     private boolean isMusicAvailable(Music currentItem){

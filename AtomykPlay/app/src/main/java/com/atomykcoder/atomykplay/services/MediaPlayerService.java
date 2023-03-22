@@ -1,5 +1,6 @@
 package com.atomykcoder.atomykplay.services;
 
+import static com.atomykcoder.atomykplay.activities.MainActivity.BROADCAST_PLAY_NEW_MUSIC;
 import static com.atomykcoder.atomykplay.activities.MainActivity.service_bound;
 import static com.atomykcoder.atomykplay.activities.MainActivity.service_stopped;
 import static com.atomykcoder.atomykplay.classes.ApplicationClass.CHANNEL_ID;
@@ -245,7 +246,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     }
 
     private void registerPlayNewMusic() {
-        IntentFilter filter = new IntentFilter(MainActivity.BROADCAST_PLAY_NEW_MUSIC);
+        IntentFilter filter = new IntentFilter(BROADCAST_PLAY_NEW_MUSIC);
         registerReceiver(playNewMusicReceiver, filter);
     }
 
@@ -600,12 +601,33 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     public boolean onError(MediaPlayer mp, int what, int extra) {
         switch (what) {
             case MediaPlayer.MEDIA_ERROR_UNKNOWN:
+                try {
+                    stoppedByNotification();
+                    setIcon(PlaybackStatus.PAUSED);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 Toast.makeText(this, "MEDIA_ERROR_UNKNOWN" + extra, Toast.LENGTH_SHORT).show();
                 return true;
             case MediaPlayer.MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK:
+                try {
+                    stoppedByNotification();
+                    setIcon(PlaybackStatus.PAUSED);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 Toast.makeText(this, "MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK" + extra, Toast.LENGTH_SHORT).show();
                 return true;
             case MediaPlayer.MEDIA_ERROR_SERVER_DIED:
+                try {
+                    //service is active send media with broadcast receiver
+                    String encodedMessage = MusicHelper.encode(activeMusic);
+                    Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEW_MUSIC);
+                    broadcastIntent.putExtra("music", encodedMessage);
+                    sendBroadcast(broadcastIntent);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 Toast.makeText(this, "MEDIA_ERROR_SERVER_DIED" + extra, Toast.LENGTH_SHORT).show();
                 return true;
             default:
@@ -776,24 +798,23 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
      */
     public void setSeekBar() {
         seekBarHandler = new Handler(Looper.getMainLooper());
-        // early return if media_player is null
-        if (media_player == null) return;
+        if (media_player != null) {
+            // if media_player hasn't finished the song yet then update progress
+            if (media_player.getCurrentPosition() <= media_player.getDuration()) {
+                seekBarRunnable = () -> {
+                    int position = 0;
 
-        // if media_player hasn't finished the song yet then update progress
-        if (media_player.getCurrentPosition() <= media_player.getDuration()) {
-            seekBarRunnable = () -> {
-                int position = 0;
+                    try {
+                        position = media_player.getCurrentPosition();
+                    } catch (IllegalStateException e) {
+                        e.printStackTrace();
+                    }
 
-                try {
-                    position = media_player.getCurrentPosition();
-                } catch (IllegalStateException e) {
-                    e.printStackTrace();
-                }
-
-                EventBus.getDefault().post(new UpdateMusicProgressEvent(position));
-                seekBarHandler.postDelayed(seekBarRunnable, 300);
-            };
-            seekBarHandler.postDelayed(seekBarRunnable, 0);
+                    EventBus.getDefault().post(new UpdateMusicProgressEvent(position));
+                    seekBarHandler.postDelayed(seekBarRunnable, 300);
+                };
+                seekBarHandler.postDelayed(seekBarRunnable, 0);
+            }
         }
     }
 

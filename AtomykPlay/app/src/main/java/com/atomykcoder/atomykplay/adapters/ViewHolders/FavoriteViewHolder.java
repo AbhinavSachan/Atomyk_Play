@@ -1,5 +1,7 @@
 package com.atomykcoder.atomykplay.adapters.ViewHolders;
 
+import static com.atomykcoder.atomykplay.helperFunctions.MusicHelper.convertDuration;
+
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -30,6 +32,6 @@ public class FavoriteViewHolder extends GenericViewHolder<Music> {
     public void onBind(Music item) {
         nameText.setText(item.getName());
         artistText.setText(item.getArtist());
-
+        durationText.setText(convertDuration(item.getDuration()));
     }
 }

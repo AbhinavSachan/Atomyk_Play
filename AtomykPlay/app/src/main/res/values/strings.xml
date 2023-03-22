@@ -3,7 +3,7 @@
     <string name="song_name_e">Song</string>
     <string name="empty">empty</string>
     <string name="song_artist_e">Artist</string>
-    <string name="nothing_to_show">Nothing to show</string>
+    <string name="nothing_to_show">Nothing to see here.</string>
     <string name="search">Search</string>
     <string name="search_here">Search here</string>
     <string name="song_dur_e">Duration</string>
@@ -117,4 +117,8 @@
     <string name="lottie"><u>Lottie files</u></string>
     <string name="flat_icon"><u>Flat Icons</u></string>
     <string name="svg_repo"><u>SVG Repo</u></string>
+    <string name="add_lyr">Add lyrics</string>
+    <string name="permission_request">Permission request</string>
+    <string name="read_per"><b>Read External Storage -</b> In order to scan songs from your device, app needs to request this permission.</string>
+    <string name="phone_state_per"><b>Read Phone State -</b> In order to provide better experience while receiving phone calls, app needs to request this permission.</string>
 </resources>

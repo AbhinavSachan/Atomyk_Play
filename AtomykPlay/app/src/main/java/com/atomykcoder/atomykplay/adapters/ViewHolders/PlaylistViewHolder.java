@@ -24,4 +24,5 @@ public class PlaylistViewHolder extends GenericViewHolder<Playlist> {
         optImg = view.findViewById(R.id.playlist_option);
         cardView = view.findViewById(R.id.playlist_card);
     }
+
 }

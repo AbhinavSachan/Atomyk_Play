@@ -1,5 +1,6 @@
 package com.atomykcoder.atomykplay.fragments;
 
+import static com.atomykcoder.atomykplay.activities.MainActivity.ADD_LYRICS_FRAGMENT_TAG;
 import static com.atomykcoder.atomykplay.activities.MainActivity.media_player_service;
 import static com.atomykcoder.atomykplay.activities.MainActivity.service_bound;
 import static com.atomykcoder.atomykplay.helperFunctions.MusicHelper.convertDuration;
@@ -37,6 +38,8 @@ import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.palette.graphics.Palette;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -53,6 +56,7 @@ import com.atomykcoder.atomykplay.customScripts.CenterSmoothScrollScript;
 import com.atomykcoder.atomykplay.customScripts.CustomBottomSheet;
 import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.dataModels.LRCMap;
+import com.atomykcoder.atomykplay.enums.OptionSheetEnum;
 import com.atomykcoder.atomykplay.enums.PlaybackStatus;
 import com.atomykcoder.atomykplay.events.PrepareRunnableEvent;
 import com.atomykcoder.atomykplay.events.RemoveLyricsHandlerEvent;
@@ -152,7 +156,15 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     private Music activeMusic;
     private boolean app_paused;
     private boolean should_refresh_layout = true;
+    private MutableLiveData<Integer> color = new MutableLiveData<>();
 
+    public void setThemeColorForApp(int color){
+        this.color.setValue(color);
+    }
+
+    public LiveData<Integer> getThemeColor(){
+        return color;
+    }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_player, container, false);
@@ -410,9 +422,11 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
                 Bitmap image = event.image;
                 if (image != null) {
                     int themeColor = generateThemeColor(image);
+                    setThemeColorForApp(themeColor);
                     setThemeColorInPlayer(themeColor);
                     setThemeColorLyricView(themeColor);
                 } else {
+                    setThemeColorForApp(getResources().getColor(R.color.player_bg, Resources.getSystem().newTheme()));
                     setThemeColorInPlayer(getResources().getColor(R.color.player_bg, Resources.getSystem().newTheme()));
                     setThemeColorLyricView(getResources().getColor(R.color.player_bg, Resources.getSystem().newTheme()));
                 }
@@ -606,7 +620,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
     public void setLyricsLayout(Music music) {
         FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
-        Fragment fragment = fragmentManager.findFragmentByTag("AddLyricsFragment");
+        Fragment fragment = fragmentManager.findFragmentByTag(ADD_LYRICS_FRAGMENT_TAG);
         if (fragment != null) {
             fragmentManager.popBackStackImmediate();
         }
@@ -624,7 +638,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
             mainActivity.mainPlayerSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         }
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.replace(R.id.sec_container, addLyricsFragment, "AddLyricsFragment");
+        transaction.replace(R.id.sec_container, addLyricsFragment, ADD_LYRICS_FRAGMENT_TAG);
         transaction.addToBackStack(null);
         transaction.commit();
     }
@@ -700,7 +714,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
     private void optionMenu(Music music) {
         //add a bottom sheet to show music options like set to ringtone ,audio details ,add to playlist etc.
-        if (music != null) mainActivity.openOptionMenu(music, "mainList");
+        if (music != null) mainActivity.openOptionMenu(music, OptionSheetEnum.MAIN_LIST);
     }
 
     //region Timer setup

@@ -282,7 +282,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center_vertical"
-                    android:text="@string/add_lyrics"
+                    android:text="@string/add_lyr"
                     android:textColor="@color/text_color"
                     android:textSize="@dimen/d_14sp"
                     android:textStyle="bold" />

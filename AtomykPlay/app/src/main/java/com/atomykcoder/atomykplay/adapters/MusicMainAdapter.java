@@ -15,6 +15,7 @@ import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.adapters.Generics.GenericViewHolder;
 import com.atomykcoder.atomykplay.adapters.ViewHolders.MusicMainViewHolder;
 import com.atomykcoder.atomykplay.data.Music;
+import com.atomykcoder.atomykplay.enums.OptionSheetEnum;
 import com.atomykcoder.atomykplay.helperFunctions.MusicDiffCallback;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.repository.MusicUtils;
@@ -83,7 +84,7 @@ public class MusicMainAdapter extends MusicAdapter {
             if (!isMusicAvailable(currentItem)){
                 return;
             }
-            mainActivity.openOptionMenu(currentItem, "mainList");
+            mainActivity.openOptionMenu(currentItem, OptionSheetEnum.MAIN_LIST);
         });
     }
     private boolean isMusicAvailable(Music currentItem){

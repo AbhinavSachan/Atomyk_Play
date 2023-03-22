@@ -1,5 +1,7 @@
 package com.atomykcoder.atomykplay.adapters;
 
+import static com.atomykcoder.atomykplay.activities.MainActivity.ADD_LYRICS_FRAGMENT_TAG;
+
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -42,7 +44,7 @@ public class FoundLyricsAdapter extends RecyclerView.Adapter<FoundLyricsViewHold
 
         holder.itemView.setOnClickListener(view -> {
             mainActivity.setBottomSheetState();
-            AddLyricsFragment fragment = (AddLyricsFragment) mainActivity.getSupportFragmentManager().findFragmentByTag("AddLyricsFragment");
+            AddLyricsFragment fragment = (AddLyricsFragment) mainActivity.getSupportFragmentManager().findFragmentByTag(ADD_LYRICS_FRAGMENT_TAG);
             if (fragment != null) {
                 fragment.loadSelectedLyrics(urls.get(holder.getBindingAdapterPosition()));
             }

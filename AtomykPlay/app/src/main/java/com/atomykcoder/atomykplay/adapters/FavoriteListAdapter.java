@@ -15,6 +15,7 @@ import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.adapters.Generics.GenericViewHolder;
 import com.atomykcoder.atomykplay.adapters.ViewHolders.FavoriteViewHolder;
 import com.atomykcoder.atomykplay.data.Music;
+import com.atomykcoder.atomykplay.enums.OptionSheetEnum;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.ItemTouchHelperAdapter;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
@@ -66,7 +67,6 @@ public class FavoriteListAdapter extends MusicAdapter implements ItemTouchHelper
 
         FavoriteViewHolder holder = (FavoriteViewHolder) _holder;
         Music currentItem = super.items.get(position);
-        holder.durationText.setText(convertDuration(currentItem.getDuration()));
 
         loadImage(context, currentItem, position, holder.albumCoverIV);
 
@@ -89,7 +89,7 @@ public class FavoriteListAdapter extends MusicAdapter implements ItemTouchHelper
             if (!isMusicAvailable(currentItem)) {
                 return;
             }
-            mainActivity.openOptionMenu(currentItem, "mainList");
+            mainActivity.openOptionMenu(currentItem, OptionSheetEnum.FAVORITE_LIST);
         });
     }
     private boolean isMusicAvailable(Music currentItem){

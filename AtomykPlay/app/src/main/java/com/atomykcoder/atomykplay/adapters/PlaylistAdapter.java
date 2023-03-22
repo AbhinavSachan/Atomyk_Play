@@ -1,5 +1,7 @@
 package com.atomykcoder.atomykplay.adapters;
 
+import static com.atomykcoder.atomykplay.activities.MainActivity.OPEN_PLAYLIST_FRAGMENT_TAG;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
@@ -50,7 +52,7 @@ public class PlaylistAdapter extends GenericRecyclerAdapter<Playlist> {
 
         ArrayList<Music> musicList = currentItem.getMusicList();
 
-        glideBuilt.glide( currentItem.getCoverUri(), R.drawable.ic_music_list, holder.coverIV, 300);
+        glideBuilt.glide(currentItem.getCoverUri(), R.drawable.ic_music_list, holder.coverIV, 300);
         String count = musicList.size() + " Songs";
         holder.playlistName.setText(currentItem.getName());
         holder.songCount.setText(count);
@@ -59,7 +61,7 @@ public class PlaylistAdapter extends GenericRecyclerAdapter<Playlist> {
             //opening fragment when clicked on playlist
             FragmentManager fragmentManager = ((MainActivity) context).getSupportFragmentManager();
 
-            Fragment fragment3 = fragmentManager.findFragmentByTag("OpenPlayListFragment");
+            Fragment fragment3 = fragmentManager.findFragmentByTag(OPEN_PLAYLIST_FRAGMENT_TAG);
             FragmentTransaction transaction = fragmentManager.beginTransaction();
 
             Bundle bundle = new Bundle();
@@ -71,7 +73,7 @@ public class PlaylistAdapter extends GenericRecyclerAdapter<Playlist> {
             OpenPlayListFragment openPlayListFragment = new OpenPlayListFragment();
             openPlayListFragment.setArguments(bundle);
 
-            transaction.add(R.id.sec_container, openPlayListFragment, "OpenPlayListFragment").addToBackStack(null).commit();
+            transaction.add(R.id.sec_container, openPlayListFragment, OPEN_PLAYLIST_FRAGMENT_TAG).addToBackStack(null).commit();
 
         });
 

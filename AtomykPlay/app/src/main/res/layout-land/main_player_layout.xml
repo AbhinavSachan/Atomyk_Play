@@ -284,6 +284,8 @@
                 android:id="@+id/player_seek_bar"
                 android:layout_width="match_parent"
                 android:layout_height="33dp"
+                android:clickable="true"
+                android:focusable="true"
                 android:padding="15dp"
                 android:progressDrawable="@drawable/seekbar_style"
                 android:splitTrack="false"
@@ -544,8 +546,8 @@
                 android:id="@+id/queue_music_recycler"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:visibility="gone"
-                android:layout_below="@+id/queue_music_item" />
+                android:layout_below="@+id/queue_music_item"
+                android:visibility="gone" />
 
             <!--this is fade effect in queue recycler-->
             <View
