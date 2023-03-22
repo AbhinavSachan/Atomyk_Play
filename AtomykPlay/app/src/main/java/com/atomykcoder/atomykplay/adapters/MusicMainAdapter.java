@@ -1,6 +1,7 @@
 package com.atomykcoder.atomykplay.adapters;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -73,7 +74,9 @@ public class MusicMainAdapter extends MusicAdapter {
             else
                 handleNoShuffle(storage, position, super.items);
 
-            handlePlayMusic(mainActivity, currentItem);
+            handlePlayMusic(mainActivity, currentItem,super.items);
+            String TAG = "TAG";
+            Log.d(TAG, "onItemDismiss: "+super.items.size()+"pos : "+position);
         });
 
         holder.optionButton.setOnClickListener(v -> {
@@ -91,7 +94,7 @@ public class MusicMainAdapter extends MusicAdapter {
         }
         return true;
     }
-    @Override
+
     public void removeItem(Music item) {
         int position = super.items.indexOf(item);
         int savedIndex = storage.loadMusicIndex();

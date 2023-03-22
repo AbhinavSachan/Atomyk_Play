@@ -41,6 +41,7 @@ import androidx.core.app.NotificationCompat;
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.data.Music;
+import com.atomykcoder.atomykplay.dataModels.LRCMap;
 import com.atomykcoder.atomykplay.enums.PlaybackStatus;
 import com.atomykcoder.atomykplay.events.PrepareRunnableEvent;
 import com.atomykcoder.atomykplay.events.RemoveLyricsHandlerEvent;
@@ -49,7 +50,6 @@ import com.atomykcoder.atomykplay.events.UpdateMusicImageEvent;
 import com.atomykcoder.atomykplay.events.UpdateMusicProgressEvent;
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
-import com.atomykcoder.atomykplay.dataModels.LRCMap;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -640,9 +640,12 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         media_player.setAudioStreamType(AudioManager.STREAM_MUSIC);
 
         try {
+            loadList();
             if (activeMusic != null) {
-                media_player.setDataSource(activeMusic.getPath());
-                media_player.prepareAsync();
+                if (musicList != null && !musicList.isEmpty()) {
+                    media_player.setDataSource(activeMusic.getPath());
+                    media_player.prepareAsync();
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -802,13 +805,13 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         int lastPos = storage.loadMusicLastPos();
 
         storage.clearMusicLastPos();
-        if (musicIndex == -1 || musicList == null){
+        if (musicIndex == -1 || musicList == null) {
             return;
         }
         if (settingsStorage.loadOneClickSkip()) {
             setActiveMusic();
         } else {
-            if ((media_player != null && media_player.getCurrentPosition() >= 3000)|| lastPos >= 3000)
+            if ((media_player != null && media_player.getCurrentPosition() >= 3000) || lastPos >= 3000)
                 activeMusic = musicList.get(musicIndex);
             else
                 setActiveMusic();

@@ -678,12 +678,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
         // assign class member id list to new updated _id-list
         musicArrayList = new ArrayList<>(list);
-
-        queueAdapter = new MusicQueueAdapter(requireContext(), list, this);
-        queueRecyclerView.setAdapter(queueAdapter);
-        ItemTouchHelper.Callback callback = new SimpleTouchCallback(queueAdapter);
-        itemTouchHelper = new ItemTouchHelper(callback);
-        itemTouchHelper.attachToRecyclerView(queueRecyclerView);
+        queueAdapter.updateMusicListItems(list);
     }
 
     /**

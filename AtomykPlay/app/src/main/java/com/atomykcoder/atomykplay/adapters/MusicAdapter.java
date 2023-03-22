@@ -19,9 +19,9 @@ public class MusicAdapter extends GenericRecyclerAdapter<Music> {
 
     private ArrayList<Music> musicList;
 
-    protected void handlePlayMusic(MainActivity mainActivity, Music item) {
+    protected void handlePlayMusic(MainActivity mainActivity, Music item,ArrayList<Music> list) {
         mainActivity.playAudio(item);
-        mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(musicList);
+        mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(list);
         mainActivity.openBottomPlayer();
     }
 
@@ -72,6 +72,4 @@ public class MusicAdapter extends GenericRecyclerAdapter<Music> {
         return file.exists();
     }
 
-    public void removeItem(Music item) {
-    }
 }

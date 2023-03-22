@@ -2,6 +2,7 @@ package com.atomykcoder.atomykplay.adapters;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -9,12 +10,14 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
 
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.adapters.Generics.GenericViewHolder;
 import com.atomykcoder.atomykplay.adapters.ViewHolders.MusicQueueViewHolder;
 import com.atomykcoder.atomykplay.data.Music;
+import com.atomykcoder.atomykplay.helperFunctions.MusicDiffCallback;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.ItemTouchHelperAdapter;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
@@ -36,6 +39,16 @@ public class MusicQueueAdapter extends MusicAdapter implements ItemTouchHelperAd
         mainActivity = (MainActivity) context;
         storageUtil = new StorageUtil(context);
     }
+
+    public void updateMusicListItems(ArrayList<Music> newMusicArrayList) {
+        final MusicDiffCallback diffCallback = new MusicDiffCallback(super.items, newMusicArrayList);
+        final DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
+
+        super.items.clear();
+        super.items.addAll(newMusicArrayList);
+        diffResult.dispatchUpdatesTo(this);
+    }
+
 
     //when item starts to move it will change positions of every item in real time
     @Override
@@ -63,6 +76,8 @@ public class MusicQueueAdapter extends MusicAdapter implements ItemTouchHelperAd
 
     }
 
+    String TAG = "TAG";
+
     //removing item on swipe
     @Override
     public void onItemDismiss(int position) {
@@ -73,10 +88,13 @@ public class MusicQueueAdapter extends MusicAdapter implements ItemTouchHelperAd
             if (position != -1 && position < super.items.size()) {
                 removeItem(super.items.get(position));
             }
-            if (position == savedIndex) {
-                mainActivity.playAudio(super.items.get(position));
-            } else if (position < savedIndex) {
-                storageUtil.saveMusicIndex(savedIndex - 1);
+            if (!super.items.isEmpty()) {
+                if (position == savedIndex) {
+                    Log.d(TAG, "onItemDismiss: " + super.items.size() + "pos : " + position);
+                    mainActivity.playAudio(super.items.get(savedIndex));
+                } else if (position < savedIndex) {
+                    storageUtil.saveMusicIndex(savedIndex - 1);
+                }
             }
         }
     }
@@ -123,7 +141,8 @@ public class MusicQueueAdapter extends MusicAdapter implements ItemTouchHelperAd
         });
 
     }
-    private boolean isMusicAvailable(Music currentItem){
+
+    private boolean isMusicAvailable(Music currentItem) {
         if (!doesMusicExists(currentItem)) {
             Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show();
             removeItem(currentItem);
@@ -131,23 +150,25 @@ public class MusicQueueAdapter extends MusicAdapter implements ItemTouchHelperAd
         }
         return true;
     }
-    @Override
+
     public void removeItem(Music item) {
         int position = super.items.indexOf(item);
-        if (super.items.size() != 1 && !super.items.isEmpty()) {
+        if (!super.items.isEmpty()) {
+            if (super.items.size() == 1) {
+                Log.d(TAG, "onItemRemove: " + super.items.size() + "pos : " + position);
+                mainActivity.bottomSheetPlayerFragment.queueSheetBehaviour.setState(BottomSheetBehavior.STATE_HIDDEN);
+                mainActivity.clearStorage();
+                mainActivity.mainPlayerSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+                mainActivity.bottomSheetPlayerFragment.resetMainPlayerLayout();
+                mainActivity.resetDataInNavigation();
+                mainActivity.stopMusic();
+            }
             if (item != null) {
                 super.items.remove(item);
             }
             notifyItemRangeChanged(position, super.items.size() - (position + 1));
             notifyItemRemoved(position);
             storageUtil.saveQueueList(super.items);
-        } else if (super.items.size() == 1) {
-            mainActivity.bottomSheetPlayerFragment.queueSheetBehaviour.setState(BottomSheetBehavior.STATE_HIDDEN);
-            mainActivity.clearStorage();
-            mainActivity.mainPlayerSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-            mainActivity.bottomSheetPlayerFragment.resetMainPlayerLayout();
-            mainActivity.resetDataInNavigation();
-            mainActivity.stopMusic();
         }
     }
 

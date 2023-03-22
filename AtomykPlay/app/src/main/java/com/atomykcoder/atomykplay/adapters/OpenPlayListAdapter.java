@@ -83,7 +83,7 @@ public class OpenPlayListAdapter extends MusicAdapter implements ItemTouchHelper
             else
                 handleNoShuffle(storage, position, super.items);
 
-            handlePlayMusic(mainActivity, currentItem);
+            handlePlayMusic(mainActivity, currentItem,super.items);
         });
 
         holder.optBtn.setOnClickListener(v -> {
