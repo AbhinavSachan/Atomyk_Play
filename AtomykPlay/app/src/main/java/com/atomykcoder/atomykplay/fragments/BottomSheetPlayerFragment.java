@@ -408,11 +408,11 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     }
 
     private void setThemeColorLyricView(int color) {
-//        gradientTop.mutate();
-//        gradientBottom.mutate();
-//
-//        gradientTop.setColors(new int[]{Color.TRANSPARENT, color});
-//        gradientBottom.setColors(new int[]{color, Color.TRANSPARENT});
+        gradientTop.mutate();
+        gradientBottom.mutate();
+
+        gradientTop.setColors(new int[]{Color.TRANSPARENT, color});
+        gradientBottom.setColors(new int[]{color, Color.TRANSPARENT});
 
     }
 

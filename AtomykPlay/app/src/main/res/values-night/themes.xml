@@ -10,7 +10,7 @@
         <item name="colorSecondaryVariant">@color/primary_bg</item>
         <item name="colorOnSecondary">@color/tertiary_bg</item>
         <!-- Status bar color. -->
-        <item name="android:navigationBarColor">?colorPrimaryVariant</item>
+        <item name="android:navigationBarColor">@color/player_bg</item>
 
         <!-- Customize your theme here. -->
         <item name="android:windowContentTransitions">true</item>

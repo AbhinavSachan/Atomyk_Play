@@ -1,15 +1,12 @@
 package com.atomykcoder.atomykplay.fragments;
 
-import static android.provider.MediaStore.Images.Media.insertImage;
 import static com.atomykcoder.atomykplay.helperFunctions.CustomMethods.pickImage;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.ContentResolver;
-import android.content.ContentUris;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -26,21 +23,29 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.PickVisualMediaRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 
 import com.atomykcoder.atomykplay.BuildConfig;
 import com.atomykcoder.atomykplay.R;
+import com.atomykcoder.atomykplay.activities.MainActivity;
+import com.atomykcoder.atomykplay.classes.ApplicationClass;
 import com.atomykcoder.atomykplay.classes.GlideBuilt;
 import com.atomykcoder.atomykplay.data.Music;
+import com.atomykcoder.atomykplay.helperFunctions.Logger;
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper;
+import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
+import com.atomykcoder.atomykplay.repository.LoadingStatus;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
@@ -59,8 +64,8 @@ import org.jaudiotagger.tag.TagException;
 import org.jaudiotagger.tag.datatype.Artwork;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -71,9 +76,21 @@ public class TagEditorFragment extends Fragment {
     private EditText editName, editArtist, editAlbum, editGenre;
     private Music music;
     private Uri imageUri;
+    private final MutableLiveData<LoadingStatus> loadingStatus = new MutableLiveData<>();
     ExecutorService service = Executors.newFixedThreadPool(1);
     Handler handler = new Handler();
     GlideBuilt glideBuilt;
+    private Uri musicUri;
+    private View progressIndicator;
+
+    public LiveData<LoadingStatus> getLoadingStatus() {
+        return loadingStatus;
+    }
+
+    public void setLoadingStatus(LoadingStatus status) {
+        loadingStatus.setValue(status);
+    }
+
     // Registers a photo picker activity launcher in single-select mode.
     private final ActivityResultLauncher<PickVisualMediaRequest> mediaPicker = registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), uri -> {
         // Callback is invoked after the user selects a media item or closes the
@@ -106,6 +123,7 @@ public class TagEditorFragment extends Fragment {
         toolbar.setNavigationOnClickListener(v -> requireActivity().onBackPressed());
 
         editName = view.findViewById(R.id.edit_song_name_tag);
+        progressIndicator = view.findViewById(R.id.progress_bar_tag);
         editArtist = view.findViewById(R.id.edit_song_artist_tag);
         editAlbum = view.findViewById(R.id.edit_song_album_tag);
         editGenre = view.findViewById(R.id.edit_song_genre_tag);
@@ -152,9 +170,15 @@ public class TagEditorFragment extends Fragment {
                     saveMusicChanges(music);
                 }
             } else {
-                requestPermissionAndroidBelow11();
+                if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    requestPermissionAndroidBelow11();
+                } else {
+                    saveMusicChanges(music);
+                }
             }
         });
+
+        setLoader();
 
         return view;
     }
@@ -173,13 +197,15 @@ public class TagEditorFragment extends Fragment {
     }
 
     private void requestPermissionAndroidBelow11() {
-        Dexter.withContext(getContext())
-                .withPermissions(Manifest.permission.READ_EXTERNAL_STORAGE,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                .withListener(new MultiplePermissionsListener() {
+        Dexter.withContext(requireContext())
+                .withPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE).withListener(new MultiplePermissionsListener() {
                     @Override
                     public void onPermissionsChecked(MultiplePermissionsReport multiplePermissionsReport) {
-                        saveMusicChanges(music);
+                        if (multiplePermissionsReport.areAllPermissionsGranted()) {
+                            saveMusicChanges(music);
+                        } else {
+                            showToast("Permissions denied!");
+                        }
                     }
 
                     @Override
@@ -189,11 +215,16 @@ public class TagEditorFragment extends Fragment {
                 }).check();
     }
 
+    private void showToast(String s) {
+        ((ApplicationClass) requireActivity().getApplication()).showToast(s);
+    }
+
     private void saveMusicChanges(Music music) {
         String newTitle = editName.getText().toString().trim();
         String newArtist = editArtist.getText().toString().trim();
         String newAlbum = editAlbum.getText().toString().trim();
         String newGenre = editGenre.getText().toString().trim();
+        setLoadingStatus(LoadingStatus.LOADING);
         service.execute(() -> {
             try {
                 File musicFile = new File(music.getPath());
@@ -219,21 +250,42 @@ public class TagEditorFragment extends Fragment {
                 f.commit();
 
                 handler.post(() -> {
-                    Toast.makeText(getContext(), "Changes will be applied after restart", Toast.LENGTH_SHORT).show();
-                    requireContext().sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(musicFile)));
-                    requireActivity().onBackPressed();
+                    musicUri = Uri.fromFile(musicFile);
+                    setLoadingStatus(LoadingStatus.SUCCESS);
                 });
             } catch (CannotReadException | InvalidAudioFrameException | ReadOnlyFileException |
                      TagException | IOException | CannotWriteException e) {
-                e.printStackTrace();
+                Logger logger = new Logger();
+                logger.normalLog(e.toString());
                 handler.post(() -> {
-                    Toast.makeText(requireContext(), "Something went wrong", Toast.LENGTH_SHORT).show();
-                    requireActivity().onBackPressed();
+                    setLoadingStatus(LoadingStatus.FAILURE);
                 });
             }
         });
 
     }
+
+    private void setLoader() {
+        getLoadingStatus().observe(requireActivity(), it -> {
+            switch (it) {
+                case LOADING:
+                    progressIndicator.setVisibility(View.VISIBLE);
+                    break;
+                case SUCCESS:
+                    showToast("Change's will be applied after restart");
+                    requireContext().sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, musicUri));
+                    progressIndicator.setVisibility(View.GONE);
+                    requireActivity().onBackPressed();
+                    break;
+                case FAILURE:
+                    showToast("Something went wrong");
+                    progressIndicator.setVisibility(View.GONE);
+                    requireActivity().onBackPressed();
+                    break;
+            }
+        });
+    }
+
     @Override
     public void onDestroy() {
         super.onDestroy();

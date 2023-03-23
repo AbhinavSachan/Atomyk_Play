@@ -40,7 +40,6 @@ import android.util.DisplayMetrics;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -56,6 +55,7 @@ import androidx.activity.result.PickVisualMediaRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.content.ContextCompat;
@@ -72,8 +72,8 @@ import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.adapters.FoundLyricsAdapter;
 import com.atomykcoder.atomykplay.adapters.MusicMainAdapter;
 import com.atomykcoder.atomykplay.adapters.PlaylistDialogAdapter;
-import com.atomykcoder.atomykplay.classes.ApplicationClass;
 import com.atomykcoder.atomykplay.classes.GlideBuilt;
+import com.atomykcoder.atomykplay.classes.PhoneStateCallback;
 import com.atomykcoder.atomykplay.customScripts.CustomBottomSheet;
 import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.dataModels.Playlist;
@@ -171,12 +171,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Dialog plDialog;
     private View shadowLyrFound;
     private final BottomSheetBehavior.BottomSheetCallback lrcFoundCallback = new BottomSheetBehavior.BottomSheetCallback() {
+        @SuppressLint("SwitchIntDef")
         @Override
         public void onStateChanged(@NonNull View bottomSheet, int newState) {
-            if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
-                shadowLyrFound.setAlpha(0.2f);
-            } else if (newState == BottomSheetBehavior.STATE_EXPANDED) {
-                shadowLyrFound.setAlpha(1f);
+            switch (newState) {
+                case BottomSheetBehavior.STATE_COLLAPSED:
+                    shadowLyrFound.setAlpha(0.2f);
+                    lyricsSheet.setElevation(4f);
+                    break;
+                case BottomSheetBehavior.STATE_EXPANDED:
+                    shadowLyrFound.setAlpha(1f);
+                    lyricsSheet.setElevation(4f);
+                    break;
+                case BottomSheetBehavior.STATE_HIDDEN:
+                    lyricsSheet.setElevation(0f);
+                    break;
             }
         }
 
@@ -196,26 +205,35 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private RecyclerView musicRecyclerView;
     private TelephonyManager telephonyManager;
     private PhoneStateListener phoneStateListener;
+    private PhoneStateCallback phoneStateCallback;
     private ProgressBar progressBar;
     private StorageUtil storageUtil;
     private DrawerLayout drawer;
     private final BottomSheetBehavior.BottomSheetCallback optionCallback = new BottomSheetBehavior.BottomSheetCallback() {
+        @SuppressLint("SwitchIntDef")
         @Override
         public void onStateChanged(@NonNull View bottomSheet, int newState) {
-            if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
-                drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-                shadowOuterSheet.setClickable(true);
-                shadowOuterSheet.setFocusable(true);
-                shadowOuterSheet.setAlpha(0.7f);
-            } else if (newState == BottomSheetBehavior.STATE_EXPANDED) {
-                shadowOuterSheet.setClickable(true);
-                shadowOuterSheet.setFocusable(true);
-                drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-                shadowOuterSheet.setAlpha(1f);
-            } else if (newState == BottomSheetBehavior.STATE_HIDDEN) {
-                drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-                shadowOuterSheet.setClickable(false);
-                shadowOuterSheet.setFocusable(false);
+            switch (newState) {
+                case BottomSheetBehavior.STATE_COLLAPSED:
+                    drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+                    shadowOuterSheet.setClickable(true);
+                    shadowOuterSheet.setFocusable(true);
+                    shadowOuterSheet.setAlpha(0.7f);
+                    optionSheet.setElevation(18f);
+                    break;
+                case BottomSheetBehavior.STATE_EXPANDED:
+                    shadowOuterSheet.setClickable(true);
+                    shadowOuterSheet.setFocusable(true);
+                    drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+                    shadowOuterSheet.setAlpha(1f);
+                    optionSheet.setElevation(18f);
+                    break;
+                case BottomSheetBehavior.STATE_HIDDEN:
+                    drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+                    shadowOuterSheet.setClickable(false);
+                    shadowOuterSheet.setFocusable(false);
+                    optionSheet.setElevation(0f);
+                    break;
             }
         }
 
@@ -225,22 +243,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     };
     private final BottomSheetBehavior.BottomSheetCallback detailsSheetCallback = new BottomSheetBehavior.BottomSheetCallback() {
+        @SuppressLint("SwitchIntDef")
         @Override
         public void onStateChanged(@NonNull View bottomSheet, int newState) {
-            if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
-                drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-                shadowOuterSheet2.setClickable(true);
-                shadowOuterSheet2.setFocusable(true);
-                shadowOuterSheet2.setAlpha(0.45f);
-            } else if (newState == BottomSheetBehavior.STATE_EXPANDED) {
-                shadowOuterSheet2.setClickable(true);
-                shadowOuterSheet2.setFocusable(true);
-                drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-                shadowOuterSheet2.setAlpha(1f);
-            } else if (newState == BottomSheetBehavior.STATE_HIDDEN) {
-                drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-                shadowOuterSheet2.setClickable(false);
-                shadowOuterSheet2.setFocusable(false);
+            switch (newState) {
+                case BottomSheetBehavior.STATE_COLLAPSED:
+                    drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+                    shadowOuterSheet2.setClickable(true);
+                    shadowOuterSheet2.setFocusable(true);
+                    shadowOuterSheet2.setAlpha(0.45f);
+                    detailsSheet.setElevation(20f);
+                    break;
+                case BottomSheetBehavior.STATE_EXPANDED:
+                    shadowOuterSheet2.setClickable(true);
+                    shadowOuterSheet2.setFocusable(true);
+                    drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+                    shadowOuterSheet2.setAlpha(1f);
+                    detailsSheet.setElevation(20f);
+                    break;
+                case BottomSheetBehavior.STATE_HIDDEN:
+                    drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+                    shadowOuterSheet2.setClickable(false);
+                    shadowOuterSheet2.setFocusable(false);
+                    detailsSheet.setElevation(0f);
+                    break;
             }
         }
 
@@ -250,22 +276,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     };
     private final BottomSheetBehavior.BottomSheetCallback donationCallback = new BottomSheetBehavior.BottomSheetCallback() {
+        @SuppressLint("SwitchIntDef")
         @Override
         public void onStateChanged(@NonNull View bottomSheet, int newState) {
-            if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
-                drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-                shadowOuterSheet.setClickable(true);
-                shadowOuterSheet.setFocusable(true);
-                shadowOuterSheet.setAlpha(0.6f);
-            } else if (newState == BottomSheetBehavior.STATE_EXPANDED) {
-                shadowOuterSheet.setClickable(true);
-                shadowOuterSheet.setFocusable(true);
-                drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-                shadowOuterSheet.setAlpha(1f);
-            } else if (newState == BottomSheetBehavior.STATE_HIDDEN) {
-                drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-                shadowOuterSheet.setClickable(false);
-                shadowOuterSheet.setFocusable(false);
+            switch (newState) {
+                case BottomSheetBehavior.STATE_COLLAPSED:
+                    drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+                    shadowOuterSheet.setClickable(true);
+                    shadowOuterSheet.setFocusable(true);
+                    shadowOuterSheet.setAlpha(0.6f);
+                    donationSheet.setElevation(16f);
+                    break;
+                case BottomSheetBehavior.STATE_EXPANDED:
+                    shadowOuterSheet.setClickable(true);
+                    shadowOuterSheet.setFocusable(true);
+                    drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+                    shadowOuterSheet.setAlpha(1f);
+                    donationSheet.setElevation(16f);
+                    break;
+                case BottomSheetBehavior.STATE_HIDDEN:
+                    drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+                    shadowOuterSheet.setClickable(false);
+                    shadowOuterSheet.setFocusable(false);
+                    donationSheet.setElevation(0f);
+                    break;
             }
         }
 
@@ -276,22 +310,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     };
 
     private final BottomSheetBehavior.BottomSheetCallback plSheetCallback = new BottomSheetBehavior.BottomSheetCallback() {
+        @SuppressLint("SwitchIntDef")
         @Override
         public void onStateChanged(@NonNull View bottomSheet, int newState) {
-            if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
-                drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-                shadowOuterSheet.setClickable(true);
-                shadowOuterSheet.setFocusable(true);
-                shadowOuterSheet.setAlpha(0.6f);
-            } else if (newState == BottomSheetBehavior.STATE_EXPANDED) {
-                shadowOuterSheet.setClickable(true);
-                shadowOuterSheet.setFocusable(true);
-                drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-                shadowOuterSheet.setAlpha(1f);
-            } else if (newState == BottomSheetBehavior.STATE_HIDDEN) {
-                drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-                shadowOuterSheet.setClickable(false);
-                shadowOuterSheet.setFocusable(false);
+            switch (newState) {
+                case BottomSheetBehavior.STATE_COLLAPSED:
+                    drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+                    shadowOuterSheet.setClickable(true);
+                    shadowOuterSheet.setFocusable(true);
+                    shadowOuterSheet.setAlpha(0.6f);
+                    plSheet.setElevation(18f);
+                    break;
+                case BottomSheetBehavior.STATE_EXPANDED:
+                    shadowOuterSheet.setClickable(true);
+                    shadowOuterSheet.setFocusable(true);
+                    drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+                    plSheet.setElevation(18f);
+                    shadowOuterSheet.setAlpha(1f);
+                    break;
+                case BottomSheetBehavior.STATE_HIDDEN:
+                    drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+                    shadowOuterSheet.setClickable(false);
+                    shadowOuterSheet.setFocusable(false);
+                    plSheet.setElevation(0f);
+                    break;
             }
         }
 
@@ -303,42 +345,57 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private NavigationView navigationView;
     private int tempThemeColor;
     private TextView navSongName, navArtistName;
-    public BottomSheetBehavior.BottomSheetCallback bottomSheetCallback = new BottomSheetBehavior.BottomSheetCallback() {
+    public BottomSheetBehavior.BottomSheetCallback mainPlayerSheetCallback = new BottomSheetBehavior.BottomSheetCallback() {
+        @SuppressLint("SwitchIntDef")
         @Override
         public void onStateChanged(@NonNull View bottomSheet, int newState) {
-            if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
-                View miniPlayer = bottomSheetPlayerFragment.mini_play_view;
-                View mainPlayer = bottomSheetPlayerFragment.player_layout;
-                mainPlayer.setVisibility(View.INVISIBLE);
-                miniPlayer.setVisibility(View.VISIBLE);
-                drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-                miniPlayer.setAlpha(1);
-                shadowMain.setAlpha(0);
-                anchoredShadow.setAlpha(1);
-                mainPlayer.setAlpha(0);
-                changeNavigationColor(tempThemeColor, getResources().getColor(R.color.player_bg, null));
-                tempThemeColor = getResources().getColor(R.color.player_bg, null);
-            } else if (newState == BottomSheetBehavior.STATE_EXPANDED) {
-                View miniPlayer = bottomSheetPlayerFragment.mini_play_view;
-                View mainPlayer = bottomSheetPlayerFragment.player_layout;
-                miniPlayer.setVisibility(View.INVISIBLE);
-                mainPlayer.setVisibility(View.VISIBLE);
-                drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-                miniPlayer.setAlpha(0);
-                mainPlayer.setAlpha(1);
-                anchoredShadow.setAlpha(1);
-                shadowMain.setAlpha(1);
-                bottomSheetPlayerFragment.getThemeColor().observe(MainActivity.this, it -> {
-                    changeNavigationColor(tempThemeColor, it);
-                    tempThemeColor = it;
-                });
-            } else if (newState == BottomSheetBehavior.STATE_HIDDEN) {
-                anchoredShadow.setAlpha(0);
-                drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-                clearStorage();
-                bottomSheetPlayerFragment.resetMainPlayerLayout();
-                resetDataInNavigation();
-                stopMusic();
+            switch (newState) {
+                case BottomSheetBehavior.STATE_COLLAPSED: {
+                    View miniPlayer = bottomSheetPlayerFragment.mini_play_view;
+                    View mainPlayer = bottomSheetPlayerFragment.player_layout;
+                    mainPlayer.setVisibility(View.INVISIBLE);
+                    miniPlayer.setVisibility(View.VISIBLE);
+                    drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+                    miniPlayer.setAlpha(1);
+                    shadowMain.setAlpha(0);
+                    anchoredShadow.setAlpha(1);
+                    mainPlayer.setAlpha(0);
+                    anchoredShadow.setElevation(10f);
+                    player_bottom_sheet.setElevation(12f);
+                    changeNavigationColor(tempThemeColor, getResources().getColor(R.color.player_bg, null));
+                    tempThemeColor = getResources().getColor(R.color.player_bg, null);
+                    break;
+                }
+                case BottomSheetBehavior.STATE_EXPANDED: {
+                    View miniPlayer = bottomSheetPlayerFragment.mini_play_view;
+                    View mainPlayer = bottomSheetPlayerFragment.player_layout;
+                    miniPlayer.setVisibility(View.INVISIBLE);
+                    mainPlayer.setVisibility(View.VISIBLE);
+                    drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+                    miniPlayer.setAlpha(0);
+                    mainPlayer.setAlpha(1);
+                    anchoredShadow.setAlpha(1);
+                    shadowMain.setAlpha(1);
+                    anchoredShadow.setElevation(10f);
+                    player_bottom_sheet.setElevation(12f);
+                    bottomSheetPlayerFragment.getThemeColor().observe(MainActivity.this, it -> {
+                        if (mainPlayerSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+                            changeNavigationColor(tempThemeColor, it);
+                            tempThemeColor = it;
+                        }
+                    });
+                    break;
+                }
+                case BottomSheetBehavior.STATE_HIDDEN:
+                    anchoredShadow.setAlpha(0);
+                    drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+                    player_bottom_sheet.setElevation(0f);
+                    anchoredShadow.setElevation(0f);
+                    clearStorage();
+                    bottomSheetPlayerFragment.resetMainPlayerLayout();
+                    resetDataInNavigation();
+                    stopMusic();
+                    break;
             }
         }
 
@@ -351,6 +408,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             miniPlayer.setAlpha(1 - slideOffset * 35);
             mainPlayer.setAlpha(0 + slideOffset);
             shadowMain.setAlpha(0 + slideOffset);
+
         }
     };
     private View deleteBtn;
@@ -412,6 +470,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         }
     });
+    private View lyricsSheet;
 
     public void clearStorage() {
         storageUtil.clearMusicLastPos();
@@ -516,7 +575,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         detailsSheetBehavior.addBottomSheetCallback(detailsSheetCallback);
         plSheetBehavior.addBottomSheetCallback(plSheetCallback);
         donationSheetBehavior.addBottomSheetCallback(donationCallback);
-        mainPlayerSheetBehavior.addBottomSheetCallback(bottomSheetCallback);
+        mainPlayerSheetBehavior.addBottomSheetCallback(mainPlayerSheetCallback);
 
         if (savedInstanceState == null) {
             navigationView.setCheckedItem(R.id.navigation_home);
@@ -524,12 +583,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void checkForPermission() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-            is_granted = false;
-            showRequestDialog();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_AUDIO) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+                is_granted = false;
+                showRequestDialog();
+            } else {
+                is_granted = true;
+                setUpServiceAndScanner();
+            }
         } else {
-            is_granted = true;
-            setUpServiceAndScanner();
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+                is_granted = false;
+                showRequestDialog();
+            } else {
+                is_granted = true;
+                setUpServiceAndScanner();
+            }
         }
     }
 
@@ -538,7 +607,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         View customLayout = getLayoutInflater().inflate(R.layout.permission_request_dialog_layout, null);
         builder.setView(customLayout);
         builder.setPositiveButton("OK", (dialogInterface, i) -> {
-            requestPermission();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                requestReadAudioAndPhonePermissionAbove12();
+            } else {
+                requestReadStorageAndPhonePermissionBelow12();
+            }
         });
         builder.setNegativeButton("Cancel", null);
         androidx.appcompat.app.AlertDialog dialog;
@@ -587,7 +660,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void changeNavigationColor(int animateFrom, int animateTo) {
         Window window = getWindow();
         ValueAnimator colorAnimation = ValueAnimator.ofArgb(animateFrom, animateTo);
-        colorAnimation.setDuration(200);
+        colorAnimation.setDuration(100);
         colorAnimation.addUpdateListener(animator -> window.setNavigationBarColor((int) animator.getAnimatedValue()));
         colorAnimation.start();
     }
@@ -607,8 +680,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         }
         MediaPlayerService.ui_visible = false;
-        if (phoneStateListener != null && telephonyManager != null) {
-            telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (phoneStateCallback != null && telephonyManager != null) {
+                telephonyManager.unregisterTelephonyCallback(phoneStateCallback);
+            }
+        } else {
+            if (phoneStateListener != null && telephonyManager != null) {
+                telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE);
+            }
         }
         playlistFragment = null;
     }
@@ -750,8 +829,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setBottomSheetProperties(detailsSheetBehavior, detailsPeekHeight, true);
 
         int lyricFoundPeekHeight = (int) (metrics.heightPixels / 3.5f);
-        View lyricsListView = findViewById(R.id.found_lyrics_fragments);
-        lyricsListBehavior = BottomSheetBehavior.from(lyricsListView);
+        lyricsSheet = findViewById(R.id.found_lyrics_fragments);
+        lyricsListBehavior = BottomSheetBehavior.from(lyricsSheet);
 
         setBottomSheetProperties(lyricsListBehavior, lyricFoundPeekHeight, false);
 
@@ -1152,7 +1231,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (requestCode == RESULT_CANCELED) {
             return;
         }
-
         switch (requestCode) {
 
             // check for delete item request
@@ -1213,35 +1291,49 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void showToast(String s) {
         Toast.makeText(getApplicationContext(), s, Toast.LENGTH_SHORT).show();
-
     }
 
     private void callStateListener() {
         telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-        //noinspection deprecation
-        phoneStateListener = new PhoneStateListener() {
-            @Override
-            public void onCallStateChanged(int state, String phoneNumber) {
-                super.onCallStateChanged(state, phoneNumber);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            phoneStateCallback = new PhoneStateCallback();
+            phoneStateCallback.getState().observe(this, state -> {
                 switch (state) {
                     case TelephonyManager.CALL_STATE_OFFHOOK:
-                    case TelephonyManager.CALL_STATE_RINGING: {
+                    case TelephonyManager.CALL_STATE_RINGING:
                         phone_ringing = true;
-                    }
-                    break;
-                    case TelephonyManager.CALL_STATE_IDLE: {
+                        break;
+                    case TelephonyManager.CALL_STATE_IDLE:
                         phone_ringing = false;
-                    }
-                    break;
+                        break;
                 }
-            }
-        };
-        telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
+            });
+            telephonyManager.registerTelephonyCallback(ContextCompat.getMainExecutor(this), phoneStateCallback);
+        } else {
+            phoneStateListener = new PhoneStateListener() {
+                @Override
+                public void onCallStateChanged(int state, String phoneNumber) {
+                    super.onCallStateChanged(state, phoneNumber);
+                    switch (state) {
+                        case TelephonyManager.CALL_STATE_OFFHOOK:
+                        case TelephonyManager.CALL_STATE_RINGING: {
+                            phone_ringing = true;
+                        }
+                        break;
+                        case TelephonyManager.CALL_STATE_IDLE: {
+                            phone_ringing = false;
+                        }
+                        break;
+                    }
+                }
+            };
+            telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
+        }
     }
 
     //Checks whether user granted permissions for external storage or not
     //if not then shows dialogue to grant permissions
-    private void requestPermission() {
+    private void requestReadStorageAndPhonePermissionBelow12() {
         Dexter.withContext(MainActivity.this).withPermissions(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.READ_PHONE_STATE).withListener(new MultiplePermissionsListener() {
             @Override
             public void onPermissionsChecked(MultiplePermissionsReport multiplePermissionsReport) {
@@ -1250,7 +1342,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     setUpServiceAndScanner();
                 } else {
                     is_granted = false;
-                    ((ApplicationClass) getApplication()).showToast("Permissions denied!");
+                    showToast("Permissions denied!");
+                }
+            }
+
+            @Override
+            public void onPermissionRationaleShouldBeShown(List<PermissionRequest> list, PermissionToken permissionToken) {
+                is_granted = false;
+                permissionToken.continuePermissionRequest();
+            }
+        }).check();
+
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
+    private void requestReadAudioAndPhonePermissionAbove12() {
+        Dexter.withContext(MainActivity.this).withPermissions(Manifest.permission.READ_MEDIA_AUDIO, Manifest.permission.READ_PHONE_STATE).withListener(new MultiplePermissionsListener() {
+            @Override
+            public void onPermissionsChecked(MultiplePermissionsReport multiplePermissionsReport) {
+                if (multiplePermissionsReport.areAllPermissionsGranted()) {
+                    is_granted = true;
+                    setUpServiceAndScanner();
+                } else {
+                    is_granted = false;
+                    showToast("Permissions denied!");
                 }
             }
 
@@ -1281,7 +1396,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             setMusicAdapter(musicUtils.getInitialMusicList());
             isChecking = false;
         }).exceptionally(it -> {
-            ((ApplicationClass) getApplication()).showToast(it.getMessage());
+            showToast(it.getMessage());
             isChecking = false;
             return null;
         }));

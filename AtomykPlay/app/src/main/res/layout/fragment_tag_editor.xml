@@ -200,6 +200,25 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
+    <FrameLayout
+        android:id="@+id/progress_bar_tag"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#CB050B10"
+        android:visibility="gone"
+        android:clickable="true"
+        android:elevation="16dp"
+        android:focusable="true">
+
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"
+            android:layout_gravity="center"
+            android:indeterminateTint="@color/accent_color_bg" />
+
+    </FrameLayout>
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/tag_editor_save_button"
         android:layout_width="wrap_content"

@@ -2,7 +2,6 @@ package com.atomykcoder.atomykplay.adapters;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -76,25 +75,14 @@ public class MusicQueueAdapter extends MusicAdapter implements ItemTouchHelperAd
 
     }
 
-    String TAG = "TAG";
 
     //removing item on swipe
     @Override
     public void onItemDismiss(int position) {
-        int savedIndex;
-        savedIndex = storageUtil.loadMusicIndex();
         //if any item has been removed this will save new list on temp list
         if (super.items != null) {
             if (position != -1 && position < super.items.size()) {
                 removeItem(super.items.get(position));
-            }
-            if (!super.items.isEmpty()) {
-                if (position == savedIndex) {
-                    Log.d(TAG, "onItemDismiss: " + super.items.size() + "pos : " + position);
-                    mainActivity.playAudio(super.items.get(savedIndex));
-                } else if (position < savedIndex) {
-                    storageUtil.saveMusicIndex(savedIndex - 1);
-                }
             }
         }
     }
@@ -153,9 +141,9 @@ public class MusicQueueAdapter extends MusicAdapter implements ItemTouchHelperAd
 
     public void removeItem(Music item) {
         int position = super.items.indexOf(item);
+        int savedIndex = storageUtil.loadMusicIndex();
         if (!super.items.isEmpty()) {
             if (super.items.size() == 1) {
-                Log.d(TAG, "onItemRemove: " + super.items.size() + "pos : " + position);
                 mainActivity.bottomSheetPlayerFragment.queueSheetBehaviour.setState(BottomSheetBehavior.STATE_HIDDEN);
                 mainActivity.clearStorage();
                 mainActivity.mainPlayerSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
@@ -165,6 +153,13 @@ public class MusicQueueAdapter extends MusicAdapter implements ItemTouchHelperAd
             }
             if (item != null) {
                 super.items.remove(item);
+            }
+            if (!super.items.isEmpty()) {
+                if (position == savedIndex) {
+                    mainActivity.playAudio(super.items.get(savedIndex));
+                } else if (position < savedIndex) {
+                    storageUtil.saveMusicIndex(savedIndex - 1);
+                }
             }
             notifyItemRangeChanged(position, super.items.size() - (position + 1));
             notifyItemRemoved(position);

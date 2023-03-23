@@ -93,14 +93,9 @@ public class MusicMainAdapter extends MusicAdapter {
         }
         return true;
     }
-
     public void removeItem(Music item) {
         int position = super.items.indexOf(item);
-        int savedIndex = storage.loadMusicIndex();
 
-        if (position < savedIndex) {
-            storage.saveMusicIndex(savedIndex - 1);
-        }
         if (position != -1) {
             storage.removeFromInitialList(item);
             super.items.remove(position);
@@ -109,9 +104,6 @@ public class MusicMainAdapter extends MusicAdapter {
         notifyItemRangeChanged(position, super.items.size() - (position + 1));
         notifyItemRemoved(position);
 
-        if (position == savedIndex) {
-            mainActivity.playAudio(item);
-        }
         mainActivity.bottomSheetPlayerFragment.queueAdapter.removeItem(item);
     }
 }

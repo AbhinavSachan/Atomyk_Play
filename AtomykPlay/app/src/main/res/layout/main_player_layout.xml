@@ -448,7 +448,7 @@
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:elevation="16dp"
+        android:elevation="8dp"
         android:layout_height="match_parent">
 
         <LinearLayout
@@ -456,7 +456,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:alpha="0"
-            android:elevation="10dp"
+            android:elevation="4dp"
             android:background="@drawable/rounded_bottom_lyric_sheet"
             android:clickable="true"
             android:focusable="true"

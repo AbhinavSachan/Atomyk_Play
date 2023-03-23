@@ -264,8 +264,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:alpha="0"
-            android:background="@color/translucent_black"
-            android:elevation="10dp" />
+            android:background="@color/translucent_black" />
 
         <LinearLayout
             android:id="@+id/found_lyrics_fragments"
@@ -273,7 +272,6 @@
             android:layout_height="match_parent"
             android:background="@drawable/rounded_bottom_lyric_sheet"
             android:clickable="true"
-            android:elevation="10dp"
             android:focusable="true"
             android:orientation="vertical"
             app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
@@ -283,7 +281,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:contentDescription="@string/empty"
-                android:elevation="4dp"
+                android:elevation="2dp"
                 android:src="@drawable/ic_horizontal_rule" />
 
             <androidx.recyclerview.widget.RecyclerView
@@ -299,16 +297,15 @@
             android:layout_width="match_parent"
             android:layout_height="24dp"
             android:background="@drawable/player_shadow"
-            android:elevation="15dp"
-            app:layout_anchor="@id/player_main_container" />
+            app:layout_anchor="@id/player_main_container"
+            tools:ignore="PxUsage" />
 
         <View
             android:id="@+id/shadow_main"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:alpha="0"
-            android:background="@color/translucent_black"
-            android:elevation="16dp" />
+            android:background="@color/translucent_black" />
 
         <FrameLayout
             android:id="@+id/player_main_container"
@@ -316,7 +313,6 @@
             android:layout_height="match_parent"
             android:background="@drawable/rounded_bottom_sheet"
             android:clickable="true"
-            android:elevation="20dp"
             android:focusable="true"
             app:layout_behavior=".customScripts.CustomBottomSheet" />
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
@@ -329,16 +325,14 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:alpha="0"
-            android:background="@color/translucent_black"
-            android:elevation="25dp" />
+            android:background="@color/translucent_black" />
 
         <View
             android:id="@+id/outer_sheet_details_shadow"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:alpha="0"
-            android:background="@color/translucent_black"
-            android:elevation="30dp" />
+            android:background="@color/translucent_black" />
 
         <include layout="@layout/donation_layout" />
 

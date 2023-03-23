@@ -1,6 +1,5 @@
 package com.atomykcoder.atomykplay.repository;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -27,22 +26,38 @@ public class MusicDaoImpl implements MusicDaoI {
         CompletableFuture<ArrayList<Music>> future = new CompletableFuture<>();
         String selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0";
         ArrayList<Music> dataList = new ArrayList<>();
-        @SuppressLint("InlinedApi")
-        String[] proj = {
-                MediaStore.Audio.Media.TITLE,
-                MediaStore.Audio.Media.ARTIST,
-                MediaStore.Audio.Media.ALBUM_ID,
-                MediaStore.Audio.Media.DURATION,
-                MediaStore.Audio.Media.DATA,
-                MediaStore.Audio.Media.ALBUM,
-                MediaStore.Audio.Media.MIME_TYPE,
-                MediaStore.Audio.Media.SIZE,
-                MediaStore.Audio.Media.BITRATE,
-                MediaStore.Audio.Media.GENRE,
-                MediaStore.Audio.Media.DATE_ADDED,
-                MediaStore.Audio.Media._ID,
-                MediaStore.Audio.Media.YEAR
-        };
+        String[] proj;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+            proj = new String[]{
+                    MediaStore.Audio.Media.TITLE,
+                    MediaStore.Audio.Media.ARTIST,
+                    MediaStore.Audio.Media.ALBUM_ID,
+                    MediaStore.Audio.Media.DURATION,
+                    MediaStore.Audio.Media.DATA,
+                    MediaStore.Audio.Media.ALBUM,
+                    MediaStore.Audio.Media.MIME_TYPE,
+                    MediaStore.Audio.Media.SIZE,
+                    MediaStore.Audio.Media.DATE_ADDED,
+                    MediaStore.Audio.Media._ID,
+                    MediaStore.Audio.Media.YEAR,
+                    MediaStore.Audio.Media.BITRATE,
+                    MediaStore.Audio.Media.GENRE
+            };
+        } else {
+            proj = new String[]{
+                    MediaStore.Audio.Media.TITLE,
+                    MediaStore.Audio.Media.ARTIST,
+                    MediaStore.Audio.Media.ALBUM_ID,
+                    MediaStore.Audio.Media.DURATION,
+                    MediaStore.Audio.Media.DATA,
+                    MediaStore.Audio.Media.ALBUM,
+                    MediaStore.Audio.Media.MIME_TYPE,
+                    MediaStore.Audio.Media.SIZE,
+                    MediaStore.Audio.Media.DATE_ADDED,
+                    MediaStore.Audio.Media._ID,
+                    MediaStore.Audio.Media.YEAR
+            };
+        }
         //Creating a cursor to store all data of a song
         Cursor audioCursor = context.getContentResolver().query(
                 MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
@@ -51,7 +66,6 @@ public class MusicDaoImpl implements MusicDaoI {
                 null,
                 null
         );
-
         //If cursor is not null then storing data inside a data list.
         if (audioCursor != null) {
             if (audioCursor.moveToFirst()) {
@@ -69,45 +83,56 @@ public class MusicDaoImpl implements MusicDaoI {
 
                     if (!isSongBlacklisted) {
 
+                        //Music title (name)
                         String sTitle = audioCursor.getString(0).trim();
-//                                .replace("y2mate.com -", "")
 //                                .replace("&#039;", "'")
 //                                .replace("%20", " ")
 //                                .replace("_", " ")
 //                                .replace("&amp;", ",").trim();
+                        //Music Artist
                         String sArtist = audioCursor.getString(1).trim();
+                        //Music album art id
                         String sAlbumId = audioCursor.getString(2);
-                        //converting duration in readable format
                         String sDuration = audioCursor.getString(3);
                         String sPath = audioCursor.getString(4);
                         String sAlbum = audioCursor.getString(5);
                         String sMimeType = audioCursor.getString(6);
                         String sSize = audioCursor.getString(7);
-                        long dateInMillis = audioCursor.getLong(10);
-                        String sId = audioCursor.getString(11);
-                        String sYear = audioCursor.getString(12);
+                        long dateInMillis = audioCursor.getLong(8);
+                        String sId = audioCursor.getString(9);
+                        String sYear = audioCursor.getString(10);
+                        String sDateAdded = convertLongToDate(dateInMillis);
 
                         Uri uri = Uri.parse("content://media/external/audio/albumart");
                         String sAlbumUri = Uri.withAppendedPath(uri, sAlbumId).toString();
 
                         String sBitrate = "";
                         String sGenre = "";
+                        //In android 10 or lower these fields are unavailable
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                            sBitrate = audioCursor.getString(8);
-                            sGenre = audioCursor.getString(9);
+                            sBitrate = audioCursor.getString(11);
+                            sGenre = audioCursor.getString(12);
                         }
 
-                        String sDateAdded = convertLongToDate(dateInMillis);
                         File file = new File(sPath);
                         int filter = new StorageUtil.SettingsStorage(context).loadFilterDur() * 1000;
                         if (file.exists()) {
-                            context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
                             if (sDuration != null && filter <= Integer.parseInt(sDuration)) {
-                                Music music = Music.newBuilder().setName(sTitle).setArtist(sArtist)
-                                        .setAlbum(sAlbum).setAlbumUri(sAlbumUri).setDuration(sDuration)
-                                        .setPath(sPath).setBitrate(sBitrate).setMimeType(sMimeType)
-                                        .setSize(sSize).setGenre(sGenre != null ? sGenre : "").setId(sId).setDateAdded(sDateAdded)
-                                        .setYear(sYear != null ? sYear : "").build();
+                                Music music = Music.newBuilder()
+                                        .setName(sTitle)
+                                        .setArtist(sArtist)
+                                        .setAlbum(sAlbum)
+                                        .setAlbumUri(sAlbumUri)
+                                        .setDuration(sDuration)
+                                        .setPath(sPath)
+                                        .setBitrate(sBitrate)
+                                        .setMimeType(sMimeType)
+                                        .setSize(sSize)
+                                        .setGenre(sGenre != null ? sGenre : "")
+                                        .setId(sId)
+                                        .setDateAdded(sDateAdded)
+                                        .setYear(sYear != null ? sYear : "")
+                                        .build();
 
                                 dataList.add(music);
                             }
@@ -121,7 +146,11 @@ public class MusicDaoImpl implements MusicDaoI {
                 } else {
                     future.completeExceptionally(new Throwable("Music's unavailable"));
                 }
+            } else {
+                future.completeExceptionally(new Throwable("Music's unavailable"));
             }
+        } else {
+            future.completeExceptionally(new Throwable("Music's unavailable"));
         }
         return future;
     }
