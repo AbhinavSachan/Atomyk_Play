@@ -13,7 +13,6 @@ import java.util.concurrent.CompletableFuture;
 public class MusicUtils {
     private static MusicUtils instance;
     private final ArrayList<Music> initialMusicList = new ArrayList<>();
-    private boolean shouldChangeShuffleMode = true;
     private final MutableLiveData<LoadingStatus> status = new MutableLiveData<>();
 
     public static MusicUtils getInstance() {
@@ -41,15 +40,6 @@ public class MusicUtils {
         });
         return future;
     }
-
-    public boolean shouldChangeShuffleMode() {
-        return shouldChangeShuffleMode;
-    }
-
-    public void setShouldChangeShuffleMode(boolean shouldChangeShuffleMode) {
-        this.shouldChangeShuffleMode = shouldChangeShuffleMode;
-    }
-
     public ArrayList<Music> getInitialMusicList() {
         return initialMusicList;
     }

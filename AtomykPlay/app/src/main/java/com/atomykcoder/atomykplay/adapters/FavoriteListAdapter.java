@@ -82,7 +82,7 @@ public class FavoriteListAdapter extends MusicAdapter implements ItemTouchHelper
             else
                 handleNoShuffle(storage, position, super.items);
 
-            handlePlayMusic(mainActivity, currentItem,super.items);
+            handlePlayMusic(mainActivity, currentItem);
         });
 
         holder.optBtn.setOnClickListener(v -> {

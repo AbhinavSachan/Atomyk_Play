@@ -75,9 +75,7 @@ public class MusicMainAdapter extends MusicAdapter {
             else
                 handleNoShuffle(storage, position, super.items);
 
-            handlePlayMusic(mainActivity, currentItem,super.items);
-            String TAG = "TAG";
-            Log.d(TAG, "onItemDismiss: "+super.items.size()+"pos : "+position);
+            handlePlayMusic(mainActivity, currentItem);
         });
 
         holder.optionButton.setOnClickListener(v -> {

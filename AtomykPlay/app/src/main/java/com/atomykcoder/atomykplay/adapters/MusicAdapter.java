@@ -19,9 +19,9 @@ public class MusicAdapter extends GenericRecyclerAdapter<Music> {
 
     private ArrayList<Music> musicList;
 
-    protected void handlePlayMusic(MainActivity mainActivity, Music item,ArrayList<Music> list) {
+    protected void handlePlayMusic(MainActivity mainActivity, Music item) {
         mainActivity.playAudio(item);
-        mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(list);
+        mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(musicList);
         mainActivity.openBottomPlayer();
     }
 
@@ -34,11 +34,7 @@ public class MusicAdapter extends GenericRecyclerAdapter<Music> {
     protected void handleShuffle(StorageUtil storage, int position, ArrayList<Music> musicList) {
 
         ArrayList<Music> shuffleList = new ArrayList<>(musicList);
-        if (MusicUtils.getInstance().shouldChangeShuffleMode()) {
-            storage.saveShuffle(true);
-            MusicUtils.getInstance().setShouldChangeShuffleMode(false);
-        }
-
+        storage.saveShuffle(true);
         storage.saveTempMusicList(shuffleList);
 
         //removing current item from list
@@ -58,10 +54,7 @@ public class MusicAdapter extends GenericRecyclerAdapter<Music> {
     }
 
     protected void handleNoShuffle(StorageUtil storage, int position, ArrayList<Music> musicList) {
-        if (MusicUtils.getInstance().shouldChangeShuffleMode()) {
-            storage.saveShuffle(false);
-            MusicUtils.getInstance().setShouldChangeShuffleMode(false);
-        }
+        storage.saveShuffle(false);
         storage.saveQueueList(musicList);
         storage.saveMusicIndex(position);
         this.musicList = musicList;

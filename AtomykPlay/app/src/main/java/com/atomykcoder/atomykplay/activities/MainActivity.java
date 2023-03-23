@@ -800,11 +800,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void setDataInNavigation(String song_name, String artist_name, Bitmap album_uri) {
         navSongName.setText(song_name);
         navArtistName.setText(artist_name);
-        try {
-            glideBuilt.glideBitmap(album_uri, R.drawable.ic_music, navCover, 300);
-        } catch (RuntimeException e) {
-            e.printStackTrace();
-        }
+        glideBuilt.glideBitmap(album_uri, R.drawable.ic_music, navCover, 300);
     }
 
     private Music getMusic() {
@@ -897,9 +893,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
     public void playRandomSong(ArrayList<Music> songs) {
-        if (MusicUtils.getInstance().shouldChangeShuffleMode()) {
-            storageUtil.saveShuffle(true);
-        }
+        storageUtil.saveShuffle(true);
         storageUtil.saveTempMusicList(songs);
         /*
          * Plays a random song from the given list of songs by sending a broadcast message

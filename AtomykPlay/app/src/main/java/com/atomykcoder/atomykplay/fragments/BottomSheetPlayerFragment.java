@@ -408,10 +408,12 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     }
 
     private void setThemeColorLyricView(int color) {
-        gradientTop.mutate();
-        gradientBottom.mutate();
-        gradientTop.setColors(new int[]{Color.TRANSPARENT, color});
-        gradientBottom.setColors(new int[]{color, Color.TRANSPARENT});
+//        gradientTop.mutate();
+//        gradientBottom.mutate();
+//
+//        gradientTop.setColors(new int[]{Color.TRANSPARENT, color});
+//        gradientBottom.setColors(new int[]{color, Color.TRANSPARENT});
+
     }
 
     @Subscribe
@@ -473,8 +475,6 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
                     glideBuilt.glideBitmap(image, R.drawable.ic_music, mini_cover, 128);
                     glideBuilt.glideBitmap(image, R.drawable.ic_music, queueCoverImg, 128);
                     mainActivity.setDataInNavigation(songName, artistName, image);
-
-
                 } catch (NumberFormatException ignored) {
                 }
             }
@@ -851,7 +851,6 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
             storageUtil.saveShuffle(false);
             restoreLastListAndPos(activeMusic);
         }
-        MusicUtils.getInstance().setShouldChangeShuffleMode(true);
     }
 
     private ExecutorService executorService;
