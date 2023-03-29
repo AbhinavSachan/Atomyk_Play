@@ -36,16 +36,13 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.atomykcoder.atomykplay.BuildConfig;
 import com.atomykcoder.atomykplay.R;
-import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.classes.ApplicationClass;
 import com.atomykcoder.atomykplay.classes.GlideBuilt;
 import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.helperFunctions.Logger;
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper;
-import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.repository.LoadingStatus;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
@@ -65,7 +62,6 @@ import org.jaudiotagger.tag.datatype.Artwork;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -127,6 +123,9 @@ public class TagEditorFragment extends Fragment {
         editArtist = view.findViewById(R.id.edit_song_artist_tag);
         editAlbum = view.findViewById(R.id.edit_song_album_tag);
         editGenre = view.findViewById(R.id.edit_song_genre_tag);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            editGenre.setVisibility(View.GONE);
+        }
         ImageView pickImageView = view.findViewById(R.id.pick_cover_tag);
         coverImageView = view.findViewById(R.id.song_image_view_tag);
         FloatingActionButton saveButton = view.findViewById(R.id.tag_editor_save_button);
@@ -136,7 +135,9 @@ public class TagEditorFragment extends Fragment {
             editName.setText(music.getName());
             editArtist.setText(music.getArtist());
             editAlbum.setText(music.getAlbum());
-            editGenre.setText(music.getGenre());
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                editGenre.setText(music.getGenre());
+            }
             final Bitmap[] image = {null};
 
 
@@ -223,10 +224,15 @@ public class TagEditorFragment extends Fragment {
         String newTitle = editName.getText().toString().trim();
         String newArtist = editArtist.getText().toString().trim();
         String newAlbum = editAlbum.getText().toString().trim();
-        String newGenre = editGenre.getText().toString().trim();
+        String newGenre = "";
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            newGenre = editGenre.getText().toString().trim();
+        }
         setLoadingStatus(LoadingStatus.LOADING);
+        String finalNewGenre = newGenre;
         service.execute(() -> {
             try {
+
                 File musicFile = new File(music.getPath());
                 AudioFile f = AudioFileIO.read(musicFile);
                 Tag tag = f.getTag();
@@ -234,7 +240,9 @@ public class TagEditorFragment extends Fragment {
                 tag.setField(FieldKey.TITLE, newTitle);
                 tag.setField(FieldKey.ARTIST, newArtist);
                 tag.setField(FieldKey.ALBUM, newAlbum);
-                tag.setField(FieldKey.GENRE, newGenre);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    tag.setField(FieldKey.GENRE, finalNewGenre);
+                }
 
                 if (imageUri != null) {
                     String filePath = getRealPathFromURI(requireContext(), imageUri);

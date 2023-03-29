@@ -99,6 +99,7 @@ public class MusicMainAdapter extends MusicAdapter {
         if (position != -1) {
             storage.removeFromInitialList(item);
             super.items.remove(position);
+            musicUtils.removeFromList(item);
         }
 
         notifyItemRangeChanged(position, super.items.size() - (position + 1));

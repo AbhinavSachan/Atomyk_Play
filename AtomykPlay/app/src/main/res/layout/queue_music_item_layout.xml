@@ -150,7 +150,6 @@
             android:clickable="true"
             android:contentDescription="@string/empty"
             android:focusable="true"
-            android:foreground="@drawable/round_select_effect_small"
             android:padding="13dp"
             android:src="@drawable/ic_drag_handle"
             app:layout_constraintBottom_toBottomOf="parent"

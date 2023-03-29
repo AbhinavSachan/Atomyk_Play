@@ -8,86 +8,79 @@
     android:layout_margin="8dp"
     android:clickable="true"
     android:focusable="true"
-    android:foreground="?selectableItemBackground"
     tools:ignore="UnusedAttribute">
 
-    <RelativeLayout
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="165dp"
+        app:cardBackgroundColor="@color/cover_black"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="1dp">
 
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cardView"
+        <ImageView
+            android:id="@+id/playlist_cover_img"
             android:layout_width="match_parent"
-            android:layout_height="165dp"
-            app:cardBackgroundColor="@color/cover_black"
-            app:cardCornerRadius="6dp"
-            app:cardElevation="1dp">
+            android:layout_height="match_parent"
+            android:contentDescription="@string/imageView"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_music_list" />
 
-            <ImageView
-                android:id="@+id/playlist_cover_img"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:contentDescription="@string/imageView"
-                android:scaleType="centerCrop"
-                android:src="@drawable/ic_music_list" />
+    </com.google.android.material.card.MaterialCardView>
 
-        </com.google.android.material.card.MaterialCardView>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/cardView"
+        android:orientation="horizontal"
+        android:weightSum="6">
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/cardView"
-            android:orientation="horizontal"
-            android:weightSum="6">
+            android:layout_weight="5"
+            android:orientation="vertical">
 
-            <LinearLayout
-                android:layout_width="0dp"
+            <TextView
+                android:id="@+id/playlist_name_tv"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="5"
-                android:orientation="vertical">
+                android:ellipsize="end"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:paddingStart="11dp"
+                android:paddingTop="6dp"
+                android:paddingEnd="12dp"
+                android:paddingBottom="4dp"
+                android:singleLine="true"
+                android:text="@string/empty"
+                android:textColor="@color/text_color"
+                android:textSize="@dimen/d_16sp" />
 
-                <TextView
-                    android:id="@+id/playlist_name_tv"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ellipsize="marquee"
-                    android:marqueeRepeatLimit="marquee_forever"
-                    android:paddingStart="11dp"
-                    android:paddingTop="6dp"
-                    android:paddingEnd="12dp"
-                    android:paddingBottom="4dp"
-                    android:singleLine="true"
-                    android:text="@string/empty"
-                    android:textColor="@color/text_color"
-                    android:textSize="@dimen/d_16sp" />
+            <TextView
+                android:id="@+id/playlist_item_count_tv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="12dp"
+                android:paddingTop="4dp"
+                android:paddingEnd="12dp"
+                android:paddingBottom="4dp"
+                android:text="@string/empty"
+                android:textColor="@color/sub_text_grey"
+                android:textSize="@dimen/d_12sp" />
 
-                <TextView
-                    android:id="@+id/playlist_item_count_tv"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingStart="12dp"
-                    android:paddingTop="4dp"
-                    android:paddingEnd="12dp"
-                    android:paddingBottom="4dp"
-                    android:text="@string/empty"
-                    android:textColor="@color/sub_text_grey"
-                    android:textSize="@dimen/d_12sp" />
-
-
-            </LinearLayout>
-
-            <ImageView
-                android:id="@+id/playlist_option"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:clickable="true"
-                android:contentDescription="@string/empty"
-                android:focusable="true"
-                android:padding="2dp"
-                android:src="@drawable/ic_option" />
         </LinearLayout>
 
-    </RelativeLayout>
+        <ImageView
+            android:id="@+id/playlist_option"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="?selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:contentDescription="@string/empty"
+            android:focusable="true"
+            android:padding="2dp"
+            android:src="@drawable/ic_option" />
+    </LinearLayout>
 
 </RelativeLayout>

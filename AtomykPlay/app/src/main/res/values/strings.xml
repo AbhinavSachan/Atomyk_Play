@@ -13,10 +13,10 @@
     <string name="your_lyrics">Paste Here Your Lyrics …</string>
     <string name="imageView">"Music cover image"</string>
     <string name="start_pos">00:00</string>
-    <string name="song">Song</string>
-    <string name="album">Album</string>
-    <string name="artist">Artist</string>
-    <string name="genre">Genre</string>
+    <string name="song">0 Song</string>
+    <string name="album">0 Album</string>
+    <string name="artist">0 Artist</string>
+    <string name="genre">0 Genre</string>
     <string name="start_text">Start</string>
     <string name="sleep_timer_text">Set sleep timer</string>
     <string name="filter_duration">Filter duration</string>
@@ -48,7 +48,7 @@
     <string name="option_des">Show option menu in the main player</string>
     <string name="audio">Audio</string>
     <string name="auto_play">Auto Play</string>
-    <string name="autoplay_des">Start playing immediately when a wired or bluetooth device is plugged in</string>
+    <string name="autoplay_des">Start playing immediately when a wired headset is plugged in</string>
     <string name="keep_shuffle_on">Keep Shuffle On</string>
     <string name="shuffle_des">Shuffle mode won\'t turn off when playing new song from list</string>
     <string name="lowerVol">Lower Volume</string>
@@ -118,7 +118,20 @@
     <string name="flat_icon"><u>Flat Icons</u></string>
     <string name="svg_repo"><u>SVG Repo</u></string>
     <string name="add_lyr">Add lyrics</string>
-    <string name="permission_request">Permission request</string>
+    <string name="permission_req">Permission Required</string>
+    <string name="permission_des">Without these permission\'s app cannot function</string>
     <string name="read_per"><b>Read External Storage -</b> In order to scan songs from your device, app needs to request this permission.</string>
     <string name="phone_state_per"><b>Read Phone State -</b> In order to provide better experience while receiving phone calls, app needs to request this permission.</string>
+    <string name="delete_file">Delete this file</string>
+    <string name="allow">Allow</string>
+    <string name="deny">Deny</string>
+    <string name="beautify_songs">Beautify Song Name</string>
+    <string name="beautify_des">Remove unnecessary symbols from name \n(Ex - &amp;#039;, %20, _, etc.)</string>
+    <string name="scan_all_files">Scan All Files</string>
+    <string name="scan_all_des">App will scan for all audio files including \n(Ex - Music, Ringtone, Recordings (Call recordings as well), etc.)</string>
+    <string name="add_tag_removal">Add Tags To Remove</string>
+    <string name="add_tag">Add Tag</string>
+    <string name="tag_name">Replace this</string>
+    <string name="tag_suggestion">Tags should exactly be what you want to remove from name including empty spaces.</string>
+    <string name="replacing_tag">Replace with</string>
 </resources>

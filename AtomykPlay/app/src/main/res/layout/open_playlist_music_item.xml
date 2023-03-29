@@ -124,6 +124,7 @@
             android:clickable="true"
             android:contentDescription="@string/empty"
             android:focusable="true"
+            android:background="?selectableItemBackgroundBorderless"
             android:padding="6dp"
             android:src="@drawable/ic_option"
             app:layout_constraintBottom_toBottomOf="parent"

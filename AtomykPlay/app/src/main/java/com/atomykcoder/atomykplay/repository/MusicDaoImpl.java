@@ -1,7 +1,6 @@
 package com.atomykcoder.atomykplay.repository;
 
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
@@ -23,12 +22,18 @@ import java.util.concurrent.CompletableFuture;
 public class MusicDaoImpl implements MusicDaoI {
     @Override
     public CompletableFuture<ArrayList<Music>> fetchMusic(Context context) {
+        Uri albumArtBaseUri = Uri.parse("content://media/external/audio/albumart");
+        StorageUtil.SettingsStorage settingsStorage = new StorageUtil.SettingsStorage(context);
         CompletableFuture<ArrayList<Music>> future = new CompletableFuture<>();
-        String selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0";
+        String selection = null;
+        if (!settingsStorage.loadScanAllMusic()) {
+            //if selection is IS_MUSIC, ringtones will not appear in the list
+            selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0";
+        }
         ArrayList<Music> dataList = new ArrayList<>();
-        String[] proj;
+        String[] projection;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
-            proj = new String[]{
+            projection = new String[]{
                     MediaStore.Audio.Media.TITLE,
                     MediaStore.Audio.Media.ARTIST,
                     MediaStore.Audio.Media.ALBUM_ID,
@@ -44,7 +49,7 @@ public class MusicDaoImpl implements MusicDaoI {
                     MediaStore.Audio.Media.GENRE
             };
         } else {
-            proj = new String[]{
+            projection = new String[]{
                     MediaStore.Audio.Media.TITLE,
                     MediaStore.Audio.Media.ARTIST,
                     MediaStore.Audio.Media.ALBUM_ID,
@@ -58,10 +63,11 @@ public class MusicDaoImpl implements MusicDaoI {
                     MediaStore.Audio.Media.YEAR
             };
         }
+
         //Creating a cursor to store all data of a song
         Cursor audioCursor = context.getContentResolver().query(
                 MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                proj,
+                projection,
                 selection,
                 null,
                 null
@@ -69,7 +75,6 @@ public class MusicDaoImpl implements MusicDaoI {
         //If cursor is not null then storing data inside a data list.
         if (audioCursor != null) {
             if (audioCursor.moveToFirst()) {
-                StorageUtil.SettingsStorage settingsStorage = new StorageUtil.SettingsStorage(context);
                 ArrayList<String> blackList = settingsStorage.loadBlackList();
                 do {
                     boolean isSongBlacklisted = false;
@@ -84,13 +89,24 @@ public class MusicDaoImpl implements MusicDaoI {
                     if (!isSongBlacklisted) {
 
                         //Music title (name)
-                        String sTitle = audioCursor.getString(0).trim();
-//                                .replace("&#039;", "'")
-//                                .replace("%20", " ")
-//                                .replace("_", " ")
-//                                .replace("&amp;", ",").trim();
+                        String sTitle;
+                        sTitle = audioCursor.getString(0);
+                        if (settingsStorage.loadBeautifyName()) {
+                            sTitle = sTitle.replace("&#039;", "'")
+                                    .replace("%20", " ")
+                                    .replace("_", " ")
+                                    .replace("&amp;", ",").trim();
+                            ArrayList<String> beautifyTags = settingsStorage.getAllBeautifyTag();
+                            ArrayList<String> replacingTags = settingsStorage.getAllReplacingTag();
+                            if (!beautifyTags.isEmpty() && !replacingTags.isEmpty()) {
+                                for (int i = 0; i < beautifyTags.size(); i++) {
+                                    sTitle = sTitle.replace(beautifyTags.get(i), replacingTags.get(i));
+                                }
+                            }
+                        }
+
                         //Music Artist
-                        String sArtist = audioCursor.getString(1).trim();
+                        String sArtist = audioCursor.getString(1);
                         //Music album art id
                         String sAlbumId = audioCursor.getString(2);
                         String sDuration = audioCursor.getString(3);
@@ -103,8 +119,7 @@ public class MusicDaoImpl implements MusicDaoI {
                         String sYear = audioCursor.getString(10);
                         String sDateAdded = convertLongToDate(dateInMillis);
 
-                        Uri uri = Uri.parse("content://media/external/audio/albumart");
-                        String sAlbumUri = Uri.withAppendedPath(uri, sAlbumId).toString();
+                        String sAlbumUri = Uri.withAppendedPath(albumArtBaseUri, sAlbumId).toString();
 
                         String sBitrate = "";
                         String sGenre = "";

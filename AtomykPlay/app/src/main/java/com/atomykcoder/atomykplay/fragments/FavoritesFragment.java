@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.adapters.FavoriteListAdapter;
 import com.atomykcoder.atomykplay.adapters.SimpleTouchCallback;
+import com.atomykcoder.atomykplay.customScripts.LinearLayoutManagerWrapper;
 import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.events.RemoveFromFavoriteEvent;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
@@ -50,7 +51,7 @@ public class FavoritesFragment extends Fragment implements OnDragStartListener {
 
         recyclerView.setHasFixedSize(true);
 
-        LinearLayoutManager manager = new LinearLayoutManager(getContext());
+        LinearLayoutManager manager = new LinearLayoutManagerWrapper(getContext());
 
         ArrayList<Music> favList = storageUtil.getFavouriteList();
 

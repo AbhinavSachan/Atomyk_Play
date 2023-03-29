@@ -60,7 +60,7 @@ public class PlaylistsFragment extends Fragment {
         });
 
         recyclerView.setHasFixedSize(true);
-        RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getContext(), 2);
+        GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 2);
 
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.addItemDecoration(new GridSpacing(2, 8, false));

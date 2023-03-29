@@ -146,6 +146,7 @@ public class MusicQueueAdapter extends MusicAdapter implements ItemTouchHelperAd
             if (super.items.size() == 1) {
                 mainActivity.bottomSheetPlayerFragment.queueSheetBehaviour.setState(BottomSheetBehavior.STATE_HIDDEN);
                 mainActivity.clearStorage();
+                clearList();
                 mainActivity.mainPlayerSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
                 mainActivity.bottomSheetPlayerFragment.resetMainPlayerLayout();
                 mainActivity.resetDataInNavigation();
@@ -156,7 +157,9 @@ public class MusicQueueAdapter extends MusicAdapter implements ItemTouchHelperAd
             }
             if (!super.items.isEmpty()) {
                 if (position == savedIndex) {
-                    mainActivity.playAudio(super.items.get(savedIndex));
+                    if (savedIndex != -1) {
+                        mainActivity.playAudio(super.items.get(savedIndex));
+                    }
                 } else if (position < savedIndex) {
                     storageUtil.saveMusicIndex(savedIndex - 1);
                 }
@@ -167,6 +170,9 @@ public class MusicQueueAdapter extends MusicAdapter implements ItemTouchHelperAd
         }
     }
 
+    public void clearList(){
+        super.items.clear();
+    }
     @Override
     public int getItemCount() {
         return super.items.size();
@@ -174,21 +180,43 @@ public class MusicQueueAdapter extends MusicAdapter implements ItemTouchHelperAd
 
     public void updateItemInserted(Music music) {
         int pos = storageUtil.loadMusicIndex();
-        super.items.add(pos + 1, music);
-        notifyItemInserted(pos + 1);
-        notifyItemRangeChanged(pos + 1, super.items.size() - (pos + 2));
+        if (super.items.isEmpty()) {
+            super.items.add(0, music);
+            storageUtil.saveMusicIndex(0);
+            mainActivity.playAudio(music);
+            mainActivity.openBottomPlayer();
+            notifyItemInserted(0);
+        } else {
+            super.items.add(pos + 1, music);
+            notifyItemInserted(pos + 1);
+            notifyItemRangeChanged(pos + 1, super.items.size() - (pos + 2));
+        }
         storageUtil.saveQueueList(super.items);
     }
 
     public void updateListInserted(ArrayList<Music> list) {
         int pos = storageUtil.loadMusicIndex();
-        super.items.addAll(pos + 1, list);
-        notifyItemRangeInserted(pos + 1, list.size());
-        notifyItemRangeChanged(pos + list.size() + 1, super.items.size() - (pos + list.size() + 2));
+        if (super.items.isEmpty()) {
+            super.items.addAll(0, list);
+            storageUtil.saveMusicIndex(0);
+            mainActivity.playAudio(list.get(0));
+            mainActivity.openBottomPlayer();
+            notifyItemRangeInserted(1, list.size());
+            notifyItemRangeChanged(list.size() + 1, super.items.size() - (pos + list.size() + 2));
+        } else {
+            super.items.addAll(pos + 1, list);
+            notifyItemRangeInserted(pos + 1, list.size());
+            notifyItemRangeChanged(pos + list.size() + 1, super.items.size() - (pos + list.size() + 2));
+        }
         storageUtil.saveQueueList(super.items);
     }
 
     public void updateListInsertedLast(ArrayList<Music> list) {
+        if (super.items.isEmpty()) {
+            storageUtil.saveMusicIndex(0);
+            mainActivity.playAudio(list.get(0));
+            mainActivity.openBottomPlayer();
+        }
         super.items.addAll(list);
         int pos = super.items.lastIndexOf(list.get(0));
         notifyItemRangeInserted(pos, list.size());
@@ -196,7 +224,12 @@ public class MusicQueueAdapter extends MusicAdapter implements ItemTouchHelperAd
     }
 
     public void updateItemInsertedLast(Music music) {
-        super.items.add(music);
+        if (super.items.isEmpty()) {
+            storageUtil.saveMusicIndex(0);
+            mainActivity.playAudio(music);
+            mainActivity.openBottomPlayer();
+        }
+        super.items.add( music);
         int pos = super.items.lastIndexOf(music);
         notifyItemInserted(pos);
         storageUtil.saveQueueList(super.items);

@@ -38,6 +38,12 @@
     <color name="player_bg">#F6F6F6</color>
     <color name="red_layer">#0FDC2525</color>
     <color name="collapsed_appbar_color">#CDE9F6</color>
+    <color name="pressed_radio_btn">#B1DBF1</color>
+    <color name="checked_radio_btn">#B5CDDF</color>
+    <color name="unchecked_radio_btn">#DCDCDC</color>
+    <color name="pressed_stroke_radio_btn">#567C8F</color>
+    <color name="checked_stroke_radio_btn">#5389B3</color>
+    <color name="unchecked_stroke_radio_btn">#7A7A7A</color>
 
 
 </resources>

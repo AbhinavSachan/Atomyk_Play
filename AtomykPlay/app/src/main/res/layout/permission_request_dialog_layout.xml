@@ -1,43 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    app:strokeWidth="0dp"
-    app:cardCornerRadius="8dp"
-    android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:strokeWidth="0dp">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/tv0"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="16dp"
+            android:padding="4dp"
+            android:text="@string/permission_req"
+            android:textSize="@dimen/d_28sp"
+            android:textStyle="bold" />
+
         <TextView
             android:id="@+id/tv1"
             android:layout_width="wrap_content"
-            android:text="@string/permission_request"
-            android:textStyle="bold"
-            android:padding="4dp"
-            android:layout_marginTop="16dp"
-            android:textSize="@dimen/d_28sp"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv0"
+            android:padding="12dp"
             android:layout_centerHorizontal="true"
-            android:layout_height="wrap_content"/>
+            android:text="@string/permission_des"
+            android:textSize="@dimen/d_14sp" />
 
         <TextView
             android:id="@+id/tv2"
-            android:textSize="@dimen/d_18sp"
-            android:layout_below="@id/tv1"
             android:layout_width="wrap_content"
-            android:text="@string/read_per"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv1"
             android:lineSpacingMultiplier="1.2"
             android:padding="12dp"
-            android:layout_height="wrap_content"/>
+            android:text="@string/read_per"
+            android:textSize="@dimen/d_18sp" />
+
         <TextView
             android:id="@+id/tv3"
-            android:textSize="@dimen/d_18sp"
-            android:layout_below="@id/tv2"
             android:layout_width="wrap_content"
-            android:text="@string/phone_state_per"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv2"
             android:lineSpacingMultiplier="1.2"
             android:padding="12dp"
-            android:layout_height="wrap_content"/>
+            android:text="@string/phone_state_per"
+            android:textSize="@dimen/d_18sp" />
     </RelativeLayout>
 
 </com.google.android.material.card.MaterialCardView>

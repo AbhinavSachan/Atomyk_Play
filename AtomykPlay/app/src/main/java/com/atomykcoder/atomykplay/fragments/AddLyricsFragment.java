@@ -14,17 +14,19 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.data.Music;
+import com.atomykcoder.atomykplay.dataModels.LRCMap;
 import com.atomykcoder.atomykplay.events.RunnableSyncLyricsEvent;
 import com.atomykcoder.atomykplay.helperFunctions.FetchLyrics;
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
-import com.atomykcoder.atomykplay.dataModels.LRCMap;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -41,7 +43,7 @@ public class AddLyricsFragment extends Fragment {
     private EditText nameEditText, artistEditText;
     private StorageUtil storageUtil;
     private Button btnFind;
-    private Dialog dialog;
+    private AlertDialog dialog;
     private String name, artist, musicId;
     private View view;
 
@@ -123,27 +125,26 @@ public class AddLyricsFragment extends Fragment {
     }
 
     private void setDialogBox() {
-        dialog = new Dialog(getContext());
-
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.edit_name_dialog_box);
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(requireContext());
+        View customLayout = getLayoutInflater().inflate(R.layout.edit_name_dialog_box, null);
+        builder.setView(customLayout);
+        builder.setCancelable(true);
 
         //Initialize Dialogue Box UI Items
-        nameEditText = dialog.findViewById(R.id.edit_song_name);
-        artistEditText = dialog.findViewById(R.id.edit_artist_name);
-        Button btnCancel = dialog.findViewById(R.id.btn_cancel);
-        Button btnOk = dialog.findViewById(R.id.btn_ok);
+        nameEditText = customLayout.findViewById(R.id.edit_song_name);
+        artistEditText = customLayout.findViewById(R.id.edit_artist_name);
 
         nameEditText.setText(name);
         artistEditText.setText(artist);
 
-        btnOk.setOnClickListener(v -> {
+        builder.setPositiveButton("OK",(dialog,i) -> {
             if (isValidInput()) {
                 btnFind.setVisibility(View.GONE);
                 fetchLyrics();
             }
         });
-        btnCancel.setOnClickListener(v -> dialog.dismiss());
+        builder.setNegativeButton("Cancel",null);
+        dialog = builder.create();
         dialog.show();
     }
 

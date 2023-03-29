@@ -15,11 +15,11 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.adapters.MusicMainAdapter;
+import com.atomykcoder.atomykplay.customScripts.LinearLayoutManagerWrapper;
 import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 
@@ -27,7 +27,6 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Locale;
@@ -41,7 +40,7 @@ public class LastAddedFragment extends Fragment {
     private final int thirdOptionValue = 180;
     private final int fourthOptionValue = 360;
     private RadioButton firstRadio, secondRadio, thirdRadio, fourthRadio;
-    private MusicMainAdapter adapter;
+    public MusicMainAdapter adapter;
     private ArrayList<Music> lastAddedMusicList;
     private Dialog filterDialog;
     private TextView songCountTv;
@@ -208,7 +207,7 @@ public class LastAddedFragment extends Fragment {
 
                 // set recyclerview and adapter
                 recyclerView.setHasFixedSize(true);
-                recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+                recyclerView.setLayoutManager(new LinearLayoutManagerWrapper(getContext()));
                 adapter = new MusicMainAdapter(getContext(), lastAddedMusicList);
                 recyclerView.setAdapter(adapter);
             });

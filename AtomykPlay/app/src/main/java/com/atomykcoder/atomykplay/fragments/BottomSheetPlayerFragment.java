@@ -5,6 +5,8 @@ import static com.atomykcoder.atomykplay.activities.MainActivity.media_player_se
 import static com.atomykcoder.atomykplay.activities.MainActivity.service_bound;
 import static com.atomykcoder.atomykplay.helperFunctions.MusicHelper.convertDuration;
 import static com.atomykcoder.atomykplay.helperFunctions.MusicHelper.convertToMillis;
+import static com.atomykcoder.atomykplay.helperFunctions.MusicHelper.decode;
+import static com.atomykcoder.atomykplay.helperFunctions.MusicHelper.encode;
 import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.no_repeat;
 import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.repeat;
 import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.repeat_one;
@@ -51,9 +53,11 @@ import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.adapters.MusicLyricsAdapter;
 import com.atomykcoder.atomykplay.adapters.MusicQueueAdapter;
 import com.atomykcoder.atomykplay.adapters.SimpleTouchCallback;
+import com.atomykcoder.atomykplay.classes.ApplicationClass;
 import com.atomykcoder.atomykplay.classes.GlideBuilt;
 import com.atomykcoder.atomykplay.customScripts.CenterSmoothScrollScript;
 import com.atomykcoder.atomykplay.customScripts.CustomBottomSheet;
+import com.atomykcoder.atomykplay.customScripts.LinearLayoutManagerWrapper;
 import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.dataModels.LRCMap;
 import com.atomykcoder.atomykplay.enums.OptionSheetEnum;
@@ -67,9 +71,9 @@ import com.atomykcoder.atomykplay.events.UpdateMusicProgressEvent;
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
-import com.atomykcoder.atomykplay.repository.MusicUtils;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 import org.greenrobot.eventbus.EventBus;
@@ -158,13 +162,14 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     private boolean should_refresh_layout = true;
     private MutableLiveData<Integer> color = new MutableLiveData<>();
 
-    public void setThemeColorForApp(int color){
+    public void setThemeColorForApp(int color) {
         this.color.setValue(color);
     }
 
-    public LiveData<Integer> getThemeColor(){
+    public LiveData<Integer> getThemeColor() {
         return color;
     }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_player, container, false);
@@ -181,8 +186,12 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         executorService = Executors.newFixedThreadPool(10);
         handler = new Handler(Looper.getMainLooper());
 
-        if (activeMusic == null) {
-            activeMusic = getCurrentMusic();
+        if (savedInstanceState == null) {
+            if (activeMusic == null) {
+                activeMusic = getCurrentMusic();
+            }
+        }else {
+            activeMusic = decode(savedInstanceState.getString("activeMusic"));
         }
         if (activeMusic != null) {
             lrcMap = storageUtil.loadLyrics(activeMusic.getId());
@@ -265,7 +274,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         optionImg.setOnClickListener(v -> optionMenu(activeMusic));
 
         queueRecyclerView = view.findViewById(R.id.queue_music_recycler);
-        linearLayoutManager = new LinearLayoutManager(getContext());
+        linearLayoutManager = new LinearLayoutManagerWrapper(getContext());
 
         musicArrayList = storageUtil.loadQueueList();
         queueBottomSheet = view.findViewById(R.id.queue_bottom_sheet);
@@ -351,7 +360,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
      */
     private void scrollToCurSong() {
         int index = storageUtil.loadMusicIndex();
-        linearLayoutManager.scrollToPositionWithOffset(index, 0);
+        linearLayoutManager.scrollToPositionWithOffset(index,0);
     }
 
     /**
@@ -373,17 +382,10 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         } else {
             mini_next.setVisibility(View.GONE);
         }
-        if (settingsStorage.loadOptionMenu()) {
-            optionImg.setVisibility(View.VISIBLE);
-        } else {
-            optionImg.setVisibility(View.GONE);
-        }
     }
 
     private boolean getPlayerState() {
-        if (media_player_service.media_player != null)
-            return media_player_service.media_player.isPlaying();
-        else return false;
+        return media_player_service.isMediaPlaying();
     }
 
     @Subscribe
@@ -435,13 +437,24 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
                 songName = activeMusic.getName();
                 bitrate = activeMusic.getBitrate();
                 artistName = activeMusic.getArtist();
-                mimeType = getMime(activeMusic.getMimeType()).toUpperCase();
+                try {
+                    mimeType = getMime(activeMusic.getMimeType()).toUpperCase();
+                } catch (Exception e) {
+                    mimeType = "mp3";
+                }
                 duration = activeMusic.getDuration();
-                String convertedDur = convertDuration(duration);
+                String convertedDur = "00:00";
+                try {
+                    convertedDur = convertDuration(duration);
+                } catch (Exception ignored) {
+                }
 
                 int bitrateInNum = 0;
-                if (!bitrate.equals("")) {
-                    bitrateInNum = Integer.parseInt(bitrate) / 1000;
+                try {
+                    if (!bitrate.equals("")) {
+                        bitrateInNum = Integer.parseInt(bitrate) / 1000;
+                    }
+                } catch (NumberFormatException ignored) {
                 }
                 String finalBitrate = bitrateInNum + " KBPS";
 
@@ -450,7 +463,6 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
                 } else if (storageUtil.checkFavourite(activeMusic)) {
                     favoriteImg.setImageResource(R.drawable.ic_favorite);
                 }
-
 
                 if (!storageUtil.loadShuffle()) {
                     shuffleImg.setImageResource(R.drawable.ic_shuffle_empty);
@@ -466,16 +478,23 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
                     mimeTv.setText(mimeType);
                     durationTv.setText(convertedDur);
                     mini_name_text.setText(songName);
+                    bitrateTv.setText(finalBitrate);
                     mini_artist_text.setText(artistName);
+                } catch (Exception ignored) {
+                }
+                try {
                     seekBarMain.setMax(Integer.parseInt(duration));
                     mini_progress.setMax(Integer.parseInt(duration));
-                    bitrateTv.setText(finalBitrate);
-
-                    glideBuilt.glideBitmap(image, R.drawable.ic_music, playerCoverImage, 512);
-                    glideBuilt.glideBitmap(image, R.drawable.ic_music, mini_cover, 128);
-                    glideBuilt.glideBitmap(image, R.drawable.ic_music, queueCoverImg, 128);
-                    mainActivity.setDataInNavigation(songName, artistName, image);
-                } catch (NumberFormatException ignored) {
+                } catch (NumberFormatException e) {
+                    showToast("Something went wrong");
+                }
+                glideBuilt.glideBitmap(image, R.drawable.ic_music, playerCoverImage, 512);
+                glideBuilt.glideBitmap(image, R.drawable.ic_music, mini_cover, 128);
+                glideBuilt.glideBitmap(image, R.drawable.ic_music, queueCoverImg, 128);
+                mainActivity.setDataInNavigation(songName, artistName, image);
+                if (image != null && image.isRecycled()) {
+                    //Don't remove this it will prevent app from crashing if bitmap was trying to recycle from available instance
+                    image = null;
                 }
             }
 
@@ -483,6 +502,10 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
             should_refresh_layout = true;
         }
         EventBus.getDefault().post(new RunnableSyncLyricsEvent());
+    }
+
+    private void showToast(String s) {
+        ((ApplicationClass) requireContext().getApplicationContext()).showToast(s);
     }
 
     @SuppressLint("SetTextI18n")
@@ -522,6 +545,13 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
             }
         }
 
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        String music = encode(activeMusic);
+        outState.putString("activeMusic",music);
     }
 
     // Don't Remove This Event Bus is using this method (It might look unused still DON'T REMOVE
@@ -576,7 +606,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     public String getCurrentStamp() {
         int currPosInMillis = 0;
         if (media_player_service != null)
-            currPosInMillis = media_player_service.media_player.getCurrentPosition();
+            currPosInMillis = media_player_service.getCurrentMediaPosition();
 
         return "[" + convertDuration(String.valueOf(currPosInMillis)) + "]";
     }
@@ -605,7 +635,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     }
 
     public int getCurrentPos() {
-        return media_player_service.media_player.getCurrentPosition();
+        return media_player_service.getCurrentMediaPosition();
     }
 
     private void setLyricsAdapter() {
@@ -719,16 +749,14 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
     //region Timer setup
     private void setTimer() {
-        //Create a dialogue Box
-        timerDialogue = new Dialog(context);
-        timerDialogue.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        timerDialogue.setCancelable(true);
-        timerDialogue.setContentView(R.layout.timer_dialogue);
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(requireContext());
+        View customLayout = getLayoutInflater().inflate(R.layout.timer_dialog, null);
+        builder.setView(customLayout);
+        builder.setCancelable(true);
 
         //Initialize Dialogue Box UI Items
-        TextView showTimeText = timerDialogue.findViewById(R.id.timer_time_textview);
-        SeekBar timerSeekBar = timerDialogue.findViewById(R.id.timer_time_seekbar);
-        Button timerConfirmButton = timerDialogue.findViewById(R.id.timer_confirm_button);
+        TextView showTimeText = customLayout.findViewById(R.id.timer_time_textview);
+        SeekBar timerSeekBar = customLayout.findViewById(R.id.timer_time_seekbar);
 
         //Set TextView Initially based on seekbar progress
         String finalTextTime = String.valueOf(timerSeekBar.getProgress() + 5);
@@ -754,8 +782,8 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         });
 
         //Dialogue Box Confirm Button Listener
-        timerConfirmButton.setOnClickListener(view -> {
-            timerDialogue.dismiss();
+        builder.setPositiveButton("Start",(dialog,i) -> {
+            dialog.cancel();
             timerTv.setVisibility(View.VISIBLE);
             timerImg.setVisibility(View.GONE);
 
@@ -796,6 +824,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
             countDownTimer[0].start();
         });
         //Show Timer Dialogue Box
+        timerDialogue = builder.create();
         timerDialogue.show();
 
 
@@ -955,13 +984,12 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         }
         //layout setup ☺
         if (service_bound) {
-            if (media_player_service != null) if (media_player_service.media_player != null) {
-                if (media_player_service.media_player.isPlaying()) {
+            if (media_player_service != null)
+                if (media_player_service.isMediaPlaying()) {
                     media_player_service.setIcon(PlaybackStatus.PLAYING);
                 } else {
                     media_player_service.setIcon(PlaybackStatus.PAUSED);
                 }
-            }
         }
     }
 
@@ -992,15 +1020,14 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
         //first checking setting the media seek to current position of seek bar and then setting all data in UI
         if (service_bound) {
-            if (media_player_service.seekBarHandler != null)
+            if (media_player_service.seekBarHandler != null) {
                 media_player_service.seekBarHandler.removeCallbacks(media_player_service.seekBarRunnable);
-            if (media_player_service.media_player != null) {
-                media_player_service.media_player.seekTo(seekBar.getProgress());
-                if (media_player_service.media_player.isPlaying()) {
-                    media_player_service.buildNotification(PlaybackStatus.PLAYING, 1f);
-                } else {
-                    media_player_service.buildNotification(PlaybackStatus.PAUSED, 0f);
-                }
+            }
+            media_player_service.seekMediaTo(seekBar.getProgress());
+            if (media_player_service.isMediaPlaying()) {
+                media_player_service.buildNotification(PlaybackStatus.PLAYING, 1f);
+            } else {
+                media_player_service.buildNotification(PlaybackStatus.PAUSED, 0f);
             }
             media_player_service.setSeekBar();
         } else {
@@ -1027,16 +1054,16 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
             //first checking setting the media seek to current position of seek bar and then setting all data in UI
             if (service_bound) {
-                if (media_player_service.seekBarHandler != null)
+                if (media_player_service.seekBarHandler != null) {
                     media_player_service.seekBarHandler.removeCallbacks(media_player_service.seekBarRunnable);
-                if (media_player_service.media_player != null) {
-                    media_player_service.media_player.seekTo(position);
-                    if (media_player_service.media_player.isPlaying()) {
-                        media_player_service.buildNotification(PlaybackStatus.PLAYING, 1f);
-                    } else {
-                        media_player_service.buildNotification(PlaybackStatus.PAUSED, 0f);
-                    }
                 }
+                media_player_service.seekMediaTo(position);
+                if (media_player_service.isMediaPlaying()) {
+                    media_player_service.buildNotification(PlaybackStatus.PLAYING, 1f);
+                } else {
+                    media_player_service.buildNotification(PlaybackStatus.PAUSED, 0f);
+                }
+
                 media_player_service.setSeekBar();
             } else {
                 mini_progress.setProgress(position);

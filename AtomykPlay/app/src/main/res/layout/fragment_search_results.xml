@@ -11,12 +11,12 @@
     tools:context=".fragments.SearchFragment"
     tools:ignore="UnusedAttribute">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/search_layout_view"
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:clickable="true"
         android:focusable="true"
-        android:layout_height="wrap_content"
         android:orientation="horizontal">
 
         <ImageView
@@ -24,22 +24,29 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
-            android:contentDescription="@string/empty"
             android:clickable="true"
+            android:contentDescription="@string/empty"
             android:focusable="true"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/search_layout"
+            app:layout_constraintTop_toTopOf="parent"
             android:paddingHorizontal="8dp"
             android:paddingVertical="8dp"
             android:src="@drawable/ic_back" />
 
         <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:id="@+id/search_layout"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            app:layout_constraintStart_toEndOf="@id/close_search_btn"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:clickable="true"
+            android:focusable="true"
             app:boxBackgroundColor="@color/primary_bg"
             app:boxCornerRadiusBottomEnd="0dp"
             app:boxCornerRadiusBottomStart="0dp"
             app:boxCornerRadiusTopEnd="0dp"
-            android:clickable="true"
-            android:focusable="true"
             app:boxCornerRadiusTopStart="0dp"
             app:boxStrokeWidth="0dp"
             app:boxStrokeWidthFocused="0dp"
@@ -60,7 +67,7 @@
                 android:textColorHint="@color/hint_color" />
 
         </com.google.android.material.textfield.TextInputLayout>
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <View
         android:id="@+id/view_line"
@@ -73,11 +80,14 @@
         android:id="@+id/scv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/view_line">
+        android:layout_below="@+id/view_line"
+        android:scrollbars="none">
 
         <RadioGroup
             android:id="@+id/radio_group"
             android:layout_width="wrap_content"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
@@ -85,9 +95,13 @@
                 android:id="@+id/song_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="4dp"
+                android:background="@drawable/radio_button_background"
+                android:button="@null"
                 android:clickable="true"
                 android:focusable="true"
+                android:paddingHorizontal="24dp"
                 android:text="@string/song"
                 android:textColor="@color/text_color"
                 android:textSize="16sp" />
@@ -96,9 +110,12 @@
                 android:id="@+id/album_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="8dp"
+                android:layout_marginHorizontal="4dp"
+                android:background="@drawable/radio_button_background"
+                android:button="@null"
                 android:clickable="true"
                 android:focusable="true"
+                android:paddingHorizontal="24dp"
                 android:text="@string/album"
                 android:textColor="@color/text_color"
                 android:textSize="16sp" />
@@ -107,9 +124,12 @@
                 android:id="@+id/artist_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="8dp"
+                android:layout_marginHorizontal="4dp"
+                android:background="@drawable/radio_button_background"
+                android:button="@null"
                 android:clickable="true"
                 android:focusable="true"
+                android:paddingHorizontal="24dp"
                 android:text="@string/artist"
                 android:textColor="@color/text_color"
                 android:textSize="16sp" />
@@ -118,35 +138,24 @@
                 android:id="@+id/genre_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/radio_button_background"
+                android:button="@null"
                 android:clickable="true"
                 android:focusable="true"
-                android:paddingHorizontal="8dp"
+                android:paddingHorizontal="24dp"
                 android:text="@string/genre"
                 android:textColor="@color/text_color"
                 android:textSize="16sp" />
         </RadioGroup>
     </HorizontalScrollView>
 
-    <TextView
-        android:id="@+id/searched_song_num"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/scv"
-        android:layout_centerInParent="true"
-        android:layout_margin="2dp"
-        android:clickable="true"
-        android:focusable="true"
-        android:padding="4dp"
-        android:text="@string/song0"
-        android:textColor="@color/sub_text_grey"
-        android:textSize="@dimen/d_16sp"
-        android:textStyle="bold" />
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/search_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/searched_song_num"
+        android:layout_below="@id/scv"
         android:clipToPadding="false"
         android:nestedScrollingEnabled="false"
         android:paddingBottom="@dimen/most_bottom_padding" />

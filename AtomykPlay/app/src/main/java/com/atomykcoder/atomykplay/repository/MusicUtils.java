@@ -12,7 +12,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class MusicUtils {
     private static MusicUtils instance;
-    private final ArrayList<Music> initialMusicList = new ArrayList<>();
+    private ArrayList<Music> initialMusicList = new ArrayList<>();
     private final MutableLiveData<LoadingStatus> status = new MutableLiveData<>();
 
     public static MusicUtils getInstance() {
@@ -27,10 +27,7 @@ public class MusicUtils {
         MusicRepository repository = new MusicRepository(activity.getApplicationContext());
         activity.runOnUiThread(() -> status.setValue(LoadingStatus.LOADING));
         repository.fetchMusicList().thenAccept(it -> {
-            if (!initialMusicList.isEmpty()) {
-                initialMusicList.clear();
-            }
-            initialMusicList.addAll(it);
+            initialMusicList = new ArrayList<>(it);
             activity.runOnUiThread(() -> status.setValue(LoadingStatus.SUCCESS));
             future.complete(null);
         }).exceptionally(it -> {

@@ -19,7 +19,7 @@ public class ApplicationClass extends Application {
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID, "Music Notification", NotificationManager.IMPORTANCE_NONE);
-            notificationChannel.setDescription("Description");
+            notificationChannel.setDescription("Music playback notification are controlled from here");
             notificationChannel.setImportance(NotificationManager.IMPORTANCE_LOW);
             notificationChannel.setBypassDnd(false);
 

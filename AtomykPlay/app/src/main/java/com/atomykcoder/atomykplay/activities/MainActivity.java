@@ -9,8 +9,6 @@ import android.Manifest;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.PendingIntent;
 import android.app.RecoverableSecurityException;
 import android.content.ComponentName;
@@ -20,6 +18,7 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -36,13 +35,13 @@ import android.provider.MediaStore;
 import android.provider.Settings;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -51,11 +50,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.IntentSenderRequest;
 import androidx.activity.result.PickVisualMediaRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.content.ContextCompat;
@@ -75,6 +76,7 @@ import com.atomykcoder.atomykplay.adapters.PlaylistDialogAdapter;
 import com.atomykcoder.atomykplay.classes.GlideBuilt;
 import com.atomykcoder.atomykplay.classes.PhoneStateCallback;
 import com.atomykcoder.atomykplay.customScripts.CustomBottomSheet;
+import com.atomykcoder.atomykplay.customScripts.LinearLayoutManagerWrapper;
 import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.dataModels.Playlist;
 import com.atomykcoder.atomykplay.enums.OptionSheetEnum;
@@ -100,8 +102,11 @@ import com.google.android.material.navigation.NavigationView;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
+import com.karumi.dexter.listener.PermissionDeniedResponse;
+import com.karumi.dexter.listener.PermissionGrantedResponse;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
+import com.karumi.dexter.listener.single.PermissionListener;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -124,7 +129,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public static final String BROADCAST_PLAY_NEXT_MUSIC = "com.atomykcoder.atomykplay.PlayNextMusic";
     public static final String BROADCAST_PLAY_PREVIOUS_MUSIC = "com.atomykcoder.atomykplay.PlayPreviousMusic";
     public static final int TAG_BLOCK_LIST = 2153;
-    private static final int DELETE_ITEM = 7461;
     public static boolean service_bound = false;
     public static boolean is_granted = false;
     public static boolean phone_ringing = false;
@@ -158,17 +162,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public CustomBottomSheet<View> mainPlayerSheetBehavior;
     public BottomSheetPlayerFragment bottomSheetPlayerFragment;
+    public LastAddedFragment lastAddedFragment;
     public BottomSheetBehavior<View> lyricsListBehavior;
     public BottomSheetBehavior<View> optionSheetBehavior;
     public BottomSheetBehavior<View> donationSheetBehavior;
     public BottomSheetBehavior<View> detailsSheetBehavior;
     public BottomSheetBehavior<View> plSheetBehavior;
-    public Dialog addToPlDialog;
+    public AlertDialog addToPlDialog;
     public View plSheet, player_bottom_sheet;
     public Playlist plItemSelected;
     public Music selectedItem;
     public boolean isChecking = false;
-    private Dialog plDialog;
     private View shadowLyrFound;
     private final BottomSheetBehavior.BottomSheetCallback lrcFoundCallback = new BottomSheetBehavior.BottomSheetCallback() {
         @SuppressLint("SwitchIntDef")
@@ -392,6 +396,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     player_bottom_sheet.setElevation(0f);
                     anchoredShadow.setElevation(0f);
                     clearStorage();
+                    bottomSheetPlayerFragment.queueAdapter.clearList();
                     bottomSheetPlayerFragment.resetMainPlayerLayout();
                     resetDataInNavigation();
                     stopMusic();
@@ -421,13 +426,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private ArrayList<Playlist> playlistArrayList;
     private RecyclerView plDialogRecyclerView;
     private PlaylistsFragment playlistFragment;
-    private Dialog renameDialog;
+    private SearchFragment searchFragment;
     private AlertDialog ringtoneDialog = null;
     private String pl_name;
     private OptionSheetEnum optionTag;
     private TextView songPathTv, songNameTv, songArtistTv, songSizeTv, songGenreTv, songBitrateTv, songAlbumTv;
     private Handler handler;
     private MusicUtils musicUtils;
+
+    // Create a new ActivityResultLauncher to handle the delete request result
+    private final ActivityResultLauncher<IntentSenderRequest> deleteMusicRequestLauncher = registerForActivityResult(new ActivityResultContracts.StartIntentSenderForResult(), result -> {
+        if (result.getResultCode() == Activity.RESULT_OK) {
+            // Delete request was successful
+            updateAdaptersForRemovedItem();
+        } else {
+            // Delete request failed
+            showToast("Failed to delete this song");
+        }
+    });
+
+
     // Registers a photo picker activity launcher in single-select mode.
     private final ActivityResultLauncher<PickVisualMediaRequest> mediaPickerForPLCover = registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), uri -> {
         // Callback is invoked after the user selects a media item or closes the
@@ -471,6 +489,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     });
     private View lyricsSheet;
+    private boolean app_paused = false;
 
     public void clearStorage() {
         storageUtil.clearMusicLastPos();
@@ -580,7 +599,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (savedInstanceState == null) {
             navigationView.setCheckedItem(R.id.navigation_home);
         }
+
     }
+
 
     private void checkForPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -606,14 +627,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
         View customLayout = getLayoutInflater().inflate(R.layout.permission_request_dialog_layout, null);
         builder.setView(customLayout);
-        builder.setPositiveButton("OK", (dialogInterface, i) -> {
+        builder.setCancelable(true);
+        builder.setPositiveButton("Allow", (dialogInterface, i) -> {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 requestReadAudioAndPhonePermissionAbove12();
             } else {
                 requestReadStorageAndPhonePermissionBelow12();
             }
         });
-        builder.setNegativeButton("Cancel", null);
+        builder.setOnCancelListener(dialog -> finish());
         androidx.appcompat.app.AlertDialog dialog;
         dialog = builder.create();
         dialog.show();
@@ -633,6 +655,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onStart() {
         super.onStart();
+        app_paused = false;
+        if (is_granted) {
+            if (musicMainAdapter == null) {
+                setUpMusicScanner();
+            }
+        }
         if (is_granted) {
             if (!isChecking) {
                 checkForUpdateList(false);
@@ -647,8 +675,39 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
+    public void onTrimMemory(int level) {
+        super.onTrimMemory(level);
+        switch (level) {
+            case android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL:
+                break;
+            case android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW:
+                break;
+            case android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE:
+                break;
+            case android.content.ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN:
+                if (app_paused) {
+                    musicMainAdapter = null;
+                }
+                break;
+            case android.content.ComponentCallbacks2.TRIM_MEMORY_BACKGROUND:
+                break;
+            case android.content.ComponentCallbacks2.TRIM_MEMORY_COMPLETE:
+                break;
+            case android.content.ComponentCallbacks2.TRIM_MEMORY_MODERATE:
+                break;
+        }
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
+        app_paused = true;
+
         if (service_bound) {
             if (media_player_service != null) if (media_player_service.seekBarHandler != null) {
                 media_player_service.seekBarHandler.removeCallbacks(media_player_service.seekBarRunnable);
@@ -671,15 +730,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (executorService != null) {
             executorService.shutdown();
         }
-        if (service_bound) {
-            MainActivity.this.unbindService(service_connection);
-            //if media player is not playing it will stop the service
-            if (!is_playing) {
-                stopService(new Intent(MainActivity.this, MediaPlayerService.class));
-                service_stopped = true;
-            }
-        }
-        MediaPlayerService.ui_visible = false;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             if (phoneStateCallback != null && telephonyManager != null) {
                 telephonyManager.unregisterTelephonyCallback(phoneStateCallback);
@@ -689,9 +739,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE);
             }
         }
+        if (service_bound) {
+            MainActivity.this.unbindService(service_connection);
+            stopMusicService();
+        }
+        MediaPlayerService.ui_visible = false;
+
         playlistFragment = null;
     }
 
+    private void stopMusicService(){
+        //if media player is not playing it will stop the service
+        if (!is_playing) {
+            stopService(new Intent(MainActivity.this, MediaPlayerService.class));
+            service_stopped = true;
+        }
+    }
     /**
      * this function starts service and binds to MainActivity
      */
@@ -702,8 +765,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void startService() {
         Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
-        startService(playerIntent);
-        service_stopped = false;
+        try {
+            startService(playerIntent);
+            service_stopped = false;
+        } catch (Exception e) {
+            service_stopped = true;
+        }
+
     }
 
     private void setUpPlOptionMenuButtons() {
@@ -739,11 +807,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void setLastAddFragment() {
         FragmentManager fragmentManager = getSupportFragmentManager();
-        Fragment fragment3 = fragmentManager.findFragmentByTag(LAST_ADDED_FRAGMENT_TAG);
+        lastAddedFragment = (LastAddedFragment) fragmentManager.findFragmentByTag(LAST_ADDED_FRAGMENT_TAG);
 
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        LastAddedFragment lastAddedFragment = new LastAddedFragment();
-        if (fragment3 == null) {
+        if (lastAddedFragment == null) {
+            lastAddedFragment = new LastAddedFragment();
             lastAddedFragment.setEnterTransition(TransitionInflater.from(this).inflateTransition(android.R.transition.slide_bottom));
             transaction.replace(R.id.sec_container, lastAddedFragment, LAST_ADDED_FRAGMENT_TAG).addToBackStack(null).commit();
             navigationView.setCheckedItem(R.id.navigation_last_added);
@@ -873,13 +941,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void resetDataInNavigation() {
         navSongName.setText("Song Name");
         navArtistName.setText("Artist");
-        glideBuilt.glide(null, R.drawable.ic_music, navCover, 300);
+        glideBuilt.glide(null, R.drawable.ic_music, navCover, 512);
     }
 
     public void setDataInNavigation(String song_name, String artist_name, Bitmap album_uri) {
         navSongName.setText(song_name);
         navArtistName.setText(artist_name);
-        glideBuilt.glideBitmap(album_uri, R.drawable.ic_music, navCover, 300);
+        glideBuilt.glideBitmap(album_uri, R.drawable.ic_music, navCover, 512);
     }
 
     private Music getMusic() {
@@ -911,9 +979,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         ArrayList<String> urls = bundle.getStringArrayList("urls");
 
         RecyclerView recyclerView = findViewById(R.id.found_lyrics_recycler_view);
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(layoutManager);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         FoundLyricsAdapter adapter = new FoundLyricsAdapter(titles, sampleLyrics, urls, this);
+        recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
     }
 
@@ -1074,7 +1142,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void setSearchFragment() {
-        replaceFragment(R.id.sec_container, new SearchFragment(), android.R.transition.fade, SEARCH_FRAGMENT_TAG);
+        searchFragment = new SearchFragment();
+        replaceFragment(R.id.sec_container, searchFragment, android.R.transition.fade, SEARCH_FRAGMENT_TAG);
     }
 
     private void setRingtone(Music music) {
@@ -1084,8 +1153,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (canWrite) {
             Uri newUri = Uri.fromFile(new File(music.getPath()));
             AlertDialog.Builder ringtoneDialog = new AlertDialog.Builder(MainActivity.this);
-            ringtoneDialog.setTitle("Confirmation");
-            ringtoneDialog.setMessage(music.getName() + " - Set as ringtone");
+            ringtoneDialog.setTitle("Set as ringtone");
+            ringtoneDialog.setMessage("Name - " + music.getName());
             ringtoneDialog.setCancelable(true);
             ringtoneDialog.setPositiveButton("OK", (dialog, which) -> {
                 RingtoneManager.setActualDefaultRingtoneUri(MainActivity.this, RingtoneManager.TYPE_RINGTONE, newUri);
@@ -1159,7 +1228,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 optionSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
                 optionName.setText(music.getName());
                 optionArtist.setText(music.getArtist());
-                glideBuilt.glideBitmap(finalImage, R.drawable.ic_music, optionCover, 65);
+                glideBuilt.glideBitmap(finalImage, R.drawable.ic_music, optionCover, 128);
             });
         });
 
@@ -1171,110 +1240,99 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         plSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         plOptionName.setText(currentItem.getName());
         optionPlCount.setText(count);
-        glideBuilt.glide(currentItem.getCoverUri(), R.drawable.ic_music_list, plOptionCover, 200);
+        glideBuilt.glide(currentItem.getCoverUri(), R.drawable.ic_music_list, plOptionCover, 128);
     }
 
-    /**
-     * delete song permanently from device *USE WITH CAUTION*
-     *
-     * @param music music to be deleted
-     */
-    private void deleteFromDevice(Music music) {
-        Uri contentUri = getContentUri(music);
-        ContentResolver contentResolver = getContentResolver();
-        Uri normalUri = Uri.fromFile(new File(music.getId()));
+    private void deleteFromDevice(List<Music> musics) {
 
+        ContentResolver contentResolver = getContentResolver();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            // for android 11 and above
-            if (contentUri != null) {
-                List<Uri> uris = new ArrayList<>(1);
-                uris.add(contentUri);
-                PendingIntent pendingIntent = MediaStore.createDeleteRequest(contentResolver, uris);
-                try {
-                    //noinspection deprecation
-                    startIntentSenderForResult(pendingIntent.getIntentSender(), DELETE_ITEM, null, 0, 0, 0, null);
-                } catch (IntentSender.SendIntentException e) {
-                    e.printStackTrace();
+            List<Uri> uris = new ArrayList<>();
+            for (Music music : musics) {
+                Uri contentUri = getContentUri(music);
+                if (contentUri != null) {
+                    uris.add(contentUri);
                 }
             }
+            // for android 11 and above
+            if (!uris.isEmpty()) {
+                // Create a PendingIntent for the delete request
+                PendingIntent pendingIntent = MediaStore.createDeleteRequest(contentResolver, uris);
+
+                // Create an IntentSenderRequest for the delete request
+                IntentSenderRequest request = new IntentSenderRequest.Builder(pendingIntent.getIntentSender()).build();
+
+                // Launch the delete request using the ActivityResultLauncher
+                deleteMusicRequestLauncher.launch(request);
+            }
         } else if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
-            //for android 10
-            if (normalUri != null) {
+            // for android 10
+            for (Music music : musics) {
                 try {
-                    contentResolver.delete(normalUri, null, null);
+                    deleteItemWithContentResolver(music, contentResolver);
                 }
                 // for android 10 we must catch a recoverable security exception
                 catch (RecoverableSecurityException e) {
                     final IntentSender intent = e.getUserAction().getActionIntent().getIntentSender();
-                    try {
-                        //noinspection deprecation
-                        startIntentSenderForResult(intent, DELETE_ITEM, null, 0, 0, 0, null);
-                    } catch (IntentSender.SendIntentException ex) {
-                        ex.printStackTrace();
-                    }
+                    // Create an IntentSenderRequest for the delete request
+                    IntentSenderRequest request = new IntentSenderRequest.Builder(intent).build();
+                    // Launch the delete request using the ActivityResultLauncher
+                    deleteMusicRequestLauncher.launch(request);
                 }
             }
         } else {
             // for older devices
-            if (normalUri != null) {
-                contentResolver.delete(normalUri, null, null);
-                bottomSheetPlayerFragment.queueAdapter.removeItem(selectedItem);
-                musicMainAdapter.removeItem(selectedItem);
+            for (Music music : musics) {
+                try {
+                    deleteItemWithContentResolver(music, contentResolver);
+                } catch (Exception e) {
+                    showToast("Failed to delete this song");
+                }
             }
         }
     }
 
-    @SuppressLint("NotifyDataSetChanged")
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == RESULT_CANCELED) {
-            return;
-        }
-        switch (requestCode) {
+    private void deleteItemWithContentResolver(Music music, ContentResolver contentResolver) {
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
+        View customLayout = getLayoutInflater().inflate(R.layout.delete_layout, null);
+        builder.setView(customLayout);
+        builder.setCancelable(false);
+        ImageView imageView = customLayout.findViewById(R.id.cover_image);
+        glideBuilt.glide(music.getAlbumUri(), R.drawable.ic_music_thumbnail, imageView, 512);
+        builder.setPositiveButton("Allow", (dialog, i) -> {
+            if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                requestWriteStoragePermissionBelow11();
+            } else {
+                Uri contentUri = getContentUri(music);
+                String[] selectionArgs = new String[]{music.getId()};
 
-            // check for delete item request
-            case DELETE_ITEM:
-                musicMainAdapter.removeItem(selectedItem);
-                bottomSheetPlayerFragment.queueAdapter.removeItem(selectedItem);
-                break;
-            // check for blacklist folder select request
-            case TAG_BLOCK_LIST:
-                if (data != null) {
-                    // find fragment
-                    FragmentManager fragmentManager = getSupportFragmentManager();
-                    SettingsFragment fragment = (SettingsFragment) fragmentManager.findFragmentByTag(SETTINGS_FRAGMENT_TAG);
-                    // set settings fragment UI here
-                    if (fragment != null) {
-                        Uri uri = data.getData();
-                        String treePath = uri.getPath();
-                        String pathUri = convertTreeUriToPathUri(treePath);
-                        //save path in blacklist storage
-                        StorageUtil.SettingsStorage settingsStorage = new StorageUtil.SettingsStorage(this);
-                        settingsStorage.saveInBlackList(pathUri);
-                        checkForUpdateList(true);
-                    }
+                if (contentUri != null) {
+                    contentResolver.delete(contentUri, MediaStore.Audio.Media._ID + "=?", selectionArgs);
+                    updateAdaptersForRemovedItem();
                 }
-                break;
+                dialog.cancel();
+            }
+        });
+        builder.setNegativeButton("Deny", null);
+        AlertDialog dialog;
+        dialog = builder.create();
+        dialog.show();
+    }
+
+    private void updateAdaptersForRemovedItem() {
+        musicMainAdapter.removeItem(selectedItem);
+        bottomSheetPlayerFragment.queueAdapter.removeItem(selectedItem);
+        if (lastAddedFragment != null) {
+            lastAddedFragment.adapter.removeItem(selectedItem);
+        }
+        if (searchFragment != null) {
+            searchFragment.adapter.removeItem(selectedItem);
         }
     }
 
-    /**
-     * converts tree path uri to usable path uri (WORKS WITH BOTH INTERNAL AND EXTERNAL STORAGE)
-     *
-     * @param treePath tree path to be converted
-     * @return returns usable path uri
-     */
-    private String convertTreeUriToPathUri(String treePath) {
-        if (treePath.contains("/tree/primary:")) {
-            treePath = treePath.replace("/tree/primary:", "/storage/emulated/0/");
-        } else {
-            int colonIndex = treePath.indexOf(":");
-            String sdCard = treePath.substring(6, colonIndex);
-            String folders = treePath.substring(colonIndex + 1);
-            treePath = "/storage/" + sdCard + "/" + folders;
-        }
-        return treePath;
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     private void addToNextPlay(Music music) {
@@ -1296,38 +1354,40 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void callStateListener() {
         telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            phoneStateCallback = new PhoneStateCallback();
-            phoneStateCallback.getState().observe(this, state -> {
-                switch (state) {
-                    case TelephonyManager.CALL_STATE_OFFHOOK:
-                    case TelephonyManager.CALL_STATE_RINGING:
-                        phone_ringing = true;
-                        break;
-                    case TelephonyManager.CALL_STATE_IDLE:
-                        phone_ringing = false;
-                        break;
-                }
-            });
+            phoneStateCallback = new CustomCallStateListener();
+
             telephonyManager.registerTelephonyCallback(ContextCompat.getMainExecutor(this), phoneStateCallback);
         } else {
             phoneStateListener = new PhoneStateListener() {
                 @Override
                 public void onCallStateChanged(int state, String phoneNumber) {
                     super.onCallStateChanged(state, phoneNumber);
-                    switch (state) {
-                        case TelephonyManager.CALL_STATE_OFFHOOK:
-                        case TelephonyManager.CALL_STATE_RINGING: {
-                            phone_ringing = true;
-                        }
-                        break;
-                        case TelephonyManager.CALL_STATE_IDLE: {
-                            phone_ringing = false;
-                        }
-                        break;
-                    }
+                    takeActionOnCall(state);
                 }
             };
             telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.S)
+    private class CustomCallStateListener extends PhoneStateCallback {
+        @Override
+        public void onCallStateChanged(int state) {
+            takeActionOnCall(state);
+        }
+    }
+
+    private void takeActionOnCall(int state) {
+        switch (state) {
+            case TelephonyManager.CALL_STATE_OFFHOOK:
+            case TelephonyManager.CALL_STATE_RINGING: {
+                phone_ringing = true;
+            }
+            break;
+            case TelephonyManager.CALL_STATE_IDLE: {
+                phone_ringing = false;
+            }
+            break;
         }
     }
 
@@ -1338,6 +1398,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onPermissionsChecked(MultiplePermissionsReport multiplePermissionsReport) {
                 if (multiplePermissionsReport.areAllPermissionsGranted()) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                        requestForegroundServicePermissionAbove8();
+                    }
                     is_granted = true;
                     setUpServiceAndScanner();
                 } else {
@@ -1361,6 +1424,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onPermissionsChecked(MultiplePermissionsReport multiplePermissionsReport) {
                 if (multiplePermissionsReport.areAllPermissionsGranted()) {
+                    requestForegroundServicePermissionAbove8();
                     is_granted = true;
                     setUpServiceAndScanner();
                 } else {
@@ -1372,6 +1436,45 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onPermissionRationaleShouldBeShown(List<PermissionRequest> list, PermissionToken permissionToken) {
                 is_granted = false;
+                permissionToken.continuePermissionRequest();
+            }
+        }).check();
+
+    }
+
+    private void requestWriteStoragePermissionBelow11() {
+        Dexter.withContext(MainActivity.this).withPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE).withListener(new PermissionListener() {
+            @Override
+            public void onPermissionGranted(PermissionGrantedResponse permissionGrantedResponse) {
+
+            }
+
+            @Override
+            public void onPermissionDenied(PermissionDeniedResponse permissionDeniedResponse) {
+                showToast("Permission denied!");
+            }
+
+            @Override
+            public void onPermissionRationaleShouldBeShown(PermissionRequest permissionRequest, PermissionToken permissionToken) {
+                permissionToken.continuePermissionRequest();
+            }
+        }).check();
+
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.P)
+    private void requestForegroundServicePermissionAbove8() {
+        Dexter.withContext(MainActivity.this).withPermission(Manifest.permission.FOREGROUND_SERVICE).withListener(new PermissionListener() {
+            @Override
+            public void onPermissionGranted(PermissionGrantedResponse permissionGrantedResponse) {
+            }
+
+            @Override
+            public void onPermissionDenied(PermissionDeniedResponse permissionDeniedResponse) {
+            }
+
+            @Override
+            public void onPermissionRationaleShouldBeShown(PermissionRequest permissionRequest, PermissionToken permissionToken) {
                 permissionToken.continuePermissionRequest();
             }
         }).check();
@@ -1411,13 +1514,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     linearLayout.setVisibility(View.GONE);
                     break;
                 case SUCCESS:
-                    storageUtil.saveInitialList(musicUtils.getInitialMusicList());
-                    try {
-                        if (musicUtils.getInitialMusicList().isEmpty()) {
-                            linearLayout.setVisibility(View.VISIBLE);
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                    ArrayList<Music> list = musicUtils.getInitialMusicList();
+                    storageUtil.saveInitialList(list);
+                    if (list.isEmpty()) {
+                        linearLayout.setVisibility(View.VISIBLE);
                     }
                     progressBar.setVisibility(View.GONE);
                     break;
@@ -1467,17 +1567,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Fragment fragment3 = fragmentManager.findFragmentByTag(ABOUT_FRAGMENT_TAG);
         Fragment fragment4 = fragmentManager.findFragmentByTag(LAST_ADDED_FRAGMENT_TAG);
 
-        if (mainPlayerSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED ||
-                mainPlayerSheetBehavior.getState() == BottomSheetBehavior.STATE_HIDDEN) {
+        if (mainPlayerSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED || mainPlayerSheetBehavior.getState() == BottomSheetBehavior.STATE_HIDDEN) {
             if (drawer.isDrawerOpen(GravityCompat.START)) {
                 drawer.closeDrawer(GravityCompat.START);
             } else {
-                if (lyricsListBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED ||
-                        lyricsListBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+                if (lyricsListBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED || lyricsListBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
                     lyricsListBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
                 } else {
-                    if (optionSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED ||
-                            optionSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+                    if (optionSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED || optionSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
                         optionSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
                     } else {
                         if (fragment1 != null || fragment2 != null || fragment3 != null || fragment4 != null) {
@@ -1607,7 +1704,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             }
             case R.id.delete_music_option: {
-                deleteFromDevice(selectedItem);
+                List<Music> list = new ArrayList<>();
+                list.add(selectedItem);
+                deleteFromDevice(list);
                 break;
             }
             case R.id.tagEditor_option: {
@@ -1668,19 +1767,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void openRenameDialog(Playlist playlist) {
-        renameDialog = new Dialog(MainActivity.this);
-
-        renameDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        renameDialog.setContentView(R.layout.rename_playlist_layout);
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
+        View customLayout = getLayoutInflater().inflate(R.layout.rename_playlist_layout, null);
+        builder.setView(customLayout);
+        builder.setCancelable(true);
 
         playlistArrayList = storageUtil.getAllPlaylist();
-        EditText editText = renameDialog.findViewById(R.id.edit_playlist_rename);
-        Button btnOk = renameDialog.findViewById(R.id.btn_ok_rename_pl);
-        Button btnCancel = renameDialog.findViewById(R.id.btn_cancel_rename_pl);
+        EditText editText = customLayout.findViewById(R.id.edit_playlist_rename);
 
         editText.setText(playlist.getName());
 
-        btnOk.setOnClickListener(v -> {
+        builder.setPositiveButton("OK", (dialog, i) -> {
             String plKey = editText.getText().toString().trim();
 
             ArrayList<String> playlistNames = new ArrayList<>();
@@ -1691,7 +1788,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (!plKey.equals("")) {
                 if (!playlistNames.contains(plKey)) {
                     renamePl(playlist, plKey);
-                    renameDialog.dismiss();
+                    dialog.dismiss();
                 } else {
                     editText.setError("Name already exist");
                 }
@@ -1699,7 +1796,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 editText.setError("Empty");
             }
         });
-        btnCancel.setOnClickListener(v -> renameDialog.dismiss());
+        builder.setNegativeButton("Cancel", null);
+        AlertDialog renameDialog = builder.create();
         renameDialog.show();
     }
 
@@ -1744,23 +1842,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private TextView noPl_tv;
 
     private void openPlaylistDialog(Music music) {
-        addToPlDialog = new Dialog(MainActivity.this);
-
-        addToPlDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        addToPlDialog.setContentView(R.layout.playlist_dialog_layout);
-
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
+        View customLayout = getLayoutInflater().inflate(R.layout.playlist_dialog_layout, null);
+        builder.setView(customLayout);
+        builder.setCancelable(true);
         //Initialize Dialogue Box UI Items
         playlistArrayList = storageUtil.getAllPlaylist();
-        ImageView image = addToPlDialog.findViewById(R.id.add_to_fav_dialog_box_img);
+        ImageView image = customLayout.findViewById(R.id.add_to_fav_dialog_box_img);
         if (!storageUtil.checkFavourite(music)) {
             image.setImageResource(R.drawable.ic_favorite_border);
         } else if (storageUtil.checkFavourite(music)) {
             image.setImageResource(R.drawable.ic_favorite);
         }
-        plDialogRecyclerView = addToPlDialog.findViewById(R.id.playlist_dialog_recycler);
-        View createPlaylistBtnDialog = addToPlDialog.findViewById(R.id.create_playlist);
-        View addFavBtnDialog = addToPlDialog.findViewById(R.id.add_to_fav_dialog_box);
-        noPl_tv = addToPlDialog.findViewById(R.id.text_no_pl);
+        plDialogRecyclerView = customLayout.findViewById(R.id.playlist_dialog_recycler);
+        View createPlaylistBtnDialog = customLayout.findViewById(R.id.create_playlist);
+        View addFavBtnDialog = customLayout.findViewById(R.id.add_to_fav_dialog_box);
+        noPl_tv = customLayout.findViewById(R.id.text_no_pl);
 
         createPlaylistBtnDialog.setOnClickListener(v -> openCreatePlaylistDialog(music));
 
@@ -1769,7 +1866,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             addToPlDialog.dismiss();
         });
 
-        LinearLayoutManager manager = new LinearLayoutManager(MainActivity.this);
+        LinearLayoutManager manager = new LinearLayoutManagerWrapper(this);
         plDialogRecyclerView.setLayoutManager(manager);
 
         if (playlistArrayList != null) {
@@ -1784,6 +1881,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else {
             noPl_tv.setVisibility(View.VISIBLE);
         }
+        addToPlDialog = builder.create();
         addToPlDialog.show();
     }
 
@@ -1793,20 +1891,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @SuppressLint("NotifyDataSetChanged")
     private void openCreatePlaylistDialog(Music music) {
-        plDialog = new Dialog(MainActivity.this);
-        plDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        plDialog.setContentView(R.layout.create_playlist_layout);
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
+        View customLayout = getLayoutInflater().inflate(R.layout.create_playlist_layout, null);
+        builder.setView(customLayout);
+        builder.setCancelable(true);
 
-        EditText editText = plDialog.findViewById(R.id.edit_playlist_name);
-        Button btnOk = plDialog.findViewById(R.id.btn_ok_pl);
-        Button btnCancel = plDialog.findViewById(R.id.btn_cancel_pl);
-        playlist_image_View = plDialog.findViewById(R.id.playlist_image_view);
-        View playerPickCover_l = plDialog.findViewById(R.id.playlist_cover_pick);
+        EditText editText = customLayout.findViewById(R.id.edit_playlist_name);
+        playlist_image_View = customLayout.findViewById(R.id.playlist_image_view);
+        View playerPickCover_l = customLayout.findViewById(R.id.playlist_cover_pick);
 
         playerPickCover_l.setOnClickListener(v -> pickImage(pickIntentForPLCover, mediaPickerForPLCover));
 
         //check if previous list contains the same name as we are saving
-        btnOk.setOnClickListener(v -> {
+        builder.setPositiveButton("OK", (dialog, i) -> {
             String plKey = editText.getText().toString().trim();
             String plCoverUri = playListImageUri != null ? playListImageUri.toString() : "";
 
@@ -1831,7 +1928,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         playlistDialogAdapter = new PlaylistDialogAdapter(this, allList, music);
                         plDialogRecyclerView.setAdapter(playlistDialogAdapter);
                     }
-                    plDialog.dismiss();
+                    dialog.dismiss();
                 } else {
                     editText.setError("Name already exist");
                 }
@@ -1839,7 +1936,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 editText.setError("Empty");
             }
         });
-        btnCancel.setOnClickListener(v -> plDialog.dismiss());
+        builder.setNegativeButton("Cancel", null);
+        AlertDialog plDialog = builder.create();
         plDialog.show();
     }
 
@@ -1856,26 +1954,58 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void openDetailsBox(Music music) {
         detailsSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
 
-        int bitrateInNum = Integer.parseInt(music.getBitrate()) / 1000;
-
-        float size = Float.parseFloat(music.getSize()) / (1024 * 1024);
-
-        int pos = String.valueOf(size).indexOf(".");
-
-        String beforeDot = String.valueOf(size).substring(0, pos);
-        String afterDot = String.valueOf(size).substring(pos, pos + 3);
-
+        int bitrateInNum = 0;
+        String bitrate = music.getBitrate();
+        if (!TextUtils.isEmpty(bitrate)) {
+            bitrateInNum = Integer.parseInt(bitrate) / 1000;
+        }
         String finalBitrate = bitrateInNum + " KBPS";
-        String finalSize = beforeDot + afterDot + " mb";
+
 
         songPathTv.setText(music.getPath());
         songNameTv.setText(music.getName());
         songArtistTv.setText(music.getArtist());
-        songSizeTv.setText(finalSize);
-        songBitrateTv.setText(finalBitrate);
+        songSizeTv.setText(convertByteSizeToReadableSize(music.getSize()));
         songAlbumTv.setText(music.getAlbum());
-        songGenreTv.setText(music.getGenre());
 
+        String genre = music.getGenre();
+        if (TextUtils.isEmpty(genre)) {
+            genre = "Unknown";
+        }
+        songGenreTv.setText(genre);
+        songBitrateTv.setText(finalBitrate);
+
+    }
+
+    private String convertByteSizeToReadableSize(String fileSize) {
+        float size = Float.parseFloat(fileSize) / (1024 * 1024);
+
+        int pos = String.valueOf(size).indexOf(".");
+
+        String beforeDot = String.valueOf(size).substring(0, pos);
+        String afterDot;
+        try {
+            afterDot = String.valueOf(size).substring(pos, pos + 3);
+        } catch (IndexOutOfBoundsException e) {
+            afterDot = "0";
+        }
+
+        String sizeExt = " mb";
+        int beforeDotInt = Integer.parseInt(beforeDot);
+        if (beforeDotInt % 1024 != beforeDotInt) {
+            float in = Float.parseFloat(beforeDot);
+            size = in / 1024;
+
+            pos = String.valueOf(size).indexOf(".");
+            beforeDot = String.valueOf(size).substring(0, pos);
+            try {
+                afterDot = String.valueOf(size).substring(pos, pos + 3);
+            } catch (IndexOutOfBoundsException e) {
+                afterDot = "0";
+            }
+            sizeExt = " gb";
+        }
+        return beforeDot + afterDot + sizeExt;
     }
 
     private void openTagEditor(Music itemSelected) {
@@ -1910,7 +2040,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      */
     private Uri getContentUri(Music music) {
         int id = Integer.parseInt(music.getId());
-        Uri baseUri = Uri.parse("content://media/external/audio/media");
+        Uri baseUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
         return Uri.withAppendedPath(baseUri, "" + id);
 
     }

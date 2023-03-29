@@ -5,7 +5,6 @@ import static com.atomykcoder.atomykplay.helperFunctions.MusicHelper.encode;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Build;
 
 import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.dataModels.LRCMap;
@@ -15,7 +14,6 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Map;
 
@@ -65,11 +63,11 @@ public class StorageUtil {
         clearQueueList();
         sharedPreferences = context.getSharedPreferences(MUSIC_LIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        int i = 0;
-        for (Music music : list) {
+
+        for (int i = 0; i < list.size(); i++) {
+            Music music = list.get(i);
             String encodedMessage = encode(music);
             editor.putString(String.valueOf(i), encodedMessage);
-            i++;
         }
         editor.apply();
     }
@@ -113,11 +111,15 @@ public class StorageUtil {
      * @param list initial list of Music
      */
     public void saveInitialList(ArrayList<Music> list) {
+        clearInitialList();
         sharedPreferences = context.getSharedPreferences(INITIAL_LIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.clear();
 
-        for (Music music : list) {
+        //don't use for each loop it will throw ConcurrentModificationException some times
+
+        for (int i = 0; i < list.size(); i++) {
+            Music music = list.get(i);
             String encodedMessage = encode(music);
             editor.putString(music.getId(), encodedMessage);
         }
@@ -140,13 +142,20 @@ public class StorageUtil {
             Music music = decode(encodedMessage);
             musicList.add(music);
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            Collections.sort(musicList, Comparator.comparing(Music::getName));
-        }
+        musicList.sort(Comparator.comparing(Music::getName));
 
         return musicList;
     }
 
+    /**
+     * clear saved music Initial list
+     */
+    public void clearInitialList() {
+        sharedPreferences = context.getSharedPreferences(INITIAL_LIST_STORAGE, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.clear();
+        editor.apply();
+    }
     public void removeFromInitialList(Music music) {
         sharedPreferences = context.getSharedPreferences(INITIAL_LIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -350,11 +359,10 @@ public class StorageUtil {
         sharedPreferences = context.getSharedPreferences(TEMP_MUSIC_LIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
-        int i = 0;
-        for (Music music : list) {
+        for (int i = 0; i < list.size(); i++) {
+            Music music = list.get(i);
             String encodedMessage = encode(music);
             editor.putString(String.valueOf(i), encodedMessage);
-            i++;
         }
         editor.apply();
     }
@@ -597,6 +605,8 @@ public class StorageUtil {
     public static class SettingsStorage {
 
         private final String SETTINGS_STORAGE = "com.atomykcoder.atomykplay.settings.SETTINGS_STORAGE";
+        private final String BEAUTIFY_TAGS_STORAGE = "com.atomykcoder.atomykplay.settings.BEAUTIFY_TAGS_STORAGE";
+        private final String REPLACING_TAGS_STORAGE = "com.atomykcoder.atomykplay.settings.REPLACING_TAGS_STORAGE";
         private final String BLACKLIST_STORAGE = "com.atomykcoder.atomykplay.settings.BLACKLIST_STORAGE";
         private final Context context;
         private SharedPreferences sharedPreferences;
@@ -652,19 +662,6 @@ public class StorageUtil {
             sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
             return sharedPreferences.getBoolean("show_extra", false);
         }
-
-        public void showOptionMenu(boolean show) {
-            sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putBoolean("show_opt_menu", show);
-            editor.apply();
-        }
-
-        public boolean loadOptionMenu() {
-            sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
-            return sharedPreferences.getBoolean("show_opt_menu", true);
-        }
-
         public void autoPlay(boolean b) {
             sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -749,7 +746,93 @@ public class StorageUtil {
             return sharedPreferences.getBoolean("one_click_skip", false);
         }
 
+        public void scanAllMusic(boolean b) {
+            sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean("should_scan_only_music", b);
+            editor.apply();
+        }
 
+        public boolean loadScanAllMusic() {
+            sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
+            return sharedPreferences.getBoolean("should_scan_only_music", false);
+        }
+
+        public void beautifyName(boolean b) {
+            sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean("beautify_name", b);
+            editor.apply();
+        }
+
+        public boolean loadBeautifyName() {
+            sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
+            return sharedPreferences.getBoolean("beautify_name", false);
+        }
+
+        public void addBeautifyTag(String s){
+            sharedPreferences = context.getSharedPreferences(BEAUTIFY_TAGS_STORAGE, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            ArrayList<String> list = getAllBeautifyTag();
+            int index = list.size();
+            if (!list.contains(s)) {
+                editor.putString(String.valueOf(index),s);
+                editor.apply();
+            }
+        }
+        public void addReplacingTag(String s){
+            sharedPreferences = context.getSharedPreferences(REPLACING_TAGS_STORAGE, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            ArrayList<String> list = getAllReplacingTag();
+            int index = list.size();
+            if (!list.contains(s)) {
+                editor.putString(String.valueOf(index),s);
+                editor.apply();
+            }
+        }
+
+        public ArrayList<String> getAllBeautifyTag(){
+            sharedPreferences = context.getSharedPreferences(BEAUTIFY_TAGS_STORAGE, Context.MODE_PRIVATE);
+            Map<String, ?> map = sharedPreferences.getAll();
+            ArrayList<String> tags = new ArrayList<>();
+            for (Map.Entry<String, ?> entry : map.entrySet()) {
+                tags.add((String) entry.getValue());
+            }
+            return tags;
+        }
+        public ArrayList<String> getAllReplacingTag(){
+            sharedPreferences = context.getSharedPreferences(REPLACING_TAGS_STORAGE, Context.MODE_PRIVATE);
+            Map<String, ?> map = sharedPreferences.getAll();
+            ArrayList<String> tags = new ArrayList<>();
+            for (Map.Entry<String, ?> entry : map.entrySet()) {
+                tags.add((String) entry.getValue());
+            }
+            return tags;
+        }
+        public void removeFromReplacingList(String key) {
+            sharedPreferences = context.getSharedPreferences(REPLACING_TAGS_STORAGE, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.remove(key);
+            editor.apply();
+        }
+        public void removeFromBeautifyList(String key) {
+            sharedPreferences = context.getSharedPreferences(BEAUTIFY_TAGS_STORAGE, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.remove(key);
+            editor.apply();
+        }
+        public void clearBeautifyTags(){
+            sharedPreferences = context.getSharedPreferences(BEAUTIFY_TAGS_STORAGE, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.clear();
+            editor.apply();
+        }
+        public void clearReplacingTags(){
+            sharedPreferences = context.getSharedPreferences(REPLACING_TAGS_STORAGE, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.clear();
+            editor.apply();
+        }
         /**
          * @param dur it should be between 10 to 120 (120 is max duration you can filter)
          */

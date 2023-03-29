@@ -1,7 +1,6 @@
 package com.atomykcoder.atomykplay.fragments;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,10 +16,11 @@ import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.adapters.OpenPlayListAdapter;
 import com.atomykcoder.atomykplay.adapters.SimpleTouchCallback;
 import com.atomykcoder.atomykplay.classes.GlideBuilt;
+import com.atomykcoder.atomykplay.customScripts.LinearLayoutManagerWrapper;
 import com.atomykcoder.atomykplay.data.Music;
+import com.atomykcoder.atomykplay.dataModels.Playlist;
 import com.atomykcoder.atomykplay.events.RemoveFromPlaylistEvent;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
-import com.atomykcoder.atomykplay.dataModels.Playlist;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 
 import org.greenrobot.eventbus.EventBus;
@@ -53,7 +53,7 @@ public class OpenPlayListFragment extends Fragment implements OnDragStartListene
         toolbar.setNavigationOnClickListener(v -> requireActivity().onBackPressed());
 
         recyclerView.setHasFixedSize(true);
-        LinearLayoutManager manager = new LinearLayoutManager(getContext());
+        LinearLayoutManager manager = new LinearLayoutManagerWrapper(getContext());
 
         ArrayList<Music> musicList = null;
 

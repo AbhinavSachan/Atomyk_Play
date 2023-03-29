@@ -3,49 +3,72 @@ package com.atomykcoder.atomykplay.fragments;
 import static com.atomykcoder.atomykplay.activities.MainActivity.TAG_BLOCK_LIST;
 
 import android.annotation.SuppressLint;
-import android.app.Dialog;
+import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.activities.MainActivity;
+import com.atomykcoder.atomykplay.adapters.BeautifyListAdapter;
 import com.atomykcoder.atomykplay.adapters.BlockFolderListAdapter;
+import com.atomykcoder.atomykplay.classes.ApplicationClass;
+import com.atomykcoder.atomykplay.customScripts.LinearLayoutManagerWrapper;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.util.ArrayList;
 
 
 public class SettingsFragment extends Fragment {
 
-    public ArrayList<String> blacklist;
-    public BlockFolderListAdapter adapter;
-    private RadioGroup radioGroup;
     private RadioButton light_theme_btn, dark_theme_btn;
-    private SwitchCompat songInfoSwi, artistSwi, extraSwi, autoPlaySwi, keepShuffleSwi, lowerVolSwi, selfStopSwi, keepScreenOnSwi, oneClickSkipSwi;
-    private View songInfoLl, artistLl, extraLl, autoPlayLl, keepShuffleLl, lowerVolLl, blackListLl, filterDurLl, selfStopLl, keepScreenOnLl, oneClickSkipLl;
+    private SwitchCompat songInfoSwi, artistSwi, extraSwi, autoPlaySwi, keepShuffleSwi, lowerVolSwi, selfStopSwi, keepScreenOnSwi, oneClickSkipSwi, scanAllSwi, beautifySwi;
     private boolean dark;
-    private boolean showInfo, showArtist, showOption, showExtra, autoPlay, keepShuffle, lowerVol, selfStop, keepScreenOn, oneClickSkip;
+    private boolean showInfo, showArtist, showExtra, autoPlay, keepShuffle, lowerVol, selfStop, keepScreenOn, oneClickSkip, beautify, scanAll;
     private StorageUtil.SettingsStorage settingsStorage;
     private MainActivity mainActivity;
-    private Dialog blacklistDialog, filterDurDialog;
+    private AlertDialog blacklistDialog, filterDurDialog;
+    private BeautifyListAdapter beautifyListAdapter;
+    private TextView noTagTV;
+    private ArrayList<String> beautifyList;
+    private ArrayList<String> replacingTagList;
+    private final ActivityResultLauncher<Intent> mGetTreeLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK) {
+                    assert result.getData() != null;
+                    Uri treeUri = result.getData().getData();
+
+                    String treePath = treeUri.getPath();
+                    String pathUri = convertTreeUriToPathUri(treePath);
+                    if (pathUri != null) {
+                        //save path in blacklist storage
+                        settingsStorage.saveInBlackList(pathUri);
+                        mainActivity.checkForUpdateList(true);
+                    }
+                }
+            });
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -62,45 +85,53 @@ public class SettingsFragment extends Fragment {
         showInfo = settingsStorage.loadShowInfo();
         showArtist = settingsStorage.loadShowArtist();
         showExtra = settingsStorage.loadExtraCon();
-        showOption = settingsStorage.loadOptionMenu();
         autoPlay = settingsStorage.loadAutoPlay();
         keepShuffle = settingsStorage.loadKeepShuffle();
         lowerVol = settingsStorage.loadLowerVol();
         selfStop = settingsStorage.loadSelfStop();
         keepScreenOn = settingsStorage.loadKeepScreenOn();
         oneClickSkip = settingsStorage.loadOneClickSkip();
+        beautify = settingsStorage.loadBeautifyName();
+        scanAll = settingsStorage.loadScanAllMusic();
 
 
         //Player settings
         songInfoSwi = view.findViewById(R.id.show_file_info_swi);
-        songInfoLl = view.findViewById(R.id.show_file_info_ll);
+        View songInfoLl = view.findViewById(R.id.show_file_info_ll);
         artistSwi = view.findViewById(R.id.show_artist_swi);
-        artistLl = view.findViewById(R.id.show_artist_ll);
+        View artistLl = view.findViewById(R.id.show_artist_ll);
         extraSwi = view.findViewById(R.id.show_extra_swi);
-        extraLl = view.findViewById(R.id.show_extra_ll);
+        View extraLl = view.findViewById(R.id.show_extra_ll);
         keepScreenOnSwi = view.findViewById(R.id.keep_screen_swi);
-        keepScreenOnLl = view.findViewById(R.id.keep_screen_ll);
+        View keepScreenOnLl = view.findViewById(R.id.keep_screen_ll);
+        beautifySwi = view.findViewById(R.id.beautify_swi);
+        View beautifyLl = view.findViewById(R.id.beautify_ll);
+        Button addBeautifyTags = view.findViewById(R.id.beautify_add_tag_btn);
+        scanAllSwi = view.findViewById(R.id.should_scan_all_swi);
+        View scanAllLl = view.findViewById(R.id.should_scan_all_ll);
 
         //audio settings
         autoPlaySwi = view.findViewById(R.id.autoPlay_swi);
-        autoPlayLl = view.findViewById(R.id.autoPlay_ll);
+        View autoPlayLl = view.findViewById(R.id.autoPlay_ll);
         keepShuffleSwi = view.findViewById(R.id.keep_shuffle_swi);
-        keepShuffleLl = view.findViewById(R.id.keep_shuffle_ll);
+        View keepShuffleLl = view.findViewById(R.id.keep_shuffle_ll);
         lowerVolSwi = view.findViewById(R.id.lower_vol_swi);
-        lowerVolLl = view.findViewById(R.id.lower_vol_ll);
+        View lowerVolLl = view.findViewById(R.id.lower_vol_ll);
         selfStopSwi = view.findViewById(R.id.self_stop_swi);
-        selfStopLl = view.findViewById(R.id.self_stop_ll);
+        View selfStopLl = view.findViewById(R.id.self_stop_ll);
         oneClickSkipSwi = view.findViewById(R.id.one_click_skip_swi);
-        oneClickSkipLl = view.findViewById(R.id.one_click_skip_ll);
+        View oneClickSkipLl = view.findViewById(R.id.one_click_skip_ll);
 
         //filter settings
-        blackListLl = view.findViewById(R.id.blacklist_ll);
-        filterDurLl = view.findViewById(R.id.filter_dur_ll);
+        View blackListLl = view.findViewById(R.id.blacklist_ll);
+        View filterDurLl = view.findViewById(R.id.filter_dur_ll);
 
         //theme settings
-        radioGroup = view.findViewById(R.id.radio_group_theme);
+        RadioGroup radioGroup = view.findViewById(R.id.radio_group_theme);
         light_theme_btn = view.findViewById(R.id.light_button);
         dark_theme_btn = view.findViewById(R.id.dark_button);
+
+        addBeautifyTags.setEnabled(beautify);
 
         setButtonState();
 
@@ -114,6 +145,9 @@ public class SettingsFragment extends Fragment {
         selfStopLl.setOnClickListener(v -> selfStopSwi.setChecked(!selfStopSwi.isChecked()));
         keepScreenOnLl.setOnClickListener(v -> keepScreenOnSwi.setChecked(!keepScreenOnSwi.isChecked()));
         oneClickSkipLl.setOnClickListener(v -> oneClickSkipSwi.setChecked(!oneClickSkipSwi.isChecked()));
+        beautifyLl.setOnClickListener(v -> beautifySwi.setChecked(!beautifySwi.isChecked()));
+        addBeautifyTags.setOnClickListener(v -> showBeatifyTagDialog());
+        scanAllLl.setOnClickListener(v -> scanAllSwi.setChecked(!scanAllSwi.isChecked()));
         blackListLl.setOnClickListener(v -> openBlackListDialogue());
         filterDurLl.setOnClickListener(v -> openFilterDurationDialog());
 
@@ -156,6 +190,21 @@ public class SettingsFragment extends Fragment {
             oneClickSkipSwi.setChecked(isChecked);
             settingsStorage.oneClickSkip(isChecked);
         });
+        beautifySwi.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            beautifySwi.setChecked(isChecked);
+            settingsStorage.beautifyName(isChecked);
+            if (!isChecked) {
+                settingsStorage.clearBeautifyTags();
+                settingsStorage.clearReplacingTags();
+            }
+            addBeautifyTags.setEnabled(isChecked);
+            mainActivity.checkForUpdateList(true);
+        });
+        scanAllSwi.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            scanAllSwi.setChecked(isChecked);
+            settingsStorage.scanAllMusic(isChecked);
+            mainActivity.checkForUpdateList(true);
+        });
 
         //Check if any radio button is pressed
         radioGroup.setOnCheckedChangeListener((group, checkedId) -> {
@@ -165,14 +214,86 @@ public class SettingsFragment extends Fragment {
         return view;
     }
 
-    private void openFilterDurationDialog() {
-        filterDurDialog = new Dialog(requireContext());
-        filterDurDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        filterDurDialog.setContentView(R.layout.filter_duration_dialog);
+    private void showBeatifyTagDialog() {
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(requireContext());
+        View customLayout = getLayoutInflater().inflate(R.layout.black_list_dialog, null);
+        builder.setView(customLayout);
+        builder.setCancelable(true);
+        ImageView directory_icon = customLayout.findViewById(R.id.blacklist_open_directory_icon);
+        RecyclerView recyclerView = customLayout.findViewById(R.id.blacklist_recycler);
+        noTagTV = customLayout.findViewById(R.id.text_no_folders);
+        TextView heading = customLayout.findViewById(R.id.textview_black_list);
+        heading.setText(getString(R.string.add_tag_removal));
+        replacingTagList = settingsStorage.getAllReplacingTag();
+        beautifyList = settingsStorage.getAllBeautifyTag();
 
-        TextView filter_time_tv = filterDurDialog.findViewById(R.id.filter_time_textview);
-        SeekBar filter_dur_seekbar = filterDurDialog.findViewById(R.id.filter_dur_seekBar);
-        Button filter_dur_ok_bt = filterDurDialog.findViewById(R.id.filter_dur_ok_bt);
+        beautifyListAdapter = new BeautifyListAdapter(beautifyList, requireContext(), replacingTagList);
+
+
+        if (beautifyList != null) {
+            if (beautifyList.isEmpty()) {
+                noTagTV.setVisibility(View.VISIBLE);
+            } else {
+                noTagTV.setVisibility(View.GONE);
+            }
+        } else {
+            noTagTV.setVisibility(View.VISIBLE);
+        }
+        recyclerView.setLayoutManager(new LinearLayoutManagerWrapper(getContext()));
+        recyclerView.setAdapter(beautifyListAdapter);
+        // adapter to load in spinner dropdown
+
+        // start "SELECT FOLDER" activity when we click on directory icon
+        directory_icon.setOnClickListener(view -> showAddTagDialog());
+
+        builder.setNegativeButton("OK", null);
+        AlertDialog dialog;
+        dialog = builder.create();
+        dialog.show();
+    }
+
+    private void showAddTagDialog() {
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(requireContext());
+        View customLayout = getLayoutInflater().inflate(R.layout.replacing_tag_layout, null);
+        builder.setView(customLayout);
+        builder.setCancelable(true);
+        EditText editText = customLayout.findViewById(R.id.edit_tag_name);
+        EditText editText1 = customLayout.findViewById(R.id.edit_replacing_tag);
+        builder.setPositiveButton("OK", (dialog, i) -> {
+            String tag = editText.getText().toString();
+            String replacingTag = editText1.getText().toString();
+
+            if (TextUtils.isEmpty(tag)) {
+                editText.setError("Empty");
+            } else {
+                settingsStorage.addBeautifyTag(tag);
+                settingsStorage.addReplacingTag(replacingTag);
+                beautifyList.add(tag);
+                replacingTagList.add(replacingTag);
+                if (noTagTV != null) {
+                    if (noTagTV.getVisibility() == View.VISIBLE) {
+                        noTagTV.setVisibility(View.GONE);
+                    }
+                }
+                beautifyListAdapter.notifyItemInserted(beautifyList.indexOf(tag));
+                mainActivity.checkForUpdateList(false);
+                dialog.cancel();
+            }
+        });
+        builder.setNegativeButton("Cancel", null);
+        AlertDialog dialog;
+        dialog = builder.create();
+        dialog.show();
+    }
+
+    private void openFilterDurationDialog() {
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(requireContext());
+        View customLayout = getLayoutInflater().inflate(R.layout.filter_duration_dialog, null);
+        builder.setView(customLayout);
+        builder.setCancelable(true);
+
+        TextView filter_time_tv = customLayout.findViewById(R.id.filter_time_textview);
+        SeekBar filter_dur_seekbar = customLayout.findViewById(R.id.filter_dur_seekBar);
 
         //set max in seconds
         filter_dur_seekbar.setMax(120);
@@ -200,26 +321,23 @@ public class SettingsFragment extends Fragment {
             }
         });
 
-        filter_dur_ok_bt.setOnClickListener(view -> {
+        builder.setPositiveButton("Filter", (dialog, which) -> {
             settingsStorage.saveFilterDur(Integer.parseInt(filter_time_tv.getText().toString()));
             mainActivity.checkForUpdateList(true);
-            filterDurDialog.dismiss();
+            dialog.cancel();
         });
+        filterDurDialog = builder.create();
         filterDurDialog.show();
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        if (blacklistDialog != null) {
-            if (blacklistDialog.isShowing()) {
-                blacklistDialog.dismiss();
-            }
+        if (blacklistDialog != null && blacklistDialog.isShowing()) {
+            blacklistDialog.dismiss();
         }
-        if (filterDurDialog != null) {
-            if (filterDurDialog.isShowing()) {
-                filterDurDialog.dismiss();
-            }
+        if (filterDurDialog != null && filterDurDialog.isShowing()) {
+            filterDurDialog.dismiss();
         }
     }
 
@@ -229,52 +347,47 @@ public class SettingsFragment extends Fragment {
     }
 
     private void openBlackListDialogue() {
-        //create blacklistDialog
-        blacklistDialog = new Dialog(getContext());
-        blacklistDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(requireContext());
+        View customLayout = getLayoutInflater().inflate(R.layout.black_list_dialog, null);
+        builder.setView(customLayout);
+        builder.setCancelable(true);
 
-        // collect references to ui components
-        blacklistDialog.setContentView(R.layout.black_list_dialog);
-        ImageView directory_icon = blacklistDialog.findViewById(R.id.blacklist_open_directory_icon);
-        Button okay_bt = blacklistDialog.findViewById(R.id.blacklist_confirm_bt);
-        RecyclerView recyclerView = blacklistDialog.findViewById(R.id.blacklist_recycler);
-        TextView textView = blacklistDialog.findViewById(R.id.text_no_folders);
+        ImageView directory_icon = customLayout.findViewById(R.id.blacklist_open_directory_icon);
+        RecyclerView recyclerView = customLayout.findViewById(R.id.blacklist_recycler);
+        TextView textView = customLayout.findViewById(R.id.text_no_folders);
 
-        blacklist = settingsStorage.loadBlackList();
+        ArrayList<String> blacklist = settingsStorage.loadBlackList();
 
-        adapter = new BlockFolderListAdapter(blacklist, requireContext());
+        BlockFolderListAdapter adapter = new BlockFolderListAdapter(blacklist, requireContext());
 
 
         if (blacklist != null) {
             if (blacklist.isEmpty()) {
                 textView.setVisibility(View.VISIBLE);
-            }else {
+            } else {
                 textView.setVisibility(View.GONE);
             }
-        }else {
+        } else {
             textView.setVisibility(View.VISIBLE);
         }
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setLayoutManager(new LinearLayoutManagerWrapper(getContext()));
         recyclerView.setAdapter(adapter);
         // adapter to load in spinner dropdown
 
         // start "SELECT FOLDER" activity when we click on directory icon
         directory_icon.setOnClickListener(view -> {
-            Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-            i.addCategory(Intent.CATEGORY_DEFAULT);
-            requireActivity().startActivityForResult(i, TAG_BLOCK_LIST);
+            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+            intent.addCategory(Intent.CATEGORY_DEFAULT);
+            mGetTreeLauncher.launch(intent);
         });
-
-        // set listener on okay button
-        okay_bt.setOnClickListener(v -> {
-            blacklistDialog.dismiss();
-        });
+        builder.setNegativeButton("OK",null);
         //finally show the blacklistDialog
+        blacklistDialog = builder.create();
         blacklistDialog.show();
     }
 
     private void showToast(String s) {
-        Toast.makeText(requireContext(), s, Toast.LENGTH_SHORT).show();
+        ((ApplicationClass) requireContext().getApplicationContext()).showToast(s);
     }
 
     private void hideExtra(boolean v) {
@@ -316,6 +429,8 @@ public class SettingsFragment extends Fragment {
         selfStopSwi.setChecked(selfStop);
         keepScreenOnSwi.setChecked(keepScreenOn);
         oneClickSkipSwi.setChecked(oneClickSkip);
+        beautifySwi.setChecked(beautify);
+        scanAllSwi.setChecked(scanAll);
 
         if (!dark) {
             light_theme_btn.setChecked(true);
@@ -324,6 +439,30 @@ public class SettingsFragment extends Fragment {
         }
     }
 
+    /**
+     * converts tree path uri to usable path uri (WORKS WITH BOTH INTERNAL AND EXTERNAL STORAGE)
+     *
+     * @param treePath tree path to be converted
+     * @return returns usable path uri
+     */
+    private String convertTreeUriToPathUri(String treePath) {
+        if (treePath.contains("/tree/primary:")) {
+            treePath = treePath.replace("/tree/primary:", "/storage/emulated/0/");
+        } else {
+            int colonIndex = treePath.indexOf(":");
+            String sdCard;
+            String folders;
+            try {
+                sdCard = treePath.substring(6, colonIndex);
+                folders = treePath.substring(colonIndex + 1);
+            } catch (IndexOutOfBoundsException e) {
+                showToast("Cannot recognise path");
+                return null;
+            }
+            treePath = "/storage/" + sdCard + "/" + folders;
+        }
+        return treePath;
+    }
 
     @SuppressLint("NonConstantResourceId")
     private void setDark(int checkedId) {
