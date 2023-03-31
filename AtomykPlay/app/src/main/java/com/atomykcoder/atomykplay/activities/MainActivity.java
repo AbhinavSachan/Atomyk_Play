@@ -49,6 +49,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedDispatcher;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.IntentSenderRequest;
 import androidx.activity.result.PickVisualMediaRequest;
@@ -91,6 +92,7 @@ import com.atomykcoder.atomykplay.fragments.PlaylistsFragment;
 import com.atomykcoder.atomykplay.fragments.SearchFragment;
 import com.atomykcoder.atomykplay.fragments.SettingsFragment;
 import com.atomykcoder.atomykplay.fragments.TagEditorFragment;
+import com.atomykcoder.atomykplay.helperFunctions.Logger;
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.repository.MusicUtils;
@@ -473,7 +475,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (uri != null) {
             String coverImageUri = uri.toString();
             storageUtil.replacePlaylist(storageUtil.loadPlaylist(pl_name), pl_name, coverImageUri);
-            playlistFragment.playlistAdapter.updateView(storageUtil.getAllPlaylist());
+            if (playlistFragment != null && playlistFragment.playlistAdapter != null) {
+                playlistFragment.playlistAdapter.updateView(storageUtil.getAllPlaylist());
+            }
 
         }
     });
@@ -483,8 +487,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (result.getData() != null) {
                 String coverImageUri = result.getData().getData().toString();
                 storageUtil.replacePlaylist(storageUtil.loadPlaylist(pl_name), pl_name, coverImageUri);
-                playlistFragment.playlistAdapter.updateView(storageUtil.getAllPlaylist());
-
+                if (playlistFragment != null && playlistFragment.playlistAdapter != null) {
+                    playlistFragment.playlistAdapter.updateView(storageUtil.getAllPlaylist());
+                }
             }
         }
     });
@@ -547,8 +552,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         View plCard = findViewById(R.id.playlist_card_view_ma);
         View lastAddCard = findViewById(R.id.last_added_card_view);
         View shuffleCard = findViewById(R.id.shuffle_play_card_view);
-
-        MediaPlayerService.ui_visible = true;
 
         navigationView = findViewById(R.id.navigation_drawer);
         drawer = findViewById(R.id.drawer_layout);
@@ -656,6 +659,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onStart() {
         super.onStart();
         app_paused = false;
+        MediaPlayerService.ui_visible = true;
+
         if (is_granted) {
             if (musicMainAdapter == null) {
                 setUpMusicScanner();
@@ -668,45 +673,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         if (service_bound) {
             if (is_playing) {
-                media_player_service.setSeekBar();
+                if (media_player_service!=null) {
+                    media_player_service.setSeekBar();
+                }
                 EventBus.getDefault().post(new PrepareRunnableEvent());
             }
         }
     }
-
-    @Override
-    public void onTrimMemory(int level) {
-        super.onTrimMemory(level);
-        switch (level) {
-            case android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL:
-                break;
-            case android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW:
-                break;
-            case android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE:
-                break;
-            case android.content.ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN:
-                if (app_paused) {
-                    musicMainAdapter = null;
-                }
-                break;
-            case android.content.ComponentCallbacks2.TRIM_MEMORY_BACKGROUND:
-                break;
-            case android.content.ComponentCallbacks2.TRIM_MEMORY_COMPLETE:
-                break;
-            case android.content.ComponentCallbacks2.TRIM_MEMORY_MODERATE:
-                break;
-        }
-    }
-
     @Override
     public void onLowMemory() {
         super.onLowMemory();
+        if (app_paused){
+            Logger.normalLog("LowMemory"+" - MainActivity");
+            if (!is_playing) {
+                stopMusicService();
+            }
+        }
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         app_paused = true;
+        MediaPlayerService.ui_visible = false;
 
         if (service_bound) {
             if (media_player_service != null) if (media_player_service.seekBarHandler != null) {
@@ -741,30 +730,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         if (service_bound) {
             MainActivity.this.unbindService(service_connection);
+            Logger.normalLog("UnbindService"+" - MainActivity");
             stopMusicService();
         }
-        MediaPlayerService.ui_visible = false;
-
         playlistFragment = null;
     }
 
     private void stopMusicService(){
-        //if media player is not playing it will stop the service
-        if (!is_playing) {
-            stopService(new Intent(MainActivity.this, MediaPlayerService.class));
-            service_stopped = true;
-        }
+        stopService(new Intent(MainActivity.this, MediaPlayerService.class));
+        Logger.normalLog("ServiceStopped"+" - MainActivity");
+        service_stopped = true;
     }
     /**
      * this function starts service and binds to MainActivity
      */
     private void bindService() {
         Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
+        Logger.normalLog("ServiceBind"+" - MainActivity");
         MainActivity.this.bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
     }
 
     private void startService() {
         Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
+        Logger.normalLog("StartService"+" - MainActivity");
         try {
             startService(playerIntent);
             service_stopped = false;
@@ -947,7 +935,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void setDataInNavigation(String song_name, String artist_name, Bitmap album_uri) {
         navSongName.setText(song_name);
         navArtistName.setText(artist_name);
-        glideBuilt.glideBitmap(album_uri, R.drawable.ic_music, navCover, 512);
+        glideBuilt.glideBitmap(album_uri, R.drawable.ic_music, navCover, 512,false);
     }
 
     private Music getMusic() {
@@ -989,6 +977,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (!service_stopped) {
             //service is active send media with broadcast receiver
             Intent broadcastIntent = new Intent(BROADCAST_STOP_MUSIC);
+            Logger.normalLog("MusicStop"+" - MainActivity");
             sendBroadcast(broadcastIntent);
         }
     }
@@ -1015,7 +1004,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void playAudio(Music music) {
         //starting service if its not started yet otherwise it will send broadcast msg to service
         storageUtil.clearMusicLastPos();
-
+        Logger.normalLog("MusicPlay"+" - MainActivity");
         String encodedMessage = MusicHelper.encode(music);
 
         if (!phone_ringing) {
@@ -1084,6 +1073,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else {
             showToast("Can't play while on call");
         }
+        Logger.normalLog("MusicResume"+" - MainActivity");
     }
 
     /**
@@ -1106,6 +1096,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else {
             showToast("Can't play while on call");
         }
+        Logger.normalLog("MusicNext"+" - MainActivity");
     }
 
     /**
@@ -1128,6 +1119,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else {
             showToast("Can't play while on call");
         }
+        Logger.normalLog("MusicPrev"+" - MainActivity");
     }
 
     /**
@@ -1228,7 +1220,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 optionSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
                 optionName.setText(music.getName());
                 optionArtist.setText(music.getArtist());
-                glideBuilt.glideBitmap(finalImage, R.drawable.ic_music, optionCover, 128);
+                glideBuilt.glideBitmap(finalImage, R.drawable.ic_music, optionCover, 128,false);
             });
         });
 
@@ -1325,7 +1317,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (lastAddedFragment != null) {
             lastAddedFragment.adapter.removeItem(selectedItem);
         }
-        if (searchFragment != null) {
+        if (searchFragment != null && searchFragment.adapter != null) {
             searchFragment.adapter.removeItem(selectedItem);
         }
     }
@@ -1538,7 +1530,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (loadList != null && !loadList.isEmpty()) {
             setMusicAdapter(loadList);
         } else {
-            checkForUpdateList(true);
+            if (!isChecking) {
+                checkForUpdateList(true);
+            }
         }
 
     }
@@ -1558,7 +1552,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
-    @SuppressLint("SwitchIntDef")
     @Override
     public void onBackPressed() {
         FragmentManager fragmentManager = getSupportFragmentManager();
@@ -1580,7 +1573,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         if (fragment1 != null || fragment2 != null || fragment3 != null || fragment4 != null) {
                             navigationView.setCheckedItem(R.id.navigation_home);
                         }
-                        super.onBackPressed();
+                        if (is_playing){
+                            moveTaskToBack(false);
+                        }else {
+                            super.onBackPressed();
+                        }
                     }
                 }
             }

@@ -11,6 +11,7 @@ import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.no_repeat;
 import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.repeat;
 import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.repeat_one;
 
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
@@ -82,6 +83,7 @@ import org.greenrobot.eventbus.Subscribe;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -159,7 +161,9 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     private Dialog timerDialogue;
     private Music activeMusic;
     private boolean app_paused;
+    public static boolean playing_same_song = false;
     private boolean should_refresh_layout = true;
+    private int tempColor;
     private MutableLiveData<Integer> color = new MutableLiveData<>();
 
     public void setThemeColorForApp(int color) {
@@ -184,7 +188,6 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         //StorageUtil initialization
         storageUtil = new StorageUtil(requireContext());
         executorService = Executors.newFixedThreadPool(10);
-        handler = new Handler(Looper.getMainLooper());
 
         if (savedInstanceState == null) {
             if (activeMusic == null) {
@@ -198,6 +201,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         }
         settingsStorage = new StorageUtil.SettingsStorage(requireContext());
         mainActivity = (MainActivity) requireContext();
+        playing_same_song = false;
 
         //Mini player items initializations
         mini_play_view = view.findViewById(R.id.mini_player_layout);//○
@@ -300,6 +304,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
                 sheet.setState(BottomSheetBehavior.STATE_COLLAPSED);
             }
         });
+        tempColor = getResources().getColor(R.color.player_bg, Resources.getSystem().newTheme());
         setupQueueBottomSheet();
         return view;
     }
@@ -308,6 +313,9 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     public void onStart() {
         super.onStart();
         setButton(activeMusic);
+        if (should_refresh_layout) {
+            setPreviousData(activeMusic);
+        }
         if (mainActivity.mainPlayerSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
             mini_play_view.setAlpha(0);
             mini_play_view.setVisibility(View.INVISIBLE);
@@ -336,9 +344,6 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     @Override
     public void onResume() {
         super.onResume();
-        if (should_refresh_layout) {
-            setPreviousData(activeMusic);
-        }
         if (queueSheetBehaviour.getState() == BottomSheetBehavior.STATE_EXPANDED) {
             queueRecyclerView.setVisibility(View.VISIBLE);
         }
@@ -352,6 +357,11 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
             queueRecyclerView.setVisibility(View.GONE);
         }
         app_paused = true;
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
         should_refresh_layout = false;
     }
 
@@ -405,8 +415,11 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         }
     }
 
-    private void setThemeColorInPlayer(int color) {
-        player_layout.setBackgroundColor(color);
+    private void setThemeColorInPlayer(int animateFrom,int animateTo) {
+        ValueAnimator colorAnimation = ValueAnimator.ofArgb(animateFrom, animateTo);
+        colorAnimation.setDuration(400);
+        colorAnimation.addUpdateListener(animator -> player_layout.setBackgroundColor((Integer) animator.getAnimatedValue()));
+        colorAnimation.start();
     }
 
     private void setThemeColorLyricView(int color) {
@@ -420,6 +433,11 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
     @Subscribe
     public void setMainPlayerLayout(SetMainLayoutEvent event) {
+        if (playing_same_song){
+            if (Objects.equals(activeMusic.getPath(), event.activeMusic.getPath())){
+                return;
+            }
+        }
         activeMusic = event.activeMusic;
         if (!app_paused) {
             if (activeMusic != null) {
@@ -427,12 +445,14 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
                 if (image != null) {
                     int themeColor = generateThemeColor(image);
                     setThemeColorForApp(themeColor);
-                    setThemeColorInPlayer(themeColor);
+                    setThemeColorInPlayer(tempColor,themeColor);
                     setThemeColorLyricView(themeColor);
+                    tempColor = themeColor;
                 } else {
                     setThemeColorForApp(getResources().getColor(R.color.player_bg, Resources.getSystem().newTheme()));
-                    setThemeColorInPlayer(getResources().getColor(R.color.player_bg, Resources.getSystem().newTheme()));
+                    setThemeColorInPlayer(tempColor,getResources().getColor(R.color.player_bg, Resources.getSystem().newTheme()));
                     setThemeColorLyricView(getResources().getColor(R.color.player_bg, Resources.getSystem().newTheme()));
+                    tempColor = getResources().getColor(R.color.player_bg, Resources.getSystem().newTheme());
                 }
                 songName = activeMusic.getName();
                 bitrate = activeMusic.getBitrate();
@@ -488,12 +508,12 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
                 } catch (NumberFormatException e) {
                     showToast("Something went wrong");
                 }
-                glideBuilt.glideBitmap(image, R.drawable.ic_music, playerCoverImage, 512);
-                glideBuilt.glideBitmap(image, R.drawable.ic_music, mini_cover, 128);
-                glideBuilt.glideBitmap(image, R.drawable.ic_music, queueCoverImg, 128);
+                glideBuilt.glideBitmap(image, R.drawable.ic_music, playerCoverImage, 512,true);
+                glideBuilt.glideBitmap(image, R.drawable.ic_music, mini_cover, 128,true);
+                glideBuilt.glideBitmap(image, R.drawable.ic_music, queueCoverImg, 128,true);
                 mainActivity.setDataInNavigation(songName, artistName, image);
                 if (image != null && image.isRecycled()) {
-                    //Don't remove this it will prevent app from crashing if bitmap was trying to recycle from available instance
+                    //Don't remove this it will prevent app from crashing if bitmap was trying to recycle from instance
                     image = null;
                 }
             }
@@ -523,8 +543,8 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         seekBarMain.setProgress(0);
         mini_progress.setProgress(0);
 
-        glideBuilt.glideBitmap(null, R.drawable.ic_music, playerCoverImage, 512);
-        glideBuilt.glideBitmap(null, R.drawable.ic_music, mini_cover, 128);
+        glideBuilt.glideBitmap(null, R.drawable.ic_music, playerCoverImage, 512,false);
+        glideBuilt.glideBitmap(null, R.drawable.ic_music, mini_cover, 128,false);
     }
 
     @Subscribe
@@ -883,7 +903,6 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     }
 
     private ExecutorService executorService;
-    private Handler handler;
 
     private void shuffleListAndSave(Music activeMusic) {
         ArrayList<Music> musicList = storageUtil.loadQueueList();
@@ -900,12 +919,10 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
                     storageUtil.saveQueueList(musicList);
                     storageUtil.saveMusicIndex(0);
                     return musicList;
-                }, executorService).thenAcceptAsync(result -> {
-                    handler.post(() -> {
-                        updateQueueAdapter(musicList);
-                        shuffleImg.setClickable(true);
-                    });
-                });
+                }, executorService).thenAcceptAsync(result -> requireActivity().runOnUiThread(() -> {
+                    updateQueueAdapter(musicList);
+                    shuffleImg.setClickable(true);
+                }));
             } catch (Exception ignored) {
             }
         }
@@ -924,7 +941,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
                 }
                 storageUtil.saveQueueList(tempList);
                 // post-execute code here
-                handler.post(() -> {
+                requireActivity().runOnUiThread(() -> {
                     updateQueueAdapter(tempList);
                     shuffleImg.setClickable(true);
                 });

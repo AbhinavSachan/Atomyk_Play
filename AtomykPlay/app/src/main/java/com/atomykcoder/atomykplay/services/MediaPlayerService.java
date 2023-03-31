@@ -6,20 +6,16 @@ import static com.atomykcoder.atomykplay.activities.MainActivity.service_stopped
 import static com.atomykcoder.atomykplay.classes.ApplicationClass.CHANNEL_ID;
 
 import android.annotation.SuppressLint;
-import android.app.ForegroundServiceStartNotAllowedException;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
-import android.content.ComponentCallbacks;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.icu.text.UnicodeSetSpanner;
 import android.media.AudioFocusRequest;
 import android.media.AudioManager;
 import android.media.MediaMetadataRetriever;
@@ -38,10 +34,8 @@ import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 import android.view.KeyEvent;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
@@ -59,11 +53,14 @@ import com.atomykcoder.atomykplay.events.RemoveLyricsHandlerEvent;
 import com.atomykcoder.atomykplay.events.SetMainLayoutEvent;
 import com.atomykcoder.atomykplay.events.UpdateMusicImageEvent;
 import com.atomykcoder.atomykplay.events.UpdateMusicProgressEvent;
+import com.atomykcoder.atomykplay.fragments.BottomSheetPlayerFragment;
+import com.atomykcoder.atomykplay.helperFunctions.Logger;
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
@@ -94,6 +91,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     private final IBinder iBinder = new LocalBinder();
     private final Handler handler = new Handler();
     private final Handler mainThreadHandler = new Handler(Looper.getMainLooper());
+    private Runnable selfStopRunnable;
     public MediaPlayer media_player;
     public Runnable seekBarRunnable;
     public Handler seekBarHandler;
@@ -149,6 +147,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                                     }
                                     initiateMediaPlayer();
                                 }
+                                Logger.normalLog("PluggedIn");
                             }
                         }
                     }
@@ -217,6 +216,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             }
         }
         skipToNext();
+        Logger.normalLog("onNext");
     }
 
     private void onPreviousReceived() {
@@ -229,6 +229,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             }
         }
         skipToPrevious();
+        Logger.normalLog("onPrev");
     }
 
     private void onPlayPauseReceived() {
@@ -246,6 +247,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 resumeMedia();
             }
         }
+        Logger.normalLog("onPlayPause");
     }
 
     /**
@@ -385,41 +387,26 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                         .setState(PlaybackStateCompat.STATE_PLAYING, getCurrentMediaPosition(), playbackSpeed)
                         .setActions(PlaybackStateCompat.ACTION_SEEK_TO).build());
             }
-            // In android 11 or below foreground service will stop and start everytime music pauses unlike android 12
-            // where foreground is starting one time when app is started
-            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.R) {
-                try {
-                    startForeground(NOTIFICATION_ID, musicNotification);
-                } catch (ForegroundServiceStartNotAllowedException e) {
-                    pauseMedia();
-                }
-            }
         } else if (playbackStatus == PlaybackStatus.PAUSED) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 mediaSession.setPlaybackState(new PlaybackStateCompat.Builder()
                         .setState(PlaybackStateCompat.STATE_PAUSED, getCurrentMediaPosition(), playbackSpeed)
                         .setActions(PlaybackStateCompat.ACTION_SEEK_TO).build());
             }
-            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.R) {
-                stopForeground(STOP_FOREGROUND_DETACH);
-                notificationManager.notify(NOTIFICATION_ID, musicNotification);
-            }
+
             //here we are stopping service after 5 minutes if app
             // is not running in background and player is not playing
             //this is a optional feature for user
             if (settingsStorage.loadSelfStop()) {
-                mainThreadHandler.postDelayed(() -> {
-                    if (!is_playing && !ui_visible) {
+                selfStopRunnable = () -> {
+                    if ((!isMediaPlaying() || !is_playing) && !ui_visible) {
                         stopSelf();
                     }
-                }, 5 * 60 * 1000); // 5 minutes
-
+                };
+                mainThreadHandler.postDelayed(selfStopRunnable, 5 * 60 * 1000);
             }
         }
-        //this will only run if app is running in android 12 for one time foreground startup
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            notificationManager.notify(NOTIFICATION_ID, musicNotification);
-        }
+        notificationManager.notify(NOTIFICATION_ID, musicNotification);
     }
 
     private void buildInitialNotification() {
@@ -507,7 +494,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                     transportControls.skipToPrevious();
                 break;
             case ACTION_STOP:
-                Log.d("TAG", "playbackAction: stop");
                 if (!isMediaPlayerNotNull())
                     stoppedByNotification();
                 else
@@ -559,7 +545,18 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 if (isMediaPlayerNotNull()) {
                     MainActivity.phone_ringing = false;
                     if (was_playing) {
-                        resumeMedia();
+                        if (!isMediaPlayerNotNull()) {
+                            initiateMediaPlayer();
+                            if (mediaSession == null) {
+                                try {
+                                    initiateMediaSession();
+                                } catch (RemoteException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        } else {
+                            resumeMedia();
+                        }
                         was_playing = false;
                     }
                 }
@@ -588,6 +585,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
+        Logger.normalLog("BindService");
         return iBinder;
     }
 
@@ -745,6 +743,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         } catch (IOException e) {
             e.printStackTrace();
         }
+        Logger.normalLog("InitiatedMediaPlayer");
     }
 
     /**
@@ -825,7 +824,19 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             initiateMediaPlayer();
             return;
         }
-
+        File file = null;
+        if (activeMusic != null) {
+            file = new File(activeMusic.getPath());
+        }
+        if (file != null) {
+            if (!file.exists()) {
+                skipToNext();
+                return;
+            }
+        } else {
+            skipToNext();
+            return;
+        }
         //if service is bound then set seekbar and load lyrics
         if (service_bound) {
             setSeekBar();
@@ -848,6 +859,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         // set icon to playing and build notification
         setIcon(PlaybackStatus.PLAYING);
         buildNotification(PlaybackStatus.PLAYING, 1f);
+        Logger.normalLog("Resumed");
     }
 
 
@@ -867,6 +879,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             is_playing = false;
             setIcon(PlaybackStatus.PAUSED);
             buildNotification(PlaybackStatus.PAUSED, 0f);
+            Logger.normalLog("Played");
         }
     }
 
@@ -892,6 +905,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 };
                 seekBarHandler.postDelayed(seekBarRunnable, 0);
             }
+            Logger.normalLog("SeekBarSet");
         }
     }
 
@@ -932,30 +946,47 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 return;
             }
             if (settingsStorage.loadOneClickSkip()) {
-                setActiveMusic();
+                setActiveMusicForPrevious();
             } else {
-                if ((isMediaPlayerNotNull() && getCurrentMediaPosition() >= 3000) || lastPos >= 3000)
+                if ((isMediaPlayerNotNull() && getCurrentMediaPosition() >= 3000) || lastPos >= 3000) {
                     activeMusic = musicList.get(musicIndex);
-                else
-                    setActiveMusic();
+                    BottomSheetPlayerFragment.playing_same_song = true;
+                } else {
+                    setActiveMusicForPrevious();
+                }
             }
         } catch (IndexOutOfBoundsException e) {
             showToast("Please try to play another song");
+        }
+        File file = null;
+        if (activeMusic != null) {
+            file = new File(activeMusic.getPath());
+        }
+        if (file != null) {
+            if (!file.exists()) {
+                skipToPrevious();
+                return;
+            }
+        } else {
+            skipToPrevious();
+            return;
         }
         if (activeMusic != null) {
             storage.saveMusicIndex(musicIndex);
             stopMedia();
             initiateMediaPlayer();
+            Logger.normalLog("Previous");
         }
     }
 
-    private void setActiveMusic() {
+    private void setActiveMusicForPrevious() {
         if (musicIndex == 0) {
             musicIndex = musicList.size() - 1;
             activeMusic = musicList.get(musicIndex);
         } else {
             activeMusic = musicList.get(--musicIndex);
         }
+        BottomSheetPlayerFragment.playing_same_song = false;
     }
 
     /**
@@ -975,13 +1006,28 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 } else {
                     activeMusic = musicList.get(++musicIndex);
                 }
-            if (activeMusic != null) {
-                storage.saveMusicIndex(musicIndex);
-                stopMedia();
-                initiateMediaPlayer();
-            }
+            BottomSheetPlayerFragment.playing_same_song = false;
         } catch (IndexOutOfBoundsException e) {
             showToast("Please try to play another song");
+        }
+        File file = null;
+        if (activeMusic != null) {
+            file = new File(activeMusic.getPath());
+        }
+        if (file != null) {
+            if (!file.exists()) {
+                skipToNext();
+                return;
+            }
+        } else {
+            skipToNext();
+            return;
+        }
+        if (activeMusic != null) {
+            storage.saveMusicIndex(musicIndex);
+            stopMedia();
+            initiateMediaPlayer();
+            Logger.normalLog("Next");
         }
     }
 
@@ -994,6 +1040,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         mediaSession = new MediaSessionCompat(getApplicationContext(), "MediaPlayerMediaSession");
         transportControls = mediaSession.getController().getTransportControls();
         mediaSession.setActive(true);
+        mediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_QUEUE_COMMANDS);
+        Logger.normalLog("MediaSessionCreated");
         mediaSession.setCallback(new MediaSessionCompat.Callback() {
             @Override
             public boolean onMediaButtonEvent(Intent mediaButtonEvent) {
@@ -1086,7 +1134,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             }
 
         });
-        mediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_QUEUE_COMMANDS);
     }
 
     @Override
@@ -1094,7 +1141,20 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         switch (focusState) {
             case AudioManager.AUDIOFOCUS_GAIN:
                 if (was_playing) {
-                    resumeMedia();
+                    if (!isMediaPlayerNotNull()) {
+                        initiateMediaPlayer();
+                        Logger.normalLog("FocusGainInitiated");
+                        if (mediaSession == null) {
+                            try {
+                                initiateMediaSession();
+                            } catch (RemoteException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    } else {
+                        resumeMedia();
+                        Logger.normalLog("FocusGainResumed");
+                    }
                     was_playing = false;
                 }
                 break;
@@ -1102,6 +1162,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
                 if (isMediaPlaying()) {
                     pauseMedia();
+                    Logger.normalLog("FocusTransientPaused");
                     was_playing = true;
                 }
                 break;
@@ -1109,6 +1170,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 if (settingsStorage.loadLowerVol()) {
                     if (isMediaPlaying()) {
                         media_player.setVolume(0.3f, 0.3f);
+                        Logger.normalLog("FocusDuckLowerVol");
                     }
                 }
                 break;
@@ -1120,6 +1182,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     public int onStartCommand(Intent intent, int flags, int startId) {
         //Handle Intent action from MediaSession.TransportControls
         handleNotificationActions(intent);
+        Logger.normalLog("ServiceStarted");
 
         storage = new StorageUtil(getApplicationContext());
         settingsStorage = new StorageUtil.SettingsStorage(getApplicationContext());
@@ -1152,28 +1215,29 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, 0)
                 .build();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            if (activeMusic != null) {
-                if (musicNotification != null) {
-                    try {
-                        startForeground(NOTIFICATION_ID, musicNotification);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    buildInitialNotification();
-                    try {
-                        startForeground(NOTIFICATION_ID, initialNotification);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+        if (activeMusic != null) {
+            if (musicNotification != null) {
+                try {
+                    startForeground(NOTIFICATION_ID, musicNotification);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else {
+                buildInitialNotification();
+                try {
+                    startForeground(NOTIFICATION_ID, initialNotification);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         }
-        return START_STICKY;
+        return START_NOT_STICKY;
     }
-
-
+    @Override
+    public void onTaskRemoved(Intent rootIntent) {
+        super.onTaskRemoved(rootIntent);
+        stopSelf();
+    }
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -1204,7 +1268,9 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
         releasePlayer();
     }
+
     private void releasePlayer() {
+        Logger.normalLog("MediaPlayerReleased");
         if (isMediaPlayerNotNull()) {
             media_player.release();
         }
@@ -1218,7 +1284,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             notificationManager.cancelAll();
         }
         stopForeground(true);
-        stopSelf();
     }
 
     /**
@@ -1249,6 +1314,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             }
         }
     }
+
     public class LocalBinder extends Binder {
         public MediaPlayerService getService() {
             return MediaPlayerService.this;

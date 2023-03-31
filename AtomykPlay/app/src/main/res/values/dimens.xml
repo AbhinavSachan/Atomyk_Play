@@ -10,6 +10,7 @@
     <dimen name="d_24sp">24sp</dimen>
     <dimen name="d_28sp">28sp</dimen>
     <dimen name="d_32sp">32sp</dimen>
+    <dimen name="d_34sp">34sp</dimen>
     <dimen name="option_icon_mea">20dp</dimen>
     <dimen name="most_bottom_padding">90dp</dimen>
     <dimen name="most_top_padding">90dp</dimen>

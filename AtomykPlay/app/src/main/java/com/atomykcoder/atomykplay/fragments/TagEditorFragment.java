@@ -18,6 +18,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -157,7 +158,7 @@ public class TagEditorFragment extends Fragment {
                 } catch (Exception ignored) {
                 }
                 handler.post(() -> {
-                    glideBuilt.glideBitmap(image[0], R.drawable.ic_music, coverImageView, 412);
+                    glideBuilt.glideBitmap(image[0], R.drawable.ic_music, coverImageView, 412,false);
                 });
             });
         }
@@ -263,8 +264,7 @@ public class TagEditorFragment extends Fragment {
                 });
             } catch (CannotReadException | InvalidAudioFrameException | ReadOnlyFileException |
                      TagException | IOException | CannotWriteException e) {
-                Logger logger = new Logger();
-                logger.normalLog(e.toString());
+                Logger.normalLog(e.toString());
                 handler.post(() -> {
                     setLoadingStatus(LoadingStatus.FAILURE);
                 });

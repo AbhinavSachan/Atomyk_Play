@@ -41,6 +41,7 @@ public class SearchFragment extends Fragment {
         radioGroup.setOnCheckedChangeListener((radioGroup, i) -> {
             //search if any radio button is pressed
             search(query, dataList);
+
         });
     }
 
@@ -76,6 +77,7 @@ public class SearchFragment extends Fragment {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        searchWithFilters("",searchedMusicList);
         searchView.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -180,37 +182,42 @@ public class SearchFragment extends Fragment {
         adapter.notifyDataSetChanged();
     }
 
+    private int getListSize(){
+        if (searchedMusicList != null) {
+            return searchedMusicList.size();
+        }else return 0;
+    }
     private void setNumText(int id) {
-        String song0 = "0 Song";
-        String album0 = "0 Album";
-        String artist0 = "0 Artist";
-        String genre0 = "0 Genre";
+        String song0 = "Song";
+        String album0 = "Album";
+        String artist0 = "Artist";
+        String genre0 = "Genre";
         String space = " ";
         String num;
         switch (id) {
             case 1:
-                num = searchedMusicList.size()+space+ "Song";
+                num = getListSize()+space+ "Song";
                 songButton.setText(num);
                 albumButton.setText(album0);
                 artistButton.setText(artist0);
                 genreButton.setText(genre0);
                 break;
             case 2:
-                num = searchedMusicList.size()+space+ "Album";
+                num = getListSize()+space+ "Album";
                 songButton.setText(song0);
                 albumButton.setText(num);
                 artistButton.setText(artist0);
                 genreButton.setText(genre0);
                 break;
             case 3:
-                num = searchedMusicList.size()+space+ "Artist";
+                num = getListSize()+space+ "Artist";
                 songButton.setText(song0);
                 albumButton.setText(album0);
                 artistButton.setText(num);
                 genreButton.setText(genre0);
                 break;
             case 4:
-                num = searchedMusicList.size()+space+ "Genre";
+                num = getListSize()+space+ "Genre";
                 songButton.setText(song0);
                 albumButton.setText(album0);
                 artistButton.setText(artist0);

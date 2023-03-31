@@ -100,11 +100,11 @@ public class MusicQueueAdapter extends MusicAdapter implements ItemTouchHelperAd
         super.onBindViewHolder(_holder, position);
 
         MusicQueueViewHolder holder = (MusicQueueViewHolder) _holder;
-        holder.musicIndex.setText(String.valueOf(position + 1));
 
         Music currentItem = super.items.get(position);
 
         loadImage(context, currentItem, position, holder.albumCoverIV);
+        holder.musicIndex.setText(String.valueOf(position + 1));
 
         //playing song
         holder.cardView.setOnClickListener(v -> {
