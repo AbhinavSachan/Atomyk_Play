@@ -25,15 +25,15 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.webkit.MimeTypeMap;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -67,6 +67,8 @@ import com.atomykcoder.atomykplay.events.PrepareRunnableEvent;
 import com.atomykcoder.atomykplay.events.RemoveLyricsHandlerEvent;
 import com.atomykcoder.atomykplay.events.RunnableSyncLyricsEvent;
 import com.atomykcoder.atomykplay.events.SetMainLayoutEvent;
+import com.atomykcoder.atomykplay.events.SetTimerText;
+import com.atomykcoder.atomykplay.events.TimerFinished;
 import com.atomykcoder.atomykplay.events.UpdateMusicImageEvent;
 import com.atomykcoder.atomykplay.events.UpdateMusicProgressEvent;
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper;
@@ -80,6 +82,7 @@ import com.google.android.material.progressindicator.LinearProgressIndicator;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -165,6 +168,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     private boolean should_refresh_layout = true;
     private int tempColor;
     private MutableLiveData<Integer> color = new MutableLiveData<>();
+    private long lastClickTime;
 
     public void setThemeColorForApp(int color) {
         this.color.setValue(color);
@@ -193,7 +197,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
             if (activeMusic == null) {
                 activeMusic = getCurrentMusic();
             }
-        }else {
+        } else {
             activeMusic = decode(savedInstanceState.getString("activeMusic"));
         }
         if (activeMusic != null) {
@@ -267,7 +271,13 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         shuffleImg.setOnClickListener(v -> shuffleList());
         favoriteImg.setOnClickListener(v -> addFavorite(storageUtil, activeMusic, favoriteImg));
         timerImg.setOnClickListener(v -> setTimer());
-        timerTv.setOnClickListener(v -> cancelTimer());
+        timerTv.setOnClickListener(v -> {
+            if (media_player_service != null) {
+                media_player_service.cancelTimer();
+            } else {
+                showToast("Music service is not running");
+            }
+        });
         lyricsImg.setOnClickListener(v -> openLyricsPanel());
         queueItem.setOnClickListener(v -> scrollToCurSong());
         lyricsImg.setOnLongClickListener(view1 -> {
@@ -323,7 +333,14 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
             player_layout.setAlpha(0);
             player_layout.setVisibility(View.INVISIBLE);
         }
-
+        if (queueSheetBehaviour.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+            queueRecyclerView.setVisibility(View.VISIBLE);
+        }
+        if (countDownTimer[0] == null) {
+            timerTv.setVisibility(View.GONE);
+            timerImg.setVisibility(View.VISIBLE);
+        }
+        app_paused = false;
     }
 
     @Override
@@ -342,27 +359,13 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        if (queueSheetBehaviour.getState() == BottomSheetBehavior.STATE_EXPANDED) {
-            queueRecyclerView.setVisibility(View.VISIBLE);
-        }
-        app_paused = false;
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
+    public void onStop() {
+        super.onStop();
+        should_refresh_layout = false;
         if (queueSheetBehaviour.getState() == BottomSheetBehavior.STATE_EXPANDED) {
             queueRecyclerView.setVisibility(View.GONE);
         }
         app_paused = true;
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        should_refresh_layout = false;
     }
 
     /**
@@ -370,7 +373,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
      */
     private void scrollToCurSong() {
         int index = storageUtil.loadMusicIndex();
-        linearLayoutManager.scrollToPositionWithOffset(index,0);
+        linearLayoutManager.scrollToPositionWithOffset(index, 0);
     }
 
     /**
@@ -415,7 +418,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         }
     }
 
-    private void setThemeColorInPlayer(int animateFrom,int animateTo) {
+    private void setThemeColorInPlayer(int animateFrom, int animateTo) {
         ValueAnimator colorAnimation = ValueAnimator.ofArgb(animateFrom, animateTo);
         colorAnimation.setDuration(400);
         colorAnimation.addUpdateListener(animator -> player_layout.setBackgroundColor((Integer) animator.getAnimatedValue()));
@@ -433,8 +436,8 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
     @Subscribe
     public void setMainPlayerLayout(SetMainLayoutEvent event) {
-        if (playing_same_song){
-            if (Objects.equals(activeMusic.getPath(), event.activeMusic.getPath())){
+        if (playing_same_song) {
+            if (Objects.equals(activeMusic.getPath(), event.activeMusic.getPath())) {
                 return;
             }
         }
@@ -445,12 +448,12 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
                 if (image != null) {
                     int themeColor = generateThemeColor(image);
                     setThemeColorForApp(themeColor);
-                    setThemeColorInPlayer(tempColor,themeColor);
+                    setThemeColorInPlayer(tempColor, themeColor);
                     setThemeColorLyricView(themeColor);
                     tempColor = themeColor;
                 } else {
                     setThemeColorForApp(getResources().getColor(R.color.player_bg, Resources.getSystem().newTheme()));
-                    setThemeColorInPlayer(tempColor,getResources().getColor(R.color.player_bg, Resources.getSystem().newTheme()));
+                    setThemeColorInPlayer(tempColor, getResources().getColor(R.color.player_bg, Resources.getSystem().newTheme()));
                     setThemeColorLyricView(getResources().getColor(R.color.player_bg, Resources.getSystem().newTheme()));
                     tempColor = getResources().getColor(R.color.player_bg, Resources.getSystem().newTheme());
                 }
@@ -508,9 +511,9 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
                 } catch (NumberFormatException e) {
                     showToast("Something went wrong");
                 }
-                glideBuilt.glideBitmap(image, R.drawable.ic_music, playerCoverImage, 512,true);
-                glideBuilt.glideBitmap(image, R.drawable.ic_music, mini_cover, 128,true);
-                glideBuilt.glideBitmap(image, R.drawable.ic_music, queueCoverImg, 128,true);
+                glideBuilt.glideBitmap(image, R.drawable.ic_music, playerCoverImage, 512, true);
+                glideBuilt.glideBitmap(image, R.drawable.ic_music, mini_cover, 128, true);
+                glideBuilt.glideBitmap(image, R.drawable.ic_music, queueCoverImg, 128, true);
                 mainActivity.setDataInNavigation(songName, artistName, image);
                 if (image != null && image.isRecycled()) {
                     //Don't remove this it will prevent app from crashing if bitmap was trying to recycle from instance
@@ -543,8 +546,8 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         seekBarMain.setProgress(0);
         mini_progress.setProgress(0);
 
-        glideBuilt.glideBitmap(null, R.drawable.ic_music, playerCoverImage, 512,false);
-        glideBuilt.glideBitmap(null, R.drawable.ic_music, mini_cover, 128,false);
+        glideBuilt.glideBitmap(null, R.drawable.ic_music, playerCoverImage, 512, false);
+        glideBuilt.glideBitmap(null, R.drawable.ic_music, mini_cover, 128, false);
     }
 
     @Subscribe
@@ -571,7 +574,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         String music = encode(activeMusic);
-        outState.putString("activeMusic",music);
+        outState.putString("activeMusic", music);
     }
 
     // Don't Remove This Event Bus is using this method (It might look unused still DON'T REMOVE
@@ -742,7 +745,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
         // assign class member id list to new updated _id-list
         musicArrayList = new ArrayList<>(list);
-        queueAdapter.updateMusicListItems(list);
+        queueAdapter.updateMusicListItems(musicArrayList);
     }
 
     /**
@@ -762,7 +765,22 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         }
     }
 
+    private boolean isMusicNotAvailable(Music currentItem) {
+        if (!doesMusicExists(currentItem)) {
+            Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show();
+            mainActivity.updateAdaptersForRemovedItem();
+            return true;
+        }
+        return false;
+    }
+
+    protected boolean doesMusicExists(Music music) {
+        File file = new File(music.getPath());
+        return file.exists();
+    }
+
     private void optionMenu(Music music) {
+        if (isMusicNotAvailable(music)) return;
         //add a bottom sheet to show music options like set to ringtone ,audio details ,add to playlist etc.
         if (music != null) mainActivity.openOptionMenu(music, OptionSheetEnum.MAIN_LIST);
     }
@@ -802,58 +820,30 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         });
 
         //Dialogue Box Confirm Button Listener
-        builder.setPositiveButton("Start",(dialog,i) -> {
+        builder.setPositiveButton("Start", (dialog, i) -> {
             dialog.cancel();
-            timerTv.setVisibility(View.VISIBLE);
-            timerImg.setVisibility(View.GONE);
-
-            //Sets The already Initialized countDownTimer to a new countDownTimer with given parameters
-            countDownTimer[0] = new CountDownTimer((timerSeekBar.getProgress() * 5L + 5) * 1000L * 60, 1000) {
-
-                //Variables For storing seconds and minutes
-                int seconds;
-                int minutes;
-
-                //Every Second Do Something
-                //Update TextView Code Goes Here
-                @Override
-                public void onTick(long l) {
-
-                    //Storing Seconds and Minutes on Every Tick
-                    seconds = (int) (l / 1000) % 60;
-                    minutes = (int) ((l / (1000 * 60)) % 60);
-
-                    // Replace This with TextView.setText(View);
-                    String finalCDTimer = minutes + ":" + seconds;
-                    timerTv.setText(finalCDTimer);
-                }
-
-
-                //Code After timer is Finished Goes Here
-                @Override
-                public void onFinish() {
-
-                    //Replace This pausePlayAudio() with just a pause Method.
-                    //Replaced it
-                    media_player_service.pauseMedia();
-                    timerTv.setVisibility(View.GONE);
-                    timerImg.setVisibility(View.VISIBLE);
-                }
-            };
-            // Start timer
-            countDownTimer[0].start();
+            if (media_player_service != null) {
+                media_player_service.setTimer(timerSeekBar.getProgress());
+            } else {
+                showToast("Music service is not running");
+            }
         });
         //Show Timer Dialogue Box
         timerDialogue = builder.create();
         timerDialogue.show();
-
-
     }
 
-    private void cancelTimer() {
-        // Else if timer Icon is set to ic_timer already then execute this
-        // Cancel any previous set timer
-        countDownTimer[0].cancel();
+    @Subscribe
+    public void setTimerLiveText(SetTimerText setTimerText) {
+        if (timerTv.getVisibility() == View.GONE) {
+            timerTv.setVisibility(View.VISIBLE);
+            timerImg.setVisibility(View.GONE);
+        }
+        timerTv.setText(setTimerText.liveTimerText);
+    }
+
+    @Subscribe
+    public void setTimerFinished(TimerFinished timerFinished) {
         timerTv.setVisibility(View.GONE);
         timerImg.setVisibility(View.VISIBLE);
     }
@@ -890,6 +880,9 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     }
 
     private void shuffleList() {
+        if (shouldIgnoreClick()) {
+            return;
+        }
         //shuffle list program
         if (!storageUtil.loadShuffle()) {
             shuffleImg.setImageResource(R.drawable.ic_shuffle);
@@ -904,12 +897,20 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
 
     private ExecutorService executorService;
 
+    private boolean shouldIgnoreClick() {
+        long delay = 600;
+        if (SystemClock.elapsedRealtime() < (lastClickTime + delay)) {
+            return true;
+        }
+        lastClickTime = SystemClock.elapsedRealtime();
+        return false;
+    }
+
     private void shuffleListAndSave(Music activeMusic) {
         ArrayList<Music> musicList = storageUtil.loadQueueList();
         int musicIndex = storageUtil.loadMusicIndex();
 
         if (musicList != null) {
-            shuffleImg.setClickable(false);
             try {
                 CompletableFuture.supplyAsync(() -> {
                     storageUtil.saveTempMusicList(musicList);
@@ -921,9 +922,9 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
                     return musicList;
                 }, executorService).thenAcceptAsync(result -> requireActivity().runOnUiThread(() -> {
                     updateQueueAdapter(musicList);
-                    shuffleImg.setClickable(true);
                 }));
-            } catch (Exception ignored) {
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }
@@ -931,7 +932,6 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     private void restoreLastListAndPos(Music activeMusic) {
         ArrayList<Music> tempList = storageUtil.loadTempMusicList();
         if (tempList != null) {
-            shuffleImg.setClickable(false);
             // do in background code here
             executorService.execute(() -> {
                 int index;
@@ -943,7 +943,6 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
                 // post-execute code here
                 requireActivity().runOnUiThread(() -> {
                     updateQueueAdapter(tempList);
-                    shuffleImg.setClickable(true);
                 });
             });
         }

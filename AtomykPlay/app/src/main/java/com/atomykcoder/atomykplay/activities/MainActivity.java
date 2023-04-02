@@ -31,6 +31,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.telephony.PhoneStateListener;
@@ -494,7 +495,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     });
     private View lyricsSheet;
-    private boolean app_paused = false;
+    private long lastClickTime;
 
     public void clearStorage() {
         storageUtil.clearMusicLastPos();
@@ -524,6 +525,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
 
         //initializations
+        MediaPlayerService.ui_visible = true;
         storageUtil = new StorageUtil(MainActivity.this);
         executorService = Executors.newFixedThreadPool(10);
         handler = new Handler(Looper.getMainLooper());
@@ -658,7 +660,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onStart() {
         super.onStart();
-        app_paused = false;
+
         MediaPlayerService.ui_visible = true;
 
         if (is_granted) {
@@ -681,20 +683,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
     @Override
-    public void onLowMemory() {
-        super.onLowMemory();
-        if (app_paused){
-            Logger.normalLog("LowMemory"+" - MainActivity");
-            if (!is_playing) {
-                stopMusicService();
-            }
-        }
-    }
-
-    @Override
     protected void onStop() {
         super.onStop();
-        app_paused = true;
         MediaPlayerService.ui_visible = false;
 
         if (service_bound) {
@@ -716,6 +706,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        MediaPlayerService.ui_visible = false;
         if (executorService != null) {
             executorService.shutdown();
         }
@@ -732,14 +723,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             MainActivity.this.unbindService(service_connection);
             Logger.normalLog("UnbindService"+" - MainActivity");
             stopMusicService();
+
         }
         playlistFragment = null;
+        searchFragment = null;
+        lastAddedFragment = null;
+        bottomSheetPlayerFragment = null;
     }
 
     private void stopMusicService(){
-        stopService(new Intent(MainActivity.this, MediaPlayerService.class));
-        Logger.normalLog("ServiceStopped"+" - MainActivity");
-        service_stopped = true;
+        if (media_player_service != null){
+            if (!media_player_service.isMediaPlaying()){
+                stopService(new Intent(MainActivity.this, MediaPlayerService.class));
+                Logger.normalLog("ServiceStopped"+" - MainActivity");
+                service_stopped = true;
+            }
+        }
     }
     /**
      * this function starts service and binds to MainActivity
@@ -1029,6 +1028,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
     public void playRandomSong(ArrayList<Music> songs) {
+        if (shouldIgnoreClick()) {
+            return;
+        }
         storageUtil.saveShuffle(true);
         storageUtil.saveTempMusicList(songs);
         /*
@@ -1075,11 +1077,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         Logger.normalLog("MusicResume"+" - MainActivity");
     }
+    private boolean shouldIgnoreClick(){
+        long delay = 500;
+        if (SystemClock.elapsedRealtime() < (lastClickTime + delay)) {
+            return true;
+        }
+        lastClickTime = SystemClock.elapsedRealtime();
+        return false;
+    }
 
     /**
      * next music
      */
     public void playNextAudio() {
+        if (shouldIgnoreClick()) {
+            return;
+        }
         if (!phone_ringing) {
             if (service_stopped) {
                 startService();
@@ -1103,6 +1116,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * previous music
      */
     public void playPreviousAudio() {
+        if (shouldIgnoreClick()) {
+            return;
+        }
         if (!phone_ringing) {
             if (service_stopped) {
                 startService();
@@ -1284,7 +1300,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    private void deleteItemWithContentResolver(Music music, ContentResolver contentResolver) {
+    private void deleteItemWithContentResolver(@NonNull Music music, ContentResolver contentResolver) {
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
         View customLayout = getLayoutInflater().inflate(R.layout.delete_layout, null);
         builder.setView(customLayout);
@@ -1311,7 +1327,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         dialog.show();
     }
 
-    private void updateAdaptersForRemovedItem() {
+    public void updateAdaptersForRemovedItem() {
         musicMainAdapter.removeItem(selectedItem);
         bottomSheetPlayerFragment.queueAdapter.removeItem(selectedItem);
         if (lastAddedFragment != null) {
@@ -1559,6 +1575,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Fragment fragment2 = fragmentManager.findFragmentByTag(PLAYLISTS_FRAGMENT_TAG);
         Fragment fragment3 = fragmentManager.findFragmentByTag(ABOUT_FRAGMENT_TAG);
         Fragment fragment4 = fragmentManager.findFragmentByTag(LAST_ADDED_FRAGMENT_TAG);
+        Fragment fragment5 = fragmentManager.findFragmentByTag(FAVORITE_FRAGMENT_TAG);
+        Fragment fragment6 = fragmentManager.findFragmentByTag(TAG_EDITOR_FRAGMENT_TAG);
+        Fragment fragment7 = fragmentManager.findFragmentByTag(SEARCH_FRAGMENT_TAG);
+        Fragment fragment8 = fragmentManager.findFragmentByTag(ADD_LYRICS_FRAGMENT_TAG);
+        Fragment fragment9 = fragmentManager.findFragmentByTag(OPEN_PLAYLIST_FRAGMENT_TAG);
 
         if (mainPlayerSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED || mainPlayerSheetBehavior.getState() == BottomSheetBehavior.STATE_HIDDEN) {
             if (drawer.isDrawerOpen(GravityCompat.START)) {
@@ -1574,7 +1595,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             navigationView.setCheckedItem(R.id.navigation_home);
                         }
                         if (is_playing){
-                            moveTaskToBack(false);
+                            if (fragment1 != null ||fragment2 != null ||fragment3 != null ||fragment4 != null ||fragment5 != null||fragment6 != null||fragment7 != null||fragment8 != null||fragment9 != null) {
+                                fragmentManager.popBackStackImmediate();
+                            }else {
+                                moveTaskToBack(false);
+                            }
                         }else {
                             super.onBackPressed();
                         }

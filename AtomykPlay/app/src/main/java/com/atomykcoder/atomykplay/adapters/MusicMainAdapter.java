@@ -1,7 +1,6 @@
 package com.atomykcoder.atomykplay.adapters;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,7 +36,6 @@ public class MusicMainAdapter extends MusicAdapter {
         musicUtils = MusicUtils.getInstance();
         super.items = musicList;
     }
-
     public void updateMusicListItems(ArrayList<Music> newMusicArrayList) {
         final MusicDiffCallback diffCallback = new MusicDiffCallback(super.items, newMusicArrayList);
         final DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
@@ -50,23 +48,21 @@ public class MusicMainAdapter extends MusicAdapter {
     @NonNull
     @Override
     public GenericViewHolder<Music> onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.music_item_layout, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.music_item_layout, parent, false);
         return new MusicMainViewHolder(view);
     }
-
     @Override
     public void onBindViewHolder(@NonNull GenericViewHolder<Music> _holder, int position) {
         super.onBindViewHolder(_holder, position);
 
         MusicMainViewHolder holder = (MusicMainViewHolder) _holder;
         Music currentItem = super.items.get(position);
-
-        loadImage(context, currentItem, position, holder.albumCoverIV);
+        loadImage(holder.albumCoverIV.getContext(), currentItem, position, holder.albumCoverIV);
 
         holder.cardView.setOnClickListener(view -> {
-            if (shouldIgnoreClick(context)) return;
+            if (shouldIgnoreClick()) return;
 
-            if (!isMusicAvailable(currentItem)){
+            if (isMusicNotAvailable(currentItem)){
                 return;
             }
 
@@ -79,19 +75,19 @@ public class MusicMainAdapter extends MusicAdapter {
         });
 
         holder.optionButton.setOnClickListener(v -> {
-            if (!isMusicAvailable(currentItem)){
+            if (isMusicNotAvailable(currentItem)){
                 return;
             }
             mainActivity.openOptionMenu(currentItem, OptionSheetEnum.MAIN_LIST);
         });
     }
-    private boolean isMusicAvailable(Music currentItem){
+    private boolean isMusicNotAvailable(Music currentItem){
         if (!doesMusicExists(currentItem)) {
             Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show();
             removeItem(currentItem);
-            return false;
+            return true;
         }
-        return true;
+        return false;
     }
     public void removeItem(Music item) {
         int position = super.items.indexOf(item);

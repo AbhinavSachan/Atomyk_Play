@@ -90,7 +90,7 @@ public class MusicQueueAdapter extends MusicAdapter implements ItemTouchHelperAd
     @NonNull
     @Override
     public GenericViewHolder<Music> onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.queue_music_item_layout, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.queue_music_item_layout, parent, false);
         return new MusicQueueViewHolder(view);
     }
 
@@ -103,12 +103,12 @@ public class MusicQueueAdapter extends MusicAdapter implements ItemTouchHelperAd
 
         Music currentItem = super.items.get(position);
 
-        loadImage(context, currentItem, position, holder.albumCoverIV);
+        loadImage(holder.albumCoverIV.getContext(), currentItem, position, holder.albumCoverIV);
         holder.musicIndex.setText(String.valueOf(position + 1));
 
         //playing song
         holder.cardView.setOnClickListener(v -> {
-            if (shouldIgnoreClick(context)) return;
+            if (shouldIgnoreClick()) return;
 
             if (!isMusicAvailable(currentItem)) {
                 return;

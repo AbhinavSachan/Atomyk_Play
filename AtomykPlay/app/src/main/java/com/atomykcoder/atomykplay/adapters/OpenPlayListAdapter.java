@@ -58,7 +58,7 @@ public class OpenPlayListAdapter extends MusicAdapter implements ItemTouchHelper
     @NonNull
     @Override
     public GenericViewHolder<Music> onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.open_playlist_music_item, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.open_playlist_music_item, parent, false);
         return new OpenPlayListViewHolder(view);
     }
 
@@ -72,9 +72,9 @@ public class OpenPlayListAdapter extends MusicAdapter implements ItemTouchHelper
         loadImage(context, currentItem, position, holder.albumCoverIV);
 
         holder.cardView.setOnClickListener(view -> {
-            if (shouldIgnoreClick(context)) return;
+            if (shouldIgnoreClick()) return;
 
-            if (!isMusicAvailable(currentItem)){
+            if (isMusicNotAvailable(currentItem)){
                 return;
             }
 
@@ -88,19 +88,19 @@ public class OpenPlayListAdapter extends MusicAdapter implements ItemTouchHelper
         });
 
         holder.optBtn.setOnClickListener(v -> {
-            if (!isMusicAvailable(currentItem)){
+            if (isMusicNotAvailable(currentItem)){
                 return;
             }
             mainActivity.openOptionMenu(currentItem, OptionSheetEnum.OPEN_PLAYLIST);
         });
     }
-    private boolean isMusicAvailable(Music currentItem){
+    private boolean isMusicNotAvailable(Music currentItem){
         if (!doesMusicExists(currentItem)) {
             Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show();
             removeItem(currentItem);
-            return false;
+            return true;
         }
-        return true;
+        return false;
     }
     public void removeItem(Music music) {
         int position = super.items.indexOf(music);

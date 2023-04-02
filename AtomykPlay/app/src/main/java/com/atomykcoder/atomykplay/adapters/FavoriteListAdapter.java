@@ -1,7 +1,5 @@
 package com.atomykcoder.atomykplay.adapters;
 
-import static com.atomykcoder.atomykplay.helperFunctions.MusicHelper.convertDuration;
-
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -71,9 +69,9 @@ public class FavoriteListAdapter extends MusicAdapter implements ItemTouchHelper
         loadImage(context, currentItem, position, holder.albumCoverIV);
 
         holder.cardView.setOnClickListener(view -> {
-            if (shouldIgnoreClick(context)) return;
+            if (shouldIgnoreClick()) return;
 
-            if (!isMusicAvailable(currentItem)) {
+            if (isMusicNotAvailable(currentItem)) {
                 return;
             }
 
@@ -86,19 +84,19 @@ public class FavoriteListAdapter extends MusicAdapter implements ItemTouchHelper
         });
 
         holder.optBtn.setOnClickListener(v -> {
-            if (!isMusicAvailable(currentItem)) {
+            if (isMusicNotAvailable(currentItem)) {
                 return;
             }
             mainActivity.openOptionMenu(currentItem, OptionSheetEnum.FAVORITE_LIST);
         });
     }
-    private boolean isMusicAvailable(Music currentItem){
+    private boolean isMusicNotAvailable(Music currentItem){
         if (!doesMusicExists(currentItem)) {
             Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show();
             removeItem(currentItem);
-            return false;
+            return true;
         }
-        return true;
+        return false;
     }
     public void removeItem(Music item) {
         int position = super.items.indexOf(item);

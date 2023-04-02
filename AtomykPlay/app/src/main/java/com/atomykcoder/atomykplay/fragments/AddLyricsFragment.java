@@ -138,34 +138,18 @@ public class AddLyricsFragment extends Fragment {
         artistEditText.setText(artist);
 
         builder.setPositiveButton("OK",(dialog,i) -> {
-            if (isValidInput()) {
-                btnFind.setVisibility(View.GONE);
-                fetchLyrics();
-            }
+            btnFind.setVisibility(View.GONE);
+            fetchLyrics();
         });
         builder.setNegativeButton("Cancel",null);
         dialog = builder.create();
         dialog.show();
     }
-
-    private boolean isValidInput() {
-        artistName = artistEditText.getText().toString().toLowerCase().trim();
-        songName = nameEditText.getText().toString().toLowerCase().trim();
-
-        if (songName.equals("")) {
-            nameEditText.setError("Required");
-            return false;
-        } else {
-            dialog.dismiss();
-            return true;
-        }
-
-    }
-
     private void fetchLyrics() {
         //show lyrics in bottom sheet
         artistName = artistEditText.getText().toString().toLowerCase().trim();
         songName = nameEditText.getText().toString().toLowerCase().trim();
+
 
         //clear hashmap prior to retrieving data
         lrcMap.clear();

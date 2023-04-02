@@ -16,7 +16,7 @@ import java.util.ArrayList;
 public class GenericRecyclerAdapter<T> extends RecyclerView.Adapter<GenericViewHolder<T>> {
 
     protected ArrayList<T> items;
-    protected int delay = 500;
+    protected int delay = 600;
     long lastClickTime;
 
     @SuppressLint("NotifyDataSetChanged")
@@ -43,7 +43,7 @@ public class GenericRecyclerAdapter<T> extends RecyclerView.Adapter<GenericViewH
         return items.size();
     }
 
-    protected boolean shouldIgnoreClick(Context context) {
+    protected boolean shouldIgnoreClick() {
         if (SystemClock.elapsedRealtime() < (lastClickTime + delay)) {
             return true;
         }

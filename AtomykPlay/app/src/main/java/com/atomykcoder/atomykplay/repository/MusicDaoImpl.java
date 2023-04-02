@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
+import android.text.TextUtils;
 
 import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
@@ -119,7 +120,10 @@ public class MusicDaoImpl implements MusicDaoI {
                         String sYear = audioCursor.getString(10);
                         String sDateAdded = convertLongToDate(dateInMillis);
 
-                        String sAlbumUri = Uri.withAppendedPath(albumArtBaseUri, sAlbumId).toString();
+                        String sAlbumUri = null;
+                        if (!TextUtils.isEmpty(sAlbumId)) {
+                            sAlbumUri = Uri.withAppendedPath(albumArtBaseUri, sAlbumId).toString();
+                        }
 
                         String sBitrate = "";
                         String sGenre = "";
