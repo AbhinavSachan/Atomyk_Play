@@ -13,7 +13,8 @@
         android:id="@+id/dragHandle_image"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_horizontal_rule" />
+        android:src="@drawable/ic_horizontal_rule"
+        android:contentDescription="@string/empty" />
 
     <View
         android:layout_width="match_parent"
@@ -40,16 +41,15 @@
                 android:layout_height="wrap_content"
                 android:text="@string/file_path"
                 android:textColor="@color/text_color"
-                android:textSize="@dimen/d_15sp" />
+                android:textSize="@dimen/d_15sp"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/file_path_detail"
+                style="@style/DetailSheetDataText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingVertical="2dp"
-                android:text="@string/empty"
-                android:textColor="@color/sub_text_grey"
-                android:textSize="@dimen/d_16sp" />
+                android:text="@string/empty" />
 
         </LinearLayout>
 
@@ -61,20 +61,17 @@
             android:paddingVertical="6dp">
 
             <TextView
+                style="@style/DetailSheetTitleText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/file_name"
-                android:textColor="@color/text_color"
-                android:textSize="@dimen/d_15sp" />
+                android:text="@string/file_name" />
 
             <TextView
                 android:id="@+id/file_name_detail"
+                style="@style/DetailSheetDataText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingVertical="2dp"
-                android:text="@string/empty"
-                android:textColor="@color/sub_text_grey"
-                android:textSize="@dimen/d_16sp" />
+                android:text="@string/empty" />
 
         </LinearLayout>
 
@@ -86,20 +83,17 @@
             android:paddingVertical="6dp">
 
             <TextView
+                style="@style/DetailSheetTitleText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/file_artist"
-                android:textColor="@color/text_color"
-                android:textSize="@dimen/d_15sp" />
+                android:text="@string/file_artist" />
 
             <TextView
                 android:id="@+id/file_artist_detail"
+                style="@style/DetailSheetDataText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingVertical="2dp"
-                android:text="@string/empty"
-                android:textColor="@color/sub_text_grey"
-                android:textSize="@dimen/d_16sp" />
+                android:text="@string/empty" />
 
         </LinearLayout>
 
@@ -118,20 +112,17 @@
                 android:orientation="vertical">
 
                 <TextView
+                    style="@style/DetailSheetTitleText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/file_size"
-                    android:textColor="@color/text_color"
-                    android:textSize="@dimen/d_15sp" />
+                    android:text="@string/file_size" />
 
                 <TextView
                     android:id="@+id/file_size_detail"
+                    style="@style/DetailSheetDataText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingVertical="2dp"
-                    android:text="@string/empty"
-                    android:textColor="@color/sub_text_grey"
-                    android:textSize="@dimen/d_16sp" />
+                    android:text="@string/empty" />
 
             </LinearLayout>
 
@@ -142,20 +133,17 @@
                 android:orientation="vertical">
 
                 <TextView
+                    style="@style/DetailSheetTitleText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/file_bit"
-                    android:textColor="@color/text_color"
-                    android:textSize="@dimen/d_15sp" />
+                    android:text="@string/file_bit" />
 
                 <TextView
                     android:id="@+id/file_bitrate_detail"
+                    style="@style/DetailSheetDataText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingVertical="2dp"
-                    android:text="@string/empty"
-                    android:textColor="@color/sub_text_grey"
-                    android:textSize="@dimen/d_16sp" />
+                    android:text="@string/empty" />
 
             </LinearLayout>
         </LinearLayout>
@@ -175,20 +163,17 @@
                 android:orientation="vertical">
 
                 <TextView
+                    style="@style/DetailSheetTitleText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/file_album"
-                    android:textColor="@color/text_color"
-                    android:textSize="@dimen/d_15sp" />
+                    android:text="@string/file_album" />
 
                 <TextView
                     android:id="@+id/file_album_detail"
+                    style="@style/DetailSheetDataText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingVertical="2dp"
-                    android:text="@string/empty"
-                    android:textColor="@color/sub_text_grey"
-                    android:textSize="@dimen/d_16sp" />
+                    android:text="@string/empty" />
 
             </LinearLayout>
 
@@ -199,20 +184,17 @@
                 android:orientation="vertical">
 
                 <TextView
+                    style="@style/DetailSheetTitleText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/file_genre"
-                    android:textColor="@color/text_color"
-                    android:textSize="@dimen/d_15sp" />
+                    android:text="@string/file_genre" />
 
                 <TextView
                     android:id="@+id/file_genre_detail"
+                    style="@style/DetailSheetDataText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingVertical="2dp"
-                    android:text="@string/empty"
-                    android:textColor="@color/sub_text_grey"
-                    android:textSize="@dimen/d_16sp" />
+                    android:text="@string/empty" />
 
             </LinearLayout>
         </LinearLayout>

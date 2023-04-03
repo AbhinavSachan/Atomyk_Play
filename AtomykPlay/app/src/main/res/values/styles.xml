@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="DetailSheetDataText" parent="TextAppearance.Material3.BodySmall">
+        <item name="android:textColor">@color/sub_text_grey</item>
+        <item name="android:textSize">@dimen/d_15sp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:paddingStart">0dp</item>
+        <item name="android:paddingTop">2dp</item>
+        <item name="android:paddingBottom">2dp</item>
+        <item name="android:paddingEnd">6dp</item>
+    </style>
+    <style name="DetailSheetTitleText" parent="TextAppearance.Material3.TitleSmall">
+        <item name="android:textColor">@color/text_color</item>
+        <item name="android:textSize">@dimen/d_15sp</item>
+    </style>
+</resources>

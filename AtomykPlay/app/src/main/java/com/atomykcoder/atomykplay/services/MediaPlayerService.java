@@ -620,24 +620,25 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     @Override
     public void onCompletion(MediaPlayer mp) {
         storage.clearMusicLastPos();
-        loadList();
         if (musicIndex == -1 || musicList == null) {
-            switch (storage.loadRepeatStatus()) {
-                case "no_repeat":
-                    if (musicIndex == musicList.size() - 1)
-                        pauseMedia();
-                    else
-                        skipToNext();
-                    break;
-                case "repeat":
-                    skipToNext();
-                    break;
-                case "repeat_one":
-                    playMedia();
-                    EventBus.getDefault().post(new PrepareRunnableEvent());
-                    break;
-            }
+            loadList();
         }
+        switch (storage.loadRepeatStatus()) {
+            case "no_repeat":
+                if (musicIndex == musicList.size() - 1)
+                    pauseMedia();
+                else
+                    skipToNext();
+                break;
+            case "repeat":
+                skipToNext();
+                break;
+            case "repeat_one":
+                playMedia();
+                EventBus.getDefault().post(new PrepareRunnableEvent());
+                break;
+        }
+
         if (isMediaPlaying()) {
             setIcon(PlaybackStatus.PLAYING);
             buildNotification(PlaybackStatus.PLAYING, 1f);

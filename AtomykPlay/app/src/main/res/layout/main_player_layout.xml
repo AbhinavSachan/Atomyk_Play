@@ -389,7 +389,6 @@
                 android:focusable="true"
                 android:padding="12dp"
                 android:src="@drawable/ic_favorite_border"
-                android:theme="@android:style/ThemeOverlay.Material.Dark"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />
 

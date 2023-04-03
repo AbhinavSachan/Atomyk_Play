@@ -648,7 +648,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             service_stopped = true;
         }
     }
-
     private void setUpPlOptionMenuButtons() {
         View addPlayNextPlBtn = findViewById(R.id.add_play_next_pl_option);
         View addToQueuePlBtn = findViewById(R.id.add_to_queue_pl_option);
