@@ -27,14 +27,14 @@
             <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
                 android:id="@+id/pl_favorites_btn"
                 android:layout_width="wrap_content"
-                android:layout_gravity="end|bottom"
-                android:layout_marginBottom="112dp"
-                android:layout_marginEnd="32dp"
-                app:icon="@drawable/ic_favorite"
-                app:backgroundTint="@color/collapsed_appbar_color"
-                android:text="@string/favorite"
                 android:layout_height="wrap_content"
-                android:contentDescription="@string/favorite" />
+                android:layout_gravity="end|bottom"
+                android:layout_marginEnd="32dp"
+                android:layout_marginBottom="112dp"
+                android:contentDescription="@string/favorite"
+                android:text="@string/favorite"
+                app:backgroundTint="@color/collapsed_appbar_color"
+                app:icon="@drawable/ic_favorite" />
 
             <!--no data layout-->
             <LinearLayout

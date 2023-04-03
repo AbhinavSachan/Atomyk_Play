@@ -82,6 +82,12 @@ public class OpenPlayListFragment extends Fragment implements OnDragStartListene
         return view;
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
+    }
+
     @Subscribe
     public void removeMusicFromList(RemoveFromPlaylistEvent event) {
         openPlayListAdapter.removeItem(event.music);
@@ -90,11 +96,5 @@ public class OpenPlayListFragment extends Fragment implements OnDragStartListene
     @Override
     public void onDragStart(RecyclerView.ViewHolder viewHolder) {
         itemTouchHelper.startDrag(viewHolder);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        EventBus.getDefault().unregister(this);
     }
 }

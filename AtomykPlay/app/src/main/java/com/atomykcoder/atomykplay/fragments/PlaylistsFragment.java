@@ -17,12 +17,10 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.R;
-import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.adapters.PlaylistAdapter;
 import com.atomykcoder.atomykplay.customScripts.GridSpacing;
-import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.dataModels.Playlist;
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
+import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 
 import java.util.ArrayList;
 

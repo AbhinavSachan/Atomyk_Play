@@ -13,10 +13,12 @@ import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.adapters.Generics.GenericViewHolder;
 import com.atomykcoder.atomykplay.adapters.ViewHolders.MusicMainViewHolder;
+import com.atomykcoder.atomykplay.classes.GlideBuilt;
 import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.enums.OptionSheetEnum;
 import com.atomykcoder.atomykplay.helperFunctions.MusicDiffCallback;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
+import com.atomykcoder.atomykplay.kotlin.ImageLoader;
 import com.atomykcoder.atomykplay.repository.MusicUtils;
 
 import java.util.ArrayList;
@@ -27,6 +29,8 @@ public class MusicMainAdapter extends MusicAdapter {
     StorageUtil storage;
     StorageUtil.SettingsStorage settingsStorage;
     MusicUtils musicUtils;
+    ImageLoader imageLoader;
+    GlideBuilt glideBuilt;
 
     public MusicMainAdapter(Context _context, ArrayList<Music> musicList) {
         context = _context;
@@ -35,7 +39,10 @@ public class MusicMainAdapter extends MusicAdapter {
         settingsStorage = new StorageUtil.SettingsStorage(context);
         musicUtils = MusicUtils.getInstance();
         super.items = musicList;
+        imageLoader = new ImageLoader(_context);
+        glideBuilt = new GlideBuilt(context);
     }
+
     public void updateMusicListItems(ArrayList<Music> newMusicArrayList) {
         final MusicDiffCallback diffCallback = new MusicDiffCallback(super.items, newMusicArrayList);
         final DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
@@ -51,37 +58,41 @@ public class MusicMainAdapter extends MusicAdapter {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.music_item_layout, parent, false);
         return new MusicMainViewHolder(view);
     }
+
     @Override
     public void onBindViewHolder(@NonNull GenericViewHolder<Music> _holder, int position) {
         super.onBindViewHolder(_holder, position);
 
         MusicMainViewHolder holder = (MusicMainViewHolder) _holder;
         Music currentItem = super.items.get(position);
-        loadImage(holder.albumCoverIV.getContext(), currentItem, position, holder.albumCoverIV);
+
+        imageLoader.loadImage(R.drawable.ic_music, currentItem, holder.albumCoverIV, 128);
 
         holder.cardView.setOnClickListener(view -> {
             if (shouldIgnoreClick()) return;
 
-            if (isMusicNotAvailable(currentItem)){
+            if (isMusicNotAvailable(currentItem)) {
                 return;
             }
 
-            if (settingsStorage.loadKeepShuffle())
-                handleShuffle(storage, position, super.items);
-            else
-                handleNoShuffle(storage, position, super.items);
-
-            handlePlayMusic(mainActivity, currentItem);
+            if (canPlay()){
+                if (settingsStorage.loadKeepShuffle()) {
+                    handleShuffle(mainActivity,currentItem,storage, position, super.items);
+                } else {
+                    handleNoShuffle(mainActivity,currentItem,storage, position, super.items);
+                }
+            }
         });
 
         holder.optionButton.setOnClickListener(v -> {
-            if (isMusicNotAvailable(currentItem)){
+            if (isMusicNotAvailable(currentItem)) {
                 return;
             }
             mainActivity.openOptionMenu(currentItem, OptionSheetEnum.MAIN_LIST);
         });
     }
-    private boolean isMusicNotAvailable(Music currentItem){
+
+    private boolean isMusicNotAvailable(Music currentItem) {
         if (!doesMusicExists(currentItem)) {
             Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show();
             removeItem(currentItem);
@@ -89,6 +100,7 @@ public class MusicMainAdapter extends MusicAdapter {
         }
         return false;
     }
+
     public void removeItem(Music item) {
         int position = super.items.indexOf(item);
 

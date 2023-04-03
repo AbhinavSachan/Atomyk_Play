@@ -18,7 +18,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.provider.Settings;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -69,25 +68,14 @@ import java.util.concurrent.Executors;
 
 public class TagEditorFragment extends Fragment {
 
-    public ImageView coverImageView;
-    private EditText editName, editArtist, editAlbum, editGenre;
-    private Music music;
-    private Uri imageUri;
     private final MutableLiveData<LoadingStatus> loadingStatus = new MutableLiveData<>();
+    public ImageView coverImageView;
     ExecutorService service = Executors.newFixedThreadPool(1);
     Handler handler = new Handler();
     GlideBuilt glideBuilt;
-    private Uri musicUri;
-    private View progressIndicator;
-
-    public LiveData<LoadingStatus> getLoadingStatus() {
-        return loadingStatus;
-    }
-
-    public void setLoadingStatus(LoadingStatus status) {
-        loadingStatus.setValue(status);
-    }
-
+    private EditText editName, editArtist, editAlbum, editGenre;
+    private Music music;
+    private Uri imageUri;
     // Registers a photo picker activity launcher in single-select mode.
     private final ActivityResultLauncher<PickVisualMediaRequest> mediaPicker = registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), uri -> {
         // Callback is invoked after the user selects a media item or closes the
@@ -96,7 +84,6 @@ public class TagEditorFragment extends Fragment {
             setImageUri(uri);
         }
     });
-
     private final ActivityResultLauncher<Intent> pickIntent = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
         if (result.getResultCode() == Activity.RESULT_OK) {
             if (result.getData() != null) {
@@ -104,6 +91,31 @@ public class TagEditorFragment extends Fragment {
             }
         }
     });
+    private Uri musicUri;
+    private View progressIndicator;
+
+    public static String getRealPathFromURI(Context context, Uri contentUri) {
+        Cursor cursor = null;
+        try {
+            String[] proj = {MediaStore.Images.Media.DATA};
+            cursor = context.getContentResolver().query(contentUri, proj, null, null, null);
+            cursor.moveToFirst();
+            int column_index = cursor.getColumnIndex(proj[0]);
+            return cursor.getString(column_index);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
+
+    public LiveData<LoadingStatus> getLoadingStatus() {
+        return loadingStatus;
+    }
+
+    public void setLoadingStatus(LoadingStatus status) {
+        loadingStatus.setValue(status);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -158,7 +170,7 @@ public class TagEditorFragment extends Fragment {
                 } catch (Exception ignored) {
                 }
                 handler.post(() -> {
-                    glideBuilt.glideBitmap(image[0], R.drawable.ic_music, coverImageView, 412,false);
+                    glideBuilt.glideBitmap(image[0], R.drawable.ic_music, coverImageView, 412, false);
                 });
             });
         }
@@ -183,6 +195,12 @@ public class TagEditorFragment extends Fragment {
         setLoader();
 
         return view;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        service.shutdown();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.R)
@@ -294,29 +312,8 @@ public class TagEditorFragment extends Fragment {
         });
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        service.shutdown();
-    }
-
     private void setImageUri(Uri album_uri) {
         imageUri = album_uri;
         glideBuilt.glide(String.valueOf(imageUri), 0, coverImageView, 512);
-    }
-
-    public static String getRealPathFromURI(Context context, Uri contentUri) {
-        Cursor cursor = null;
-        try {
-            String[] proj = {MediaStore.Images.Media.DATA};
-            cursor = context.getContentResolver().query(contentUri, proj, null, null, null);
-            cursor.moveToFirst();
-            int column_index = cursor.getColumnIndex(proj[0]);
-            return cursor.getString(column_index);
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
     }
 }

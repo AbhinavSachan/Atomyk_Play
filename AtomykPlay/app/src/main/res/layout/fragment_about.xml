@@ -14,8 +14,8 @@
         android:id="@+id/sl"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingBottom="@dimen/most_bottom_padding"
         android:clipToPadding="false"
+        android:paddingBottom="@dimen/most_bottom_padding"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
         <LinearLayout

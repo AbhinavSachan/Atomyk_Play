@@ -18,8 +18,8 @@ import java.util.ArrayList;
 
 public class BeautifyListAdapter extends GenericRecyclerAdapter<String> {
     private final Context context;
-    StorageUtil.SettingsStorage settingsStorage;
     private final ArrayList<String> replacingTags;
+    StorageUtil.SettingsStorage settingsStorage;
 
     public BeautifyListAdapter(ArrayList<String> tags, Context context, ArrayList<String> replacingTags) {
         this.replacingTags = replacingTags;
@@ -42,9 +42,14 @@ public class BeautifyListAdapter extends GenericRecyclerAdapter<String> {
         BeautifyListViewHolder holder = (BeautifyListViewHolder) _holder;
 
         String s;
-        s = super.items.get(position) +" = "+"("+ replacingTags.get(position)+")";
+        s = super.items.get(position) + " = " + "(" + replacingTags.get(position) + ")";
         holder.textView.setText(s);
         holder.imageView.setOnClickListener(v -> removeFromList(position));
+    }
+
+    @Override
+    public int getItemCount() {
+        return super.items.size();
     }
 
     private void removeFromList(int pos) {
@@ -55,11 +60,6 @@ public class BeautifyListAdapter extends GenericRecyclerAdapter<String> {
         notifyItemRemoved(pos);
         notifyItemRangeChanged(pos, super.items.size() - (pos + 1));
         mainActivity.checkForUpdateList(true);
-    }
-
-    @Override
-    public int getItemCount() {
-        return super.items.size();
     }
 
 

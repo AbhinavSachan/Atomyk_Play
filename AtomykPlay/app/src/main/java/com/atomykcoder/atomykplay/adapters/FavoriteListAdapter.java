@@ -17,6 +17,7 @@ import com.atomykcoder.atomykplay.enums.OptionSheetEnum;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.ItemTouchHelperAdapter;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
+import com.atomykcoder.atomykplay.kotlin.ImageLoader;
 
 import java.util.ArrayList;
 
@@ -26,6 +27,7 @@ public class FavoriteListAdapter extends MusicAdapter implements ItemTouchHelper
     OnDragStartListener onDragStartListener;
     StorageUtil storage;
     StorageUtil.SettingsStorage settingsStorage;
+    ImageLoader imageLoader;
 
     public FavoriteListAdapter(Context context, ArrayList<Music> _musicList, OnDragStartListener onDragStartListener) {
         this.context = context;
@@ -34,6 +36,7 @@ public class FavoriteListAdapter extends MusicAdapter implements ItemTouchHelper
         mainActivity = (MainActivity) context;
         storage = new StorageUtil(context);
         settingsStorage = new StorageUtil.SettingsStorage(context);
+        imageLoader = new ImageLoader(context);
     }
 
     //when item starts to move it will change positions of every item in real time
@@ -66,7 +69,7 @@ public class FavoriteListAdapter extends MusicAdapter implements ItemTouchHelper
         FavoriteViewHolder holder = (FavoriteViewHolder) _holder;
         Music currentItem = super.items.get(position);
 
-        loadImage(context, currentItem, position, holder.albumCoverIV);
+        imageLoader.loadImage(R.drawable.ic_music, currentItem, holder.albumCoverIV, 128);
 
         holder.cardView.setOnClickListener(view -> {
             if (shouldIgnoreClick()) return;
@@ -75,12 +78,13 @@ public class FavoriteListAdapter extends MusicAdapter implements ItemTouchHelper
                 return;
             }
 
-            if (settingsStorage.loadKeepShuffle())
-                handleShuffle(storage, position, super.items);
-            else
-                handleNoShuffle(storage, position, super.items);
-
-            handlePlayMusic(mainActivity, currentItem);
+            if (canPlay()){
+                if (settingsStorage.loadKeepShuffle()) {
+                    handleShuffle(mainActivity,currentItem,storage, position, super.items);
+                } else {
+                    handleNoShuffle(mainActivity,currentItem,storage, position, super.items);
+                }
+            }
         });
 
         holder.optBtn.setOnClickListener(v -> {
@@ -90,7 +94,13 @@ public class FavoriteListAdapter extends MusicAdapter implements ItemTouchHelper
             mainActivity.openOptionMenu(currentItem, OptionSheetEnum.FAVORITE_LIST);
         });
     }
-    private boolean isMusicNotAvailable(Music currentItem){
+
+    @Override
+    public int getItemCount() {
+        return super.items.size();
+    }
+
+    private boolean isMusicNotAvailable(Music currentItem) {
         if (!doesMusicExists(currentItem)) {
             Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show();
             removeItem(currentItem);
@@ -98,6 +108,7 @@ public class FavoriteListAdapter extends MusicAdapter implements ItemTouchHelper
         }
         return false;
     }
+
     public void removeItem(Music item) {
         int position = super.items.indexOf(item);
 
@@ -109,11 +120,6 @@ public class FavoriteListAdapter extends MusicAdapter implements ItemTouchHelper
         notifyItemRangeChanged(position, super.items.size() - (position + 1));
         notifyItemRemoved(position);
 
-    }
-
-    @Override
-    public int getItemCount() {
-        return super.items.size();
     }
 
 

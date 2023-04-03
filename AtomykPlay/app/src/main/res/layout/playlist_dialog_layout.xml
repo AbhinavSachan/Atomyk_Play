@@ -56,12 +56,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:paddingTop="50dp"
         android:gravity="center"
+        android:paddingTop="50dp"
         android:text="No Playlists Added"
-        android:visibility="gone"
         android:textSize="@dimen/d_18sp"
         android:textStyle="bold"
+        android:visibility="gone"
         tools:ignore="HardcodedText" />
 
     <LinearLayout

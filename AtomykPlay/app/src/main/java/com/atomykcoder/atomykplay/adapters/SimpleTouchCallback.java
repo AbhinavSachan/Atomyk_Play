@@ -19,27 +19,11 @@ public class SimpleTouchCallback extends ItemTouchHelper.Callback {
     }
 
     @Override
-    public boolean isLongPressDragEnabled() {
-        return false;
-    }
-
-    @Override
-    public boolean isItemViewSwipeEnabled() {
-        return true;
-    }
-
-    @Override
     public int getMovementFlags(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
         final int dragFlag = ItemTouchHelper.UP | ItemTouchHelper.DOWN;
         final int swipeFlag = ItemTouchHelper.START;
 
         return makeMovementFlags(dragFlag, swipeFlag);
-    }
-
-    @Override
-    public void onMoved(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, int fromPos, @NonNull RecyclerView.ViewHolder target, int toPos, int x, int y) {
-        adapter.onItemMove(fromPos, toPos);
-        super.onMoved(recyclerView, viewHolder, fromPos, target, toPos, x, y);
     }
 
     //this will be called when we start dragging something
@@ -50,8 +34,35 @@ public class SimpleTouchCallback extends ItemTouchHelper.Callback {
     }
 
     @Override
+    public boolean isLongPressDragEnabled() {
+        return false;
+    }
+
+    @Override
+    public boolean isItemViewSwipeEnabled() {
+        return true;
+    }
+
+    @Override
     public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
         adapter.onItemDismiss(viewHolder.getAbsoluteAdapterPosition());
+    }
+
+    //when item is selected we are calling interface that we created
+    @Override
+    public void onSelectedChanged(@Nullable RecyclerView.ViewHolder viewHolder, int actionState) {
+        super.onSelectedChanged(viewHolder, actionState);
+    }
+
+    @Override
+    public void onMoved(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, int fromPos, @NonNull RecyclerView.ViewHolder target, int toPos, int x, int y) {
+        adapter.onItemMove(fromPos, toPos);
+        super.onMoved(recyclerView, viewHolder, fromPos, target, toPos, x, y);
+    }
+
+    @Override
+    public void clearView(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
+        super.clearView(recyclerView, viewHolder);
     }
 
     //this handles fade animation on swipe
@@ -64,16 +75,5 @@ public class SimpleTouchCallback extends ItemTouchHelper.Callback {
         } else {
             super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
         }
-    }
-
-    //when item is selected we are calling interface that we created
-    @Override
-    public void onSelectedChanged(@Nullable RecyclerView.ViewHolder viewHolder, int actionState) {
-        super.onSelectedChanged(viewHolder, actionState);
-    }
-
-    @Override
-    public void clearView(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
-        super.clearView(recyclerView, viewHolder);
     }
 }

@@ -1,7 +1,5 @@
 package com.atomykcoder.atomykplay.fragments;
 
-import static com.atomykcoder.atomykplay.activities.MainActivity.TAG_BLOCK_LIST;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
@@ -48,11 +46,6 @@ public class SettingsFragment extends Fragment {
     private boolean showInfo, showArtist, showExtra, autoPlay, keepShuffle, lowerVol, selfStop, keepScreenOn, oneClickSkip, beautify, scanAll;
     private StorageUtil.SettingsStorage settingsStorage;
     private MainActivity mainActivity;
-    private AlertDialog blacklistDialog, filterDurDialog;
-    private BeautifyListAdapter beautifyListAdapter;
-    private TextView noTagTV;
-    private ArrayList<String> beautifyList;
-    private ArrayList<String> replacingTagList;
     private final ActivityResultLauncher<Intent> mGetTreeLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
@@ -69,6 +62,11 @@ public class SettingsFragment extends Fragment {
                     }
                 }
             });
+    private AlertDialog blacklistDialog, filterDurDialog;
+    private BeautifyListAdapter beautifyListAdapter;
+    private TextView noTagTV;
+    private ArrayList<String> beautifyList;
+    private ArrayList<String> replacingTagList;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -214,6 +212,22 @@ public class SettingsFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (blacklistDialog != null && blacklistDialog.isShowing()) {
+            blacklistDialog.dismiss();
+        }
+        if (filterDurDialog != null && filterDurDialog.isShowing()) {
+            filterDurDialog.dismiss();
+        }
+    }
+
     private void showBeatifyTagDialog() {
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(requireContext());
         View customLayout = getLayoutInflater().inflate(R.layout.black_list_dialog, null);
@@ -330,22 +344,6 @@ public class SettingsFragment extends Fragment {
         filterDurDialog.show();
     }
 
-    @Override
-    public void onStop() {
-        super.onStop();
-        if (blacklistDialog != null && blacklistDialog.isShowing()) {
-            blacklistDialog.dismiss();
-        }
-        if (filterDurDialog != null && filterDurDialog.isShowing()) {
-            filterDurDialog.dismiss();
-        }
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-    }
-
     private void openBlackListDialogue() {
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(requireContext());
         View customLayout = getLayoutInflater().inflate(R.layout.black_list_dialog, null);
@@ -380,7 +378,7 @@ public class SettingsFragment extends Fragment {
             intent.addCategory(Intent.CATEGORY_DEFAULT);
             mGetTreeLauncher.launch(intent);
         });
-        builder.setNegativeButton("OK",null);
+        builder.setNegativeButton("OK", null);
         //finally show the blacklistDialog
         blacklistDialog = builder.create();
         blacklistDialog.show();

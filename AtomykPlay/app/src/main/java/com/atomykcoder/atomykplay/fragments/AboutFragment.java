@@ -71,7 +71,7 @@ public class AboutFragment extends Fragment {
     }
 
     private void changes() {
-        Toast.makeText(requireContext(),"Coming soon!",Toast.LENGTH_SHORT).show();
+        Toast.makeText(requireContext(), "Coming soon!", Toast.LENGTH_SHORT).show();
     }
 
     private int getColor(Bitmap bitmap) {
@@ -87,7 +87,8 @@ public class AboutFragment extends Fragment {
             ex.printStackTrace();
         }
     }
-    private void rateUs(){
+
+    private void rateUs() {
         Intent rateIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + requireContext().getPackageName()));
         startActivity(rateIntent);
     }

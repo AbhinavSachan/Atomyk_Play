@@ -20,6 +20,7 @@ import com.atomykcoder.atomykplay.helperFunctions.MusicDiffCallback;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.ItemTouchHelperAdapter;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
+import com.atomykcoder.atomykplay.kotlin.ImageLoader;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 import java.util.ArrayList;
@@ -30,13 +31,15 @@ public class MusicQueueAdapter extends MusicAdapter implements ItemTouchHelperAd
     OnDragStartListener onDragStartListener;
     MainActivity mainActivity;
     StorageUtil storageUtil;
+    ImageLoader imageLoader;
 
     public MusicQueueAdapter(Context _context, ArrayList<Music> items, OnDragStartListener onDragStartListener) {
         context = _context;
         super.items = items;
         this.onDragStartListener = onDragStartListener;
-        mainActivity = (MainActivity) context;
-        storageUtil = new StorageUtil(context);
+        mainActivity = (MainActivity) _context;
+        storageUtil = new StorageUtil(_context);
+        imageLoader = new ImageLoader(_context);
     }
 
     public void updateMusicListItems(ArrayList<Music> newMusicArrayList) {
@@ -103,7 +106,7 @@ public class MusicQueueAdapter extends MusicAdapter implements ItemTouchHelperAd
 
         Music currentItem = super.items.get(position);
 
-        loadImage(holder.albumCoverIV.getContext(), currentItem, position, holder.albumCoverIV);
+        imageLoader.loadImage(R.drawable.ic_music, currentItem, holder.albumCoverIV, 128);
         holder.musicIndex.setText(String.valueOf(position + 1));
 
         //playing song
@@ -128,6 +131,11 @@ public class MusicQueueAdapter extends MusicAdapter implements ItemTouchHelperAd
             return false;
         });
 
+    }
+
+    @Override
+    public int getItemCount() {
+        return super.items.size();
     }
 
     private boolean isMusicAvailable(Music currentItem) {
@@ -170,12 +178,8 @@ public class MusicQueueAdapter extends MusicAdapter implements ItemTouchHelperAd
         }
     }
 
-    public void clearList(){
+    public void clearList() {
         super.items.clear();
-    }
-    @Override
-    public int getItemCount() {
-        return super.items.size();
     }
 
     public void updateItemInserted(Music music) {
@@ -229,7 +233,7 @@ public class MusicQueueAdapter extends MusicAdapter implements ItemTouchHelperAd
             mainActivity.playAudio(music);
             mainActivity.openBottomPlayer();
         }
-        super.items.add( music);
+        super.items.add(music);
         int pos = super.items.lastIndexOf(music);
         notifyItemInserted(pos);
         storageUtil.saveQueueList(super.items);

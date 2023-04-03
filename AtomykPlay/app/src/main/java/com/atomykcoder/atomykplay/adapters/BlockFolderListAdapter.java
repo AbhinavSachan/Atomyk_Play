@@ -42,6 +42,11 @@ public class BlockFolderListAdapter extends GenericRecyclerAdapter<String> {
         holder.imageView.setOnClickListener(v -> removeFromList(super.items.get(position)));
     }
 
+    @Override
+    public int getItemCount() {
+        return super.items.size();
+    }
+
     private void removeFromList(String name) {
         int pos = super.items.indexOf(name);
         MainActivity mainActivity = (MainActivity) context;
@@ -51,11 +56,6 @@ public class BlockFolderListAdapter extends GenericRecyclerAdapter<String> {
         notifyItemRemoved(pos);
         notifyItemRangeChanged(pos, super.items.size() - (pos + 1));
         mainActivity.checkForUpdateList(true);
-    }
-
-    @Override
-    public int getItemCount() {
-        return super.items.size();
     }
 
 

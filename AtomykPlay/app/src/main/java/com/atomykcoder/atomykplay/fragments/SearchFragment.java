@@ -30,9 +30,9 @@ import java.util.ArrayList;
 //Search Layout Fragment for Performing Searches and Presenting Results
 public class SearchFragment extends Fragment {
 
+    public MusicMainAdapter adapter;
     private RadioGroup radioGroup;
     private ArrayList<Music> searchedMusicList;
-    public MusicMainAdapter adapter;
     private RadioButton songButton, albumButton, artistButton, genreButton;
 
     private void searchWithFilters(String query, ArrayList<Music> dataList) {
@@ -43,11 +43,6 @@ public class SearchFragment extends Fragment {
             search(query, dataList);
 
         });
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
     }
 
     @Override
@@ -77,7 +72,7 @@ public class SearchFragment extends Fragment {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        searchWithFilters("",searchedMusicList);
+        searchWithFilters("", searchedMusicList);
         searchView.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -111,6 +106,11 @@ public class SearchFragment extends Fragment {
         recycler_view.setAdapter(adapter);
         songButton.setChecked(true);
         return view;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
     }
 
     //Function that adds music to an arraylist which is being used to show music in recycler view
@@ -182,11 +182,12 @@ public class SearchFragment extends Fragment {
         adapter.notifyDataSetChanged();
     }
 
-    private int getListSize(){
+    private int getListSize() {
         if (searchedMusicList != null) {
             return searchedMusicList.size();
-        }else return 0;
+        } else return 0;
     }
+
     private void setNumText(int id) {
         String song0 = "Song";
         String album0 = "Album";
@@ -196,28 +197,28 @@ public class SearchFragment extends Fragment {
         String num;
         switch (id) {
             case 1:
-                num = getListSize()+space+ "Song";
+                num = getListSize() + space + "Song";
                 songButton.setText(num);
                 albumButton.setText(album0);
                 artistButton.setText(artist0);
                 genreButton.setText(genre0);
                 break;
             case 2:
-                num = getListSize()+space+ "Album";
+                num = getListSize() + space + "Album";
                 songButton.setText(song0);
                 albumButton.setText(num);
                 artistButton.setText(artist0);
                 genreButton.setText(genre0);
                 break;
             case 3:
-                num = getListSize()+space+ "Artist";
+                num = getListSize() + space + "Artist";
                 songButton.setText(song0);
                 albumButton.setText(album0);
                 artistButton.setText(num);
                 genreButton.setText(genre0);
                 break;
             case 4:
-                num = getListSize()+space+ "Genre";
+                num = getListSize() + space + "Genre";
                 songButton.setText(song0);
                 albumButton.setText(album0);
                 artistButton.setText(artist0);

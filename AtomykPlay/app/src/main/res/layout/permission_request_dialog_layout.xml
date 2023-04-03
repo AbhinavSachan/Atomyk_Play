@@ -25,8 +25,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/tv0"
-            android:padding="12dp"
             android:layout_centerHorizontal="true"
+            android:padding="12dp"
             android:text="@string/permission_des"
             android:textSize="@dimen/d_14sp" />
 

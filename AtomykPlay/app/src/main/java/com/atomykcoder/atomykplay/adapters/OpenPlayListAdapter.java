@@ -17,6 +17,7 @@ import com.atomykcoder.atomykplay.enums.OptionSheetEnum;
 import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.ItemTouchHelperAdapter;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
+import com.atomykcoder.atomykplay.kotlin.ImageLoader;
 
 import java.util.ArrayList;
 
@@ -27,15 +28,17 @@ public class OpenPlayListAdapter extends MusicAdapter implements ItemTouchHelper
     StorageUtil storage;
     StorageUtil.SettingsStorage settingsStorage;
     OnDragStartListener onDragStartListener;
+    ImageLoader imageLoader;
 
     public OpenPlayListAdapter(Context _context, String _playlistName, ArrayList<Music> items, OnDragStartListener onDragStartListener) {
         context = _context;
         playlistName = _playlistName;
         super.items = items;
-        mainActivity = (MainActivity) context;
+        mainActivity = (MainActivity) _context;
         this.onDragStartListener = onDragStartListener;
-        storage = new StorageUtil(context);
-        settingsStorage = new StorageUtil.SettingsStorage(context);
+        storage = new StorageUtil(_context);
+        settingsStorage = new StorageUtil.SettingsStorage(_context);
+        imageLoader = new ImageLoader(_context);
     }
 
     //when item starts to move it will change positions of every item in real time
@@ -69,32 +72,38 @@ public class OpenPlayListAdapter extends MusicAdapter implements ItemTouchHelper
         OpenPlayListViewHolder holder = (OpenPlayListViewHolder) _holder;
         Music currentItem = super.items.get(position);
 
-        loadImage(context, currentItem, position, holder.albumCoverIV);
+        imageLoader.loadImage(R.drawable.ic_music, currentItem, holder.albumCoverIV, 128);
 
         holder.cardView.setOnClickListener(view -> {
             if (shouldIgnoreClick()) return;
 
-            if (isMusicNotAvailable(currentItem)){
+            if (isMusicNotAvailable(currentItem)) {
                 return;
             }
 
-            //region timer to stop extra clicks
-            if (settingsStorage.loadKeepShuffle())
-                handleShuffle(storage, position, super.items);
-            else
-                handleNoShuffle(storage, position, super.items);
-
-            handlePlayMusic(mainActivity, currentItem);
+            if (canPlay()){
+                if (settingsStorage.loadKeepShuffle()) {
+                    handleShuffle(mainActivity,currentItem,storage, position, super.items);
+                } else {
+                    handleNoShuffle(mainActivity,currentItem,storage, position, super.items);
+                }
+            }
         });
 
         holder.optBtn.setOnClickListener(v -> {
-            if (isMusicNotAvailable(currentItem)){
+            if (isMusicNotAvailable(currentItem)) {
                 return;
             }
             mainActivity.openOptionMenu(currentItem, OptionSheetEnum.OPEN_PLAYLIST);
         });
     }
-    private boolean isMusicNotAvailable(Music currentItem){
+
+    @Override
+    public int getItemCount() {
+        return super.items.size();
+    }
+
+    private boolean isMusicNotAvailable(Music currentItem) {
         if (!doesMusicExists(currentItem)) {
             Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show();
             removeItem(currentItem);
@@ -102,6 +111,7 @@ public class OpenPlayListAdapter extends MusicAdapter implements ItemTouchHelper
         }
         return false;
     }
+
     public void removeItem(Music music) {
         int position = super.items.indexOf(music);
 
@@ -112,11 +122,6 @@ public class OpenPlayListAdapter extends MusicAdapter implements ItemTouchHelper
 
         notifyItemRangeChanged(position, super.items.size() - (position + 1));
         notifyItemRemoved(position);
-    }
-
-    @Override
-    public int getItemCount() {
-        return super.items.size();
     }
 }
 

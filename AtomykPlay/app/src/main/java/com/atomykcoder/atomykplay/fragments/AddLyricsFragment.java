@@ -1,13 +1,11 @@
 package com.atomykcoder.atomykplay.fragments;
 
-import android.app.Dialog;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -48,14 +46,6 @@ public class AddLyricsFragment extends Fragment {
     private View view;
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        view = null;
-        btnFind = null;
-        editTextLyrics = null;
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
@@ -91,6 +81,14 @@ public class AddLyricsFragment extends Fragment {
         btnFind.setOnClickListener(v -> setDialogBox());
 
         return view;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        view = null;
+        btnFind = null;
+        editTextLyrics = null;
     }
 
     private void saveMusic() {
@@ -137,14 +135,15 @@ public class AddLyricsFragment extends Fragment {
         nameEditText.setText(name);
         artistEditText.setText(artist);
 
-        builder.setPositiveButton("OK",(dialog,i) -> {
+        builder.setPositiveButton("OK", (dialog, i) -> {
             btnFind.setVisibility(View.GONE);
             fetchLyrics();
         });
-        builder.setNegativeButton("Cancel",null);
+        builder.setNegativeButton("Cancel", null);
         dialog = builder.create();
         dialog.show();
     }
+
     private void fetchLyrics() {
         //show lyrics in bottom sheet
         artistName = artistEditText.getText().toString().toLowerCase().trim();

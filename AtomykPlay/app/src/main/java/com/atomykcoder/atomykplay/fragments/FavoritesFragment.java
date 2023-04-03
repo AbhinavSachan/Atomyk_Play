@@ -78,6 +78,12 @@ public class FavoritesFragment extends Fragment implements OnDragStartListener {
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
+    }
+
+    @Override
     public void onDragStart(RecyclerView.ViewHolder viewHolder) {
         itemTouchHelper.startDrag(viewHolder);
     }
@@ -85,11 +91,5 @@ public class FavoritesFragment extends Fragment implements OnDragStartListener {
     @Subscribe
     public void removeFromPlaylist(RemoveFromFavoriteEvent event) {
         playListAdapter.removeItem(event.music);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        EventBus.getDefault().unregister(this);
     }
 }

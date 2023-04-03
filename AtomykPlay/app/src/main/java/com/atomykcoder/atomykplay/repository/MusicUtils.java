@@ -12,8 +12,8 @@ import java.util.concurrent.CompletableFuture;
 
 public class MusicUtils {
     private static MusicUtils instance;
-    private ArrayList<Music> initialMusicList = new ArrayList<>();
     private final MutableLiveData<LoadingStatus> status = new MutableLiveData<>();
+    private ArrayList<Music> initialMusicList = new ArrayList<>();
 
     public static MusicUtils getInstance() {
         if (instance == null) {
@@ -37,6 +37,7 @@ public class MusicUtils {
         });
         return future;
     }
+
     public ArrayList<Music> getInitialMusicList() {
         return initialMusicList;
     }

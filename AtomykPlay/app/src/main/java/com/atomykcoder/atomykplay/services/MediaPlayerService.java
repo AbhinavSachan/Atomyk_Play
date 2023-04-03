@@ -92,11 +92,12 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     //binder
     private final IBinder iBinder = new LocalBinder();
     private final Handler handler = new Handler();
-    private Handler selfStopHandler;
-    private Runnable selfStopRunnable;
+    private final CountDownTimer[] countDownTimer = new CountDownTimer[1];
     public MediaPlayer media_player;
     public Runnable seekBarRunnable;
     public Handler seekBarHandler;
+    private Handler selfStopHandler;
+    private Runnable selfStopRunnable;
     private boolean was_playing = false;
     //media session
     private MediaSessionManager mediaSessionManager;
@@ -106,7 +107,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     private ArrayList<Music> musicList;
     private int musicIndex = -1;
     private Music activeMusic = null;//object of currently playing audio
-    private final CountDownTimer[] countDownTimer = new CountDownTimer[1];
     // phone call listener
     private PhoneStateListener phoneStateListener;
     //for above android 10 devices
@@ -118,6 +118,11 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     private StorageUtil storage;
     private StorageUtil.SettingsStorage settingsStorage;
     private NotificationManager notificationManager;
+    private int artworkDimension;
+    private Bitmap defaultThumbnail;
+    private MediaMetadataCompat defaultMetadata;
+    private Notification initialNotification;
+    private Notification musicNotification;
     private final BroadcastReceiver stopMusicReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -131,6 +136,21 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             pauseMedia();
         }
     };//to play when output device is plugged
+    private final BroadcastReceiver nextMusicReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            onNextReceived();
+
+        }
+    };
+    private final BroadcastReceiver prevMusicReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            onPreviousReceived();
+
+        }
+    };
+    private AudioFocusRequest audioFocusRequest;
     private final BroadcastReceiver pluggedInDevice = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -158,20 +178,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             }
         }
     };
-    private final BroadcastReceiver nextMusicReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            onNextReceived();
-
-        }
-    };
-    private final BroadcastReceiver prevMusicReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            onPreviousReceived();
-
-        }
-    };
     private final BroadcastReceiver pausePlayMusicReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -188,7 +194,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             if (music != null) {
                 activeMusic = music;
             }
-
             if (mediaSessionManager == null) {
                 try {
                     initiateMediaSession();
@@ -197,24 +202,16 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                     stopSelf();
                 }
             }
-
             stopMedia();
             initiateMediaPlayer();
         }
     };
-    private int artworkDimension;
-    private Bitmap defaultThumbnail;
-    private MediaMetadataCompat defaultMetadata;
-    private Notification initialNotification;
-    private Notification musicNotification;
-    private AudioFocusRequest audioFocusRequest;
 
     private void onNextReceived() {
         if (mediaSessionManager == null) {
             try {
                 initiateMediaSession();
             } catch (RemoteException e) {
-                e.printStackTrace();
                 stopSelf();
             }
         }
@@ -227,7 +224,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             try {
                 initiateMediaSession();
             } catch (RemoteException e) {
-                e.printStackTrace();
                 stopSelf();
             }
         }
@@ -355,6 +351,20 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             notificationAction = R.drawable.ic_play_for_noti;
             play_pauseAction = playbackAction(0);
         }
+        NotificationCompat.Action prevAction, stopAction;
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.R) {
+            if (isMediaPlaying()) {
+                prevAction = new NotificationCompat.Action.Builder(R.drawable.ic_previous_for_noti, "Previous", playbackAction(3)).build();
+                stopAction = new NotificationCompat.Action.Builder(R.drawable.ic_close, "stop", playbackAction(4)).build();
+            } else {
+                prevAction = new NotificationCompat.Action.Builder(R.drawable.ic_close, "Stop", playbackAction(4)).build();
+                stopAction = new NotificationCompat.Action.Builder(R.drawable.ic_previous_for_noti, "Previous", playbackAction(3)).build();
+            }
+        } else {
+            prevAction = new NotificationCompat.Action.Builder(R.drawable.ic_previous_for_noti, "Previous", playbackAction(3)).build();
+            stopAction = new NotificationCompat.Action.Builder(R.drawable.ic_close, "Stop", playbackAction(4)).build();
+        }
+
 
         //building notification for player
         //set content
@@ -373,13 +383,13 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 .setDeleteIntent(playbackAction(4))
                 .setChannelId(CHANNEL_ID)
                 //set control
-                .addAction(R.drawable.ic_previous_for_noti, "Previous", playbackAction(3))
+                .addAction(prevAction)
                 .addAction(notificationAction, "Pause", play_pauseAction)
                 .addAction(R.drawable.ic_next_for_noti, "next", playbackAction(2))
-                .addAction(R.drawable.ic_close, "stop", playbackAction(4))
+                .addAction(stopAction)
                 .setContentIntent(PendingIntent.getActivity(this, 0, new Intent(getApplicationContext(), MainActivity.class), PendingIntent.FLAG_IMMUTABLE))
                 .setSilent(true)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_DEFAULT)
                 .build();
 
@@ -397,6 +407,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             }
         }
         notificationManager.notify(NOTIFICATION_ID, musicNotification);
+        Logger.normalLog("notification created");
     }
 
     private void buildInitialNotification() {
@@ -410,10 +421,9 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 .setChannelId(CHANNEL_ID)
                 .setContentIntent(PendingIntent.getActivity(this, 0, new Intent(getApplicationContext(), MainActivity.class), PendingIntent.FLAG_IMMUTABLE))
                 .setSilent(true)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_DEFAULT)
                 .build();
-
     }
 
 
@@ -513,14 +523,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.S)
-    private class CustomCallStateListener extends PhoneStateCallback {
-        @Override
-        public void onCallStateChanged(int state) {
-            takeActionOnCall(state);
-        }
-    }
-
     private void takeActionOnCall(int state) {
         switch (state) {
             case TelephonyManager.CALL_STATE_OFFHOOK:
@@ -580,6 +582,27 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     }
 
     @Override
+    public void onTaskRemoved(Intent rootIntent) {
+        super.onTaskRemoved(rootIntent);
+
+        //here we are stopping service after 5 minutes if app
+        // is not running in background and player is not playing
+        //this is a optional feature for user
+        if (settingsStorage != null && settingsStorage.loadSelfStop()) {
+            if (selfStopHandler != null && selfStopRunnable != null) {
+                selfStopRunnable = () -> {
+
+                    if (!is_playing && !ui_visible) {
+                        stopSelf();
+                    }
+                    selfStopHandler.postDelayed(selfStopRunnable, 5 * 60 * 1000);
+                };
+                selfStopHandler.postDelayed(selfStopRunnable, 0);
+            }
+        }
+    }
+
+    @Override
     public void onPrepared(MediaPlayer mp) {
         ExecutorService service = Executors.newFixedThreadPool(1);
         service.execute(() -> {
@@ -614,25 +637,23 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     public void onCompletion(MediaPlayer mp) {
         storage.clearMusicLastPos();
         loadList();
-
-        if (musicIndex == -1 || musicList == null) return;
-
-        switch (storage.loadRepeatStatus()) {
-            case "no_repeat":
-                if (musicIndex == musicList.size() - 1)
-                    pauseMedia();
-                else
+        if (musicIndex == -1 || musicList == null) {
+            switch (storage.loadRepeatStatus()) {
+                case "no_repeat":
+                    if (musicIndex == musicList.size() - 1)
+                        pauseMedia();
+                    else
+                        skipToNext();
+                    break;
+                case "repeat":
                     skipToNext();
-                break;
-            case "repeat":
-                skipToNext();
-                break;
-            case "repeat_one":
-                playMedia();
-                EventBus.getDefault().post(new PrepareRunnableEvent());
-                break;
+                    break;
+                case "repeat_one":
+                    playMedia();
+                    EventBus.getDefault().post(new PrepareRunnableEvent());
+                    break;
+            }
         }
-
         if (isMediaPlaying()) {
             setIcon(PlaybackStatus.PLAYING);
             buildNotification(PlaybackStatus.PLAYING, 1f);
@@ -726,15 +747,14 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         media_player.setAudioStreamType(AudioManager.STREAM_MUSIC);
 
         try {
-            loadList();
             if (activeMusic != null) {
-                if (musicList != null && !musicList.isEmpty()) {
-                    media_player.setDataSource(activeMusic.getPath());
-                    media_player.prepare();
+                if (musicList == null) {
+                    loadList();
                 }
+                media_player.setDataSource(activeMusic.getPath());
+                media_player.prepare();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ignored) {
         }
 
     }
@@ -783,11 +803,13 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             media_player.pause();
             is_playing = false;
             setIcon(PlaybackStatus.PAUSED);
-            buildNotification(PlaybackStatus.PAUSED, 0f);
+            buildNotification(PlaybackStatus.PAUSED,0f);
         }
-
+        if (initialNotification == null) {
+            buildInitialNotification();
+        }
         if (notificationManager != null) {
-            notificationManager.cancelAll();
+            notificationManager.notify(NOTIFICATION_ID, initialNotification);
         }
 
         service_stopped = true;
@@ -854,7 +876,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         buildNotification(PlaybackStatus.PLAYING, 1f);
         Logger.normalLog("Resume");
     }
-
 
     /**
      * This function pauses music
@@ -1389,6 +1410,14 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             } else {
                 audioManager.abandonAudioFocus(this);
             }
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.S)
+    private class CustomCallStateListener extends PhoneStateCallback {
+        @Override
+        public void onCallStateChanged(int state) {
+            takeActionOnCall(state);
         }
     }
 

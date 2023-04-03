@@ -28,7 +28,7 @@
     </group>
     <item
         android:id="@+id/navigation_donate"
-        android:visible="false"
         android:icon="@drawable/ic_donate"
-        android:title="@string/donate" />
+        android:title="@string/donate"
+        android:visible="false" />
 </menu>

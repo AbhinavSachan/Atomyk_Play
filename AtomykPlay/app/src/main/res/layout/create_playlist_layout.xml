@@ -79,10 +79,10 @@
             android:layout_below="@+id/playlist_cover_pick"
             android:paddingHorizontal="16dp"
             android:paddingVertical="@dimen/dialog_btn_ver_pad"
-            android:visibility="gone"
             android:text="@string/tag_suggestion"
             android:textColor="@color/sub_text_grey"
-            android:textSize="@dimen/d_14sp" />
+            android:textSize="@dimen/d_14sp"
+            android:visibility="gone" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/edit_playlist_name_l"

@@ -156,6 +156,7 @@ public class StorageUtil {
         editor.clear();
         editor.apply();
     }
+
     public void removeFromInitialList(Music music) {
         sharedPreferences = context.getSharedPreferences(INITIAL_LIST_STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -662,6 +663,7 @@ public class StorageUtil {
             sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
             return sharedPreferences.getBoolean("show_extra", false);
         }
+
         public void autoPlay(boolean b) {
             sharedPreferences = context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -770,28 +772,29 @@ public class StorageUtil {
             return sharedPreferences.getBoolean("beautify_name", false);
         }
 
-        public void addBeautifyTag(String s){
+        public void addBeautifyTag(String s) {
             sharedPreferences = context.getSharedPreferences(BEAUTIFY_TAGS_STORAGE, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPreferences.edit();
             ArrayList<String> list = getAllBeautifyTag();
             int index = list.size();
             if (!list.contains(s)) {
-                editor.putString(String.valueOf(index),s);
+                editor.putString(String.valueOf(index), s);
                 editor.apply();
             }
         }
-        public void addReplacingTag(String s){
+
+        public void addReplacingTag(String s) {
             sharedPreferences = context.getSharedPreferences(REPLACING_TAGS_STORAGE, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPreferences.edit();
             ArrayList<String> list = getAllReplacingTag();
             int index = list.size();
             if (!list.contains(s)) {
-                editor.putString(String.valueOf(index),s);
+                editor.putString(String.valueOf(index), s);
                 editor.apply();
             }
         }
 
-        public ArrayList<String> getAllBeautifyTag(){
+        public ArrayList<String> getAllBeautifyTag() {
             sharedPreferences = context.getSharedPreferences(BEAUTIFY_TAGS_STORAGE, Context.MODE_PRIVATE);
             Map<String, ?> map = sharedPreferences.getAll();
             ArrayList<String> tags = new ArrayList<>();
@@ -800,7 +803,8 @@ public class StorageUtil {
             }
             return tags;
         }
-        public ArrayList<String> getAllReplacingTag(){
+
+        public ArrayList<String> getAllReplacingTag() {
             sharedPreferences = context.getSharedPreferences(REPLACING_TAGS_STORAGE, Context.MODE_PRIVATE);
             Map<String, ?> map = sharedPreferences.getAll();
             ArrayList<String> tags = new ArrayList<>();
@@ -809,30 +813,35 @@ public class StorageUtil {
             }
             return tags;
         }
+
         public void removeFromReplacingList(String key) {
             sharedPreferences = context.getSharedPreferences(REPLACING_TAGS_STORAGE, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.remove(key);
             editor.apply();
         }
+
         public void removeFromBeautifyList(String key) {
             sharedPreferences = context.getSharedPreferences(BEAUTIFY_TAGS_STORAGE, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.remove(key);
             editor.apply();
         }
-        public void clearBeautifyTags(){
+
+        public void clearBeautifyTags() {
             sharedPreferences = context.getSharedPreferences(BEAUTIFY_TAGS_STORAGE, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.clear();
             editor.apply();
         }
-        public void clearReplacingTags(){
+
+        public void clearReplacingTags() {
             sharedPreferences = context.getSharedPreferences(REPLACING_TAGS_STORAGE, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.clear();
             editor.apply();
         }
+
         /**
          * @param dur it should be between 10 to 120 (120 is max duration you can filter)
          */

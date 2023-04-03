@@ -7,6 +7,6 @@
         android:centerColor="@color/center_player_shadow"
         android:endColor="@android:color/transparent"
         android:startColor="@color/player_shadow_black"
-        android:type="linear"/>
+        android:type="linear" />
 
 </shape>

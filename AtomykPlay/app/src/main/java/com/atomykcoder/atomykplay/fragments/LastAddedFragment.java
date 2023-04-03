@@ -39,8 +39,8 @@ public class LastAddedFragment extends Fragment {
     private final int secondOptionValue = 90;
     private final int thirdOptionValue = 180;
     private final int fourthOptionValue = 360;
-    private RadioButton firstRadio, secondRadio, thirdRadio, fourthRadio;
     public MusicMainAdapter adapter;
+    private RadioButton firstRadio, secondRadio, thirdRadio, fourthRadio;
     private ArrayList<Music> lastAddedMusicList;
     private Dialog filterDialog;
     private TextView songCountTv;
@@ -103,6 +103,21 @@ public class LastAddedFragment extends Fragment {
         super.onStart();
     }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (filterDialog != null) {
+            if (filterDialog.isShowing()) {
+                filterDialog.dismiss();
+            }
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
+
     @SuppressLint("SetTextI18n")
     private void openDialogFilter() {
         filterDialog = new Dialog(requireContext());
@@ -143,18 +158,6 @@ public class LastAddedFragment extends Fragment {
         });
         filterDialog.show();
     }
-
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        if (filterDialog != null) {
-            if (filterDialog.isShowing()) {
-                filterDialog.dismiss();
-            }
-        }
-    }
-
 
     /**
      * load all last added songs based on selected radio buttons
@@ -213,11 +216,6 @@ public class LastAddedFragment extends Fragment {
             });
         });
         service.shutdown();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
     }
 
     private ArrayList<Music> getLastAddedMusicList(long max) throws ParseException {

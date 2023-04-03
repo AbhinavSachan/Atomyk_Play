@@ -27,20 +27,18 @@
             android:clickable="true"
             android:contentDescription="@string/empty"
             android:focusable="true"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/search_layout"
-            app:layout_constraintTop_toTopOf="parent"
             android:paddingHorizontal="8dp"
             android:paddingVertical="8dp"
-            android:src="@drawable/ic_back" />
+            android:src="@drawable/ic_back"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/search_layout"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/search_layout"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            app:layout_constraintStart_toEndOf="@id/close_search_btn"
-            app:layout_constraintEnd_toEndOf="parent"
             android:clickable="true"
             android:focusable="true"
             app:boxBackgroundColor="@color/primary_bg"
@@ -52,7 +50,9 @@
             app:boxStrokeWidthFocused="0dp"
             app:endIconDrawable="@drawable/ic_close"
             app:endIconMode="clear_text"
-            app:hintEnabled="false">
+            app:hintEnabled="false"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/close_search_btn">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/search_view_search"
@@ -86,10 +86,10 @@
         <RadioGroup
             android:id="@+id/radio_group"
             android:layout_width="wrap_content"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp">
 
             <RadioButton
                 android:id="@+id/song_button"

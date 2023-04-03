@@ -30,7 +30,7 @@ public class ApplicationClass extends Application {
 
     }
 
-    public void showToast(String s){
-        Toast.makeText(getApplicationContext(),s,Toast.LENGTH_SHORT).show();
+    public void showToast(String s) {
+        Toast.makeText(getApplicationContext(), s, Toast.LENGTH_SHORT).show();
     }
 }

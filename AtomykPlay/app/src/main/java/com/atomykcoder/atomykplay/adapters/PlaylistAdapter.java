@@ -81,16 +81,16 @@ public class PlaylistAdapter extends GenericRecyclerAdapter<Playlist> {
 
     }
 
+    @Override
+    public int getItemCount() {
+        return super.items.size();
+    }
+
     @SuppressLint("NotifyDataSetChanged")
     public void updateView(ArrayList<Playlist> _arrayList) {
         super.items.clear();
         super.items.addAll(_arrayList);
         notifyDataSetChanged();
-    }
-
-    @Override
-    public int getItemCount() {
-        return super.items.size();
     }
 
 }

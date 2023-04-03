@@ -93,8 +93,8 @@ import java.util.concurrent.Executors;
 
 public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeListener, OnDragStartListener {
 
+    public static boolean playing_same_song = false;
     private final ArrayList<String> lyricsArrayList = new ArrayList<>();
-    private final CountDownTimer[] countDownTimer = new CountDownTimer[1];
     public CustomBottomSheet<View> queueSheetBehaviour;
     public Runnable lyricsRunnable;
     public Handler lyricsHandler;
@@ -164,11 +164,11 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
     private Dialog timerDialogue;
     private Music activeMusic;
     private boolean app_paused;
-    public static boolean playing_same_song = false;
     private boolean should_refresh_layout = true;
     private int tempColor;
     private MutableLiveData<Integer> color = new MutableLiveData<>();
     private long lastClickTime;
+    private ExecutorService executorService;
 
     public void setThemeColorForApp(int color) {
         this.color.setValue(color);
@@ -336,26 +336,14 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
         if (queueSheetBehaviour.getState() == BottomSheetBehavior.STATE_EXPANDED) {
             queueRecyclerView.setVisibility(View.VISIBLE);
         }
-        if (countDownTimer[0] == null) {
-            timerTv.setVisibility(View.GONE);
-            timerImg.setVisibility(View.VISIBLE);
-        }
         app_paused = false;
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-        EventBus.getDefault().unregister(this);
-        lyricsRecyclerView.clearOnScrollListeners();
-        if (executorService != null) {
-            executorService.shutdown();
-        }
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        String music = encode(activeMusic);
+        outState.putString("activeMusic", music);
     }
 
     @Override
@@ -366,6 +354,21 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
             queueRecyclerView.setVisibility(View.GONE);
         }
         app_paused = true;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
+        lyricsRecyclerView.clearOnScrollListeners();
+        if (executorService != null) {
+            executorService.shutdown();
+        }
     }
 
     /**
@@ -568,13 +571,6 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
             }
         }
 
-    }
-
-    @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-        String music = encode(activeMusic);
-        outState.putString("activeMusic", music);
     }
 
     // Don't Remove This Event Bus is using this method (It might look unused still DON'T REMOVE
@@ -894,8 +890,6 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
             restoreLastListAndPos(activeMusic);
         }
     }
-
-    private ExecutorService executorService;
 
     private boolean shouldIgnoreClick() {
         long delay = 600;
