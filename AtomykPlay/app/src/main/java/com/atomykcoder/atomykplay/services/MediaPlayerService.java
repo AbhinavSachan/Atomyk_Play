@@ -303,8 +303,13 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
      * this function updates new music data in notification
      */
     private void updateMetaData(Music activeMusic, Bitmap finalImage) {
-        musicList = storage.loadQueueList();
-        musicIndex = storage.loadMusicIndex();
+        if (mediaSession == null) {
+            try {
+                initiateMediaSession();
+            } catch (RemoteException ignored) {
+            }
+        }
+        loadList();
         Bitmap thumbnail;
         MediaMetadataCompat metadata = defaultMetadata;
 
@@ -582,27 +587,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     }
 
     @Override
-    public void onTaskRemoved(Intent rootIntent) {
-        super.onTaskRemoved(rootIntent);
-
-        //here we are stopping service after 5 minutes if app
-        // is not running in background and player is not playing
-        //this is a optional feature for user
-        if (settingsStorage != null && settingsStorage.loadSelfStop()) {
-            if (selfStopHandler != null && selfStopRunnable != null) {
-                selfStopRunnable = () -> {
-
-                    if (!is_playing && !ui_visible) {
-                        stopSelf();
-                    }
-                    selfStopHandler.postDelayed(selfStopRunnable, 5 * 60 * 1000);
-                };
-                selfStopHandler.postDelayed(selfStopRunnable, 0);
-            }
-        }
-    }
-
-    @Override
     public void onPrepared(MediaPlayer mp) {
         ExecutorService service = Executors.newFixedThreadPool(1);
         service.execute(() -> {
@@ -803,7 +787,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             media_player.pause();
             is_playing = false;
             setIcon(PlaybackStatus.PAUSED);
-            buildNotification(PlaybackStatus.PAUSED,0f);
+            buildNotification(PlaybackStatus.PAUSED, 0f);
         }
         if (initialNotification == null) {
             buildInitialNotification();
@@ -812,7 +796,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             notificationManager.notify(NOTIFICATION_ID, initialNotification);
         }
 
-        service_stopped = true;
         stopSelf();
     }
 
@@ -1266,9 +1249,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         if (musicList != null)
             if (musicIndex != -1 && musicIndex < musicList.size()) {
                 activeMusic = musicList.get(musicIndex);
-            } else {
-                stopSelf();
-                return START_STICKY;
             }
 
         Bitmap defaultArtwork = BitmapFactory.decodeResource(MediaPlayerService.this.getApplicationContext()
@@ -1292,22 +1272,21 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                     .build();
         }
 
-        if (activeMusic != null) {
-            if (musicNotification != null) {
-                try {
-                    startForeground(NOTIFICATION_ID, musicNotification);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            } else {
-                buildInitialNotification();
-                try {
-                    startForeground(NOTIFICATION_ID, initialNotification);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+        if (musicNotification != null) {
+            try {
+                startForeground(NOTIFICATION_ID, musicNotification);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            buildInitialNotification();
+            try {
+                startForeground(NOTIFICATION_ID, initialNotification);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
+
         return START_STICKY;
     }
 
