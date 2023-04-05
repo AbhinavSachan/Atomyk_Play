@@ -6,6 +6,7 @@ import android.widget.ImageView;
 
 import com.atomykcoder.atomykplay.R;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.annotation.GlideModule;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestOptions;
@@ -21,7 +22,8 @@ public class GlideBuilt {
     public void glide(String uri, int placeholderImage, ImageView imageView, int image_measure) {
         try {
             Glide.with(context).load(uri).apply(new RequestOptions().placeholder(placeholderImage).error(R.drawable.ic_music_thumbnail))
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                    .skipMemoryCache(true)
                     .override(image_measure, image_measure)
                     .into(imageView);
         } catch (Exception ignored) {

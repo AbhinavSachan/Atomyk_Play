@@ -144,6 +144,15 @@
                                 android:layout_gravity="center_vertical"
                                 android:paddingHorizontal="16dp"
                                 android:paddingVertical="4dp"
+                                android:text="@string/what_we_collect"
+                                android:textColor="@color/sub_text_grey"
+                                android:textSize="@dimen/d_12sp" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:paddingHorizontal="16dp"
+                                android:paddingVertical="4dp"
                                 android:text="@string/copyright_text"
                                 android:textColor="@color/sub_text_grey"
                                 android:textSize="@dimen/d_11sp" />
@@ -237,63 +246,6 @@
                         android:scaleType="centerCrop" />
 
                 </RelativeLayout>
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-
-                    android:clipToPadding="false"
-                    android:paddingBottom="16dp">
-
-                    <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/akash_card"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="16dp"
-                        android:layout_marginTop="60dp"
-                        app:cardBackgroundColor="@color/secondary_bg"
-                        app:cardElevation="4dp"
-                        app:strokeWidth="0dp">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:layout_marginTop="40dp"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center_horizontal"
-                                android:padding="8dp"
-                                android:text="Akash Goyal"
-                                android:textColor="@color/text_color"
-                                android:textSize="@dimen/d_14sp"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:lineSpacingMultiplier="1.2"
-                                android:paddingHorizontal="16dp"
-                                android:paddingBottom="16dp"
-                                android:text="@string/akash_des"
-                                android:textColor="@color/text_color"
-                                android:textSize="@dimen/d_14sp" />
-                        </LinearLayout>
-                    </com.google.android.material.card.MaterialCardView>
-
-                    <de.hdodenhof.circleimageview.CircleImageView
-                        android:id="@+id/akash_profile"
-                        android:layout_width="100dp"
-                        android:layout_height="100dp"
-                        android:layout_centerHorizontal="true"
-                        android:contentDescription="profile image"
-                        android:elevation="6dp"
-                        android:scaleType="centerCrop" />
-
-                </RelativeLayout>
-
             </LinearLayout>
 
             <LinearLayout

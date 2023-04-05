@@ -13,4 +13,9 @@
         <item name="android:textColor">@color/text_color</item>
         <item name="android:textSize">@dimen/d_15sp</item>
     </style>
+
+    <style name="App.Custom.Title" parent="TextAppearance.Material3.DisplaySmall">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/text_color</item>
+    </style>
 </resources>

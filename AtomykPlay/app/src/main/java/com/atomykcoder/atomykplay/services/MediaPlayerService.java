@@ -344,7 +344,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
      */
     public void buildNotification(PlaybackStatus playbackStatus, float playbackSpeed) {
 
-        if (!isMediaPlayerNotNull() || musicList == null || activeMusic == null) return;
+        if (!isMediaPlayerNotNull() || activeMusic == null) return;
 
         int notificationAction = R.drawable.ic_pause_for_noti;//needs to be initialized
         PendingIntent play_pauseAction = null;
@@ -412,7 +412,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             }
         }
         notificationManager.notify(NOTIFICATION_ID, musicNotification);
-        Logger.normalLog("notification created");
     }
 
     private void buildInitialNotification() {
@@ -534,26 +533,15 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             case TelephonyManager.CALL_STATE_RINGING:
                 if (isMediaPlaying()) {
                     was_playing = true;
-                    pauseMedia();
-                    MainActivity.phone_ringing = true;
                 }
+                pauseMedia();
+                MainActivity.phone_ringing = true;
                 break;
             case TelephonyManager.CALL_STATE_IDLE:
                 if (isMediaPlayerNotNull()) {
                     MainActivity.phone_ringing = false;
                     if (was_playing) {
-                        if (!isMediaPlayerNotNull()) {
-                            initiateMediaPlayer();
-                            if (mediaSession == null) {
-                                try {
-                                    initiateMediaSession();
-                                } catch (RemoteException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        } else {
-                            resumeMedia();
-                        }
+                        resumeMedia();
                         was_playing = false;
                     }
                 }
@@ -796,7 +784,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         if (notificationManager != null) {
             notificationManager.notify(NOTIFICATION_ID, initialNotification);
         }
-
         stopSelf();
     }
 
@@ -1188,19 +1175,9 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         switch (focusState) {
             case AudioManager.AUDIOFOCUS_GAIN:
                 if (was_playing) {
-                    if (!isMediaPlayerNotNull()) {
-                        initiateMediaPlayer();
-                        Logger.normalLog("FocusGainInitiated");
-                        if (mediaSession == null) {
-                            try {
-                                initiateMediaSession();
-                            } catch (RemoteException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    } else {
-                        resumeMedia();
+                    if (isMediaPlayerNotNull()) {
                         Logger.normalLog("FocusGainResumed");
+                        resumeMedia();
                     }
                     was_playing = false;
                 }
@@ -1208,8 +1185,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             case AudioManager.AUDIOFOCUS_LOSS:
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
                 if (isMediaPlaying()) {
-                    pauseMedia();
                     Logger.normalLog("FocusTransientPaused");
+                    pauseMedia();
                     was_playing = true;
                 }
                 break;
@@ -1224,10 +1201,12 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         }
     }
 
-
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         //Handle Intent action from MediaSession.TransportControls
+        if (intent == null) {
+            return START_STICKY;
+        }
         handleNotificationActions(intent);
         Logger.normalLog("ServiceStarted");
         if (selfStopHandler == null) {
@@ -1294,7 +1273,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     @Override
     public void onTaskRemoved(Intent rootIntent) {
         super.onTaskRemoved(rootIntent);
-
         //here we are stopping service after 5 minutes if app
         // is not running in background and player is not playing
         //this is a optional feature for user
@@ -1313,6 +1291,16 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     }
 
     @Override
+    public boolean onUnbind(Intent intent) {
+        return isMediaPlaying();
+    }
+
+    @Override
+    public void onRebind(Intent intent) {
+        super.onRebind(intent);
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
         removeAudioFocus();
@@ -1320,6 +1308,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         selfStopHandler.removeCallbacks(selfStopRunnable);
         selfStopHandler = null;
         selfStopRunnable = null;
+        cancelTimer();
         if (isMediaPlayerNotNull()) {
             storage.saveMusicLastPos(getCurrentMediaPosition());
         }
@@ -1333,8 +1322,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE);
             }
         }
-
-
         unregisterReceiver(becomingNoisyReceiver);
         unregisterReceiver(pluggedInDevice);
         unregisterReceiver(playNewMusicReceiver);

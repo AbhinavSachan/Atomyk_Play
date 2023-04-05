@@ -516,7 +516,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
                 }
                 glideBuilt.glideBitmap(image, R.drawable.ic_music, playerCoverImage, 512, true);
                 glideBuilt.glideBitmap(image, R.drawable.ic_music, mini_cover, 128, true);
-                glideBuilt.glideBitmap(image, R.drawable.ic_music, queueCoverImg, 128, true);
+                glideBuilt.glideBitmap(image, R.drawable.ic_music, queueCoverImg, 128, false);
                 mainActivity.setDataInNavigation(songName, artistName, image);
                 if (image != null && image.isRecycled()) {
                     //Don't remove this it will prevent app from crashing if bitmap was trying to recycle from instance

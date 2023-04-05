@@ -35,9 +35,7 @@ public class AboutFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_about, container, false);
 
         Toolbar toolbar = view.findViewById(R.id.toolbar_about);
-        CircleImageView aks_img = view.findViewById(R.id.akash_profile);
         CircleImageView abh_img = view.findViewById(R.id.abhinav_profile);
-        MaterialCardView akash_card = view.findViewById(R.id.akash_card);
         MaterialCardView abhinav_card = view.findViewById(R.id.abhinav_card);
 
         TextView flatIcon = view.findViewById(R.id.flat_icon);
@@ -54,10 +52,8 @@ public class AboutFragment extends Fragment {
 
         Bitmap aks = BitmapFactory.decodeResource(getResources(), R.drawable.akash);
         Bitmap abh = BitmapFactory.decodeResource(getResources(), R.drawable.abhinav);
-        aks_img.setImageBitmap(aks);
         abh_img.setImageBitmap(abh);
 
-        akash_card.setCardBackgroundColor(getColor(aks));
         abhinav_card.setCardBackgroundColor(getColor(abh));
 
         flatIcon.setOnClickListener(v -> openLinkInChrome(flatIconUri));

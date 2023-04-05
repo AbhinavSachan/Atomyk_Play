@@ -129,7 +129,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public static final String BROADCAST_STOP_MUSIC = "com.atomykcoder.atomykplay.StopMusic";
     public static final String BROADCAST_PLAY_NEXT_MUSIC = "com.atomykcoder.atomykplay.PlayNextMusic";
     public static final String BROADCAST_PLAY_PREVIOUS_MUSIC = "com.atomykcoder.atomykplay.PlayPreviousMusic";
-    public static final int TAG_BLOCK_LIST = 2153;
+
     public static final String SETTINGS_FRAGMENT_TAG = "SettingsFragment";
     public static final String ADD_LYRICS_FRAGMENT_TAG = "AddLyricsFragment";
     public static final String SEARCH_FRAGMENT_TAG = "SearchFragment";
@@ -139,10 +139,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public static final String ABOUT_FRAGMENT_TAG = "AboutFragment";
     public static final String OPEN_PLAYLIST_FRAGMENT_TAG = "OpenPlayListFragment";
     public static final String LAST_ADDED_FRAGMENT_TAG = "LastAddedFragment";
+
     public static boolean service_bound = false;
     public static boolean is_granted = false;
     public static boolean phone_ringing = false;
     public static boolean service_stopped = false;
+
     public static MediaPlayerService media_player_service;
     public ServiceConnection service_connection = new ServiceConnection() {
         @Override
@@ -735,14 +737,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         addToFav.setOnClickListener(this);
         removeFromList.setOnClickListener(this);
     }
-
     private void setBottomSheetProperties(BottomSheetBehavior<View> sheet, int peekHeight, boolean skipCollapse) {
         sheet.setHideable(true);
         sheet.setPeekHeight(peekHeight);
         sheet.setSkipCollapsed(skipCollapse);
         sheet.setState(BottomSheetBehavior.STATE_HIDDEN);
     }
-
     private void setBottomSheets() {
         DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
@@ -832,7 +832,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             mainPlayerSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         }
     }
-
     public void setLyricListAdapter(Bundle bundle) {
         ArrayList<String> titles = bundle.getStringArrayList("titles");
         ArrayList<String> sampleLyrics = bundle.getStringArrayList("sampleLyrics");
@@ -859,7 +858,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         outState.putBoolean("serviceState", service_bound);
         super.onSaveInstanceState(outState);
     }
-
     @Override
     public void onBackPressed() {
         FragmentManager fragmentManager = getSupportFragmentManager();
