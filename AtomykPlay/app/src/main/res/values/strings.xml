@@ -134,4 +134,7 @@
     <string name="tag_suggestion">Tags should exactly be what you want to remove from name including empty spaces.</string>
     <string name="replacing_tag">Replace with</string>
     <string name="abhinav_des">I am proud to work on this project. My passion for music and technology has resulted in an app that will bring joy and entertainment to users for years to come. Thank you for using this app, and a friendly reminder make sure that your friends also know about this amazing player.</string>
+    <string name="year">Year</string>
+    <string name="lyric_artist_hint">Artist Ex- Alan Walker, Justin Bieber, etc.</string>
+    <string name="lyric_song_hint">Song Ex- Faded, Let me love you, etc.</string>
 </resources>

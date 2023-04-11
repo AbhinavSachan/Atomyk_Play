@@ -14,7 +14,7 @@ import com.atomykcoder.atomykplay.adapters.Generics.GenericViewHolder;
 import com.atomykcoder.atomykplay.adapters.ViewHolders.FavoriteViewHolder;
 import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.enums.OptionSheetEnum;
-import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
+import com.atomykcoder.atomykplay.utils.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.ItemTouchHelperAdapter;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
 import com.atomykcoder.atomykplay.kotlin.ImageLoader;

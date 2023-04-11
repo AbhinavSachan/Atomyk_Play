@@ -32,7 +32,7 @@ import com.atomykcoder.atomykplay.adapters.BeautifyListAdapter;
 import com.atomykcoder.atomykplay.adapters.BlockFolderListAdapter;
 import com.atomykcoder.atomykplay.classes.ApplicationClass;
 import com.atomykcoder.atomykplay.customScripts.LinearLayoutManagerWrapper;
-import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
+import com.atomykcoder.atomykplay.utils.StorageUtil;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.util.ArrayList;

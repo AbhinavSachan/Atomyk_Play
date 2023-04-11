@@ -7,9 +7,9 @@ import static com.atomykcoder.atomykplay.helperFunctions.MusicHelper.convertDura
 import static com.atomykcoder.atomykplay.helperFunctions.MusicHelper.convertToMillis;
 import static com.atomykcoder.atomykplay.helperFunctions.MusicHelper.decode;
 import static com.atomykcoder.atomykplay.helperFunctions.MusicHelper.encode;
-import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.no_repeat;
-import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.repeat;
-import static com.atomykcoder.atomykplay.helperFunctions.StorageUtil.repeat_one;
+import static com.atomykcoder.atomykplay.utils.StorageUtil.no_repeat;
+import static com.atomykcoder.atomykplay.utils.StorageUtil.repeat;
+import static com.atomykcoder.atomykplay.utils.StorageUtil.repeat_one;
 
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
@@ -22,7 +22,6 @@ import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.media.MediaMetadataRetriever;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
@@ -72,7 +71,7 @@ import com.atomykcoder.atomykplay.events.TimerFinished;
 import com.atomykcoder.atomykplay.events.UpdateMusicImageEvent;
 import com.atomykcoder.atomykplay.events.UpdateMusicProgressEvent;
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper;
-import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
+import com.atomykcoder.atomykplay.utils.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.card.MaterialCardView;
@@ -914,9 +913,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
                     storageUtil.saveQueueList(musicList);
                     storageUtil.saveMusicIndex(0);
                     return musicList;
-                }, executorService).thenAcceptAsync(result -> requireActivity().runOnUiThread(() -> {
-                    updateQueueAdapter(musicList);
-                }));
+                }, executorService).thenAcceptAsync(result -> requireActivity().runOnUiThread(() -> updateQueueAdapter(musicList)));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -935,9 +932,7 @@ public class BottomSheetPlayerFragment extends Fragment implements SeekBar.OnSee
                 }
                 storageUtil.saveQueueList(tempList);
                 // post-execute code here
-                requireActivity().runOnUiThread(() -> {
-                    updateQueueAdapter(tempList);
-                });
+                requireActivity().runOnUiThread(() -> updateQueueAdapter(tempList));
             });
         }
     }

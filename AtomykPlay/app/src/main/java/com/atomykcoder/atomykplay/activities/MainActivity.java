@@ -91,10 +91,9 @@ import com.atomykcoder.atomykplay.fragments.PlaylistsFragment;
 import com.atomykcoder.atomykplay.fragments.SearchFragment;
 import com.atomykcoder.atomykplay.fragments.SettingsFragment;
 import com.atomykcoder.atomykplay.fragments.TagEditorFragment;
-import com.atomykcoder.atomykplay.helperFunctions.Logger;
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper;
-import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
-import com.atomykcoder.atomykplay.repository.MusicUtils;
+import com.atomykcoder.atomykplay.utils.StorageUtil;
+import com.atomykcoder.atomykplay.utils.MusicUtils;
 import com.atomykcoder.atomykplay.services.MediaPlayerService;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.card.MaterialCardView;
@@ -119,6 +118,10 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import kotlin.coroutines.CoroutineContext;
+import kotlinx.coroutines.CoroutineScope;
+import kotlinx.coroutines.DispatchedCoroutine;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, NavigationView.OnNavigationItemSelectedListener {
@@ -483,6 +486,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     break;
             }
         }
+
         @Override
         public void onSlide(@NonNull View bottomSheet, float slideOffset) {
             shadowLyrFound.setAlpha(0.2f + slideOffset);
@@ -604,7 +608,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         if (service_bound) {
             MainActivity.this.unbindService(service_connection);
-            Logger.normalLog("UnbindService" + " - MainActivity");
             stopMusicService();
         }
         playlistFragment = null;
@@ -625,7 +628,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (media_player_service != null) {
             if (!media_player_service.isMediaPlaying()) {
                 stopService(new Intent(MainActivity.this, MediaPlayerService.class));
-                Logger.normalLog("ServiceStopped" + " - MainActivity");
                 service_stopped = true;
             }
         }
@@ -636,13 +638,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      */
     private void bindService() {
         Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
-        Logger.normalLog("ServiceBind" + " - MainActivity");
         MainActivity.this.bindService(playerIntent, service_connection, Context.BIND_AUTO_CREATE);
     }
 
     private void startService() {
         Intent playerIntent = new Intent(MainActivity.this, MediaPlayerService.class);
-        Logger.normalLog("StartService" + " - MainActivity");
         try {
             startService(playerIntent);
             service_stopped = false;
@@ -650,6 +650,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             service_stopped = true;
         }
     }
+
     private void setUpPlOptionMenuButtons() {
         View addPlayNextPlBtn = findViewById(R.id.add_play_next_pl_option);
         View addToQueuePlBtn = findViewById(R.id.add_to_queue_pl_option);
@@ -737,12 +738,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         addToFav.setOnClickListener(this);
         removeFromList.setOnClickListener(this);
     }
+
     private void setBottomSheetProperties(BottomSheetBehavior<View> sheet, int peekHeight, boolean skipCollapse) {
         sheet.setHideable(true);
         sheet.setPeekHeight(peekHeight);
         sheet.setSkipCollapsed(skipCollapse);
         sheet.setState(BottomSheetBehavior.STATE_HIDDEN);
     }
+
     private void setBottomSheets() {
         DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
@@ -832,6 +835,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             mainPlayerSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         }
     }
+
     public void setLyricListAdapter(Bundle bundle) {
         ArrayList<String> titles = bundle.getStringArrayList("titles");
         ArrayList<String> sampleLyrics = bundle.getStringArrayList("sampleLyrics");
@@ -848,7 +852,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (!service_stopped) {
             //service is active send media with broadcast receiver
             Intent broadcastIntent = new Intent(BROADCAST_STOP_MUSIC);
-            Logger.normalLog("MusicStop" + " - MainActivity");
             sendBroadcast(broadcastIntent);
         }
     }
@@ -858,6 +861,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         outState.putBoolean("serviceState", service_bound);
         super.onSaveInstanceState(outState);
     }
+
     @Override
     public void onBackPressed() {
         FragmentManager fragmentManager = getSupportFragmentManager();
@@ -936,7 +940,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void playAudio(Music music) {
         //starting service if its not started yet otherwise it will send broadcast msg to service
         storageUtil.clearMusicLastPos();
-        Logger.normalLog("MusicPlay" + " - MainActivity");
         String encodedMessage = MusicHelper.encode(music);
 
         if (!phone_ringing) {
@@ -1007,7 +1010,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else {
             showToast("Can't play while on call");
         }
-        Logger.normalLog("MusicResume" + " - MainActivity");
     }
 
     private boolean shouldIgnoreClick() {
@@ -1042,7 +1044,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else {
             showToast("Can't play while on call");
         }
-        Logger.normalLog("MusicNext" + " - MainActivity");
     }
 
     /**
@@ -1068,7 +1069,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else {
             showToast("Can't play while on call");
         }
-        Logger.normalLog("MusicPrev" + " - MainActivity");
     }
 
     /**
@@ -1262,7 +1262,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void updateAdaptersForRemovedItem() {
         musicMainAdapter.removeItem(selectedItem);
         bottomSheetPlayerFragment.queueAdapter.removeItem(selectedItem);
-        if (lastAddedFragment != null) {
+        if (lastAddedFragment != null && lastAddedFragment.adapter != null) {
             lastAddedFragment.adapter.removeItem(selectedItem);
         }
         if (searchFragment != null && searchFragment.adapter != null) {
@@ -1984,7 +1984,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } catch (IndexOutOfBoundsException e) {
             afterDot = "0";
         }
-
         String sizeExt = " mb";
         int beforeDotInt = Integer.parseInt(beforeDot);
         if (beforeDotInt % 1024 != beforeDotInt) {

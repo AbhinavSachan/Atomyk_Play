@@ -56,9 +56,8 @@ import com.atomykcoder.atomykplay.events.TimerFinished;
 import com.atomykcoder.atomykplay.events.UpdateMusicImageEvent;
 import com.atomykcoder.atomykplay.events.UpdateMusicProgressEvent;
 import com.atomykcoder.atomykplay.fragments.BottomSheetPlayerFragment;
-import com.atomykcoder.atomykplay.helperFunctions.Logger;
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper;
-import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
+import com.atomykcoder.atomykplay.utils.StorageUtil;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -170,7 +169,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                                     }
                                     initiateMediaPlayer();
                                 }
-                                Logger.normalLog("PluggedIn");
                             }
                         }
                     }
@@ -216,7 +214,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             }
         }
         skipToNext();
-        Logger.normalLog("onNext");
     }
 
     private void onPreviousReceived() {
@@ -228,7 +225,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             }
         }
         skipToPrevious();
-        Logger.normalLog("onPrev");
     }
 
     private void onPlayPauseReceived() {
@@ -246,7 +242,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 resumeMedia();
             }
         }
-        Logger.normalLog("onPlayPause");
     }
 
     /**
@@ -570,7 +565,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        Logger.normalLog("BindService");
         return iBinder;
     }
 
@@ -704,7 +698,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
     private void initiateMediaPlayer() {
         if (!isMediaPlayerNotNull()) {
-            Logger.normalLog("Media player null = " + isMediaPlayerNotNull());
             media_player = new MediaPlayer();
             //setup MediaPlayer event listeners
             media_player.setOnPreparedListener(this);
@@ -845,7 +838,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         // set icon to playing and build notification
         setIcon(PlaybackStatus.PLAYING);
         buildNotification(PlaybackStatus.PLAYING, 1f);
-        Logger.normalLog("Resume");
     }
 
     /**
@@ -960,7 +952,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             storage.saveMusicIndex(musicIndex);
             stopMedia();
             initiateMediaPlayer();
-            Logger.normalLog("Previous");
         }
     }
 
@@ -1014,7 +1005,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             storage.saveMusicIndex(musicIndex);
             stopMedia();
             initiateMediaPlayer();
-            Logger.normalLog("Next");
         }
     }
 
@@ -1061,21 +1051,21 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     }
 
     public void cancelTimer() {
-        countDownTimer[0].cancel();
-        EventBus.getDefault().post(new TimerFinished());
+        if (countDownTimer[0] != null) {
+            countDownTimer[0].cancel();
+            EventBus.getDefault().post(new TimerFinished());
+        }
     }
 
     /**
      * this function sets up a media session
      */
     public void initiateMediaSession() throws RemoteException {
-        Logger.normalLog("Media session null = " + (mediaSession == null));
         if (mediaSession != null) return;
         mediaSession = new MediaSessionCompat(getApplicationContext(), "MediaPlayerMediaSession");
         transportControls = mediaSession.getController().getTransportControls();
         mediaSession.setActive(true);
         mediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_QUEUE_COMMANDS);
-        Logger.normalLog("MediaSessionCreated");
         mediaSession.setCallback(new MediaSessionCompat.Callback() {
             @Override
             public boolean onMediaButtonEvent(Intent mediaButtonEvent) {
@@ -1176,7 +1166,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             case AudioManager.AUDIOFOCUS_GAIN:
                 if (was_playing) {
                     if (isMediaPlayerNotNull()) {
-                        Logger.normalLog("FocusGainResumed");
                         resumeMedia();
                     }
                     was_playing = false;
@@ -1185,7 +1174,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             case AudioManager.AUDIOFOCUS_LOSS:
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
                 if (isMediaPlaying()) {
-                    Logger.normalLog("FocusTransientPaused");
                     pauseMedia();
                     was_playing = true;
                 }
@@ -1194,7 +1182,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 if (settingsStorage.loadLowerVol()) {
                     if (isMediaPlaying()) {
                         media_player.setVolume(0.3f, 0.3f);
-                        Logger.normalLog("FocusDuckLowerVol");
                     }
                 }
                 break;
@@ -1208,7 +1195,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             return START_STICKY;
         }
         handleNotificationActions(intent);
-        Logger.normalLog("ServiceStarted");
         if (selfStopHandler == null) {
             selfStopHandler = new Handler(Looper.getMainLooper());
         }
@@ -1334,7 +1320,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     }
 
     private void releasePlayer() {
-        Logger.normalLog("MediaPlayerReleased");
         if (isMediaPlayerNotNull()) {
             media_player.release();
         }

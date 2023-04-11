@@ -12,7 +12,7 @@ import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.adapters.Generics.GenericRecyclerAdapter;
 import com.atomykcoder.atomykplay.adapters.Generics.GenericViewHolder;
 import com.atomykcoder.atomykplay.adapters.ViewHolders.BeautifyListViewHolder;
-import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
+import com.atomykcoder.atomykplay.utils.StorageUtil;
 
 import java.util.ArrayList;
 

@@ -17,7 +17,7 @@ import com.atomykcoder.atomykplay.adapters.SimpleTouchCallback;
 import com.atomykcoder.atomykplay.customScripts.LinearLayoutManagerWrapper;
 import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.events.RemoveFromFavoriteEvent;
-import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
+import com.atomykcoder.atomykplay.utils.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
 
 import org.greenrobot.eventbus.EventBus;

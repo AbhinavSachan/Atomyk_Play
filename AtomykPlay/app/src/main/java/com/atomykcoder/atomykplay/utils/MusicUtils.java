@@ -1,4 +1,4 @@
-package com.atomykcoder.atomykplay.repository;
+package com.atomykcoder.atomykplay.utils;
 
 import android.app.Activity;
 
@@ -6,6 +6,8 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.atomykcoder.atomykplay.data.Music;
+import com.atomykcoder.atomykplay.repository.LoadingStatus;
+import com.atomykcoder.atomykplay.repository.MusicRepository;
 
 import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;

@@ -17,7 +17,7 @@ import com.atomykcoder.atomykplay.adapters.Generics.GenericViewHolder;
 import com.atomykcoder.atomykplay.adapters.ViewHolders.MusicQueueViewHolder;
 import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.helperFunctions.MusicDiffCallback;
-import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
+import com.atomykcoder.atomykplay.utils.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.ItemTouchHelperAdapter;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
 import com.atomykcoder.atomykplay.kotlin.ImageLoader;
@@ -42,7 +42,7 @@ public class MusicQueueAdapter extends MusicAdapter implements ItemTouchHelperAd
         imageLoader = new ImageLoader(_context);
     }
 
-    public void updateMusicListItems(ArrayList<Music> newMusicArrayList) {
+    public synchronized void updateMusicListItems(ArrayList<Music> newMusicArrayList) {
         final MusicDiffCallback diffCallback = new MusicDiffCallback(super.items, newMusicArrayList);
         final DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
 

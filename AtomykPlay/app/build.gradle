@@ -14,8 +14,8 @@ android {
         applicationId "com.atomykcoder.atomykplay"
         minSdk 24
         targetSdk 33
-        versionCode 8
-        versionName '1.2.5'
+        versionCode 10
+        versionName '1.2.7'
     }
 
     buildTypes {
@@ -47,7 +47,6 @@ android {
 }
 
 dependencies {
-//    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.10'
 
     //event bus implementations
     implementation 'org.greenrobot:eventbus:3.3.1'

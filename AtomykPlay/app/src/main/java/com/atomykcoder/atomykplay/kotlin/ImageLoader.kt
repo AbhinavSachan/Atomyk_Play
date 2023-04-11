@@ -10,6 +10,7 @@ import com.atomykcoder.atomykplay.data.Music
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.File
 import java.io.IOException
 
 class ImageLoader(context: Context) {
@@ -26,27 +27,26 @@ class ImageLoader(context: Context) {
             }
         }
     }
-
     private fun loadFromMedia(item: Music): Bitmap? {
         var image: Bitmap? = null
         var art: ByteArray? = null // initialize to null
 
-        try {
-            MediaMetadataRetriever().use { mediaMetadataRetriever ->
-                mediaMetadataRetriever.setDataSource(item.path)
-                art = mediaMetadataRetriever.embeddedPicture
-            }
-        } catch (ignored: IOException) {
-        }
-
-        if (art != null) { // add null check
+        if (File(item.path).exists()) {
             try {
-                image = BitmapFactory.decodeByteArray(art, 0, art!!.size)
-            } catch (ignored: Exception) {
+                MediaMetadataRetriever().use { mediaMetadataRetriever ->
+                    mediaMetadataRetriever.setDataSource(item.path)
+                    art = mediaMetadataRetriever.embeddedPicture
+                }
+            } catch (ignored: IOException) {
+            }
+
+            if (art != null) { // add null check
+                try {
+                    image = BitmapFactory.decodeByteArray(art, 0, art!!.size)
+                } catch (ignored: Exception) {
+                }
             }
         }
-
         return image
     }
-
 }

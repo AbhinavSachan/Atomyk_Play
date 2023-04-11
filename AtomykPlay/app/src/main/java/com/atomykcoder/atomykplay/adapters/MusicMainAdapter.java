@@ -17,9 +17,9 @@ import com.atomykcoder.atomykplay.classes.GlideBuilt;
 import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.enums.OptionSheetEnum;
 import com.atomykcoder.atomykplay.helperFunctions.MusicDiffCallback;
-import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
+import com.atomykcoder.atomykplay.utils.StorageUtil;
 import com.atomykcoder.atomykplay.kotlin.ImageLoader;
-import com.atomykcoder.atomykplay.repository.MusicUtils;
+import com.atomykcoder.atomykplay.utils.MusicUtils;
 
 import java.util.ArrayList;
 

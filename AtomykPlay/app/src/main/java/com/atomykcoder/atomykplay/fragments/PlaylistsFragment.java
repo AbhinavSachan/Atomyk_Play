@@ -20,7 +20,7 @@ import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.adapters.PlaylistAdapter;
 import com.atomykcoder.atomykplay.customScripts.GridSpacing;
 import com.atomykcoder.atomykplay.dataModels.Playlist;
-import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
+import com.atomykcoder.atomykplay.utils.StorageUtil;
 
 import java.util.ArrayList;
 

@@ -59,9 +59,14 @@ import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.Tag;
 import org.jaudiotagger.tag.TagException;
 import org.jaudiotagger.tag.datatype.Artwork;
+import org.jaudiotagger.tag.id3.AbstractID3v2Tag;
+import org.jaudiotagger.tag.id3.framebody.FrameBodyAPIC;
+import org.jaudiotagger.tag.id3.framebody.FrameBodyUSLT;
+import org.jaudiotagger.tag.id3.valuepair.TextEncoding;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -73,7 +78,7 @@ public class TagEditorFragment extends Fragment {
     ExecutorService service = Executors.newFixedThreadPool(1);
     Handler handler = new Handler();
     GlideBuilt glideBuilt;
-    private EditText editName, editArtist, editAlbum, editGenre;
+    private EditText editName, editArtist, editAlbum,editYear, editGenre;
     private Music music;
     private Uri imageUri;
     // Registers a photo picker activity launcher in single-select mode.
@@ -93,6 +98,19 @@ public class TagEditorFragment extends Fragment {
     });
     private Uri musicUri;
     private View progressIndicator;
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        service.shutdown();
+        progressIndicator = null;
+        coverImageView = null;
+        editName = null;
+        editArtist = null;
+        editGenre = null;
+        editAlbum = null;
+        editYear = null;
+    }
 
     public static String getRealPathFromURI(Context context, Uri contentUri) {
         Cursor cursor = null;
@@ -135,8 +153,9 @@ public class TagEditorFragment extends Fragment {
         progressIndicator = view.findViewById(R.id.progress_bar_tag);
         editArtist = view.findViewById(R.id.edit_song_artist_tag);
         editAlbum = view.findViewById(R.id.edit_song_album_tag);
+        editYear = view.findViewById(R.id.edit_song_year_tag);
         editGenre = view.findViewById(R.id.edit_song_genre_tag);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
             editGenre.setVisibility(View.GONE);
         }
         ImageView pickImageView = view.findViewById(R.id.pick_cover_tag);
@@ -148,6 +167,7 @@ public class TagEditorFragment extends Fragment {
             editName.setText(music.getName());
             editArtist.setText(music.getArtist());
             editAlbum.setText(music.getAlbum());
+            editYear.setText(music.getYear());
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 editGenre.setText(music.getGenre());
             }
@@ -197,11 +217,6 @@ public class TagEditorFragment extends Fragment {
         return view;
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        service.shutdown();
-    }
 
     @RequiresApi(api = Build.VERSION_CODES.R)
     private void requestPermissionAndroid11AndAbove() {
@@ -243,6 +258,7 @@ public class TagEditorFragment extends Fragment {
         String newTitle = editName.getText().toString().trim();
         String newArtist = editArtist.getText().toString().trim();
         String newAlbum = editAlbum.getText().toString().trim();
+        String newYear = editYear.getText().toString().trim();
         String newGenre = "";
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             newGenre = editGenre.getText().toString().trim();
@@ -259,6 +275,8 @@ public class TagEditorFragment extends Fragment {
                 tag.setField(FieldKey.TITLE, newTitle);
                 tag.setField(FieldKey.ARTIST, newArtist);
                 tag.setField(FieldKey.ALBUM, newAlbum);
+                tag.setField(FieldKey.YEAR, newYear);
+
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                     tag.setField(FieldKey.GENRE, finalNewGenre);
                 }
@@ -268,8 +286,6 @@ public class TagEditorFragment extends Fragment {
                     File imageFile = new File(filePath);
 
                     Artwork artwork = Artwork.createArtworkFromFile(imageFile);
-
-                    tag.addField(artwork);
                     tag.setField(artwork);
                 }
 

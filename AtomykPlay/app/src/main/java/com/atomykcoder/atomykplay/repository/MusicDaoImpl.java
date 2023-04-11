@@ -8,7 +8,7 @@ import android.provider.MediaStore;
 import android.text.TextUtils;
 
 import com.atomykcoder.atomykplay.data.Music;
-import com.atomykcoder.atomykplay.helperFunctions.StorageUtil;
+import com.atomykcoder.atomykplay.utils.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.MusicDaoI;
 
 import java.io.File;
