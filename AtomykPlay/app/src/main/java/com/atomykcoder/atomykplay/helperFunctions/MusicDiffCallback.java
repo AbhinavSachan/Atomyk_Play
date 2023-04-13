@@ -29,7 +29,9 @@ public class MusicDiffCallback extends Callback {
 
     @Override
     public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-        return Objects.equals(oldMusicList.get(oldItemPosition).getId(), newMusicList.get(newItemPosition).getId());
+        if (oldMusicList.get(oldItemPosition) != null && newMusicList.get(newItemPosition) != null) {
+            return Objects.equals(oldMusicList.get(oldItemPosition).getId(), newMusicList.get(newItemPosition).getId());
+        }else return false;
     }
 
     @Override

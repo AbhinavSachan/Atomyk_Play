@@ -118,7 +118,10 @@ public class MusicHelper {
     }
 
     public static String encode(Music music) {
-        byte[] serializedMessage = music.toByteArray();
+        byte[] serializedMessage = new byte[0];
+        if (music!= null) {
+            serializedMessage = music.toByteArray();
+        }
         return Base64.encodeToString(serializedMessage, Base64.DEFAULT);
     }
 

@@ -92,9 +92,9 @@ import com.atomykcoder.atomykplay.fragments.SearchFragment;
 import com.atomykcoder.atomykplay.fragments.SettingsFragment;
 import com.atomykcoder.atomykplay.fragments.TagEditorFragment;
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper;
-import com.atomykcoder.atomykplay.utils.StorageUtil;
-import com.atomykcoder.atomykplay.utils.MusicUtils;
 import com.atomykcoder.atomykplay.services.MediaPlayerService;
+import com.atomykcoder.atomykplay.utils.MusicUtils;
+import com.atomykcoder.atomykplay.utils.StorageUtil;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -118,10 +118,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import kotlin.coroutines.CoroutineContext;
-import kotlinx.coroutines.CoroutineScope;
-import kotlinx.coroutines.DispatchedCoroutine;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, NavigationView.OnNavigationItemSelectedListener {
@@ -324,6 +320,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 case BottomSheetBehavior.STATE_COLLAPSED: {
                     View miniPlayer = bottomSheetPlayerFragment.mini_play_view;
                     View mainPlayer = bottomSheetPlayerFragment.player_layout;
+                    if (miniPlayer == null || mainPlayer == null) {
+                        return;
+                    }
                     mainPlayer.setVisibility(View.INVISIBLE);
                     miniPlayer.setVisibility(View.VISIBLE);
                     drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
@@ -340,6 +339,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 case BottomSheetBehavior.STATE_EXPANDED: {
                     View miniPlayer = bottomSheetPlayerFragment.mini_play_view;
                     View mainPlayer = bottomSheetPlayerFragment.player_layout;
+                    if (miniPlayer == null || mainPlayer == null) {
+                        return;
+                    }
                     miniPlayer.setVisibility(View.INVISIBLE);
                     mainPlayer.setVisibility(View.VISIBLE);
                     drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
@@ -363,6 +365,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     player_bottom_sheet.setElevation(0f);
                     anchoredShadow.setElevation(0f);
                     clearStorage();
+                    assert bottomSheetPlayerFragment.queueAdapter != null;
                     bottomSheetPlayerFragment.queueAdapter.clearList();
                     bottomSheetPlayerFragment.resetMainPlayerLayout();
                     resetDataInNavigation();
@@ -375,6 +378,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         public void onSlide(@NonNull View bottomSheet, float slideOffset) {
             View miniPlayer = bottomSheetPlayerFragment.mini_play_view;
             View mainPlayer = bottomSheetPlayerFragment.player_layout;
+            if (miniPlayer == null || mainPlayer == null) {
+                return;
+            }
             miniPlayer.setVisibility(View.VISIBLE);
             mainPlayer.setVisibility(View.VISIBLE);
             miniPlayer.setAlpha(1 - slideOffset * 35);
@@ -902,6 +908,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
 
         } else {
+            assert bottomSheetPlayerFragment.queueSheetBehaviour != null;
             if (bottomSheetPlayerFragment.queueSheetBehaviour.getState() == BottomSheetBehavior.STATE_EXPANDED) {
                 bottomSheetPlayerFragment.queueSheetBehaviour.setState(BottomSheetBehavior.STATE_HIDDEN);
             } else {

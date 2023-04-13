@@ -153,33 +153,6 @@
                 app:placeholderTextColor="@color/hint_color">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/edit_song_year_tag"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:focusable="true"
-                    android:hint="@string/year"
-                    android:imeOptions="actionNext"
-                    android:inputType="text"
-                    android:maxLines="1"
-                    android:textColor="@color/text_color"
-                    android:textColorHint="@color/hint_color" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="12dp"
-                android:layout_marginVertical="6dp"
-                app:boxBackgroundColor="@color/tertiary_bg"
-                app:boxCornerRadiusBottomEnd="8dp"
-                app:boxCornerRadiusBottomStart="8dp"
-                app:boxCornerRadiusTopEnd="8dp"
-                app:boxCornerRadiusTopStart="8dp"
-                app:hintTextColor="@color/accent_color_bg"
-                app:placeholderTextColor="@color/hint_color">
-
-                <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/edit_song_genre_tag"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"

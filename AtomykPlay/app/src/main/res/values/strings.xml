@@ -137,4 +137,5 @@
     <string name="year">Year</string>
     <string name="lyric_artist_hint">Artist Ex- Alan Walker, Justin Bieber, etc.</string>
     <string name="lyric_song_hint">Song Ex- Faded, Let me love you, etc.</string>
+    <string name="album_artist">Album artist</string>
 </resources>
