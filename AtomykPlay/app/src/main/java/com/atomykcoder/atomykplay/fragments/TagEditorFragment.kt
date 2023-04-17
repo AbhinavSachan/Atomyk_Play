@@ -31,7 +31,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.atomykcoder.atomykplay.BuildConfig
 import com.atomykcoder.atomykplay.R
-import com.atomykcoder.atomykplay.activities.MainActivity
 import com.atomykcoder.atomykplay.classes.ApplicationClass
 import com.atomykcoder.atomykplay.classes.GlideBuilt
 import com.atomykcoder.atomykplay.data.Music
@@ -111,6 +110,10 @@ class TagEditorFragment : Fragment() {
                 arguments?.getSerializable("currentMusic") as String
             }
         music = MusicHelper.decode(decodeMessage)
+        if (music == null) {
+            requireActivity().supportFragmentManager.popBackStack()
+            showToast(null)
+        }
         b!!.toolbarTagEditor.setNavigationIcon(R.drawable.ic_back)
         b!!.toolbarTagEditor.setNavigationOnClickListener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -120,39 +123,36 @@ class TagEditorFragment : Fragment() {
             }
         }
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
-            b!!.editSongGenreTag.visibility = View.GONE
+            b?.editSongGenreTag?.visibility = View.GONE
         }
         glideBuilt = GlideBuilt(requireContext())
-        if (music != null) {
-            b!!.editSongNameTag.setText(music!!.name)
-            b!!.editSongArtistTag.setText(music!!.artist)
-            b!!.editSongAlbumTag.setText(music!!.album)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                b!!.editSongGenreTag.setText(music!!.genre)
+        b!!.editSongNameTag.setText(music?.name)
+        b!!.editSongArtistTag.setText(music?.artist)
+        b!!.editSongAlbumTag.setText(music?.album)
+        b!!.editSongYearTag.setText(music?.year)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            b!!.editSongGenreTag.setText(music?.genre)
+        }
+        val image = arrayOf<Bitmap?>(null)
+        coroutineScope.launch {
+            //image decoder
+            var art: ByteArray? = ByteArray(0)
+            try {
+                MediaMetadataRetriever().use { mediaMetadataRetriever ->
+                    mediaMetadataRetriever.setDataSource(music?.path)
+                    art = mediaMetadataRetriever.embeddedPicture
+                }
+            } catch (e: IOException) {
+                e.printStackTrace()
             }
-            val image = arrayOf<Bitmap?>(null)
-            coroutineScope.launch {
-
-
-                //image decoder
-                var art: ByteArray? = ByteArray(0)
-                try {
-                    MediaMetadataRetriever().use { mediaMetadataRetriever ->
-                        mediaMetadataRetriever.setDataSource(music?.path)
-                        art = mediaMetadataRetriever.embeddedPicture
-                    }
-                } catch (e: IOException) {
-                    e.printStackTrace()
-                }
-                try {
-                    image[0] = art?.size?.let { BitmapFactory.decodeByteArray(art, 0, it) }
-                } catch (ignored: Exception) {
-                }
-                coroutineMainScope.launch {
-                    glideBuilt!!.glideBitmap(
-                        image[0], R.drawable.ic_music, b!!.songImageViewTag, 412, false
-                    )
-                }
+            try {
+                image[0] = art?.size?.let { BitmapFactory.decodeByteArray(art, 0, it) }
+            } catch (ignored: Exception) {
+            }
+            coroutineMainScope.launch {
+                glideBuilt!!.glideBitmap(
+                    image[0], R.drawable.ic_music, b!!.songImageViewTag, 412, false
+                )
             }
         }
         b!!.pickCoverTag.setOnClickListener { pickImage(pickIntent, mediaPicker) }
@@ -211,7 +211,7 @@ class TagEditorFragment : Fragment() {
             }).check()
     }
 
-    private fun showToast(s: String) {
+    private fun showToast(s: String?) {
         (requireActivity().application as ApplicationClass).showToast(s)
     }
 
@@ -219,6 +219,7 @@ class TagEditorFragment : Fragment() {
         val newTitle = b!!.editSongNameTag.text.toString().trim()
         val newArtist = b!!.editSongArtistTag.text.toString().trim()
         val newAlbum = b!!.editSongAlbumTag.text.toString().trim()
+        val newYear = b!!.editSongYearTag.text.toString().trim()
         var newGenre = ""
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             newGenre = b!!.editSongGenreTag.text.toString().trim()
@@ -250,11 +251,16 @@ class TagEditorFragment : Fragment() {
                 } else {
                     tag.setField(FieldKey.ALBUM, "Unknown")
                 }
+                if (!TextUtils.isEmpty(newYear)) {
+                    tag.setField(FieldKey.YEAR, newYear)
+                } else {
+                    tag.setField(FieldKey.YEAR, "Unknown")
+                }
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                     if (!TextUtils.isEmpty(finalNewGenre)) {
                         tag.setField(FieldKey.GENRE, finalNewGenre)
-                    }else{
+                    } else {
                         tag.setField(FieldKey.GENRE, "")
                     }
                 }

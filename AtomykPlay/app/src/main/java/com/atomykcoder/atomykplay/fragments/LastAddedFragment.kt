@@ -1,6 +1,7 @@
 package com.atomykcoder.atomykplay.fragments
 
 import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.app.Dialog
 import android.app.ProgressDialog
 import android.os.Bundle
@@ -8,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.TextView
@@ -17,8 +19,10 @@ import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.adapters.MusicMainAdapter
 import com.atomykcoder.atomykplay.customScripts.LinearLayoutManagerWrapper
 import com.atomykcoder.atomykplay.data.Music
+import com.atomykcoder.atomykplay.helperFunctions.Logger
 import com.atomykcoder.atomykplay.utils.StorageUtil
 import com.atomykcoder.atomykplay.utils.StorageUtil.SettingsStorage
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.*
 import java.text.DateFormat
 import java.text.ParseException
@@ -33,32 +37,19 @@ class LastAddedFragment : Fragment() {
 
     @JvmField
     var adapter: MusicMainAdapter? = null
-    private var firstRadio: RadioButton? = null
-    private var secondRadio: RadioButton? = null
-    private var thirdRadio: RadioButton? = null
-    private var fourthRadio: RadioButton? = null
     private var lastAddedMusicList: ArrayList<Music>? = null
     private var filterDialog: Dialog? = null
     private var songCountTv: TextView? = null
     private var settingsStorage: SettingsStorage? = null
     private var initialMusicList: ArrayList<Music>? = null
-    private var progressDialog: ProgressDialog? = null
+    private var progressDialog: ProgressBar? = null
     private val coroutineMainScope = CoroutineScope(Dispatchers.Main)
     private val coroutineDefaultScope = CoroutineScope(Dispatchers.Default)
 
-
-    override fun onDestroy() {
-        super.onDestroy()
-        firstRadio = null
-        secondRadio = null
-        thirdRadio = null
-        fourthRadio = null
-        songCountTv = null
-    }
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View? {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_last_added, container, false)
@@ -68,11 +59,11 @@ class LastAddedFragment : Fragment() {
         settingsStorage = SettingsStorage(requireContext())
         val filterButton = view.findViewById<View>(R.id.filter_last_added_btn)
         val backImageView = view.findViewById<ImageView>(R.id.close_filter_btn)
-        progressDialog = ProgressDialog(requireContext())
+        progressDialog = view.findViewById(R.id.progress_bar_last_added)
         songCountTv = view.findViewById(R.id.count_of_lastAdded)
         // initialize/load music array lists
         initialMusicList = StorageUtil(
-            context
+            requireContext()
         ).loadInitialList()
         lastAddedMusicList = ArrayList()
 
@@ -98,9 +89,9 @@ class LastAddedFragment : Fragment() {
         //set recyclerview and adapter
         recyclerView.setHasFixedSize(true)
         recyclerView.layoutManager = LinearLayoutManagerWrapper(context)
-        adapter = MusicMainAdapter(context, lastAddedMusicList)
+        adapter = MusicMainAdapter(requireContext(), lastAddedMusicList)
         recyclerView.adapter = adapter
-        loadLastAddedList(settingsStorage!!.loadLastAddedDur())
+        loadLastAddedList(settingsStorage?.loadLastAddedDur())
         // back button click listener
         backImageView.setOnClickListener {
             requireActivity().onBackPressed()
@@ -122,30 +113,17 @@ class LastAddedFragment : Fragment() {
 
     @SuppressLint("SetTextI18n")
     private fun openDialogFilter() {
-        filterDialog = Dialog(requireContext())
-        filterDialog!!.setContentView(R.layout.last_added_filter_dialog)
-        val savedState = settingsStorage!!.loadLastAddedDur()
-        val radioGroup1 = filterDialog!!.findViewById<RadioGroup>(R.id.last_Added_radio_group)
-        firstRadio = filterDialog!!.findViewById(R.id.last_added_rb_1)
-        secondRadio = filterDialog!!.findViewById(R.id.last_added_rb_2)
-        thirdRadio = filterDialog!!.findViewById(R.id.last_added_rb_3)
-        fourthRadio = filterDialog!!.findViewById(R.id.last_added_rb_4)
-        when (savedState) {
-            1 -> firstRadio?.isChecked = true
-            2 -> secondRadio?.isChecked = true
-            3 -> thirdRadio?.isChecked = true
-            4 -> fourthRadio?.isChecked = true
+        val builder = MaterialAlertDialogBuilder(requireContext())
+        builder.setTitle("Filter")
+        val savedState = settingsStorage?.loadLastAddedDur() ?:0
+        val options = arrayOf("Last month", "Last three months", "Last six months", "Last year")
+        builder.setSingleChoiceItems(options, savedState) { dialog, which ->
+            loadLastAddedList(which)
+            dialog.dismiss()
         }
-        firstRadio?.text = "Last month"
-        secondRadio?.text = "Last three months"
-        thirdRadio?.text = "Last six months"
-        fourthRadio?.text = "Last year"
-        radioGroup1.setOnCheckedChangeListener { _: RadioGroup?, _: Int ->
-            val i = radioID
-            loadLastAddedList(i)
-            filterDialog!!.dismiss()
-        }
-        filterDialog!!.show()
+
+        filterDialog = builder.create()
+        filterDialog?.show()
     }
 
     /**
@@ -153,14 +131,14 @@ class LastAddedFragment : Fragment() {
      *
      * @param i radio id
      */
-    private fun loadLastAddedList(i: Int) {
+    private fun loadLastAddedList(i: Int?) {
         when (i) {
-            1 -> startThread(firstOptionValue)
-            2 -> startThread(secondOptionValue)
-            3 -> startThread(thirdOptionValue)
-            4 -> startThread(fourthOptionValue)
+            0 -> startThread(firstOptionValue)
+            1 -> startThread(secondOptionValue)
+            2 -> startThread(thirdOptionValue)
+            3 -> startThread(fourthOptionValue)
         }
-        settingsStorage!!.setLastAddedDur(i)
+        settingsStorage!!.setLastAddedDur(i ?:0)
     }
 
     /**
@@ -169,8 +147,7 @@ class LastAddedFragment : Fragment() {
      * @param maxValue clamp at max value
      */
     private fun startThread(maxValue: Int) {
-        progressDialog!!.setMessage("Calculating...")
-        progressDialog!!.show()
+        progressDialog!!.visibility = View.VISIBLE
         coroutineDefaultScope.launch {
             lastAddedMusicList!!.clear()
             try {
@@ -179,8 +156,8 @@ class LastAddedFragment : Fragment() {
                 e.printStackTrace()
             }
             coroutineMainScope.launch {
-                progressDialog!!.dismiss()
-                val num = lastAddedMusicList!!.size.toString() + " Songs"
+                progressDialog!!.visibility = View.GONE
+                val num = lastAddedMusicList?.size?.toString() + " Songs"
                 songCountTv!!.text = num
                 notifyAdapter()
             }
@@ -214,27 +191,6 @@ class LastAddedFragment : Fragment() {
         //return music ranging between current date and given older date
         return result
     }
-
-    /**
-     * radio id check
-     *
-     * @return returns selected radio button id
-     */
-    private val radioID: Int
-        get() {
-            var radioId = 0
-            if (firstRadio!!.isChecked) {
-                radioId = 1
-            } else if (secondRadio!!.isChecked) {
-                radioId = 2
-            } else if (thirdRadio!!.isChecked) {
-                radioId = 3
-            } else if (fourthRadio!!.isChecked) {
-                radioId = 4
-            }
-            return radioId
-        }
-
     @SuppressLint("NotifyDataSetChanged")
     private fun notifyAdapter() {
         adapter!!.notifyDataSetChanged()

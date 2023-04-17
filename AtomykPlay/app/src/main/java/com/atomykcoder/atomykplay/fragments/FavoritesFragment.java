@@ -41,7 +41,7 @@ public class FavoritesFragment extends Fragment implements OnDragStartListener {
             EventBus.getDefault().register(this);
         }
 
-        storageUtil = new StorageUtil(getContext());
+        storageUtil = new StorageUtil(requireContext());
 
         RecyclerView recyclerView = view.findViewById(R.id.favorite_music_recycler);
         View noPlLayout = view.findViewById(R.id.song_not_found_layout_favorite);

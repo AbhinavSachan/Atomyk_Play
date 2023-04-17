@@ -27,7 +27,6 @@ public class MusicMainViewHolder extends GenericViewHolder<Music> {
         nameText = itemView.findViewById(R.id.song_name);
         artistText = itemView.findViewById(R.id.song_artist_name);
         durationText = itemView.findViewById(R.id.song_length);
-
     }
 
     @Override

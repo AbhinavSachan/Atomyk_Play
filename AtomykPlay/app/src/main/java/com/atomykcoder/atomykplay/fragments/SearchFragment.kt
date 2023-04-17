@@ -26,13 +26,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.*
+import kotlin.collections.ArrayList
 
 //Search Layout Fragment for Performing Searches and Presenting Results
 class SearchFragment : Fragment() {
     @JvmField
     var adapter: MusicMainAdapter? = null
     private var radioGroup: RadioGroup? = null
-    private var searchedMusicList: ArrayList<Music>? = null
+    private var searchedMusicList: ArrayList<Music> = ArrayList()
     private var songButton: RadioButton? = null
     private var albumButton: RadioButton? = null
     private var artistButton: RadioButton? = null
@@ -75,9 +76,7 @@ class SearchFragment : Fragment() {
         artistButton = view.findViewById(R.id.artist_button)
         genreButton = view.findViewById(R.id.genre_button)
         radioGroup = view.findViewById(R.id.radio_group)
-        val dataList = StorageUtil(
-            context
-        ).loadInitialList()
+        val dataList = StorageUtil(requireContext()).loadInitialList()
         val manager =
             requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         val searchView = view.findViewById<EditText>(R.id.search_view_search)
@@ -91,7 +90,7 @@ class SearchFragment : Fragment() {
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        searchWithFilters("", searchedMusicList!!)
+        searchWithFilters("", searchedMusicList)
         searchView.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(query: CharSequence, start: Int, before: Int, count: Int) {
@@ -120,7 +119,7 @@ class SearchFragment : Fragment() {
         recyclerView.setHasFixedSize(true)
         val layoutManager: LinearLayoutManager = LinearLayoutManagerWrapper(requireContext())
         recyclerView.layoutManager = layoutManager
-        adapter = MusicMainAdapter(context, searchedMusicList)
+        adapter = MusicMainAdapter(requireContext(), searchedMusicList)
         recyclerView.adapter = adapter
         songButton?.isChecked = true
         return view

@@ -91,7 +91,7 @@ class MusicDaoImpl : MusicDaoI {
                                 .replace("&amp;", ",").trim { it <= ' ' }
                             val beautifyTags = settingsStorage.allBeautifyTag
                             val replacingTags = settingsStorage.allReplacingTag
-                            if (!beautifyTags.isEmpty() && !replacingTags.isEmpty()) {
+                            if (beautifyTags.isNotEmpty() && replacingTags.isNotEmpty()) {
                                 for (i in beautifyTags.indices) {
                                     sTitle = sTitle.replace(beautifyTags[i], replacingTags[i])
                                 }

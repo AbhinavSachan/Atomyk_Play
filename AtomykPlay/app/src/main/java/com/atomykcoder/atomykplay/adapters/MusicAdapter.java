@@ -22,6 +22,7 @@ public class MusicAdapter extends GenericRecyclerAdapter<Music> {
 
     protected void handlePlayMusic(MainActivity mainActivity, Music item) {
         mainActivity.playAudio(item);
+        assert mainActivity.bottomSheetPlayerFragment != null;
         mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(musicList);
         mainActivity.openBottomPlayer();
     }

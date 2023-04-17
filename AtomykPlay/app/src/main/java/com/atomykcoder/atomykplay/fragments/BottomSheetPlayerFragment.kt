@@ -98,7 +98,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
     var info_layout: View? = null
     @JvmField
     var queueAdapter: MusicQueueAdapter? = null
-    var musicArrayList: ArrayList<Music?>? = null
+    private var musicArrayList: ArrayList<Music>? = null
     private var glideBuilt: GlideBuilt? = null
     private var gradientTop: GradientDrawable? = null
     private var gradientBottom: GradientDrawable? = null
@@ -198,7 +198,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
             activeMusic = MusicHelper.decode(savedInstanceState.getString("activeMusic"))
         }
         if (activeMusic != null) {
-            lrcMap = storageUtil!!.loadLyrics(activeMusic!!.id)
+            lrcMap = storageUtil?.loadLyrics(activeMusic?.id)
         }
         settingsStorage = SettingsStorage(requireContext())
         mainActivity = requireContext() as MainActivity
@@ -271,7 +271,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         timerImg?.setOnClickListener { setTimer() }
         timerTv?.setOnClickListener {
             if (MainActivity.media_player_service != null) {
-                MainActivity.media_player_service.cancelTimer()
+                MainActivity.media_player_service?.cancelTimer()
             } else {
                 showToast("Music service is not running")
             }
@@ -286,7 +286,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         optionImg?.setOnClickListener { optionMenu(activeMusic) }
         queueRecyclerView = view.findViewById(R.id.queue_music_recycler)
         linearLayoutManager = LinearLayoutManagerWrapper(getContext())
-        musicArrayList = storageUtil!!.loadQueueList()
+        musicArrayList = storageUtil?.loadQueueList()
         queueBottomSheet = view.findViewById(R.id.queue_bottom_sheet)
 
         //lyrics layout related initializations
@@ -300,11 +300,11 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         playerSongNameTv?.isSelected = true
         mini_name_text?.isSelected = true
         mini_play_view?.setOnClickListener {
-            val sheet: BottomSheetBehavior<View> = mainActivity!!.mainPlayerSheetBehavior
-            if (sheet.state == BottomSheetBehavior.STATE_COLLAPSED) {
+            val sheet = mainActivity?.mainPlayerSheetBehavior
+            if (sheet?.state == BottomSheetBehavior.STATE_COLLAPSED) {
                 sheet.setState(BottomSheetBehavior.STATE_EXPANDED)
             } else {
-                sheet.setState(BottomSheetBehavior.STATE_COLLAPSED)
+                sheet?.setState(BottomSheetBehavior.STATE_COLLAPSED)
             }
         }
         tempColor = resources.getColor(R.color.player_bg, Resources.getSystem().newTheme())
@@ -318,10 +318,10 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         if (should_refresh_layout) {
             setPreviousData(activeMusic)
         }
-        if (mainActivity!!.mainPlayerSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED) {
+        if (mainActivity?.mainPlayerSheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
             mini_play_view!!.alpha = 0f
             mini_play_view!!.visibility = View.INVISIBLE
-        } else if (mainActivity!!.mainPlayerSheetBehavior.state == BottomSheetBehavior.STATE_COLLAPSED) {
+        } else if (mainActivity?.mainPlayerSheetBehavior?.state == BottomSheetBehavior.STATE_COLLAPSED) {
             player_layout!!.alpha = 0f
             player_layout!!.visibility = View.INVISIBLE
         }
@@ -583,11 +583,11 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
                 var nextStampInMillis = 0
                 var currPosInMillis = 0
                 if (MainActivity.media_player_service != null) {
-                    if (!MainActivity.media_player_service.isMediaPlaying) return@Runnable
+                    if (!MainActivity.media_player_service?.isMediaPlaying!!) return@Runnable
                     val nextStamp = getNextStamp(lrcMap)
                     if (nextStamp != "") {
                         nextStampInMillis = MusicHelper.convertToMillis(nextStamp)
-                        currPosInMillis = MainActivity.media_player_service.currentMediaPosition
+                        currPosInMillis = MainActivity.media_player_service?.currentMediaPosition!!
                     }
                 }
                 if (lrcMap != null) {
@@ -629,7 +629,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         get() {
             var currPosInMillis = 0
             if (MainActivity.media_player_service != null) currPosInMillis =
-                MainActivity.media_player_service.currentMediaPosition
+                MainActivity.media_player_service?.currentMediaPosition!!
             return "[" + MusicHelper.convertDuration(currPosInMillis.toString()) + "]"
         }
 
@@ -680,8 +680,8 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         addLyricsFragment.enterTransition =
             TransitionInflater.from(requireContext())
                 .inflateTransition(android.R.transition.slide_top)
-        if (mainActivity!!.mainPlayerSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED) {
-            mainActivity!!.mainPlayerSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+        if (mainActivity!!.mainPlayerSheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
+            mainActivity!!.mainPlayerSheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
         }
         val transaction = fragmentManager.beginTransaction()
         transaction.replace(
@@ -702,7 +702,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         queueSheetBehaviour!!.state = BottomSheetBehavior.STATE_HIDDEN
         queueSheetBehaviour!!.addBottomSheetCallback(object : BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
-                (context as MainActivity?)!!.mainPlayerSheetBehavior.isEnableCollapse(newState == BottomSheetBehavior.STATE_EXPANDED || newState == BottomSheetBehavior.STATE_DRAGGING)
+                (context as MainActivity?)!!.mainPlayerSheetBehavior?.isEnableCollapse(newState == BottomSheetBehavior.STATE_EXPANDED || newState == BottomSheetBehavior.STATE_DRAGGING)
                 if (queueSheetBehaviour!!.state == BottomSheetBehavior.STATE_EXPANDED) {
                     shadowPlayer!!.alpha = 1f
                 } else if (queueSheetBehaviour!!.state == BottomSheetBehavior.STATE_HIDDEN) {
@@ -734,7 +734,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
     /**
      * Updating adapter in queue list
      */
-    fun updateQueueAdapter(list: ArrayList<Music?>?) {
+    fun updateQueueAdapter(list: ArrayList<Music>) {
 
         // assign class member id list to new updated _id-list
         musicArrayList = ArrayList(list)
@@ -810,7 +810,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         builder.setPositiveButton("Start") { dialog: DialogInterface, i: Int ->
             dialog.cancel()
             if (MainActivity.media_player_service != null) {
-                MainActivity.media_player_service.setTimer(timerSeekBar.progress)
+                MainActivity.media_player_service?.setTimer(timerSeekBar.progress)
             } else {
                 showToast("Music service is not running")
             }
@@ -888,19 +888,19 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
     }
 
     private fun shuffleListAndSave(activeMusic: Music?) {
-        val musicList = storageUtil!!.loadQueueList()
+        val musicList = storageUtil?.loadQueueList()
         val musicIndex = storageUtil!!.loadMusicIndex()
         if (musicList != null) {
             try {
-                CompletableFuture.supplyAsync<ArrayList<Music?>>({
+                CompletableFuture.supplyAsync({
                     storageUtil!!.saveTempMusicList(musicList)
                     musicList.removeAt(musicIndex)
-                    Collections.shuffle(musicList)
-                    musicList.add(0, activeMusic)
+                    musicList.shuffle()
+                    activeMusic?.let { musicList.add(0, it) }
                     storageUtil!!.saveQueueList(musicList)
                     storageUtil!!.saveMusicIndex(0)
                     musicList
-                }, executorService).thenAcceptAsync { result: ArrayList<Music?>? ->
+                }, executorService).thenAcceptAsync {
                     requireActivity().runOnUiThread {
                         updateQueueAdapter(musicList)
                     }
@@ -912,12 +912,11 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
     }
 
     private fun restoreLastListAndPos(activeMusic: Music?) {
-        val tempList = storageUtil!!.loadTempMusicList()
+        val tempList = storageUtil?.loadTempMusicList()
         if (tempList != null) {
             // do in background code here
             executorService!!.execute {
-                val index: Int
-                index = tempList.indexOf(activeMusic)
+                val index: Int = tempList.indexOf(activeMusic)
                 if (index != -1) {
                     storageUtil!!.saveMusicIndex(index)
                 }
@@ -979,10 +978,10 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         }
         //layout setup ☺
         if (MainActivity.service_bound) {
-            if (MainActivity.media_player_service != null) if (MainActivity.media_player_service.isMediaPlaying) {
-                MainActivity.media_player_service.setIcon(PlaybackStatus.PLAYING)
+            if (MainActivity.media_player_service != null) if (MainActivity.media_player_service?.isMediaPlaying!!) {
+                MainActivity.media_player_service?.setIcon(PlaybackStatus.PLAYING)
             } else {
-                MainActivity.media_player_service.setIcon(PlaybackStatus.PAUSED)
+                MainActivity.media_player_service?.setIcon(PlaybackStatus.PAUSED)
             }
         }
     }
@@ -997,8 +996,8 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
     override fun onStartTrackingTouch(seekBar: SeekBar) {
         //removing handler so we can change position of seekbar
         if (MainActivity.service_bound) {
-            if (MainActivity.media_player_service.seekBarHandler != null) MainActivity.media_player_service.seekBarHandler!!.removeCallbacks(
-                MainActivity.media_player_service.seekBarRunnable!!
+            if (MainActivity.media_player_service?.seekBarHandler != null) MainActivity.media_player_service?.seekBarHandler!!.removeCallbacks(
+                MainActivity.media_player_service?.seekBarRunnable!!
             )
         }
     }
@@ -1012,16 +1011,16 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
 
         //first checking setting the media seek to current position of seek bar and then setting all data in UI
         if (MainActivity.service_bound) {
-            if (MainActivity.media_player_service.seekBarHandler != null) {
-                MainActivity.media_player_service.seekBarHandler!!.removeCallbacks(MainActivity.media_player_service.seekBarRunnable!!)
+            if (MainActivity.media_player_service?.seekBarHandler != null) {
+                MainActivity.media_player_service?.seekBarHandler!!.removeCallbacks(MainActivity.media_player_service?.seekBarRunnable!!)
             }
-            MainActivity.media_player_service.seekMediaTo(seekBar.progress)
-            if (MainActivity.media_player_service.isMediaPlaying) {
-                MainActivity.media_player_service.buildNotification(PlaybackStatus.PLAYING, 1f)
+            MainActivity.media_player_service?.seekMediaTo(seekBar.progress)
+            if (MainActivity.media_player_service?.isMediaPlaying!!) {
+                MainActivity.media_player_service?.buildNotification(PlaybackStatus.PLAYING, 1f)
             } else {
-                MainActivity.media_player_service.buildNotification(PlaybackStatus.PAUSED, 0f)
+                MainActivity.media_player_service?.buildNotification(PlaybackStatus.PAUSED, 0f)
             }
-            MainActivity.media_player_service.setSeekBar()
+            MainActivity.media_player_service?.setSeekBar()
         } else {
             mini_progress!!.progress = seekBar.progress
         }
@@ -1046,16 +1045,16 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
 
             //first checking setting the media seek to current position of seek bar and then setting all data in UI
             if (MainActivity.service_bound) {
-                if (MainActivity.media_player_service.seekBarHandler != null) {
-                    MainActivity.media_player_service.seekBarHandler!!.removeCallbacks(MainActivity.media_player_service.seekBarRunnable!!)
+                if (MainActivity.media_player_service?.seekBarHandler != null) {
+                    MainActivity.media_player_service?.seekBarHandler!!.removeCallbacks(MainActivity.media_player_service?.seekBarRunnable!!)
                 }
-                MainActivity.media_player_service.seekMediaTo(position)
-                if (MainActivity.media_player_service.isMediaPlaying) {
-                    MainActivity.media_player_service.buildNotification(PlaybackStatus.PLAYING, 1f)
+                MainActivity.media_player_service?.seekMediaTo(position)
+                if (MainActivity.media_player_service?.isMediaPlaying!!) {
+                    MainActivity.media_player_service?.buildNotification(PlaybackStatus.PLAYING, 1f)
                 } else {
-                    MainActivity.media_player_service.buildNotification(PlaybackStatus.PAUSED, 0f)
+                    MainActivity.media_player_service?.buildNotification(PlaybackStatus.PAUSED, 0f)
                 }
-                MainActivity.media_player_service.setSeekBar()
+                MainActivity.media_player_service?.setSeekBar()
             } else {
                 mini_progress!!.progress = position
             }
