@@ -1,4 +1,4 @@
-package com.atomykcoder.atomykplay.kotlin
+package com.atomykcoder.atomykplay.helperFunctions
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -48,5 +48,11 @@ class ImageLoader(context: Context) {
             }
         }
         return image
+    }
+    fun pauseRequest(){
+        glideBuilt.pauseRequest()
+    }
+    fun resumeRequest(){
+        glideBuilt.resumeRequest()
     }
 }

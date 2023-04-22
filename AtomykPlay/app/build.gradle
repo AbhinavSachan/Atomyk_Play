@@ -92,8 +92,7 @@ dependencies {
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.1'
     implementation 'androidx.core:core-splashscreen:1.0.0'
 
-    // Ok layout inflater
-    implementation 'com.github.okcredit:OkLayoutInflater:1.0.2'
+    implementation 'com.airbnb.android:lottie:6.0.0'
 }
 
 protobuf {

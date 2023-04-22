@@ -39,20 +39,39 @@
                         android:id="@+id/song_image_view_tag"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
+                        android:layout_centerInParent="true"
                         android:scaleType="centerCrop"
                         android:src="@drawable/ic_choose_artwork" />
 
-                    <ImageView
-                        android:id="@+id/pick_cover_tag"
-                        android:layout_width="60dp"
-                        android:layout_height="60dp"
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:orientation="horizontal"
                         android:layout_centerInParent="true"
-                        android:layout_margin="6dp"
-                        android:background="@drawable/round_bg_for_pl"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:padding="12dp"
-                        android:src="@drawable/ic_tag_edit" />
+                        android:gravity="center"
+                        android:layout_height="wrap_content">
+                        <ImageView
+                            android:id="@+id/pick_cover_tag"
+                            android:layout_width="60dp"
+                            android:layout_height="60dp"
+                            android:layout_margin="6dp"
+                            android:background="@drawable/round_bg_for_pl"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:padding="12dp"
+                            android:src="@drawable/ic_tag_edit" />
+                        <ImageView
+                            android:id="@+id/delete_cover_tag"
+                            android:layout_width="60dp"
+                            android:layout_height="60dp"
+                            android:layout_margin="6dp"
+                            android:background="@drawable/round_bg_for_pl"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:padding="12dp"
+                            android:src="@drawable/ic_delete" />
+                    </LinearLayout>
+
+
 
                 </RelativeLayout>
             </com.google.android.material.card.MaterialCardView>

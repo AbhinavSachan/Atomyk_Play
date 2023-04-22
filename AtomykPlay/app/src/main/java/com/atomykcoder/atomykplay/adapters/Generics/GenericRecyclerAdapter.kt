@@ -4,7 +4,9 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.os.SystemClock
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import androidx.asynclayoutinflater.view.AsyncLayoutInflater
 import androidx.recyclerview.widget.RecyclerView
 
 open class GenericRecyclerAdapter<T> : RecyclerView.Adapter<GenericViewHolder<T>>() {
@@ -12,7 +14,6 @@ open class GenericRecyclerAdapter<T> : RecyclerView.Adapter<GenericViewHolder<T>
     protected var items: ArrayList<T>? = null
     private var delay = 600
     private var lastClickTime: Long = 0
-
     @SuppressLint("NotifyDataSetChanged")
     fun addItems(_items: ArrayList<T>?) {
         items?.addAll(_items!!)
@@ -40,5 +41,4 @@ open class GenericRecyclerAdapter<T> : RecyclerView.Adapter<GenericViewHolder<T>
         lastClickTime = SystemClock.elapsedRealtime()
         return false
     }
-
 }

@@ -31,8 +31,12 @@ public class MusicMainViewHolder extends GenericViewHolder<Music> {
 
     @Override
     public void onBind(Music item) {
-        nameText.setText(item.getName());
-        artistText.setText(item.getArtist());
-        durationText.setText(convertDuration(item.getDuration()));
+        try {
+            nameText.setText(item.getName());
+            artistText.setText(item.getArtist());
+            durationText.setText(convertDuration(item.getDuration()));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

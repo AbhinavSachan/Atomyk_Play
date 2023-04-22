@@ -374,21 +374,44 @@
                 android:padding="12dp"
                 android:src="@drawable/ic_lyrics" />
 
-            <ImageView
-                android:id="@+id/player_favorite_iv"
+
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="8dp"
-                android:background="?selectableItemBackgroundBorderless"
-                android:clickable="true"
-                android:contentDescription="@string/imageView"
-                android:cropToPadding="false"
-                android:elevation="10dp"
-                android:focusable="true"
-                android:padding="12dp"
-                android:src="@drawable/ic_favorite_border"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                android:layout_marginHorizontal="8dp">
+
+                <ImageView
+                    android:id="@+id/player_favorite_iv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="8dp"
+                    android:clickable="true"
+                    android:contentDescription="@string/imageView"
+                    android:cropToPadding="false"
+                    android:elevation="10dp"
+                    android:focusable="true"
+                    android:padding="12dp"
+                    android:src="@drawable/ic_favorite_border"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+
+                <com.airbnb.lottie.LottieAnimationView
+                    android:id="@+id/like_anim"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    android:contentDescription="@string/imageView"
+                    android:cropToPadding="false"
+                    android:visibility="invisible"
+                    android:elevation="10dp"
+                    app:lottie_loop="false"
+                    android:scrollY="-9dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:lottie_rawRes="@raw/like_anim_click_effect" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
 
             <RelativeLayout

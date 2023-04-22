@@ -52,10 +52,11 @@ import com.atomykcoder.atomykplay.fragments.*
 import com.atomykcoder.atomykplay.helperFunctions.CustomMethods.pickImage
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper
 import com.atomykcoder.atomykplay.repository.LoadingStatus
+import com.atomykcoder.atomykplay.repository.MusicRepo
+import com.atomykcoder.atomykplay.repository.MusicRepo.Companion.instance
 import com.atomykcoder.atomykplay.services.MediaPlayerService
 import com.atomykcoder.atomykplay.services.MediaPlayerService.LocalBinder
-import com.atomykcoder.atomykplay.utils.MusicUtils
-import com.atomykcoder.atomykplay.utils.MusicUtils.Companion.instance
+import com.atomykcoder.atomykplay.utils.MusicUtil
 import com.atomykcoder.atomykplay.utils.StorageUtil
 import com.atomykcoder.atomykplay.utils.StorageUtil.SettingsStorage
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -77,7 +78,6 @@ import java.io.IOException
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-import kotlin.collections.ArrayList
 
 
 class MainActivity : AppCompatActivity(), View.OnClickListener,
@@ -422,7 +422,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                 showToast("Failed to delete this song")
             }
         }
-    private var musicUtils: MusicUtils? = null
+    private var musicRepo: MusicRepo? = null
     private var lyricsSheet: View? = null
     private val lrcFoundCallback: BottomSheetCallback = object : BottomSheetCallback() {
         @SuppressLint("SwitchIntDef")
@@ -523,11 +523,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                 setUpMusicScanner()
             }
         }
-        if (is_granted) {
-            if (!isChecking) {
-                checkForUpdateList(false)
-            }
-        }
         if (service_bound) {
             if (MediaPlayerService.is_playing) {
                 if (media_player_service != null) {
@@ -571,6 +566,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         searchFragment = null
         lastAddedFragment = null
         bottomSheetPlayerFragment = null
+
     }
 
     fun changeNavigationColor(animateFrom: Int, animateTo: Int) {
@@ -1079,11 +1075,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         val canWrite = Settings.System.canWrite(this)
         if (canWrite) {
             val newUri = Uri.fromFile(File(music!!.path))
-            val ringtoneDialog = AlertDialog.Builder(this@MainActivity)
-            ringtoneDialog.setTitle("Set as ringtone")
-            ringtoneDialog.setMessage("Name - " + music.name)
-            ringtoneDialog.setCancelable(true)
-            ringtoneDialog.setPositiveButton("OK") { dialog: DialogInterface?, which: Int ->
+            val builder = MaterialAlertDialogBuilder(this@MainActivity)
+            builder.setTitle("Set as ringtone")
+            builder.setMessage("Name - ${music.name}")
+            builder.setCancelable(true)
+            builder.setPositiveButton("OK") { _: DialogInterface?, _: Int ->
                 RingtoneManager.setActualDefaultRingtoneUri(
                     this@MainActivity,
                     RingtoneManager.TYPE_RINGTONE,
@@ -1091,18 +1087,25 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                 )
                 showToast("Ringtone set successfully")
             }
-            ringtoneDialog.setNegativeButton("Cancel") { dialog: DialogInterface, which: Int -> dialog.dismiss() }
-            try {
-                this.ringtoneDialog = ringtoneDialog.create()
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-            if (this.ringtoneDialog != null) {
-                this.ringtoneDialog!!.show()
-            }
+            builder.setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
+
+            ringtoneDialog = builder.create()
+            ringtoneDialog?.show()
         } else {
+            requestWriteSettingsDialog()
+        }
+    }
+
+    private fun requestWriteSettingsDialog() {
+        val builder = MaterialAlertDialogBuilder(this@MainActivity)
+        builder.setTitle("Permission request")
+        builder.setMessage("For this function to work properly it needs WRITE_SETTINGS Permission.")
+        builder.setCancelable(true)
+        builder.setPositiveButton("Allow") { _, _ ->
             requestWriteSettingsPermission()
         }
+        val dialog = builder.create()
+        dialog.show()
     }
 
     private fun requestWriteSettingsPermission() {
@@ -1113,7 +1116,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         startActivity(intent)
     }
 
-    fun openOptionMenu(music: Music, tag: OptionSheetEnum?) {
+    fun openOptionMenu(music: Music, tag: OptionSheetEnum) {
         selectedItem = music
         optionTag = tag
         removeFromList!!.visibility = View.GONE
@@ -1133,7 +1136,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                 removeFromList!!.visibility = View.GONE
                 deleteBtn!!.visibility = View.VISIBLE
             }
-            else -> {}
         }
         executorService?.execute {
             var image: Bitmap? = null
@@ -1284,7 +1286,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         storageUtil = StorageUtil(this@MainActivity)
         executorService = Executors.newFixedThreadPool(10)
         handler = Handler(Looper.getMainLooper())
-        musicUtils = instance
+        musicRepo = instance
         glideBuilt = GlideBuilt(this)
         tempThemeColor = resources.getColor(R.color.player_bg, null)
         linearLayout = findViewById(R.id.song_not_found_layout)
@@ -1346,6 +1348,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         mainPlayerSheetBehavior!!.addBottomSheetCallback(mainPlayerSheetCallback)
         if (savedInstanceState == null) {
             navigationView!!.setCheckedItem(R.id.navigation_home)
+        }
+        if (is_granted) {
+            if (!isChecking) {
+                checkForUpdateList(false)
+            }
         }
     }
 
@@ -1501,8 +1508,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         }
         isChecking = true
         service.execute {
-            musicUtils!!.fetchMusic(this).thenAccept {
-                setMusicAdapter(musicUtils!!.initialMusicList)
+            musicRepo!!.fetchMusic(this).thenAccept {
+                setMusicAdapter(musicRepo!!.initialMusicList)
                 isChecking = false
             }.exceptionally {
                 showToast(it.message)
@@ -1514,14 +1521,14 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     }
 
     private fun setObserver() {
-        musicUtils!!.getStatus().observe(this) {
+        musicRepo!!.getStatus().observe(this) {
             when (it) {
                 LoadingStatus.LOADING -> {
                     progressBar!!.visibility = View.VISIBLE
                     linearLayout!!.visibility = View.GONE
                 }
                 LoadingStatus.SUCCESS -> {
-                    val list: ArrayList<Music> = musicUtils!!.initialMusicList
+                    val list: ArrayList<Music> = musicRepo!!.initialMusicList
                     storageUtil!!.saveInitialList(list)
                     if (list.isEmpty()) {
                         linearLayout!!.visibility = View.VISIBLE
@@ -1566,6 +1573,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
             }
         }
     }
+
 
     @SuppressLint("NonConstantResourceId")
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
@@ -1893,10 +1901,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     }
 
     private fun openShare(music: Music?) {
-        val uri = Uri.parse(music!!.path)
-        val intent = Intent(Intent.ACTION_SEND)
-        intent.type = "audio/*"
-        intent.putExtra(Intent.EXTRA_STREAM, uri)
+        val intent = MusicUtil.createShareSongFileIntent(this, music)
         startActivity(Intent.createChooser(intent, "Share Via ..."))
     }
 
@@ -1980,7 +1985,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
      * @return returns content uri of given music
      */
     private fun getContentUri(music: Music?): Uri? {
-        music?.let{
+        music?.let {
             val id = it.id.toInt()
             val baseUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
             return Uri.withAppendedPath(baseUri, "" + id)

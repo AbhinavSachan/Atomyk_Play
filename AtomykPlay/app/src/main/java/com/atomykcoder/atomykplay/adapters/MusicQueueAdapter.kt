@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.RecyclerView
 import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.activities.MainActivity
 import com.atomykcoder.atomykplay.adapters.Generics.GenericViewHolder
@@ -16,7 +17,7 @@ import com.atomykcoder.atomykplay.data.Music
 import com.atomykcoder.atomykplay.helperFunctions.MusicDiffCallback
 import com.atomykcoder.atomykplay.interfaces.ItemTouchHelperAdapter
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener
-import com.atomykcoder.atomykplay.kotlin.ImageLoader
+import com.atomykcoder.atomykplay.helperFunctions.ImageLoader
 import com.atomykcoder.atomykplay.utils.StorageUtil
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import java.util.*
@@ -85,7 +86,6 @@ class MusicQueueAdapter(
             .inflate(R.layout.queue_music_item_layout, parent, false)
         return MusicQueueViewHolder(view)
     }
-
     @SuppressLint("ClickableViewAccessibility")
     override fun onBindViewHolder(holder: GenericViewHolder<Music>, position: Int) {
         super.onBindViewHolder(holder, position)

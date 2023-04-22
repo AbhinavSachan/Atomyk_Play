@@ -15,8 +15,12 @@ import android.widget.ImageView
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.airbnb.lottie.Lottie
+import com.airbnb.lottie.LottieAnimationView
 import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.adapters.MusicMainAdapter
 import com.atomykcoder.atomykplay.customScripts.LinearLayoutManagerWrapper
@@ -39,6 +43,15 @@ class SearchFragment : Fragment() {
     private var artistButton: RadioButton? = null
     private var genreButton: RadioButton? = null
     private var isSearching = false
+    private var noResultAnim: LottieAnimationView? = null
+    private val searchList = MutableLiveData<ArrayList<Music>>()
+
+    private fun setSearchList(list:ArrayList<Music>){
+        searchList.value = list
+    }
+    private fun getSearchList():LiveData<ArrayList<Music>>{
+        return searchList
+    }
 
     private val handler = Handler(Looper.getMainLooper())
     private var coroutineScope = CoroutineScope(Dispatchers.Default)
@@ -50,6 +63,7 @@ class SearchFragment : Fragment() {
         albumButton = null
         artistButton = null
         genreButton = null
+        noResultAnim = null
     }
     private fun searchWithFilters(query: String, dataList: ArrayList<Music>) {
 
@@ -76,6 +90,7 @@ class SearchFragment : Fragment() {
         artistButton = view.findViewById(R.id.artist_button)
         genreButton = view.findViewById(R.id.genre_button)
         radioGroup = view.findViewById(R.id.radio_group)
+        noResultAnim = view.findViewById(R.id.noResultAnim)
         val dataList = StorageUtil(requireContext()).loadInitialList()
         val manager =
             requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -91,6 +106,7 @@ class SearchFragment : Fragment() {
             e.printStackTrace()
         }
         searchWithFilters("", searchedMusicList)
+        setSearchList(searchedMusicList)
         searchView.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(query: CharSequence, start: Int, before: Int, count: Int) {
@@ -122,12 +138,21 @@ class SearchFragment : Fragment() {
         adapter = MusicMainAdapter(requireContext(), searchedMusicList)
         recyclerView.adapter = adapter
         songButton?.isChecked = true
+        getSearchList().observe(viewLifecycleOwner) {
+            if (it.isNotEmpty()){
+                noResultAnim?.visibility = View.GONE
+                noResultAnim?.pauseAnimation()
+            }else{
+                noResultAnim?.visibility = View.VISIBLE
+                noResultAnim?.playAnimation()
+            }
+        }
         return view
     }
 
     //Function that adds music to an arraylist which is being used to show music in recycler view
     private fun addMusicToSearchList(song: Music) {
-        searchedMusicList!!.add(song)
+        searchedMusicList.add(song)
     }
 
     //Function that performs searches and if it finds a match we add that song to our arraylist
@@ -189,15 +214,14 @@ class SearchFragment : Fragment() {
             coroutineMainScope.launch {
                 setNumText(id)
                 adapter!!.notifyDataSetChanged()
+                setSearchList(searchedMusicList)
                 isSearching = false
             }
         }
     }
 
     private val listSize: Int
-        get() = if (searchedMusicList != null) {
-            searchedMusicList!!.size
-        } else 0
+        get() = searchedMusicList.size
 
     private fun setNumText(id: Int) {
         val song0 = "Song"
@@ -264,6 +288,6 @@ class SearchFragment : Fragment() {
     //Cleaning up any search results left from last search
     //Refreshing list
     private fun cleanUp() {
-        searchedMusicList!!.clear()
+        searchedMusicList.clear()
     }
 }

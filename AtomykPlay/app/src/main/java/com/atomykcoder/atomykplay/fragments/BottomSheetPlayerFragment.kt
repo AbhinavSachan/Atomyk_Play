@@ -1,5 +1,6 @@
 package com.atomykcoder.atomykplay.fragments
 
+import android.animation.Animator
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.app.Dialog
@@ -34,6 +35,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.SmoothScroller
 import androidx.transition.TransitionInflater
+import com.airbnb.lottie.LottieAnimationView
 import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.activities.MainActivity
 import com.atomykcoder.atomykplay.adapters.MusicLyricsAdapter
@@ -72,6 +74,7 @@ import java.util.concurrent.Executors
 
 class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragStartListener {
     private val lyricsArrayList = ArrayList<String>()
+
     @JvmField
     var queueSheetBehaviour: CustomBottomSheet<View?>? = null
     var lyricsRunnable: Runnable? = null
@@ -84,18 +87,24 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
     var playImg: ImageView? = null
     var curPosTv: TextView? = null
     var mini_cover: ImageView? = null
+
     @JvmField
     var mini_next: ImageView? = null
     var mini_name_text: TextView? = null
+
     @JvmField
     var mini_artist_text: TextView? = null
+
     @JvmField
     var mini_play_view: View? = null
+
     @JvmField
     var player_layout: View? = null
     var optionImg: ImageView? = null
+
     @JvmField
     var info_layout: View? = null
+
     @JvmField
     var queueAdapter: MusicQueueAdapter? = null
     private var musicArrayList: ArrayList<Music>? = null
@@ -141,6 +150,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
     private var repeatImg: ImageView? = null
     private var shuffleImg: ImageView? = null
     private var timerImg: ImageView? = null
+    private var likeAnim: LottieAnimationView? = null
 
     //setting up mini player layout
     //calling it from service when player is prepared and also calling it in this fragment class
@@ -226,6 +236,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         shuffleImg = view.findViewById(R.id.player_shuffle_iv) //○
         favoriteImg = view.findViewById(R.id.player_favorite_iv) //○
         timerImg = view.findViewById(R.id.player_timer_iv) //○
+        likeAnim = view.findViewById(R.id.like_anim)
         optionImg = view.findViewById(R.id.player_option_iv) //○
         playerSongNameTv = view.findViewById(R.id.player_song_name_tv) //○
         playerArtistNameTv = view.findViewById(R.id.player_song_artist_name_tv) //○
@@ -346,25 +357,19 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         app_paused = true
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-    }
-
     override fun onDestroy() {
         super.onDestroy()
         EventBus.getDefault().unregister(this)
-        lyricsRecyclerView!!.clearOnScrollListeners()
-        if (executorService != null) {
-            executorService!!.shutdown()
-        }
+        lyricsRecyclerView?.clearOnScrollListeners()
+        executorService?.shutdown()
     }
 
     /**
      * this is for queue item click
      */
     private fun scrollToCurSong() {
-        val index = storageUtil!!.loadMusicIndex()
-        linearLayoutManager!!.scrollToPositionWithOffset(index, 0)
+        val index = storageUtil?.loadMusicIndex() ?:0
+        linearLayoutManager?.scrollToPositionWithOffset(index, 0)
     }
 
     /**
@@ -389,7 +394,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
     }
 
     @Subscribe
-    fun RemoveLyricsHandler(event: RemoveLyricsHandlerEvent?) {
+    fun removeLyricsHandler(event: RemoveLyricsHandlerEvent?) {
         if (lyricsHandler != null) {
             lyricsHandler!!.removeCallbacks(lyricsRunnable!!)
         }
@@ -436,13 +441,14 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
     @Subscribe
     fun setMainPlayerLayout(event: SetMainLayoutEvent) {
         if (playing_same_song) {
-            if (activeMusic!!.path == event.activeMusic.path) {
+            if (activeMusic!!.id == event.activeMusic.id) {
                 return
             }
         }
         activeMusic = event.activeMusic
         if (!app_paused) {
             if (activeMusic != null) {
+                should_refresh_layout = false
                 var image = event.image
                 tempColor = if (image != null) {
                     val themeColor = generateThemeColor(image)
@@ -625,7 +631,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         }
     }
 
-    val currentStamp: String
+    private val currentStamp: String
         get() {
             var currPosInMillis = 0
             if (MainActivity.media_player_service != null) currPosInMillis =
@@ -633,7 +639,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
             return "[" + MusicHelper.convertDuration(currPosInMillis.toString()) + "]"
         }
 
-    fun getNextStamp(_lrcMap: LRCMap?): String {
+    private fun getNextStamp(_lrcMap: LRCMap?): String {
         val curStamp = currentStamp
         var currIndex = -1
         if (_lrcMap != null) {
@@ -696,7 +702,8 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
     private fun setupQueueBottomSheet() {
         queueRecyclerView!!.layoutManager = linearLayoutManager
         setQueueAdapter()
-        queueSheetBehaviour = BottomSheetBehavior.from(queueBottomSheet!!) as CustomBottomSheet<View?>
+        queueSheetBehaviour =
+            BottomSheetBehavior.from(queueBottomSheet!!) as CustomBottomSheet<View?>
         queueSheetBehaviour!!.isHideable = true
         queueSheetBehaviour!!.skipCollapsed = true
         queueSheetBehaviour!!.state = BottomSheetBehavior.STATE_HIDDEN
@@ -839,21 +846,38 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         if (music != null) {
             if (!storageUtil.checkFavourite(music)) {
                 storageUtil.saveFavorite(music)
+                if (music == activeMusic) {
+                    favoriteImg?.setImageResource(R.drawable.ic_favorite)
+
+                    likeAnim?.visibility = View.VISIBLE
+                    likeAnim?.playAnimation()
+                    likeAnim?.addAnimatorListener(object : Animator.AnimatorListener {
+                        override fun onAnimationStart(animation: Animator) {}
+                        override fun onAnimationEnd(animation: Animator) {
+                            likeAnim?.visibility = View.INVISIBLE
+                        }
+
+                        override fun onAnimationCancel(animation: Animator) {}
+                        override fun onAnimationRepeat(animation: Animator) {}
+                    })
+                }
                 imageView?.setImageResource(R.drawable.ic_favorite)
             } else if (storageUtil.checkFavourite(music)) {
                 storageUtil.removeFavorite(music)
+                if (music == activeMusic) {
+                    favoriteImg?.setImageResource(R.drawable.ic_favorite_border)
+                }
                 imageView?.setImageResource(R.drawable.ic_favorite_border)
             }
         }
     }
 
     private val currentMusic: Music?
-        private get() {
+        get() {
             val musicList = storageUtil!!.loadQueueList()
             var activeMusic: Music? = null
-            val musicIndex: Int
-            musicIndex = storageUtil!!.loadMusicIndex()
-            if (musicList != null && !musicList.isEmpty()) activeMusic =
+            val musicIndex: Int = storageUtil!!.loadMusicIndex()
+            if (musicList.isNotNullAndNotEmpty()) activeMusic =
                 if (musicIndex != -1 && musicIndex < musicList.size) {
                     musicList[musicIndex]
                 } else {
@@ -861,6 +885,10 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
                 }
             return activeMusic
         }
+
+    private fun <T> Collection<T>?.isNotNullAndNotEmpty(): Boolean {
+        return this != null && this.isNotEmpty()
+    }
 
     private fun shuffleList() {
         if (shouldIgnoreClick()) {

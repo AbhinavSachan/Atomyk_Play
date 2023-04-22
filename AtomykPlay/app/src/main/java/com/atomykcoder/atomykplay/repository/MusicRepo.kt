@@ -1,14 +1,12 @@
-package com.atomykcoder.atomykplay.utils
+package com.atomykcoder.atomykplay.repository
 
 import android.app.Activity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.atomykcoder.atomykplay.data.Music
-import com.atomykcoder.atomykplay.repository.LoadingStatus
-import com.atomykcoder.atomykplay.repository.MusicRepository
 import java.util.concurrent.CompletableFuture
 
-class MusicUtils {
+class MusicRepo {
     private val status = MutableLiveData<LoadingStatus>()
     var initialMusicList = ArrayList<Music>()
     fun fetchMusic(activity: Activity): CompletableFuture<Void?> {
@@ -37,10 +35,10 @@ class MusicUtils {
 
     companion object {
         @JvmStatic
-        var instance: MusicUtils? = null
+        var instance: MusicRepo? = null
             get() {
                 if (field == null) {
-                    field = MusicUtils()
+                    field = MusicRepo()
                 }
                 return field
             }

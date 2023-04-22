@@ -17,28 +17,35 @@ import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
 import android.provider.Settings
-import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.lifecycleScope
 import com.atomykcoder.atomykplay.BuildConfig
 import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.classes.ApplicationClass
 import com.atomykcoder.atomykplay.classes.GlideBuilt
+import com.atomykcoder.atomykplay.customScripts.ArtworkInfo
+import com.atomykcoder.atomykplay.customScripts.AudioTagInfo
+import com.atomykcoder.atomykplay.customScripts.TagWriter
 import com.atomykcoder.atomykplay.data.Music
 import com.atomykcoder.atomykplay.databinding.FragmentTagEditorBinding
 import com.atomykcoder.atomykplay.helperFunctions.CustomMethods.pickImage
 import com.atomykcoder.atomykplay.helperFunctions.Logger
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper
 import com.atomykcoder.atomykplay.repository.LoadingStatus
+import com.atomykcoder.atomykplay.utils.MusicUtil
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
@@ -47,26 +54,25 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.jaudiotagger.audio.AudioFileIO
-import org.jaudiotagger.audio.exceptions.CannotReadException
-import org.jaudiotagger.audio.exceptions.CannotWriteException
-import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException
-import org.jaudiotagger.audio.exceptions.ReadOnlyFileException
 import org.jaudiotagger.tag.FieldKey
-import org.jaudiotagger.tag.TagException
-import org.jaudiotagger.tag.datatype.Artwork
 import java.io.File
 import java.io.IOException
+import java.util.*
 
 class TagEditorFragment : Fragment() {
+    private lateinit var launcher: ActivityResultLauncher<IntentSenderRequest>
+    private lateinit var cacheFiles: List<File>
     private lateinit var mediaScannerConnection: MediaScannerConnection
     private val loadingStatus = MutableLiveData<LoadingStatus>()
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
     private val coroutineMainScope = CoroutineScope(Dispatchers.Main)
     private var glideBuilt: GlideBuilt? = null
-    private var b: FragmentTagEditorBinding? = null
+    private lateinit var b: FragmentTagEditorBinding
     private var music: Music? = null
     private var imageUri: Uri? = null
+    private var songPaths: List<String>? = null
+    private var deleteAlbumArt: Boolean = false
+
 
     // Registers a photo picker activity launcher in single-select mode.
     private val mediaPicker =
@@ -84,11 +90,6 @@ class TagEditorFragment : Fragment() {
             }
         }
     private var musicUri: Uri? = null
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        b = null
-    }
 
     private fun getLoadingStatus(): LiveData<LoadingStatus> {
         return loadingStatus
@@ -114,8 +115,8 @@ class TagEditorFragment : Fragment() {
             requireActivity().supportFragmentManager.popBackStack()
             showToast(null)
         }
-        b!!.toolbarTagEditor.setNavigationIcon(R.drawable.ic_back)
-        b!!.toolbarTagEditor.setNavigationOnClickListener {
+        b.toolbarTagEditor.setNavigationIcon(R.drawable.ic_back)
+        b.toolbarTagEditor.setNavigationOnClickListener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 requireActivity().onBackInvokedDispatcher
             } else {
@@ -123,15 +124,15 @@ class TagEditorFragment : Fragment() {
             }
         }
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
-            b?.editSongGenreTag?.visibility = View.GONE
+            b.editSongGenreTag.visibility = View.GONE
         }
         glideBuilt = GlideBuilt(requireContext())
-        b!!.editSongNameTag.setText(music?.name)
-        b!!.editSongArtistTag.setText(music?.artist)
-        b!!.editSongAlbumTag.setText(music?.album)
-        b!!.editSongYearTag.setText(music?.year)
+        b.editSongNameTag.setText(music?.name)
+        b.editSongArtistTag.setText(music?.artist)
+        b.editSongAlbumTag.setText(music?.album)
+        b.editSongYearTag.setText(music?.year)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            b!!.editSongGenreTag.setText(music?.genre)
+            b.editSongGenreTag.setText(music?.genre)
         }
         val image = arrayOf<Bitmap?>(null)
         coroutineScope.launch {
@@ -151,12 +152,16 @@ class TagEditorFragment : Fragment() {
             }
             coroutineMainScope.launch {
                 glideBuilt!!.glideBitmap(
-                    image[0], R.drawable.ic_music, b!!.songImageViewTag, 412, false
+                    image[0], R.drawable.ic_music, b.songImageViewTag, 412, false
                 )
             }
         }
-        b!!.pickCoverTag.setOnClickListener { pickImage(pickIntent, mediaPicker) }
-        b!!.tagEditorSaveButton.setOnClickListener {
+        b.pickCoverTag.setOnClickListener {
+            deleteAlbumArt = false
+            pickImage(pickIntent, mediaPicker)
+        }
+        b.deleteCoverTag.setOnClickListener { deleteCoverArt() }
+        b.tagEditorSaveButton.setOnClickListener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 if (!Environment.isExternalStorageManager()) {
                     requestPermissionAndroid11AndAbove()
@@ -175,7 +180,36 @@ class TagEditorFragment : Fragment() {
             }
         }
         setLoader()
-        return b!!.root
+        launcher = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {
+            if (it.resultCode == Activity.RESULT_OK) {
+                writeToFiles(
+                    mutableListOf(MusicUtil.getSongFileUri(music?.id!!.toLong())),
+                    cacheFiles
+                )
+            }
+        }
+        return b.root
+    }
+
+    private fun writeToFiles(songUris: List<Uri>, cacheFiles: List<File>) {
+        if (cacheFiles.size == songUris.size) {
+            for (i in cacheFiles.indices) {
+                requireContext().contentResolver.openOutputStream(songUris[i])?.use { output ->
+                    cacheFiles[i].inputStream().use { input ->
+                        input.copyTo(output)
+                    }
+                }
+            }
+        }
+        lifecycleScope.launch {
+            TagWriter.scan(requireContext(), MusicUtil.getSongFileUri(music?.id!!.toLong()))
+        }
+    }
+
+    private fun deleteCoverArt() {
+        glideBuilt!!.glide(null, R.drawable.ic_choose_artwork, b.songImageViewTag, 512)
+        deleteAlbumArt = true
+        imageUri = null
     }
 
     @RequiresApi(api = Build.VERSION_CODES.R)
@@ -216,113 +250,91 @@ class TagEditorFragment : Fragment() {
     }
 
     private fun saveMusicChanges(music: Music?) {
-        val newTitle = b!!.editSongNameTag.text.toString().trim()
-        val newArtist = b!!.editSongArtistTag.text.toString().trim()
-        val newAlbum = b!!.editSongAlbumTag.text.toString().trim()
-        val newYear = b!!.editSongYearTag.text.toString().trim()
-        var newGenre = ""
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            newGenre = b!!.editSongGenreTag.text.toString().trim()
-        }
-        setLoadingStatus(LoadingStatus.LOADING)
-        val finalNewGenre = newGenre
+        val fieldKeyValueMap = EnumMap<FieldKey, String>(FieldKey::class.java)
+        fieldKeyValueMap[FieldKey.TITLE] = b.editSongNameTag.text.toString().trim()
+        fieldKeyValueMap[FieldKey.ALBUM] = b.editSongAlbumTag.text.toString().trim()
+        fieldKeyValueMap[FieldKey.ARTIST] = b.editSongArtistTag.text.toString().trim()
+        fieldKeyValueMap[FieldKey.GENRE] = b.editSongGenreTag.text.toString().trim()
+        fieldKeyValueMap[FieldKey.YEAR] = b.editSongYearTag.text.toString()
+        songPaths = listOf(music!!.path)
+        writeValuesToFiles(
+            fieldKeyValueMap, when {
+                deleteAlbumArt -> ArtworkInfo(
+                    getAlbumId(
+                        requireContext(),
+                        music.path!!.toUri()
+                    ).toLong(), null
+                )
+                imageUri == null -> null
+                else -> ArtworkInfo(
+                    getAlbumId(requireContext(), music.path!!.toUri()).toLong(),
+                    imageUri
+                )
+            }
+        )
+    }
+
+    private fun writeValuesToFiles(
+        fieldKeyValueMap: Map<FieldKey, String>,
+        artworkInfo: ArtworkInfo?,
+    ) {
+
+        Logger.normalLog(fieldKeyValueMap.toString())
         coroutineScope.launch {
-            try {
-                val musicFile = File(music!!.path)
-                val f = AudioFileIO.read(musicFile)
-                val tag = f.tag
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                cacheFiles = TagWriter.writeTagsToFilesR(
+                    requireContext(), AudioTagInfo(
+                        songPaths,
+                        fieldKeyValueMap,
+                        artworkInfo
+                    )
+                )
 
-                if (!TextUtils.isEmpty(newTitle)) {
-                    tag.setField(FieldKey.TITLE, newTitle)
-                } else {
-                    val s = tag.getFirst(FieldKey.TITLE)
-                    tag.setField(FieldKey.TITLE, s)
+                if (cacheFiles.isNotEmpty()) {
+                    val pendingIntent =
+                        MediaStore.createWriteRequest(
+                            requireContext().contentResolver,
+                            mutableListOf(MusicUtil.getSongFileUri(music?.id!!.toLong()))
+                        )
+                    launcher.launch(IntentSenderRequest.Builder(pendingIntent).build())
                 }
-
-                if (!TextUtils.isEmpty(newArtist)) {
-                    tag.setField(FieldKey.ARTIST, newArtist)
-                } else {
-                    val s = "Unknown Artist"
-                    tag.setField(FieldKey.ARTIST, s)
-                }
-
-                if (!TextUtils.isEmpty(newAlbum)) {
-                    tag.setField(FieldKey.ALBUM, newAlbum)
-                } else {
-                    tag.setField(FieldKey.ALBUM, "Unknown")
-                }
-                if (!TextUtils.isEmpty(newYear)) {
-                    tag.setField(FieldKey.YEAR, newYear)
-                } else {
-                    tag.setField(FieldKey.YEAR, "Unknown")
-                }
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    if (!TextUtils.isEmpty(finalNewGenre)) {
-                        tag.setField(FieldKey.GENRE, finalNewGenre)
-                    } else {
-                        tag.setField(FieldKey.GENRE, "")
-                    }
-                }
-                if (imageUri != null) {
-                    val filePath = getRealPathFromImageURI(requireContext(), imageUri)
-                    val imageFile = File(filePath)
-                    val artwork = Artwork.createArtworkFromFile(imageFile)
-                    tag.addField(artwork)
-                    tag.setField(artwork)
-                }
-                f.tag = tag
-                f.commit()
-                coroutineMainScope.launch {
-                    musicUri = Uri.fromFile(musicFile)
-                    setLoadingStatus(LoadingStatus.SUCCESS)
-                }
-            } catch (e: CannotReadException) {
-                Logger.normalLog(e.toString())
-                coroutineMainScope.launch { setLoadingStatus(LoadingStatus.FAILURE) }
-            } catch (e: InvalidAudioFrameException) {
-                Logger.normalLog(e.toString())
-                coroutineMainScope.launch { setLoadingStatus(LoadingStatus.FAILURE) }
-            } catch (e: ReadOnlyFileException) {
-                Logger.normalLog(e.toString())
-                coroutineMainScope.launch { setLoadingStatus(LoadingStatus.FAILURE) }
-            } catch (e: TagException) {
-                Logger.normalLog(e.toString())
-                coroutineMainScope.launch { setLoadingStatus(LoadingStatus.FAILURE) }
-            } catch (e: IOException) {
-                Logger.normalLog(e.toString())
-                coroutineMainScope.launch { setLoadingStatus(LoadingStatus.FAILURE) }
-            } catch (e: CannotWriteException) {
-                Logger.normalLog(e.toString())
-                coroutineMainScope.launch { setLoadingStatus(LoadingStatus.FAILURE) }
+            } else {
+                TagWriter.writeTagsToFiles(
+                    requireContext(), AudioTagInfo(
+                        songPaths,
+                        fieldKeyValueMap,
+                        artworkInfo
+                    )
+                )
             }
         }
     }
+
 
     private fun setLoader() {
         val fragmentManager = requireActivity().supportFragmentManager
         getLoadingStatus().observe(requireActivity()) {
             when (it) {
                 LoadingStatus.LOADING -> {
-                    b!!.progressBarTag.visibility = View.VISIBLE
+                    b.progressBarTag.visibility = View.VISIBLE
                 }
                 LoadingStatus.SUCCESS -> {
                     showToast("Change's will be applied after restart")
                     musicUri?.let { it1 ->
                         addToMediaStore(it1)
                     }.also {
-                        b!!.progressBarTag.visibility = View.GONE
+                        b.progressBarTag.visibility = View.GONE
                         fragmentManager.popBackStack()
                     }
                 }
                 LoadingStatus.FAILURE -> {
                     showToast("Something went wrong")
-                    b!!.progressBarTag.visibility = View.GONE
+                    b.progressBarTag.visibility = View.GONE
                     fragmentManager.popBackStack()
                 }
                 else -> {
                     showToast("Something went wrong")
-                    b!!.progressBarTag.visibility = View.GONE
+                    b.progressBarTag.visibility = View.GONE
                     fragmentManager.popBackStack()
                 }
             }
@@ -346,7 +358,7 @@ class TagEditorFragment : Fragment() {
 
     private fun setImageUri(album_uri: Uri?) {
         imageUri = album_uri
-        glideBuilt!!.glide(imageUri.toString(), 0, b!!.songImageViewTag, 512)
+        glideBuilt!!.glide(imageUri.toString(), 0, b.songImageViewTag, 512)
     }
 
     companion object {
@@ -358,6 +370,19 @@ class TagEditorFragment : Fragment() {
                 cursor!!.moveToFirst()
                 val columnIndex = cursor.getColumnIndex(proj[0])
                 cursor.getString(columnIndex)
+            } finally {
+                cursor?.close()
+            }
+        }
+
+        fun getAlbumId(context: Context, contentUri: Uri): String {
+            var cursor: Cursor? = null
+            return try {
+                val proj = arrayOf(MediaStore.Audio.Media.ALBUM_ID)
+                cursor = context.contentResolver.query(contentUri, proj, null, null, null)
+                cursor!!.moveToFirst()
+                val columnIndex = cursor.getColumnIndex(proj[0])
+                columnIndex.let { cursor.getString(it) }
             } finally {
                 cursor?.close()
             }

@@ -151,6 +151,14 @@
         </RadioGroup>
     </HorizontalScrollView>
 
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/noResultAnim"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/scv"
+        app:lottie_loop="true"
+        app:lottie_rawRes="@raw/no_result_green" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/search_recycler_view"
         android:layout_width="match_parent"

@@ -3,11 +3,7 @@ package com.atomykcoder.atomykplay.services
 import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent
-import android.app.Service
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.*
@@ -15,6 +11,7 @@ import android.media.AudioManager.OnAudioFocusChangeListener
 import android.media.MediaPlayer.*
 import android.media.session.MediaSessionManager
 import android.os.*
+import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.MediaSessionCompat
@@ -25,6 +22,8 @@ import android.view.KeyEvent
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
+import androidx.media.MediaBrowserServiceCompat
+import com.atomykcoder.atomykplay.BuildConfig
 import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.activities.MainActivity
 import com.atomykcoder.atomykplay.classes.ApplicationClass
@@ -44,9 +43,11 @@ import org.greenrobot.eventbus.EventBus
 import java.io.File
 import java.io.IOException
 
-class MediaPlayerService : Service(), OnCompletionListener, OnBufferingUpdateListener,
-    OnErrorListener, OnInfoListener, OnPreparedListener,
+class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
+    OnBufferingUpdateListener, OnErrorListener, OnInfoListener, OnPreparedListener,
     OnSeekCompleteListener, OnAudioFocusChangeListener {
+    private var mPackageValidator: PackageValidator? = null
+
     //binder
     private val iBinder: IBinder = LocalBinder()
     private val handler = Handler(Looper.getMainLooper())
@@ -343,12 +344,10 @@ class MediaPlayerService : Service(), OnCompletionListener, OnBufferingUpdateLis
                         .setShowActionsInCompactView(0, 1, 2)
                 ).setColor(resources.getColor(R.color.tertiary_bg, theme)).setColorized(true)
                 .setSmallIcon(R.drawable.ic_headset) //set content
-                .setSubText(activeMusic!!.artist)
-                .setContentTitle(activeMusic!!.name)
+                .setSubText(activeMusic!!.artist).setContentTitle(activeMusic!!.name)
                 .setDeleteIntent(playbackAction(4))
                 .setChannelId(ApplicationClass.CHANNEL_ID) //set control
-                .addAction(prevAction)
-                .addAction(notificationAction, "Pause", playPauseAction)
+                .addAction(prevAction).addAction(notificationAction, "Pause", playPauseAction)
                 .addAction(R.drawable.ic_next_for_noti, "next", playbackAction(2))
                 .addAction(stopAction).setContentIntent(
                     PendingIntent.getActivity(
@@ -512,6 +511,8 @@ class MediaPlayerService : Service(), OnCompletionListener, OnBufferingUpdateLis
         registerPlayNextMusic()
         registerPlayPreviousMusic()
         registerStopMusic()
+        mPackageValidator = PackageValidator(this, R.xml.allowed_media_browser_callers)
+
     }
 
     override fun onBind(intent: Intent): IBinder {
@@ -939,9 +940,7 @@ class MediaPlayerService : Service(), OnCompletionListener, OnBufferingUpdateLis
 
                 // Replace This with TextView.setText(View);
                 val finalCDTimer = "$minutes:$seconds"
-                if (ui_visible) {
-                    EventBus.getDefault().post(SetTimerText(finalCDTimer))
-                }
+                EventBus.getDefault().post(SetTimerText(finalCDTimer))
             }
 
             //Code After timer is Finished Goes Here
@@ -949,10 +948,8 @@ class MediaPlayerService : Service(), OnCompletionListener, OnBufferingUpdateLis
                 //Replace This pausePlayAudio() with just a pause Method.
                 //Replaced it
                 pauseMedia()
-                if (ui_visible) {
-                    EventBus.getDefault().post(TimerFinished())
-                    countDownTimer[0] = null
-                }
+                EventBus.getDefault().post(TimerFinished())
+                countDownTimer[0] = null
             }
         }
         // Start timer
@@ -960,8 +957,8 @@ class MediaPlayerService : Service(), OnCompletionListener, OnBufferingUpdateLis
     }
 
     fun cancelTimer() {
-        if (countDownTimer[0] != null) {
-            countDownTimer[0]!!.cancel()
+        countDownTimer[0]?.apply {
+            cancel()
             EventBus.getDefault().post(TimerFinished())
         }
     }
@@ -972,7 +969,7 @@ class MediaPlayerService : Service(), OnCompletionListener, OnBufferingUpdateLis
     @Throws(RemoteException::class)
     fun initiateMediaSession() {
         if (mediaSession != null) return
-        mediaSession = MediaSessionCompat(applicationContext, "MediaPlayerMediaSession")
+        mediaSession = MediaSessionCompat(this, BuildConfig.APPLICATION_ID)
         transportControls = mediaSession!!.controller.transportControls
         mediaSession!!.isActive = true
         mediaSession!!.setFlags(MediaSessionCompat.FLAG_HANDLES_QUEUE_COMMANDS)
@@ -1028,24 +1025,26 @@ class MediaPlayerService : Service(), OnCompletionListener, OnBufferingUpdateLis
 
             override fun onSeekTo(pos: Long) {
                 super.onSeekTo(pos)
-                //clearing the storage before putting new value
-                storage!!.clearMusicLastPos()
-                //storing the current position of seekbar in storage so we can access it from services
-                storage!!.saveMusicLastPos(Math.toIntExact(pos))
+                try {//clearing the storage before putting new value
+                    storage!!.clearMusicLastPos()
+                    //storing the current position of seekbar in storage so we can access it from services
+                    storage!!.saveMusicLastPos(Math.toIntExact(pos))
 
-                //first checking setting the media seek to current position of seek bar and then setting all data in UI•
-                if (MainActivity.service_bound) {
-                    //removing handler so that we can seek without glitches handler will restart in setSeekBar() method☻
-                    if (seekBarHandler != null) seekBarHandler!!.removeCallbacks(seekBarRunnable!!)
-                    if (isMediaPlayerNotNull) {
-                        seekMediaTo(Math.toIntExact(pos))
-                        if (isMediaPlaying) {
-                            buildNotification(PlaybackStatus.PLAYING, 1f)
-                        } else {
-                            buildNotification(PlaybackStatus.PAUSED, 0f)
+                    //first checking setting the media seek to current position of seek bar and then setting all data in UI•
+                    if (MainActivity.service_bound) {
+                        //removing handler so that we can seek without glitches handler will restart in setSeekBar() method☻
+                        if (seekBarHandler != null) seekBarHandler!!.removeCallbacks(seekBarRunnable!!)
+                        if (isMediaPlayerNotNull) {
+                            seekMediaTo(Math.toIntExact(pos))
+                            if (isMediaPlaying) {
+                                buildNotification(PlaybackStatus.PLAYING, 1f)
+                            } else {
+                                buildNotification(PlaybackStatus.PAUSED, 0f)
+                            }
+                            setSeekBar()
                         }
-                        setSeekBar()
                     }
+                } catch (_: Exception) {
                 }
             }
         })
@@ -1074,7 +1073,7 @@ class MediaPlayerService : Service(), OnCompletionListener, OnBufferingUpdateLis
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         //Handle Intent action from MediaSession.TransportControls
         if (intent == null) {
-            return START_STICKY
+            return START_NOT_STICKY
         }
         handleNotificationActions(intent)
         if (selfStopHandler == null) {
@@ -1149,6 +1148,32 @@ class MediaPlayerService : Service(), OnCompletionListener, OnBufferingUpdateLis
         }
     }
 
+    override fun onGetRoot(
+        clientPackageName: String,
+        clientUid: Int,
+        rootHints: Bundle?,
+    ): BrowserRoot {
+        // Check origin to ensure we're not allowing any arbitrary app to browse app contents
+        return if (!mPackageValidator!!.isKnownCaller(clientPackageName, clientUid)) {
+            // Request from an untrusted package: return an empty browser root
+            BrowserRoot("__EMPTY_ROOT__", null)
+        } else {
+            /**
+             * By default return the browsable root. Treat the EXTRA_RECENT flag as a special case
+             * and return the recent root instead.
+             */
+            val isRecentRequest = rootHints?.getBoolean(BrowserRoot.EXTRA_RECENT) ?: false
+            val browserRootPath = if (isRecentRequest) "__RECENT__" else "__ROOT__"
+            BrowserRoot(browserRootPath, null)
+        }
+    }
+
+    override fun onLoadChildren(
+        parentId: String,
+        result: Result<MutableList<MediaBrowserCompat.MediaItem>>,
+    ) {
+    }
+
     override fun onUnbind(intent: Intent): Boolean {
         return isMediaPlaying
     }
@@ -1161,11 +1186,9 @@ class MediaPlayerService : Service(), OnCompletionListener, OnBufferingUpdateLis
         super.onDestroy()
         removeAudioFocus()
         MainActivity.service_stopped = true
-        if (selfStopHandler != null && selfStopRunnable != null) {
-            selfStopHandler!!.removeCallbacks(selfStopRunnable!!)
-        }
-        selfStopHandler = null
-        selfStopRunnable = null
+        selfStopHandler!!.removeCallbacksAndMessages(null)
+        handler.removeCallbacksAndMessages(null)
+
         cancelTimer()
         if (isMediaPlayerNotNull) {
             storage!!.saveMusicLastPos(currentMediaPosition)

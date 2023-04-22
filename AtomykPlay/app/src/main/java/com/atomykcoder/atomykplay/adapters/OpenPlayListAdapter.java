@@ -17,7 +17,7 @@ import com.atomykcoder.atomykplay.enums.OptionSheetEnum;
 import com.atomykcoder.atomykplay.utils.StorageUtil;
 import com.atomykcoder.atomykplay.interfaces.ItemTouchHelperAdapter;
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener;
-import com.atomykcoder.atomykplay.kotlin.ImageLoader;
+import com.atomykcoder.atomykplay.helperFunctions.ImageLoader;
 
 import java.util.ArrayList;
 

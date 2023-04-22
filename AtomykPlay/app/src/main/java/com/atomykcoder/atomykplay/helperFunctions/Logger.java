@@ -2,6 +2,9 @@ package com.atomykcoder.atomykplay.helperFunctions;
 
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
 public class Logger {
     /**
      * Tag is "DebugTag"
