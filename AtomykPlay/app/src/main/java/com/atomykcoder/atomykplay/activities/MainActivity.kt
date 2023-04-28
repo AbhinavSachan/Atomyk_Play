@@ -915,6 +915,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
      */
     fun playAudio(music: Music?) {
         //starting service if its not started yet otherwise it will send broadcast msg to service
+
         storageUtil?.clearMusicLastPos()
         val encodedMessage = MusicHelper.encode(music)
         if (!phone_ringing) {
@@ -1005,6 +1006,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         if (shouldIgnoreClick()) {
             return
         }
+
         if (!phone_ringing) {
             if (service_stopped) {
                 startService()

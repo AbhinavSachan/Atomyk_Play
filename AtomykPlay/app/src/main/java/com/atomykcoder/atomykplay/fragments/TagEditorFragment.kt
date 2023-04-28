@@ -34,6 +34,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
 import com.atomykcoder.atomykplay.BuildConfig
 import com.atomykcoder.atomykplay.R
+import com.atomykcoder.atomykplay.activities.MainActivity
 import com.atomykcoder.atomykplay.classes.ApplicationClass
 import com.atomykcoder.atomykplay.classes.GlideBuilt
 import com.atomykcoder.atomykplay.customScripts.ArtworkInfo
@@ -203,6 +204,7 @@ class TagEditorFragment : Fragment() {
         }
         lifecycleScope.launch {
             TagWriter.scan(requireContext(), MusicUtil.getSongFileUri(music?.id!!.toLong()))
+            setLoadingStatus(LoadingStatus.SUCCESS)
         }
     }
 
@@ -250,6 +252,7 @@ class TagEditorFragment : Fragment() {
     }
 
     private fun saveMusicChanges(music: Music?) {
+        setLoadingStatus(LoadingStatus.LOADING)
         val fieldKeyValueMap = EnumMap<FieldKey, String>(FieldKey::class.java)
         fieldKeyValueMap[FieldKey.TITLE] = b.editSongNameTag.text.toString().trim()
         fieldKeyValueMap[FieldKey.ALBUM] = b.editSongAlbumTag.text.toString().trim()
@@ -260,14 +263,11 @@ class TagEditorFragment : Fragment() {
         writeValuesToFiles(
             fieldKeyValueMap, when {
                 deleteAlbumArt -> ArtworkInfo(
-                    getAlbumId(
-                        requireContext(),
-                        music.path!!.toUri()
-                    ).toLong(), null
+                    music.albumId.toLong(), null
                 )
                 imageUri == null -> null
                 else -> ArtworkInfo(
-                    getAlbumId(requireContext(), music.path!!.toUri()).toLong(),
+                    music.albumId.toLong(),
                     imageUri
                 )
             }
@@ -279,16 +279,20 @@ class TagEditorFragment : Fragment() {
         artworkInfo: ArtworkInfo?,
     ) {
 
-        Logger.normalLog(fieldKeyValueMap.toString())
         coroutineScope.launch {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                cacheFiles = TagWriter.writeTagsToFilesR(
-                    requireContext(), AudioTagInfo(
-                        songPaths,
-                        fieldKeyValueMap,
-                        artworkInfo
+                cacheFiles = try {
+                    TagWriter.writeTagsToFilesR(
+                        requireContext(), AudioTagInfo(
+                            songPaths,
+                            fieldKeyValueMap,
+                            artworkInfo
+                        )
                     )
-                )
+                } catch (e: Exception) {
+                    setLoadingStatus(LoadingStatus.FAILURE)
+                    return@launch
+                }
 
                 if (cacheFiles.isNotEmpty()) {
                     val pendingIntent =
@@ -299,13 +303,20 @@ class TagEditorFragment : Fragment() {
                     launcher.launch(IntentSenderRequest.Builder(pendingIntent).build())
                 }
             } else {
-                TagWriter.writeTagsToFiles(
-                    requireContext(), AudioTagInfo(
-                        songPaths,
-                        fieldKeyValueMap,
-                        artworkInfo
+                try {
+                    TagWriter.writeTagsToFiles(
+                        requireContext(), AudioTagInfo(
+                            songPaths,
+                            fieldKeyValueMap,
+                            artworkInfo
+                        )
                     )
-                )
+                } catch (e: Exception) {
+                    setLoadingStatus(LoadingStatus.FAILURE)
+                    return@launch
+                }
+                setLoadingStatus(LoadingStatus.SUCCESS)
+
             }
         }
     }
@@ -319,13 +330,10 @@ class TagEditorFragment : Fragment() {
                     b.progressBarTag.visibility = View.VISIBLE
                 }
                 LoadingStatus.SUCCESS -> {
-                    showToast("Change's will be applied after restart")
-                    musicUri?.let { it1 ->
-                        addToMediaStore(it1)
-                    }.also {
-                        b.progressBarTag.visibility = View.GONE
-                        fragmentManager.popBackStack()
-                    }
+                    showToast("Change's may be applied after restart")
+                    (requireActivity() as MainActivity).checkForUpdateList(true)
+                    b.progressBarTag.visibility = View.GONE
+                    fragmentManager.popBackStack()
                 }
                 LoadingStatus.FAILURE -> {
                     showToast("Something went wrong")
@@ -370,19 +378,6 @@ class TagEditorFragment : Fragment() {
                 cursor!!.moveToFirst()
                 val columnIndex = cursor.getColumnIndex(proj[0])
                 cursor.getString(columnIndex)
-            } finally {
-                cursor?.close()
-            }
-        }
-
-        fun getAlbumId(context: Context, contentUri: Uri): String {
-            var cursor: Cursor? = null
-            return try {
-                val proj = arrayOf(MediaStore.Audio.Media.ALBUM_ID)
-                cursor = context.contentResolver.query(contentUri, proj, null, null, null)
-                cursor!!.moveToFirst()
-                val columnIndex = cursor.getColumnIndex(proj[0])
-                columnIndex.let { cursor.getString(it) }
             } finally {
                 cursor?.close()
             }

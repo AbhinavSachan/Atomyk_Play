@@ -1,0 +1,36 @@
+<resources>
+    <!-- Base application theme. -->
+    <style name="Theme.AtomykPlay" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/accent_color_bg</item>
+        <item name="colorPrimaryVariant">@color/primary_bg</item>
+        <item name="colorOnPrimary">@color/tertiary_bg</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/accent_color_bg</item>
+        <item name="colorSecondaryVariant">@color/primary_bg</item>
+        <item name="colorOnSecondary">@color/tertiary_bg</item>
+        <!-- Status bar color. -->
+        <item name="android:navigationBarColor">@color/player_bg</item>
+
+        <!-- Customize your theme here. -->
+
+
+    </style> <!-- Base application theme. -->
+
+    <style name="Theme.Splash" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/tertiary_bg</item>
+        <item name="colorPrimaryVariant">@color/primary_bg</item>
+        <item name="colorOnPrimary">@color/black</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/teal_200</item>
+        <item name="colorSecondaryVariant">@color/teal_700</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <!-- Status bar color. -->
+        <item name="android:navigationBarColor">?colorPrimaryVariant</item>
+        <item name="android:statusBarColor">?colorPrimaryVariant</item>
+        <!-- Customize your theme here. -->
+
+    </style>
+
+</resources>

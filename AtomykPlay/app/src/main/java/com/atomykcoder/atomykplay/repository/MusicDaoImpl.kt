@@ -9,6 +9,7 @@ import com.atomykcoder.atomykplay.data.Music
 import com.atomykcoder.atomykplay.interfaces.MusicDaoI
 import com.atomykcoder.atomykplay.utils.StorageUtil.SettingsStorage
 import java.io.File
+import java.lang.NumberFormatException
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.ZoneId
@@ -133,13 +134,14 @@ class MusicDaoImpl : MusicDaoI {
                                     .setAlbumUri(sAlbumUri)
                                     .setDuration(sDuration)
                                     .setPath(sPath)
-                                    .setBitrate(sBitrate)
+                                    .setBitrate(sBitrate ?:"")
                                     .setMimeType(sMimeType)
                                     .setSize(sSize)
                                     .setGenre(sGenre ?: "")
                                     .setId(sId)
                                     .setDateAdded(sDateAdded)
                                     .setYear(sYear ?: "")
+                                    .setAlbumId(sAlbumId ?:"")
                                     .build()
                                 dataList.add(music)
                             }
@@ -162,16 +164,20 @@ class MusicDaoImpl : MusicDaoI {
         return future
     }
 
-    private fun convertLongToDate(time: Long): String {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            DateTimeFormatter.ofPattern("dd MMMM yyyy").format(
-                Instant.ofEpochMilli(time * 1000)
-                    .atZone(ZoneId.systemDefault())
-                    .toLocalDate()
-            )
-        } else {
-            SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
-                .format(Date(time * 1000))
+    private fun convertLongToDate(time: Long): String? {
+        return try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                DateTimeFormatter.ofPattern("dd MMMM yyyy").format(
+                    Instant.ofEpochMilli(time * 1000)
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDate()
+                )
+            } else {
+                SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
+                    .format(Date(time * 1000))
+            }
+        } catch (_: Exception) {
+            null
         }
     }
 }

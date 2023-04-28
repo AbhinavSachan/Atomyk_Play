@@ -1073,7 +1073,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         //Handle Intent action from MediaSession.TransportControls
         if (intent == null) {
-            return START_NOT_STICKY
+            return START_STICKY
         }
         handleNotificationActions(intent)
         if (selfStopHandler == null) {
@@ -1186,12 +1186,12 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
         super.onDestroy()
         removeAudioFocus()
         MainActivity.service_stopped = true
-        selfStopHandler!!.removeCallbacksAndMessages(null)
+        selfStopHandler?.removeCallbacksAndMessages(null)
         handler.removeCallbacksAndMessages(null)
 
         cancelTimer()
         if (isMediaPlayerNotNull) {
-            storage!!.saveMusicLastPos(currentMediaPosition)
+            storage?.saveMusicLastPos(currentMediaPosition)
         }
         //disable phone state listener ♣
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -1214,18 +1214,13 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
     }
 
     private fun releasePlayer() {
-        if (isMediaPlayerNotNull) {
-            mediaPlayer!!.release()
-        }
-        if (mediaSession != null) {
-            mediaSession!!.release()
-        }
+        mediaPlayer?.release()
+        mediaSession?.release()
+
         mediaPlayer = null
         mediaSession = null
-        if (notificationManager != null) {
-            notificationManager!!.cancel(NOTIFICATION_ID)
-            musicNotification = null
-        }
+        notificationManager?.cancel(NOTIFICATION_ID)
+
         stopForeground(STOP_FOREGROUND_REMOVE)
     }
 

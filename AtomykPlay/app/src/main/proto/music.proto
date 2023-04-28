@@ -17,4 +17,5 @@ message Music {
   string id = 11;
   string dateAdded = 12;
   string year = 13;
+  string albumId = 14;
 }

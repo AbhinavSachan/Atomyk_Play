@@ -385,12 +385,16 @@ class StorageUtil
      * @return returns LRC-MAP of given music
      */
     fun loadLyrics(musicId: String?): LRCMap? {
-        lyricsSharedPref = context.getSharedPreferences(LYRICS_STORAGE, Context.MODE_PRIVATE)
-        val gson = Gson()
-        val json = lyricsSharedPref.getString(musicId, null)
-        val type = object : TypeToken<LRCMap?>() {}.type
-        json?.let {
-            return gson.fromJson(it, type)
+        try {
+            lyricsSharedPref = context.getSharedPreferences(LYRICS_STORAGE, Context.MODE_PRIVATE)
+            val gson = Gson()
+            val json = lyricsSharedPref.getString(musicId, null)
+            val type = object : TypeToken<LRCMap?>() {}.type
+            json?.let {
+                return gson.fromJson(it, type)
+            }
+        } catch (_: Exception) {
+            return null
         }
         return null
     }

@@ -51,8 +51,7 @@ class TagWriter {
             mediaScannerConnection.connect()
         }
 
-        suspend fun writeTagsToFiles(context: Context, info: AudioTagInfo):CompletableFuture<Void> {
-            val future = CompletableFuture<Void>()
+        suspend fun writeTagsToFiles(context: Context, info: AudioTagInfo) {
             withContext(Dispatchers.IO) {
                 var artwork: Artwork? = null
                 var albumArtFile: File? = null
@@ -62,10 +61,8 @@ class TagWriter {
                             info.artworkInfo.artwork
                         ))
                         artwork = Artwork.createArtworkFromFile(albumArtFile)
-                        Logger.normalLog("artwork created")
-
-                    } catch (e: IOException) {
-                        e.printStackTrace()
+                    } catch (e: Exception) {
+                        context.showToast("Something went wrong with artwork")
                     }
                 }
                 var wroteArtwork = false
@@ -79,11 +76,7 @@ class TagWriter {
                                 try {
                                     tag.setField(key, value)
                                 } catch (e: FieldDataInvalidException) {
-                                    withContext(Dispatchers.Main) {
-                                        context.showToast("Could not write tags in file")
-                                        future.completeExceptionally(Throwable("Failed to write"))
-                                    }
-                                    return@withContext listOf<File>()
+                                    throw e
                                 } catch (e: Exception) {
                                     e.printStackTrace()
                                 }
@@ -115,17 +108,12 @@ class TagWriter {
                     }
                 }
                 if (wroteArtwork) {
-                    Logger.normalLog("inserted")
                     insertAlbumArt(context, info.artworkInfo!!.albumId, albumArtFile!!.path)
                 } else if (deletedArtwork) {
-                    Logger.normalLog("deleted")
-
                     deleteAlbumArt(context, info.artworkInfo!!.albumId)
                 }
                 scan(context, info.filePaths[0].toUri())
-                future.complete(null)
             }
-            return future
         }
 
         @RequiresApi(Build.VERSION_CODES.R)
@@ -140,10 +128,9 @@ class TagWriter {
                             info.artworkInfo.artwork
                         ))
                         artwork = Artwork.createArtworkFromFile(albumArtFile)
-                        Logger.normalLog("artwork created")
 
                     } catch (e: IOException) {
-                        e.printStackTrace()
+                        context.showToast("Something went wrong with artwork")
                     }
                 }
                 var wroteArtwork = false
@@ -165,10 +152,7 @@ class TagWriter {
                                 try {
                                     tag.setField(key, value)
                                 } catch (e: FieldDataInvalidException) {
-                                    withContext(Dispatchers.Main) {
-                                        context.showToast("Could not write tags in file")
-                                    }
-                                    return@withContext listOf<File>()
+                                    throw e
                                 } catch (e: Exception) {
                                     e.printStackTrace()
                                 }
@@ -200,12 +184,8 @@ class TagWriter {
                     }
                 }
                 if (wroteArtwork) {
-                    Logger.normalLog("inserted")
-
                     insertAlbumArt(context, info.artworkInfo!!.albumId, albumArtFile!!.path)
                 } else if (deletedArtwork) {
-                    Logger.normalLog("deleted")
-
                     deleteAlbumArt(context, info.artworkInfo!!.albumId)
                 }
                 cacheFiles

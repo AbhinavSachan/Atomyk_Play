@@ -471,15 +471,14 @@ public class SettingsFragment extends Fragment {
     @SuppressLint("NonConstantResourceId")
     private void setDark(int checkedId) {
         switch (checkedId) {
-            case R.id.light_button:
+            case R.id.light_button -> {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
                 dark = false;
-                break;
-            case R.id.dark_button:
+            }
+            case R.id.dark_button -> {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
                 dark = true;
-                break;
-
+            }
         }
         settingsStorage.saveThemeDark(dark);
     }

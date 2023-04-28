@@ -36,7 +36,7 @@ class BeautifyListAdapter(
         val holder = _holder as BeautifyListViewHolder
         val s: String = super.items!![position] + " = " + "(" + replacingTags[position] + ")"
         holder.textView.text = s
-        holder.imageView.setOnClickListener { v: View? -> removeFromList(position) }
+        holder.imageView.setOnClickListener { removeFromList(position) }
     }
 
     override fun getItemCount(): Int {
