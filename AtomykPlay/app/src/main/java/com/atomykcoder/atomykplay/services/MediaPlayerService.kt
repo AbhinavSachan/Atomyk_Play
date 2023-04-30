@@ -33,6 +33,7 @@ import com.atomykcoder.atomykplay.dataModels.LRCMap
 import com.atomykcoder.atomykplay.enums.PlaybackStatus
 import com.atomykcoder.atomykplay.events.*
 import com.atomykcoder.atomykplay.fragments.BottomSheetPlayerFragment
+import com.atomykcoder.atomykplay.helperFunctions.Logger
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper
 import com.atomykcoder.atomykplay.utils.StorageUtil
 import com.atomykcoder.atomykplay.utils.StorageUtil.SettingsStorage
@@ -409,6 +410,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
                     this, actionNumber, playbackIntent, PendingIntent.FLAG_IMMUTABLE
                 )
             }
+
             1 -> {
                 //pause
                 playbackIntent.action = ACTION_PAUSE
@@ -416,6 +418,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
                     this, actionNumber, playbackIntent, PendingIntent.FLAG_IMMUTABLE
                 )
             }
+
             2 -> {
                 //next
                 playbackIntent.action = ACTION_NEXT
@@ -423,6 +426,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
                     this, actionNumber, playbackIntent, PendingIntent.FLAG_IMMUTABLE
                 )
             }
+
             3 -> {
                 //previous
                 playbackIntent.action = ACTION_PREVIOUS
@@ -430,6 +434,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
                     this, actionNumber, playbackIntent, PendingIntent.FLAG_IMMUTABLE
                 )
             }
+
             4 -> {
                 //stop
                 playbackIntent.action = ACTION_STOP
@@ -437,6 +442,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
                     this, actionNumber, playbackIntent, PendingIntent.FLAG_IMMUTABLE
                 )
             }
+
             else -> {}
         }
         return null
@@ -487,6 +493,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
                 pauseMedia()
                 MainActivity.phone_ringing = true
             }
+
             TelephonyManager.CALL_STATE_IDLE -> if (isMediaPlayerNotNull) {
                 MainActivity.phone_ringing = false
                 if (wasPlaying) {
@@ -499,6 +506,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
 
     override fun onCreate() {
         super.onCreate()
+        Logger.normalLog("created service")
 
         //manage incoming calls during playback
         callStateListener()
@@ -513,6 +521,48 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
         registerStopMusic()
         mPackageValidator = PackageValidator(this, R.xml.allowed_media_browser_callers)
 
+        selfStopHandler = Handler(Looper.getMainLooper())
+        storage = StorageUtil(applicationContext)
+        settingsStorage = SettingsStorage(applicationContext)
+        mediaSessionManager = getSystemService(MEDIA_SESSION_SERVICE) as MediaSessionManager
+        notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        loadList()
+
+        if (musicIndex != -1 && musicIndex < musicList!!.size) {
+            activeMusic = musicList!![musicIndex]
+        }
+        val defaultArtwork = BitmapFactory.decodeResource(
+            this@MediaPlayerService.applicationContext.resources, R.drawable.placeholder_art
+        )
+        artworkDimension = defaultArtwork.width.coerceAtMost(defaultArtwork.height)
+        defaultThumbnail = ThumbnailUtils.extractThumbnail(
+            defaultArtwork,
+            artworkDimension - artworkDimension / 5,
+            artworkDimension - artworkDimension / 5,
+            ThumbnailUtils.OPTIONS_RECYCLE_INPUT
+        )
+        if (defaultMetadata == null) {
+            defaultMetadata = MediaMetadataCompat.Builder()
+                .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, defaultThumbnail)
+                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, "")
+                .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, "")
+                .putString(MediaMetadataCompat.METADATA_KEY_TITLE, "")
+                .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, 0).build()
+        }
+        if (musicNotification != null) {
+            try {
+                startForeground(NOTIFICATION_ID, musicNotification)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        } else {
+            buildInitialNotification()
+            try {
+                startForeground(NOTIFICATION_ID, initialNotification)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 
     override fun onBind(intent: Intent): IBinder {
@@ -592,6 +642,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
                 showToast("MEDIA_ERROR_UNKNOWN$extra")
                 return true
             }
+
             MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK -> {
                 try {
                     stoppedByNotification()
@@ -602,6 +653,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
                 showToast("MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK$extra")
                 return true
             }
+
             MEDIA_ERROR_SERVER_DIED -> {
                 try {
                     //service is active send media with broadcast receiver
@@ -615,6 +667,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
                 showToast("MEDIA_ERROR_SERVER_DIED$extra")
                 return true
             }
+
             else -> {}
         }
         return false
@@ -623,6 +676,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
     override fun onInfo(mp: MediaPlayer, what: Int, extra: Int): Boolean {
         return false
     }
+
 
     override fun onSeekComplete(mp: MediaPlayer) {}
     private fun initiateMediaPlayer() {
@@ -1058,10 +1112,12 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
                 }
                 wasPlaying = false
             }
+
             AudioManager.AUDIOFOCUS_LOSS, AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> if (isMediaPlaying) {
                 pauseMedia()
                 wasPlaying = true
             }
+
             AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> if (settingsStorage!!.loadLowerVol()) {
                 if (isMediaPlaying) {
                     mediaPlayer!!.setVolume(0.3f, 0.3f)
@@ -1072,62 +1128,11 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         //Handle Intent action from MediaSession.TransportControls
-        if (intent == null) {
+        if (intent != null) {
+            handleNotificationActions(intent)
             return START_STICKY
         }
-        handleNotificationActions(intent)
-        if (selfStopHandler == null) {
-            selfStopHandler = Handler(Looper.getMainLooper())
-        }
-        if (storage == null) {
-            storage = StorageUtil(applicationContext)
-        }
-        if (settingsStorage == null) {
-            settingsStorage = SettingsStorage(applicationContext)
-        }
-        if (mediaSessionManager == null) {
-            mediaSessionManager = getSystemService(MEDIA_SESSION_SERVICE) as MediaSessionManager
-        }
-        if (notificationManager == null) {
-            notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        }
-        loadList()
-        if (musicList != null) if (musicIndex != -1 && musicIndex < musicList!!.size) {
-            activeMusic = musicList!![musicIndex]
-        }
-        val defaultArtwork = BitmapFactory.decodeResource(
-            this@MediaPlayerService.applicationContext.resources, R.drawable.placeholder_art
-        )
-        artworkDimension = defaultArtwork.width.coerceAtMost(defaultArtwork.height)
-        defaultThumbnail = ThumbnailUtils.extractThumbnail(
-            defaultArtwork,
-            artworkDimension - artworkDimension / 5,
-            artworkDimension - artworkDimension / 5,
-            ThumbnailUtils.OPTIONS_RECYCLE_INPUT
-        )
-        if (defaultMetadata == null) {
-            defaultMetadata = MediaMetadataCompat.Builder()
-                .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, defaultThumbnail)
-                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, "")
-                .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, "")
-                .putString(MediaMetadataCompat.METADATA_KEY_TITLE, "")
-                .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, 0).build()
-        }
-        if (musicNotification != null) {
-            try {
-                startForeground(NOTIFICATION_ID, musicNotification)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        } else {
-            buildInitialNotification()
-            try {
-                startForeground(NOTIFICATION_ID, initialNotification)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-        return START_STICKY
+        return super.onStartCommand(intent, flags, startId)
     }
 
     override fun onTaskRemoved(rootIntent: Intent) {
