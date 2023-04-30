@@ -1,4 +1,4 @@
-package com.atomykcoder.atomykplay.adapters.ViewHolders;
+package com.atomykcoder.atomykplay.adapters.viewHolders;
 
 import android.view.View;
 import android.widget.TextView;
@@ -6,7 +6,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 
 import com.atomykcoder.atomykplay.R;
-import com.atomykcoder.atomykplay.adapters.Generics.GenericViewHolder;
+import com.atomykcoder.atomykplay.adapters.generics.GenericViewHolder;
 
 public class MusicLyricsViewHolder extends GenericViewHolder<String> {
     public final TextView textView;

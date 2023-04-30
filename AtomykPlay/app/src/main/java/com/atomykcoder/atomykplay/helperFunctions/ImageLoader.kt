@@ -9,23 +9,21 @@ import com.atomykcoder.atomykplay.classes.GlideBuilt
 import com.atomykcoder.atomykplay.data.Music
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.IOException
 
 class ImageLoader(context: Context) {
-    private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
-    private val coroutineScopeMain: CoroutineScope = CoroutineScope(Dispatchers.Main)
-    private val glideBuilt: GlideBuilt = GlideBuilt(context)
 
-    fun loadImage(placeholder: Int, music: Music, imageView: ImageView, measure: Int) {
-        var result: Bitmap?
-        coroutineScope.launch {
-            result = loadFromMedia(music)
-            coroutineScopeMain.launch {
-                glideBuilt.glideBitmap(result, placeholder, imageView, measure, false)
-            }
-        }
+    /**
+     * Loads image must call this method from background thread
+     *
+     * @param music music model
+     * @return
+     */
+    fun loadImage( music: Music):Bitmap? {
+        return loadFromMedia(music)
     }
     private fun loadFromMedia(item: Music): Bitmap? {
         var image: Bitmap? = null
@@ -48,11 +46,5 @@ class ImageLoader(context: Context) {
             }
         }
         return image
-    }
-    fun pauseRequest(){
-        glideBuilt.pauseRequest()
-    }
-    fun resumeRequest(){
-        glideBuilt.resumeRequest()
     }
 }

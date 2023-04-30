@@ -1,4 +1,4 @@
-package com.atomykcoder.atomykplay.adapters.ViewHolders;
+package com.atomykcoder.atomykplay.adapters.viewHolders;
 
 import static com.atomykcoder.atomykplay.helperFunctions.MusicHelper.convertDuration;
 
@@ -9,7 +9,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 
 import com.atomykcoder.atomykplay.R;
-import com.atomykcoder.atomykplay.adapters.Generics.GenericViewHolder;
+import com.atomykcoder.atomykplay.adapters.generics.GenericViewHolder;
 import com.atomykcoder.atomykplay.data.Music;
 
 public class MusicQueueViewHolder extends GenericViewHolder<Music> {

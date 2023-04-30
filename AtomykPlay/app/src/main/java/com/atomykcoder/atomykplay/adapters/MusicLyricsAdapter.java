@@ -9,9 +9,9 @@ import androidx.annotation.NonNull;
 
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.activities.MainActivity;
-import com.atomykcoder.atomykplay.adapters.Generics.GenericRecyclerAdapter;
-import com.atomykcoder.atomykplay.adapters.Generics.GenericViewHolder;
-import com.atomykcoder.atomykplay.adapters.ViewHolders.MusicLyricsViewHolder;
+import com.atomykcoder.atomykplay.adapters.generics.GenericRecyclerAdapter;
+import com.atomykcoder.atomykplay.adapters.generics.GenericViewHolder;
+import com.atomykcoder.atomykplay.adapters.viewHolders.MusicLyricsViewHolder;
 
 import java.util.ArrayList;
 

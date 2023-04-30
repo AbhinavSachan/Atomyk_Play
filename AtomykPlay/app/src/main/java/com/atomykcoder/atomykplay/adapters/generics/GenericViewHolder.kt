@@ -1,4 +1,4 @@
-package com.atomykcoder.atomykplay.adapters.Generics
+package com.atomykcoder.atomykplay.adapters.generics
 
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView

@@ -4,7 +4,7 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.atomykcoder.atomykplay.activities.MainActivity;
-import com.atomykcoder.atomykplay.adapters.Generics.GenericRecyclerAdapter;
+import com.atomykcoder.atomykplay.adapters.generics.GenericRecyclerAdapter;
 import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.utils.StorageUtil;
 
@@ -53,8 +53,8 @@ public class MusicAdapter extends GenericRecyclerAdapter<Music> {
 
             this.musicList = shuffleList;
             handler.post(()-> {
-                canPlay = true;
                 handlePlayMusic(mainActivity, item);
+                canPlay = true;
             });
         });
         service.shutdown();
@@ -69,8 +69,8 @@ public class MusicAdapter extends GenericRecyclerAdapter<Music> {
             storage.saveMusicIndex(position);
             this.musicList = musicList;
             handler.post(()-> {
-                canPlay = true;
                 handlePlayMusic(mainActivity, item);
+                canPlay = true;
             });
         });
         service.shutdown();

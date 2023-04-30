@@ -2,17 +2,18 @@ package com.atomykcoder.atomykplay.adapters
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Bitmap
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.RecyclerView
 import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.activities.MainActivity
-import com.atomykcoder.atomykplay.adapters.Generics.GenericViewHolder
-import com.atomykcoder.atomykplay.adapters.ViewHolders.MusicQueueViewHolder
+import com.atomykcoder.atomykplay.adapters.generics.GenericViewHolder
+import com.atomykcoder.atomykplay.adapters.viewHolders.MusicQueueViewHolder
+import com.atomykcoder.atomykplay.classes.GlideBuilt
 import com.atomykcoder.atomykplay.data.Music
 import com.atomykcoder.atomykplay.helperFunctions.MusicDiffCallback
 import com.atomykcoder.atomykplay.interfaces.ItemTouchHelperAdapter
@@ -20,6 +21,9 @@ import com.atomykcoder.atomykplay.interfaces.OnDragStartListener
 import com.atomykcoder.atomykplay.helperFunctions.ImageLoader
 import com.atomykcoder.atomykplay.utils.StorageUtil
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.*
 
 class MusicQueueAdapter(
@@ -27,10 +31,14 @@ class MusicQueueAdapter(
     items: ArrayList<Music>?,
     onDragStartListener: OnDragStartListener
 ) : MusicAdapter(), ItemTouchHelperAdapter {
-    var onDragStartListener: OnDragStartListener
+    private var onDragStartListener: OnDragStartListener
     var mainActivity: MainActivity
-    var storageUtil: StorageUtil
-    var imageLoader: ImageLoader
+    private var storageUtil: StorageUtil
+    private var imageLoader: ImageLoader
+    private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
+    private val coroutineScopeMain: CoroutineScope = CoroutineScope(Dispatchers.Main)
+    private val glideBuilt: GlideBuilt = GlideBuilt(context)
+
 
     init {
         super.items = items
@@ -93,8 +101,15 @@ class MusicQueueAdapter(
         val currentItem = super.items!![position]
         val index = "${position + 1}"
         queueViewHolder.musicIndex.text = index
-        imageLoader.loadImage(R.drawable.ic_music, currentItem, queueViewHolder.albumCoverIV, 128)
-
+        coroutineScope.launch {
+            var result: Bitmap?
+            coroutineScope.launch {
+                result = imageLoader.loadImage(R.drawable.ic_music, currentItem, queueViewHolder.albumCoverIV, 128)
+                coroutineScopeMain.launch{
+                    glideBuilt.glideBitmap(result, R.drawable.ic_music, queueViewHolder.albumCoverIV, 128, false)
+                }
+            }
+        }
         //playing song
         queueViewHolder.cardView.setOnClickListener {
             if (shouldIgnoreClick()) return@setOnClickListener

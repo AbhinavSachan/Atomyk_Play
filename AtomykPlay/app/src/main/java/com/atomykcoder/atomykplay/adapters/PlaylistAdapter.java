@@ -16,9 +16,9 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.activities.MainActivity;
-import com.atomykcoder.atomykplay.adapters.Generics.GenericRecyclerAdapter;
-import com.atomykcoder.atomykplay.adapters.Generics.GenericViewHolder;
-import com.atomykcoder.atomykplay.adapters.ViewHolders.PlaylistViewHolder;
+import com.atomykcoder.atomykplay.adapters.generics.GenericRecyclerAdapter;
+import com.atomykcoder.atomykplay.adapters.generics.GenericViewHolder;
+import com.atomykcoder.atomykplay.adapters.viewHolders.PlaylistViewHolder;
 import com.atomykcoder.atomykplay.classes.GlideBuilt;
 import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.dataModels.Playlist;

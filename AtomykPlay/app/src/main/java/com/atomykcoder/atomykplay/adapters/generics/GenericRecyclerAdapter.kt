@@ -1,12 +1,9 @@
-package com.atomykcoder.atomykplay.adapters.Generics
+package com.atomykcoder.atomykplay.adapters.generics
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.os.SystemClock
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import androidx.asynclayoutinflater.view.AsyncLayoutInflater
 import androidx.recyclerview.widget.RecyclerView
 
 open class GenericRecyclerAdapter<T> : RecyclerView.Adapter<GenericViewHolder<T>>() {

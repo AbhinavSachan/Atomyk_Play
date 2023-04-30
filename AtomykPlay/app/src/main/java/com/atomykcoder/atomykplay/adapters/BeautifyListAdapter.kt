@@ -2,13 +2,12 @@ package com.atomykcoder.atomykplay.adapters
 
 import android.content.Context
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.activities.MainActivity
-import com.atomykcoder.atomykplay.adapters.Generics.GenericRecyclerAdapter
-import com.atomykcoder.atomykplay.adapters.Generics.GenericViewHolder
-import com.atomykcoder.atomykplay.adapters.ViewHolders.BeautifyListViewHolder
+import com.atomykcoder.atomykplay.adapters.generics.GenericRecyclerAdapter
+import com.atomykcoder.atomykplay.adapters.generics.GenericViewHolder
+import com.atomykcoder.atomykplay.adapters.viewHolders.BeautifyListViewHolder
 import com.atomykcoder.atomykplay.utils.StorageUtil.SettingsStorage
 
 class BeautifyListAdapter(

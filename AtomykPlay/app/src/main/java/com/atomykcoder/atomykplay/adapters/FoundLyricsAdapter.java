@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.activities.MainActivity;
-import com.atomykcoder.atomykplay.adapters.ViewHolders.FoundLyricsViewHolder;
+import com.atomykcoder.atomykplay.adapters.viewHolders.FoundLyricsViewHolder;
 import com.atomykcoder.atomykplay.fragments.AddLyricsFragment;
 
 import java.util.ArrayList;
