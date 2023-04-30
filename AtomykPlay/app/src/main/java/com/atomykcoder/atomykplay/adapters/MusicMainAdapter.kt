@@ -56,7 +56,7 @@ class MusicMainAdapter(var context: Context, musicList: ArrayList<Music>?) : Mus
         currentItem?.let {
             var result:Bitmap?
             coroutineScope.launch {
-                result = imageLoader.loadImage(R.drawable.ic_music, currentItem, musicViewHolder.albumCoverIV, 128)
+                result = imageLoader.loadImage(currentItem)
                 coroutineScopeMain.launch{
                     glideBuilt.glideBitmap(result, R.drawable.ic_music, musicViewHolder.albumCoverIV, 128, false)
                 }

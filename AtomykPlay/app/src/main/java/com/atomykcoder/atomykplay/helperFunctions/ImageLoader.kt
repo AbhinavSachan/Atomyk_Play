@@ -4,13 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
-import android.widget.ImageView
-import com.atomykcoder.atomykplay.classes.GlideBuilt
 import com.atomykcoder.atomykplay.data.Music
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
 import java.io.File
 import java.io.IOException
 
@@ -22,9 +16,10 @@ class ImageLoader(context: Context) {
      * @param music music model
      * @return
      */
-    fun loadImage( music: Music):Bitmap? {
+    fun loadImage(music: Music): Bitmap? {
         return loadFromMedia(music)
     }
+
     private fun loadFromMedia(item: Music): Bitmap? {
         var image: Bitmap? = null
         var art: ByteArray? = null // initialize to null

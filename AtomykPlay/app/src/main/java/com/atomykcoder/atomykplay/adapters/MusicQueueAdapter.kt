@@ -104,7 +104,7 @@ class MusicQueueAdapter(
         coroutineScope.launch {
             var result: Bitmap?
             coroutineScope.launch {
-                result = imageLoader.loadImage(R.drawable.ic_music, currentItem, queueViewHolder.albumCoverIV, 128)
+                result = imageLoader.loadImage(currentItem)
                 coroutineScopeMain.launch{
                     glideBuilt.glideBitmap(result, R.drawable.ic_music, queueViewHolder.albumCoverIV, 128, false)
                 }
