@@ -589,9 +589,10 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
             handler.post {
                 if (MainActivity.service_bound) {
                     EventBus.getDefault().post(SetMainLayoutEvent(activeMusic, image[0]))
-                    updateMetaData(activeMusic, image[0])
                 }
+                updateMetaData(activeMusic, image[0])
                 resumeMedia()
+
             }
         }
     }

@@ -389,32 +389,29 @@ public class SettingsFragment extends Fragment {
     }
 
     private void hideExtra(boolean v) {
+        assert mainActivity.bottomSheetPlayerFragment.mini_next != null;
         if (v) {
-            assert mainActivity.bottomSheetPlayerFragment.mini_next != null;
             mainActivity.bottomSheetPlayerFragment.mini_next.setVisibility(View.VISIBLE);
         } else {
-            assert mainActivity.bottomSheetPlayerFragment.mini_next != null;
             mainActivity.bottomSheetPlayerFragment.mini_next.setVisibility(View.GONE);
         }
     }
 
 
     private void hideArtist(boolean v) {
+        assert mainActivity.bottomSheetPlayerFragment.mini_artist_text != null;
         if (v) {
-            assert mainActivity.bottomSheetPlayerFragment.mini_artist_text != null;
             mainActivity.bottomSheetPlayerFragment.mini_artist_text.setVisibility(View.VISIBLE);
         } else {
-            assert mainActivity.bottomSheetPlayerFragment.mini_artist_text != null;
             mainActivity.bottomSheetPlayerFragment.mini_artist_text.setVisibility(View.GONE);
         }
     }
 
     private void hideInfo(boolean v) {
+        assert mainActivity.bottomSheetPlayerFragment.info_layout != null;
         if (v) {
-            assert mainActivity.bottomSheetPlayerFragment.info_layout != null;
             mainActivity.bottomSheetPlayerFragment.info_layout.setVisibility(View.VISIBLE);
         } else {
-            assert mainActivity.bottomSheetPlayerFragment.info_layout != null;
             mainActivity.bottomSheetPlayerFragment.info_layout.setVisibility(View.GONE);
         }
     }

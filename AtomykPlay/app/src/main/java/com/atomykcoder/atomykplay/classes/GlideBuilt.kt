@@ -4,6 +4,8 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.widget.ImageView
 import com.atomykcoder.atomykplay.R
+import com.atomykcoder.atomykplay.helperFunctions.AudioFileCover
+import com.atomykcoder.atomykplay.helperFunctions.GlideApp
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
@@ -18,31 +20,33 @@ class GlideBuilt(private val context: Context) {
             )
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .skipMemoryCache(true)
+                .transition(DrawableTransitionOptions.withCrossFade(300))
                 .override(image_measure, image_measure)
                 .into(imageView!!)
         } catch (ignored: Exception) {
         }
     }
 
-    fun glideBitmap(
-        newBitmap: Bitmap?,
+    fun glideLoadAlbumArt(
+        path: String?,
         placeholderImage: Int,
         imageView: ImageView?,
         image_measure: Int,
         animate: Boolean
     ) {
-        var shadowed = placeholderImage
-        if (newBitmap != null) {
-            shadowed = -1
-        }
+
         val drawableTransitionOptions: DrawableTransitionOptions = if (animate) {
             DrawableTransitionOptions.withCrossFade(300)
         } else {
             DrawableTransitionOptions().dontTransition()
         }
         try {
-            Glide.with(context).load(newBitmap).apply(requestOptions.placeholder(shadowed).error(R.drawable.ic_music_thumbnail))
-                .diskCacheStrategy(DiskCacheStrategy.NONE)
+            GlideApp.with(context).load(path?.let { AudioFileCover(it) }).apply(
+                requestOptions.placeholder(
+                    placeholderImage
+                ).error(R.drawable.ic_music_thumbnail)
+            )
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .skipMemoryCache(true)
                 .transition(drawableTransitionOptions)
                 .override(image_measure, image_measure)
@@ -50,12 +54,47 @@ class GlideBuilt(private val context: Context) {
         } catch (ignored: Exception) {
         }
     }
-    fun pauseRequest(){
+
+    fun glideBitmap(
+        bitmap: Bitmap?,
+        placeholderImage: Int,
+        imageView: ImageView?,
+        image_measure: Int,
+        animate: Boolean
+    ) {
+
+        val shadowed = if (bitmap == null) {
+            placeholderImage
+        } else {
+            -1
+        }
+        val drawableTransitionOptions: DrawableTransitionOptions = if (animate) {
+            DrawableTransitionOptions.withCrossFade(300)
+        } else {
+            DrawableTransitionOptions().dontTransition()
+        }
+        try {
+            GlideApp.with(context).load(bitmap).apply(
+                requestOptions.placeholder(
+                    shadowed
+                ).error(R.drawable.ic_music_thumbnail)
+            )
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .skipMemoryCache(true)
+                .transition(drawableTransitionOptions)
+                .override(image_measure, image_measure)
+                .into(imageView!!)
+        } catch (ignored: Exception) {
+        }
+    }
+
+    fun pauseRequest() {
         if (!Glide.with(context).isPaused) {
             Glide.with(context).pauseRequests();
         }
     }
-    fun resumeRequest(){
+
+    fun resumeRequest() {
         if (Glide.with(context).isPaused) {
             Glide.with(context).resumeRequests();
         }

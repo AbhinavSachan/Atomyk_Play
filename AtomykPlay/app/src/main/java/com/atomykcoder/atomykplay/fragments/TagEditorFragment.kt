@@ -6,11 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.database.Cursor
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.media.MediaMetadataRetriever
 import android.media.MediaScannerConnection
-import android.media.MediaScannerConnection.MediaScannerConnectionClient
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -27,11 +23,9 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
-import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.lifecycleScope
 import com.atomykcoder.atomykplay.BuildConfig
 import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.activities.MainActivity
@@ -43,7 +37,6 @@ import com.atomykcoder.atomykplay.customScripts.TagWriter
 import com.atomykcoder.atomykplay.data.Music
 import com.atomykcoder.atomykplay.databinding.FragmentTagEditorBinding
 import com.atomykcoder.atomykplay.helperFunctions.CustomMethods.pickImage
-import com.atomykcoder.atomykplay.helperFunctions.Logger
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper
 import com.atomykcoder.atomykplay.repository.LoadingStatus
 import com.atomykcoder.atomykplay.utils.MusicUtil
@@ -57,13 +50,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.jaudiotagger.tag.FieldKey
 import java.io.File
-import java.io.IOException
-import java.util.*
+import java.util.EnumMap
 
 class TagEditorFragment : Fragment() {
     private lateinit var launcher: ActivityResultLauncher<IntentSenderRequest>
     private lateinit var cacheFiles: List<File>
-    private lateinit var mediaScannerConnection: MediaScannerConnection
     private val loadingStatus = MutableLiveData<LoadingStatus>()
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
     private val coroutineMainScope = CoroutineScope(Dispatchers.Main)
@@ -90,14 +81,15 @@ class TagEditorFragment : Fragment() {
                 }
             }
         }
-    private var musicUri: Uri? = null
 
     private fun getLoadingStatus(): LiveData<LoadingStatus> {
         return loadingStatus
     }
 
     private fun setLoadingStatus(status: LoadingStatus) {
-        loadingStatus.value = status
+        coroutineMainScope.launch {
+            loadingStatus.value = status
+        }
     }
 
     override fun onCreateView(
@@ -135,28 +127,9 @@ class TagEditorFragment : Fragment() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             b.editSongGenreTag.setText(music?.genre)
         }
-        val image = arrayOf<Bitmap?>(null)
-        coroutineScope.launch {
-            //image decoder
-            var art: ByteArray? = ByteArray(0)
-            try {
-                MediaMetadataRetriever().use { mediaMetadataRetriever ->
-                    mediaMetadataRetriever.setDataSource(music?.path)
-                    art = mediaMetadataRetriever.embeddedPicture
-                }
-            } catch (e: IOException) {
-                e.printStackTrace()
-            }
-            try {
-                image[0] = art?.size?.let { BitmapFactory.decodeByteArray(art, 0, it) }
-            } catch (ignored: Exception) {
-            }
-            coroutineMainScope.launch {
-                glideBuilt!!.glideBitmap(
-                    image[0], R.drawable.ic_music, b.songImageViewTag, 412, false
-                )
-            }
-        }
+        glideBuilt!!.glideLoadAlbumArt(
+            music!!.path, R.drawable.ic_music, b.songImageViewTag, 412, false
+        )
         b.pickCoverTag.setOnClickListener {
             deleteAlbumArt = false
             pickImage(pickIntent, mediaPicker)
@@ -202,10 +175,8 @@ class TagEditorFragment : Fragment() {
                 }
             }
         }
-        lifecycleScope.launch {
-            TagWriter.scan(requireContext(), MusicUtil.getSongFileUri(music?.id!!.toLong()))
-            setLoadingStatus(LoadingStatus.SUCCESS)
-        }
+        TagWriter.scan(requireContext(), MusicUtil.getSongFileUri(music?.id!!.toLong()))
+        setLoadingStatus(LoadingStatus.SUCCESS)
     }
 
     private fun deleteCoverArt() {
@@ -265,6 +236,7 @@ class TagEditorFragment : Fragment() {
                 deleteAlbumArt -> ArtworkInfo(
                     music.albumId.toLong(), null
                 )
+
                 imageUri == null -> null
                 else -> ArtworkInfo(
                     music.albumId.toLong(),
@@ -329,17 +301,20 @@ class TagEditorFragment : Fragment() {
                 LoadingStatus.LOADING -> {
                     b.progressBarTag.visibility = View.VISIBLE
                 }
+
                 LoadingStatus.SUCCESS -> {
                     showToast("Change's may be applied after restart")
                     (requireActivity() as MainActivity).checkForUpdateList(true)
                     b.progressBarTag.visibility = View.GONE
                     fragmentManager.popBackStack()
                 }
+
                 LoadingStatus.FAILURE -> {
                     showToast("Something went wrong")
                     b.progressBarTag.visibility = View.GONE
                     fragmentManager.popBackStack()
                 }
+
                 else -> {
                     showToast("Something went wrong")
                     b.progressBarTag.visibility = View.GONE
@@ -347,21 +322,6 @@ class TagEditorFragment : Fragment() {
                 }
             }
         }
-    }
-
-    private fun addToMediaStore(musicUri: Uri) {
-        val file = File(musicUri.path.toString())
-        val client = object : MediaScannerConnectionClient {
-            override fun onScanCompleted(path: String?, uri: Uri?) {
-                mediaScannerConnection.disconnect()
-            }
-
-            override fun onMediaScannerConnected() {
-                mediaScannerConnection.scanFile(file.absolutePath, null)
-            }
-        }
-        mediaScannerConnection = MediaScannerConnection(context, client)
-        mediaScannerConnection.connect()
     }
 
     private fun setImageUri(album_uri: Uri?) {

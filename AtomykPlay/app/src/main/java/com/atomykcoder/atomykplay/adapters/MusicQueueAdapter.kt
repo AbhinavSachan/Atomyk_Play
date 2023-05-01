@@ -2,7 +2,6 @@ package com.atomykcoder.atomykplay.adapters
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Bitmap
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -15,15 +14,14 @@ import com.atomykcoder.atomykplay.adapters.generics.GenericViewHolder
 import com.atomykcoder.atomykplay.adapters.viewHolders.MusicQueueViewHolder
 import com.atomykcoder.atomykplay.classes.GlideBuilt
 import com.atomykcoder.atomykplay.data.Music
+import com.atomykcoder.atomykplay.helperFunctions.AudioFileCover
 import com.atomykcoder.atomykplay.helperFunctions.MusicDiffCallback
 import com.atomykcoder.atomykplay.interfaces.ItemTouchHelperAdapter
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener
-import com.atomykcoder.atomykplay.helperFunctions.ImageLoader
 import com.atomykcoder.atomykplay.utils.StorageUtil
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.util.*
 
 class MusicQueueAdapter(
@@ -34,9 +32,6 @@ class MusicQueueAdapter(
     private var onDragStartListener: OnDragStartListener
     var mainActivity: MainActivity
     private var storageUtil: StorageUtil
-    private var imageLoader: ImageLoader
-    private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
-    private val coroutineScopeMain: CoroutineScope = CoroutineScope(Dispatchers.Main)
     private val glideBuilt: GlideBuilt = GlideBuilt(context)
 
 
@@ -45,7 +40,6 @@ class MusicQueueAdapter(
         this.onDragStartListener = onDragStartListener
         mainActivity = context as MainActivity
         storageUtil = StorageUtil(context)
-        imageLoader = ImageLoader(context)
     }
 
     @Synchronized
@@ -94,6 +88,7 @@ class MusicQueueAdapter(
             .inflate(R.layout.queue_music_item_layout, parent, false)
         return MusicQueueViewHolder(view)
     }
+
     @SuppressLint("ClickableViewAccessibility")
     override fun onBindViewHolder(holder: GenericViewHolder<Music>, position: Int) {
         super.onBindViewHolder(holder, position)
@@ -101,15 +96,14 @@ class MusicQueueAdapter(
         val currentItem = super.items!![position]
         val index = "${position + 1}"
         queueViewHolder.musicIndex.text = index
-        coroutineScope.launch {
-            var result: Bitmap?
-            coroutineScope.launch {
-                result = imageLoader.loadImage(currentItem)
-                coroutineScopeMain.launch{
-                    glideBuilt.glideBitmap(result, R.drawable.ic_music, queueViewHolder.albumCoverIV, 128, false)
-                }
-            }
-        }
+        glideBuilt.glideLoadAlbumArt(
+            currentItem.path,
+            R.drawable.ic_music,
+            queueViewHolder.albumCoverIV,
+            128,
+            true
+        )
+
         //playing song
         queueViewHolder.cardView.setOnClickListener {
             if (shouldIgnoreClick()) return@setOnClickListener
@@ -131,7 +125,7 @@ class MusicQueueAdapter(
     }
 
     override fun getItemCount(): Int {
-        return super.items?.size ?:0
+        return super.items?.size ?: 0
     }
 
     private fun isMusicAvailable(currentItem: Music): Boolean {

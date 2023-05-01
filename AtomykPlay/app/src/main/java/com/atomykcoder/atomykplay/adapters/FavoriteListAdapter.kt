@@ -1,9 +1,7 @@
 package com.atomykcoder.atomykplay.adapters
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import com.atomykcoder.atomykplay.R
@@ -13,14 +11,10 @@ import com.atomykcoder.atomykplay.adapters.viewHolders.FavoriteViewHolder
 import com.atomykcoder.atomykplay.classes.GlideBuilt
 import com.atomykcoder.atomykplay.data.Music
 import com.atomykcoder.atomykplay.enums.OptionSheetEnum
-import com.atomykcoder.atomykplay.helperFunctions.ImageLoader
 import com.atomykcoder.atomykplay.interfaces.ItemTouchHelperAdapter
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener
 import com.atomykcoder.atomykplay.utils.StorageUtil
 import com.atomykcoder.atomykplay.utils.StorageUtil.SettingsStorage
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 class FavoriteListAdapter(
     private val context: Context,
@@ -31,9 +25,6 @@ class FavoriteListAdapter(
     private var onDragStartListener: OnDragStartListener
     var storage: StorageUtil
     var settingsStorage: SettingsStorage
-    private var imageLoader: ImageLoader
-    private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
-    private val coroutineScopeMain: CoroutineScope = CoroutineScope(Dispatchers.Main)
     private val glideBuilt: GlideBuilt = GlideBuilt(context)
 
     init {
@@ -42,7 +33,6 @@ class FavoriteListAdapter(
         mainActivity = context as MainActivity
         storage = StorageUtil(context)
         settingsStorage = SettingsStorage(context)
-        imageLoader = ImageLoader(context)
     }
 
     //when item starts to move it will change positions of every item in real time
@@ -68,15 +58,13 @@ class FavoriteListAdapter(
         super.onBindViewHolder(_holder, position)
         val holder = _holder as FavoriteViewHolder
         val currentItem = super.items!![position]
-        coroutineScope.launch {
-            var result: Bitmap?
-            coroutineScope.launch {
-                result = imageLoader.loadImage(currentItem)
-                coroutineScopeMain.launch{
-                    glideBuilt.glideBitmap(result, R.drawable.ic_music, holder.albumCoverIV, 128, false)
-                }
-            }
-        }
+        glideBuilt.glideLoadAlbumArt(
+            currentItem.path,
+            R.drawable.ic_music,
+            holder.albumCoverIV,
+            128,
+            true
+        )
         holder.cardView.setOnClickListener {
             if (shouldIgnoreClick()) return@setOnClickListener
             if (isMusicNotAvailable(currentItem)) {

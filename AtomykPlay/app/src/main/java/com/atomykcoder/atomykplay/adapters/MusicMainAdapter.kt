@@ -1,7 +1,6 @@
 package com.atomykcoder.atomykplay.adapters
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.Toast
@@ -14,27 +13,19 @@ import com.atomykcoder.atomykplay.classes.GlideBuilt
 import com.atomykcoder.atomykplay.data.Music
 import com.atomykcoder.atomykplay.enums.OptionSheetEnum
 import com.atomykcoder.atomykplay.helperFunctions.MusicDiffCallback
-import com.atomykcoder.atomykplay.helperFunctions.ImageLoader
 import com.atomykcoder.atomykplay.repository.MusicRepo
 import com.atomykcoder.atomykplay.utils.StorageUtil
 import com.atomykcoder.atomykplay.utils.StorageUtil.SettingsStorage
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 class MusicMainAdapter(var context: Context, musicList: ArrayList<Music>?) : MusicAdapter() {
     private var mainActivity: MainActivity = context as MainActivity
     private var storage: StorageUtil = StorageUtil(context)
     private var settingsStorage: SettingsStorage = SettingsStorage(context)
     private var musicRepo: MusicRepo = MusicRepo.instance!!
-    private var imageLoader: ImageLoader
-    private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
-    private val coroutineScopeMain: CoroutineScope = CoroutineScope(Dispatchers.Main)
     private val glideBuilt: GlideBuilt = GlideBuilt(context)
 
     init {
         super.items = musicList
-        imageLoader = ImageLoader(context)
     }
 
     fun updateMusicListItems(newMusicArrayList: ArrayList<Music>?) {
@@ -46,21 +37,23 @@ class MusicMainAdapter(var context: Context, musicList: ArrayList<Music>?) : Mus
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GenericViewHolder<Music> {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.music_item_layout, parent, false)
+        val view =
+            LayoutInflater.from(parent.context).inflate(R.layout.music_item_layout, parent, false)
         return MusicMainViewHolder(view)
     }
+
     override fun onBindViewHolder(holder: GenericViewHolder<Music>, position: Int) {
         super.onBindViewHolder(holder, position)
         val musicViewHolder = holder as MusicMainViewHolder
         val currentItem = super.items?.get(position)
         currentItem?.let {
-            var result:Bitmap?
-            coroutineScope.launch {
-                result = imageLoader.loadImage(currentItem)
-                coroutineScopeMain.launch{
-                    glideBuilt.glideBitmap(result, R.drawable.ic_music, musicViewHolder.albumCoverIV, 128, false)
-                }
-            }
+            glideBuilt.glideLoadAlbumArt(
+                currentItem.path,
+                R.drawable.ic_music,
+                musicViewHolder.albumCoverIV,
+                128,
+                true
+            )
             musicViewHolder.cardView.setOnClickListener {
                 if (shouldIgnoreClick()) return@setOnClickListener
                 if (isMusicNotAvailable(currentItem)) {
@@ -91,6 +84,7 @@ class MusicMainAdapter(var context: Context, musicList: ArrayList<Music>?) : Mus
         }
         return false
     }
+
     fun removeItem(item: Music) {
         val position = super.items?.indexOf(item)
         position?.let {

@@ -7,6 +7,7 @@ import android.app.Dialog
 import android.content.Context
 import android.content.DialogInterface
 import android.content.res.Resources
+import android.content.res.Resources.NotFoundException
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
@@ -27,8 +28,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -123,9 +122,6 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
             super.onScrollStateChanged(recyclerView, newState)
         }
 
-        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-            super.onScrolled(recyclerView, dx, dy)
-        }
     }
     private var context: Context? = null
     private var durationTv: TextView? = null
@@ -175,17 +171,9 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
     private var app_paused = false
     private var should_refresh_layout = true
     private var tempColor = 0
-    private val color = MutableLiveData<Int>()
     private var lastClickTime: Long = 0
     private var executorService: ExecutorService? = null
-    private var firstSetup = true
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
-    private fun setThemeColorForApp(color: Int) {
-        this.color.value = color
-    }
-
-    val themeColor: LiveData<Int>
-        get() = color
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -340,6 +328,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         playerSongNameTv?.isSelected = true
         mini_name_text?.isSelected = true
         songNameQueueItem?.isSelected = true
+
     }
 
     private fun stopAnimText() {
@@ -431,23 +420,27 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         }
     }
 
-    // Don't Remove This Event Bus is using this method (It might look unused still DON'T REMOVE
     private fun generateThemeColor(image: Bitmap): Int {
         val palette = Palette.Builder(image).generate()
         return if (settingsStorage!!.loadIsThemeDark()) {
             palette.getDarkMutedColor(
-                resources.getColor(
-                    R.color.player_bg,
-                    Resources.getSystem().newTheme()
-                )
+                Color.BLACK
             )
         } else {
-            palette.getLightMutedColor(
-                resources.getColor(
-                    R.color.player_bg,
-                    Resources.getSystem().newTheme()
-                )
+            palette.getDominantColor(
+                Color.WHITE
             )
+        }
+    }
+
+    private fun getColor(id: Int): Int {
+        return try {
+            resources.getColor(
+                id,
+                Resources.getSystem().newTheme()
+            )
+        } catch (e: NotFoundException) {
+            -1
         }
     }
 
@@ -456,15 +449,15 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         colorAnimation.duration = 400
         colorAnimation.addUpdateListener { animator: ValueAnimator ->
             val color = animator.animatedValue as Int
-            val gradientBg = if (!settingsStorage!!.loadIsThemeDark()) {
+            val gradientBg = if (settingsStorage!!.loadIsThemeDark()) {
                 GradientDrawable(
                     GradientDrawable.Orientation.BOTTOM_TOP,
-                    intArrayOf(Color.WHITE,color )
+                    intArrayOf(Color.BLACK, color)
                 )
             } else {
                 GradientDrawable(
                     GradientDrawable.Orientation.BOTTOM_TOP,
-                    intArrayOf(Color.BLACK, color)
+                    intArrayOf(Color.WHITE, color)
                 )
             }
             player_layout!!.background = gradientBg
@@ -483,6 +476,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
     fun setMainPlayerLayout(event: SetMainLayoutEvent) {
         if (playing_same_song) {
             if (activeMusic!!.id == event.activeMusic.id) {
+                animateText()
                 return
             }
         }
@@ -493,28 +487,18 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
                 var image = event.image
                 tempColor = if (image != null) {
                     val themeColor = generateThemeColor(image)
-                    setThemeColorForApp(themeColor)
                     setThemeColorInPlayer(tempColor, themeColor)
                     setThemeColorLyricView(themeColor)
                     themeColor
                 } else {
-                    setThemeColorForApp(
-                        resources.getColor(
-                            R.color.player_bg,
-                            Resources.getSystem().newTheme()
-                        )
-                    )
                     setThemeColorInPlayer(
                         tempColor,
-                        resources.getColor(R.color.player_bg, Resources.getSystem().newTheme())
+                        getColor(R.color.player_bg)
                     )
                     setThemeColorLyricView(
-                        resources.getColor(
-                            R.color.player_bg,
-                            Resources.getSystem().newTheme()
-                        )
+                        getColor(R.color.player_bg)
                     )
-                    resources.getColor(R.color.player_bg, Resources.getSystem().newTheme())
+                    getColor(R.color.player_bg)
                 }
                 songName = activeMusic!!.name
                 bitrate = activeMusic!!.bitrate
@@ -560,6 +544,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
                     mini_artist_text!!.text = artistName
                 } catch (ignored: Exception) {
                 }
+                animateText()
                 try {
                     seekBarMain!!.max = duration!!.toInt()
                     mini_progress!!.max = duration!!.toInt()
@@ -568,7 +553,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
                 }
                 glideBuilt!!.glideBitmap(image, R.drawable.ic_music, playerCoverImage, 512, true)
                 glideBuilt!!.glideBitmap(image, R.drawable.ic_music, mini_cover, 128, true)
-                glideBuilt!!.glideBitmap(image, R.drawable.ic_music, queueCoverImg, 128, false)
+                glideBuilt!!.glideBitmap(image, R.drawable.ic_music, queueCoverImg, 128, true)
                 mainActivity!!.setDataInNavigation(songName, artistName, image)
                 if (image != null && image.isRecycled) {
                     //Don't remove this it will prevent app from crashing if bitmap was trying to recycle from instance
@@ -578,8 +563,6 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         } else {
             should_refresh_layout = true
         }
-        animateText()
-
         EventBus.getDefault().post(RunnableSyncLyricsEvent())
     }
 
@@ -601,8 +584,8 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         mini_progress!!.max = 0
         seekBarMain!!.progress = 0
         mini_progress!!.progress = 0
-        glideBuilt!!.glideBitmap(null, R.drawable.ic_music, playerCoverImage, 512, false)
-        glideBuilt!!.glideBitmap(null, R.drawable.ic_music, mini_cover, 128, false)
+        glideBuilt!!.glideLoadAlbumArt(null, R.drawable.ic_music, playerCoverImage, 512, false)
+        glideBuilt!!.glideLoadAlbumArt(null, R.drawable.ic_music, mini_cover, 128, false)
     }
 
     @Subscribe

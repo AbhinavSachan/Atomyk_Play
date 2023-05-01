@@ -7,7 +7,6 @@ import android.app.RecoverableSecurityException
 import android.content.*
 import android.content.pm.PackageManager
 import android.graphics.*
-import android.media.MediaMetadataRetriever
 import android.media.RingtoneManager
 import android.net.Uri
 import android.os.*
@@ -74,7 +73,6 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import com.karumi.dexter.listener.single.PermissionListener
 import org.greenrobot.eventbus.EventBus
 import java.io.File
-import java.io.IOException
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -82,7 +80,7 @@ import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity(), View.OnClickListener,
     NavigationView.OnNavigationItemSelectedListener {
-    var service_connection: ServiceConnection = object : ServiceConnection {
+    var serviceConnection: ServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
             val binder = service as LocalBinder
             media_player_service = binder.service
@@ -118,7 +116,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     private var shadowOuterSheet2: View? = null
     private var shadowMain: View? = null
     private var anchoredShadow: View? = null
-    private var playlist_image_View: ImageView? = null
+    private var playlistImageView: ImageView? = null
     private var navCover: ImageView? = null
     private var playListImageUri: Uri? = null
 
@@ -129,7 +127,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
             // photo picker.
             if (uri != null) {
                 playListImageUri = uri
-                playlist_image_View!!.setImageURI(playListImageUri)
+                playlistImageView!!.setImageURI(playListImageUri)
             }
         }
     private val pickIntentForPLCover =
@@ -137,7 +135,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
             if (result.resultCode == RESULT_OK) {
                 if (result.data != null) {
                     playListImageUri = result.data!!.data
-                    playlist_image_View!!.setImageURI(playListImageUri)
+                    playlistImageView!!.setImageURI(playListImageUri)
                 }
             }
         }
@@ -150,6 +148,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     private var progressBar: ProgressBar? = null
     private var storageUtil: StorageUtil? = null
     private var drawer: DrawerLayout? = null
+    private lateinit var settingsStorage: SettingsStorage
     private val detailsSheetCallback: BottomSheetCallback = object : BottomSheetCallback() {
         @SuppressLint("SwitchIntDef")
         override fun onStateChanged(bottomSheet: View, newState: Int) {
@@ -161,6 +160,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                     shadowOuterSheet2!!.alpha = 0.45f
                     detailsSheet!!.elevation = 20f
                 }
+
                 BottomSheetBehavior.STATE_EXPANDED -> {
                     shadowOuterSheet2!!.isClickable = true
                     shadowOuterSheet2!!.isFocusable = true
@@ -168,6 +168,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                     shadowOuterSheet2!!.alpha = 1f
                     detailsSheet!!.elevation = 20f
                 }
+
                 BottomSheetBehavior.STATE_HIDDEN -> {
                     drawer!!.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
                     shadowOuterSheet2!!.isClickable = false
@@ -192,6 +193,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                     shadowOuterSheet!!.alpha = 0.6f
                     donationSheet!!.elevation = 16f
                 }
+
                 BottomSheetBehavior.STATE_EXPANDED -> {
                     shadowOuterSheet!!.isClickable = true
                     shadowOuterSheet!!.isFocusable = true
@@ -199,6 +201,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                     shadowOuterSheet!!.alpha = 1f
                     donationSheet!!.elevation = 16f
                 }
+
                 BottomSheetBehavior.STATE_HIDDEN -> {
                     drawer!!.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
                     shadowOuterSheet!!.isClickable = false
@@ -223,6 +226,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                     shadowOuterSheet!!.alpha = 0.6f
                     plSheet!!.elevation = 18f
                 }
+
                 BottomSheetBehavior.STATE_EXPANDED -> {
                     shadowOuterSheet!!.isClickable = true
                     shadowOuterSheet!!.isFocusable = true
@@ -230,6 +234,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                     plSheet!!.elevation = 18f
                     shadowOuterSheet!!.alpha = 1f
                 }
+
                 BottomSheetBehavior.STATE_HIDDEN -> {
                     drawer!!.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
                     shadowOuterSheet!!.isClickable = false
@@ -272,6 +277,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                     )
                     tempThemeColor = resources.getColor(R.color.player_bg, null)
                 }
+
                 BottomSheetBehavior.STATE_EXPANDED -> {
                     val miniPlayer = bottomSheetPlayerFragment?.mini_play_view
                     val mainPlayer = bottomSheetPlayerFragment?.player_layout
@@ -287,13 +293,21 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                     shadowMain!!.alpha = 1f
                     anchoredShadow!!.elevation = 10f
                     player_bottom_sheet!!.elevation = 12f
-                    bottomSheetPlayerFragment?.themeColor?.observe(this@MainActivity) { it: Int ->
-                        if (mainPlayerSheetBehavior!!.state == BottomSheetBehavior.STATE_EXPANDED) {
-                            changeNavigationColor(tempThemeColor, it)
-                            tempThemeColor = it
-                        }
+                    tempThemeColor = if (settingsStorage.loadIsThemeDark()) {
+                        changeNavigationColor(
+                            tempThemeColor,
+                            Color.BLACK
+                        )
+                        Color.BLACK
+                    } else {
+                        changeNavigationColor(
+                            tempThemeColor,
+                            Color.BLACK
+                        )
+                        Color.WHITE
                     }
                 }
+
                 BottomSheetBehavior.STATE_HIDDEN -> {
                     anchoredShadow!!.alpha = 0f
                     drawer!!.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
@@ -336,6 +350,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                     shadowOuterSheet!!.alpha = 0.7f
                     optionSheet!!.elevation = 18f
                 }
+
                 BottomSheetBehavior.STATE_EXPANDED -> {
                     shadowOuterSheet!!.isClickable = true
                     shadowOuterSheet!!.isFocusable = true
@@ -343,6 +358,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                     shadowOuterSheet!!.alpha = 1f
                     optionSheet!!.elevation = 18f
                 }
+
                 BottomSheetBehavior.STATE_HIDDEN -> {
                     drawer!!.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
                     shadowOuterSheet!!.isClickable = false
@@ -432,10 +448,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                     shadowLyrFound!!.alpha = 0.2f
                     lyricsSheet!!.elevation = 4f
                 }
+
                 BottomSheetBehavior.STATE_EXPANDED -> {
                     shadowLyrFound!!.alpha = 1f
                     lyricsSheet!!.elevation = 4f
                 }
+
                 BottomSheetBehavior.STATE_HIDDEN -> lyricsSheet!!.elevation = 0f
             }
         }
@@ -559,7 +577,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
             }
         }
         if (service_bound) {
-            unbindService(service_connection)
+            unbindService(serviceConnection)
             stopMusicService()
         }
         playlistFragment = null
@@ -593,7 +611,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
      */
     private fun bindService() {
         val playerIntent = Intent(this@MainActivity, MediaPlayerService::class.java)
-        this@MainActivity.bindService(playerIntent, service_connection, BIND_AUTO_CREATE)
+        this@MainActivity.bindService(playerIntent, serviceConnection, BIND_AUTO_CREATE)
     }
 
     private fun startService() {
@@ -809,7 +827,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         }
 
     private fun <T> Collection<T>?.isNotNullAndNotEmpty(): Boolean {
-        return this != null && this.isNotEmpty()
+        return !this.isNullOrEmpty()
     }
 
     fun openBottomPlayer() {
@@ -1133,35 +1151,18 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                 removeFromList!!.visibility = View.VISIBLE
                 deleteBtn!!.visibility = View.GONE
             }
+
             OptionSheetEnum.FAVORITE_LIST -> {}
             OptionSheetEnum.MAIN_LIST -> {
                 removeFromList!!.visibility = View.GONE
                 deleteBtn!!.visibility = View.VISIBLE
             }
         }
-        executorService?.execute {
-            var image: Bitmap? = null
-            //image decoder
-            try {
-                MediaMetadataRetriever().use { mediaMetadataRetriever ->
-                    mediaMetadataRetriever.setDataSource(music.path)
-                    val art = mediaMetadataRetriever.embeddedPicture
-                    try {
-                        image = BitmapFactory.decodeByteArray(art, 0, art!!.size)
-                    } catch (ignored: Exception) {
-                    }
-                }
-            } catch (e: IOException) {
-                e.printStackTrace()
-            }
-            val finalImage = image
-            runOnUiThread {
-                optionSheetBehavior!!.state = BottomSheetBehavior.STATE_COLLAPSED
-                optionName!!.text = music.name
-                optionArtist!!.text = music.artist
-                glideBuilt!!.glideBitmap(finalImage, R.drawable.ic_music, optionCover, 128, false)
-            }
-        }
+        optionSheetBehavior!!.state = BottomSheetBehavior.STATE_COLLAPSED
+        optionName!!.text = music.name
+        optionArtist!!.text = music.artist
+        glideBuilt!!.glideLoadAlbumArt(music.path, R.drawable.ic_music, optionCover, 128, true)
+
     }
 
     fun openPlOptionMenu(currentItem: Playlist) {
@@ -1265,7 +1266,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val settingsStorage = SettingsStorage(this)
+        settingsStorage = SettingsStorage(this)
         val switch1 = settingsStorage.loadIsThemeDark()
         if (!switch1) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
@@ -1399,6 +1400,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
             TelephonyManager.CALL_STATE_OFFHOOK, TelephonyManager.CALL_STATE_RINGING -> {
                 phone_ringing = true
             }
+
             TelephonyManager.CALL_STATE_IDLE -> {
                 phone_ringing = false
             }
@@ -1529,6 +1531,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                     progressBar!!.visibility = View.VISIBLE
                     linearLayout!!.visibility = View.GONE
                 }
+
                 LoadingStatus.SUCCESS -> {
                     val list: ArrayList<Music> = musicRepo!!.initialMusicList
                     storageUtil!!.saveInitialList(list)
@@ -1537,10 +1540,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                     }
                     progressBar!!.visibility = View.GONE
                 }
+
                 LoadingStatus.FAILURE -> {
                     linearLayout!!.visibility = View.VISIBLE
                     progressBar!!.visibility = View.GONE
                 }
+
                 else -> {}
             }
         }
@@ -1593,6 +1598,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                     fragmentManager.popBackStackImmediate()
                 }
             }
+
             R.id.navigation_setting -> {
                 if (fragment2 != null || fragment3 != null || fragment5 != null || fragment6 != null) {
                     fragmentManager.popBackStackImmediate()
@@ -1606,6 +1612,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                     )
                 }
             }
+
             R.id.navigation_playlist -> {
                 if (fragment1 != null || fragment3 != null || fragment4 != null || fragment5 != null || fragment6 != null) {
                     fragmentManager.popBackStackImmediate()
@@ -1619,6 +1626,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                     )
                 }
             }
+
             R.id.navigation_about -> {
                 if (fragment1 != null || fragment2 != null || fragment5 != null || fragment6 != null) {
                     fragmentManager.popBackStackImmediate()
@@ -1632,6 +1640,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                     )
                 }
             }
+
             R.id.navigation_last_added -> {
                 if (fragment1 != null || fragment2 != null || fragment5 != null || fragment3 != null) {
                     fragmentManager.popBackStackImmediate()
@@ -1645,6 +1654,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                     )
                 }
             }
+
             R.id.navigation_donate -> {
                 donationSheetBehavior!!.setState(BottomSheetBehavior.STATE_COLLAPSED)
             }
@@ -1681,50 +1691,65 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
             R.id.add_play_next_option -> {
                 addToNextPlay(selectedItem)
             }
+
             R.id.add_to_queue_option -> {
                 addToQueue(selectedItem)
             }
+
             R.id.add_to_playlist_option -> {
                 addToPlaylist(selectedItem)
             }
+
             R.id.set_ringtone_option -> {
                 setRingtone(selectedItem)
             }
+
             R.id.delete_music_option -> {
                 val list: MutableList<Music?> = ArrayList()
                 list.add(selectedItem)
                 deleteFromDevice(list)
             }
+
             R.id.tagEditor_option -> {
                 openTagEditor(selectedItem)
             }
+
             R.id.addLyrics_option -> {
                 bottomSheetPlayerFragment!!.setLyricsLayout(selectedItem)
             }
+
             R.id.details_option -> {
                 openDetailsBox(selectedItem)
             }
+
             R.id.share_music_option -> {
                 openShare(selectedItem)
             }
+
             R.id.add_to_favourites_option -> {
                 bottomSheetPlayerFragment!!.addFavorite(storageUtil!!, selectedItem, addToFav)
             }
+
             R.id.add_play_next_pl_option -> {
                 addToNextPlayPl(plItemSelected)
             }
+
             R.id.add_to_queue_pl_option -> {
                 addToQueuePl(plItemSelected)
             }
+
             R.id.rename_pl_option -> {
                 openRenameDialog(plItemSelected)
             }
+
             R.id.choose_cover_option -> {
                 changeUriPl(plItemSelected)
             }
+
             R.id.delete_pl_option -> {
                 deletePl(plItemSelected)
             }
+
             R.id.remove_music_option -> {
                 removeFromList(selectedItem, optionTag)
             }
@@ -1856,7 +1881,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         builder.setView(customLayout)
         builder.setCancelable(true)
         val editText = customLayout.findViewById<EditText>(R.id.edit_playlist_name)
-        playlist_image_View = customLayout.findViewById(R.id.playlist_image_view)
+        playlistImageView = customLayout.findViewById(R.id.playlist_image_view)
         val playerPickCover_l = customLayout.findViewById<View>(R.id.playlist_cover_pick)
         playerPickCover_l.setOnClickListener { v: View? ->
             pickImage(

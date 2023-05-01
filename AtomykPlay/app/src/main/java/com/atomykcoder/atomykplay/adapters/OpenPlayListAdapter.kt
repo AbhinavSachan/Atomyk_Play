@@ -1,9 +1,7 @@
 package com.atomykcoder.atomykplay.adapters
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import com.atomykcoder.atomykplay.R
@@ -13,14 +11,10 @@ import com.atomykcoder.atomykplay.adapters.viewHolders.OpenPlayListViewHolder
 import com.atomykcoder.atomykplay.classes.GlideBuilt
 import com.atomykcoder.atomykplay.data.Music
 import com.atomykcoder.atomykplay.enums.OptionSheetEnum
-import com.atomykcoder.atomykplay.helperFunctions.ImageLoader
 import com.atomykcoder.atomykplay.interfaces.ItemTouchHelperAdapter
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener
 import com.atomykcoder.atomykplay.utils.StorageUtil
 import com.atomykcoder.atomykplay.utils.StorageUtil.SettingsStorage
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 class OpenPlayListAdapter(
     val context: Context,
@@ -32,9 +26,6 @@ class OpenPlayListAdapter(
     var storage: StorageUtil
     var settingsStorage: SettingsStorage
     private var onDragStartListener: OnDragStartListener
-    private var imageLoader: ImageLoader
-    private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
-    private val coroutineScopeMain: CoroutineScope = CoroutineScope(Dispatchers.Main)
     private val glideBuilt: GlideBuilt = GlideBuilt(context)
 
 
@@ -44,7 +35,6 @@ class OpenPlayListAdapter(
         this.onDragStartListener = onDragStartListener
         storage = StorageUtil(context)
         settingsStorage = SettingsStorage(context)
-        imageLoader = ImageLoader(context)
     }
 
     //when item starts to move it will change positions of every item in real time
@@ -67,20 +57,19 @@ class OpenPlayListAdapter(
         return OpenPlayListViewHolder(view)
     }
 
-    override fun onBindViewHolder(_holder: GenericViewHolder<Music>, position: Int) {
-        super.onBindViewHolder(_holder, position)
-        val holder = _holder as OpenPlayListViewHolder
+    override fun onBindViewHolder(holder: GenericViewHolder<Music>, position: Int) {
+        super.onBindViewHolder(holder, position)
+        val playListViewHolder = holder as OpenPlayListViewHolder
         val currentItem = super.items!![position]
-        coroutineScope.launch {
-            var result: Bitmap?
-            coroutineScope.launch {
-                result = imageLoader.loadImage(currentItem)
-                coroutineScopeMain.launch{
-                    glideBuilt.glideBitmap(result, R.drawable.ic_music, holder.albumCoverIV, 128, false)
-                }
-            }
-        }
-        holder.cardView.setOnClickListener {
+        glideBuilt.glideLoadAlbumArt(
+            currentItem.path,
+            R.drawable.ic_music,
+            playListViewHolder.albumCoverIV,
+            128,
+            true
+        )
+
+        playListViewHolder.cardView.setOnClickListener {
             if (shouldIgnoreClick()) return@setOnClickListener
             if (isMusicNotAvailable(currentItem)) {
                 return@setOnClickListener
@@ -93,7 +82,7 @@ class OpenPlayListAdapter(
                 }
             }
         }
-        holder.optBtn.setOnClickListener {
+        playListViewHolder.optBtn.setOnClickListener {
             if (isMusicNotAvailable(currentItem)) {
                 return@setOnClickListener
             }
