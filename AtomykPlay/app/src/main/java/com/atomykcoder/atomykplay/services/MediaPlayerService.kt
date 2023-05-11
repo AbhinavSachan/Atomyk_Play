@@ -54,6 +54,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
     private val handler = Handler(Looper.getMainLooper())
     private val countDownTimer = arrayOfNulls<CountDownTimer>(1)
     private var mediaPlayer: MediaPlayer? = null
+    private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
     @JvmField
     var seekBarRunnable: Runnable? = null
@@ -124,7 +125,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
                         if (state == 1) {
                             if (!is_playing) {
                                 if (isMediaPlayerNotNull) {
-                                    resumeMedia()
+                                    resumeMedia(true)
                                 } else {
                                     try {
                                         initiateMediaSession()
@@ -199,7 +200,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
             if (isMediaPlaying) {
                 pauseMedia()
             } else {
-                resumeMedia()
+                resumeMedia(true)
             }
         }
     }
@@ -264,28 +265,36 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
             } catch (ignored: RemoteException) {
             }
         }
-        loadList()
-        val thumbnail: Bitmap
-        var metadata = defaultMetadata
-        if (activeMusic != null) {
-            val dur = activeMusic.duration
-            val songName = activeMusic.name
-            val artistName = activeMusic.artist
-            val album = activeMusic.album
-            thumbnail = if (finalImage != null) ThumbnailUtils.extractThumbnail(
-                finalImage,
-                artworkDimension - artworkDimension / 5,
-                artworkDimension - artworkDimension / 5,
-                ThumbnailUtils.OPTIONS_RECYCLE_INPUT
-            ) else defaultThumbnail!!
-            metadata = MediaMetadataCompat.Builder()
-                .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, thumbnail)
-                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artistName)
-                .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, album)
-                .putString(MediaMetadataCompat.METADATA_KEY_TITLE, songName)
-                .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, dur.toLong()).build()
+        coroutineScope.launch {
+            loadList()
+            val thumbnail: Bitmap
+            var metadata = defaultMetadata
+            if (activeMusic != null) {
+                val dur = activeMusic.duration
+                val songName = activeMusic.name
+                val artistName = activeMusic.artist
+                val album = activeMusic.album
+                thumbnail = if (finalImage != null) ThumbnailUtils.extractThumbnail(
+                    finalImage,
+                    artworkDimension - artworkDimension / 5,
+                    artworkDimension - artworkDimension / 5,
+                    ThumbnailUtils.OPTIONS_RECYCLE_INPUT
+                ) else defaultThumbnail!!
+
+                metadata = MediaMetadataCompat.Builder()
+                    .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, thumbnail)
+                    .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artistName)
+                    .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, album)
+                    .putString(MediaMetadataCompat.METADATA_KEY_TITLE, songName)
+                    .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, dur.toLong()).build()
+            }
+            val finalMetaData = metadata
+            handler.post {
+                mediaSession!!.setMetadata(finalMetaData)
+                buildNotification(PlaybackStatus.PLAYING, 1f)
+            }
         }
-        mediaSession!!.setMetadata(metadata)
+
     }
 
     /**
@@ -343,6 +352,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
                     androidx.media.app.NotificationCompat.MediaStyle()
                         .setMediaSession(mediaSession!!.sessionToken)
                         .setShowActionsInCompactView(0, 1, 2)
+
                 ).setColor(resources.getColor(R.color.tertiary_bg, theme)).setColorized(true)
                 .setSmallIcon(R.drawable.ic_headset) //set content
                 .setSubText(activeMusic!!.artist).setContentTitle(activeMusic!!.name)
@@ -367,7 +377,13 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
                         PlaybackStateCompat.STATE_PLAYING,
                         currentMediaPosition.toLong(),
                         playbackSpeed
-                    ).setActions(PlaybackStateCompat.ACTION_SEEK_TO).build()
+                    ).setActions(
+                        PlaybackStateCompat.ACTION_SEEK_TO
+                                or PlaybackStateCompat.ACTION_PLAY_PAUSE
+                                or PlaybackStateCompat.ACTION_SKIP_TO_NEXT
+                                or PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
+                    )
+                        .build()
                 )
             }
         } else if (playbackStatus == PlaybackStatus.PAUSED) {
@@ -377,7 +393,12 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
                         PlaybackStateCompat.STATE_PAUSED,
                         currentMediaPosition.toLong(),
                         playbackSpeed
-                    ).setActions(PlaybackStateCompat.ACTION_SEEK_TO).build()
+                    ).setActions(
+                        PlaybackStateCompat.ACTION_SEEK_TO
+                                or PlaybackStateCompat.ACTION_PLAY_PAUSE
+                                or PlaybackStateCompat.ACTION_SKIP_TO_NEXT
+                                or PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
+                    ).build()
                 )
             }
         }
@@ -497,7 +518,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
             TelephonyManager.CALL_STATE_IDLE -> if (isMediaPlayerNotNull) {
                 MainActivity.phone_ringing = false
                 if (wasPlaying) {
-                    resumeMedia()
+                    resumeMedia(true)
                     wasPlaying = false
                 }
             }
@@ -532,7 +553,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
             activeMusic = musicList!![musicIndex]
         }
         val defaultArtwork = BitmapFactory.decodeResource(
-            this@MediaPlayerService.applicationContext.resources, R.drawable.placeholder_art
+            this@MediaPlayerService.applicationContext.resources, R.drawable.music_notes
         )
         artworkDimension = defaultArtwork.width.coerceAtMost(defaultArtwork.height)
         defaultThumbnail = ThumbnailUtils.extractThumbnail(
@@ -570,31 +591,36 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
     }
 
     override fun onPrepared(mp: MediaPlayer) {
-        CoroutineScope(Dispatchers.IO).launch {
+        EventBus.getDefault().post(SetMainLayoutEvent(activeMusic))
+        resumeMedia(false)
+        coroutineScope.launch {
 
             //image decoder
             val image = arrayOf<Bitmap?>(null)
-            var art: ByteArray? = ByteArray(0)
+            var art: ByteArray?
             try {
                 MediaMetadataRetriever().use { mediaMetadataRetriever ->
                     mediaMetadataRetriever.setDataSource(activeMusic!!.path)
                     art = mediaMetadataRetriever.embeddedPicture
+                    mediaMetadataRetriever.release()
                 }
             } catch (ignored: IOException) {
+                art = null
             }
             try {
                 image[0] = art?.size?.let { BitmapFactory.decodeByteArray(art, 0, it) }
             } catch (ignored: Exception) {
+                image[0] = null
             }
+            val finalImage = image[0]
             handler.post {
                 if (MainActivity.service_bound) {
-                    EventBus.getDefault().post(SetMainLayoutEvent(activeMusic, image[0]))
+                    EventBus.getDefault().post(SetImageInMainPlayer(finalImage, activeMusic))
                 }
-                updateMetaData(activeMusic, image[0])
-                resumeMedia()
-
+                updateMetaData(activeMusic, finalImage)
             }
         }
+
     }
 
     override fun onCompletion(mp: MediaPlayer) {
@@ -765,7 +791,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
     /**
      * This function resumes music
      */
-    fun resumeMedia() {
+    fun resumeMedia(showNotification: Boolean) {
         // request audio focus if false
         if (!requestAudioFocus()) requestAudioFocus()
 
@@ -818,7 +844,9 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
 
         // set icon to playing and build notification
         setIcon(PlaybackStatus.PLAYING)
-        buildNotification(PlaybackStatus.PLAYING, 1f)
+        if (showNotification) {
+            buildNotification(PlaybackStatus.PLAYING, 1f)
+        }
     }
 
     /**
@@ -1044,7 +1072,10 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
                 }
                 if (event.action == KeyEvent.ACTION_DOWN) {
                     when (event.keyCode) {
-                        KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE -> if (isMediaPlaying) pauseMedia() else resumeMedia()
+                        KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE -> if (isMediaPlaying) pauseMedia() else resumeMedia(
+                            true
+                        )
+
                         KeyEvent.KEYCODE_MEDIA_NEXT -> onSkipToNext()
                         KeyEvent.KEYCODE_MEDIA_PREVIOUS -> onSkipToPrevious()
                     }
@@ -1055,7 +1086,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
 
             override fun onPlay() {
                 super.onPlay()
-                resumeMedia()
+                resumeMedia(true)
             }
 
             override fun onPause() {
@@ -1109,7 +1140,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
         when (focusState) {
             AudioManager.AUDIOFOCUS_GAIN -> if (wasPlaying) {
                 if (isMediaPlayerNotNull) {
-                    resumeMedia()
+                    resumeMedia(true)
                 }
                 wasPlaying = false
             }

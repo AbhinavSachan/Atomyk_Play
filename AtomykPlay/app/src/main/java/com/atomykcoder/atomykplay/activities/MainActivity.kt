@@ -1,7 +1,7 @@
 package com.atomykcoder.atomykplay.activities
 
 import android.Manifest
-import android.animation.ValueAnimator
+import android.animation.ArgbEvaluator
 import android.annotation.SuppressLint
 import android.app.RecoverableSecurityException
 import android.content.*
@@ -26,6 +26,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
@@ -55,6 +56,7 @@ import com.atomykcoder.atomykplay.repository.MusicRepo
 import com.atomykcoder.atomykplay.repository.MusicRepo.Companion.instance
 import com.atomykcoder.atomykplay.services.MediaPlayerService
 import com.atomykcoder.atomykplay.services.MediaPlayerService.LocalBinder
+import com.atomykcoder.atomykplay.utils.AndroidUtil.Companion.setSystemDrawBehindBars
 import com.atomykcoder.atomykplay.utils.MusicUtil
 import com.atomykcoder.atomykplay.utils.StorageUtil
 import com.atomykcoder.atomykplay.utils.StorageUtil.SettingsStorage
@@ -147,7 +149,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     private var phoneStateCallback: PhoneStateCallback? = null
     private var progressBar: ProgressBar? = null
     private var storageUtil: StorageUtil? = null
-    private var drawer: DrawerLayout? = null
+    var drawer: DrawerLayout? = null
     private lateinit var settingsStorage: SettingsStorage
     private val detailsSheetCallback: BottomSheetCallback = object : BottomSheetCallback() {
         @SuppressLint("SwitchIntDef")
@@ -249,16 +251,18 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         }
     }
     private var navigationView: NavigationView? = null
-    private var tempThemeColor = 0
+    private var animateFromColor = 0
+    private var animateToColor = 0
+    private var isMainPlayerCollapsed = false
     private var navSongName: TextView? = null
     private var navArtistName: TextView? = null
-    var mainPlayerSheetCallback: BottomSheetCallback = object : BottomSheetCallback() {
+    private var mainPlayerSheetCallback: BottomSheetCallback = object : BottomSheetCallback() {
         @SuppressLint("SwitchIntDef")
         override fun onStateChanged(bottomSheet: View, newState: Int) {
             when (newState) {
                 BottomSheetBehavior.STATE_COLLAPSED -> {
-                    val miniPlayer = bottomSheetPlayerFragment?.mini_play_view
-                    val mainPlayer = bottomSheetPlayerFragment?.player_layout
+                    val miniPlayer = bottomSheetPlayerFragment?.miniPlayView
+                    val mainPlayer = bottomSheetPlayerFragment?.playerLayout
                     if (miniPlayer == null || mainPlayer == null) {
                         return
                     }
@@ -271,16 +275,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                     mainPlayer.alpha = 0f
                     anchoredShadow!!.elevation = 10f
                     player_bottom_sheet!!.elevation = 12f
-                    changeNavigationColor(
-                        tempThemeColor,
-                        resources.getColor(R.color.player_bg, null)
-                    )
-                    tempThemeColor = resources.getColor(R.color.player_bg, null)
+                    isMainPlayerCollapsed = true
                 }
 
                 BottomSheetBehavior.STATE_EXPANDED -> {
-                    val miniPlayer = bottomSheetPlayerFragment?.mini_play_view
-                    val mainPlayer = bottomSheetPlayerFragment?.player_layout
+                    val miniPlayer = bottomSheetPlayerFragment?.miniPlayView
+                    val mainPlayer = bottomSheetPlayerFragment?.playerLayout
                     if (miniPlayer == null || mainPlayer == null) {
                         return
                     }
@@ -293,19 +293,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                     shadowMain!!.alpha = 1f
                     anchoredShadow!!.elevation = 10f
                     player_bottom_sheet!!.elevation = 12f
-                    tempThemeColor = if (settingsStorage.loadIsThemeDark()) {
-                        changeNavigationColor(
-                            tempThemeColor,
-                            Color.BLACK
-                        )
-                        Color.BLACK
-                    } else {
-                        changeNavigationColor(
-                            tempThemeColor,
-                            Color.BLACK
-                        )
-                        Color.WHITE
-                    }
+                    isMainPlayerCollapsed = false
                 }
 
                 BottomSheetBehavior.STATE_HIDDEN -> {
@@ -323,8 +311,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         }
 
         override fun onSlide(bottomSheet: View, slideOffset: Float) {
-            val miniPlayer = bottomSheetPlayerFragment?.mini_play_view
-            val mainPlayer = bottomSheetPlayerFragment?.player_layout
+            val miniPlayer = bottomSheetPlayerFragment?.miniPlayView
+            val mainPlayer = bottomSheetPlayerFragment?.playerLayout
             if (miniPlayer == null || mainPlayer == null) {
                 return
             }
@@ -333,6 +321,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
             miniPlayer.alpha = 1 - slideOffset * 35
             mainPlayer.alpha = 0 + slideOffset
             shadowMain!!.alpha = 0 + slideOffset
+            changeNavigationColor(animateFromColor, animateToColor, slideOffset)
         }
     }
     private var deleteBtn: View? = null
@@ -518,7 +507,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                 requestReadStorageAndPhonePermissionBelow12()
             }
         }
-        builder.setOnCancelListener { dialog: DialogInterface? -> finish() }
+        builder.setOnCancelListener { finish() }
         val dialog: AlertDialog = builder.create()
         dialog.show()
     }
@@ -587,14 +576,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
 
     }
 
-    fun changeNavigationColor(animateFrom: Int, animateTo: Int) {
-        val window = window
-        val colorAnimation = ValueAnimator.ofArgb(animateFrom, animateTo)
-        colorAnimation.duration = 100
-        colorAnimation.addUpdateListener { animator: ValueAnimator ->
-            window.navigationBarColor = animator.animatedValue as Int
-        }
-        colorAnimation.start()
+    fun changeNavigationColor(animateFrom: Int, animateTo: Int, slideOffset: Float) {
+        val color = ArgbEvaluator().evaluate(slideOffset, animateFrom, animateTo) as Int
+        window.navigationBarColor = color
     }
 
     private fun stopMusicService() {
@@ -805,9 +789,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         glideBuilt!!.glide(null, R.drawable.ic_music, navCover, 512)
     }
 
-    fun setDataInNavigation(song_name: String?, artist_name: String?, album_uri: Bitmap?) {
+    fun setDataInNavigation(song_name: String?, artist_name: String?) {
         navSongName!!.text = song_name
         navArtistName!!.text = artist_name
+    }
+
+    fun setImageInNavigation(album_uri: Bitmap?) {
         glideBuilt!!.glideBitmap(album_uri, R.drawable.ic_music, navCover, 512, false)
     }
 
@@ -961,6 +948,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         if (shouldIgnoreClick()) {
             return
         }
+
         storageUtil?.saveShuffle(true)
         storageUtil?.saveTempMusicList(songs)
         /*
@@ -1024,7 +1012,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         if (shouldIgnoreClick()) {
             return
         }
-
         if (!phone_ringing) {
             if (service_stopped) {
                 startService()
@@ -1265,7 +1252,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+        val splashScreen = installSplashScreen()
+
         settingsStorage = SettingsStorage(this)
         val switch1 = settingsStorage.loadIsThemeDark()
         if (!switch1) {
@@ -1273,15 +1261,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         } else {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
         }
-        val window = window
-        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
-        if (!settingsStorage.loadIsThemeDark()) {
-            window.decorView.systemUiVisibility =
-                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-        } else {
-            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-        }
-        window.statusBarColor = Color.TRANSPARENT
+        super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         //initializations
@@ -1291,7 +1271,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         handler = Handler(Looper.getMainLooper())
         musicRepo = instance
         glideBuilt = GlideBuilt(this)
-        tempThemeColor = resources.getColor(R.color.player_bg, null)
+        animateFromColor = resources.getColor(R.color.player_bg, null)
+        animateToColor = resources.getColor(R.color.white, null)
         linearLayout = findViewById(R.id.song_not_found_layout)
         musicRecyclerView = findViewById(R.id.music_recycler)
         player_bottom_sheet = findViewById(R.id.player_main_container)
@@ -1314,6 +1295,16 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         val shuffleCard = findViewById<View>(R.id.shuffle_play_card_view)
         navigationView = findViewById(R.id.navigation_drawer)
         drawer = findViewById(R.id.drawer_layout)
+        setSystemDrawBehindBars(
+            window,
+            settingsStorage.loadIsThemeDark(),
+            drawer!!,
+            Color.TRANSPARENT,
+            resources.getColor(R.color.player_bg, null),
+            hideStatusBar = false,
+            hideNavigationBar = false
+        )
+
         val headerView = navigationView!!.getHeaderView(0)
         val navDetailLayout = headerView.findViewById<View>(R.id.nav_details_layout)
         navCover = headerView.findViewById(R.id.nav_cover_img)

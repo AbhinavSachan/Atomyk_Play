@@ -1,11 +1,15 @@
 package com.atomykcoder.atomykplay.helperFunctions
 
+import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Build
 import android.provider.MediaStore
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia.ImageOnly
+import androidx.core.net.toUri
 
 object CustomMethods {
     @JvmStatic
@@ -25,5 +29,22 @@ object CustomMethods {
             val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
             intentActivityResultLauncher.launch(intent)
         }
+    }
+    @JvmStatic
+    fun getBitmapFromAlbumUri(albumUri: String,context: Context): Bitmap? {
+        try {
+            val inputStream = context.contentResolver.openInputStream(albumUri.toUri())
+            if (inputStream != null) {
+                val options = BitmapFactory.Options()
+                options.inPreferredConfig = Bitmap.Config.ARGB_8888
+                val img = BitmapFactory.decodeStream(inputStream, null, options)
+                inputStream.close()
+                return img
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        return null
     }
 }

@@ -14,6 +14,7 @@ import com.atomykcoder.atomykplay.adapters.generics.GenericViewHolder;
 import com.atomykcoder.atomykplay.adapters.viewHolders.MusicLyricsViewHolder;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class MusicLyricsAdapter extends GenericRecyclerAdapter<String> {
     private final Context context;
@@ -35,15 +36,18 @@ public class MusicLyricsAdapter extends GenericRecyclerAdapter<String> {
         super.onBindViewHolder(_holder, position);
 
         MusicLyricsViewHolder holder = (MusicLyricsViewHolder) _holder;
-
-
-        holder.textView.setOnClickListener(v -> ((MainActivity) context).bottomSheetPlayerFragment
-                .skipToPosition(holder.getAbsoluteAdapterPosition()));
+        holder.textView.setOnClickListener(v -> {
+            try {
+                Objects.requireNonNull(((MainActivity) context).bottomSheetPlayerFragment).skipToPosition(holder.getAbsoluteAdapterPosition());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     @Override
     public int getItemCount() {
-        return super.items.size();
+        return super.items != null ? super.items.size() : 0;
     }
 
 

@@ -410,6 +410,104 @@
                         android:thumb="@drawable/custom_switch_thumb"
                         app:track="@drawable/custom_track_switch" />
                 </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/hide_status_bar_ll"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="4dp"
+                    android:weightSum="6">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="5"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif"
+                            android:paddingVertical="4dp"
+                            android:text="@string/hide_sb"
+                            android:textColor="@color/text_color"
+                            android:textSize="@dimen/d_18sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif"
+                            android:paddingStart="2dp"
+                            android:paddingEnd="16dp"
+                            android:text="@string/hide_sb_des"
+                            android:textColor="@color/sub_text_grey"
+                            android:textSize="@dimen/d_15sp" />
+
+                    </LinearLayout>
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/hide_status_bar_swi"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:thumb="@drawable/custom_switch_thumb"
+                        app:track="@drawable/custom_track_switch" />
+                </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/hide_nav_bar_ll"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="4dp"
+                    android:weightSum="6">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="5"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif"
+                            android:paddingVertical="4dp"
+                            android:text="@string/hide_nb"
+                            android:textColor="@color/text_color"
+                            android:textSize="@dimen/d_18sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif"
+                            android:paddingStart="2dp"
+                            android:paddingEnd="16dp"
+                            android:text="@string/hide_nb_des"
+                            android:textColor="@color/sub_text_grey"
+                            android:textSize="@dimen/d_15sp" />
+
+                    </LinearLayout>
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/hide_nav_bar_swi"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:thumb="@drawable/custom_switch_thumb"
+                        app:track="@drawable/custom_track_switch" />
+                </LinearLayout>
 
             </LinearLayout>
 

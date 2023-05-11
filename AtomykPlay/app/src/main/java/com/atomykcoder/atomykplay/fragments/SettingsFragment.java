@@ -3,6 +3,7 @@ package com.atomykcoder.atomykplay.fragments;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -32,6 +33,7 @@ import com.atomykcoder.atomykplay.adapters.BeautifyListAdapter;
 import com.atomykcoder.atomykplay.adapters.BlockFolderListAdapter;
 import com.atomykcoder.atomykplay.classes.ApplicationClass;
 import com.atomykcoder.atomykplay.customScripts.LinearLayoutManagerWrapper;
+import com.atomykcoder.atomykplay.utils.AndroidUtil;
 import com.atomykcoder.atomykplay.utils.StorageUtil;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
@@ -41,9 +43,9 @@ import java.util.ArrayList;
 public class SettingsFragment extends Fragment {
 
     private RadioButton light_theme_btn, dark_theme_btn;
-    private SwitchCompat songInfoSwi, artistSwi, extraSwi, autoPlaySwi, keepShuffleSwi, lowerVolSwi, selfStopSwi, keepScreenOnSwi, oneClickSkipSwi, scanAllSwi, beautifySwi;
+    private SwitchCompat songInfoSwi, artistSwi, extraSwi, autoPlaySwi, keepShuffleSwi, lowerVolSwi, selfStopSwi, keepScreenOnSwi, oneClickSkipSwi, scanAllSwi, beautifySwi, hideNbSwi, hideSbSwi;
     private boolean dark;
-    private boolean showInfo, showArtist, showExtra, autoPlay, keepShuffle, lowerVol, selfStop, keepScreenOn, oneClickSkip, beautify, scanAll;
+    private boolean showInfo, showArtist, showExtra, autoPlay, keepShuffle, lowerVol, selfStop, keepScreenOn, oneClickSkip, beautify, scanAll, hideSb, hideNb;
     private StorageUtil.SettingsStorage settingsStorage;
     private MainActivity mainActivity;
     private final ActivityResultLauncher<Intent> mGetTreeLauncher = registerForActivityResult(
@@ -91,6 +93,8 @@ public class SettingsFragment extends Fragment {
         oneClickSkip = settingsStorage.loadOneClickSkip();
         beautify = settingsStorage.loadBeautifyName();
         scanAll = settingsStorage.loadScanAllMusic();
+        hideSb = settingsStorage.loadIsStatusBarHidden();
+        hideNb = settingsStorage.loadIsNavBarHidden();
 
 
         //Player settings
@@ -107,6 +111,10 @@ public class SettingsFragment extends Fragment {
         Button addBeautifyTags = view.findViewById(R.id.beautify_add_tag_btn);
         scanAllSwi = view.findViewById(R.id.should_scan_all_swi);
         View scanAllLl = view.findViewById(R.id.should_scan_all_ll);
+        hideSbSwi = view.findViewById(R.id.hide_status_bar_swi);
+        View hideSbLl = view.findViewById(R.id.hide_status_bar_ll);
+        hideNbSwi = view.findViewById(R.id.hide_nav_bar_swi);
+        View hideNbLl = view.findViewById(R.id.hide_nav_bar_ll);
 
         //audio settings
         autoPlaySwi = view.findViewById(R.id.autoPlay_swi);
@@ -146,6 +154,8 @@ public class SettingsFragment extends Fragment {
         beautifyLl.setOnClickListener(v -> beautifySwi.setChecked(!beautifySwi.isChecked()));
         addBeautifyTags.setOnClickListener(v -> showBeatifyTagDialog());
         scanAllLl.setOnClickListener(v -> scanAllSwi.setChecked(!scanAllSwi.isChecked()));
+        hideSbLl.setOnClickListener(v -> hideSbSwi.setChecked(!hideSbSwi.isChecked()));
+        hideNbLl.setOnClickListener(v -> hideNbSwi.setChecked(!hideNbSwi.isChecked()));
         blackListLl.setOnClickListener(v -> openBlackListDialogue());
         filterDurLl.setOnClickListener(v -> openFilterDurationDialog());
 
@@ -202,6 +212,32 @@ public class SettingsFragment extends Fragment {
             scanAllSwi.setChecked(isChecked);
             settingsStorage.scanAllMusic(isChecked);
             mainActivity.checkForUpdateList(true);
+        });
+        hideSbSwi.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            hideSbSwi.setChecked(isChecked);
+            settingsStorage.saveHideStatusBar(isChecked);
+            AndroidUtil.Companion.setSystemDrawBehindBars(
+                    mainActivity.getWindow(),
+                    dark,
+                    mainActivity.getDrawer(),
+                    Color.TRANSPARENT,
+                    mainActivity.getResources().getColor(R.color.player_bg, null),
+                    isChecked,
+                    hideNb);
+            hideSb = isChecked;
+        });
+        hideNbSwi.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            hideNbSwi.setChecked(isChecked);
+            settingsStorage.saveHideNavBar(isChecked);
+            AndroidUtil.Companion.setSystemDrawBehindBars(
+                    mainActivity.getWindow(),
+                    dark,
+                    mainActivity.getDrawer(),
+                    Color.TRANSPARENT,
+                    mainActivity.getResources().getColor(R.color.player_bg, null),
+                    hideSb,
+                    isChecked);
+            hideNb = isChecked;
         });
 
         //Check if any radio button is pressed
@@ -359,14 +395,10 @@ public class SettingsFragment extends Fragment {
         BlockFolderListAdapter adapter = new BlockFolderListAdapter(blacklist, requireContext());
 
 
-        if (blacklist != null) {
-            if (blacklist.isEmpty()) {
-                textView.setVisibility(View.VISIBLE);
-            } else {
-                textView.setVisibility(View.GONE);
-            }
-        } else {
+        if (blacklist.isEmpty()) {
             textView.setVisibility(View.VISIBLE);
+        } else {
+            textView.setVisibility(View.GONE);
         }
         recyclerView.setLayoutManager(new LinearLayoutManagerWrapper(getContext()));
         recyclerView.setAdapter(adapter);
@@ -389,30 +421,30 @@ public class SettingsFragment extends Fragment {
     }
 
     private void hideExtra(boolean v) {
-        assert mainActivity.bottomSheetPlayerFragment.mini_next != null;
+        assert mainActivity.bottomSheetPlayerFragment.miniNext != null;
         if (v) {
-            mainActivity.bottomSheetPlayerFragment.mini_next.setVisibility(View.VISIBLE);
+            mainActivity.bottomSheetPlayerFragment.miniNext.setVisibility(View.VISIBLE);
         } else {
-            mainActivity.bottomSheetPlayerFragment.mini_next.setVisibility(View.GONE);
+            mainActivity.bottomSheetPlayerFragment.miniNext.setVisibility(View.GONE);
         }
     }
 
 
     private void hideArtist(boolean v) {
-        assert mainActivity.bottomSheetPlayerFragment.mini_artist_text != null;
+        assert mainActivity.bottomSheetPlayerFragment.miniArtistText != null;
         if (v) {
-            mainActivity.bottomSheetPlayerFragment.mini_artist_text.setVisibility(View.VISIBLE);
+            mainActivity.bottomSheetPlayerFragment.miniArtistText.setVisibility(View.VISIBLE);
         } else {
-            mainActivity.bottomSheetPlayerFragment.mini_artist_text.setVisibility(View.GONE);
+            mainActivity.bottomSheetPlayerFragment.miniArtistText.setVisibility(View.GONE);
         }
     }
 
     private void hideInfo(boolean v) {
-        assert mainActivity.bottomSheetPlayerFragment.info_layout != null;
+        assert mainActivity.bottomSheetPlayerFragment.infoLayout != null;
         if (v) {
-            mainActivity.bottomSheetPlayerFragment.info_layout.setVisibility(View.VISIBLE);
+            mainActivity.bottomSheetPlayerFragment.infoLayout.setVisibility(View.VISIBLE);
         } else {
-            mainActivity.bottomSheetPlayerFragment.info_layout.setVisibility(View.GONE);
+            mainActivity.bottomSheetPlayerFragment.infoLayout.setVisibility(View.GONE);
         }
     }
 
@@ -432,6 +464,8 @@ public class SettingsFragment extends Fragment {
         oneClickSkipSwi.setChecked(oneClickSkip);
         beautifySwi.setChecked(beautify);
         scanAllSwi.setChecked(scanAll);
+        hideSbSwi.setChecked(hideSb);
+        hideNbSwi.setChecked(hideNb);
 
         if (!dark) {
             light_theme_btn.setChecked(true);

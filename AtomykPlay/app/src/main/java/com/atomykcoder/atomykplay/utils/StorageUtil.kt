@@ -581,6 +581,32 @@ class StorageUtil
                 context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE)
             return sharedPreferences.getBoolean("theme_name", false)
         }
+        fun saveHideStatusBar(b: Boolean) {
+            val sharedPreferences =
+                context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE)
+            val editor = sharedPreferences.edit()
+            editor.putBoolean("hidden_status_bar", b)
+            editor.apply()
+        }
+
+        fun loadIsStatusBarHidden(): Boolean {
+            val sharedPreferences =
+                context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE)
+            return sharedPreferences.getBoolean("hidden_status_bar", false)
+        }
+        fun saveHideNavBar(b: Boolean) {
+            val sharedPreferences =
+                context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE)
+            val editor = sharedPreferences.edit()
+            editor.putBoolean("hidden_navigation_bar", b)
+            editor.apply()
+        }
+
+        fun loadIsNavBarHidden(): Boolean {
+            val sharedPreferences =
+                context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE)
+            return sharedPreferences.getBoolean("hidden_navigation_bar", false)
+        }
 
         fun showInfo(show: Boolean) {
             val sharedPreferences =

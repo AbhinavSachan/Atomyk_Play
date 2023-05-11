@@ -3,6 +3,7 @@
     <color name="accent_color_bg">#245EA5</color>
     <color name="primary_bg">#151819</color>
     <color name="black">#FFFFFF</color>
+    <color name="white">#000000</color>
     <color name="secondary_bg">#1D1E22</color>
     <color name="nav_center_shadow">#6416171C</color>
     <color name="tertiary_bg">#1E2025</color>
@@ -27,7 +28,7 @@
     <color name="thumb_dark">#F5DADADA</color>
     <color name="switch_track_on">#922D76CF</color>
     <color name="switch_track_off">#8FE3D8D8</color>
-    <color name="status_bar_color">#B40E0F12</color>
+    <color name="status_bar_color">#A6111316</color>
     <color name="cover_black_player">#1A1D1E</color>
     <color name="player_bg">#222227</color>
     <color name="collapsed_appbar_color">#1B282E</color>
