@@ -23,10 +23,10 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.media.MediaBrowserServiceCompat
+import com.atomykcoder.atomykplay.ApplicationClass
 import com.atomykcoder.atomykplay.BuildConfig
 import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.activities.MainActivity
-import com.atomykcoder.atomykplay.classes.ApplicationClass
 import com.atomykcoder.atomykplay.classes.PhoneStateCallback
 import com.atomykcoder.atomykplay.data.Music
 import com.atomykcoder.atomykplay.dataModels.LRCMap
@@ -35,6 +35,7 @@ import com.atomykcoder.atomykplay.events.*
 import com.atomykcoder.atomykplay.fragments.BottomSheetPlayerFragment
 import com.atomykcoder.atomykplay.helperFunctions.Logger
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper
+import com.atomykcoder.atomykplay.utils.AndroidUtil
 import com.atomykcoder.atomykplay.utils.StorageUtil
 import com.atomykcoder.atomykplay.utils.StorageUtil.SettingsStorage
 import kotlinx.coroutines.CoroutineScope
@@ -345,7 +346,6 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
 
         //building notification for player
         //set content
-        //set control
         musicNotification =
             NotificationCompat.Builder(this, ApplicationClass.CHANNEL_ID).setShowWhen(false)
                 .setStyle(
@@ -552,14 +552,15 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
         if (musicIndex != -1 && musicIndex < musicList!!.size) {
             activeMusic = musicList!![musicIndex]
         }
+
         val defaultArtwork = BitmapFactory.decodeResource(
             this@MediaPlayerService.applicationContext.resources, R.drawable.music_notes
         )
         artworkDimension = defaultArtwork.width.coerceAtMost(defaultArtwork.height)
         defaultThumbnail = ThumbnailUtils.extractThumbnail(
             defaultArtwork,
-            artworkDimension - artworkDimension / 5,
-            artworkDimension - artworkDimension / 5,
+            artworkDimension,
+            artworkDimension,
             ThumbnailUtils.OPTIONS_RECYCLE_INPUT
         )
         if (defaultMetadata == null) {
@@ -1119,7 +1120,9 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
                     //first checking setting the media seek to current position of seek bar and then setting all data in UI•
                     if (MainActivity.service_bound) {
                         //removing handler so that we can seek without glitches handler will restart in setSeekBar() method☻
-                        if (seekBarHandler != null) seekBarHandler!!.removeCallbacks(seekBarRunnable!!)
+                        seekBarRunnable?.let {
+                            seekBarHandler?.removeCallbacks(it)
+                        }
                         if (isMediaPlayerNotNull) {
                             seekMediaTo(Math.toIntExact(pos))
                             if (isMediaPlaying) {

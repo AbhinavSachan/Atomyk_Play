@@ -1,5 +1,7 @@
 package com.atomykcoder.atomykplay.fragments;
 
+import static com.atomykcoder.atomykplay.utils.AndroidUtil.Companion;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
@@ -21,7 +23,6 @@ import android.widget.TextView;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
@@ -31,7 +32,7 @@ import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.adapters.BeautifyListAdapter;
 import com.atomykcoder.atomykplay.adapters.BlockFolderListAdapter;
-import com.atomykcoder.atomykplay.classes.ApplicationClass;
+import com.atomykcoder.atomykplay.ApplicationClass;
 import com.atomykcoder.atomykplay.customScripts.LinearLayoutManagerWrapper;
 import com.atomykcoder.atomykplay.utils.AndroidUtil;
 import com.atomykcoder.atomykplay.utils.StorageUtil;
@@ -216,7 +217,7 @@ public class SettingsFragment extends Fragment {
         hideSbSwi.setOnCheckedChangeListener((buttonView, isChecked) -> {
             hideSbSwi.setChecked(isChecked);
             settingsStorage.saveHideStatusBar(isChecked);
-            AndroidUtil.Companion.setSystemDrawBehindBars(
+            Companion.setSystemDrawBehindBars(
                     mainActivity.getWindow(),
                     dark,
                     mainActivity.getDrawer(),
@@ -229,7 +230,7 @@ public class SettingsFragment extends Fragment {
         hideNbSwi.setOnCheckedChangeListener((buttonView, isChecked) -> {
             hideNbSwi.setChecked(isChecked);
             settingsStorage.saveHideNavBar(isChecked);
-            AndroidUtil.Companion.setSystemDrawBehindBars(
+            Companion.setSystemDrawBehindBars(
                     mainActivity.getWindow(),
                     dark,
                     mainActivity.getDrawer(),
@@ -503,11 +504,11 @@ public class SettingsFragment extends Fragment {
     private void setDark(int checkedId) {
         switch (checkedId) {
             case R.id.light_button -> {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                AndroidUtil.Companion.setTheme(requireActivity().getWindow(), false);
                 dark = false;
             }
             case R.id.dark_button -> {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                AndroidUtil.Companion.setTheme(requireActivity().getWindow(), true);
                 dark = true;
             }
         }

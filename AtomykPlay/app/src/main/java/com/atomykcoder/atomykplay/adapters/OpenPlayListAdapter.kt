@@ -61,7 +61,7 @@ class OpenPlayListAdapter(
         super.onBindViewHolder(holder, position)
         val playListViewHolder = holder as OpenPlayListViewHolder
         val currentItem = super.items!![position]
-        glideBuilt.glideLoadAlbumArt(
+        glideBuilt.loadAlbumArt(
             currentItem.path,
             R.drawable.ic_music,
             playListViewHolder.albumCoverIV,

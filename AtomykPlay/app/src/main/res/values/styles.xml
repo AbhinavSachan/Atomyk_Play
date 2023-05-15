@@ -18,4 +18,13 @@
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">@color/text_color</item>
     </style>
+    <style name="FadeAnimationDark">
+        <item name="android:windowEnterAnimation">@android:anim/fade_in</item>
+        <item name="android:windowExitAnimation">@android:anim/fade_out</item>
+    </style>
+
+    <style name="FadeAnimationLight">
+        <item name="android:windowEnterAnimation">@android:anim/fade_in</item>
+        <item name="android:windowExitAnimation">@android:anim/fade_out</item>
+    </style>
 </resources>

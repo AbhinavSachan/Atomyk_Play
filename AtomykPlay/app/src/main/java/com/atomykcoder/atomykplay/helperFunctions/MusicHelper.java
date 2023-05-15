@@ -126,6 +126,9 @@ public class MusicHelper {
     }
 
     public static Music decode(String encoded) {
+        if (encoded == null){
+            return null;
+        }
         byte[] serializedMessage = Base64.decode(encoded, Base64.DEFAULT);
         try {
             return Music.parseFrom(serializedMessage);

@@ -41,7 +41,7 @@
     </queries>
 
     <application
-        android:name=".classes.ApplicationClass"
+        android:name=".ApplicationClass"
         android:allowBackup="false"
         android:configChanges="locale|layoutDirection"
         android:dataExtractionRules="@xml/data_extraction_rules"

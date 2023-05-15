@@ -61,7 +61,7 @@ public class OpenPlayListFragment extends Fragment implements OnDragStartListene
             musicList = playlist.getMusicList();
 
             collapsingToolbarLayout.setTitle(playlist.getName());
-            glideBuilt.glide(playlist.getCoverUri(), 0, imageView, 512);
+            glideBuilt.loadFromUri(playlist.getCoverUri(), 0, imageView, 512);
         }
 
         if (musicList != null) {

@@ -156,7 +156,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/scv"
-        app:lottie_loop="true"
+        app:lottie_loop="false"
         app:lottie_rawRes="@raw/no_result_green" />
 
     <androidx.recyclerview.widget.RecyclerView

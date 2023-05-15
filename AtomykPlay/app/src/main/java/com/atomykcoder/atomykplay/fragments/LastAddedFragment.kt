@@ -1,17 +1,13 @@
 package com.atomykcoder.atomykplay.fragments
 
 import android.annotation.SuppressLint
-import android.app.AlertDialog
 import android.app.Dialog
-import android.app.ProgressDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.ProgressBar
-import android.widget.RadioButton
-import android.widget.RadioGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
@@ -19,7 +15,6 @@ import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.adapters.MusicMainAdapter
 import com.atomykcoder.atomykplay.customScripts.LinearLayoutManagerWrapper
 import com.atomykcoder.atomykplay.data.Music
-import com.atomykcoder.atomykplay.helperFunctions.Logger
 import com.atomykcoder.atomykplay.utils.StorageUtil
 import com.atomykcoder.atomykplay.utils.StorageUtil.SettingsStorage
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -30,6 +25,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class LastAddedFragment : Fragment() {
+    private lateinit var recyclerView: RecyclerView
     private val firstOptionValue = 30
     private val secondOptionValue = 90
     private val thirdOptionValue = 180
@@ -55,7 +51,11 @@ class LastAddedFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_last_added, container, false)
 
         //get references
-        val recyclerView = view.findViewById<RecyclerView>(R.id.last_added_recycle_view)
+        recyclerView = view.findViewById(R.id.last_added_recycle_view)
+        //set recyclerview and adapter
+        recyclerView.setHasFixedSize(true)
+        recyclerView.setItemViewCacheSize(5)
+        recyclerView.layoutManager = LinearLayoutManagerWrapper(context)
         settingsStorage = SettingsStorage(requireContext())
         val filterButton = view.findViewById<View>(R.id.filter_last_added_btn)
         val backImageView = view.findViewById<ImageView>(R.id.close_filter_btn)
@@ -67,31 +67,6 @@ class LastAddedFragment : Fragment() {
         ).loadInitialList()
         lastAddedMusicList = ArrayList()
 
-        //sort initial music list by date in reverse order
-        val locale: Locale = Locale.getDefault()
-        initialMusicList?.sortWith(object : Comparator<Music> {
-            val dateFormat: DateFormat = SimpleDateFormat("dd MMMM yyyy", locale)
-            override fun compare(t1: Music, t2: Music): Int {
-                try {
-                    val d1 = dateFormat.parse(t1.dateAdded)
-                    val d2 = dateFormat.parse(t2.dateAdded)
-                    var i = 0
-                    if (d1 != null) {
-                        i = d1.compareTo(d2)
-                    }
-                    if (i != 0) return -i
-                } catch (e: ParseException) {
-                    e.printStackTrace()
-                }
-                return 0
-            }
-        })
-        //set recyclerview and adapter
-        recyclerView.setHasFixedSize(true)
-        recyclerView.layoutManager = LinearLayoutManagerWrapper(context)
-        adapter = MusicMainAdapter(requireContext(), lastAddedMusicList)
-        recyclerView.adapter = adapter
-        loadLastAddedList(settingsStorage?.loadLastAddedDur())
         // back button click listener
         backImageView.setOnClickListener {
             requireActivity().onBackPressed()
@@ -100,6 +75,38 @@ class LastAddedFragment : Fragment() {
         // filter click listener
         filterButton.setOnClickListener { openDialogFilter() }
         return view
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        coroutineDefaultScope.launch {
+            //sort initial music list by date in reverse order
+            val locale: Locale = Locale.getDefault()
+            initialMusicList?.sortWith(object : Comparator<Music> {
+                val dateFormat: DateFormat = SimpleDateFormat("dd MMMM yyyy", locale)
+                override fun compare(t1: Music, t2: Music): Int {
+                    try {
+                        val d1 = dateFormat.parse(t1.dateAdded)
+                        val d2 = dateFormat.parse(t2.dateAdded)
+                        var i = 0
+                        if (d1 != null) {
+                            i = d1.compareTo(d2)
+                        }
+                        if (i != 0) return -i
+                    } catch (e: ParseException) {
+                        e.printStackTrace()
+                    }
+                    return 0
+                }
+            })
+            val finalList = initialMusicList
+            coroutineMainScope.launch {
+                adapter = MusicMainAdapter(requireContext(), finalList)
+                adapter!!.setHasStableIds(true)
+                recyclerView.adapter = adapter
+                loadLastAddedList(settingsStorage?.loadLastAddedDur())
+            }
+        }
     }
 
     override fun onStop() {
@@ -115,7 +122,7 @@ class LastAddedFragment : Fragment() {
     private fun openDialogFilter() {
         val builder = MaterialAlertDialogBuilder(requireContext())
         builder.setTitle("Filter")
-        val savedState = settingsStorage?.loadLastAddedDur() ?:0
+        val savedState = settingsStorage?.loadLastAddedDur() ?: 0
         val options = arrayOf("Last month", "Last three months", "Last six months", "Last year")
         builder.setSingleChoiceItems(options, savedState) { dialog, which ->
             loadLastAddedList(which)
@@ -138,7 +145,7 @@ class LastAddedFragment : Fragment() {
             2 -> startThread(thirdOptionValue)
             3 -> startThread(fourthOptionValue)
         }
-        settingsStorage!!.setLastAddedDur(i ?:0)
+        settingsStorage!!.setLastAddedDur(i ?: 0)
     }
 
     /**
@@ -191,6 +198,7 @@ class LastAddedFragment : Fragment() {
         //return music ranging between current date and given older date
         return result
     }
+
     @SuppressLint("NotifyDataSetChanged")
     private fun notifyAdapter() {
         adapter!!.notifyDataSetChanged()

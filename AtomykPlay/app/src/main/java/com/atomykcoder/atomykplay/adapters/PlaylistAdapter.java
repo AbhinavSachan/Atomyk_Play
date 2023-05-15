@@ -52,7 +52,7 @@ public class PlaylistAdapter extends GenericRecyclerAdapter<Playlist> {
 
         ArrayList<Music> musicList = currentItem.getMusicList();
 
-        glideBuilt.glide(currentItem.getCoverUri(), R.drawable.ic_music_list, holder.coverIV, 412);
+        glideBuilt.loadFromUri(currentItem.getCoverUri(), R.drawable.ic_music_list, holder.coverIV, 412);
         String count = musicList.size() + " Songs";
         holder.playlistName.setText(currentItem.getName());
         holder.songCount.setText(count);

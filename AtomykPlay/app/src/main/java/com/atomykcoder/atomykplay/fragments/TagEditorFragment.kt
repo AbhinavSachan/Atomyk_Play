@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.database.Cursor
-import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -16,9 +15,6 @@ import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.Window
-import android.view.WindowManager
-import android.view.inputmethod.InputMethod
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
@@ -32,7 +28,7 @@ import androidx.lifecycle.MutableLiveData
 import com.atomykcoder.atomykplay.BuildConfig
 import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.activities.MainActivity
-import com.atomykcoder.atomykplay.classes.ApplicationClass
+import com.atomykcoder.atomykplay.ApplicationClass
 import com.atomykcoder.atomykplay.classes.GlideBuilt
 import com.atomykcoder.atomykplay.customScripts.ArtworkInfo
 import com.atomykcoder.atomykplay.customScripts.AudioTagInfo
@@ -130,7 +126,7 @@ class TagEditorFragment : Fragment() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             b.editSongGenreTag.setText(music?.genre)
         }
-        glideBuilt!!.glideLoadAlbumArt(
+        glideBuilt!!.loadAlbumArt(
             music!!.path, R.drawable.ic_music, b.songImageViewTag, 412, false
         )
         b.pickCoverTag.setOnClickListener {
@@ -183,7 +179,7 @@ class TagEditorFragment : Fragment() {
     }
 
     private fun deleteCoverArt() {
-        glideBuilt!!.glide(null, R.drawable.ic_choose_artwork, b.songImageViewTag, 512)
+        glideBuilt!!.loadFromUri(null, R.drawable.ic_choose_artwork, b.songImageViewTag, 512)
         deleteAlbumArt = true
         imageUri = null
     }
@@ -329,7 +325,7 @@ class TagEditorFragment : Fragment() {
 
     private fun setImageUri(album_uri: Uri?) {
         imageUri = album_uri
-        glideBuilt!!.glide(imageUri.toString(), 0, b.songImageViewTag, 512)
+        glideBuilt!!.loadFromUri(imageUri.toString(), 0, b.songImageViewTag, 512)
     }
 
     companion object {

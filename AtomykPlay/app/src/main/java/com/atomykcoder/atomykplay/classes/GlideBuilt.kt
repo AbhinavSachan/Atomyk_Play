@@ -13,9 +13,9 @@ import com.bumptech.glide.request.RequestOptions
 
 class GlideBuilt(private val context: Context) {
     private val requestOptions = RequestOptions()
-    fun glide(uri: String?, placeholderImage: Int, imageView: ImageView?, image_measure: Int) {
+    fun loadFromUri(uri: String?, placeholderImage: Int, imageView: ImageView?, image_measure: Int) {
         Glide.with(context).load(uri).apply(
-            RequestOptions().placeholder(placeholderImage).error(R.drawable.ic_music_thumbnail)
+            RequestOptions().placeholder(placeholderImage).error(R.drawable.ic_music)
         )
             .diskCacheStrategy(DiskCacheStrategy.NONE)
             .skipMemoryCache(true)
@@ -23,8 +23,14 @@ class GlideBuilt(private val context: Context) {
             .override(image_measure, image_measure)
             .into(imageView!!)
     }
+    fun loadFromRes(res: Int?, imageView: ImageView?) {
+        Glide.with(context).load(res)
+            .diskCacheStrategy(DiskCacheStrategy.NONE)
+            .skipMemoryCache(true)
+            .into(imageView!!)
+    }
 
-    fun glideLoadAlbumArt(
+    fun loadAlbumArt(
         path: String?,
         placeholderImage: Int,
         imageView: ImageView?,
@@ -40,7 +46,7 @@ class GlideBuilt(private val context: Context) {
         GlideApp.with(context).load(path?.let { AudioFileCover(it) }).apply(
             requestOptions.placeholder(
                 placeholderImage
-            ).error(R.drawable.ic_music_thumbnail)
+            ).error(R.drawable.ic_music)
         )
             .diskCacheStrategy(DiskCacheStrategy.NONE)
             .skipMemoryCache(true)
@@ -49,7 +55,7 @@ class GlideBuilt(private val context: Context) {
             .into(imageView!!)
     }
 
-    fun glideBitmap(
+    fun loadFromBitmap(
         bitmap: Bitmap?,
         placeholderImage: Int,
         imageView: ImageView?,
@@ -70,7 +76,7 @@ class GlideBuilt(private val context: Context) {
         Glide.with(context).load(bitmap).apply(
             requestOptions.placeholder(
                 shadowed
-            ).error(R.drawable.ic_music_thumbnail)
+            ).error(R.drawable.ic_music)
         )
             .diskCacheStrategy(DiskCacheStrategy.NONE)
             .skipMemoryCache(true)

@@ -27,7 +27,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -40,7 +39,7 @@ import com.atomykcoder.atomykplay.activities.MainActivity
 import com.atomykcoder.atomykplay.adapters.MusicLyricsAdapter
 import com.atomykcoder.atomykplay.adapters.MusicQueueAdapter
 import com.atomykcoder.atomykplay.adapters.SimpleTouchCallback
-import com.atomykcoder.atomykplay.classes.ApplicationClass
+import com.atomykcoder.atomykplay.ApplicationClass
 import com.atomykcoder.atomykplay.classes.GlideBuilt
 import com.atomykcoder.atomykplay.customScripts.CenterSmoothScrollScript.CenterSmoothScroller
 import com.atomykcoder.atomykplay.customScripts.CustomBottomSheet
@@ -109,17 +108,18 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
     private var musicArrayList: ArrayList<Music>? = null
     private var glideBuilt: GlideBuilt? = null
     private var userScrolling = false
-    private var onScrollListener: RecyclerView.OnScrollListener = object : RecyclerView.OnScrollListener() {
-        override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-            if (newState == 0) {
-                userScrolling = false
-            } else if (newState == 1 || newState == 2) {
-                userScrolling = true
+    private var onScrollListener: RecyclerView.OnScrollListener =
+        object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                if (newState == 0) {
+                    userScrolling = false
+                } else if (newState == 1 || newState == 2) {
+                    userScrolling = true
+                }
+                super.onScrollStateChanged(recyclerView, newState)
             }
-            super.onScrollStateChanged(recyclerView, newState)
-        }
 
-    }
+        }
     private var context: Context? = null
     private var durationTv: TextView? = null
     private var playerCoverImage: ImageView? = null
@@ -172,6 +172,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
     private var lastClickTime: Long = 0
     private var executorService: ExecutorService? = null
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
+    private val coroutineScopeMain = CoroutineScope(Dispatchers.Main)
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -434,7 +435,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
                     getColor(R.color.white)
                 )
             }
-            if (color ==getColor(R.color.white)) {
+            if (color == getColor(R.color.white)) {
                 color = palette.getMutedColor(
                     getColor(R.color.white)
                 )
@@ -464,7 +465,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
 
     private fun getColor(id: Int): Int {
         return try {
-            resources.getColor(
+            requireContext().resources.getColor(
                 id,
                 Resources.getSystem().newTheme()
             )
@@ -487,8 +488,8 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         colorAnimation.start()
     }
 
-    private fun setCurColorInLyricView(color: Int) {
-        lyricsCardView?.setCardBackgroundColor(color)
+    private fun setCurColorInLyricView(animateFrom: Int, animateTo: Int) {
+        lyricsCardView?.setCardBackgroundColor(animateTo)
     }
 
     @Subscribe
@@ -506,25 +507,35 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
                 songName = activeMusic!!.name
                 bitrate = activeMusic!!.bitrate
                 artistName = activeMusic!!.artist
-                mimeType = try {
-                    getMime(activeMusic!!.mimeType)!!.uppercase(Locale.getDefault())
-                } catch (e: Exception) {
-                    "UNKNOWN"
-                }
                 duration = activeMusic!!.duration
-                var convertedDur: String? = "00:00"
-                try {
-                    convertedDur = MusicHelper.convertDuration(duration)
-                } catch (ignored: Exception) {
-                }
+                mimeType = "MP3"
                 var bitrateInNum = 0
-                try {
-                    if (bitrate != "") {
-                        bitrateInNum = bitrate!!.toInt() / 1000
+                coroutineScope.launch {
+                    if (settingsStorage!!.loadExtraCon()) {
+                        try {
+                            getMime(activeMusic!!.mimeType)!!.uppercase(Locale.getDefault())
+                        } catch (_: Exception) {
+                        }
                     }
-                } catch (ignored: NumberFormatException) {
+                    var convertedDur: String? = "00:00"
+                    try {
+                        convertedDur = MusicHelper.convertDuration(duration)
+                    } catch (ignored: Exception) {
+                    }
+                    try {
+                        if (bitrate != "") {
+                            bitrateInNum = bitrate!!.toInt() / 1000
+                        }
+                    } catch (_: NumberFormatException) {
+                    } catch (_: Exception) {
+                    }
+                    val finalBitrate = "$bitrateInNum KBPS"
+                    coroutineScopeMain.launch {
+                        mimeTv!!.text = mimeType
+                        durationTv!!.text = convertedDur
+                        bitrateTv!!.text = finalBitrate
+                    }
                 }
-                val finalBitrate = "$bitrateInNum KBPS"
                 if (!storageUtil!!.checkFavourite(activeMusic)) {
                     favoriteImg!!.setImageResource(R.drawable.ic_favorite_border)
                 } else if (storageUtil!!.checkFavourite(activeMusic)) {
@@ -540,10 +551,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
                     songNameQueueItem!!.text = songName
                     playerArtistNameTv!!.text = artistName
                     artistQueueItem!!.text = artistName
-                    mimeTv!!.text = mimeType
-                    durationTv!!.text = convertedDur
                     miniNameText!!.text = songName
-                    bitrateTv!!.text = finalBitrate
                     miniArtistText!!.text = artistName
                 } catch (ignored: Exception) {
                 }
@@ -576,20 +584,16 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
                     val themeColor = generateThemeColor(image)
                     val palette = generatePalette(image)
                     setCurColorInPlayer(tempColor, themeColor)
+                    setCurColorInLyricView(tempColor, getColor(R.color.player_bg))
                     themeColor
                 } else {
-                    setCurColorInPlayer(
-                        tempColor,
-                        getColor(R.color.player_bg)
-                    )
+                    setCurColorInPlayer(tempColor, getColor(R.color.player_bg))
+                    setCurColorInLyricView(tempColor, getColor(R.color.player_bg))
                     getColor(R.color.player_bg)
                 }
-                setCurColorInLyricView(
-                    getColor(R.color.player_bg)
-                )
-                glideBuilt!!.glideBitmap(image, R.drawable.ic_music, playerCoverImage, 512, true)
-                glideBuilt!!.glideBitmap(image, R.drawable.ic_music, miniCover, 128, false)
-                glideBuilt!!.glideBitmap(image, R.drawable.ic_music, queueCoverImg, 128, false)
+                glideBuilt!!.loadFromBitmap(image, R.drawable.ic_music, playerCoverImage, 512, true)
+                glideBuilt!!.loadFromBitmap(image, R.drawable.ic_music, miniCover, 128, false)
+                glideBuilt!!.loadFromBitmap(image, R.drawable.ic_music, queueCoverImg, 128, false)
                 mainActivity!!.setImageInNavigation(image)
                 if (image != null && image.isRecycled) {
                     //Don't remove this it will prevent app from crashing if bitmap was trying to recycle from instance
@@ -618,8 +622,8 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         miniProgress!!.max = 0
         seekBarMain!!.progress = 0
         miniProgress!!.progress = 0
-        glideBuilt!!.glideLoadAlbumArt(null, R.drawable.ic_music, playerCoverImage, 512, false)
-        glideBuilt!!.glideLoadAlbumArt(null, R.drawable.ic_music, miniCover, 128, false)
+        glideBuilt!!.loadAlbumArt(null, R.drawable.ic_music, playerCoverImage, 512, false)
+        glideBuilt!!.loadAlbumArt(null, R.drawable.ic_music, miniCover, 128, false)
     }
 
     @Subscribe
@@ -809,7 +813,12 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
     fun updateQueueAdapter(list: ArrayList<Music>) {
 
         // assign class member id list to new updated _id-list
-        musicArrayList = ArrayList(list)
+        if (musicArrayList == null) {
+            musicArrayList = ArrayList(list)
+        } else {
+            musicArrayList?.clear()
+            musicArrayList?.addAll(list)
+        }
         queueAdapter!!.updateMusicListItems(musicArrayList)
     }
 
@@ -1091,9 +1100,11 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
     override fun onStartTrackingTouch(seekBar: SeekBar) {
         //removing handler so we can change position of seekbar
         if (MainActivity.service_bound) {
-            if (MainActivity.media_player_service?.seekBarHandler != null) MainActivity.media_player_service?.seekBarHandler!!.removeCallbacks(
-                MainActivity.media_player_service?.seekBarRunnable!!
-            )
+            MainActivity.media_player_service?.seekBarRunnable?.let {
+                MainActivity.media_player_service?.seekBarHandler?.removeCallbacks(
+                    it
+                )
+            }
         }
     }
 
@@ -1106,8 +1117,8 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
 
         //first checking setting the media seek to current position of seek bar and then setting all data in UI
         if (MainActivity.service_bound) {
-            if (MainActivity.media_player_service?.seekBarHandler != null) {
-                MainActivity.media_player_service?.seekBarHandler!!.removeCallbacks(MainActivity.media_player_service?.seekBarRunnable!!)
+            MainActivity.media_player_service?.seekBarRunnable?.let {
+                MainActivity.media_player_service?.seekBarHandler?.removeCallbacks(it)
             }
             MainActivity.media_player_service?.seekMediaTo(seekBar.progress)
             if (MainActivity.media_player_service?.isMediaPlaying!!) {
@@ -1140,8 +1151,8 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
 
             //first checking setting the media seek to current position of seek bar and then setting all data in UI
             if (MainActivity.service_bound) {
-                if (MainActivity.media_player_service?.seekBarHandler != null) {
-                    MainActivity.media_player_service?.seekBarHandler!!.removeCallbacks(MainActivity.media_player_service?.seekBarRunnable!!)
+                MainActivity.media_player_service?.seekBarRunnable?.let {
+                    MainActivity.media_player_service?.seekBarHandler?.removeCallbacks(it)
                 }
                 MainActivity.media_player_service?.seekMediaTo(position)
                 if (MainActivity.media_player_service?.isMediaPlaying!!) {
@@ -1178,7 +1189,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
                     e.printStackTrace()
                 }
                 val finalImage = image
-                lifecycleScope.launch {
+                coroutineScopeMain.launch {
                     EventBus.getDefault().post(SetImageInMainPlayer(finalImage, activeMusic))
                 }
             }

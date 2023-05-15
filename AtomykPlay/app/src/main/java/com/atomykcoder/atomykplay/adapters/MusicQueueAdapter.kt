@@ -14,14 +14,11 @@ import com.atomykcoder.atomykplay.adapters.generics.GenericViewHolder
 import com.atomykcoder.atomykplay.adapters.viewHolders.MusicQueueViewHolder
 import com.atomykcoder.atomykplay.classes.GlideBuilt
 import com.atomykcoder.atomykplay.data.Music
-import com.atomykcoder.atomykplay.helperFunctions.AudioFileCover
 import com.atomykcoder.atomykplay.helperFunctions.MusicDiffCallback
 import com.atomykcoder.atomykplay.interfaces.ItemTouchHelperAdapter
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener
 import com.atomykcoder.atomykplay.utils.StorageUtil
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import java.util.*
 
 class MusicQueueAdapter(
@@ -96,7 +93,7 @@ class MusicQueueAdapter(
         val currentItem = super.items!![position]
         val index = "${position + 1}"
         queueViewHolder.musicIndex.text = index
-        glideBuilt.glideLoadAlbumArt(
+        glideBuilt.loadAlbumArt(
             currentItem.path,
             R.drawable.ic_music,
             queueViewHolder.albumCoverIV,

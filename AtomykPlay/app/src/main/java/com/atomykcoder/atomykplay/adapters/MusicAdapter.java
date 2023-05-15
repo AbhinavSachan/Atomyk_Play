@@ -22,8 +22,9 @@ public class MusicAdapter extends GenericRecyclerAdapter<Music> {
 
     protected void handlePlayMusic(MainActivity mainActivity, Music item) {
         mainActivity.playAudio(item);
-        assert mainActivity.bottomSheetPlayerFragment != null;
-        mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(musicList);
+        if (mainActivity.bottomSheetPlayerFragment != null) {
+            mainActivity.bottomSheetPlayerFragment.updateQueueAdapter(musicList);
+        }
         mainActivity.openBottomPlayer();
     }
 
@@ -32,7 +33,7 @@ public class MusicAdapter extends GenericRecyclerAdapter<Music> {
     }
 
     protected void handleShuffle(MainActivity mainActivity, Music item, StorageUtil storage, int position, ArrayList<Music> musicList) {
-        ExecutorService service = Executors.newSingleThreadExecutor();
+        ExecutorService service = Executors.newFixedThreadPool(3);
         ArrayList<Music> shuffleList = new ArrayList<>(musicList);
         canPlay = false;
         service.execute(()->{
@@ -61,7 +62,7 @@ public class MusicAdapter extends GenericRecyclerAdapter<Music> {
     }
 
     protected void handleNoShuffle(MainActivity mainActivity,Music item,StorageUtil storage, int position, ArrayList<Music> musicList) {
-        ExecutorService service = Executors.newSingleThreadExecutor();
+        ExecutorService service = Executors.newFixedThreadPool(2);
         canPlay = false;
         service.execute(()->{
             storage.saveShuffle(false);

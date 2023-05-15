@@ -24,8 +24,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
+import androidx.core.splashscreen.SplashScreen
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
@@ -33,6 +33,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.TransitionInflater
+import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
 import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.adapters.FoundLyricsAdapter
 import com.atomykcoder.atomykplay.adapters.MusicMainAdapter
@@ -56,6 +57,7 @@ import com.atomykcoder.atomykplay.repository.MusicRepo
 import com.atomykcoder.atomykplay.repository.MusicRepo.Companion.instance
 import com.atomykcoder.atomykplay.services.MediaPlayerService
 import com.atomykcoder.atomykplay.services.MediaPlayerService.LocalBinder
+import com.atomykcoder.atomykplay.utils.AndroidUtil
 import com.atomykcoder.atomykplay.utils.AndroidUtil.Companion.setSystemDrawBehindBars
 import com.atomykcoder.atomykplay.utils.MusicUtil
 import com.atomykcoder.atomykplay.utils.StorageUtil
@@ -99,7 +101,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     @JvmField
     var bottomSheetPlayerFragment: BottomSheetPlayerFragment? = null
     private var lastAddedFragment: LastAddedFragment? = null
-    private var lyricsListBehavior: BottomSheetBehavior<View?>? = null
+    @JvmField
+    var lyricsListBehavior: BottomSheetBehavior<View?>? = null
     private var optionSheetBehavior: BottomSheetBehavior<View?>? = null
     private var donationSheetBehavior: BottomSheetBehavior<View?>? = null
     private var detailsSheetBehavior: BottomSheetBehavior<View?>? = null
@@ -108,7 +111,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     @JvmField
     var addToPlDialog: AlertDialog? = null
     var plSheet: View? = null
-    var player_bottom_sheet: View? = null
+    var playerBottomSheet: View? = null
     var plItemSelected: Playlist? = null
     var selectedItem: Music? = null
     var isChecking = false
@@ -274,7 +277,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                     anchoredShadow!!.alpha = 1f
                     mainPlayer.alpha = 0f
                     anchoredShadow!!.elevation = 10f
-                    player_bottom_sheet!!.elevation = 12f
+                    playerBottomSheet!!.elevation = 12f
                     isMainPlayerCollapsed = true
                 }
 
@@ -292,14 +295,14 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                     anchoredShadow!!.alpha = 1f
                     shadowMain!!.alpha = 1f
                     anchoredShadow!!.elevation = 10f
-                    player_bottom_sheet!!.elevation = 12f
+                    playerBottomSheet!!.elevation = 12f
                     isMainPlayerCollapsed = false
                 }
 
                 BottomSheetBehavior.STATE_HIDDEN -> {
                     anchoredShadow!!.alpha = 0f
                     drawer!!.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
-                    player_bottom_sheet!!.elevation = 0f
+                    playerBottomSheet!!.elevation = 0f
                     anchoredShadow!!.elevation = 0f
                     clearStorage()
                     bottomSheetPlayerFragment?.queueAdapter?.clearList()
@@ -786,7 +789,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     fun resetDataInNavigation() {
         navSongName!!.text = "Song Name"
         navArtistName!!.text = "Artist"
-        glideBuilt!!.glide(null, R.drawable.ic_music, navCover, 512)
+        glideBuilt!!.loadFromUri(null, R.drawable.ic_music, navCover, 512)
     }
 
     fun setDataInNavigation(song_name: String?, artist_name: String?) {
@@ -795,7 +798,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     }
 
     fun setImageInNavigation(album_uri: Bitmap?) {
-        glideBuilt!!.glideBitmap(album_uri, R.drawable.ic_music, navCover, 512, false)
+        glideBuilt!!.loadFromBitmap(album_uri, R.drawable.ic_music, navCover, 512, false)
     }
 
     private val music: Music?
@@ -949,28 +952,34 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
             return
         }
 
-        storageUtil?.saveShuffle(true)
-        storageUtil?.saveTempMusicList(songs)
-        /*
-         * Plays a random song from the given list of songs by sending a broadcast message
-         */
-        val rand = Random()
-        val music = songs[rand.nextInt(songs.size)]
-        //removing current item from list
-        songs.remove(music)
+        executorService?.apply {
+            execute {
+                storageUtil?.saveShuffle(true)
+                storageUtil?.saveTempMusicList(songs)
+                /*
+                 * Plays a random song from the given list of songs by sending a broadcast message
+                 */
+                val rand = Random()
+                val music = songs[rand.nextInt(songs.size)]
+                //removing current item from list
+                songs.remove(music)
 
-        //shuffling list
-        songs.shuffle()
+                //shuffling list
+                songs.shuffle()
 
-        //adding the removed item in shuffled list on 0th index
-        songs.add(0, music)
+                //adding the removed item in shuffled list on 0th index
+                songs.add(0, music)
 
-        //saving list
-        storageUtil!!.saveQueueList(songs)
-        storageUtil!!.saveMusicIndex(0)
-        bottomSheetPlayerFragment!!.updateQueueAdapter(songs)
-        playAudio(music)
-        openBottomPlayer()
+                //saving list
+                storageUtil!!.saveQueueList(songs)
+                storageUtil!!.saveMusicIndex(0)
+                runOnUiThread{
+                    playAudio(music)
+                    bottomSheetPlayerFragment!!.updateQueueAdapter(songs)
+                    openBottomPlayer()
+                }
+            }
+        }
     }
 
     /**
@@ -1148,7 +1157,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         optionSheetBehavior!!.state = BottomSheetBehavior.STATE_COLLAPSED
         optionName!!.text = music.name
         optionArtist!!.text = music.artist
-        glideBuilt!!.glideLoadAlbumArt(music.path, R.drawable.ic_music, optionCover, 128, true)
+        glideBuilt!!.loadAlbumArt(music.path, R.drawable.ic_music, optionCover, 128, true)
 
     }
 
@@ -1158,7 +1167,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         plSheetBehavior!!.state = BottomSheetBehavior.STATE_COLLAPSED
         plOptionName!!.text = currentItem.name
         optionPlCount!!.text = count
-        glideBuilt!!.glide(currentItem.coverUri, R.drawable.ic_music_list, plOptionCover, 128)
+        glideBuilt!!.loadFromUri(currentItem.coverUri, R.drawable.ic_music_list, plOptionCover, 128)
     }
 
     private fun deleteFromDevice(musics: List<Music?>) {
@@ -1214,7 +1223,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         builder.setView(customLayout)
         builder.setCancelable(false)
         val imageView = customLayout.findViewById<ImageView>(R.id.cover_image)
-        glideBuilt!!.glide(music.albumUri, R.drawable.ic_music_thumbnail, imageView, 512)
+        glideBuilt!!.loadFromUri(music.albumUri, R.drawable.ic_music_thumbnail, imageView, 512)
         builder.setPositiveButton("Allow") { dialog: DialogInterface, i: Int ->
             if (ContextCompat.checkSelfPermission(
                     this@MainActivity,
@@ -1252,16 +1261,10 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        val splashScreen = installSplashScreen()
-
         settingsStorage = SettingsStorage(this)
-        val switch1 = settingsStorage.loadIsThemeDark()
-        if (!switch1) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-        } else {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-        }
+        installSplashScreen()
         super.onCreate(savedInstanceState)
+
         setContentView(R.layout.activity_main)
 
         //initializations
@@ -1275,7 +1278,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         animateToColor = resources.getColor(R.color.white, null)
         linearLayout = findViewById(R.id.song_not_found_layout)
         musicRecyclerView = findViewById(R.id.music_recycler)
-        player_bottom_sheet = findViewById(R.id.player_main_container)
+        playerBottomSheet = findViewById(R.id.player_main_container)
         progressBar = findViewById(R.id.progress_bar_main_activity)
         shadowMain = findViewById(R.id.shadow_main)
         shadowLyrFound = findViewById(R.id.shadow_lyrics_found)
@@ -1287,7 +1290,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         detailsSheet = findViewById(R.id.file_details_sheet)
         anchoredShadow = findViewById(R.id.anchored_player_shadow)
         mainPlayerSheetBehavior =
-            BottomSheetBehavior.from(player_bottom_sheet!!) as CustomBottomSheet<View?>
+            BottomSheetBehavior.from(playerBottomSheet!!) as CustomBottomSheet<View?>
         val openDrawer = findViewById<ImageView>(R.id.open_drawer_btn)
         val searchBar = findViewById<MaterialCardView>(R.id.searchBar_card)
         val plCard = findViewById<View>(R.id.playlist_card_view_ma)
@@ -1562,9 +1565,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
             if (musicMainAdapter == null) {
                 val manager = LinearLayoutManager(this@MainActivity)
                 musicMainAdapter = MusicMainAdapter(this@MainActivity, musicArrayList)
-                musicRecyclerView!!.setHasFixedSize(true)
-                musicRecyclerView!!.layoutManager = manager
-                musicRecyclerView!!.adapter = musicMainAdapter
+                musicMainAdapter!!.setHasStableIds(true)
+                musicRecyclerView?.setHasFixedSize(true)
+                musicRecyclerView?.setItemViewCacheSize(5)
+                musicRecyclerView?.layoutManager = manager
+                musicRecyclerView?.adapter = musicMainAdapter
             } else {
                 musicMainAdapter?.updateMusicListItems(musicArrayList)
                 storageUtil?.saveInitialList(musicArrayList!!)

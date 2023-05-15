@@ -58,7 +58,7 @@ class FavoriteListAdapter(
         super.onBindViewHolder(_holder, position)
         val holder = _holder as FavoriteViewHolder
         val currentItem = super.items!![position]
-        glideBuilt.glideLoadAlbumArt(
+        glideBuilt.loadAlbumArt(
             currentItem.path,
             R.drawable.ic_music,
             holder.albumCoverIV,

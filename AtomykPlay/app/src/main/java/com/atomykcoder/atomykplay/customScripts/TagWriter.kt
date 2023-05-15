@@ -1,19 +1,14 @@
 package com.atomykcoder.atomykplay.customScripts
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.media.MediaScannerConnection
 import android.media.MediaScannerConnection.MediaScannerConnectionClient
 import android.net.Uri
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.net.toUri
-import com.atomykcoder.atomykplay.classes.ApplicationClass
+import com.atomykcoder.atomykplay.ApplicationClass
 import com.atomykcoder.atomykplay.fragments.TagEditorFragment.Companion.getRealPathFromImageURI
-import com.atomykcoder.atomykplay.helperFunctions.Logger
-import com.atomykcoder.atomykplay.repository.LoadingStatus
-import com.atomykcoder.atomykplay.utils.MusicUtil.createAlbumArtFile
 import com.atomykcoder.atomykplay.utils.MusicUtil.deleteAlbumArt
 import com.atomykcoder.atomykplay.utils.MusicUtil.insertAlbumArt
 import kotlinx.coroutines.Dispatchers
@@ -28,7 +23,6 @@ import org.jaudiotagger.tag.TagException
 import org.jaudiotagger.tag.datatype.Artwork
 import java.io.File
 import java.io.IOException
-import java.util.concurrent.CompletableFuture
 
 class TagWriter {
 

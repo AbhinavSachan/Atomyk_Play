@@ -8,11 +8,11 @@ class MusicDiffCallback(
     private val newMusicList: ArrayList<Music>?
 ) : DiffUtil.Callback() {
     override fun getOldListSize(): Int {
-        return oldMusicList?.size ?:0
+        return oldMusicList?.size ?: 0
     }
 
     override fun getNewListSize(): Int {
-        return newMusicList?.size ?:0
+        return newMusicList?.size ?: 0
     }
 
     override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
@@ -22,6 +22,6 @@ class MusicDiffCallback(
     override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
         val oldMusic = oldMusicList?.get(oldItemPosition)
         val newMusic = newMusicList?.get(newItemPosition)
-        return oldMusic === newMusic
+        return oldMusic == newMusic
     }
 }
