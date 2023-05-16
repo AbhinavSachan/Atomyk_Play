@@ -531,6 +531,10 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         if (is_granted) {
             if (musicMainAdapter == null) {
                 setUpMusicScanner()
+            }else{
+                if (!isChecking) {
+                    checkForUpdateList(true)
+                }
             }
         }
         if (service_bound) {
@@ -1264,7 +1268,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         settingsStorage = SettingsStorage(this)
         installSplashScreen()
         super.onCreate(savedInstanceState)
-
+        val darkTheme = settingsStorage.loadIsThemeDark()
+        AndroidUtil.setTheme(window,darkTheme)
         setContentView(R.layout.activity_main)
 
         //initializations

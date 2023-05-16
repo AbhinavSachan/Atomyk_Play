@@ -35,7 +35,6 @@ import com.atomykcoder.atomykplay.events.*
 import com.atomykcoder.atomykplay.fragments.BottomSheetPlayerFragment
 import com.atomykcoder.atomykplay.helperFunctions.Logger
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper
-import com.atomykcoder.atomykplay.utils.AndroidUtil
 import com.atomykcoder.atomykplay.utils.StorageUtil
 import com.atomykcoder.atomykplay.utils.StorageUtil.SettingsStorage
 import kotlinx.coroutines.CoroutineScope
@@ -281,6 +280,8 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
                     artworkDimension - artworkDimension / 5,
                     ThumbnailUtils.OPTIONS_RECYCLE_INPUT
                 ) else defaultThumbnail!!
+
+                Logger.normalLog("${thumbnail.height}")
 
                 metadata = MediaMetadataCompat.Builder()
                     .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, thumbnail)
@@ -554,15 +555,17 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
         }
 
         val defaultArtwork = BitmapFactory.decodeResource(
-            this@MediaPlayerService.applicationContext.resources, R.drawable.music_notes
+            this@MediaPlayerService.applicationContext.resources, R.drawable.ic_music_notification
         )
+
         artworkDimension = defaultArtwork.width.coerceAtMost(defaultArtwork.height)
         defaultThumbnail = ThumbnailUtils.extractThumbnail(
             defaultArtwork,
-            artworkDimension,
-            artworkDimension,
+            artworkDimension - artworkDimension / 5,
+            artworkDimension - artworkDimension / 5,
             ThumbnailUtils.OPTIONS_RECYCLE_INPUT
         )
+
         if (defaultMetadata == null) {
             defaultMetadata = MediaMetadataCompat.Builder()
                 .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, defaultThumbnail)

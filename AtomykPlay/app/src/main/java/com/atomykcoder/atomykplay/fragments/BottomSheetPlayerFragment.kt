@@ -465,10 +465,12 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
 
     private fun getColor(id: Int): Int {
         return try {
-            requireContext().resources.getColor(
-                id,
-                Resources.getSystem().newTheme()
-            )
+            if (isAdded){
+                requireContext().resources.getColor(
+                    id,
+                    Resources.getSystem().newTheme()
+                )
+            }else -1
         } catch (e: NotFoundException) {
             -1
         }
@@ -811,14 +813,8 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
      * Updating adapter in queue list
      */
     fun updateQueueAdapter(list: ArrayList<Music>) {
-
         // assign class member id list to new updated _id-list
-        if (musicArrayList == null) {
-            musicArrayList = ArrayList(list)
-        } else {
-            musicArrayList?.clear()
-            musicArrayList?.addAll(list)
-        }
+        musicArrayList = ArrayList(list)
         queueAdapter!!.updateMusicListItems(musicArrayList)
     }
 
