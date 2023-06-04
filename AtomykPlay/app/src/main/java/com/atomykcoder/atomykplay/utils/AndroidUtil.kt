@@ -1,10 +1,6 @@
 package com.atomykcoder.atomykplay.utils
 
-import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.drawable.VectorDrawable
 import android.os.Build
 import android.view.View
 import android.view.Window
@@ -13,7 +9,6 @@ import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -30,7 +25,7 @@ class AndroidUtil {
             } else {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
             }
-            setSystemBarColor(window, isDark)
+            window?.let { setSystemBarColor(it, isDark) }
         }
 
         private fun getAnimation(isDark: Boolean): Int {
@@ -39,29 +34,11 @@ class AndroidUtil {
             } else {
                 R.style.FadeAnimationLight
             }
-
         }
 
-        fun createBitmapFromVector(context: Context, vectorResId: Int): Bitmap {
-            val vectorDrawable = AppCompatResources.getDrawable(context,vectorResId)
-            return if (vectorDrawable is VectorDrawable) {
-                val bitmap = Bitmap.createBitmap(
-                    vectorDrawable.intrinsicWidth,
-                    vectorDrawable.intrinsicHeight,
-                    Bitmap.Config.ARGB_8888
-                )
-                val canvas = Canvas(bitmap)
-                vectorDrawable.setBounds(0, 0, canvas.width, canvas.height)
-                vectorDrawable.draw(canvas)
-                bitmap
-            } else {
-                throw IllegalArgumentException("The provided drawable is not a VectorDrawable.")
-            }
-        }
-
-        private fun setSystemBarColor(window: Window?, isDarkTheme: Boolean) {
+        private fun setSystemBarColor(window: Window, isDarkTheme: Boolean) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                val controller = window?.insetsController
+                val controller = window.insetsController
                 controller?.apply {
                     if (isDarkTheme) {
                         setSystemBarsAppearance(
@@ -85,7 +62,7 @@ class AndroidUtil {
                 }
             } else {
                 if (!isDarkTheme) {
-                    window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                    window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
                 }
             }
 

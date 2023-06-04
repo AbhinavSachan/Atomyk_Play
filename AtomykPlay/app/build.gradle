@@ -8,14 +8,22 @@ apply plugin: "kotlin-android"
 apply plugin: "kotlin-kapt"
 
 android {
+    signingConfigs {
+        release {
+            storeFile file('E:\\Github\\Atomyk_Play\\AtomykPlay\\key_store.jks')
+            storePassword '123456'
+            keyAlias 'key0'
+            keyPassword '123456'
+        }
+    }
     compileSdk 33
 
     defaultConfig {
         applicationId "com.atomykcoder.atomykplay"
         minSdk 24
         targetSdk 33
-        versionCode 10
-        versionName '1.2.7'
+        versionCode 12
+        versionName '1.2.9'
     }
 
     buildTypes {
@@ -101,6 +109,14 @@ dependencies {
     implementation 'androidx.core:core-splashscreen:1.0.1'
 
     implementation 'com.airbnb.android:lottie:6.0.0'
+    // Retrofit
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-scalars:2.9.0'
+
+    implementation 'com.squareup.okhttp3:okhttp:5.0.0-alpha.9'
+
+    // OkHttp Profiler (for network request profiling)
+    implementation 'com.localebro:okhttpprofiler:1.0.8'
 }
 
 protobuf {

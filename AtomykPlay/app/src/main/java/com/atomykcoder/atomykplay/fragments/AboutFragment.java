@@ -50,7 +50,6 @@ public class AboutFragment extends Fragment {
         toolbar.setNavigationIcon(R.drawable.ic_back);
         toolbar.setNavigationOnClickListener(v -> requireActivity().onBackPressed());
 
-        Bitmap aks = BitmapFactory.decodeResource(getResources(), R.drawable.akash);
         Bitmap abh = BitmapFactory.decodeResource(getResources(), R.drawable.abhinav);
         abh_img.setImageBitmap(abh);
 

@@ -1267,9 +1267,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     override fun onCreate(savedInstanceState: Bundle?) {
         settingsStorage = SettingsStorage(this)
         installSplashScreen()
-        super.onCreate(savedInstanceState)
         val darkTheme = settingsStorage.loadIsThemeDark()
         AndroidUtil.setTheme(window,darkTheme)
+        super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         //initializations

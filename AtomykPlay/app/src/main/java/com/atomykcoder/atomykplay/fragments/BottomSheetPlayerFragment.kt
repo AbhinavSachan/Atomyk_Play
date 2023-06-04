@@ -49,6 +49,7 @@ import com.atomykcoder.atomykplay.dataModels.LRCMap
 import com.atomykcoder.atomykplay.enums.OptionSheetEnum
 import com.atomykcoder.atomykplay.enums.PlaybackStatus
 import com.atomykcoder.atomykplay.events.*
+import com.atomykcoder.atomykplay.helperFunctions.Logger
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener
 import com.atomykcoder.atomykplay.utils.StorageUtil
@@ -65,6 +66,7 @@ import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import java.io.File
 import java.io.IOException
+import java.lang.ref.WeakReference
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutorService
@@ -180,7 +182,8 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         savedInstanceState: Bundle?,
     ): View? {
         val view = inflater.inflate(R.layout.fragment_player, container, false)
-        context = requireContext()
+        val weakContext = WeakReference(requireContext())
+        context = weakContext.get()
         if (!EventBus.getDefault().isRegistered(this)) {
             EventBus.getDefault().register(this)
         }
@@ -200,7 +203,8 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
             lrcMap = storageUtil?.loadLyrics(activeMusic!!.id)
         }
         settingsStorage = SettingsStorage(requireContext())
-        mainActivity = requireContext() as MainActivity
+        val weakActivity = WeakReference(requireActivity() as MainActivity)
+        mainActivity = weakActivity.get()
         playing_same_song = false
 
         //Mini player items initializations
@@ -647,25 +651,27 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         }
     }
 
-    // Don't Remove This Event Bus is using this method (It might look unused still DON'T REMOVE
     @Subscribe
     fun prepareRunnable(event: PrepareRunnableEvent?) {
         if (lyricsHandler != null) {
             lyricsRunnable = Runnable {
                 var nextStampInMillis = 0
                 var currPosInMillis = 0
+                val curStamp = currentStamp
                 if (MainActivity.media_player_service != null) {
                     if (!MainActivity.media_player_service?.isMediaPlaying!!) return@Runnable
-                    val nextStamp = getNextStamp(lrcMap)
+                    val nextStamp = getNextStamp(lrcMap,curStamp)
                     if (nextStamp != "") {
                         nextStampInMillis = MusicHelper.convertToMillis(nextStamp)
+
                         currPosInMillis = MainActivity.media_player_service?.currentMediaPosition!!
+
                     }
                 }
                 if (lrcMap != null) {
                     if (lyricsRecyclerView!!.visibility == View.VISIBLE) {
-                        if (!userScrolling) if (lrcMap!!.containsStamp(currentStamp)) {
-                            scrollToPosition(lrcMap!!.getIndexAtStamp(currentStamp))
+                        if (!userScrolling) if (lrcMap!!.containsStamp(curStamp)) {
+                            scrollToPosition(lrcMap!!.getIndexAtStamp(curStamp))
                         }
                     }
                 }
@@ -702,11 +708,11 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
             var currPosInMillis = 0
             if (MainActivity.media_player_service != null) currPosInMillis =
                 MainActivity.media_player_service?.currentMediaPosition!!
-            return "[" + MusicHelper.convertDuration(currPosInMillis.toString()) + "]"
+
+            return "[" + MusicHelper.convertDurationForLyrics(currPosInMillis.toString()) + "]"
         }
 
-    private fun getNextStamp(_lrcMap: LRCMap?): String {
-        val curStamp = currentStamp
+    private fun getNextStamp(_lrcMap: LRCMap?,curStamp:String): String {
         var currIndex = -1
         if (_lrcMap != null) {
             currIndex = _lrcMap.getIndexAtStamp(curStamp)
@@ -718,9 +724,16 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
     }
 
     private fun scrollToPosition(position: Int) {
+        if (position == -1){
+            return
+        }
         val smoothScroller: SmoothScroller = CenterSmoothScroller(context)
         smoothScroller.targetPosition = position
-        lm!!.startSmoothScroll(smoothScroller)
+        try {
+            lm!!.startSmoothScroll(smoothScroller)
+        } catch (e: IllegalArgumentException) {
+            e.printStackTrace()
+        }
     }
 
     //give the mime type value and it will return extension
@@ -730,7 +743,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
     }
 
     private fun setLyricsAdapter() {
-        lm = LinearLayoutManager(context) // or whatever layout manager you need
+        lm = LinearLayoutManagerWrapper(context) // or whatever layout manager you need
         lyricsRecyclerView!!.layoutManager = lm
         lyricsAdapter = MusicLyricsAdapter(context, lyricsArrayList)
         if (lyricsArrayList.isEmpty()) {

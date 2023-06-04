@@ -2,6 +2,7 @@ package com.atomykcoder.atomykplay.helperFunctions;
 
 import android.annotation.SuppressLint;
 import android.util.Base64;
+import android.util.Log;
 
 import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.dataModels.LRCMap;
@@ -17,7 +18,6 @@ public class MusicHelper {
     private MusicHelper() {
         // constructor required to avoid accidentally creating any instance of this class
     }
-
     /**
      * This function takes unfiltered lrc data and returns a linked hashmap with timestamp as
      * keys and their assigned lyrics as values.
@@ -26,35 +26,29 @@ public class MusicHelper {
      * @return linked hashmap with timestamp as keys and their designated lyrics as values
      */
     public static LRCMap getLrcMap(String lyrics) {
-        //required variables
-        LRCMap _lrcMap = new LRCMap();
-        Pattern _pattern = Pattern.compile("\\[\\d\\d:\\d\\d\\.\\d\\d]\\w.*");
-        ArrayList<String> _lyricsWithTimestamps = new ArrayList<>();
-        ArrayList<String> _timestamps = new ArrayList<>();
-        ArrayList<String> _lyrics = new ArrayList<>();
+        LRCMap lrcMap = new LRCMap();
+        Pattern pattern = Pattern.compile("\\[(\\d\\d):(\\d\\d\\.\\d\\d)]\\w.*");
+        ArrayList<String> lyricsWithTimestamps = new ArrayList<>();
+        ArrayList<String> timestamps = new ArrayList<>();
+        ArrayList<String> lyricsList = new ArrayList<>();
 
-        //Separate Lyrics with timestamps from rest of the garbage
-        Matcher _matcher = _pattern.matcher(lyrics);
-        while (_matcher.find()) {
-            //store lyrics with timestamps in separate array
-            _lyricsWithTimestamps.add(_matcher.group().trim());
+        Matcher matcher = pattern.matcher(lyrics);
+        while (matcher.find()) {
+            lyricsWithTimestamps.add(matcher.group().trim());
         }
 
-        //Separate timestamps and lyrics in their respective arrays
-        Pattern _p = Pattern.compile("\\[\\d\\d:\\d\\d");
-        Matcher _m;
-        for (String lyric : _lyricsWithTimestamps) {
-            _m = _p.matcher(lyric);
-            if (_m.find()) {
-                _timestamps.add(_m.group() + "]");
-                _lyrics.add(filter(lyric));
+        Pattern timestampPattern = Pattern.compile("\\[(\\d\\d):(\\d\\d\\.\\d\\d)]");
+        for (String lyric : lyricsWithTimestamps) {
+            Matcher timestampMatcher = timestampPattern.matcher(lyric);
+            if (timestampMatcher.find()) {
+                timestamps.add(timestampMatcher.group());
+                lyricsList.add(filter(lyric));
             }
         }
-        //store both timestamps and lyrics into lrc map object
-        _lrcMap.addAll(_timestamps, _lyrics);
 
-        //return lrc map object
-        return _lrcMap;
+        lrcMap.addAll(timestamps, lyricsList);
+
+        return lrcMap;
     }
 
     public static String splitLyricsByNewLine(String lyrics) {
@@ -79,8 +73,19 @@ public class MusicHelper {
         return result;
     }
 
+    @SuppressLint("DefaultLocale")
+    public static String convertDurationForLyrics(String duration) {
+        int dur = Integer.parseInt(duration);
+
+        int minutes = (dur / 60000) % 60;
+        int seconds = (dur % 60000) / 1000;
+        int milliseconds = dur % 1000;
+
+        return String.format("%02d:%02d.%02d", minutes, seconds, milliseconds / 10);
+    }
+
     /**
-     * converts millis to readable time
+     * converts millis to readable time for text purpose
      *
      * @param duration duration in millis
      * @return readable duration
@@ -102,19 +107,16 @@ public class MusicHelper {
         }
         return out;
     }
-
-    //endregion
-    //converting readable duration to milliseconds
     public static int convertToMillis(String duration) {
-        int out;
         String _duration = duration.replace("[", "").replace("]", "");
+
         String[] numbers = _duration.split(":");
-        int min = Integer.parseInt(numbers[0]);
-        int second = Integer.parseInt(numbers[1]);
-        min = min * (60 * 1000);
-        second = second * 1000;
-        out = min + second;
-        return out;
+        int minutes = Integer.parseInt(numbers[0]);
+        String[] secondsAndMillis = numbers[1].split("\\.");
+        int seconds = Integer.parseInt(secondsAndMillis[0]);
+        int milliseconds = Integer.parseInt(secondsAndMillis[1]);
+
+        return (minutes * 60 * 1000) + (seconds * 1000) + milliseconds;
     }
 
     public static String encode(Music music) {

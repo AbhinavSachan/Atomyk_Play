@@ -2,8 +2,6 @@ package com.atomykcoder.atomykplay.fragments
 
 import android.content.DialogInterface
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,9 +22,13 @@ import com.atomykcoder.atomykplay.helperFunctions.MusicHelper
 import com.atomykcoder.atomykplay.utils.StorageUtil
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
+import java.io.IOException
+import java.lang.ref.WeakReference
 import java.util.Locale
-import java.util.concurrent.Executors
 
 class AddLyricsFragment : Fragment() {
     private val lrcMap = LRCMap()
@@ -42,17 +44,20 @@ class AddLyricsFragment : Fragment() {
     private var name: String? = null
     private var artist: String? = null
     private var musicId: String? = null
+    private var mainActivity: WeakReference<MainActivity>? = null
     private lateinit var view: View
+    private val coroutineScope = CoroutineScope(Dispatchers.IO)
+    private val coroutineScopeMain = CoroutineScope(Dispatchers.Main)
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_add_lyrics, container, false)
-        val decodeMessage =
-            (if (arguments != null) arguments!!.getSerializable("selectedMusic") else null) as String?
+        val decodeMessage = requireArguments().getSerializable("selectedMusic") as String?
         val selectedMusic = MusicHelper.decode(decodeMessage)
         editTextLyrics = view.findViewById(R.id.edit_lyrics)
+        mainActivity = WeakReference(requireActivity() as MainActivity)
         val saveBtn = view.findViewById<Button>(R.id.btn_save)
         btnFind = view.findViewById(R.id.btn_find)
         progressBar = view.findViewById(R.id.progress_lyrics)
@@ -62,7 +67,7 @@ class AddLyricsFragment : Fragment() {
         toolbar.setNavigationOnClickListener {
             val act = requireActivity() as MainActivity
             act.lyricsListBehavior?.apply {
-                if (state == BottomSheetBehavior.STATE_COLLAPSED || state == BottomSheetBehavior.STATE_EXPANDED){
+                if (state == BottomSheetBehavior.STATE_COLLAPSED || state == BottomSheetBehavior.STATE_EXPANDED) {
                     state = BottomSheetBehavior.STATE_HIDDEN
                 }
             }.run {
@@ -125,7 +130,7 @@ class AddLyricsFragment : Fragment() {
         artistEditText = customLayout.findViewById(R.id.edit_artist_name)
         nameEditText?.setText(name)
         artistEditText?.setText(artist)
-        builder.setPositiveButton("OK") { dialog: DialogInterface?, i: Int ->
+        builder.setPositiveButton("OK") { _: DialogInterface?, _: Int ->
             btnFind!!.visibility = View.GONE
             fetchLyrics()
         }
@@ -136,45 +141,38 @@ class AddLyricsFragment : Fragment() {
 
     private fun fetchLyrics() {
         //show lyrics in bottom sheet
-        artistName =
-            artistEditText!!.text.toString().lowercase(Locale.getDefault()).trim { it <= ' ' }
-        songName = nameEditText!!.text.toString().lowercase(Locale.getDefault()).trim { it <= ' ' }
+        artistName = artistEditText!!.text.toString().lowercase(Locale.getDefault()).trim()
+        songName = nameEditText!!.text.toString().lowercase(Locale.getDefault()).trim()
 
 
         //clear hashmap prior to retrieving data
         lrcMap.clear()
-        val service = Executors.newSingleThreadExecutor()
-        val handler = Handler(Looper.getMainLooper())
         val fetchLyrics = FetchLyrics()
         try {
             // pre-execute some code here
             fetchLyrics.onPreExecute(progressBar!!)
 
             // do in background code here
-            service.execute {
+            coroutineScope.launch {
                 var lyricsItems: Bundle? = null
                 try {
-                    lyricsItems = fetchLyrics.fetchList("$songName $artistName")
+                    lyricsItems = fetchLyrics.fetchList(songName, artistName)
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
                 val finalLyricsItems = lyricsItems
-                handler.post {
+                coroutineScopeMain.launch {
                     if (finalLyricsItems == null ||
                         finalLyricsItems.getStringArrayList("titles")!!.isEmpty()
                     ) {
-                        Toast.makeText(requireContext(), "No Lyrics Found", Toast.LENGTH_SHORT)
-                            .show()
+                        showToast("No Lyrics Found")
                     } else {
-                        (requireContext() as MainActivity).openBottomSheet(finalLyricsItems)
+                        mainActivity?.get()?.openBottomSheet(finalLyricsItems)
                     }
                     fetchLyrics.onPostExecute(progressBar!!)
                     btnFind!!.visibility = View.VISIBLE
                 }
             }
-
-            // stopping the background thread (crucial)
-            service.shutdown()
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -183,17 +181,14 @@ class AddLyricsFragment : Fragment() {
     fun loadSelectedLyrics(href: String?) {
         val fetchLyrics = FetchLyrics()
         try {
-            val service = Executors.newSingleThreadExecutor()
-            val handler = Handler(Looper.getMainLooper())
-
             // pre-execute some code here
             fetchLyrics.onPreExecute(progressBar!!)
             btnFind!!.visibility = View.GONE
 
             // do in background code here
-            service.execute {
+            coroutineScope.launch {
                 val unfilteredLyrics = fetchLyrics.fetchTimeStamps(href!!)
-                handler.post {
+                coroutineScopeMain.launch {
                     fetchLyrics.onPostExecute(progressBar!!)
                     btnFind!!.visibility = View.VISIBLE
                     val filteredLyrics = MusicHelper.splitLyricsByNewLine(unfilteredLyrics)
@@ -202,8 +197,6 @@ class AddLyricsFragment : Fragment() {
                     lrcMap.addAll(MusicHelper.getLrcMap(filteredLyrics))
                 }
             }
-            // stopping the background thread (crucial)
-            service.shutdown()
         } catch (e: Exception) {
             e.printStackTrace()
         }

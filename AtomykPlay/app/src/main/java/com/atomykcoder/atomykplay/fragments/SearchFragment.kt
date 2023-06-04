@@ -114,7 +114,7 @@ class SearchFragment : Fragment() {
                     handler.postDelayed({
                             isSearching = true
                             handleSearchEvent(query.toString().lowercase(Locale.getDefault()), dataList)
-                    },200)
+                    },300)
                 }
             }
 
@@ -136,6 +136,8 @@ class SearchFragment : Fragment() {
         val layoutManager: LinearLayoutManager = LinearLayoutManagerWrapper(requireContext())
         recyclerView.layoutManager = layoutManager
         adapter = MusicMainAdapter(requireContext(), searchedMusicList)
+        adapter!!.setHasStableIds(true)
+        recyclerView.setItemViewCacheSize(5)
         recyclerView.adapter = adapter
         songButton?.isChecked = true
         getSearchList().observe(viewLifecycleOwner) {
@@ -144,7 +146,9 @@ class SearchFragment : Fragment() {
                 noResultAnim?.pauseAnimation()
             }else{
                 noResultAnim?.visibility = View.VISIBLE
-                noResultAnim?.playAnimation()
+                if (!noResultAnim!!.isAnimating) {
+                    noResultAnim?.playAnimation()
+                }
             }
         }
         return view

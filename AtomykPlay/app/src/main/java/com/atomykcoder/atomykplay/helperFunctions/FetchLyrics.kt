@@ -1,56 +1,93 @@
 package com.atomykcoder.atomykplay.helperFunctions
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.ProgressBar
+import com.localebro.okhttpprofiler.OkHttpProfilerInterceptor
+import okhttp3.OkHttpClient
+import okhttp3.ResponseBody
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
+import retrofit2.Retrofit
+import retrofit2.converter.scalars.ScalarsConverterFactory
+import retrofit2.http.GET
+import retrofit2.http.Query
+import retrofit2.http.Url
 import java.io.IOException
+import java.util.concurrent.TimeUnit
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 
 class FetchLyrics {
+
+    private val retrofit: Retrofit by lazy {
+        Retrofit.Builder()
+            .baseUrl("https://www.megalobiz.com/")
+            .client(createOkHttpClient())
+            .addConverterFactory(ScalarsConverterFactory.create())
+            .build()
+    }
+
+    private val apiService: ApiService by lazy {
+        retrofit.create(ApiService::class.java)
+    }
+
+    /**
+     * Create and configure OkHttpClient with logging interceptor
+     */
+    private fun createOkHttpClient(): OkHttpClient {
+        return OkHttpClient.Builder()
+            .readTimeout(45,TimeUnit.SECONDS)
+            .callTimeout(45,TimeUnit.SECONDS)
+            .addInterceptor(OkHttpProfilerInterceptor())
+            .build()
+    }
+
     /**
      * Toggles Progressbar to View.VISIBLE
      */
     fun onPreExecute(progressBar: ProgressBar) {
-        // pre-execute code goes here
         progressBar.visibility = View.VISIBLE
     }
 
     /**
      * Fetches List of All Songs that match the given query
      *
-     * @param query query that needed to be searched (a song name + artist name)
-     * @return returns a bundle with song titles, sample lyrics and urls
+     * @param name query that needed to be searched (song name)
+     * @param artistName query that needed to be searched (artist name)
+     * @return returns a bundle with song titles, sample lyrics, and URLs
      */
-    fun fetchList(query: String): Bundle? {
+    suspend fun fetchList(name: String?, artistName: String?): Bundle? {
         val bundle = Bundle()
-        var titleLink: Element?
-        var lyricsLink: Element?
-        var lyrics: String?
         val titles = ArrayList<String>()
         val sampleLyrics = ArrayList<String>()
         val urls = ArrayList<String>()
         try {
-            val document = Jsoup.connect("https://www.megalobiz.com/search/all?qry=$query").get()
+            val response: ResponseBody = apiService.search("$name $artistName")
+
+            val document = Jsoup.parse(response.string())
+
             val titleElements = document.select("div.pro_part.mid")
             val lyricsElements = document.select("div.details.mid")
+
             if (titleElements != null) {
-                // Retrieve  Items from the list
+                // Retrieve items from the list
                 for (i in 0..9) {
-                    //get Title and urls
+                    // Get Title and URLs
                     if (!titleElements.isEmpty()) {
-                        titleLink = titleElements[i].select("a").first()
+                        val titleLink = titleElements[i].select("a").first()
                         if (titleLink != null) {
                             titles.add(titleLink.text())
                             urls.add(titleLink.attr("href"))
                         }
                     }
-                    //get sample Lyrics
+                    // Get sample Lyrics
                     if (lyricsElements != null && !lyricsElements.isEmpty()) {
-                        lyricsLink = lyricsElements[i].select("div")[2]
+                        var lyricsLink = lyricsElements[i].select("div")[2]
                         lyricsLink = lyricsLink.select("span").first()
                         if (lyricsLink != null) {
-                            lyrics = MusicHelper.splitLyricsByNewLine(lyricsLink.text())
+                            val lyrics = MusicHelper.splitLyricsByNewLine(lyricsLink.text())
                             sampleLyrics.add(lyrics)
                         }
                     }
@@ -61,32 +98,34 @@ class FetchLyrics {
         } catch (e: IOException) {
             e.printStackTrace()
         }
-        // put all the data in a bundle nicely wrapped
+
+        // Put all the data in a bundle nicely wrapped
         bundle.putStringArrayList("titles", titles)
         bundle.putStringArrayList("sampleLyrics", sampleLyrics)
         bundle.putStringArrayList("urls", urls)
 
-        //and return the bundle
+        // And return the bundle
         return bundle
     }
 
     /**
-     * Fetches the song associated with given weblink
+     * Fetches the song associated with the given weblink
      *
      * @param href weblink associated with a song
      * @return returns the Time Stamps of the song
      */
-    fun fetchTimeStamps(href: String): String {
+    suspend fun fetchTimeStamps(href: String): String {
         var lyrics: Element? = null
         try {
-            val lyricsDocument = Jsoup.connect("https://www.megalobiz.com$href").get()
+            val response: ResponseBody = apiService.getSong(href)
+            val lyricsDocument = Jsoup.parse(response.string())
             for (div in lyricsDocument.select("div.lyrics_details.entity_more_info")) {
                 lyrics = div.select("span").first()
             }
         } catch (e: IOException) {
             e.printStackTrace()
         }
-        return if (lyrics != null) lyrics.text() else ""
+        return lyrics?.text() ?: ""
     }
 
     /**
@@ -95,17 +134,12 @@ class FetchLyrics {
     fun onPostExecute(progressBar: ProgressBar) {
         progressBar.visibility = View.GONE
     }
-    //region get duration method maybe for use later...
-    //    private String getLength(String songName) {
-    //        String o = "[00:00.00]";
-    //        Log.i("match", songName);
-    //        Pattern _pattern = Pattern.compile("\\[\\d\\d:\\d\\d.\\d\\d\\]");
-    //        Matcher _matcher = _pattern.matcher(songName);
-    //        if(_matcher.find()) {
-    //            o = songName.substring(_matcher.start(), _matcher.end());
-    //        }
-    //        Log.i("match", "Match : " +  o);
-    //        return o;
-    //    }
-    //endregion.......
+}
+
+interface ApiService {
+    @GET("search/all")
+    suspend fun search(@Query("qry") query: String): ResponseBody
+
+    @GET
+    suspend fun getSong(@Url href: String): ResponseBody
 }
