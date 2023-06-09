@@ -220,39 +220,67 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
 
     private fun registerPlayNewMusic() {
         val filter = IntentFilter(MainActivity.BROADCAST_PLAY_NEW_MUSIC)
-        registerReceiver(playNewMusicReceiver, filter)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(playNewMusicReceiver, filter)
+        } else {
+            registerReceiver(playNewMusicReceiver, filter, Context.RECEIVER_EXPORTED)
+        }
     }
 
     private fun registerPausePlayMusic() {
         val filter = IntentFilter(MainActivity.BROADCAST_PAUSE_PLAY_MUSIC)
-        registerReceiver(pausePlayMusicReceiver, filter)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(pausePlayMusicReceiver, filter)
+        } else {
+            registerReceiver(pausePlayMusicReceiver, filter, Context.RECEIVER_EXPORTED)
+        }
     }
 
     private fun registerStopMusic() {
         val filter = IntentFilter(MainActivity.BROADCAST_STOP_MUSIC)
-        registerReceiver(stopMusicReceiver, filter)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(stopMusicReceiver, filter)
+        } else {
+            registerReceiver(stopMusicReceiver, filter, Context.RECEIVER_EXPORTED)
+        }
     }
 
     private fun registerPlayNextMusic() {
         val filter = IntentFilter(MainActivity.BROADCAST_PLAY_NEXT_MUSIC)
-        registerReceiver(nextMusicReceiver, filter)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(nextMusicReceiver, filter)
+        } else {
+            registerReceiver(nextMusicReceiver, filter, Context.RECEIVER_EXPORTED)
+        }
     }
 
     private fun registerPlayPreviousMusic() {
         val filter = IntentFilter(MainActivity.BROADCAST_PLAY_PREVIOUS_MUSIC)
-        registerReceiver(prevMusicReceiver, filter)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(prevMusicReceiver, filter)
+        } else {
+            registerReceiver(prevMusicReceiver, filter, Context.RECEIVER_EXPORTED)
+        }
     }
 
     //when output device is unplugged it will activate
     private fun registerBecomingNoisyReceiver() {
         val i = IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
-        registerReceiver(becomingNoisyReceiver, i)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(becomingNoisyReceiver, i)
+        } else {
+            registerReceiver(becomingNoisyReceiver, i, Context.RECEIVER_EXPORTED)
+        }
     }
 
     //when output device is plugged it will activate
     private fun registerPluggedDeviceReceiver() {
         val i = IntentFilter(AudioManager.ACTION_HEADSET_PLUG)
-        registerReceiver(pluggedInDevice, i)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(pluggedInDevice, i)
+        } else {
+            registerReceiver(pluggedInDevice, i, Context.RECEIVER_EXPORTED)
+        }
     }
 
     /**
@@ -361,14 +389,17 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
                 .setChannelId(ApplicationClass.CHANNEL_ID) //set control
                 .addAction(prevAction).addAction(notificationAction, "Pause", playPauseAction)
                 .addAction(R.drawable.ic_next_for_noti, "next", playbackAction(2))
-                .addAction(stopAction).setContentIntent(
+                .addAction(stopAction)
+                .setCategory(NotificationCompat.CATEGORY_SERVICE)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setContentIntent(
                     PendingIntent.getActivity(
                         this,
                         0,
                         Intent(applicationContext, MainActivity::class.java),
                         PendingIntent.FLAG_IMMUTABLE
                     )
-                ).setSilent(true).setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                ).setSilent(true).setPriority(NotificationCompat.PRIORITY_MAX)
                 .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
                 .build()
         if (playbackStatus == PlaybackStatus.PLAYING) {

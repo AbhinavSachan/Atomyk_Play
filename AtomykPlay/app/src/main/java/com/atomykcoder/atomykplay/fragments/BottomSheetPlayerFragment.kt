@@ -184,28 +184,6 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         val view = inflater.inflate(R.layout.fragment_player, container, false)
         val weakContext = WeakReference(requireContext())
         context = weakContext.get()
-        if (!EventBus.getDefault().isRegistered(this)) {
-            EventBus.getDefault().register(this)
-        }
-        glideBuilt = GlideBuilt(requireContext())
-
-        //StorageUtil initialization
-        storageUtil = StorageUtil(requireContext())
-        executorService = Executors.newFixedThreadPool(10)
-        if (savedInstanceState == null) {
-            if (activeMusic == null) {
-                activeMusic = currentMusic
-            }
-        } else {
-            activeMusic = MusicHelper.decode(savedInstanceState.getString("activeMusic"))
-        }
-        if (activeMusic != null) {
-            lrcMap = storageUtil?.loadLyrics(activeMusic!!.id)
-        }
-        settingsStorage = SettingsStorage(requireContext())
-        val weakActivity = WeakReference(requireActivity() as MainActivity)
-        mainActivity = weakActivity.get()
-        playing_same_song = false
 
         //Mini player items initializations
         miniPlayView = view.findViewById(R.id.mini_player_layout) //○
@@ -248,6 +226,30 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         coverCardView = view.findViewById(R.id.card_view_for_cover)
         lyricsCardView = view.findViewById(R.id.card_view_for_lyrics)
         lyricsRelativeLayout = view.findViewById(R.id.lyrics_relative_layout)
+
+        if (!EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().register(this)
+        }
+        glideBuilt = GlideBuilt(requireContext())
+
+        //StorageUtil initialization
+        storageUtil = StorageUtil(requireContext())
+        executorService = Executors.newFixedThreadPool(10)
+        if (savedInstanceState == null) {
+            if (activeMusic == null) {
+                activeMusic = currentMusic
+            }
+        } else {
+            activeMusic = MusicHelper.decode(savedInstanceState.getString("activeMusic"))
+        }
+        if (activeMusic != null) {
+            lrcMap = storageUtil?.loadLyrics(activeMusic!!.id)
+        }
+        settingsStorage = SettingsStorage(requireContext())
+        val weakActivity = WeakReference(requireActivity() as MainActivity)
+        mainActivity = weakActivity.get()
+        playing_same_song = false
+
         setAccorToSettings()
 
         //click listeners on mini player
@@ -576,6 +578,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         EventBus.getDefault().post(RunnableSyncLyricsEvent())
     }
 
+    @Synchronized
     @Subscribe
     fun setPlayerImages(result: SetImageInMainPlayer) {
         if (playing_same_song) {
@@ -597,9 +600,13 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
                     setCurColorInLyricView(tempColor, getColor(R.color.player_bg))
                     getColor(R.color.player_bg)
                 }
-                glideBuilt!!.loadFromBitmap(image, R.drawable.ic_music, playerCoverImage, 512, true)
-                glideBuilt!!.loadFromBitmap(image, R.drawable.ic_music, miniCover, 128, false)
-                glideBuilt!!.loadFromBitmap(image, R.drawable.ic_music, queueCoverImg, 128, false)
+                try {
+                    glideBuilt!!.loadAlbumArt(activeMusic!!.path, R.drawable.ic_music, playerCoverImage, 512, true)
+                    glideBuilt!!.loadAlbumArt(activeMusic!!.path, R.drawable.ic_music, miniCover, 128, false)
+                    glideBuilt!!.loadAlbumArt(activeMusic!!.path, R.drawable.ic_music, queueCoverImg, 128, false)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
                 mainActivity!!.setImageInNavigation(image)
                 if (image != null && image.isRecycled) {
                     //Don't remove this it will prevent app from crashing if bitmap was trying to recycle from instance

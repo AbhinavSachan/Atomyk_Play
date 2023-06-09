@@ -512,7 +512,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         }
         builder.setOnCancelListener { finish() }
         val dialog: AlertDialog = builder.create()
-        dialog.show()
+        if (!dialog.isShowing) {
+            dialog.show()
+        }
     }
 
     private fun setDetailsMenuButtons() {
@@ -802,7 +804,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     }
 
     fun setImageInNavigation(album_uri: Bitmap?) {
-        glideBuilt!!.loadFromBitmap(album_uri, R.drawable.ic_music, navCover, 512, false)
+        try {
+            glideBuilt!!.loadFromBitmap(album_uri, R.drawable.ic_music, navCover, 512, false)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     private val music: Music?

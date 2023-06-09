@@ -13,7 +13,12 @@ import com.bumptech.glide.request.RequestOptions
 
 class GlideBuilt(private val context: Context) {
     private val requestOptions = RequestOptions()
-    fun loadFromUri(uri: String?, placeholderImage: Int, imageView: ImageView?, image_measure: Int) {
+    fun loadFromUri(
+        uri: String?,
+        placeholderImage: Int,
+        imageView: ImageView?,
+        image_measure: Int
+    ) {
         Glide.with(context).load(uri).apply(
             RequestOptions().placeholder(placeholderImage).error(R.drawable.ic_music)
         )
@@ -23,6 +28,7 @@ class GlideBuilt(private val context: Context) {
             .override(image_measure, image_measure)
             .into(imageView!!)
     }
+
     fun loadFromRes(res: Int?, imageView: ImageView?) {
         Glide.with(context).load(res)
             .diskCacheStrategy(DiskCacheStrategy.NONE)
@@ -48,7 +54,7 @@ class GlideBuilt(private val context: Context) {
                 placeholderImage
             ).error(R.drawable.ic_music)
         )
-            .diskCacheStrategy(DiskCacheStrategy.NONE)
+            .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
             .skipMemoryCache(true)
             .transition(drawableTransitionOptions)
             .override(image_measure, image_measure)
@@ -73,16 +79,20 @@ class GlideBuilt(private val context: Context) {
         } else {
             DrawableTransitionOptions().dontTransition()
         }
-        Glide.with(context).load(bitmap).apply(
-            requestOptions.placeholder(
-                shadowed
-            ).error(R.drawable.ic_music)
-        )
-            .diskCacheStrategy(DiskCacheStrategy.NONE)
-            .skipMemoryCache(true)
-            .transition(drawableTransitionOptions)
-            .override(image_measure, image_measure)
-            .into(imageView!!)
+        try {
+            Glide.with(context).load(bitmap).apply(
+                requestOptions.placeholder(
+                    shadowed
+                ).error(R.drawable.ic_music)
+            )
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .skipMemoryCache(true)
+                .transition(drawableTransitionOptions)
+                .override(image_measure, image_measure)
+                .into(imageView!!)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     fun pauseRequest() {

@@ -23,6 +23,7 @@ import java.text.DateFormat
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.ArrayList
 
 class LastAddedFragment : Fragment() {
     private lateinit var recyclerView: RecyclerView
@@ -99,10 +100,9 @@ class LastAddedFragment : Fragment() {
                     return 0
                 }
             })
-            val finalList = initialMusicList
+            lastAddedMusicList = initialMusicList?.let { ArrayList(it) }
             coroutineMainScope.launch {
-                adapter = MusicMainAdapter(requireContext(), finalList)
-                adapter!!.setHasStableIds(true)
+                adapter = MusicMainAdapter(requireContext(), lastAddedMusicList)
                 recyclerView.adapter = adapter
                 loadLastAddedList(settingsStorage?.loadLastAddedDur())
             }
