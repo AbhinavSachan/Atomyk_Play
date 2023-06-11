@@ -389,7 +389,7 @@ class StorageUtil
             lyricsSharedPref = context.getSharedPreferences(LYRICS_STORAGE, Context.MODE_PRIVATE)
             val gson = Gson()
             val json = lyricsSharedPref.getString(musicId, null)
-            val type = object : TypeToken<LRCMap?>() {}.type
+            val type = TypeToken.getParameterized(LRCMap::class.java).type
             json?.let {
                 return gson.fromJson(it, type)
             }
@@ -477,7 +477,7 @@ class StorageUtil
         playlistSharedPref = context.getSharedPreferences(PLAYLIST_STORAGE, Context.MODE_PRIVATE)
         val gson = Gson()
         val json = playlistSharedPref.getString(playlistName, null)
-        val type = object : TypeToken<Playlist?>() {}.type
+        val type = TypeToken.getParameterized(Playlist::class.java).type
         return gson.fromJson(json, type)
     }
 
@@ -495,7 +495,7 @@ class StorageUtil
             val keys = playlistSharedPref.all
             for ((key) in keys) {
                 val json = playlistSharedPref.getString(key, null)
-                val type = object : TypeToken<Playlist?>() {}.type
+                val type = TypeToken.getParameterized(Playlist::class.java).type
                 val playlist = gson.fromJson<Playlist>(json, type)
                 playlists.add(playlist)
             }
@@ -517,7 +517,7 @@ class StorageUtil
         // Retrieving playlist json
         val json = playlistSharedPref.getString(playlistName, null)
         // Creating a playlist type
-        val type = object : TypeToken<Playlist?>() {}.type
+        val type = TypeToken.getParameterized(Playlist::class.java).type
         // converting json to gson then to playlist object
         val playlist = gson.fromJson<Playlist>(json, type)
         //adding music to playlist object
@@ -545,7 +545,7 @@ class StorageUtil
         // Retrieving playlist json
         val json = playlistSharedPref.getString(playlistName, null)
         // Creating a playlist type
-        val type = object : TypeToken<Playlist?>() {}.type
+        val type = TypeToken.getParameterized(Playlist::class.java).type
         // converting json to gson then to playlist object
         val playlist = gson.fromJson<Playlist>(json, type)
         //removing music from playlist object
@@ -581,6 +581,7 @@ class StorageUtil
                 context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE)
             return sharedPreferences.getBoolean("theme_name", false)
         }
+
         fun saveHideStatusBar(b: Boolean) {
             val sharedPreferences =
                 context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE)
@@ -594,6 +595,7 @@ class StorageUtil
                 context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE)
             return sharedPreferences.getBoolean("hidden_status_bar", false)
         }
+
         fun saveHideNavBar(b: Boolean) {
             val sharedPreferences =
                 context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE)

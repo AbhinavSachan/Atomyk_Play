@@ -106,13 +106,13 @@
             <TextView
                 android:id="@+id/info_text"
                 android:layout_width="match_parent"
-                android:padding="4dp"
-                android:textSize="12sp"
+                android:layout_height="wrap_content"
                 android:autoLink="web"
                 android:lineSpacingMultiplier="1.2"
                 android:linksClickable="true"
+                android:padding="4dp"
                 android:text="@string/info_for_lyrics"
-                android:layout_height="wrap_content"/>
+                android:textSize="12sp" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 

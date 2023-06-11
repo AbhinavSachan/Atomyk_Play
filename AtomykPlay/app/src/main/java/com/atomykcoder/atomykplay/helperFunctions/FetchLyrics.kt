@@ -1,9 +1,9 @@
 package com.atomykcoder.atomykplay.helperFunctions
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.ProgressBar
+import com.atomykcoder.atomykplay.interfaces.ApiService
 import com.localebro.okhttpprofiler.OkHttpProfilerInterceptor
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
@@ -11,13 +11,8 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 import retrofit2.Retrofit
 import retrofit2.converter.scalars.ScalarsConverterFactory
-import retrofit2.http.GET
-import retrofit2.http.Query
-import retrofit2.http.Url
 import java.io.IOException
 import java.util.concurrent.TimeUnit
-import java.util.regex.Matcher
-import java.util.regex.Pattern
 
 class FetchLyrics {
 
@@ -38,8 +33,8 @@ class FetchLyrics {
      */
     private fun createOkHttpClient(): OkHttpClient {
         return OkHttpClient.Builder()
-            .readTimeout(45,TimeUnit.SECONDS)
-            .callTimeout(45,TimeUnit.SECONDS)
+            .readTimeout(45, TimeUnit.SECONDS)
+            .callTimeout(45, TimeUnit.SECONDS)
             .addInterceptor(OkHttpProfilerInterceptor())
             .build()
     }
@@ -64,7 +59,7 @@ class FetchLyrics {
         val sampleLyrics = ArrayList<String>()
         val urls = ArrayList<String>()
         try {
-            val response: ResponseBody = apiService.search("$name $artistName")
+            val response = apiService.search("$name $artistName")
 
             val document = Jsoup.parse(response.string())
 
@@ -134,12 +129,4 @@ class FetchLyrics {
     fun onPostExecute(progressBar: ProgressBar) {
         progressBar.visibility = View.GONE
     }
-}
-
-interface ApiService {
-    @GET("search/all")
-    suspend fun search(@Query("qry") query: String): ResponseBody
-
-    @GET
-    suspend fun getSong(@Url href: String): ResponseBody
 }

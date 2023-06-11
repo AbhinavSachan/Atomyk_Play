@@ -28,11 +28,11 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.atomykcoder.atomykplay.ApplicationClass;
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.activities.MainActivity;
 import com.atomykcoder.atomykplay.adapters.BeautifyListAdapter;
 import com.atomykcoder.atomykplay.adapters.BlockFolderListAdapter;
-import com.atomykcoder.atomykplay.ApplicationClass;
 import com.atomykcoder.atomykplay.customScripts.LinearLayoutManagerWrapper;
 import com.atomykcoder.atomykplay.utils.AndroidUtil;
 import com.atomykcoder.atomykplay.utils.StorageUtil;

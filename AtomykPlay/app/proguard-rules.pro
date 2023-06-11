@@ -40,8 +40,8 @@
 
 # Music player app ProGuard rules
 # keep all model classes
--keep public class com.atomykcoder.atomykplay.data.** { *; }
--keep public class com.atomykcoder.atomykplay.dataModels.** { *; }
+-keep class com.atomykcoder.atomykplay.data.** { *; }
+-keep class com.atomykcoder.atomykplay.dataModels.** { *; }
 
 # keep Glide-generated code
 -keep public class * implements com.bumptech.glide.GeneratedAppGlideModule {
@@ -82,17 +82,10 @@
 ##---------------Begin: proguard configuration for Gson  ----------
 # Gson uses generic type information stored in a class file when working with fields. Proguard
 # removes such information by default, so configure it to keep all of it.
--keepattributes Signature
-
-# For using GSON @Expose annotation
--keepattributes *Annotation*
 
 # Gson specific classes
 -dontwarn sun.misc.**
 #-keep class com.google.gson.stream.** { *; }
-
-# Application classes that will be serialized/deserialized over Gson
--keep class com.google.gson.examples.android.model.** { <fields>; }
 
 # Prevent proguard from stripping interface information from TypeAdapterFactory,
 # JsonSerializer, JsonDeserializer instances (so they can be used in @JsonAdapter)
@@ -107,10 +100,8 @@
 -keep,allowobfuscation interface com.google.gson.annotations.SerializedName
 ##---------------End: proguard configuration for Gson  ----------
 
-#this section is for razorpay
--keepclassmembers class * {
-    @android.webkit.JavascriptInterface <methods>;
-}
+# For using GSON @Expose annotation
+-keepattributes *Annotation*
 -keepattributes Signature
 -keepattributes Exceptions
 -keep class okhttp3.** { *; }
@@ -120,8 +111,13 @@
 -dontwarn okio.**
 -dontwarn retrofit2.**
 -keep class retrofit2.**{*;}
+-keep interface com.atomykcoder.atomykplay.interfaces.ApiService { *; }
 
-# Gson uses generic type information stored in a class file when working with fields. Proguard
-# removes such information by default, so configure it to keep all of it.
-# For using GSON @Expose annotation
--keepattributes *Annotation*
+
+-keep,allowobfuscation,allowshrinking interface retrofit2.Call
+-keep,allowobfuscation,allowshrinking class retrofit2.Response
+
+ # With R8 full mode generic signatures are stripped for classes that are not
+ # kept. Suspend functions are wrapped in continuations where the type argument
+ # is used.
+-keep,allowobfuscation,allowshrinking class kotlin.coroutines.Continuation

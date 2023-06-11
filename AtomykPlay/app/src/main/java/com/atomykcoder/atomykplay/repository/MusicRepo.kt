@@ -25,6 +25,7 @@ class MusicRepo {
         return future
 
     }
+
     fun removeFromList(music: Music) {
         initialMusicList.remove(music)
     }

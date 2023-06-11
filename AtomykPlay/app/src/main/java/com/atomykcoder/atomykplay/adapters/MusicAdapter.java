@@ -16,9 +16,9 @@ import java.util.concurrent.Executors;
 
 public class MusicAdapter extends GenericRecyclerAdapter<Music> {
 
-    private ArrayList<Music> musicList;
-    public boolean canPlay = true;
     public final Handler handler = new Handler(Looper.getMainLooper());
+    public boolean canPlay = true;
+    private ArrayList<Music> musicList;
 
     protected void handlePlayMusic(MainActivity mainActivity, Music item) {
         mainActivity.playAudio(item);
@@ -36,7 +36,7 @@ public class MusicAdapter extends GenericRecyclerAdapter<Music> {
         ExecutorService service = Executors.newFixedThreadPool(3);
         ArrayList<Music> shuffleList = new ArrayList<>(musicList);
         canPlay = false;
-        service.execute(()->{
+        service.execute(() -> {
             storage.saveShuffle(true);
             storage.saveTempMusicList(shuffleList);
 
@@ -53,7 +53,7 @@ public class MusicAdapter extends GenericRecyclerAdapter<Music> {
             storage.saveMusicIndex(0);
 
             this.musicList = shuffleList;
-            handler.post(()-> {
+            handler.post(() -> {
                 handlePlayMusic(mainActivity, item);
                 canPlay = true;
             });
@@ -61,15 +61,15 @@ public class MusicAdapter extends GenericRecyclerAdapter<Music> {
         service.shutdown();
     }
 
-    protected void handleNoShuffle(MainActivity mainActivity,Music item,StorageUtil storage, int position, ArrayList<Music> musicList) {
+    protected void handleNoShuffle(MainActivity mainActivity, Music item, StorageUtil storage, int position, ArrayList<Music> musicList) {
         ExecutorService service = Executors.newFixedThreadPool(2);
         canPlay = false;
-        service.execute(()->{
+        service.execute(() -> {
             storage.saveShuffle(false);
             storage.saveQueueList(musicList);
             storage.saveMusicIndex(position);
             this.musicList = musicList;
-            handler.post(()-> {
+            handler.post(() -> {
                 handlePlayMusic(mainActivity, item);
                 canPlay = true;
             });

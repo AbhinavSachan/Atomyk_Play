@@ -34,12 +34,12 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.SmoothScroller
 import androidx.transition.TransitionInflater
 import com.airbnb.lottie.LottieAnimationView
+import com.atomykcoder.atomykplay.ApplicationClass
 import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.activities.MainActivity
 import com.atomykcoder.atomykplay.adapters.MusicLyricsAdapter
 import com.atomykcoder.atomykplay.adapters.MusicQueueAdapter
 import com.atomykcoder.atomykplay.adapters.SimpleTouchCallback
-import com.atomykcoder.atomykplay.ApplicationClass
 import com.atomykcoder.atomykplay.classes.GlideBuilt
 import com.atomykcoder.atomykplay.customScripts.CenterSmoothScrollScript.CenterSmoothScroller
 import com.atomykcoder.atomykplay.customScripts.CustomBottomSheet
@@ -49,7 +49,6 @@ import com.atomykcoder.atomykplay.dataModels.LRCMap
 import com.atomykcoder.atomykplay.enums.OptionSheetEnum
 import com.atomykcoder.atomykplay.enums.PlaybackStatus
 import com.atomykcoder.atomykplay.events.*
-import com.atomykcoder.atomykplay.helperFunctions.Logger
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener
 import com.atomykcoder.atomykplay.utils.StorageUtil
@@ -471,12 +470,12 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
 
     private fun getColor(id: Int): Int {
         return try {
-            if (isAdded){
+            if (isAdded) {
                 requireContext().resources.getColor(
                     id,
                     Resources.getSystem().newTheme()
                 )
-            }else -1
+            } else -1
         } catch (e: NotFoundException) {
             -1
         }
@@ -556,11 +555,15 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
                 }
                 try {
                     playerSongNameTv!!.text = songName
-                    songNameQueueItem!!.text = songName
                     playerArtistNameTv!!.text = artistName
-                    artistQueueItem!!.text = artistName
                     miniNameText!!.text = songName
                     miniArtistText!!.text = artistName
+                    queueSheetBehaviour?.let {
+                        if (it.state == BottomSheetBehavior.STATE_EXPANDED) {
+                            songNameQueueItem!!.text = songName
+                            artistQueueItem!!.text = artistName
+                        }
+                    }
                 } catch (ignored: Exception) {
                 }
                 try {
@@ -601,9 +604,33 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
                     getColor(R.color.player_bg)
                 }
                 try {
-                    glideBuilt!!.loadAlbumArt(activeMusic!!.path, R.drawable.ic_music, playerCoverImage, 512, true)
-                    glideBuilt!!.loadAlbumArt(activeMusic!!.path, R.drawable.ic_music, miniCover, 128, false)
-                    glideBuilt!!.loadAlbumArt(activeMusic!!.path, R.drawable.ic_music, queueCoverImg, 128, false)
+                    activeMusic?.let {
+                        glideBuilt!!.loadAlbumArt(
+                            it.path,
+                            R.drawable.ic_music,
+                            playerCoverImage,
+                            512,
+                            true
+                        )
+                        glideBuilt!!.loadAlbumArt(
+                            it.path,
+                            R.drawable.ic_music,
+                            miniCover,
+                            128,
+                            false
+                        )
+                        queueSheetBehaviour?.let { sheet ->
+                            if (sheet.state == BottomSheetBehavior.STATE_EXPANDED) {
+                                glideBuilt!!.loadAlbumArt(
+                                    it.path,
+                                    R.drawable.ic_music,
+                                    queueCoverImg,
+                                    128,
+                                    false
+                                )
+                            }
+                        }
+                    }
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
@@ -667,7 +694,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
                 val curStamp = currentStamp
                 if (MainActivity.media_player_service != null) {
                     if (!MainActivity.media_player_service?.isMediaPlaying!!) return@Runnable
-                    val nextStamp = getNextStamp(lrcMap,curStamp)
+                    val nextStamp = getNextStamp(lrcMap, curStamp)
                     if (nextStamp != "") {
                         nextStampInMillis = MusicHelper.convertToMillis(nextStamp)
 
@@ -719,7 +746,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
             return "[" + MusicHelper.convertDurationForLyrics(currPosInMillis.toString()) + "]"
         }
 
-    private fun getNextStamp(_lrcMap: LRCMap?,curStamp:String): String {
+    private fun getNextStamp(_lrcMap: LRCMap?, curStamp: String): String {
         var currIndex = -1
         if (_lrcMap != null) {
             currIndex = _lrcMap.getIndexAtStamp(curStamp)
@@ -731,7 +758,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
     }
 
     private fun scrollToPosition(position: Int) {
-        if (position == -1){
+        if (position == -1) {
             return
         }
         val smoothScroller: SmoothScroller = CenterSmoothScroller(context)
@@ -1063,6 +1090,11 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
 
     private fun openQue() {
         queueRecyclerView!!.visibility = View.VISIBLE
+        activeMusic?.let {
+            songNameQueueItem!!.text = it.name
+            artistQueueItem!!.text = it.artist
+            glideBuilt!!.loadAlbumArt(it.path, R.drawable.ic_music, queueCoverImg, 128, false)
+        }
         queueSheetBehaviour!!.state = BottomSheetBehavior.STATE_EXPANDED
         queueBottomSheet!!.alpha = 1f
     }

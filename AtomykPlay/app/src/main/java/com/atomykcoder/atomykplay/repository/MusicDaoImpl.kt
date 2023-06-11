@@ -9,12 +9,12 @@ import com.atomykcoder.atomykplay.data.Music
 import com.atomykcoder.atomykplay.interfaces.MusicDaoI
 import com.atomykcoder.atomykplay.utils.StorageUtil.SettingsStorage
 import java.io.File
-import java.lang.NumberFormatException
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.*
+import java.util.Date
+import java.util.Locale
 import java.util.concurrent.CompletableFuture
 
 class MusicDaoImpl : MusicDaoI {
@@ -75,7 +75,7 @@ class MusicDaoImpl : MusicDaoI {
                 do {
                     var isSongBlacklisted = false
                     for (path in blackList) {
-                        if (audioCursor.getString(4).contains(path!!)) {
+                        if (audioCursor.getString(4).contains(path)) {
                             isSongBlacklisted = true
                             break
                         }
@@ -134,14 +134,14 @@ class MusicDaoImpl : MusicDaoI {
                                     .setAlbumUri(sAlbumUri)
                                     .setDuration(sDuration)
                                     .setPath(sPath)
-                                    .setBitrate(sBitrate ?:"")
+                                    .setBitrate(sBitrate ?: "")
                                     .setMimeType(sMimeType)
                                     .setSize(sSize)
                                     .setGenre(sGenre ?: "")
                                     .setId(sId)
                                     .setDateAdded(sDateAdded)
                                     .setYear(sYear ?: "")
-                                    .setAlbumId(sAlbumId ?:"")
+                                    .setAlbumId(sAlbumId ?: "")
                                     .build()
                                 dataList.add(music)
                             }

@@ -2,6 +2,7 @@ package com.atomykcoder.atomykplay.fragments
 
 import android.annotation.SuppressLint
 import android.app.Dialog
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -23,7 +24,6 @@ import java.text.DateFormat
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.ArrayList
 
 class LastAddedFragment : Fragment() {
     private lateinit var recyclerView: RecyclerView

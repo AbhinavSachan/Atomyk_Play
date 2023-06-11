@@ -97,13 +97,13 @@ class GlideBuilt(private val context: Context) {
 
     fun pauseRequest() {
         if (!Glide.with(context).isPaused) {
-            Glide.with(context).pauseRequests();
+            Glide.with(context).pauseRequests()
         }
     }
 
     fun resumeRequest() {
         if (Glide.with(context).isPaused) {
-            Glide.with(context).resumeRequests();
+            Glide.with(context).resumeRequests()
         }
     }
 }

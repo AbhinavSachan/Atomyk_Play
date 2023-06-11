@@ -51,9 +51,12 @@ class TagWriter {
                 var albumArtFile: File? = null
                 if (info.artworkInfo?.artwork != null) {
                     try {
-                        albumArtFile = File(getRealPathFromImageURI(context,
-                            info.artworkInfo.artwork
-                        ))
+                        albumArtFile = File(
+                            getRealPathFromImageURI(
+                                context,
+                                info.artworkInfo.artwork
+                            )
+                        )
                         artwork = Artwork.createArtworkFromFile(albumArtFile)
                     } catch (e: Exception) {
                         context.showToast("Something went wrong with artwork")
@@ -118,9 +121,12 @@ class TagWriter {
                 var albumArtFile: File? = null
                 if (info.artworkInfo?.artwork != null) {
                     try {
-                        albumArtFile = File(getRealPathFromImageURI(context,
-                            info.artworkInfo.artwork
-                        ))
+                        albumArtFile = File(
+                            getRealPathFromImageURI(
+                                context,
+                                info.artworkInfo.artwork
+                            )
+                        )
                         artwork = Artwork.createArtworkFromFile(albumArtFile)
 
                     } catch (e: IOException) {
@@ -187,6 +193,6 @@ class TagWriter {
     }
 }
 
-private fun Context.showToast(s : String) {
+private fun Context.showToast(s: String) {
     (this as ApplicationClass).showToast(s)
 }

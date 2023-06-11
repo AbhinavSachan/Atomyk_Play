@@ -140,7 +140,10 @@ class PackageValidator(
      */
     private fun logUnknownCaller(callerPackageInfo: CallerPackageInfo) {
         if (BuildConfig.DEBUG && callerPackageInfo.signature != null) {
-            Log.i(TAG, "PackageValidator call" + callerPackageInfo.name + callerPackageInfo.packageName + callerPackageInfo.signature)
+            Log.i(
+                TAG,
+                "PackageValidator call" + callerPackageInfo.name + callerPackageInfo.packageName + callerPackageInfo.signature
+            )
         }
     }
 
@@ -178,8 +181,10 @@ class PackageValidator(
     @Suppress("Deprecation")
     @SuppressLint("PackageManagerGetSignatures")
     private fun getPackageInfo(callingPackage: String): PackageInfo? =
-        packageManager.getPackageInfo(callingPackage,
-            PackageManager.GET_SIGNATURES or PackageManager.GET_PERMISSIONS)
+        packageManager.getPackageInfo(
+            callingPackage,
+            PackageManager.GET_SIGNATURES or PackageManager.GET_PERMISSIONS
+        )
 
     /**
      * Gets the signature of a given package's [PackageInfo].

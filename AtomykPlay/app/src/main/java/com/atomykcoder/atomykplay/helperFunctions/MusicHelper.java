@@ -2,7 +2,6 @@ package com.atomykcoder.atomykplay.helperFunctions;
 
 import android.annotation.SuppressLint;
 import android.util.Base64;
-import android.util.Log;
 
 import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.dataModels.LRCMap;
@@ -18,6 +17,7 @@ public class MusicHelper {
     private MusicHelper() {
         // constructor required to avoid accidentally creating any instance of this class
     }
+
     /**
      * This function takes unfiltered lrc data and returns a linked hashmap with timestamp as
      * keys and their assigned lyrics as values.
@@ -107,6 +107,7 @@ public class MusicHelper {
         }
         return out;
     }
+
     public static int convertToMillis(String duration) {
         String _duration = duration.replace("[", "").replace("]", "");
 
@@ -121,14 +122,14 @@ public class MusicHelper {
 
     public static String encode(Music music) {
         byte[] serializedMessage = new byte[0];
-        if (music!= null) {
+        if (music != null) {
             serializedMessage = music.toByteArray();
         }
         return Base64.encodeToString(serializedMessage, Base64.DEFAULT);
     }
 
     public static Music decode(String encoded) {
-        if (encoded == null){
+        if (encoded == null) {
             return null;
         }
         byte[] serializedMessage = Base64.decode(encoded, Base64.DEFAULT);

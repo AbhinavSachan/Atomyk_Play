@@ -19,7 +19,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.airbnb.lottie.Lottie
 import com.airbnb.lottie.LottieAnimationView
 import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.adapters.MusicMainAdapter
@@ -30,7 +29,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.*
-import kotlin.collections.ArrayList
 
 //Search Layout Fragment for Performing Searches and Presenting Results
 class SearchFragment : Fragment() {
@@ -46,10 +44,11 @@ class SearchFragment : Fragment() {
     private var noResultAnim: LottieAnimationView? = null
     private val searchList = MutableLiveData<ArrayList<Music>>()
 
-    private fun setSearchList(list:ArrayList<Music>){
+    private fun setSearchList(list: ArrayList<Music>) {
         searchList.value = list
     }
-    private fun getSearchList():LiveData<ArrayList<Music>>{
+
+    private fun getSearchList(): LiveData<ArrayList<Music>> {
         return searchList
     }
 
@@ -65,6 +64,7 @@ class SearchFragment : Fragment() {
         genreButton = null
         noResultAnim = null
     }
+
     private fun searchWithFilters(query: String, dataList: ArrayList<Music>) {
 
         //Check if any radio button is pressed
@@ -112,9 +112,9 @@ class SearchFragment : Fragment() {
             override fun onTextChanged(query: CharSequence, start: Int, before: Int, count: Int) {
                 if (!isSearching) {
                     handler.postDelayed({
-                            isSearching = true
-                            handleSearchEvent(query.toString().lowercase(Locale.getDefault()), dataList)
-                    },300)
+                        isSearching = true
+                        handleSearchEvent(query.toString().lowercase(Locale.getDefault()), dataList)
+                    }, 300)
                 }
             }
 
@@ -141,10 +141,10 @@ class SearchFragment : Fragment() {
         recyclerView.adapter = adapter
         songButton?.isChecked = true
         getSearchList().observe(viewLifecycleOwner) {
-            if (it.isNotEmpty()){
+            if (it.isNotEmpty()) {
                 noResultAnim?.visibility = View.GONE
                 noResultAnim?.pauseAnimation()
-            }else{
+            } else {
                 noResultAnim?.visibility = View.VISIBLE
                 if (!noResultAnim!!.isAnimating) {
                     noResultAnim?.playAnimation()
@@ -177,6 +177,7 @@ class SearchFragment : Fragment() {
                         }
                     }
                 }
+
                 2 -> if (!TextUtils.isEmpty(query)) {
                     for (song in dataList) {
                         if (song.album.lowercase(Locale.getDefault()).contains(query!!)) {
@@ -184,6 +185,7 @@ class SearchFragment : Fragment() {
                         }
                     }
                 }
+
                 3 -> if (!TextUtils.isEmpty(query)) {
                     for (song in dataList) {
                         if (song.artist.lowercase(Locale.getDefault()).contains(query!!)) {
@@ -191,16 +193,19 @@ class SearchFragment : Fragment() {
                         }
                     }
                 }
+
                 4 -> if (!TextUtils.isEmpty(query)) {
                     for (song in dataList) {
-                        if (song.genre != null) if (song.genre.lowercase(Locale.getDefault()).contains(
-                                query!!
-                            )
+                        if (song.genre != null) if (song.genre.lowercase(Locale.getDefault())
+                                .contains(
+                                    query!!
+                                )
                         ) {
                             addMusicToSearchList(song)
                         }
                     }
                 }
+
                 else -> if (!TextUtils.isEmpty(query)) {
                     for (song in dataList) {
                         if (song.name.lowercase(Locale.getDefault())
@@ -242,6 +247,7 @@ class SearchFragment : Fragment() {
                 artistButton!!.text = artist0
                 genreButton!!.text = genre0
             }
+
             2 -> {
                 num = listSize.toString() + space + "Album"
                 songButton!!.text = song0
@@ -249,6 +255,7 @@ class SearchFragment : Fragment() {
                 artistButton!!.text = artist0
                 genreButton!!.text = genre0
             }
+
             3 -> {
                 num = listSize.toString() + space + "Artist"
                 songButton!!.text = song0
@@ -256,6 +263,7 @@ class SearchFragment : Fragment() {
                 artistButton!!.text = num
                 genreButton!!.text = genre0
             }
+
             4 -> {
                 num = listSize.toString() + space + "Genre"
                 songButton!!.text = song0

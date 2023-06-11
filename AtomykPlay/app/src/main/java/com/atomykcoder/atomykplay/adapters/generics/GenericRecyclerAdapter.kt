@@ -11,6 +11,7 @@ open class GenericRecyclerAdapter<T> : RecyclerView.Adapter<GenericViewHolder<T>
     protected var items: ArrayList<T>? = null
     private var delay = 600
     private var lastClickTime: Long = 0
+
     @SuppressLint("NotifyDataSetChanged")
     fun addItems(_items: ArrayList<T>?) {
         items?.addAll(_items!!)

@@ -25,12 +25,12 @@
                 android:id="@+id/card_view_for_cover"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                app:cardUseCompatPadding="true"
                 android:layout_centerInParent="true"
                 android:visibility="visible"
                 app:cardBackgroundColor="@color/cover_black_player"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="16dp"
+                app:cardUseCompatPadding="true"
                 app:strokeWidth="0dp">
 
                 <ImageView
@@ -48,13 +48,14 @@
                 android:id="@+id/card_view_for_lyrics"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                app:cardUseCompatPadding="true"
                 android:layout_centerInParent="true"
                 android:visibility="gone"
                 app:cardBackgroundColor="@color/white"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="16dp"
+                app:cardUseCompatPadding="true"
                 app:strokeWidth="0dp">
+
                 <RelativeLayout
                     android:id="@+id/lyrics_relative_layout"
                     android:layout_width="match_parent"
@@ -69,6 +70,7 @@
                         android:layout_centerInParent="true"
                         android:clipToPadding="false"
                         android:paddingVertical="130dp" />
+
                     <View
                         android:id="@+id/gradient_top"
                         android:layout_width="match_parent"
@@ -82,6 +84,7 @@
                         android:layout_height="165dp"
                         android:layout_alignParentBottom="true"
                         android:background="@drawable/fade_edges_end" />
+
                     <LinearLayout
                         android:id="@+id/no_lyrics_layout"
                         android:layout_width="match_parent"
@@ -118,69 +121,69 @@
                 </RelativeLayout>
             </com.google.android.material.card.MaterialCardView>
 
-<!--            <RelativeLayout-->
-<!--                android:id="@+id/lyrics_relative_layout"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="match_parent"-->
-<!--                android:layout_centerInParent="true"-->
-<!--                android:visibility="gone">-->
+            <!--            <RelativeLayout-->
+            <!--                android:id="@+id/lyrics_relative_layout"-->
+            <!--                android:layout_width="match_parent"-->
+            <!--                android:layout_height="match_parent"-->
+            <!--                android:layout_centerInParent="true"-->
+            <!--                android:visibility="gone">-->
 
-<!--                <androidx.recyclerview.widget.RecyclerView-->
-<!--                    android:id="@+id/lyrics_recycler_view"-->
-<!--                    android:layout_width="match_parent"-->
-<!--                    android:layout_height="match_parent"-->
-<!--                    android:layout_centerInParent="true"-->
-<!--                    android:clipToPadding="false"-->
-<!--                    android:paddingVertical="130dp" />-->
+            <!--                <androidx.recyclerview.widget.RecyclerView-->
+            <!--                    android:id="@+id/lyrics_recycler_view"-->
+            <!--                    android:layout_width="match_parent"-->
+            <!--                    android:layout_height="match_parent"-->
+            <!--                    android:layout_centerInParent="true"-->
+            <!--                    android:clipToPadding="false"-->
+            <!--                    android:paddingVertical="130dp" />-->
 
-<!--                <View-->
-<!--                    android:id="@+id/gradient_top"-->
-<!--                    android:layout_width="match_parent"-->
-<!--                    android:layout_height="165dp"-->
-<!--                    android:layout_alignParentTop="true"-->
-<!--                    android:background="@drawable/fade_edge_start" />-->
+            <!--                <View-->
+            <!--                    android:id="@+id/gradient_top"-->
+            <!--                    android:layout_width="match_parent"-->
+            <!--                    android:layout_height="165dp"-->
+            <!--                    android:layout_alignParentTop="true"-->
+            <!--                    android:background="@drawable/fade_edge_start" />-->
 
-<!--                <View-->
-<!--                    android:id="@+id/gradient_bottom"-->
-<!--                    android:layout_width="match_parent"-->
-<!--                    android:layout_height="165dp"-->
-<!--                    android:layout_alignParentBottom="true"-->
-<!--                    android:background="@drawable/fade_edges_end" />-->
+            <!--                <View-->
+            <!--                    android:id="@+id/gradient_bottom"-->
+            <!--                    android:layout_width="match_parent"-->
+            <!--                    android:layout_height="165dp"-->
+            <!--                    android:layout_alignParentBottom="true"-->
+            <!--                    android:background="@drawable/fade_edges_end" />-->
 
-<!--                <LinearLayout-->
-<!--                    android:id="@+id/no_lyrics_layout"-->
-<!--                    android:layout_width="match_parent"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:layout_centerInParent="true"-->
-<!--                    android:orientation="vertical"-->
-<!--                    android:visibility="gone">-->
+            <!--                <LinearLayout-->
+            <!--                    android:id="@+id/no_lyrics_layout"-->
+            <!--                    android:layout_width="match_parent"-->
+            <!--                    android:layout_height="wrap_content"-->
+            <!--                    android:layout_centerInParent="true"-->
+            <!--                    android:orientation="vertical"-->
+            <!--                    android:visibility="gone">-->
 
-<!--                    <TextView-->
-<!--                        android:layout_width="match_parent"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:layout_gravity="center"-->
-<!--                        android:layout_marginHorizontal="16dp"-->
-<!--                        android:gravity="center"-->
-<!--                        android:padding="10dp"-->
-<!--                        android:text="@string/no_lyrics_found"-->
-<!--                        android:textColor="@color/sub_text_grey"-->
-<!--                        android:textSize="@dimen/d_24sp"-->
-<!--                        android:textStyle="bold" />-->
+            <!--                    <TextView-->
+            <!--                        android:layout_width="match_parent"-->
+            <!--                        android:layout_height="wrap_content"-->
+            <!--                        android:layout_gravity="center"-->
+            <!--                        android:layout_marginHorizontal="16dp"-->
+            <!--                        android:gravity="center"-->
+            <!--                        android:padding="10dp"-->
+            <!--                        android:text="@string/no_lyrics_found"-->
+            <!--                        android:textColor="@color/sub_text_grey"-->
+            <!--                        android:textSize="@dimen/d_24sp"-->
+            <!--                        android:textStyle="bold" />-->
 
-<!--                    <TextView-->
-<!--                        android:id="@+id/btn_add_lyrics"-->
-<!--                        android:layout_width="wrap_content"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:layout_gravity="center"-->
-<!--                        android:layout_marginHorizontal="16dp"-->
-<!--                        android:padding="10dp"-->
-<!--                        android:text="@string/add_lyrics"-->
-<!--                        android:textColor="@color/accent_color_bg"-->
-<!--                        android:textSize="@dimen/d_16sp"-->
-<!--                        android:textStyle="bold" />-->
+            <!--                    <TextView-->
+            <!--                        android:id="@+id/btn_add_lyrics"-->
+            <!--                        android:layout_width="wrap_content"-->
+            <!--                        android:layout_height="wrap_content"-->
+            <!--                        android:layout_gravity="center"-->
+            <!--                        android:layout_marginHorizontal="16dp"-->
+            <!--                        android:padding="10dp"-->
+            <!--                        android:text="@string/add_lyrics"-->
+            <!--                        android:textColor="@color/accent_color_bg"-->
+            <!--                        android:textSize="@dimen/d_16sp"-->
+            <!--                        android:textStyle="bold" />-->
 
-<!--                </LinearLayout>-->
-<!--            </RelativeLayout>-->
+            <!--                </LinearLayout>-->
+            <!--            </RelativeLayout>-->
 
         </RelativeLayout>
 
@@ -481,12 +484,12 @@
                     android:contentDescription="@string/imageView"
                     android:cropToPadding="false"
                     android:elevation="10dp"
-                    android:visibility="invisible"
-                    app:lottie_loop="false"
                     android:scrollY="-9dp"
+                    android:visibility="invisible"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
+                    app:lottie_loop="false"
                     app:lottie_rawRes="@raw/like_anim_click_effect" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 

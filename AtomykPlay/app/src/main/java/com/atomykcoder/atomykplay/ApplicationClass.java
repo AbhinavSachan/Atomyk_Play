@@ -3,11 +3,8 @@ package com.atomykcoder.atomykplay;
 import android.app.Application;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.graphics.Color;
 import android.os.Build;
 import android.widget.Toast;
-
-import androidx.core.splashscreen.SplashScreen;
 
 public class ApplicationClass extends Application {
 

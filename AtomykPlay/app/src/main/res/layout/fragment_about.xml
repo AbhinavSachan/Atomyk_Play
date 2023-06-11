@@ -147,6 +147,7 @@
                                 android:text="@string/what_we_collect"
                                 android:textColor="@color/sub_text_grey"
                                 android:textSize="@dimen/d_12sp" />
+
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"

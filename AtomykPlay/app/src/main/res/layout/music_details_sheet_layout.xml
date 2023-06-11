@@ -13,8 +13,8 @@
         android:id="@+id/dragHandle_image"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_horizontal_rule"
-        android:contentDescription="@string/empty" />
+        android:contentDescription="@string/empty"
+        android:src="@drawable/ic_horizontal_rule" />
 
     <View
         android:layout_width="match_parent"

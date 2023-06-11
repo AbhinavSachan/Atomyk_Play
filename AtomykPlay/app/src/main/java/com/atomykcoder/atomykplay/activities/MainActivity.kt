@@ -25,7 +25,6 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.core.splashscreen.SplashScreen
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
@@ -33,7 +32,6 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.TransitionInflater
-import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
 import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.adapters.FoundLyricsAdapter
 import com.atomykcoder.atomykplay.adapters.MusicMainAdapter
@@ -101,6 +99,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     @JvmField
     var bottomSheetPlayerFragment: BottomSheetPlayerFragment? = null
     private var lastAddedFragment: LastAddedFragment? = null
+
     @JvmField
     var lyricsListBehavior: BottomSheetBehavior<View?>? = null
     private var optionSheetBehavior: BottomSheetBehavior<View?>? = null
@@ -533,7 +532,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         if (is_granted) {
             if (musicMainAdapter == null) {
                 setUpMusicScanner()
-            }else{
+            } else {
                 if (!isChecking) {
                     checkForUpdateList(true)
                 }
@@ -983,7 +982,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                 //saving list
                 storageUtil!!.saveQueueList(songs)
                 storageUtil!!.saveMusicIndex(0)
-                runOnUiThread{
+                runOnUiThread {
                     playAudio(music)
                     bottomSheetPlayerFragment!!.updateQueueAdapter(songs)
                     openBottomPlayer()
@@ -1274,7 +1273,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         settingsStorage = SettingsStorage(this)
         installSplashScreen()
         val darkTheme = settingsStorage.loadIsThemeDark()
-        AndroidUtil.setTheme(window,darkTheme)
+        AndroidUtil.setTheme(window, darkTheme)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 

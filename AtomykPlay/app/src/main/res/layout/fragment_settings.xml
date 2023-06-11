@@ -410,6 +410,7 @@
                         android:thumb="@drawable/custom_switch_thumb"
                         app:track="@drawable/custom_track_switch" />
                 </LinearLayout>
+
                 <LinearLayout
                     android:id="@+id/hide_status_bar_ll"
                     android:layout_width="match_parent"
@@ -459,6 +460,7 @@
                         android:thumb="@drawable/custom_switch_thumb"
                         app:track="@drawable/custom_track_switch" />
                 </LinearLayout>
+
                 <LinearLayout
                     android:id="@+id/hide_nav_bar_ll"
                     android:layout_width="match_parent"

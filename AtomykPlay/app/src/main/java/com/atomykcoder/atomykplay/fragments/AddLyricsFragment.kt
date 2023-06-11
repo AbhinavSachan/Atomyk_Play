@@ -15,6 +15,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.activities.MainActivity
+import com.atomykcoder.atomykplay.activities.MainActivity.Companion.ADD_LYRICS_FRAGMENT_TAG
 import com.atomykcoder.atomykplay.dataModels.LRCMap
 import com.atomykcoder.atomykplay.events.RunnableSyncLyricsEvent
 import com.atomykcoder.atomykplay.helperFunctions.FetchLyrics
@@ -26,7 +27,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
-import java.io.IOException
 import java.lang.ref.WeakReference
 import java.util.Locale
 
@@ -110,10 +110,10 @@ class AddLyricsFragment : Fragment() {
 
     private fun saveLyrics() {
         if (storageUtil!!.loadLyrics(musicId) == null) {
-            storageUtil!!.saveLyrics(musicId, lrcMap)
+            storageUtil?.saveLyrics(musicId, lrcMap)
         } else {
             storageUtil!!.removeLyrics(musicId)
-            storageUtil!!.saveLyrics(musicId, lrcMap)
+            storageUtil?.saveLyrics(musicId, lrcMap)
         }
         showToast("Saved")
         EventBus.getDefault().post(RunnableSyncLyricsEvent())
@@ -131,7 +131,7 @@ class AddLyricsFragment : Fragment() {
         nameEditText?.setText(name)
         artistEditText?.setText(artist)
         builder.setPositiveButton("OK") { _: DialogInterface?, _: Int ->
-            btnFind!!.visibility = View.GONE
+            btnFind?.visibility = View.GONE
             fetchLyrics()
         }
         builder.setNegativeButton("Cancel", null)
@@ -167,10 +167,16 @@ class AddLyricsFragment : Fragment() {
                     ) {
                         showToast("No Lyrics Found")
                     } else {
-                        mainActivity?.get()?.openBottomSheet(finalLyricsItems)
+                        val fragment =
+                            mainActivity?.get()?.supportFragmentManager?.findFragmentByTag(
+                                ADD_LYRICS_FRAGMENT_TAG
+                            )
+                        fragment?.let {
+                            mainActivity?.get()?.openBottomSheet(finalLyricsItems)
+                        }
                     }
                     fetchLyrics.onPostExecute(progressBar!!)
-                    btnFind!!.visibility = View.VISIBLE
+                    btnFind?.visibility = View.VISIBLE
                 }
             }
         } catch (e: Exception) {
@@ -183,14 +189,14 @@ class AddLyricsFragment : Fragment() {
         try {
             // pre-execute some code here
             fetchLyrics.onPreExecute(progressBar!!)
-            btnFind!!.visibility = View.GONE
+            btnFind?.visibility = View.GONE
 
             // do in background code here
             coroutineScope.launch {
                 val unfilteredLyrics = fetchLyrics.fetchTimeStamps(href!!)
                 coroutineScopeMain.launch {
                     fetchLyrics.onPostExecute(progressBar!!)
-                    btnFind!!.visibility = View.VISIBLE
+                    btnFind?.visibility = View.VISIBLE
                     val filteredLyrics = MusicHelper.splitLyricsByNewLine(unfilteredLyrics)
                     editTextLyrics!!.setText(filteredLyrics)
                     lrcMap.clear()

@@ -4,7 +4,6 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.activities.MainActivity
@@ -13,7 +12,6 @@ import com.atomykcoder.atomykplay.adapters.viewHolders.MusicMainViewHolder
 import com.atomykcoder.atomykplay.classes.GlideBuilt
 import com.atomykcoder.atomykplay.data.Music
 import com.atomykcoder.atomykplay.enums.OptionSheetEnum
-import com.atomykcoder.atomykplay.helperFunctions.Logger
 import com.atomykcoder.atomykplay.helperFunctions.MusicDiffCallback
 import com.atomykcoder.atomykplay.repository.MusicRepo
 import com.atomykcoder.atomykplay.utils.StorageUtil
@@ -83,6 +81,7 @@ class MusicMainAdapter(var context: Context, musicList: ArrayList<Music>?) : Mus
         val item = super.items?.get(position)
         return item?.id?.toLong() ?: 0
     }
+
     private fun isMusicNotAvailable(currentItem: Music): Boolean {
         if (!doesMusicExists(currentItem)) {
             Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show()

@@ -13,9 +13,10 @@ import androidx.core.net.toUri
 import com.atomykcoder.atomykplay.data.Music
 import java.io.File
 import java.io.IOException
+
 object MusicUtil {
     fun createShareSongFileIntent(context: Context, song: Music?): Intent? {
-        if (song != null){
+        if (song != null) {
             return Intent().apply {
                 action = Intent.ACTION_SEND
                 putExtra(
@@ -32,7 +33,7 @@ object MusicUtil {
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 type = "audio/*"
             }
-        }else{
+        } else {
             return null
         }
     }

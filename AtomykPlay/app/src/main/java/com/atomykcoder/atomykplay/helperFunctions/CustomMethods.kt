@@ -30,8 +30,9 @@ object CustomMethods {
             intentActivityResultLauncher.launch(intent)
         }
     }
+
     @JvmStatic
-    fun getBitmapFromAlbumUri(albumUri: String,context: Context): Bitmap? {
+    fun getBitmapFromAlbumUri(albumUri: String, context: Context): Bitmap? {
         try {
             val inputStream = context.contentResolver.openInputStream(albumUri.toUri())
             if (inputStream != null) {
