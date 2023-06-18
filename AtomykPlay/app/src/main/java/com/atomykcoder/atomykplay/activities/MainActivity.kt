@@ -81,7 +81,7 @@ import java.util.concurrent.Executors
 
 
 class MainActivity : AppCompatActivity(), View.OnClickListener,
-    NavigationView.OnNavigationItemSelectedListener {
+    NavigationView.OnNavigationItemSelectedListener, DrawerLayout.DrawerListener {
     var serviceConnection: ServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
             val binder = service as LocalBinder
@@ -1340,6 +1340,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         lastAddCard.setOnClickListener { setLastAddFragment() }
         shuffleCard.setOnClickListener { playShuffleSong() }
 
+        drawer?.addDrawerListener(this)
+
         //Checking storage & other permissions
         checkForPermission()
         setFragmentInSlider()
@@ -1587,84 +1589,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         }
     }
 
+    private var checkedItem = 0
 
     @SuppressLint("NonConstantResourceId")
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        drawer!!.closeDrawer(GravityCompat.START)
-        val fragmentManager = supportFragmentManager
-        val fragment1 = fragmentManager.findFragmentByTag(SETTINGS_FRAGMENT_TAG)
-        val fragment2 = fragmentManager.findFragmentByTag(PLAYLISTS_FRAGMENT_TAG)
-        val fragment3 = fragmentManager.findFragmentByTag(ABOUT_FRAGMENT_TAG)
-        val fragment4 = fragmentManager.findFragmentByTag(FAVORITE_FRAGMENT_TAG)
-        val fragment5 = fragmentManager.findFragmentByTag(SEARCH_FRAGMENT_TAG)
-        val fragment6 = fragmentManager.findFragmentByTag(LAST_ADDED_FRAGMENT_TAG)
-        when (item.itemId) {
-            R.id.navigation_home -> {
-                if (fragment1 != null || fragment2 != null || fragment3 != null || fragment6 != null) {
-                    fragmentManager.popBackStackImmediate()
-                }
-            }
-
-            R.id.navigation_setting -> {
-                if (fragment2 != null || fragment3 != null || fragment5 != null || fragment6 != null) {
-                    fragmentManager.popBackStackImmediate()
-                }
-                if (fragment1 == null) {
-                    replaceFragment(
-                        R.id.sec_container,
-                        SettingsFragment(),
-                        android.R.transition.slide_right,
-                        SETTINGS_FRAGMENT_TAG
-                    )
-                }
-            }
-
-            R.id.navigation_playlist -> {
-                if (fragment1 != null || fragment3 != null || fragment4 != null || fragment5 != null || fragment6 != null) {
-                    fragmentManager.popBackStackImmediate()
-                }
-                if (fragment2 == null) {
-                    replaceFragment(
-                        R.id.sec_container,
-                        PlaylistsFragment(),
-                        android.R.transition.slide_right,
-                        PLAYLISTS_FRAGMENT_TAG
-                    )
-                }
-            }
-
-            R.id.navigation_about -> {
-                if (fragment1 != null || fragment2 != null || fragment5 != null || fragment6 != null) {
-                    fragmentManager.popBackStackImmediate()
-                }
-                if (fragment3 == null) {
-                    replaceFragment(
-                        R.id.sec_container,
-                        AboutFragment(),
-                        android.R.transition.slide_right,
-                        ABOUT_FRAGMENT_TAG
-                    )
-                }
-            }
-
-            R.id.navigation_last_added -> {
-                if (fragment1 != null || fragment2 != null || fragment5 != null || fragment3 != null) {
-                    fragmentManager.popBackStackImmediate()
-                }
-                if (fragment6 == null) {
-                    replaceFragment(
-                        R.id.sec_container,
-                        LastAddedFragment(),
-                        android.R.transition.slide_right,
-                        LAST_ADDED_FRAGMENT_TAG
-                    )
-                }
-            }
-
-            R.id.navigation_donate -> {
-                donationSheetBehavior!!.setState(BottomSheetBehavior.STATE_COLLAPSED)
-            }
-        }
+        checkedItem = item.itemId
+        drawer?.closeDrawer(GravityCompat.START)
         return true
     }
 
@@ -1679,6 +1609,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     private fun replaceFragment(container: Int, fragment: Fragment, animation: Int, tag: String) {
         val fragmentManager = supportFragmentManager
         val transaction = fragmentManager.beginTransaction()
+
         fragment.enterTransition =
             TransitionInflater.from(this).inflateTransition(animation)
         transaction.replace(container, fragment, tag).addToBackStack(null).commit()
@@ -2053,5 +1984,92 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         var phone_ringing = false
         var service_stopped = false
         var media_player_service: MediaPlayerService? = null
+    }
+
+    override fun onDrawerSlide(drawerView: View, slideOffset: Float) {
+    }
+
+    override fun onDrawerOpened(drawerView: View) {
+        checkedItem = 0
+    }
+
+    override fun onDrawerClosed(drawerView: View) {
+        val fragmentManager = supportFragmentManager
+        val fragment1 = fragmentManager.findFragmentByTag(SETTINGS_FRAGMENT_TAG)
+        val fragment2 = fragmentManager.findFragmentByTag(PLAYLISTS_FRAGMENT_TAG)
+        val fragment3 = fragmentManager.findFragmentByTag(ABOUT_FRAGMENT_TAG)
+        val fragment4 = fragmentManager.findFragmentByTag(FAVORITE_FRAGMENT_TAG)
+        val fragment5 = fragmentManager.findFragmentByTag(SEARCH_FRAGMENT_TAG)
+        val fragment6 = fragmentManager.findFragmentByTag(LAST_ADDED_FRAGMENT_TAG)
+        when (checkedItem) {
+            R.id.navigation_home -> {
+                if (fragment1 != null || fragment2 != null || fragment3 != null || fragment6 != null) {
+                    fragmentManager.popBackStackImmediate()
+                }
+            }
+
+            R.id.navigation_setting -> {
+                if (fragment2 != null || fragment3 != null || fragment5 != null || fragment6 != null) {
+                    fragmentManager.popBackStackImmediate()
+                }
+                if (fragment1 == null) {
+                    replaceFragment(
+                        R.id.sec_container,
+                        SettingsFragment(),
+                        android.R.transition.slide_right,
+                        SETTINGS_FRAGMENT_TAG
+                    )
+                }
+            }
+
+            R.id.navigation_playlist -> {
+                if (fragment1 != null || fragment3 != null || fragment4 != null || fragment5 != null || fragment6 != null) {
+                    fragmentManager.popBackStackImmediate()
+                }
+                if (fragment2 == null) {
+                    replaceFragment(
+                        R.id.sec_container,
+                        PlaylistsFragment(),
+                        android.R.transition.slide_right,
+                        PLAYLISTS_FRAGMENT_TAG
+                    )
+                }
+            }
+
+            R.id.navigation_about -> {
+                if (fragment1 != null || fragment2 != null || fragment5 != null || fragment6 != null) {
+                    fragmentManager.popBackStackImmediate()
+                }
+                if (fragment3 == null) {
+                    replaceFragment(
+                        R.id.sec_container,
+                        AboutFragment(),
+                        android.R.transition.slide_right,
+                        ABOUT_FRAGMENT_TAG
+                    )
+                }
+            }
+
+            R.id.navigation_last_added -> {
+                if (fragment1 != null || fragment2 != null || fragment5 != null || fragment3 != null) {
+                    fragmentManager.popBackStackImmediate()
+                }
+                if (fragment6 == null) {
+                    replaceFragment(
+                        R.id.sec_container,
+                        LastAddedFragment(),
+                        android.R.transition.slide_right,
+                        LAST_ADDED_FRAGMENT_TAG
+                    )
+                }
+            }
+
+            R.id.navigation_donate -> {
+                donationSheetBehavior!!.setState(BottomSheetBehavior.STATE_COLLAPSED)
+            }
+        }
+    }
+
+    override fun onDrawerStateChanged(newState: Int) {
     }
 }

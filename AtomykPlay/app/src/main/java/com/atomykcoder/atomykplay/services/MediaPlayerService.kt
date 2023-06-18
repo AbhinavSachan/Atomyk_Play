@@ -353,7 +353,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
                     R.drawable.ic_previous_for_noti, "Previous", playbackAction(3)
                 ).build()
                 stopAction = NotificationCompat.Action.Builder(
-                    R.drawable.ic_close, "stop", playbackAction(4)
+                    R.drawable.ic_close, "Stop", playbackAction(4)
                 ).build()
             } else {
                 prevAction = NotificationCompat.Action.Builder(
@@ -388,7 +388,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
                 .setDeleteIntent(playbackAction(4))
                 .setChannelId(ApplicationClass.CHANNEL_ID) //set control
                 .addAction(prevAction).addAction(notificationAction, "Pause", playPauseAction)
-                .addAction(R.drawable.ic_next_for_noti, "next", playbackAction(2))
+                .addAction(R.drawable.ic_next_for_noti, "Next", playbackAction(2))
                 .addAction(stopAction)
                 .setCategory(NotificationCompat.CATEGORY_SERVICE)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
