@@ -1,5 +1,6 @@
 package com.atomykcoder.atomykplay.fragments
 
+import android.R.id.edit
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.*
@@ -25,14 +26,17 @@ import com.atomykcoder.atomykplay.adapters.MusicMainAdapter
 import com.atomykcoder.atomykplay.customScripts.LinearLayoutManagerWrapper
 import com.atomykcoder.atomykplay.data.Music
 import com.atomykcoder.atomykplay.repository.MusicRepo
-import com.atomykcoder.atomykplay.utils.StorageUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.*
 
+
 //Search Layout Fragment for Performing Searches and Presenting Results
 class SearchFragment : Fragment() {
+    private lateinit var manager: InputMethodManager
+    private lateinit var searchView: EditText
+
     @JvmField
     var adapter: MusicMainAdapter? = null
     private var radioGroup: RadioGroup? = null
@@ -93,19 +97,11 @@ class SearchFragment : Fragment() {
         radioGroup = view.findViewById(R.id.radio_group)
         noResultAnim = view.findViewById(R.id.noResultAnim)
         val dataList = MusicRepo.instance?.initialMusicList
-        val manager =
+        manager =
             requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        val searchView = view.findViewById<EditText>(R.id.search_view_search)
+        searchView = view.findViewById(R.id.search_view_search)
         val closeSearch = view.findViewById<ImageView>(R.id.close_search_btn)
-        searchView.requestFocus()
-        try {
-            manager.toggleSoftInput(
-                InputMethodManager.SHOW_IMPLICIT,
-                InputMethodManager.HIDE_NOT_ALWAYS
-            )
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+
         searchWithFilters("", searchedMusicList)
         setSearchList(searchedMusicList)
         searchView.addTextChangedListener(object : TextWatcher {
@@ -115,7 +111,7 @@ class SearchFragment : Fragment() {
                     handler.postDelayed({
                         isSearching = true
                         handleSearchEvent(query.toString().lowercase(Locale.getDefault()), dataList)
-                    }, 300)
+                    }, 200)
                 }
             }
 
@@ -155,6 +151,30 @@ class SearchFragment : Fragment() {
         return view
     }
 
+    override fun onResume() {
+        super.onResume()
+        searchView.post(Runnable {
+            searchView.requestFocus()
+            try {
+                manager.showSoftInput(searchView, InputMethodManager.SHOW_IMPLICIT)
+            } catch (_:Exception) {
+
+            }
+        })
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        searchView.clearFocus()
+        try {
+            manager.hideSoftInputFromWindow(
+                searchView.windowToken,
+                InputMethodManager.HIDE_NOT_ALWAYS
+            )
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
     //Function that adds music to an arraylist which is being used to show music in recycler view
     private fun addMusicToSearchList(song: Music) {
         searchedMusicList.add(song)
