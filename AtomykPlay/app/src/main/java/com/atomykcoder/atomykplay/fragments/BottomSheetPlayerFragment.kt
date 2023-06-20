@@ -849,10 +849,13 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
     private fun setQueueAdapter() {
         if (musicArrayList != null) {
             queueAdapter = MusicQueueAdapter(requireContext(), musicArrayList, this)
-            queueRecyclerView!!.adapter = queueAdapter
+            queueAdapter?.setHasStableIds(true)
+            queueRecyclerView?.setHasFixedSize(true)
+            queueRecyclerView?.setItemViewCacheSize(5)
+            queueRecyclerView?.adapter = queueAdapter
             val callback: ItemTouchHelper.Callback = SimpleTouchCallback(queueAdapter)
             itemTouchHelper = ItemTouchHelper(callback)
-            itemTouchHelper!!.attachToRecyclerView(queueRecyclerView)
+            itemTouchHelper?.attachToRecyclerView(queueRecyclerView)
         }
     }
 
@@ -862,7 +865,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
     fun updateQueueAdapter(list: ArrayList<Music>) {
         // assign class member id list to new updated _id-list
         musicArrayList = ArrayList(list)
-        queueAdapter!!.updateMusicListItems(musicArrayList)
+        queueAdapter?.updateMusicListItems(musicArrayList)
     }
 
     /**

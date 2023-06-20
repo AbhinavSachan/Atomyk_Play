@@ -125,6 +125,11 @@ class MusicQueueAdapter(
         return super.items?.size ?: 0
     }
 
+    override fun getItemId(position: Int): Long {
+        val item = super.items?.get(position)
+        return item?.id?.toLong() ?: 0
+    }
+
     private fun isMusicAvailable(currentItem: Music): Boolean {
         if (!doesMusicExists(currentItem)) {
             Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show()
@@ -135,34 +140,36 @@ class MusicQueueAdapter(
     }
 
     fun removeItem(item: Music?) {
-        val position = super.items!!.indexOf(item)
-        val savedIndex = storageUtil.loadMusicIndex()
-        if (super.items!!.isNotEmpty()) {
-            if (super.items!!.size == 1) {
-                mainActivity.bottomSheetPlayerFragment?.queueSheetBehaviour?.state =
-                    BottomSheetBehavior.STATE_HIDDEN
-                mainActivity.clearStorage()
-                clearList()
-                mainActivity.mainPlayerSheetBehavior?.state = BottomSheetBehavior.STATE_HIDDEN
-                mainActivity.bottomSheetPlayerFragment?.resetMainPlayerLayout()
-                mainActivity.resetDataInNavigation()
-                mainActivity.stopMusic()
-            }
-            if (item != null) {
-                super.items!!.remove(item)
-            }
-            if (super.items!!.isNotEmpty()) {
-                if (position == savedIndex) {
-                    if (savedIndex != -1) {
-                        mainActivity.playAudio(super.items!![savedIndex])
+        item?.let {
+            val position = super.items?.indexOf(it)
+            if (position != null && position >= 0) {
+                super.items?.removeAt(position)
+                notifyItemRemoved(position)
+                notifyItemRangeChanged(position, super.items!!.size - position)
+                storageUtil.saveQueueList(super.items!!)
+
+                if (super.items!!.isEmpty()) {
+                    mainActivity.bottomSheetPlayerFragment?.queueSheetBehaviour?.state =
+                        BottomSheetBehavior.STATE_HIDDEN
+                    mainActivity.clearStorage()
+                    mainActivity.mainPlayerSheetBehavior?.state = BottomSheetBehavior.STATE_HIDDEN
+                    mainActivity.bottomSheetPlayerFragment?.resetMainPlayerLayout()
+                    mainActivity.resetDataInNavigation()
+                    mainActivity.stopMusic()
+                } else {
+                    val savedIndex = storageUtil.loadMusicIndex()
+                    if (position == savedIndex) {
+                        if (savedIndex == super.items!!.size) {
+                            mainActivity.playAudio(super.items!![savedIndex - 1])
+                            storageUtil.saveMusicIndex(savedIndex - 1)
+                        }else{
+                            mainActivity.playAudio(super.items!![savedIndex])
+                        }
+                    } else if (position < savedIndex) {
+                        storageUtil.saveMusicIndex(savedIndex - 1)
                     }
-                } else if (position < savedIndex) {
-                    storageUtil.saveMusicIndex(savedIndex - 1)
                 }
             }
-            notifyItemRangeChanged(position, super.items!!.size - (position + 1))
-            notifyItemRemoved(position)
-            storageUtil.saveQueueList(super.items!!)
         }
     }
 

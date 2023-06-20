@@ -424,9 +424,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
             if (result.resultCode == RESULT_OK) {
                 // Delete request was successful
                 updateAdaptersForRemovedItem()
-            } else {
-                // Delete request failed
-                showToast("Failed to delete this song")
             }
         }
     private var musicRepo: MusicRepo? = null
@@ -1260,12 +1257,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     }
 
     fun updateAdaptersForRemovedItem() {
-        musicMainAdapter!!.removeItem(selectedItem!!)
+        musicMainAdapter?.removeItem(selectedItem!!)
         if (lastAddedFragment != null && lastAddedFragment!!.adapter != null) {
-            lastAddedFragment!!.adapter!!.removeItem(selectedItem!!)
+            lastAddedFragment?.adapter?.removeItem(selectedItem!!)
         }
         if (searchFragment != null && searchFragment!!.adapter != null) {
-            searchFragment!!.adapter!!.removeItem(selectedItem!!)
+            searchFragment?.adapter?.removeItem(selectedItem!!)
         }
     }
 

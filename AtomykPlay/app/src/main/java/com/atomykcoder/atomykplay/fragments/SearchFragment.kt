@@ -24,6 +24,7 @@ import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.adapters.MusicMainAdapter
 import com.atomykcoder.atomykplay.customScripts.LinearLayoutManagerWrapper
 import com.atomykcoder.atomykplay.data.Music
+import com.atomykcoder.atomykplay.repository.MusicRepo
 import com.atomykcoder.atomykplay.utils.StorageUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -91,7 +92,7 @@ class SearchFragment : Fragment() {
         genreButton = view.findViewById(R.id.genre_button)
         radioGroup = view.findViewById(R.id.radio_group)
         noResultAnim = view.findViewById(R.id.noResultAnim)
-        val dataList = StorageUtil(requireContext()).loadInitialList()
+        val dataList = MusicRepo.instance?.initialMusicList
         val manager =
             requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         val searchView = view.findViewById<EditText>(R.id.search_view_search)
