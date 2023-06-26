@@ -49,16 +49,18 @@ class GlideBuilt(private val context: Context) {
         } else {
             DrawableTransitionOptions().dontTransition()
         }
-        GlideApp.with(context).load(path?.let { AudioFileCover(it) }).apply(
-            requestOptions.placeholder(
-                placeholderImage
-            ).error(R.drawable.ic_music)
-        )
-            .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-            .skipMemoryCache(true)
-            .transition(drawableTransitionOptions)
-            .override(image_measure, image_measure)
-            .into(imageView!!)
+        imageView?.let {
+            GlideApp.with(context).load(path?.let { AudioFileCover(it) }).apply(
+                requestOptions.placeholder(
+                    placeholderImage
+                ).error(R.drawable.ic_music)
+            )
+                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                .skipMemoryCache(true)
+                .transition(drawableTransitionOptions)
+                .override(image_measure, image_measure)
+                .into(it)
+        }
     }
 
     fun loadFromBitmap(
@@ -80,16 +82,18 @@ class GlideBuilt(private val context: Context) {
             DrawableTransitionOptions().dontTransition()
         }
         try {
-            Glide.with(context).load(bitmap).apply(
-                requestOptions.placeholder(
-                    shadowed
-                ).error(R.drawable.ic_music)
-            )
-                .diskCacheStrategy(DiskCacheStrategy.NONE)
-                .skipMemoryCache(true)
-                .transition(drawableTransitionOptions)
-                .override(image_measure, image_measure)
-                .into(imageView!!)
+            imageView?.let {
+                Glide.with(context).load(bitmap).apply(
+                    requestOptions.placeholder(
+                        shadowed
+                    ).error(R.drawable.ic_music)
+                )
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .skipMemoryCache(true)
+                    .transition(drawableTransitionOptions)
+                    .override(image_measure, image_measure)
+                    .into(it)
+            }
         } catch (e: Exception) {
             e.printStackTrace()
         }
