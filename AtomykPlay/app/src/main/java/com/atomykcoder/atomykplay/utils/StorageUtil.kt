@@ -579,7 +579,7 @@ class StorageUtil
         fun loadIsThemeDark(): Boolean {
             val sharedPreferences =
                 context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE)
-            return sharedPreferences.getBoolean("theme_name", false)
+            return sharedPreferences.getBoolean("theme_name", true)
         }
 
         fun saveHideStatusBar(b: Boolean) {
@@ -621,7 +621,7 @@ class StorageUtil
         fun loadShowInfo(): Boolean {
             val sharedPreferences =
                 context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE)
-            return sharedPreferences.getBoolean("show_info", false)
+            return sharedPreferences.getBoolean("show_info", true)
         }
 
         fun showArtist(show: Boolean) {
@@ -635,7 +635,7 @@ class StorageUtil
         fun loadShowArtist(): Boolean {
             val sharedPreferences =
                 context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE)
-            return sharedPreferences.getBoolean("show_artist", false)
+            return sharedPreferences.getBoolean("show_artist", true)
         }
 
         fun showExtraCon(show: Boolean) {
@@ -775,7 +775,7 @@ class StorageUtil
         fun loadBeautifyName(): Boolean {
             val sharedPreferences =
                 context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE)
-            return sharedPreferences.getBoolean("beautify_name", false)
+            return sharedPreferences.getBoolean("beautify_name", true)
         }
 
         fun addBeautifyTag(s: String) {

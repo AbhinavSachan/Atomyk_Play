@@ -357,6 +357,8 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
 
     override fun onStart() {
         super.onStart()
+        appPaused = false
+
         if (mainActivity?.mainPlayerSheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
             miniPlayView!!.alpha = 0f
             miniPlayView!!.visibility = View.INVISIBLE
@@ -367,7 +369,6 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         if (queueSheetBehaviour!!.state == BottomSheetBehavior.STATE_EXPANDED) {
             queueRecyclerView!!.visibility = View.VISIBLE
         }
-        appPaused = false
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -378,12 +379,11 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
 
     override fun onStop() {
         super.onStop()
+        appPaused = true
         stopAnimText(StopTextAnim())
-        shouldRefreshLayout = false
         if (queueSheetBehaviour!!.state == BottomSheetBehavior.STATE_EXPANDED) {
             queueRecyclerView!!.visibility = View.GONE
         }
-        appPaused = true
     }
 
     override fun onDestroy() {
@@ -508,7 +508,9 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
             }
         }
         activeMusic = event.activeMusic
-        if (!appPaused) {
+        if (appPaused) {
+            shouldRefreshLayout = true
+        } else {
             if (activeMusic != null) {
                 shouldRefreshLayout = false
                 songName = activeMusic!!.name
@@ -575,10 +577,8 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
                 animateText()
                 mainActivity!!.setDataInNavigation(songName, artistName)
             }
-        } else {
-            shouldRefreshLayout = true
         }
-        EventBus.getDefault().post(RunnableSyncLyricsEvent())
+        runnableSyncLyrics(RunnableSyncLyricsEvent())
     }
 
     @Synchronized
@@ -1220,7 +1220,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
 
     private fun setPreviousData(activeMusic: Music?) {
         if (activeMusic != null) {
-            EventBus.getDefault().post(SetMainLayoutEvent(activeMusic))
+            setMainPlayerLayout(SetMainLayoutEvent(activeMusic))
             coroutineScope.launch {
                 //image decoder
                 var image: Bitmap? = null
@@ -1241,7 +1241,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
                 }
                 val finalImage = image
                 coroutineScopeMain.launch {
-                    EventBus.getDefault().post(SetImageInMainPlayer(finalImage, activeMusic))
+                    setPlayerImages(SetImageInMainPlayer(finalImage, activeMusic))
                 }
             }
         }
