@@ -16,10 +16,18 @@
 
         <RelativeLayout
             android:id="@+id/coverRelativeLayout"
-            android:layout_width="match_parent"
-            android:layout_height="370dp"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
             android:clipToPadding="false"
-            app:layout_constraintTop_toTopOf="parent">
+            android:padding="16dp"
+            app:layout_constraintBottom_toTopOf="@id/linearLayoutNameAndList"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHeight_max="400dp"
+            app:layout_constraintWidth_min="250dp"
+            app:layout_constraintHeight_min="250dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_max="400dp">
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/card_view_for_cover"
@@ -30,7 +38,6 @@
                 app:cardBackgroundColor="@color/cover_black_player"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="16dp"
-                app:cardUseCompatPadding="true"
                 app:strokeWidth="0dp">
 
                 <ImageView
@@ -53,7 +60,6 @@
                 app:cardBackgroundColor="@color/white"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="16dp"
-                app:cardUseCompatPadding="true"
                 app:strokeWidth="0dp">
 
                 <RelativeLayout
@@ -120,81 +126,17 @@
                     </LinearLayout>
                 </RelativeLayout>
             </com.google.android.material.card.MaterialCardView>
-
-            <!--            <RelativeLayout-->
-            <!--                android:id="@+id/lyrics_relative_layout"-->
-            <!--                android:layout_width="match_parent"-->
-            <!--                android:layout_height="match_parent"-->
-            <!--                android:layout_centerInParent="true"-->
-            <!--                android:visibility="gone">-->
-
-            <!--                <androidx.recyclerview.widget.RecyclerView-->
-            <!--                    android:id="@+id/lyrics_recycler_view"-->
-            <!--                    android:layout_width="match_parent"-->
-            <!--                    android:layout_height="match_parent"-->
-            <!--                    android:layout_centerInParent="true"-->
-            <!--                    android:clipToPadding="false"-->
-            <!--                    android:paddingVertical="130dp" />-->
-
-            <!--                <View-->
-            <!--                    android:id="@+id/gradient_top"-->
-            <!--                    android:layout_width="match_parent"-->
-            <!--                    android:layout_height="165dp"-->
-            <!--                    android:layout_alignParentTop="true"-->
-            <!--                    android:background="@drawable/fade_edge_start" />-->
-
-            <!--                <View-->
-            <!--                    android:id="@+id/gradient_bottom"-->
-            <!--                    android:layout_width="match_parent"-->
-            <!--                    android:layout_height="165dp"-->
-            <!--                    android:layout_alignParentBottom="true"-->
-            <!--                    android:background="@drawable/fade_edges_end" />-->
-
-            <!--                <LinearLayout-->
-            <!--                    android:id="@+id/no_lyrics_layout"-->
-            <!--                    android:layout_width="match_parent"-->
-            <!--                    android:layout_height="wrap_content"-->
-            <!--                    android:layout_centerInParent="true"-->
-            <!--                    android:orientation="vertical"-->
-            <!--                    android:visibility="gone">-->
-
-            <!--                    <TextView-->
-            <!--                        android:layout_width="match_parent"-->
-            <!--                        android:layout_height="wrap_content"-->
-            <!--                        android:layout_gravity="center"-->
-            <!--                        android:layout_marginHorizontal="16dp"-->
-            <!--                        android:gravity="center"-->
-            <!--                        android:padding="10dp"-->
-            <!--                        android:text="@string/no_lyrics_found"-->
-            <!--                        android:textColor="@color/sub_text_grey"-->
-            <!--                        android:textSize="@dimen/d_24sp"-->
-            <!--                        android:textStyle="bold" />-->
-
-            <!--                    <TextView-->
-            <!--                        android:id="@+id/btn_add_lyrics"-->
-            <!--                        android:layout_width="wrap_content"-->
-            <!--                        android:layout_height="wrap_content"-->
-            <!--                        android:layout_gravity="center"-->
-            <!--                        android:layout_marginHorizontal="16dp"-->
-            <!--                        android:padding="10dp"-->
-            <!--                        android:text="@string/add_lyrics"-->
-            <!--                        android:textColor="@color/accent_color_bg"-->
-            <!--                        android:textSize="@dimen/d_16sp"-->
-            <!--                        android:textStyle="bold" />-->
-
-            <!--                </LinearLayout>-->
-            <!--            </RelativeLayout>-->
-
         </RelativeLayout>
 
         <LinearLayout
             android:id="@+id/linearLayoutNameAndList"
             android:layout_width="match_parent"
-            android:layout_height="55dp"
+            android:layout_height="58dp"
             android:layout_below="@+id/coverRelativeLayout"
             android:layout_marginTop="4dp"
             android:orientation="horizontal"
             android:weightSum="16"
+            app:layout_constraintBottom_toTopOf="@id/control_ll"
             app:layout_constraintTop_toBottomOf="@+id/coverRelativeLayout">
 
             <LinearLayout
@@ -228,7 +170,7 @@
                     android:singleLine="true"
                     android:text="@string/song_artist_e"
                     android:textColor="@color/text_color"
-                    android:textSize="@dimen/d_16sp"
+                    android:textSize="@dimen/d_15sp"
                     android:textStyle="normal" />
 
             </LinearLayout>
@@ -255,6 +197,7 @@
             android:layout_marginTop="25dp"
             android:gravity="center"
             android:orientation="horizontal"
+            app:layout_constraintBottom_toTopOf="@id/seekbar_relative_l"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/linearLayoutNameAndList">
@@ -294,28 +237,16 @@
                 android:gravity="center"
                 android:padding="10dp">
 
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/player_play_cv"
-                    android:layout_width="65dp"
-                    android:layout_height="65dp"
-                    android:background="?selectableItemBackgroundBorderless"
-                    android:clickable="true"
-                    android:focusable="true"
-                    app:cardBackgroundColor="@color/accent_color_bg"
-                    app:cardCornerRadius="50dp"
-                    app:cardElevation="6dp"
-                    app:strokeWidth="0dp">
-
-                    <ImageView
-                        android:id="@+id/player_play_iv"
-                        android:layout_width="@dimen/player_icon_size"
-                        android:layout_height="@dimen/player_icon_size"
-                        android:layout_gravity="center"
-                        android:contentDescription="@string/imageView"
-                        android:padding="8dp"
-                        android:src="@drawable/ic_play_main" />
-                </com.google.android.material.card.MaterialCardView>
-
+                <ImageView
+                    android:id="@+id/player_play_iv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:background="@drawable/play_roundbg"
+                    android:contentDescription="@string/imageView"
+                    android:elevation="2dp"
+                    android:padding="10dp"
+                    android:src="@drawable/ic_play_main" />
             </RelativeLayout>
 
             <ImageView
@@ -353,6 +284,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/control_ll"
             android:padding="10dp"
+            app:layout_constraintBottom_toTopOf="@+id/linear_info_layout"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/control_ll">
@@ -399,6 +331,7 @@
             android:layout_centerHorizontal="true"
             android:gravity="center"
             android:orientation="horizontal"
+            app:layout_constraintBottom_toTopOf="@+id/ll_functions"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/seekbar_relative_l">
@@ -432,14 +365,15 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/ll_functions"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="4dp"
             android:gravity="center_horizontal|bottom"
             android:orientation="horizontal"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent">
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/linear_info_layout">
 
             <ImageView
                 android:id="@+id/player_lyrics_ll"

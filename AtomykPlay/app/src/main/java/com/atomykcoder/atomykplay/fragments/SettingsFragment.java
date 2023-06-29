@@ -1,6 +1,6 @@
 package com.atomykcoder.atomykplay.fragments;
 
-import static com.atomykcoder.atomykplay.utils.AndroidUtil.Companion;
+import static com.atomykcoder.atomykplay.utils.AndroidUtil.INSTANCE;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -96,7 +96,6 @@ public class SettingsFragment extends Fragment {
         scanAll = settingsStorage.loadScanAllMusic();
         hideSb = settingsStorage.loadIsStatusBarHidden();
         hideNb = settingsStorage.loadIsNavBarHidden();
-
 
         //Player settings
         songInfoSwi = view.findViewById(R.id.show_file_info_swi);
@@ -217,7 +216,7 @@ public class SettingsFragment extends Fragment {
         hideSbSwi.setOnCheckedChangeListener((buttonView, isChecked) -> {
             hideSbSwi.setChecked(isChecked);
             settingsStorage.saveHideStatusBar(isChecked);
-            Companion.setSystemDrawBehindBars(
+            INSTANCE.setSystemDrawBehindBars(
                     mainActivity.getWindow(),
                     dark,
                     mainActivity.getDrawer(),
@@ -230,7 +229,7 @@ public class SettingsFragment extends Fragment {
         hideNbSwi.setOnCheckedChangeListener((buttonView, isChecked) -> {
             hideNbSwi.setChecked(isChecked);
             settingsStorage.saveHideNavBar(isChecked);
-            Companion.setSystemDrawBehindBars(
+            INSTANCE.setSystemDrawBehindBars(
                     mainActivity.getWindow(),
                     dark,
                     mainActivity.getDrawer(),
@@ -504,11 +503,11 @@ public class SettingsFragment extends Fragment {
     private void setDark(int checkedId) {
         switch (checkedId) {
             case R.id.light_button -> {
-                AndroidUtil.Companion.setTheme(requireActivity().getWindow(), false);
+                AndroidUtil.INSTANCE.setTheme(requireActivity().getWindow(), false);
                 dark = false;
             }
             case R.id.dark_button -> {
-                AndroidUtil.Companion.setTheme(requireActivity().getWindow(), true);
+                AndroidUtil.INSTANCE.setTheme(requireActivity().getWindow(), true);
                 dark = true;
             }
         }

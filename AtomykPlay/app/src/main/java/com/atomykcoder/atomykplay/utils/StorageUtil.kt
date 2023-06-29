@@ -579,7 +579,7 @@ class StorageUtil
         fun loadIsThemeDark(): Boolean {
             val sharedPreferences =
                 context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE)
-            return sharedPreferences.getBoolean("theme_name", true)
+            return sharedPreferences.getBoolean("theme_name", false)
         }
 
         fun saveHideStatusBar(b: Boolean) {

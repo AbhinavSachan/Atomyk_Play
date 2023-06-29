@@ -16,19 +16,23 @@
         <RelativeLayout
             android:id="@+id/coverRelativeLayout"
             android:layout_width="0dp"
-            android:layout_height="340dp"
-            android:layout_marginBottom="15dp"
+            android:layout_height="0dp"
+            android:layout_marginBottom="16dp"
             android:clipToPadding="false"
+            android:padding="16dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/linearLayoutNameAndList"
+            app:layout_constraintHeight_max="400dp"
+            app:layout_constraintWidth_min="250dp"
+            app:layout_constraintHeight_min="250dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_max="400dp">
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/card_view_for_cover"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                app:cardUseCompatPadding="true"
                 android:layout_centerInParent="true"
                 android:visibility="visible"
                 app:cardBackgroundColor="@color/cover_black_player"
@@ -51,13 +55,13 @@
                 android:id="@+id/card_view_for_lyrics"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                app:cardUseCompatPadding="true"
                 android:layout_centerInParent="true"
                 android:visibility="gone"
                 app:cardBackgroundColor="@color/white"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="16dp"
                 app:strokeWidth="0dp">
+
                 <RelativeLayout
                     android:id="@+id/lyrics_relative_layout"
                     android:layout_width="match_parent"
@@ -72,6 +76,7 @@
                         android:layout_centerInParent="true"
                         android:clipToPadding="false"
                         android:paddingVertical="130dp" />
+
                     <View
                         android:id="@+id/gradient_top"
                         android:layout_width="match_parent"
@@ -85,6 +90,7 @@
                         android:layout_height="165dp"
                         android:layout_alignParentBottom="true"
                         android:background="@drawable/fade_edges_end" />
+
                     <LinearLayout
                         android:id="@+id/no_lyrics_layout"
                         android:layout_width="match_parent"
@@ -231,25 +237,16 @@
                 android:clipToPadding="false"
                 android:padding="10dp">
 
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/player_play_cv"
-                    android:layout_width="65dp"
-                    android:layout_height="65dp"
-                    android:background="?selectableItemBackgroundBorderless"
-                    android:clickable="true"
-                    android:focusable="true"
-                    app:cardBackgroundColor="@color/accent_color_bg"
-                    app:cardCornerRadius="50dp"
-                    app:cardElevation="6dp">
-
-                    <ImageView
-                        android:id="@+id/player_play_iv"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:contentDescription="@string/imageView"
-                        android:src="@drawable/ic_play_main" />
-                </com.google.android.material.card.MaterialCardView>
+                <ImageView
+                    android:id="@+id/player_play_iv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:padding="8dp"
+                    android:background="@drawable/play_roundbg"
+                    android:contentDescription="@string/imageView"
+                    android:elevation="2dp"
+                    android:src="@drawable/ic_play_main" />
 
             </RelativeLayout>
 
@@ -415,13 +412,13 @@
                     android:layout_height="70dp"
                     android:contentDescription="@string/imageView"
                     android:cropToPadding="false"
-                    android:visibility="invisible"
                     android:elevation="10dp"
-                    app:lottie_loop="false"
                     android:scrollY="-9dp"
+                    android:visibility="invisible"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
+                    app:lottie_loop="false"
                     app:lottie_rawRes="@raw/like_anim_click_effect" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 

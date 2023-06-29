@@ -6,6 +6,9 @@ import android.app.PendingIntent
 import android.content.*
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.media.*
 import android.media.AudioManager.OnAudioFocusChangeListener
 import android.media.MediaPlayer.*
@@ -33,10 +36,15 @@ import com.atomykcoder.atomykplay.dataModels.LRCMap
 import com.atomykcoder.atomykplay.enums.PlaybackStatus
 import com.atomykcoder.atomykplay.events.*
 import com.atomykcoder.atomykplay.fragments.BottomSheetPlayerFragment
+import com.atomykcoder.atomykplay.helperFunctions.AudioFileCover
+import com.atomykcoder.atomykplay.helperFunctions.GlideApp
 import com.atomykcoder.atomykplay.helperFunctions.Logger
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper
+import com.atomykcoder.atomykplay.utils.AndroidUtil.toUnscaledBitmap
 import com.atomykcoder.atomykplay.utils.StorageUtil
 import com.atomykcoder.atomykplay.utils.StorageUtil.SettingsStorage
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.transition.Transition
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -305,11 +313,8 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
                 thumbnail = if (finalImage != null) ThumbnailUtils.extractThumbnail(
                     finalImage,
                     artworkDimension - artworkDimension / 5,
-                    artworkDimension - artworkDimension / 5,
-                    ThumbnailUtils.OPTIONS_RECYCLE_INPUT
+                    artworkDimension - artworkDimension / 5
                 ) else defaultThumbnail!!
-
-                Logger.normalLog("${thumbnail.height}")
 
                 metadata = MediaMetadataCompat.Builder()
                     .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, thumbnail)
@@ -559,7 +564,6 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
 
     override fun onCreate() {
         super.onCreate()
-        Logger.normalLog("created service")
 
         //manage incoming calls during playback
         callStateListener()
@@ -628,35 +632,42 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
     override fun onPrepared(mp: MediaPlayer) {
         EventBus.getDefault().post(SetMainLayoutEvent(activeMusic))
         resumeMedia(false)
+        var finalImage:Bitmap?
         coroutineScope.launch {
+            GlideApp.with(applicationContext).load(activeMusic?.path?.let { AudioFileCover(it) }).into(object :CustomTarget<Drawable>(){
+                override fun onResourceReady(
+                    resource: Drawable,
+                    transition: Transition<in Drawable>?
+                ) {
+                    finalImage = resource.toUnscaledBitmap()
+                    if (MainActivity.service_bound) {
+                        EventBus.getDefault().post(SetImageInMainPlayer(finalImage, activeMusic))
+                    }
+                    updateMetaData(activeMusic, finalImage)
+                    finalImage = null
+                }
 
-            //image decoder
-            val image = arrayOf<Bitmap?>(null)
-            var art: ByteArray?
-            try {
-                MediaMetadataRetriever().use { mediaMetadataRetriever ->
-                    mediaMetadataRetriever.setDataSource(activeMusic!!.path)
-                    art = mediaMetadataRetriever.embeddedPicture
-                    mediaMetadataRetriever.release()
+                override fun onLoadCleared(placeholder: Drawable?) {
+                    if (MainActivity.service_bound) {
+                        EventBus.getDefault().post(SetImageInMainPlayer(null, activeMusic))
+                    }
+                    updateMetaData(activeMusic, null)
+                    finalImage = null
                 }
-            } catch (ignored: IOException) {
-                art = null
-            }
-            try {
-                image[0] = art?.size?.let { BitmapFactory.decodeByteArray(art, 0, it) }
-            } catch (ignored: Exception) {
-                image[0] = null
-            }
-            val finalImage = image[0]
-            handler.post {
-                if (MainActivity.service_bound) {
-                    EventBus.getDefault().post(SetImageInMainPlayer(finalImage, activeMusic))
+
+                override fun onLoadFailed(errorDrawable: Drawable?) {
+                    if (MainActivity.service_bound) {
+                        EventBus.getDefault().post(SetImageInMainPlayer(null, activeMusic))
+                    }
+                    updateMetaData(activeMusic, null)
+                    finalImage = null
                 }
-                updateMetaData(activeMusic, finalImage)
-            }
+            })
         }
 
     }
+
+
 
     override fun onCompletion(mp: MediaPlayer) {
         storage!!.clearMusicLastPos()

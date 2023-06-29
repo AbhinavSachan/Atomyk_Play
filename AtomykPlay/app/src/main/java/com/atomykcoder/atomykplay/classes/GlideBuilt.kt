@@ -2,7 +2,9 @@ package com.atomykcoder.atomykplay.classes
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BlurMaskFilter.Blur
 import android.widget.ImageView
+import com.airbnb.lottie.model.content.BlurEffect
 import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.helperFunctions.AudioFileCover
 import com.atomykcoder.atomykplay.helperFunctions.GlideApp
@@ -49,7 +51,7 @@ class GlideBuilt(private val context: Context) {
         } else {
             DrawableTransitionOptions().dontTransition()
         }
-        imageView?.let {
+        imageView?.let { imageView1 ->
             GlideApp.with(context).load(path?.let { AudioFileCover(it) }).apply(
                 requestOptions.placeholder(
                     placeholderImage
@@ -59,7 +61,7 @@ class GlideBuilt(private val context: Context) {
                 .skipMemoryCache(true)
                 .transition(drawableTransitionOptions)
                 .override(image_measure, image_measure)
-                .into(it)
+                .into(imageView1)
         }
     }
 

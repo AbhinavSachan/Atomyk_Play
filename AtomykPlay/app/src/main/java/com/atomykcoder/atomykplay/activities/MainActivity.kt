@@ -56,7 +56,7 @@ import com.atomykcoder.atomykplay.repository.MusicRepo.Companion.instance
 import com.atomykcoder.atomykplay.services.MediaPlayerService
 import com.atomykcoder.atomykplay.services.MediaPlayerService.LocalBinder
 import com.atomykcoder.atomykplay.utils.AndroidUtil
-import com.atomykcoder.atomykplay.utils.AndroidUtil.Companion.setSystemDrawBehindBars
+import com.atomykcoder.atomykplay.utils.AndroidUtil.setSystemDrawBehindBars
 import com.atomykcoder.atomykplay.utils.MusicUtil
 import com.atomykcoder.atomykplay.utils.StorageUtil
 import com.atomykcoder.atomykplay.utils.StorageUtil.SettingsStorage
@@ -1296,8 +1296,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         plSheet = findViewById(R.id.pl_option_bottom_sheet)
         detailsSheet = findViewById(R.id.file_details_sheet)
         anchoredShadow = findViewById(R.id.anchored_player_shadow)
-        mainPlayerSheetBehavior =
-            BottomSheetBehavior.from(playerBottomSheet!!) as CustomBottomSheet<View?>
+        mainPlayerSheetBehavior = BottomSheetBehavior.from(playerBottomSheet!!) as CustomBottomSheet<View?>
         val openDrawer = findViewById<ImageView>(R.id.open_drawer_btn)
         val searchBar = findViewById<MaterialCardView>(R.id.searchBar_card)
         val plCard = findViewById<View>(R.id.playlist_card_view_ma)
