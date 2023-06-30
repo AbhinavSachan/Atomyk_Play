@@ -634,7 +634,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
         resumeMedia(false)
         var finalImage:Bitmap?
         coroutineScope.launch {
-            GlideApp.with(applicationContext).load(activeMusic?.path?.let { AudioFileCover(it) }).into(object :CustomTarget<Drawable>(){
+            GlideApp.with(applicationContext).load(activeMusic?.path?.let { AudioFileCover(it) }).override(512).into(object :CustomTarget<Drawable>(){
                 override fun onResourceReady(
                     resource: Drawable,
                     transition: Transition<in Drawable>?

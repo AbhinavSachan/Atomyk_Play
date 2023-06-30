@@ -14,6 +14,7 @@ import com.atomykcoder.atomykplay.adapters.generics.GenericViewHolder
 import com.atomykcoder.atomykplay.adapters.viewHolders.MusicQueueViewHolder
 import com.atomykcoder.atomykplay.classes.GlideBuilt
 import com.atomykcoder.atomykplay.data.Music
+import com.atomykcoder.atomykplay.enums.OptionSheetEnum
 import com.atomykcoder.atomykplay.helperFunctions.MusicDiffCallback
 import com.atomykcoder.atomykplay.interfaces.ItemTouchHelperAdapter
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener
@@ -109,6 +110,11 @@ class MusicQueueAdapter(
             }
             storageUtil.saveMusicIndex(position)
             mainActivity.playAudio(currentItem)
+        }
+        queueViewHolder.cardView.setOnLongClickListener {
+            if (!isMusicAvailable(currentItem))return@setOnLongClickListener true
+            mainActivity.openOptionMenu(currentItem,OptionSheetEnum.MAIN_LIST)
+            true
         }
         queueViewHolder.dragButton.setOnTouchListener { _: View?, event: MotionEvent ->
             if (!isMusicAvailable(currentItem)) {

@@ -25,6 +25,7 @@ import android.view.ViewTreeObserver
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.webkit.MimeTypeMap
 import android.widget.ImageView
+import android.widget.RelativeLayout
 import android.widget.SeekBar
 import android.widget.SeekBar.GONE
 import android.widget.SeekBar.OnSeekBarChangeListener
@@ -32,6 +33,8 @@ import android.widget.SeekBar.VISIBLE
 import android.widget.TextView
 import android.widget.Toast
 import androidx.cardview.widget.CardView
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.setPadding
 import androidx.fragment.app.Fragment
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -57,7 +60,6 @@ import com.atomykcoder.atomykplay.enums.PlaybackStatus
 import com.atomykcoder.atomykplay.events.*
 import com.atomykcoder.atomykplay.helperFunctions.AudioFileCover
 import com.atomykcoder.atomykplay.helperFunctions.GlideApp
-import com.atomykcoder.atomykplay.helperFunctions.Logger
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener
 import com.atomykcoder.atomykplay.utils.AndroidUtil.pxToDp
@@ -188,8 +190,9 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
     private var executorService: ExecutorService? = null
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
     private val coroutineScopeMain = CoroutineScope(Dispatchers.Main)
-    private var gradientTop:View? = null
-    private var gradientBottom:View? = null
+    private var gradientTop: View? = null
+    private var gradientBottom: View? = null
+    private var coverLayout: View? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -202,6 +205,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
 
         //Mini player items initializations
         miniPlayView = view.findViewById(R.id.mini_player_layout) //○
+
         miniCover = view.findViewById(R.id.song_album_cover_mini) //○
         miniArtistText = view.findViewById(R.id.song_artist_name_mini) //○
         miniNameText = view.findViewById(R.id.song_name_mini) //○
@@ -242,6 +246,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         lyricsRelativeLayout = view.findViewById(R.id.lyrics_relative_layout)
         gradientTop = view.findViewById(R.id.gradient_top)
         gradientBottom = view.findViewById(R.id.gradient_bottom)
+        coverLayout = view.findViewById(R.id.coverRelativeLayout)
 
         if (!EventBus.getDefault().isRegistered(this)) {
             EventBus.getDefault().register(this)
@@ -264,23 +269,26 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         settingsStorage = SettingsStorage(requireContext())
         val weakActivity = WeakReference(requireActivity() as MainActivity)
         mainActivity = weakActivity.get()
+        mainActivity?.setPlayerBottomSheet()
         playing_same_song = false
 
         setAccorToSettings()
+
+        setSizeOfCoverLayout(coverLayout)
 
         //click listeners on mini player
         //and sending broadcast on click
 
         //play pause
         miniPause?.setOnClickListener {
-            mainActivity!!.pausePlayAudio()
+            mainActivity?.pausePlayAudio()
         }
         //next on mini player
         miniNext?.setOnClickListener {
             if (!shouldIgnoreClick()) {
                 stopAnimText(StopTextAnim())
             }
-            mainActivity!!.playNextAudio()
+            mainActivity?.playNextAudio()
         }
         //main player events
         previousImg.setOnClickListener {
@@ -288,16 +296,16 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
             if (!shouldIgnoreClick()) {
                 stopAnimText(StopTextAnim())
             }
-            mainActivity!!.playPreviousAudio()
+            mainActivity?.playPreviousAudio()
         }
         nextImg.setOnClickListener {
             if (!shouldIgnoreClick()) {
                 stopAnimText(StopTextAnim())
             }
-            mainActivity!!.playNextAudio()
+            mainActivity?.playNextAudio()
         }
         playImg?.setOnClickListener {
-            mainActivity!!.pausePlayAudio()
+            mainActivity?.pausePlayAudio()
         }
         queImg.setOnClickListener { openQue() }
         repeatImg?.setOnClickListener { repeatFun() }
@@ -346,6 +354,24 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         tempColor = resources.getColor(R.color.player_bg, Resources.getSystem().newTheme())
         setupQueueBottomSheet()
         return view
+    }
+
+    private fun setSizeOfCoverLayout(view: View?){
+        view?.let {
+            val vto: ViewTreeObserver = it.viewTreeObserver
+            vto.addOnGlobalLayoutListener(object : OnGlobalLayoutListener {
+                override fun onGlobalLayout() {
+                    val viewSize: Int = it.width.coerceAtMost(it.height)
+                    val layoutParams = view.layoutParams as ConstraintLayout.LayoutParams
+                    layoutParams.matchConstraintMaxWidth = viewSize
+                    layoutParams.matchConstraintMaxHeight = viewSize
+                    view.layoutParams = layoutParams
+
+                    // Remove the listener to avoid multiple callbacks
+                    it.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                }
+            })
+        }
     }
 
     private fun animateText() {
@@ -499,18 +525,22 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
     }
 
     private fun setCurColorInPlayer(animateFrom: Int, animateTo: Int) {
-        val colorAnimation = ValueAnimator.ofArgb(animateFrom, animateTo)
-        colorAnimation.duration = 500
-        colorAnimation.addUpdateListener { animator: ValueAnimator ->
-            val color = animator.animatedValue as Int
-            val gradientBg = GradientDrawable(
-                GradientDrawable.Orientation.BOTTOM_TOP,
-                intArrayOf(getColor(R.color.white), color)
-            )
-            playerLayout!!.background = gradientBg
+        val handler = Handler(Looper.getMainLooper())
+        handler.post {
+            val colorAnimation = ValueAnimator.ofArgb(animateFrom, animateTo)
+            colorAnimation.duration = 500
+            colorAnimation.addUpdateListener { animator: ValueAnimator ->
+                val color = animator.animatedValue as Int
+                val gradientBg = GradientDrawable(
+                    GradientDrawable.Orientation.BOTTOM_TOP,
+                    intArrayOf(getColor(R.color.white), color)
+                )
+                requireActivity().runOnUiThread { playerLayout!!.background = gradientBg }
+            }
+            colorAnimation.start()
         }
-        colorAnimation.start()
     }
+
 
     private fun setCurColorInLyricView(animateFrom: Int, animateTo: Int) {
         lyricsCardView?.setCardBackgroundColor(animateTo)
@@ -608,82 +638,93 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         }
         if (!appPaused) {
             if (activeMusic != null) {
+                val image = result.image
 
-                //image decoder
-                val arrayOfBitmaps = arrayOf<Bitmap?>(null)
-                var art: ByteArray? = null
-                try {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        MediaMetadataRetriever().use { mediaMetadataRetriever ->
-                            mediaMetadataRetriever.setDataSource(activeMusic!!.path)
-                            art = mediaMetadataRetriever.embeddedPicture
-                            mediaMetadataRetriever.release()
-                        }
-                    }else{
-                        val metadataRetriever = MediaMetadataRetriever()
-                        metadataRetriever.setDataSource(activeMusic!!.path)
-                        art = metadataRetriever.embeddedPicture
-                        metadataRetriever.release()
-                    }
-                } catch (ignored: IOException) {
-                    art = null
-                }
-                try {
-                    arrayOfBitmaps[0] = art?.size?.let { BitmapFactory.decodeByteArray(art, 0, it) }
-                } catch (ignored: Exception) {
-                    arrayOfBitmaps[0] = null
-                }
-                val finalImage = arrayOfBitmaps[0]
-
-                tempColor = if (finalImage != null) {
-                    val themeColor = generateThemeColor(finalImage)
-                    val palette = generatePalette(finalImage)
-                    setCurColorInPlayer(tempColor, themeColor)
-                    setCurColorInLyricView(tempColor, getColor(R.color.player_bg))
-                    themeColor
-                } else {
-                    setCurColorInPlayer(tempColor, getColor(R.color.player_bg))
-                    setCurColorInLyricView(tempColor, getColor(R.color.player_bg))
-                    getColor(R.color.player_bg)
-                }
-                var image = result.image
-                try {
-                    activeMusic?.let {
-                        glideBuilt!!.loadFromBitmap(
-                            image,
-                            R.drawable.ic_music,
-                            playerCoverImage,
-                            512,
-                            true
-                        )
-                        glideBuilt!!.loadFromBitmap(
-                            image,
-                            R.drawable.ic_music,
-                            miniCover,
-                            128,
-                            true
-                        )
-                        queueSheetBehaviour?.let { sheet ->
-                            if (sheet.state == BottomSheetBehavior.STATE_EXPANDED) {
-                                glideBuilt!!.loadFromBitmap(
-                                    image,
-                                    R.drawable.ic_music,
-                                    queueCoverImg,
-                                    128,
-                                    false
-                                )
+                executorService?.execute{//image decoder
+                    val arrayOfBitmaps = arrayOf<Bitmap?>(null)
+                    var art: ByteArray?
+                    try {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                            MediaMetadataRetriever().use { mediaMetadataRetriever ->
+                                mediaMetadataRetriever.setDataSource(activeMusic!!.path)
+                                art = mediaMetadataRetriever.embeddedPicture
+                                mediaMetadataRetriever.release()
                             }
+                        } else {
+                            val metadataRetriever = MediaMetadataRetriever()
+                            metadataRetriever.setDataSource(activeMusic!!.path)
+                            art = metadataRetriever.embeddedPicture
+                            metadataRetriever.release()
+                        }
+                    } catch (ignored: IOException) {
+                        art = null
+                    }
+                    try {
+                        arrayOfBitmaps[0] =
+                            art?.size?.let { BitmapFactory.decodeByteArray(art, 0, it) }
+                    } catch (ignored: Exception) {
+                        arrayOfBitmaps[0] = null
+                    }
+                    val finalImage = arrayOfBitmaps[0]
+                    requireActivity().runOnUiThread{
+                        tempColor = if (finalImage != null) {
+                            if (image == null) {
+                                setImages(SetImageInMainPlayer(finalImage,activeMusic))
+                            }
+                            val themeColor = generateThemeColor(finalImage)
+                            val palette = generatePalette(finalImage)
+                            setCurColorInPlayer(tempColor, themeColor)
+                            setCurColorInLyricView(tempColor, getColor(R.color.player_bg))
+                            themeColor
+                        } else {
+                            setCurColorInPlayer(tempColor, getColor(R.color.player_bg))
+                            setCurColorInLyricView(tempColor, getColor(R.color.player_bg))
+                            getColor(R.color.player_bg)
                         }
                     }
-                } catch (e: Exception) {
-                    e.printStackTrace()
                 }
-                mainActivity!!.setImageInNavigation(image)
-                //Don't remove this it will prevent app from crashing if bitmap was trying to recycle from instance
-                image = null
+                setImages(result)
             }
         }
 
+    }
+
+    private fun setImages(result: SetImageInMainPlayer){
+        var image = result.image
+        try {
+            activeMusic?.let {
+                glideBuilt!!.loadFromBitmap(
+                    image,
+                    R.drawable.ic_music,
+                    playerCoverImage,
+                    512,
+                    true
+                )
+                glideBuilt!!.loadFromBitmap(
+                    image,
+                    R.drawable.ic_music,
+                    miniCover,
+                    128,
+                    true
+                )
+                queueSheetBehaviour?.let { sheet ->
+                    if (sheet.state == BottomSheetBehavior.STATE_EXPANDED) {
+                        glideBuilt!!.loadFromBitmap(
+                            image,
+                            R.drawable.ic_music,
+                            queueCoverImg,
+                            128,
+                            false
+                        )
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        mainActivity!!.setImageInNavigation(image)
+        //Don't remove this it will prevent app from crashing if bitmap was trying to recycle from instance
+        image = null
     }
 
     private fun showToast(s: String) {
@@ -877,7 +918,6 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
                     shadowPlayer!!.alpha = 0f
                 }
             }
-
             override fun onSlide(bottomSheet: View, slideOffset: Float) {
                 bottomSheet.alpha = 0 + (slideOffset + 1f)
                 shadowPlayer!!.alpha = 0 + (slideOffset + 1f)
@@ -927,10 +967,10 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
                     override fun onGlobalLayout() {
                         val cardViewHeight: Int = it.height
                         // Use the cardViewHeight as needed
-                        if (pxToDp(resources,cardViewHeight) < 300){
+                        if (pxToDp(resources, cardViewHeight) < 300) {
                             gradientBottom?.visibility = GONE
                             gradientTop?.visibility = GONE
-                        }else{
+                        } else {
                             gradientBottom?.visibility = VISIBLE
                             gradientTop?.visibility = VISIBLE
                         }
@@ -1284,26 +1324,30 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
     private fun setPreviousData(activeMusic: Music?) {
         if (activeMusic == null) return
         setMainPlayerLayout(SetMainLayoutEvent(activeMusic))
-        var finalImage:Bitmap ?
+        var finalImage: Bitmap?
         coroutineScope.launch {
-            GlideApp.with(requireContext()).load(activeMusic.path?.let { AudioFileCover(it) }).into(object :
-                CustomTarget<Drawable>(){
-                override fun onResourceReady(
-                    resource: Drawable,
-                    transition: Transition<in Drawable>?
-                ) {
-                    finalImage = resource.toUnscaledBitmap()
-                    setPlayerImages(SetImageInMainPlayer(finalImage, activeMusic))
-                }
+            GlideApp.with(requireContext()).load(activeMusic.path?.let { AudioFileCover(it) }).override(512)
+                .into(object :
+                    CustomTarget<Drawable>() {
+                    override fun onResourceReady(
+                        resource: Drawable,
+                        transition: Transition<in Drawable>?
+                    ) {
+                        finalImage = resource.toUnscaledBitmap()
+                        setPlayerImages(SetImageInMainPlayer(finalImage, activeMusic))
+                        finalImage = null
+                    }
 
-                override fun onLoadCleared(placeholder: Drawable?) {
-                    setPlayerImages(SetImageInMainPlayer(null, activeMusic))
-                }
+                    override fun onLoadCleared(placeholder: Drawable?) {
+                        setPlayerImages(SetImageInMainPlayer(null, activeMusic))
+                        finalImage = null
+                    }
 
-                override fun onLoadFailed(errorDrawable: Drawable?) {
-                    setPlayerImages(SetImageInMainPlayer(null, activeMusic))
-                }
-            })
+                    override fun onLoadFailed(errorDrawable: Drawable?) {
+                        setPlayerImages(SetImageInMainPlayer(null, activeMusic))
+                        finalImage = null
+                    }
+                })
         }
 
         seekBarMain!!.max = activeMusic.duration.toInt()

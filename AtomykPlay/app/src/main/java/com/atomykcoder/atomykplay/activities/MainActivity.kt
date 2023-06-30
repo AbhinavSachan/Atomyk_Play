@@ -714,15 +714,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     private fun setBottomSheets() {
         val height = getDisplaySize().height
 
-        val mainPlayerPeekHeight = (height / 10.6f).toInt()
-        mainPlayerSheetBehavior!!.isHideable = true
-        mainPlayerSheetBehavior!!.peekHeight = mainPlayerPeekHeight
-        if (music != null) {
-            mainPlayerSheetBehavior!!.setState(BottomSheetBehavior.STATE_COLLAPSED)
-        } else {
-            anchoredShadow!!.alpha = 0f
-            mainPlayerSheetBehavior!!.setState(BottomSheetBehavior.STATE_HIDDEN)
-        }
         val optionPeekHeight = (height / 1.3f).toInt()
         optionSheetBehavior = BottomSheetBehavior.from(optionSheet!!)
         setBottomSheetProperties(optionSheetBehavior!!, optionPeekHeight, true)
@@ -743,6 +734,27 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         val plOptionPeekHeight = (height / 1.8f).toInt()
         plSheetBehavior = BottomSheetBehavior.from(plSheet!!)
         setBottomSheetProperties(plSheetBehavior!!, plOptionPeekHeight, true)
+    }
+
+    fun setPlayerBottomSheet() {
+        bottomSheetPlayerFragment?.miniPlayView?.let {
+            val vto: ViewTreeObserver = it.viewTreeObserver
+            vto.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+                override fun onGlobalLayout() {
+                    val miniPlayerHeight = it.height
+                    mainPlayerSheetBehavior!!.isHideable = true
+                    mainPlayerSheetBehavior!!.peekHeight = miniPlayerHeight
+                    if (music != null) {
+                        mainPlayerSheetBehavior!!.setState(BottomSheetBehavior.STATE_COLLAPSED)
+                    } else {
+                        anchoredShadow!!.alpha = 0f
+                        mainPlayerSheetBehavior!!.setState(BottomSheetBehavior.STATE_HIDDEN)
+                    }
+                    // Remove the listener to avoid multiple callbacks
+                    it.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                }
+            })
+        }
     }
 
     private fun getDisplaySize(): Size {
@@ -1296,7 +1308,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         plSheet = findViewById(R.id.pl_option_bottom_sheet)
         detailsSheet = findViewById(R.id.file_details_sheet)
         anchoredShadow = findViewById(R.id.anchored_player_shadow)
-        mainPlayerSheetBehavior = BottomSheetBehavior.from(playerBottomSheet!!) as CustomBottomSheet<View?>
+        mainPlayerSheetBehavior =
+            BottomSheetBehavior.from(playerBottomSheet!!) as CustomBottomSheet<View?>
+
         val openDrawer = findViewById<ImageView>(R.id.open_drawer_btn)
         val searchBar = findViewById<MaterialCardView>(R.id.searchBar_card)
         val plCard = findViewById<View>(R.id.playlist_card_view_ma)
