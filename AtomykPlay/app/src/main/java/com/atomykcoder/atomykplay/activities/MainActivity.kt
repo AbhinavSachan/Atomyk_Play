@@ -1318,15 +1318,25 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         val shuffleCard = findViewById<View>(R.id.shuffle_play_card_view)
         navigationView = findViewById(R.id.navigation_drawer)
         drawer = findViewById(R.id.drawer_layout)
-        setSystemDrawBehindBars(
-            window,
-            settingsStorage.loadIsThemeDark(),
-            drawer!!,
-            Color.TRANSPARENT,
-            resources.getColor(R.color.player_bg, null),
-            hideStatusBar = false,
-            hideNavigationBar = false
-        )
+
+        drawer?.viewTreeObserver?.let {
+            it.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+                override fun onGlobalLayout() {
+                    window?.apply {
+                        setSystemDrawBehindBars(
+                            this,
+                            settingsStorage.loadIsThemeDark(),
+                            drawer!!,
+                            Color.TRANSPARENT,
+                            resources.getColor(R.color.player_bg, null),
+                            hideStatusBar = false,
+                            hideNavigationBar = false
+                        )
+                    }
+                    it.removeOnGlobalLayoutListener(this)
+                }
+            })
+        }
 
         val headerView = navigationView!!.getHeaderView(0)
         val navDetailLayout = headerView.findViewById<View>(R.id.nav_details_layout)

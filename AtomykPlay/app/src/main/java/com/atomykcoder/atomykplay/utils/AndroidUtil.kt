@@ -38,10 +38,12 @@ object AndroidUtil {
 
         return bitmap
     }
-    fun pxToDp(resources:Resources,px: Int): Float {
+
+    fun pxToDp(resources: Resources, px: Int): Float {
         val density = resources.displayMetrics.density
         return px / density
     }
+
     fun setTheme(window: Window?, isDark: Boolean) {
         window?.setWindowAnimations(getAnimation(isDark))
         if (isDark) {
@@ -93,7 +95,7 @@ object AndroidUtil {
     }
 
     fun setSystemDrawBehindBars(
-        window: Window?,
+        window: Window,
         isDarkTheme: Boolean,
         root: View,
         statusBarColor: Int,
@@ -104,7 +106,7 @@ object AndroidUtil {
         // Alternate flags for Android API level 30 and above
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                val controller = window?.insetsController
+                val controller = window.insetsController
                 controller?.apply {
                     // Hide the status bar and enable transparent system bars
                     if (hideStatusBar) {
@@ -154,39 +156,39 @@ object AndroidUtil {
                     }
                 }
             } else {
-                window?.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
+                window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
                 if (isDarkTheme) {
-                    window?.decorView?.systemUiVisibility =
+                    window.decorView?.systemUiVisibility =
                         View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                 } else {
-                    window?.decorView?.systemUiVisibility =
+                    window.decorView?.systemUiVisibility =
                         View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
                 }
 
                 // Hide the status bar
                 if (hideStatusBar) {
-                    window?.decorView?.systemUiVisibility = (View.SYSTEM_UI_FLAG_FULLSCREEN
+                    window.decorView?.systemUiVisibility = (View.SYSTEM_UI_FLAG_FULLSCREEN
                             or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
-                    window?.statusBarColor = Color.TRANSPARENT
+                    window.statusBarColor = Color.TRANSPARENT
 
                 } else {
-                    window?.statusBarColor = statusBarColor
+                    window.statusBarColor = statusBarColor
 
                 }
                 // Hide the navigation bar
                 if (hideNavigationBar) {
-                    window?.decorView?.systemUiVisibility = (View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    window.decorView?.systemUiVisibility = (View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                             or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
-                    window?.navigationBarColor = Color.TRANSPARENT
+                    window.navigationBarColor = Color.TRANSPARENT
 
                 } else {
-                    window?.navigationBarColor = statusBarColor
+                    window.navigationBarColor = statusBarColor
 
                 }
 
             }
         } catch (e: Exception) {
-            Toast.makeText(window?.context, "Unable to perform the task", Toast.LENGTH_SHORT)
+            Toast.makeText(window.context, "Unable to perform the task", Toast.LENGTH_SHORT)
                 .show()
             e.printStackTrace()
         }
