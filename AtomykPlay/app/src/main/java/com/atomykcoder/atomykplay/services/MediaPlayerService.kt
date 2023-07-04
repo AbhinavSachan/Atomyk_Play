@@ -6,8 +6,6 @@ import android.app.PendingIntent
 import android.content.*
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Canvas
-import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.media.*
 import android.media.AudioManager.OnAudioFocusChangeListener
@@ -38,9 +36,9 @@ import com.atomykcoder.atomykplay.events.*
 import com.atomykcoder.atomykplay.fragments.BottomSheetPlayerFragment
 import com.atomykcoder.atomykplay.helperFunctions.AudioFileCover
 import com.atomykcoder.atomykplay.helperFunctions.GlideApp
-import com.atomykcoder.atomykplay.helperFunctions.Logger
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper
 import com.atomykcoder.atomykplay.utils.AndroidUtil.toUnscaledBitmap
+import com.atomykcoder.atomykplay.utils.EqualizerUtil
 import com.atomykcoder.atomykplay.utils.StorageUtil
 import com.atomykcoder.atomykplay.utils.StorageUtil.SettingsStorage
 import com.bumptech.glide.request.target.CustomTarget
@@ -72,6 +70,8 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
     private var selfStopHandler: Handler? = null
     private var selfStopRunnable: Runnable? = null
     private var wasPlaying = false
+
+    private var equalizerUtil: EqualizerUtil? = null
 
     //media session
     private var mediaSessionManager: MediaSessionManager? = null
@@ -629,44 +629,48 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
         return iBinder
     }
 
+    val audioSessionId: Int?
+        get() = mediaPlayer?.audioSessionId
+
     override fun onPrepared(mp: MediaPlayer) {
         EventBus.getDefault().post(SetMainLayoutEvent(activeMusic))
         resumeMedia(false)
-        var finalImage:Bitmap?
+        var finalImage: Bitmap?
         coroutineScope.launch {
-            GlideApp.with(applicationContext).load(activeMusic?.path?.let { AudioFileCover(it) }).override(512).into(object :CustomTarget<Drawable>(){
-                override fun onResourceReady(
-                    resource: Drawable,
-                    transition: Transition<in Drawable>?
-                ) {
-                    finalImage = resource.toUnscaledBitmap()
-                    if (MainActivity.service_bound) {
-                        EventBus.getDefault().post(SetImageInMainPlayer(finalImage, activeMusic))
+            GlideApp.with(applicationContext).load(activeMusic?.path?.let { AudioFileCover(it) })
+                .override(512).into(object : CustomTarget<Drawable>() {
+                    override fun onResourceReady(
+                        resource: Drawable,
+                        transition: Transition<in Drawable>?
+                    ) {
+                        finalImage = resource.toUnscaledBitmap()
+                        if (MainActivity.service_bound) {
+                            EventBus.getDefault()
+                                .post(SetImageInMainPlayer(finalImage, activeMusic))
+                        }
+                        updateMetaData(activeMusic, finalImage)
+                        finalImage = null
                     }
-                    updateMetaData(activeMusic, finalImage)
-                    finalImage = null
-                }
 
-                override fun onLoadCleared(placeholder: Drawable?) {
-                    if (MainActivity.service_bound) {
-                        EventBus.getDefault().post(SetImageInMainPlayer(null, activeMusic))
+                    override fun onLoadCleared(placeholder: Drawable?) {
+                        if (MainActivity.service_bound) {
+                            EventBus.getDefault().post(SetImageInMainPlayer(null, activeMusic))
+                        }
+                        updateMetaData(activeMusic, null)
+                        finalImage = null
                     }
-                    updateMetaData(activeMusic, null)
-                    finalImage = null
-                }
 
-                override fun onLoadFailed(errorDrawable: Drawable?) {
-                    if (MainActivity.service_bound) {
-                        EventBus.getDefault().post(SetImageInMainPlayer(null, activeMusic))
+                    override fun onLoadFailed(errorDrawable: Drawable?) {
+                        if (MainActivity.service_bound) {
+                            EventBus.getDefault().post(SetImageInMainPlayer(null, activeMusic))
+                        }
+                        updateMetaData(activeMusic, null)
+                        finalImage = null
                     }
-                    updateMetaData(activeMusic, null)
-                    finalImage = null
-                }
-            })
+                })
         }
 
     }
-
 
 
     override fun onCompletion(mp: MediaPlayer) {
@@ -765,22 +769,48 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
 
             val audioAttributes = AudioAttributes.Builder()
             audioAttributes.setLegacyStreamType(AudioManager.STREAM_MUSIC)
+            audioAttributes.setUsage(AudioAttributes.USAGE_MEDIA)
             audioAttributes.setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
             mediaPlayer!!.setAudioAttributes(audioAttributes.build())
+            if (settingsStorage!!.loadEnhanceAudio()){
+                initiateEqualizerUtil().run {
+                    setBassLevel(settingsStorage!!.loadBassLevel())
+                    setVirtualizerStrength(settingsStorage!!.loadVirLevel())
+                }
+            }
         }
 
         //reset so that the media player is not pointing to another data source
-        mediaPlayer!!.reset()
+        mediaPlayer?.reset()
         try {
-            if (activeMusic != null) {
-                if (musicList == null) {
-                    loadList()
-                }
-                mediaPlayer!!.setDataSource(activeMusic!!.path)
-                mediaPlayer!!.prepare()
+            activeMusic?.let {
+                musicList ?: loadList()
+                mediaPlayer?.setDataSource(it.path)
+                mediaPlayer?.prepare()
             }
         } catch (ignored: IOException) {
         }
+    }
+
+    fun initiateEqualizerUtil(){
+        val id = audioSessionId ?: return
+        equalizerUtil = equalizerUtil ?: EqualizerUtil(id)
+
+        equalizerUtil?.enableEffects(true)
+    }
+
+    fun disableEqualizerUtil(){
+        equalizerUtil?.enableEffects(false)
+        equalizerUtil?.releaseEqualizer()
+        equalizerUtil = null
+    }
+
+    fun setBassLevel(level: Int){
+        equalizerUtil?.setBassBandLevel(level)
+    }
+
+    fun setVirtualizerStrength(strength: Int){
+        equalizerUtil?.setVirtualizerStrength(strength)
     }
 
     /**
@@ -1098,90 +1128,92 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
     @Throws(RemoteException::class)
     fun initiateMediaSession() {
         if (mediaSession != null) return
-        mediaSession = MediaSessionCompat(this, BuildConfig.APPLICATION_ID)
-        transportControls = mediaSession!!.controller.transportControls
-        mediaSession!!.isActive = true
-        mediaSession!!.setFlags(MediaSessionCompat.FLAG_HANDLES_QUEUE_COMMANDS)
-        mediaSession!!.setCallback(object : MediaSessionCompat.Callback() {
-            override fun onMediaButtonEvent(mediaButtonEvent: Intent): Boolean {
-                val intentAction = mediaButtonEvent.action
-                if (Intent.ACTION_MEDIA_BUTTON != intentAction) {
+        handler.post {
+            mediaSession = MediaSessionCompat(this, BuildConfig.APPLICATION_ID)
+            transportControls = mediaSession!!.controller.transportControls
+            mediaSession!!.isActive = true
+            mediaSession!!.setFlags(MediaSessionCompat.FLAG_HANDLES_QUEUE_COMMANDS)
+            mediaSession!!.setCallback(object : MediaSessionCompat.Callback() {
+                override fun onMediaButtonEvent(mediaButtonEvent: Intent): Boolean {
+                    val intentAction = mediaButtonEvent.action
+                    if (Intent.ACTION_MEDIA_BUTTON != intentAction) {
+                        return super.onMediaButtonEvent(mediaButtonEvent)
+                    }
+                    val event = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        mediaButtonEvent.getParcelableExtra(
+                            Intent.EXTRA_KEY_EVENT, KeyEvent::class.java
+                        ) ?: return super.onMediaButtonEvent(mediaButtonEvent)
+                    } else {
+                        mediaButtonEvent.getParcelableExtra(Intent.EXTRA_KEY_EVENT)
+                            ?: return super.onMediaButtonEvent(mediaButtonEvent)
+                    }
+                    if (event.action == KeyEvent.ACTION_DOWN) {
+                        when (event.keyCode) {
+                            KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE -> if (isMediaPlaying) pauseMedia() else resumeMedia(
+                                true
+                            )
+
+                            KeyEvent.KEYCODE_MEDIA_NEXT -> onSkipToNext()
+                            KeyEvent.KEYCODE_MEDIA_PREVIOUS -> onSkipToPrevious()
+                        }
+                        return true
+                    }
                     return super.onMediaButtonEvent(mediaButtonEvent)
                 }
-                val event = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    mediaButtonEvent.getParcelableExtra(
-                        Intent.EXTRA_KEY_EVENT, KeyEvent::class.java
-                    ) ?: return super.onMediaButtonEvent(mediaButtonEvent)
-                } else {
-                    mediaButtonEvent.getParcelableExtra(Intent.EXTRA_KEY_EVENT)
-                        ?: return super.onMediaButtonEvent(mediaButtonEvent)
+
+                override fun onPlay() {
+                    super.onPlay()
+                    resumeMedia(true)
                 }
-                if (event.action == KeyEvent.ACTION_DOWN) {
-                    when (event.keyCode) {
-                        KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE -> if (isMediaPlaying) pauseMedia() else resumeMedia(
-                            true
-                        )
 
-                        KeyEvent.KEYCODE_MEDIA_NEXT -> onSkipToNext()
-                        KeyEvent.KEYCODE_MEDIA_PREVIOUS -> onSkipToPrevious()
-                    }
-                    return true
+                override fun onPause() {
+                    super.onPause()
+                    pauseMedia()
                 }
-                return super.onMediaButtonEvent(mediaButtonEvent)
-            }
 
-            override fun onPlay() {
-                super.onPlay()
-                resumeMedia(true)
-            }
+                override fun onSkipToNext() {
+                    super.onSkipToNext()
+                    skipToNext()
+                }
 
-            override fun onPause() {
-                super.onPause()
-                pauseMedia()
-            }
+                override fun onSkipToPrevious() {
+                    super.onSkipToPrevious()
+                    skipToPrevious()
+                }
 
-            override fun onSkipToNext() {
-                super.onSkipToNext()
-                skipToNext()
-            }
+                override fun onStop() {
+                    super.onStop()
+                    stoppedByNotification()
+                }
 
-            override fun onSkipToPrevious() {
-                super.onSkipToPrevious()
-                skipToPrevious()
-            }
+                override fun onSeekTo(pos: Long) {
+                    super.onSeekTo(pos)
+                    try {//clearing the storage before putting new value
+                        storage!!.clearMusicLastPos()
+                        //storing the current position of seekbar in storage so we can access it from services
+                        storage!!.saveMusicLastPos(Math.toIntExact(pos))
 
-            override fun onStop() {
-                super.onStop()
-                stoppedByNotification()
-            }
-
-            override fun onSeekTo(pos: Long) {
-                super.onSeekTo(pos)
-                try {//clearing the storage before putting new value
-                    storage!!.clearMusicLastPos()
-                    //storing the current position of seekbar in storage so we can access it from services
-                    storage!!.saveMusicLastPos(Math.toIntExact(pos))
-
-                    //first checking setting the media seek to current position of seek bar and then setting all data in UI•
-                    if (MainActivity.service_bound) {
-                        //removing handler so that we can seek without glitches handler will restart in setSeekBar() method☻
-                        seekBarRunnable?.let {
-                            seekBarHandler?.removeCallbacks(it)
-                        }
-                        if (isMediaPlayerNotNull) {
-                            seekMediaTo(Math.toIntExact(pos))
-                            if (isMediaPlaying) {
-                                buildNotification(PlaybackStatus.PLAYING, 1f)
-                            } else {
-                                buildNotification(PlaybackStatus.PAUSED, 0f)
+                        //first checking setting the media seek to current position of seek bar and then setting all data in UI•
+                        if (MainActivity.service_bound) {
+                            //removing handler so that we can seek without glitches handler will restart in setSeekBar() method☻
+                            seekBarRunnable?.let {
+                                seekBarHandler?.removeCallbacks(it)
                             }
-                            setSeekBar()
+                            if (isMediaPlayerNotNull) {
+                                seekMediaTo(Math.toIntExact(pos))
+                                if (isMediaPlaying) {
+                                    buildNotification(PlaybackStatus.PLAYING, 1f)
+                                } else {
+                                    buildNotification(PlaybackStatus.PAUSED, 0f)
+                                }
+                                setSeekBar()
+                            }
                         }
+                    } catch (_: Exception) {
                     }
-                } catch (_: Exception) {
                 }
-            }
-        })
+            })
+        }
     }
 
     override fun onAudioFocusChange(focusState: Int) {
@@ -1296,6 +1328,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
         unregisterReceiver(prevMusicReceiver)
         unregisterReceiver(stopMusicReceiver)
         releasePlayer()
+        disableEqualizerUtil()
     }
 
     private fun releasePlayer() {
@@ -1308,6 +1341,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
 
         stopForeground(STOP_FOREGROUND_REMOVE)
     }
+
 
     /**
      * this function requests focus to play the music

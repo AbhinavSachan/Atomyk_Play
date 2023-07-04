@@ -1310,6 +1310,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         anchoredShadow = findViewById(R.id.anchored_player_shadow)
         mainPlayerSheetBehavior =
             BottomSheetBehavior.from(playerBottomSheet!!) as CustomBottomSheet<View?>
+        mainPlayerSheetBehavior?.peekHeight = 0
 
         val openDrawer = findViewById<ImageView>(R.id.open_drawer_btn)
         val searchBar = findViewById<MaterialCardView>(R.id.searchBar_card)
@@ -1319,23 +1320,18 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         navigationView = findViewById(R.id.navigation_drawer)
         drawer = findViewById(R.id.drawer_layout)
 
-        drawer?.viewTreeObserver?.let {
-            it.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
-                override fun onGlobalLayout() {
-                    window?.apply {
-                        setSystemDrawBehindBars(
-                            this,
-                            settingsStorage.loadIsThemeDark(),
-                            drawer!!,
-                            Color.TRANSPARENT,
-                            resources.getColor(R.color.player_bg, null),
-                            hideStatusBar = false,
-                            hideNavigationBar = false
-                        )
-                    }
-                    it.removeOnGlobalLayoutListener(this)
-                }
-            })
+        val window1 = window
+
+        window1?.let {
+            setSystemDrawBehindBars(
+                it,
+                settingsStorage.loadIsThemeDark(),
+                drawer!!,
+                Color.TRANSPARENT,
+                resources.getColor(R.color.player_bg, null),
+                hideStatusBar = false,
+                hideNavigationBar = false
+            )
         }
 
         val headerView = navigationView!!.getHeaderView(0)

@@ -583,6 +583,118 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:id="@+id/enhanceAudio_ll"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="?attr/selectableItemBackground"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="16dp"
+                        android:paddingVertical="4dp"
+                        android:weightSum="6">
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="5"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="sans-serif"
+                                android:paddingVertical="4dp"
+                                android:text="@string/enhance_audio"
+                                android:textColor="@color/text_color"
+                                android:textSize="@dimen/d_18sp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="sans-serif"
+                                android:paddingStart="2dp"
+                                android:paddingEnd="16dp"
+                                android:text="@string/autoplay_des"
+                                android:textColor="@color/sub_text_grey"
+                                android:textSize="@dimen/d_15sp" />
+
+                        </LinearLayout>
+
+                        <androidx.appcompat.widget.SwitchCompat
+                            android:id="@+id/enhanceAudio_swi"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:thumb="@drawable/custom_switch_thumb"
+                            app:track="@drawable/custom_track_switch" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/level_layout"
+                        android:visibility="gone"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif-medium"
+                            android:paddingHorizontal="16dp"
+                            android:paddingTop="8dp"
+                            android:text="@string/bass_lvl"
+                            android:textColor="@color/text_color"
+                            android:textSize="@dimen/d_13sp" />
+
+                        <SeekBar
+                            android:id="@+id/bass_seek_bar"
+                            android:layout_width="match_parent"
+                            android:layout_height="34dp"
+                            android:layout_marginHorizontal="8dp"
+                            android:background="@color/secondary_bg"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:padding="15dp"
+                            android:progressDrawable="@drawable/seekbar_style"
+                            android:splitTrack="false"
+                            android:thumbTint="@color/accent_color_bg" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif-medium"
+                            android:paddingHorizontal="16dp"
+                            android:text="@string/vir_strgnth"
+                            android:textColor="@color/text_color"
+                            android:textSize="@dimen/d_13sp" />
+
+                        <SeekBar
+                            android:id="@+id/virtualizer_seek_bar"
+                            android:layout_width="match_parent"
+                            android:layout_height="34dp"
+                            android:layout_marginHorizontal="8dp"
+                            android:background="@color/secondary_bg"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:padding="15dp"
+                            android:progressDrawable="@drawable/seekbar_style"
+                            android:splitTrack="false"
+                            android:thumbTint="@color/accent_color_bg" />
+
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <LinearLayout
                     android:id="@+id/keep_shuffle_ll"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

@@ -778,6 +778,47 @@ class StorageUtil
             return sharedPreferences.getBoolean("beautify_name", true)
         }
 
+        fun enableEnhanceAudio(b: Boolean) {
+            val sharedPreferences =
+                context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE)
+            val editor = sharedPreferences.edit()
+            editor.putBoolean("enhance_audio", b)
+            editor.apply()
+        }
+
+        fun loadEnhanceAudio(): Boolean {
+            val sharedPreferences =
+                context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE)
+            return sharedPreferences.getBoolean("enhance_audio", false)
+        }
+
+        fun saveBassLevel(b: Int) {
+            val sharedPreferences =
+                context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE)
+            val editor = sharedPreferences.edit()
+            editor.putInt("bass_level", b)
+            editor.apply()
+        }
+
+        fun loadBassLevel(): Int {
+            val sharedPreferences =
+                context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE)
+            return sharedPreferences.getInt("bass_level", 30)
+        }
+        fun saveVirLevel(b: Int) {
+            val sharedPreferences =
+                context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE)
+            val editor = sharedPreferences.edit()
+            editor.putInt("virtualization_level", b)
+            editor.apply()
+        }
+
+        fun loadVirLevel(): Int {
+            val sharedPreferences =
+                context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE)
+            return sharedPreferences.getInt("virtualization_level", 50)
+        }
+
         fun addBeautifyTag(s: String) {
             val sharedPreferences =
                 context.getSharedPreferences(BEAUTIFY_TAGS_STORAGE, Context.MODE_PRIVATE)

@@ -115,6 +115,7 @@ dependencies {
 
     // OkHttp Profiler (for network request profiling)
     implementation 'com.localebro:okhttpprofiler:1.0.8'
+
 }
 
 protobuf {
