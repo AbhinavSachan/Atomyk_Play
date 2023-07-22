@@ -146,4 +146,5 @@
     <string name="info_for_lyrics">If you are not getting any results please try searching without artist and also please do keep in mind that we are not using any paid lyric fetching service so for some music you won\'t get any lyrics if you want to add lyrics manually. Please visit the <i><b>https://www.megalobiz.com</b></i> site and search your desired song click on the song, now click on copy button and paste it here.</string>
     <string name="bass_lvl">Bass Level</string>
     <string name="vir_strgnth">Virtualizer Strength</string>
+    <string name="enhance_des"><![CDATA[Add some bass & virtualization, make it more enjoyable.]]></string>
 </resources>

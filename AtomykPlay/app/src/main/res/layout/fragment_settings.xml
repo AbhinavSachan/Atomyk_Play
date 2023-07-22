@@ -620,7 +620,7 @@
                                 android:fontFamily="sans-serif"
                                 android:paddingStart="2dp"
                                 android:paddingEnd="16dp"
-                                android:text="@string/autoplay_des"
+                                android:text="@string/enhance_des"
                                 android:textColor="@color/sub_text_grey"
                                 android:textSize="@dimen/d_15sp" />
 
