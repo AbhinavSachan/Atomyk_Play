@@ -62,6 +62,7 @@ import com.atomykcoder.atomykplay.helperFunctions.AudioFileCover
 import com.atomykcoder.atomykplay.helperFunctions.GlideApp
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener
+import com.atomykcoder.atomykplay.utils.AbhinavAnimationUtil.buttonShakeAnimation
 import com.atomykcoder.atomykplay.utils.AndroidUtil.pxToDp
 import com.atomykcoder.atomykplay.utils.AndroidUtil.toUnscaledBitmap
 import com.atomykcoder.atomykplay.utils.StorageUtil
@@ -281,6 +282,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
 
         //play pause
         miniPause?.setOnClickListener {
+            it.buttonShakeAnimation()
             mainActivity?.pausePlayAudio()
         }
         //next on mini player
@@ -292,7 +294,6 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         }
         //main player events
         previousImg.setOnClickListener {
-
             if (!shouldIgnoreClick()) {
                 stopAnimText(StopTextAnim())
             }
@@ -305,6 +306,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
             mainActivity?.playNextAudio()
         }
         playImg?.setOnClickListener {
+            it.buttonShakeAnimation()
             mainActivity?.pausePlayAudio()
         }
         queImg.setOnClickListener { openQue() }
@@ -745,8 +747,10 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         miniProgress!!.max = 0
         seekBarMain!!.progress = 0
         miniProgress!!.progress = 0
-        glideBuilt!!.loadFromBitmap(null, R.drawable.ic_music, playerCoverImage, 512, false)
-        glideBuilt!!.loadFromBitmap(null, R.drawable.ic_music, miniCover, 128, false)
+        if (activity?.isDestroyed == false || !isDetached) {
+            glideBuilt!!.loadFromBitmap(null, R.drawable.ic_music, playerCoverImage, 512, false)
+            glideBuilt!!.loadFromBitmap(null, R.drawable.ic_music, miniCover, 128, false)
+        }
     }
 
     @Subscribe

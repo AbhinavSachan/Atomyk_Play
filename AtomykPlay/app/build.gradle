@@ -22,8 +22,8 @@ android {
         applicationId "com.atomykcoder.atomykplay"
         minSdk 24
         targetSdk 33
-        versionCode 21
-        versionName '1.4.16'
+        versionCode 22
+        versionName '1.4.17'
     }
 
     buildTypes {
@@ -102,7 +102,7 @@ dependencies {
     implementation 'org.jsoup:jsoup:1.16.1'
     implementation 'androidx.palette:palette-ktx:1.0.0'
     implementation 'de.hdodenhof:circleimageview:3.1.0'
-    implementation 'com.google.firebase:firebase-crashlytics:18.3.7'
+    implementation 'com.google.firebase:firebase-crashlytics:18.4.0'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1'
     implementation 'androidx.core:core-splashscreen:1.0.1'
 

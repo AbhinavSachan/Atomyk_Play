@@ -803,7 +803,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     fun resetDataInNavigation() {
         navSongName!!.text = "Song Name"
         navArtistName!!.text = "Artist"
-        glideBuilt!!.loadFromUri(null, R.drawable.ic_music, navCover, 512)
+        if (!isDestroyed) {
+            glideBuilt!!.loadFromUri(null, R.drawable.ic_music, navCover, 512)
+        }
     }
 
     fun setDataInNavigation(song_name: String?, artist_name: String?) {
@@ -812,11 +814,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     }
 
     fun setImageInNavigation(album_uri: Bitmap?) {
-        try {
-            glideBuilt!!.loadFromBitmap(album_uri, R.drawable.ic_music, navCover, 512, false)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        glideBuilt!!.loadFromBitmap(album_uri, R.drawable.ic_music, navCover, 512, false)
     }
 
     private val music: Music?
@@ -1281,8 +1279,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     override fun onCreate(savedInstanceState: Bundle?) {
         settingsStorage = SettingsStorage(this)
         installSplashScreen()
-        val darkTheme = settingsStorage.loadIsThemeDark()
-        AndroidUtil.setTheme(window, darkTheme)
+        val window1 = window
+
+        if (window1 != null) {
+            val darkTheme = settingsStorage.loadIsThemeDark()
+            AndroidUtil.setTheme(window1, darkTheme)
+        }
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
@@ -1320,19 +1322,20 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         navigationView = findViewById(R.id.navigation_drawer)
         drawer = findViewById(R.id.drawer_layout)
 
-        val window1 = window
 
-        window1?.let {
+        // Directly call setSystemDrawBehindBars without the let block
+        if (window1 != null) {
             setSystemDrawBehindBars(
-                it,
+                window1,
                 settingsStorage.loadIsThemeDark(),
                 drawer!!,
                 Color.TRANSPARENT,
                 resources.getColor(R.color.player_bg, null),
-                hideStatusBar = false,
-                hideNavigationBar = false
+                hideStatusBar = settingsStorage.loadIsStatusBarHidden(),
+                hideNavigationBar = settingsStorage.loadIsNavBarHidden()
             )
         }
+
 
         val headerView = navigationView!!.getHeaderView(0)
         val navDetailLayout = headerView.findViewById<View>(R.id.nav_details_layout)
@@ -1844,7 +1847,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         }
 
         //check if previous list contains the same name as we are saving
-        builder.setPositiveButton("OK") { dialog: DialogInterface, i: Int ->
+        builder.setPositiveButton("OK") { dialog: DialogInterface, _: Int ->
             val plKey = editText.text.toString().trim { it <= ' ' }
             val plCoverUri = if (playListImageUri != null) playListImageUri.toString() else ""
             val playlistNames = ArrayList<String>()

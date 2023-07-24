@@ -64,7 +64,12 @@ object AndroidUtil {
 
     private fun setSystemBarColor(window: Window, isDarkTheme: Boolean) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            val controller = window.insetsController
+            val controller = try {
+                window.insetsController
+            } catch (e: Exception) {
+                e.printStackTrace()
+                null
+            }
             controller?.apply {
                 if (isDarkTheme) {
                     setSystemBarsAppearance(
