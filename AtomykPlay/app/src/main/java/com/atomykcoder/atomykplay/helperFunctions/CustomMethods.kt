@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import androidx.activity.result.ActivityResultLauncher
@@ -48,4 +49,9 @@ object CustomMethods {
 
         return null
     }
+
+    fun Array<Uri?>?.toNonNullArray(): Array<Uri> {
+        return this?.filterNotNull()?.toTypedArray() ?: emptyArray()
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.atomykcoder.atomykplay.fragments
 
 import android.content.DialogInterface
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -54,7 +55,11 @@ class AddLyricsFragment : Fragment() {
     ): View {
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_add_lyrics, container, false)
-        val decodeMessage = requireArguments().getSerializable("selectedMusic") as String?
+        val decodeMessage = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requireArguments().getSerializable("selectedMusic",String::class.java)
+        } else {
+            requireArguments().getSerializable("selectedMusic") as String
+        }
         val selectedMusic = MusicHelper.decode(decodeMessage)
         editTextLyrics = view.findViewById(R.id.edit_lyrics)
         mainActivity = WeakReference(requireActivity() as MainActivity)
@@ -71,7 +76,7 @@ class AddLyricsFragment : Fragment() {
                     state = BottomSheetBehavior.STATE_HIDDEN
                 }
             }.run {
-                act.onBackPressed()
+                act.onBackPressedDispatcher.onBackPressed()
             }
         }
         name = if (selectedMusic != null) selectedMusic.name else ""
@@ -207,4 +212,10 @@ class AddLyricsFragment : Fragment() {
             e.printStackTrace()
         }
     }
+
+    companion object{
+        @JvmStatic
+        fun newInstance() = AddLyricsFragment()
+    }
+
 }

@@ -70,7 +70,7 @@ class LastAddedFragment : Fragment() {
 
         // back button click listener
         backImageView.setOnClickListener {
-            requireActivity().onBackPressed()
+            requireActivity().onBackPressedDispatcher.onBackPressed()
         }
 
         // filter click listener
@@ -202,5 +202,10 @@ class LastAddedFragment : Fragment() {
     @SuppressLint("NotifyDataSetChanged")
     private fun notifyAdapter() {
         adapter!!.notifyDataSetChanged()
+    }
+
+    companion object{
+        @JvmStatic
+        fun newInstance() = LastAddedFragment()
     }
 }

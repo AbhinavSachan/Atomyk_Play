@@ -52,6 +52,7 @@ import java.io.File
 import java.util.EnumMap
 
 class TagEditorFragment : Fragment() {
+
     private lateinit var launcher: ActivityResultLauncher<IntentSenderRequest>
     private lateinit var cacheFiles: List<File>
     private val loadingStatus = MutableLiveData<LoadingStatus>()
@@ -109,11 +110,7 @@ class TagEditorFragment : Fragment() {
         }
         b.toolbarTagEditor.setNavigationIcon(R.drawable.ic_back)
         b.toolbarTagEditor.setNavigationOnClickListener {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                requireActivity().onBackInvokedDispatcher
-            } else {
-                requireActivity().onBackPressed()
-            }
+            requireActivity().onBackPressedDispatcher.onBackPressed()
         }
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
             b.editSongGenreTag.visibility = View.GONE
@@ -341,5 +338,8 @@ class TagEditorFragment : Fragment() {
                 cursor?.close()
             }
         }
+
+        @JvmStatic
+        fun newInstance() = TagEditorFragment()
     }
 }

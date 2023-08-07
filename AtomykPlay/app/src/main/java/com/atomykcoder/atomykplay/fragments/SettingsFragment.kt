@@ -6,6 +6,7 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
+import android.provider.Settings
 import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
@@ -39,6 +40,11 @@ import com.atomykcoder.atomykplay.utils.StorageUtil.SettingsStorage
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class SettingsFragment : Fragment(), OnSeekBarChangeListener {
+
+    companion object{
+        @JvmStatic
+        fun newInstance() = SettingsFragment()
+    }
     private lateinit var light_theme_btn: RadioButton
     private lateinit var dark_theme_btn: RadioButton
     private lateinit var songInfoSwi: SwitchCompat
@@ -108,7 +114,7 @@ class SettingsFragment : Fragment(), OnSeekBarChangeListener {
         mainActivity = requireContext() as MainActivity
         val toolbar = view.findViewById<Toolbar>(R.id.toolbar_settings)
         toolbar.setNavigationIcon(R.drawable.ic_back)
-        toolbar.setNavigationOnClickListener { v: View? -> requireActivity().onBackPressed() }
+        toolbar.setNavigationOnClickListener { v: View? -> requireActivity().onBackPressedDispatcher.onBackPressed() }
         //saved values
         dark = settingsStorage!!.loadIsThemeDark()
         showInfo = settingsStorage!!.loadShowInfo()

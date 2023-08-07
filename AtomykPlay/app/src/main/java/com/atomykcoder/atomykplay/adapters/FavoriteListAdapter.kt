@@ -18,7 +18,7 @@ import com.atomykcoder.atomykplay.utils.StorageUtil.SettingsStorage
 
 class FavoriteListAdapter(
     private val context: Context,
-    _musicList: ArrayList<Music?>?,
+    _musicList: ArrayList<Music>?,
     onDragStartListener: OnDragStartListener
 ) : MusicAdapter(), ItemTouchHelperAdapter {
     var mainActivity: MainActivity

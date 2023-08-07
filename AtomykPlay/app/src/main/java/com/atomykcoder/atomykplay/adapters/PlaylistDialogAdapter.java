@@ -46,7 +46,9 @@ public class PlaylistDialogAdapter extends GenericRecyclerAdapter<Playlist> {
         holder.textView.setText(playlist.getName());
         holder.view.setOnClickListener(v -> {
             storageUtil.saveItemInPlayList(music, playlist.getName());
-            mainActivity.addToPlDialog.dismiss();
+            if (mainActivity.addToPlDialog != null) {
+                mainActivity.addToPlDialog.dismiss();
+            }
             Toast.makeText(context, "added to " + playlist.getName(), Toast.LENGTH_SHORT).show();
         });
     }

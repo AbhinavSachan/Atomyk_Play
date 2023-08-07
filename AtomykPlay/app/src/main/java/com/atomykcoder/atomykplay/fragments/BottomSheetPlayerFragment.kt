@@ -89,6 +89,7 @@ import java.util.concurrent.Executors
 
 
 class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragStartListener {
+
     private val lyricsArrayList = ArrayList<String>()
 
     @JvmField
@@ -886,7 +887,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         //encode music
         val encodedMessage = MusicHelper.encode(music)
         bundle.putSerializable("selectedMusic", encodedMessage)
-        val addLyricsFragment = AddLyricsFragment()
+        val addLyricsFragment = AddLyricsFragment.newInstance()
         addLyricsFragment.arguments = bundle
         addLyricsFragment.enterTransition =
             TransitionInflater.from(requireContext())
@@ -1372,7 +1373,9 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         }
     }
 
-    companion object {
+    companion object{
         var playing_same_song = false
+        @JvmStatic
+        fun newInstance() = BottomSheetPlayerFragment()
     }
 }

@@ -70,7 +70,7 @@ public class PlaylistAdapter extends GenericRecyclerAdapter<Playlist> {
             if (fragment3 != null) {
                 fragmentManager.popBackStackImmediate();
             }
-            OpenPlayListFragment openPlayListFragment = new OpenPlayListFragment();
+            OpenPlayListFragment openPlayListFragment = OpenPlayListFragment.newInstance();
             openPlayListFragment.setArguments(bundle);
 
             transaction.add(R.id.sec_container, openPlayListFragment, OPEN_PLAYLIST_FRAGMENT_TAG).addToBackStack(null).commit();

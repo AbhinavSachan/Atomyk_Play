@@ -82,7 +82,7 @@ import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity(), View.OnClickListener,
     NavigationView.OnNavigationItemSelectedListener, DrawerLayout.DrawerListener {
-    var serviceConnection: ServiceConnection = object : ServiceConnection {
+    private var serviceConnection: ServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
             val binder = service as LocalBinder
             media_player_service = binder.service
@@ -111,9 +111,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     var addToPlDialog: AlertDialog? = null
     var plSheet: View? = null
     var playerBottomSheet: View? = null
-    var plItemSelected: Playlist? = null
-    var selectedItem: Music? = null
-    var isChecking = false
+    private var plItemSelected: Playlist? = null
+    private var selectedItem: Music? = null
+    private var isChecking = false
     private var glideBuilt: GlideBuilt? = null
     private var shadowLyrFound: View? = null
     private var shadowOuterSheet: View? = null
@@ -648,7 +648,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
             fragmentManager.findFragmentByTag(LAST_ADDED_FRAGMENT_TAG) as LastAddedFragment?
         val transaction = fragmentManager.beginTransaction()
         if (lastAddedFragment == null) {
-            lastAddedFragment = LastAddedFragment()
+            lastAddedFragment = LastAddedFragment.newInstance()
             lastAddedFragment!!.enterTransition = TransitionInflater.from(this)
                 .inflateTransition(android.R.transition.slide_bottom)
             transaction.replace(R.id.sec_container, lastAddedFragment!!, LAST_ADDED_FRAGMENT_TAG)
@@ -661,7 +661,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         val fragmentManager = supportFragmentManager
         val fragment3 = fragmentManager.findFragmentByTag(PLAYLISTS_FRAGMENT_TAG)
         val transaction = fragmentManager.beginTransaction()
-        playlistFragment = PlaylistsFragment()
+        playlistFragment = PlaylistsFragment.newInstance()
         if (fragment3 == null) {
             playlistFragment!!.enterTransition = TransitionInflater.from(this)
                 .inflateTransition(android.R.transition.slide_right)
@@ -1086,7 +1086,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
      * this function sets up player bottom sheet
      */
     private fun setFragmentInSlider() {
-        bottomSheetPlayerFragment = BottomSheetPlayerFragment()
+        bottomSheetPlayerFragment = BottomSheetPlayerFragment.newInstance()
         val mainPlayerManager = supportFragmentManager
         val transaction = mainPlayerManager.beginTransaction()
         transaction.replace(R.id.player_main_container, bottomSheetPlayerFragment!!)
@@ -1094,7 +1094,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     }
 
     private fun setSearchFragment() {
-        searchFragment = SearchFragment()
+        searchFragment = SearchFragment.newInstance()
         replaceFragment(
             R.id.sec_container,
             searchFragment!!,
@@ -1752,10 +1752,10 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     }
 
     private fun deletePl(playlist: Playlist?) {
-        playlistFragment!!.playlistList.remove(playlist)
+        playlistFragment!!.playlistList?.remove(playlist)
         storageUtil!!.removePlayList(playlist!!.name)
         val arrayList = storageUtil!!.allPlaylist
-        playlistFragment!!.playlistAdapter.updateView(arrayList)
+        playlistFragment!!.playlistAdapter?.updateView(arrayList)
     }
 
     private fun renamePl(playlist: Playlist?, newName: String) {
@@ -1948,7 +1948,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         }
         val encodedMessage = MusicHelper.encode(itemSelected)
         if (fragment2 == null) {
-            val fragment = TagEditorFragment()
+            val fragment = TagEditorFragment.newInstance()
             val bundle = Bundle()
             bundle.putSerializable("currentMusic", encodedMessage)
             fragment.arguments = bundle
@@ -2034,7 +2034,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                 if (fragment1 == null) {
                     replaceFragment(
                         R.id.sec_container,
-                        SettingsFragment(),
+                        SettingsFragment.newInstance(),
                         android.R.transition.slide_right,
                         SETTINGS_FRAGMENT_TAG
                     )
@@ -2048,7 +2048,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                 if (fragment2 == null) {
                     replaceFragment(
                         R.id.sec_container,
-                        PlaylistsFragment(),
+                        PlaylistsFragment.newInstance(),
                         android.R.transition.slide_right,
                         PLAYLISTS_FRAGMENT_TAG
                     )
@@ -2062,7 +2062,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                 if (fragment3 == null) {
                     replaceFragment(
                         R.id.sec_container,
-                        AboutFragment(),
+                        AboutFragment.newInstance(),
                         android.R.transition.slide_right,
                         ABOUT_FRAGMENT_TAG
                     )
@@ -2076,7 +2076,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                 if (fragment6 == null) {
                     replaceFragment(
                         R.id.sec_container,
-                        LastAddedFragment(),
+                        LastAddedFragment.newInstance(),
                         android.R.transition.slide_right,
                         LAST_ADDED_FRAGMENT_TAG
                     )
