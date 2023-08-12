@@ -110,7 +110,7 @@ class TagEditorFragment : Fragment() {
         }
         b.toolbarTagEditor.setNavigationIcon(R.drawable.ic_back)
         b.toolbarTagEditor.setNavigationOnClickListener {
-            requireActivity().onBackPressedDispatcher.onBackPressed()
+            requireActivity().onBackPressed()
         }
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
             b.editSongGenreTag.visibility = View.GONE

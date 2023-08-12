@@ -666,6 +666,20 @@ class StorageUtil
             return sharedPreferences.getBoolean("auto_play", false)
         }
 
+        fun autoPlayBt(b: Boolean) {
+            val sharedPreferences =
+                context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE)
+            val editor = sharedPreferences.edit()
+            editor.putBoolean("auto_playBt", b)
+            editor.apply()
+        }
+
+        fun loadAutoPlayBt(): Boolean {
+            val sharedPreferences =
+                context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE)
+            return sharedPreferences.getBoolean("auto_playBt", false)
+        }
+
         fun keepShuffle(b: Boolean) {
             val sharedPreferences =
                 context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE)

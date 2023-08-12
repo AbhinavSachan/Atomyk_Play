@@ -16,14 +16,14 @@ android {
             keyPassword '123456'
         }
     }
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "com.atomykcoder.atomykplay"
         minSdk 24
-        targetSdk 33
-        versionCode 23
-        versionName '1.5.17'
+        targetSdk 34
+        versionCode 24
+        versionName '1.5.18'
     }
 
     buildTypes {
@@ -93,8 +93,8 @@ dependencies {
     implementation 'com.karumi:dexter:6.2.3'
 
     //navigation bars
-    implementation 'androidx.navigation:navigation-fragment-ktx:2.6.0'
-    implementation 'androidx.navigation:navigation-ui-ktx:2.6.0'
+    implementation 'androidx.navigation:navigation-fragment-ktx:2.7.0'
+    implementation 'androidx.navigation:navigation-ui-ktx:2.7.0'
 
 
     implementation 'com.google.code.gson:gson:2.10.1'

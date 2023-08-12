@@ -33,7 +33,7 @@ class PlaylistsFragment : Fragment() {
         val favBtn = view.findViewById<View>(R.id.pl_favorites_btn)
         val toolbar = view.findViewById<Toolbar>(R.id.toolbar_playlists)
         toolbar.setNavigationIcon(R.drawable.ic_back)
-        toolbar.setNavigationOnClickListener { v: View? -> requireActivity().onBackPressedDispatcher.onBackPressed() }
+        toolbar.setNavigationOnClickListener { v: View? -> requireActivity().onBackPressed() }
         favBtn.setOnClickListener { v: View? ->
             val fragmentManager = requireActivity().supportFragmentManager
             val fragment1 = fragmentManager.findFragmentByTag(MainActivity.FAVORITE_FRAGMENT_TAG)

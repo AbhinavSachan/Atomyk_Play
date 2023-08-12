@@ -31,7 +31,7 @@ class ApplicationClass : Application() {
     }
 
     fun showToast(s: String?) {
-        Toast.makeText(applicationContext, s, Toast.LENGTH_SHORT).show()
+        applicationContext?.let { Toast.makeText(it, s, Toast.LENGTH_SHORT).show() }
     }
 
     companion object {

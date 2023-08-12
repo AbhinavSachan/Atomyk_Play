@@ -17,7 +17,7 @@ class HelpFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_help, container, false)
         val toolbar = view.findViewById<Toolbar>(R.id.toolbar_help)
         toolbar.setNavigationIcon(R.drawable.ic_back)
-        toolbar.setNavigationOnClickListener { requireActivity().onBackPressedDispatcher.onBackPressed() }
+        toolbar.setNavigationOnClickListener { requireActivity().onBackPressed() }
         return view
     }
 

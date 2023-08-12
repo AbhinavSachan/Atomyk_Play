@@ -40,7 +40,7 @@ class AboutFragment : Fragment() {
         val changelog = view.findViewById<TextView>(R.id.changelog)
         val openLicense = view.findViewById<TextView>(R.id.open_license)
         toolbar.setNavigationIcon(R.drawable.ic_back)
-        toolbar.setNavigationOnClickListener { requireActivity().onBackPressedDispatcher.onBackPressed() }
+        toolbar.setNavigationOnClickListener { requireActivity().onBackPressed() }
         val abh = BitmapFactory.decodeResource(resources, R.drawable.abhinav)
         abh_img.setImageBitmap(abh)
         abhinav_card.setCardBackgroundColor(getColor(abh))

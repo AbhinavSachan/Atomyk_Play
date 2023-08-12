@@ -38,7 +38,7 @@ class FavoritesFragment : Fragment(), OnDragStartListener {
         val noPlLayout = view.findViewById<View>(R.id.song_not_found_layout_favorite)
         val toolbar = view.findViewById<Toolbar>(R.id.toolbar_favorites)
         toolbar.setNavigationIcon(R.drawable.ic_back)
-        toolbar.setNavigationOnClickListener { v: View? -> requireActivity().onBackPressedDispatcher.onBackPressed() }
+        toolbar.setNavigationOnClickListener { v: View? -> requireActivity().onBackPressed() }
         recyclerView.setHasFixedSize(true)
         val manager: LinearLayoutManager = LinearLayoutManagerWrapper(context)
         val favList: ArrayList<Music> = storageUtil!!.favouriteList

@@ -76,7 +76,7 @@ class AddLyricsFragment : Fragment() {
                     state = BottomSheetBehavior.STATE_HIDDEN
                 }
             }.run {
-                act.onBackPressedDispatcher.onBackPressed()
+                act.onBackPressed()
             }
         }
         name = if (selectedMusic != null) selectedMusic.name else ""

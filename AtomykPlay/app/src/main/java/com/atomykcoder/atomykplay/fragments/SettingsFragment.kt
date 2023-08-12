@@ -6,7 +6,6 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
-import android.provider.Settings
 import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
@@ -33,7 +32,6 @@ import com.atomykcoder.atomykplay.activities.MainActivity
 import com.atomykcoder.atomykplay.adapters.BeautifyListAdapter
 import com.atomykcoder.atomykplay.adapters.BlockFolderListAdapter
 import com.atomykcoder.atomykplay.customScripts.LinearLayoutManagerWrapper
-import com.atomykcoder.atomykplay.helperFunctions.Logger
 import com.atomykcoder.atomykplay.utils.AndroidUtil.setSystemDrawBehindBars
 import com.atomykcoder.atomykplay.utils.AndroidUtil.setTheme
 import com.atomykcoder.atomykplay.utils.StorageUtil.SettingsStorage
@@ -41,16 +39,18 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class SettingsFragment : Fragment(), OnSeekBarChangeListener {
 
-    companion object{
+    companion object {
         @JvmStatic
         fun newInstance() = SettingsFragment()
     }
+
     private lateinit var light_theme_btn: RadioButton
     private lateinit var dark_theme_btn: RadioButton
     private lateinit var songInfoSwi: SwitchCompat
     private lateinit var artistSwi: SwitchCompat
     private lateinit var extraSwi: SwitchCompat
     private lateinit var autoPlaySwi: SwitchCompat
+    private lateinit var autoPlayBtSwi: SwitchCompat
     private lateinit var keepShuffleSwi: SwitchCompat
     private lateinit var lowerVolSwi: SwitchCompat
     private lateinit var selfStopSwi: SwitchCompat
@@ -68,6 +68,7 @@ class SettingsFragment : Fragment(), OnSeekBarChangeListener {
     private var showArtist = false
     private var showExtra = false
     private var autoPlay = false
+    private var autoPlayBt = false
     private var keepShuffle = false
     private var lowerVol = false
     private var selfStop = false
@@ -114,13 +115,14 @@ class SettingsFragment : Fragment(), OnSeekBarChangeListener {
         mainActivity = requireContext() as MainActivity
         val toolbar = view.findViewById<Toolbar>(R.id.toolbar_settings)
         toolbar.setNavigationIcon(R.drawable.ic_back)
-        toolbar.setNavigationOnClickListener { v: View? -> requireActivity().onBackPressedDispatcher.onBackPressed() }
+        toolbar.setNavigationOnClickListener { v: View? -> requireActivity().onBackPressed() }
         //saved values
         dark = settingsStorage!!.loadIsThemeDark()
         showInfo = settingsStorage!!.loadShowInfo()
         showArtist = settingsStorage!!.loadShowArtist()
         showExtra = settingsStorage!!.loadExtraCon()
         autoPlay = settingsStorage!!.loadAutoPlay()
+        autoPlayBt = settingsStorage!!.loadAutoPlayBt()
         keepShuffle = settingsStorage!!.loadKeepShuffle()
         lowerVol = settingsStorage!!.loadLowerVol()
         selfStop = settingsStorage!!.loadSelfStop()
@@ -158,6 +160,8 @@ class SettingsFragment : Fragment(), OnSeekBarChangeListener {
         //audio settings
         autoPlaySwi = view.findViewById(R.id.autoPlay_swi)
         val autoPlayLl = view.findViewById<View>(R.id.autoPlay_ll)
+        autoPlayBtSwi = view.findViewById(R.id.autoPlayBt_swi)
+        val autoPlayBtLl = view.findViewById<View>(R.id.autoPlayBt_ll)
         keepShuffleSwi = view.findViewById(R.id.keep_shuffle_swi)
         val keepShuffleLl = view.findViewById<View>(R.id.keep_shuffle_ll)
         lowerVolSwi = view.findViewById(R.id.lower_vol_swi)
@@ -190,6 +194,7 @@ class SettingsFragment : Fragment(), OnSeekBarChangeListener {
         artistLl.setOnClickListener { v: View? -> artistSwi.isChecked = !artistSwi.isChecked }
         extraLl.setOnClickListener { v: View? -> extraSwi.isChecked = !extraSwi.isChecked }
         autoPlayLl.setOnClickListener { v: View? -> autoPlaySwi.isChecked = !autoPlaySwi.isChecked }
+        autoPlayBtLl.setOnClickListener { v: View? -> autoPlayBtSwi.isChecked = !autoPlayBtSwi.isChecked }
         keepShuffleLl.setOnClickListener { v: View? ->
             keepShuffleSwi.isChecked = !keepShuffleSwi.isChecked
         }
@@ -230,6 +235,10 @@ class SettingsFragment : Fragment(), OnSeekBarChangeListener {
         autoPlaySwi.setOnCheckedChangeListener { buttonView: CompoundButton?, isChecked: Boolean ->
             autoPlaySwi.isChecked = isChecked
             settingsStorage!!.autoPlay(isChecked)
+        }
+        autoPlayBtSwi.setOnCheckedChangeListener { buttonView: CompoundButton?, isChecked: Boolean ->
+            autoPlayBtSwi.isChecked = isChecked
+            settingsStorage!!.autoPlayBt(isChecked)
         }
         keepShuffleSwi.setOnCheckedChangeListener { buttonView: CompoundButton?, isChecked: Boolean ->
             keepShuffleSwi.isChecked = isChecked

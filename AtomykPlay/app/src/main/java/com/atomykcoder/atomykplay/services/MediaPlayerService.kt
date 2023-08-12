@@ -3,6 +3,7 @@ package com.atomykcoder.atomykplay.services
 import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.bluetooth.BluetoothAdapter
 import android.content.*
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -36,6 +37,7 @@ import com.atomykcoder.atomykplay.events.*
 import com.atomykcoder.atomykplay.fragments.BottomSheetPlayerFragment
 import com.atomykcoder.atomykplay.helperFunctions.AudioFileCover
 import com.atomykcoder.atomykplay.helperFunctions.GlideApp
+import com.atomykcoder.atomykplay.helperFunctions.Logger
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper
 import com.atomykcoder.atomykplay.utils.AndroidUtil.toUnscaledBitmap
 import com.atomykcoder.atomykplay.utils.EqualizerUtil
@@ -101,6 +103,8 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
     private var defaultMetadata: MediaMetadataCompat? = null
     private var initialNotification: Notification? = null
     private var musicNotification: Notification? = null
+    private lateinit var audioFocusRequest: AudioFocusRequest
+
     private val stopMusicReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             stoppedByNotification()
@@ -123,14 +127,36 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
             onPreviousReceived()
         }
     }
-    private lateinit var audioFocusRequest: AudioFocusRequest
     private val pluggedInDevice: BroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            if (intent.action == Intent.ACTION_HEADSET_PLUG) {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent?.action == Intent.ACTION_HEADSET_PLUG) {
                 val state = intent.getIntExtra("state", -1)
-                if (settingsStorage != null) {
-                    if (settingsStorage!!.loadAutoPlay()) {
-                        if (state == 1) {
+                if (state == 1) {
+                    if (settingsStorage?.loadAutoPlay() == true) {
+                        if (!is_playing) {
+                            if (isMediaPlayerNotNull) {
+                                resumeMedia(true)
+                            } else {
+                                try {
+                                    initiateMediaSession()
+                                } catch (e: RemoteException) {
+                                    e.printStackTrace()
+                                }
+                                initiateMediaPlayer()
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
+    }
+    private val bluetoothReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED == intent?.action) {
+                when (intent.getIntExtra(BluetoothAdapter.EXTRA_CONNECTION_STATE, BluetoothAdapter.ERROR)) {
+                    BluetoothAdapter.STATE_CONNECTED -> {
+                        if (settingsStorage?.loadAutoPlayBt() == true) {
                             if (!is_playing) {
                                 if (isMediaPlayerNotNull) {
                                     resumeMedia(true)
@@ -144,6 +170,9 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
                                 }
                             }
                         }
+                    }
+                    BluetoothAdapter.STATE_DISCONNECTED -> {
+                        pauseMedia()
                     }
                 }
             }
@@ -290,7 +319,10 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
             registerReceiver(pluggedInDevice, i, Context.RECEIVER_EXPORTED)
         }
     }
-
+    private fun registerBluetoothReceiver(context: Context) {
+        val intentFilter = IntentFilter(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED)
+        context.registerReceiver(bluetoothReceiver, intentFilter)
+    }
     /**
      * this function updates new music data in notification
      */
@@ -417,6 +449,8 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
                     ).setActions(
                         PlaybackStateCompat.ACTION_SEEK_TO
                                 or PlaybackStateCompat.ACTION_PLAY_PAUSE
+                                or PlaybackStateCompat.ACTION_PLAY
+                                or PlaybackStateCompat.ACTION_PAUSE
                                 or PlaybackStateCompat.ACTION_SKIP_TO_NEXT
                                 or PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
                     )
@@ -433,6 +467,8 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
                     ).setActions(
                         PlaybackStateCompat.ACTION_SEEK_TO
                                 or PlaybackStateCompat.ACTION_PLAY_PAUSE
+                                or PlaybackStateCompat.ACTION_PLAY
+                                or PlaybackStateCompat.ACTION_PAUSE
                                 or PlaybackStateCompat.ACTION_SKIP_TO_NEXT
                                 or PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
                     ).build()
@@ -1149,12 +1185,26 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
                     }
                     if (event.action == KeyEvent.ACTION_DOWN) {
                         when (event.keyCode) {
-                            KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE -> if (isMediaPlaying) pauseMedia() else resumeMedia(
-                                true
-                            )
-
-                            KeyEvent.KEYCODE_MEDIA_NEXT -> onSkipToNext()
-                            KeyEvent.KEYCODE_MEDIA_PREVIOUS -> onSkipToPrevious()
+                            KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE -> {
+                                Logger.normalLog("PLAY_PAUSE")
+                                if (isMediaPlaying) pauseMedia() else resumeMedia(true)
+                            }
+                            KeyEvent.KEYCODE_MEDIA_PLAY -> {
+                                Logger.normalLog("PLAY")
+                                if (!isMediaPlaying) resumeMedia(true)
+                            }
+                            KeyEvent.KEYCODE_MEDIA_PAUSE -> {
+                                Logger.normalLog("PAUSE")
+                                if (isMediaPlaying) pauseMedia()
+                            }
+                            KeyEvent.KEYCODE_MEDIA_NEXT -> {
+                                Logger.normalLog("NEXT")
+                                onSkipToNext()
+                            }
+                            KeyEvent.KEYCODE_MEDIA_PREVIOUS -> {
+                                Logger.normalLog("PREVIOUS")
+                                onSkipToPrevious()
+                            }
                         }
                         return true
                     }

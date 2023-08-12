@@ -70,7 +70,7 @@ class LastAddedFragment : Fragment() {
 
         // back button click listener
         backImageView.setOnClickListener {
-            requireActivity().onBackPressedDispatcher.onBackPressed()
+            requireActivity().onBackPressed()
         }
 
         // filter click listener

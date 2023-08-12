@@ -891,14 +891,14 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                         if (fragment1 != null || fragment2 != null || fragment3 != null || fragment4 != null) {
                             navigationView!!.setCheckedItem(R.id.navigation_home)
                         }
-                        if (MediaPlayerService.is_playing) {
-                            if (fragment1 != null || fragment2 != null || fragment3 != null || fragment4 != null || fragment5 != null || fragment6 != null || fragment7 != null || fragment8 != null || fragment9 != null) {
-                                fragmentManager.popBackStackImmediate()
-                            } else {
-                                moveTaskToBack(false)
-                            }
+                        if (fragment1 != null || fragment2 != null || fragment3 != null || fragment4 != null || fragment5 != null || fragment6 != null || fragment7 != null || fragment8 != null || fragment9 != null) {
+                            fragmentManager.popBackStackImmediate()
                         } else {
-                            super.onBackPressed()
+                            if (MediaPlayerService.is_playing) {
+                                moveTaskToBack(false)
+                            } else {
+                                super.onBackPressed()
+                            }
                         }
                     }
                 }

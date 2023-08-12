@@ -49,7 +49,8 @@
     <string name="audio">Audio</string>
     <string name="auto_play">Auto Play</string>
     <string name="enhance_audio">Enhance Audio</string>
-    <string name="autoplay_des">Start playing immediately when a wired headset is plugged in</string>
+    <string name="autoplay_des">Start playing immediately when a wired device is connected.</string>
+    <string name="autoplayBt_des">Start playing immediately when a bluetooth device is connected.</string>
     <string name="keep_shuffle_on">Keep Shuffle On</string>
     <string name="shuffle_des">Shuffle mode won\'t turn off when playing new song from list</string>
     <string name="lowerVol">Lower Volume</string>

@@ -132,7 +132,7 @@ class SearchFragment : Fragment() {
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-            requireActivity().onBackPressedDispatcher.onBackPressed()
+            requireActivity().onBackPressed()
         }
         recyclerView.setHasFixedSize(true)
         val layoutManager: LinearLayoutManager = LinearLayoutManagerWrapper(requireContext())

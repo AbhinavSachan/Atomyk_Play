@@ -104,13 +104,12 @@
                     android:foreground="?attr/selectableItemBackground"
                     android:orientation="horizontal"
                     android:paddingHorizontal="16dp"
-                    android:paddingVertical="4dp"
-                    android:weightSum="6">
+                    android:paddingVertical="4dp">
 
                     <LinearLayout
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="5"
+                        android:layout_weight="1"
                         android:orientation="vertical">
 
                         <TextView
@@ -139,7 +138,6 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:layout_weight="1"
                         android:gravity="center"
                         android:thumb="@drawable/custom_switch_thumb"
                         app:track="@drawable/custom_track_switch" />
@@ -154,13 +152,12 @@
                     android:foreground="?attr/selectableItemBackground"
                     android:orientation="horizontal"
                     android:paddingHorizontal="16dp"
-                    android:paddingVertical="4dp"
-                    android:weightSum="6">
+                    android:paddingVertical="4dp">
 
                     <LinearLayout
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="5"
+                        android:layout_weight="1"
                         android:orientation="vertical">
 
                         <TextView
@@ -189,7 +186,6 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:layout_weight="1"
                         android:gravity="center"
                         android:thumb="@drawable/custom_switch_thumb"
                         app:track="@drawable/custom_track_switch" />
@@ -204,13 +200,12 @@
                     android:foreground="?attr/selectableItemBackground"
                     android:orientation="horizontal"
                     android:paddingHorizontal="16dp"
-                    android:paddingVertical="4dp"
-                    android:weightSum="6">
+                    android:paddingVertical="4dp">
 
                     <LinearLayout
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="5"
+                        android:layout_weight="1"
                         android:orientation="vertical">
 
                         <TextView
@@ -239,7 +234,6 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:layout_weight="1"
                         android:gravity="center"
                         android:thumb="@drawable/custom_switch_thumb"
                         app:track="@drawable/custom_track_switch" />
@@ -254,13 +248,12 @@
                     android:foreground="?attr/selectableItemBackground"
                     android:orientation="horizontal"
                     android:paddingHorizontal="16dp"
-                    android:paddingVertical="4dp"
-                    android:weightSum="6">
+                    android:paddingVertical="4dp">
 
                     <LinearLayout
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="5"
+                        android:layout_weight="1"
                         android:orientation="vertical">
 
                         <TextView
@@ -289,7 +282,6 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:layout_weight="1"
                         android:gravity="center"
                         android:thumb="@drawable/custom_switch_thumb"
                         app:track="@drawable/custom_track_switch" />
@@ -309,13 +301,12 @@
                         android:foreground="?attr/selectableItemBackground"
                         android:orientation="horizontal"
                         android:paddingHorizontal="16dp"
-                        android:paddingVertical="4dp"
-                        android:weightSum="6">
+                        android:paddingVertical="4dp">
 
                         <LinearLayout
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="5"
+                            android:layout_weight="1"
                             android:orientation="vertical">
 
                             <TextView
@@ -344,7 +335,6 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
-                            android:layout_weight="1"
                             android:gravity="center"
                             android:thumb="@drawable/custom_switch_thumb"
                             app:track="@drawable/custom_track_switch" />
@@ -370,13 +360,12 @@
                     android:foreground="?attr/selectableItemBackground"
                     android:orientation="horizontal"
                     android:paddingHorizontal="16dp"
-                    android:paddingVertical="4dp"
-                    android:weightSum="6">
+                    android:paddingVertical="4dp">
 
                     <LinearLayout
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="5"
+                        android:layout_weight="1"
                         android:orientation="vertical">
 
                         <TextView
@@ -405,7 +394,6 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:layout_weight="1"
                         android:gravity="center"
                         android:thumb="@drawable/custom_switch_thumb"
                         app:track="@drawable/custom_track_switch" />
@@ -420,13 +408,12 @@
                     android:foreground="?attr/selectableItemBackground"
                     android:orientation="horizontal"
                     android:paddingHorizontal="16dp"
-                    android:paddingVertical="4dp"
-                    android:weightSum="6">
+                    android:paddingVertical="4dp">
 
                     <LinearLayout
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="5"
+                        android:layout_weight="1"
                         android:orientation="vertical">
 
                         <TextView
@@ -455,7 +442,6 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:layout_weight="1"
                         android:gravity="center"
                         android:thumb="@drawable/custom_switch_thumb"
                         app:track="@drawable/custom_track_switch" />
@@ -470,13 +456,12 @@
                     android:foreground="?attr/selectableItemBackground"
                     android:orientation="horizontal"
                     android:paddingHorizontal="16dp"
-                    android:paddingVertical="4dp"
-                    android:weightSum="6">
+                    android:paddingVertical="4dp">
 
                     <LinearLayout
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="5"
+                        android:layout_weight="1"
                         android:orientation="vertical">
 
                         <TextView
@@ -505,7 +490,6 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:layout_weight="1"
                         android:gravity="center"
                         android:thumb="@drawable/custom_switch_thumb"
                         app:track="@drawable/custom_track_switch" />
@@ -533,35 +517,37 @@
                     android:textStyle="bold" />
 
                 <LinearLayout
-                    android:id="@+id/autoPlay_ll"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:clickable="true"
                     android:focusable="true"
                     android:foreground="?attr/selectableItemBackground"
-                    android:orientation="horizontal"
+                    android:orientation="vertical"
                     android:paddingHorizontal="16dp"
-                    android:paddingVertical="4dp"
-                    android:weightSum="6">
+                    android:paddingVertical="4dp">
 
-                    <LinearLayout
+                    <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="5"
-                        android:orientation="vertical">
+                        android:fontFamily="sans-serif"
+                        android:paddingVertical="4dp"
+                        android:text="@string/auto_play"
+                        android:textColor="@color/text_color"
+                        android:textSize="@dimen/d_18sp" />
+
+                    <LinearLayout
+                        android:id="@+id/autoPlay_ll"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="?attr/selectableItemBackground"
+                        android:orientation="horizontal">
 
                         <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="sans-serif"
-                            android:paddingVertical="4dp"
-                            android:text="@string/auto_play"
-                            android:textColor="@color/text_color"
-                            android:textSize="@dimen/d_18sp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
                             android:fontFamily="sans-serif"
                             android:paddingStart="2dp"
                             android:paddingEnd="16dp"
@@ -569,17 +555,46 @@
                             android:textColor="@color/sub_text_grey"
                             android:textSize="@dimen/d_15sp" />
 
+                        <androidx.appcompat.widget.SwitchCompat
+                            android:id="@+id/autoPlay_swi"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:gravity="center"
+                            android:thumb="@drawable/custom_switch_thumb"
+                            app:track="@drawable/custom_track_switch" />
                     </LinearLayout>
 
-                    <androidx.appcompat.widget.SwitchCompat
-                        android:id="@+id/autoPlay_swi"
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:id="@+id/autoPlayBt_ll"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:thumb="@drawable/custom_switch_thumb"
-                        app:track="@drawable/custom_track_switch" />
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="?attr/selectableItemBackground"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:fontFamily="sans-serif"
+                            android:paddingStart="2dp"
+                            android:paddingEnd="16dp"
+                            android:text="@string/autoplayBt_des"
+                            android:textColor="@color/sub_text_grey"
+                            android:textSize="@dimen/d_15sp" />
+
+                        <androidx.appcompat.widget.SwitchCompat
+                            android:id="@+id/autoPlayBt_swi"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:gravity="center"
+                            android:thumb="@drawable/custom_switch_thumb"
+                            app:track="@drawable/custom_track_switch" />
+                    </LinearLayout>
+
                 </LinearLayout>
 
                 <LinearLayout
@@ -596,13 +611,12 @@
                         android:foreground="?attr/selectableItemBackground"
                         android:orientation="horizontal"
                         android:paddingHorizontal="16dp"
-                        android:paddingVertical="4dp"
-                        android:weightSum="6">
+                        android:paddingVertical="4dp">
 
                         <LinearLayout
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="5"
+                            android:layout_weight="1"
                             android:orientation="vertical">
 
                             <TextView
@@ -631,7 +645,6 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
-                            android:layout_weight="1"
                             android:gravity="center"
                             android:thumb="@drawable/custom_switch_thumb"
                             app:track="@drawable/custom_track_switch" />
@@ -639,10 +652,10 @@
 
                     <LinearLayout
                         android:id="@+id/level_layout"
-                        android:visibility="gone"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical">
+                        android:orientation="vertical"
+                        android:visibility="gone">
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -703,13 +716,12 @@
                     android:foreground="?attr/selectableItemBackground"
                     android:orientation="horizontal"
                     android:paddingHorizontal="16dp"
-                    android:paddingVertical="4dp"
-                    android:weightSum="6">
+                    android:paddingVertical="4dp">
 
                     <LinearLayout
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="5"
+                        android:layout_weight="1"
                         android:orientation="vertical">
 
                         <TextView
@@ -738,7 +750,6 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:layout_weight="1"
                         android:gravity="center"
                         android:thumb="@drawable/custom_switch_thumb"
                         app:track="@drawable/custom_track_switch" />
@@ -753,13 +764,12 @@
                     android:foreground="?attr/selectableItemBackground"
                     android:orientation="horizontal"
                     android:paddingHorizontal="16dp"
-                    android:paddingVertical="4dp"
-                    android:weightSum="6">
+                    android:paddingVertical="4dp">
 
                     <LinearLayout
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="5"
+                        android:layout_weight="1"
                         android:orientation="vertical">
 
                         <TextView
@@ -788,7 +798,6 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:layout_weight="1"
                         android:gravity="center"
                         android:thumb="@drawable/custom_switch_thumb"
                         app:track="@drawable/custom_track_switch" />
@@ -803,13 +812,12 @@
                     android:foreground="?attr/selectableItemBackground"
                     android:orientation="horizontal"
                     android:paddingHorizontal="16dp"
-                    android:paddingVertical="4dp"
-                    android:weightSum="6">
+                    android:paddingVertical="4dp">
 
                     <LinearLayout
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="5"
+                        android:layout_weight="1"
                         android:orientation="vertical">
 
                         <TextView
@@ -838,7 +846,6 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:layout_weight="1"
                         android:gravity="center"
                         android:thumb="@drawable/custom_switch_thumb"
                         app:track="@drawable/custom_track_switch" />
@@ -853,13 +860,12 @@
                     android:foreground="?attr/selectableItemBackground"
                     android:orientation="horizontal"
                     android:paddingHorizontal="16dp"
-                    android:paddingVertical="4dp"
-                    android:weightSum="6">
+                    android:paddingVertical="4dp">
 
                     <LinearLayout
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="5"
+                        android:layout_weight="1"
                         android:orientation="vertical">
 
                         <TextView
@@ -888,7 +894,6 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:layout_weight="1"
                         android:gravity="center"
                         android:thumb="@drawable/custom_switch_thumb"
                         app:track="@drawable/custom_track_switch" />

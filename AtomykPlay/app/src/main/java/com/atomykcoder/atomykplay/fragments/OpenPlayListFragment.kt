@@ -55,7 +55,7 @@ class OpenPlayListFragment : Fragment(), OnDragStartListener {
         val imageView = view.findViewById<ImageView>(R.id.toolbar_cover_opl)
         val toolbar = view.findViewById<Toolbar>(R.id.toolbar_opl)
         toolbar.setNavigationIcon(R.drawable.ic_back)
-        toolbar.setNavigationOnClickListener { v: View? -> requireActivity().onBackPressedDispatcher.onBackPressed() }
+        toolbar.setNavigationOnClickListener { v: View? -> requireActivity().onBackPressed() }
         recyclerView.setHasFixedSize(true)
         val manager: LinearLayoutManager = LinearLayoutManagerWrapper(context)
         var musicList: ArrayList<Music?>? = null
