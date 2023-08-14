@@ -215,7 +215,7 @@ class TagEditorFragment : Fragment() {
     }
 
     private fun showToast(s: String?) {
-        (requireActivity().application as ApplicationClass).showToast(s)
+        ApplicationClass.instance.showToast(s)
     }
 
     private fun saveMusicChanges(music: Music?) {
@@ -300,7 +300,7 @@ class TagEditorFragment : Fragment() {
 
                 LoadingStatus.SUCCESS -> {
                     showToast("Change's may be applied after restart")
-                    (requireActivity() as MainActivity).checkForUpdateList(true)
+                    (context as MainActivity).checkForUpdateList(true)
                     b.progressBarTag.visibility = View.GONE
                     fragmentManager.popBackStack()
                 }

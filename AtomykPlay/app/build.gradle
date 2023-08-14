@@ -22,8 +22,8 @@ android {
         applicationId "com.atomykcoder.atomykplay"
         minSdk 24
         targetSdk 34
-        versionCode 24
-        versionName '1.5.18'
+        versionCode 25
+        versionName '1.6.18'
     }
 
     buildTypes {
@@ -67,6 +67,8 @@ android {
 }
 
 dependencies {
+    //this here is for memory leaks
+//    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.12'
 
     //event bus implementations
     implementation 'org.greenrobot:eventbus:3.3.1'

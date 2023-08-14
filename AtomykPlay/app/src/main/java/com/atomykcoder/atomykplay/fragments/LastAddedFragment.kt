@@ -31,9 +31,7 @@ class LastAddedFragment : Fragment() {
     private val secondOptionValue = 90
     private val thirdOptionValue = 180
     private val fourthOptionValue = 360
-
-    @JvmField
-    var adapter: MusicMainAdapter? = null
+    private var adapter: MusicMainAdapter? = null
     private var lastAddedMusicList: ArrayList<Music>? = null
     private var filterDialog: Dialog? = null
     private var songCountTv: TextView? = null
@@ -42,6 +40,11 @@ class LastAddedFragment : Fragment() {
     private var progressDialog: ProgressBar? = null
     private val coroutineMainScope = CoroutineScope(Dispatchers.Main)
     private val coroutineDefaultScope = CoroutineScope(Dispatchers.Default)
+
+    fun removeItems(selectedItem: Music?) {
+        selectedItem?.let { adapter?.removeItem(it) }
+    }
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -52,6 +55,7 @@ class LastAddedFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_last_added, container, false)
 
         //get references
+
         recyclerView = view.findViewById(R.id.last_added_recycle_view)
         //set recyclerview and adapter
         recyclerView.setHasFixedSize(true)

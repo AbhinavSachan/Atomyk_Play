@@ -49,7 +49,7 @@ public class BlockFolderListAdapter extends GenericRecyclerAdapter<String> {
 
     private void removeFromList(String name) {
         int pos = super.items.indexOf(name);
-        MainActivity mainActivity = (MainActivity) context;
+        MainActivity mainActivity = ((MainActivity) context);
         settingsStorage.removeFromBlackList(name);
         super.items.remove(name);
 

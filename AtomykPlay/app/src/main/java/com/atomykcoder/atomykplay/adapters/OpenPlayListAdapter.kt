@@ -31,7 +31,7 @@ class OpenPlayListAdapter(
 
     init {
         super.items = items
-        mainActivity = context as MainActivity
+        mainActivity = (context as MainActivity)
         this.onDragStartListener = onDragStartListener
         storage = StorageUtil(context)
         settingsStorage = SettingsStorage(context)

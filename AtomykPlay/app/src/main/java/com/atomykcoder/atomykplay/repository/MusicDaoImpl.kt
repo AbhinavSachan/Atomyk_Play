@@ -25,7 +25,7 @@ class MusicDaoImpl : MusicDaoI {
         var selection: String? = null
         if (!settingsStorage.loadScanAllMusic()) {
             //if selection is IS_MUSIC, ringtones will not appear in the list
-            selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0"
+            selection = "${MediaStore.Audio.Media.IS_MUSIC} != 0"
         }
         val dataList = ArrayList<Music>()
         val projection: Array<String> = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {

@@ -7,6 +7,10 @@ import android.os.Build
 import android.widget.Toast
 
 class ApplicationClass : Application() {
+    init {
+        instance = this
+    }
+
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
@@ -36,5 +40,7 @@ class ApplicationClass : Application() {
 
     companion object {
         const val CHANNEL_ID = "MUSIC_NOTIFICATION"
+        lateinit var instance: ApplicationClass
+            private set
     }
 }

@@ -40,8 +40,9 @@ public class PlaylistDialogAdapter extends GenericRecyclerAdapter<Playlist> {
     public void onBindViewHolder(@NonNull GenericViewHolder<Playlist> _holder, int position) {
         PlayListDialogViewHolder holder = (PlayListDialogViewHolder) _holder;
 
+        assert super.items != null;
         Playlist playlist = super.items.get(position);
-        MainActivity mainActivity = (MainActivity) context;
+        MainActivity mainActivity = ((MainActivity) context);
         StorageUtil storageUtil = new StorageUtil(context);
         holder.textView.setText(playlist.getName());
         holder.view.setOnClickListener(v -> {

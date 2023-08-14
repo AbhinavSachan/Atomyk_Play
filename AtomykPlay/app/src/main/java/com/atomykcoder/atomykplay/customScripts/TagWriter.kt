@@ -194,5 +194,5 @@ class TagWriter {
 }
 
 private fun Context.showToast(s: String) {
-    (this as ApplicationClass).showToast(s)
+    ApplicationClass.instance.showToast(s)
 }

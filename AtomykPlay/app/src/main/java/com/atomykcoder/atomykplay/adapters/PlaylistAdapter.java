@@ -1,6 +1,6 @@
 package com.atomykcoder.atomykplay.adapters;
 
-import static com.atomykcoder.atomykplay.activities.MainActivity.OPEN_PLAYLIST_FRAGMENT_TAG;
+import static com.atomykcoder.atomykplay.constants.FragmentTags.OPEN_PLAYLIST_FRAGMENT_TAG;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -29,11 +29,13 @@ import java.util.ArrayList;
 public class PlaylistAdapter extends GenericRecyclerAdapter<Playlist> {
     private final Context context;
     private final GlideBuilt glideBuilt;
+    private final MainActivity mainActivity;
 
     public PlaylistAdapter(Context context, ArrayList<Playlist> arrayList) {
         this.context = context;
         super.items = arrayList;
         glideBuilt = new GlideBuilt(context);
+        mainActivity = ((MainActivity) context);
     }
 
     @NonNull
@@ -59,7 +61,7 @@ public class PlaylistAdapter extends GenericRecyclerAdapter<Playlist> {
 
         holder.cardView.setOnClickListener(v -> {
             //opening fragment when clicked on playlist
-            FragmentManager fragmentManager = ((MainActivity) context).getSupportFragmentManager();
+            FragmentManager fragmentManager = mainActivity.getSupportFragmentManager();
 
             Fragment fragment3 = fragmentManager.findFragmentByTag(OPEN_PLAYLIST_FRAGMENT_TAG);
             FragmentTransaction transaction = fragmentManager.beginTransaction();
@@ -77,19 +79,21 @@ public class PlaylistAdapter extends GenericRecyclerAdapter<Playlist> {
 
         });
 
-        holder.optImg.setOnClickListener(v -> ((MainActivity) context).openPlOptionMenu(currentItem));
+        holder.optImg.setOnClickListener(v -> mainActivity.openPlOptionMenu(currentItem));
 
     }
 
     @Override
     public int getItemCount() {
-        return super.items.size();
+        return super.items != null ? super.items.size() : 0;
     }
 
     @SuppressLint("NotifyDataSetChanged")
     public void updateView(ArrayList<Playlist> _arrayList) {
-        super.items.clear();
-        super.items.addAll(_arrayList);
+        if (super.items != null) {
+            super.items.clear();
+            super.items.addAll(_arrayList);
+        }
         notifyDataSetChanged();
     }
 

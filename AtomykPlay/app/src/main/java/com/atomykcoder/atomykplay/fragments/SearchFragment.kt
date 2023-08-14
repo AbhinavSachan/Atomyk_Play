@@ -1,6 +1,5 @@
 package com.atomykcoder.atomykplay.fragments
 
-import android.R.id.edit
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.*
@@ -42,8 +41,7 @@ class SearchFragment : Fragment() {
     private lateinit var manager: InputMethodManager
     private lateinit var searchView: EditText
 
-    @JvmField
-    var adapter: MusicMainAdapter? = null
+    private var adapter: MusicMainAdapter? = null
     private var radioGroup: RadioGroup? = null
     private var searchedMusicList: ArrayList<Music> = ArrayList()
     private var songButton: RadioButton? = null
@@ -53,6 +51,10 @@ class SearchFragment : Fragment() {
     private var isSearching = false
     private var noResultAnim: LottieAnimationView? = null
     private val searchList = MutableLiveData<ArrayList<Music>>()
+
+    fun removeItems(selectedItem: Music?) {
+        selectedItem?.let { adapter?.removeItem(it) }
+    }
 
     private fun setSearchList(list: ArrayList<Music>) {
         searchList.value = list
@@ -101,9 +103,7 @@ class SearchFragment : Fragment() {
         genreButton = view.findViewById(R.id.genre_button)
         radioGroup = view.findViewById(R.id.radio_group)
         noResultAnim = view.findViewById(R.id.noResultAnim)
-        val dataList = MusicRepo.instance?.initialMusicList
-        manager =
-            requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        manager = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         searchView = view.findViewById(R.id.search_view_search)
         val closeSearch = view.findViewById<ImageView>(R.id.close_search_btn)
 
@@ -115,7 +115,7 @@ class SearchFragment : Fragment() {
                 if (!isSearching) {
                     handler.postDelayed({
                         isSearching = true
-                        handleSearchEvent(query.toString().lowercase(Locale.getDefault()), dataList)
+                        handleSearchEvent(query.toString().lowercase(Locale.getDefault()), MusicRepo.instance?.initialMusicList)
                     }, 200)
                 }
             }

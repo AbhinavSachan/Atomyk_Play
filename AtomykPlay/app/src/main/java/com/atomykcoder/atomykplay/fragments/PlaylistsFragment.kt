@@ -13,15 +13,26 @@ import androidx.recyclerview.widget.RecyclerView
 import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.activities.MainActivity
 import com.atomykcoder.atomykplay.adapters.PlaylistAdapter
+import com.atomykcoder.atomykplay.constants.FragmentTags.FAVORITE_FRAGMENT_TAG
 import com.atomykcoder.atomykplay.customScripts.GridSpacing
 import com.atomykcoder.atomykplay.dataModels.Playlist
 import com.atomykcoder.atomykplay.utils.StorageUtil
 
 class PlaylistsFragment : Fragment() {
 
-    var noPlLayout: View? = null
-    var playlistList: ArrayList<Playlist>? = null
-    var playlistAdapter: PlaylistAdapter? = null
+    private var noPlLayout: View? = null
+    private var playlistList: ArrayList<Playlist>? = null
+    private var playlistAdapter: PlaylistAdapter? = null
+
+    fun removeItems(playlist: Playlist?) {
+        playlistList?.remove(playlist)
+    }
+
+    fun updateItems(list: ArrayList<Playlist>?) {
+        playlistAdapter?.updateView(list)
+    }
+
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -36,13 +47,13 @@ class PlaylistsFragment : Fragment() {
         toolbar.setNavigationOnClickListener { v: View? -> requireActivity().onBackPressed() }
         favBtn.setOnClickListener { v: View? ->
             val fragmentManager = requireActivity().supportFragmentManager
-            val fragment1 = fragmentManager.findFragmentByTag(MainActivity.FAVORITE_FRAGMENT_TAG)
+            val fragment1 = fragmentManager.findFragmentByTag(FAVORITE_FRAGMENT_TAG)
             val transaction = fragmentManager.beginTransaction()
             if (fragment1 == null) {
                 val fragment = FavoritesFragment.newInstance()
                 fragment.enterTransition = TransitionInflater.from(requireContext())
                     .inflateTransition(android.R.transition.slide_right)
-                transaction.add(R.id.sec_container, fragment, MainActivity.FAVORITE_FRAGMENT_TAG)
+                transaction.add(R.id.sec_container, fragment, FAVORITE_FRAGMENT_TAG)
                     .addToBackStack(null).commit()
             }
         }
@@ -63,10 +74,11 @@ class PlaylistsFragment : Fragment() {
         return view
     }
 
-    companion object{
+    companion object {
         @JvmStatic
         fun newInstance() = PlaylistsFragment()
     }
+
     override fun onDestroyView() {
         noPlLayout = null
         playlistList = null

@@ -93,8 +93,8 @@ class SettingsFragment : Fragment(), OnSeekBarChangeListener {
             val pathUri = convertTreeUriToPathUri(treePath)
             if (pathUri != null) {
                 //save path in blacklist storage
-                settingsStorage!!.saveInBlackList(pathUri)
-                mainActivity!!.checkForUpdateList(true)
+                settingsStorage?.saveInBlackList(pathUri)
+                mainActivity?.checkForUpdateList(true)
             }
         }
     }
@@ -112,7 +112,7 @@ class SettingsFragment : Fragment(), OnSeekBarChangeListener {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_settings, container, false)
         settingsStorage = SettingsStorage(requireContext())
-        mainActivity = requireContext() as MainActivity
+        mainActivity = context as MainActivity
         val toolbar = view.findViewById<Toolbar>(R.id.toolbar_settings)
         toolbar.setNavigationIcon(R.drawable.ic_back)
         toolbar.setNavigationOnClickListener { v: View? -> requireActivity().onBackPressed() }
@@ -194,7 +194,9 @@ class SettingsFragment : Fragment(), OnSeekBarChangeListener {
         artistLl.setOnClickListener { v: View? -> artistSwi.isChecked = !artistSwi.isChecked }
         extraLl.setOnClickListener { v: View? -> extraSwi.isChecked = !extraSwi.isChecked }
         autoPlayLl.setOnClickListener { v: View? -> autoPlaySwi.isChecked = !autoPlaySwi.isChecked }
-        autoPlayBtLl.setOnClickListener { v: View? -> autoPlayBtSwi.isChecked = !autoPlayBtSwi.isChecked }
+        autoPlayBtLl.setOnClickListener { v: View? ->
+            autoPlayBtSwi.isChecked = !autoPlayBtSwi.isChecked
+        }
         keepShuffleLl.setOnClickListener { v: View? ->
             keepShuffleSwi.isChecked = !keepShuffleSwi.isChecked
         }
@@ -268,12 +270,12 @@ class SettingsFragment : Fragment(), OnSeekBarChangeListener {
                 settingsStorage?.clearReplacingTags()
             }
             addBeautifyTags.isEnabled = isChecked
-            mainActivity?.checkForUpdateList(true)
+            mainActivity?.checkForUpdateList(false)
         }
         scanAllSwi.setOnCheckedChangeListener { buttonView: CompoundButton?, isChecked: Boolean ->
             scanAllSwi.isChecked = isChecked
             settingsStorage?.scanAllMusic(isChecked)
-            mainActivity?.checkForUpdateList(true)
+            mainActivity?.checkForUpdateList(false)
         }
 
         bassLevelSeekbar.setOnSeekBarChangeListener(this)
@@ -286,10 +288,7 @@ class SettingsFragment : Fragment(), OnSeekBarChangeListener {
             setSeekLayout(isChecked, levelLayout)
             if (isChecked) {
                 MainActivity.media_player_service?.apply {
-                    initiateEqualizerUtil().run {
-                        setBassLevel(settingsStorage!!.loadBassLevel())
-                        setVirtualizerStrength(settingsStorage!!.loadVirLevel())
-                    }
+                    openEqualizer(true)
                 }
             } else {
                 MainActivity.media_player_service?.disableEqualizerUtil()
@@ -486,38 +485,34 @@ class SettingsFragment : Fragment(), OnSeekBarChangeListener {
         builder.setNegativeButton("OK", null)
         //finally show the blacklistDialog
         blacklistDialog = builder.create()
-        blacklistDialog!!.show()
+        blacklistDialog?.show()
     }
 
     private fun showToast(s: String) {
-        (requireContext().applicationContext as ApplicationClass).showToast(s)
+        ApplicationClass.instance.showToast(s)
     }
 
     private fun hideExtra(v: Boolean) {
-        assert(mainActivity!!.bottomSheetPlayerFragment!!.miniNext != null)
         if (v) {
-            mainActivity!!.bottomSheetPlayerFragment!!.miniNext!!.visibility = View.VISIBLE
+            mainActivity?.bottomSheetPlayerFragment?.setMiniNextVisibility(View.VISIBLE)
         } else {
-            mainActivity!!.bottomSheetPlayerFragment!!.miniNext!!.visibility = View.GONE
+            mainActivity?.bottomSheetPlayerFragment?.setMiniNextVisibility(View.GONE)
         }
     }
 
     private fun hideArtist(v: Boolean) {
-        assert(mainActivity!!.bottomSheetPlayerFragment!!.miniArtistText != null)
         if (v) {
-            mainActivity!!.bottomSheetPlayerFragment!!.miniArtistText!!.visibility =
-                View.VISIBLE
+            mainActivity?.bottomSheetPlayerFragment?.setMiniArtistVisibility(View.VISIBLE)
         } else {
-            mainActivity!!.bottomSheetPlayerFragment!!.miniArtistText!!.visibility = View.GONE
+            mainActivity?.bottomSheetPlayerFragment?.setMiniArtistVisibility(View.GONE)
         }
     }
 
     private fun hideInfo(v: Boolean) {
-        assert(mainActivity!!.bottomSheetPlayerFragment!!.infoLayout != null)
         if (v) {
-            mainActivity!!.bottomSheetPlayerFragment!!.infoLayout!!.visibility = View.VISIBLE
+            mainActivity?.bottomSheetPlayerFragment?.setInfoLayoutVisibility(View.VISIBLE)
         } else {
-            mainActivity!!.bottomSheetPlayerFragment!!.infoLayout!!.visibility = View.GONE
+            mainActivity?.bottomSheetPlayerFragment?.setInfoLayoutVisibility(View.GONE)
         }
     }
 
@@ -529,6 +524,7 @@ class SettingsFragment : Fragment(), OnSeekBarChangeListener {
         artistSwi.isChecked = showArtist
         extraSwi.isChecked = showExtra
         autoPlaySwi.isChecked = autoPlay
+        autoPlayBtSwi.isChecked = autoPlayBt
         keepShuffleSwi.isChecked = keepShuffle
         lowerVolSwi.isChecked = lowerVol
         selfStopSwi.isChecked = selfStop
@@ -578,12 +574,12 @@ class SettingsFragment : Fragment(), OnSeekBarChangeListener {
     private fun setDark(checkedId: Int) {
         when (checkedId) {
             R.id.light_button -> {
-                setTheme(requireActivity().window, false)
+                setTheme(mainActivity?.window, false)
                 dark = false
             }
 
             R.id.dark_button -> {
-                setTheme(requireActivity().window, true)
+                setTheme(mainActivity?.window, true)
                 dark = true
             }
         }

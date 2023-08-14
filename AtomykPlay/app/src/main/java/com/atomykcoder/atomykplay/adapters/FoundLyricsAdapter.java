@@ -1,6 +1,6 @@
 package com.atomykcoder.atomykplay.adapters;
 
-import static com.atomykcoder.atomykplay.activities.MainActivity.ADD_LYRICS_FRAGMENT_TAG;
+import static com.atomykcoder.atomykplay.constants.FragmentTags.ADD_LYRICS_FRAGMENT_TAG;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -27,7 +27,7 @@ public class FoundLyricsAdapter extends RecyclerView.Adapter<FoundLyricsViewHold
         titles = _titles;
         sampleLyrics = _sampleLyrics;
         urls = _urls;
-        mainActivity = (MainActivity) _context;
+        mainActivity = ((MainActivity) _context);
     }
 
     @NonNull

@@ -30,7 +30,7 @@ class FavoriteListAdapter(
     init {
         super.items = _musicList
         this.onDragStartListener = onDragStartListener
-        mainActivity = context as MainActivity
+        mainActivity = (context as MainActivity)
         storage = StorageUtil(context)
         settingsStorage = SettingsStorage(context)
     }

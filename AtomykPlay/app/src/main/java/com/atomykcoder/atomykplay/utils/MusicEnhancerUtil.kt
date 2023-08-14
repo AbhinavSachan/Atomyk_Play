@@ -2,9 +2,8 @@ package com.atomykcoder.atomykplay.utils
 
 import android.media.audiofx.Equalizer
 import android.media.audiofx.Virtualizer
-import com.atomykcoder.atomykplay.helperFunctions.Logger
 
-class EqualizerUtil(audioSessionId: Int) {
+class MusicEnhancerUtil(audioSessionId: Int) {
 
     private var equalizer: Equalizer? = null
     private var virtualizer: Virtualizer? = null

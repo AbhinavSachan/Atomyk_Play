@@ -18,7 +18,7 @@ import com.atomykcoder.atomykplay.utils.StorageUtil
 import com.atomykcoder.atomykplay.utils.StorageUtil.SettingsStorage
 
 class MusicMainAdapter(var context: Context, musicList: ArrayList<Music>?) : MusicAdapter() {
-    private var mainActivity: MainActivity = context as MainActivity
+    private var mainActivity = context as MainActivity
     private var storage: StorageUtil = StorageUtil(context)
     private var settingsStorage: SettingsStorage = SettingsStorage(context)
     private var musicRepo: MusicRepo = MusicRepo.instance!!
@@ -101,7 +101,7 @@ class MusicMainAdapter(var context: Context, musicList: ArrayList<Music>?) : Mus
             }
             notifyItemRangeChanged(position, super.items!!.size - (position + 1))
             notifyItemRemoved(position)
-            mainActivity.bottomSheetPlayerFragment?.queueAdapter?.removeItem(item)
+            mainActivity.bottomSheetPlayerFragment?.removeMusicFromQueue(item)
         }
 
     }

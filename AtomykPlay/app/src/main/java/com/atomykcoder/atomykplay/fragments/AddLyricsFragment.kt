@@ -16,7 +16,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.activities.MainActivity
-import com.atomykcoder.atomykplay.activities.MainActivity.Companion.ADD_LYRICS_FRAGMENT_TAG
+import com.atomykcoder.atomykplay.constants.FragmentTags.ADD_LYRICS_FRAGMENT_TAG
 import com.atomykcoder.atomykplay.dataModels.LRCMap
 import com.atomykcoder.atomykplay.events.RunnableSyncLyricsEvent
 import com.atomykcoder.atomykplay.helperFunctions.FetchLyrics
@@ -56,13 +56,13 @@ class AddLyricsFragment : Fragment() {
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_add_lyrics, container, false)
         val decodeMessage = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            requireArguments().getSerializable("selectedMusic",String::class.java)
+            requireArguments().getSerializable("selectedMusic", String::class.java)
         } else {
             requireArguments().getSerializable("selectedMusic") as String
         }
         val selectedMusic = MusicHelper.decode(decodeMessage)
         editTextLyrics = view.findViewById(R.id.edit_lyrics)
-        mainActivity = WeakReference(requireActivity() as MainActivity)
+        mainActivity = WeakReference(context as? MainActivity)
         val saveBtn = view.findViewById<Button>(R.id.btn_save)
         btnFind = view.findViewById(R.id.btn_find)
         progressBar = view.findViewById(R.id.progress_lyrics)
@@ -70,13 +70,12 @@ class AddLyricsFragment : Fragment() {
         val toolbar = view.findViewById<Toolbar>(R.id.toolbar_add_lyric)
         toolbar.setNavigationIcon(R.drawable.ic_back)
         toolbar.setNavigationOnClickListener {
-            val act = requireActivity() as MainActivity
-            act.lyricsListBehavior?.apply {
+            mainActivity?.get()?.lyricsListBehavior?.apply {
                 if (state == BottomSheetBehavior.STATE_COLLAPSED || state == BottomSheetBehavior.STATE_EXPANDED) {
                     state = BottomSheetBehavior.STATE_HIDDEN
                 }
             }.run {
-                act.onBackPressed()
+                mainActivity?.get()?.onBackPressed()
             }
         }
         name = if (selectedMusic != null) selectedMusic.name else ""
@@ -213,7 +212,7 @@ class AddLyricsFragment : Fragment() {
         }
     }
 
-    companion object{
+    companion object {
         @JvmStatic
         fun newInstance() = AddLyricsFragment()
     }

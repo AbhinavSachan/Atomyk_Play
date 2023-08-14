@@ -38,7 +38,7 @@ public class MusicLyricsAdapter extends GenericRecyclerAdapter<String> {
         MusicLyricsViewHolder holder = (MusicLyricsViewHolder) _holder;
         holder.textView.setOnClickListener(v -> {
             try {
-                Objects.requireNonNull(((MainActivity) context).bottomSheetPlayerFragment).skipToPosition(holder.getAbsoluteAdapterPosition());
+                (Objects.requireNonNull(((MainActivity) context).bottomSheetPlayerFragment)).skipToPosition(holder.getAbsoluteAdapterPosition());
             } catch (Exception e) {
                 e.printStackTrace();
             }

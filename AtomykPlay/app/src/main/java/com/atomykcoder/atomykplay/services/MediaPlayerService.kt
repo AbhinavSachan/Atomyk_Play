@@ -3,7 +3,7 @@ package com.atomykcoder.atomykplay.services
 import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent
-import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
 import android.content.*
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -21,6 +21,7 @@ import android.support.v4.media.session.PlaybackStateCompat
 import android.telephony.PhoneStateListener
 import android.telephony.TelephonyManager
 import android.view.KeyEvent
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
@@ -30,6 +31,11 @@ import com.atomykcoder.atomykplay.BuildConfig
 import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.activities.MainActivity
 import com.atomykcoder.atomykplay.classes.PhoneStateCallback
+import com.atomykcoder.atomykplay.constants.BroadcastStrings.BROADCAST_PAUSE_PLAY_MUSIC
+import com.atomykcoder.atomykplay.constants.BroadcastStrings.BROADCAST_PLAY_NEW_MUSIC
+import com.atomykcoder.atomykplay.constants.BroadcastStrings.BROADCAST_PLAY_NEXT_MUSIC
+import com.atomykcoder.atomykplay.constants.BroadcastStrings.BROADCAST_PLAY_PREVIOUS_MUSIC
+import com.atomykcoder.atomykplay.constants.BroadcastStrings.BROADCAST_STOP_MUSIC
 import com.atomykcoder.atomykplay.data.Music
 import com.atomykcoder.atomykplay.dataModels.LRCMap
 import com.atomykcoder.atomykplay.enums.PlaybackStatus
@@ -40,7 +46,7 @@ import com.atomykcoder.atomykplay.helperFunctions.GlideApp
 import com.atomykcoder.atomykplay.helperFunctions.Logger
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper
 import com.atomykcoder.atomykplay.utils.AndroidUtil.toUnscaledBitmap
-import com.atomykcoder.atomykplay.utils.EqualizerUtil
+import com.atomykcoder.atomykplay.utils.MusicEnhancerUtil
 import com.atomykcoder.atomykplay.utils.StorageUtil
 import com.atomykcoder.atomykplay.utils.StorageUtil.SettingsStorage
 import com.bumptech.glide.request.target.CustomTarget
@@ -73,7 +79,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
     private var selfStopRunnable: Runnable? = null
     private var wasPlaying = false
 
-    private var equalizerUtil: EqualizerUtil? = null
+    private var musicEnhancerUtil: MusicEnhancerUtil? = null
 
     //media session
     private var mediaSessionManager: MediaSessionManager? = null
@@ -95,8 +101,8 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
 
     //broadcast receivers
     //playing new song
-    private var storage: StorageUtil? = null
-    private var settingsStorage: SettingsStorage? = null
+    private lateinit var storage: StorageUtil
+    private lateinit var settingsStorage: SettingsStorage
     private var notificationManager: NotificationManager? = null
     private var artworkDimension = 0
     private var defaultThumbnail: Bitmap? = null
@@ -132,7 +138,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
             if (intent?.action == Intent.ACTION_HEADSET_PLUG) {
                 val state = intent.getIntExtra("state", -1)
                 if (state == 1) {
-                    if (settingsStorage?.loadAutoPlay() == true) {
+                    if (settingsStorage.loadAutoPlay()) {
                         if (!is_playing) {
                             if (isMediaPlayerNotNull) {
                                 resumeMedia(true)
@@ -153,27 +159,17 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
     }
     private val bluetoothReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            if (BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED == intent?.action) {
-                when (intent.getIntExtra(BluetoothAdapter.EXTRA_CONNECTION_STATE, BluetoothAdapter.ERROR)) {
-                    BluetoothAdapter.STATE_CONNECTED -> {
-                        if (settingsStorage?.loadAutoPlayBt() == true) {
-                            if (!is_playing) {
-                                if (isMediaPlayerNotNull) {
-                                    resumeMedia(true)
-                                } else {
-                                    try {
-                                        initiateMediaSession()
-                                    } catch (e: RemoteException) {
-                                        e.printStackTrace()
-                                    }
-                                    initiateMediaPlayer()
-                                }
-                            }
-                        }
-                    }
-                    BluetoothAdapter.STATE_DISCONNECTED -> {
-                        pauseMedia()
-                    }
+            val action = intent?.action
+            Logger.normalLog("Action $action received")
+            when (action) {
+                BluetoothDevice.ACTION_ACL_CONNECTED -> {
+                    Toast.makeText(context, "Bluetooth Connected", Toast.LENGTH_SHORT).show()
+                    bluetoothConnected()
+                }
+
+                BluetoothDevice.ACTION_ACL_DISCONNECTED -> {
+                    Toast.makeText(context, "Bluetooth Disconnected", Toast.LENGTH_SHORT).show()
+                    bluetoothDisconnected()
                 }
             }
         }
@@ -256,7 +252,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
     }
 
     private fun registerPlayNewMusic() {
-        val filter = IntentFilter(MainActivity.BROADCAST_PLAY_NEW_MUSIC)
+        val filter = IntentFilter(BROADCAST_PLAY_NEW_MUSIC)
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             registerReceiver(playNewMusicReceiver, filter)
         } else {
@@ -265,7 +261,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
     }
 
     private fun registerPausePlayMusic() {
-        val filter = IntentFilter(MainActivity.BROADCAST_PAUSE_PLAY_MUSIC)
+        val filter = IntentFilter(BROADCAST_PAUSE_PLAY_MUSIC)
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             registerReceiver(pausePlayMusicReceiver, filter)
         } else {
@@ -274,7 +270,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
     }
 
     private fun registerStopMusic() {
-        val filter = IntentFilter(MainActivity.BROADCAST_STOP_MUSIC)
+        val filter = IntentFilter(BROADCAST_STOP_MUSIC)
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             registerReceiver(stopMusicReceiver, filter)
         } else {
@@ -283,7 +279,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
     }
 
     private fun registerPlayNextMusic() {
-        val filter = IntentFilter(MainActivity.BROADCAST_PLAY_NEXT_MUSIC)
+        val filter = IntentFilter(BROADCAST_PLAY_NEXT_MUSIC)
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             registerReceiver(nextMusicReceiver, filter)
         } else {
@@ -292,7 +288,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
     }
 
     private fun registerPlayPreviousMusic() {
-        val filter = IntentFilter(MainActivity.BROADCAST_PLAY_PREVIOUS_MUSIC)
+        val filter = IntentFilter(BROADCAST_PLAY_PREVIOUS_MUSIC)
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             registerReceiver(prevMusicReceiver, filter)
         } else {
@@ -319,10 +315,18 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
             registerReceiver(pluggedInDevice, i, Context.RECEIVER_EXPORTED)
         }
     }
-    private fun registerBluetoothReceiver(context: Context) {
-        val intentFilter = IntentFilter(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED)
-        context.registerReceiver(bluetoothReceiver, intentFilter)
+
+    private fun registerBluetoothReceiver() {
+        val i = IntentFilter()
+        i.addAction(BluetoothDevice.ACTION_ACL_CONNECTED)
+        i.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(bluetoothReceiver, i)
+        } else {
+            registerReceiver(bluetoothReceiver, i, Context.RECEIVER_EXPORTED)
+        }
     }
+
     /**
      * this function updates new music data in notification
      */
@@ -600,6 +604,9 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
 
     override fun onCreate() {
         super.onCreate()
+        selfStopHandler = Handler(Looper.getMainLooper())
+        storage = StorageUtil(applicationContext)
+        settingsStorage = SettingsStorage(applicationContext)
 
         //manage incoming calls during playback
         callStateListener()
@@ -612,11 +619,9 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
         registerPlayNextMusic()
         registerPlayPreviousMusic()
         registerStopMusic()
+        registerBluetoothReceiver()
         mPackageValidator = PackageValidator(this, R.xml.allowed_media_browser_callers)
 
-        selfStopHandler = Handler(Looper.getMainLooper())
-        storage = StorageUtil(applicationContext)
-        settingsStorage = SettingsStorage(applicationContext)
         mediaSessionManager = getSystemService(MEDIA_SESSION_SERVICE) as MediaSessionManager
         notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         loadList()
@@ -710,11 +715,11 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
 
 
     override fun onCompletion(mp: MediaPlayer) {
-        storage!!.clearMusicLastPos()
+        storage.clearMusicLastPos()
         if (musicIndex == -1 || musicList == null) {
             loadList()
         }
-        when (storage!!.loadRepeatStatus()) {
+        when (storage.loadRepeatStatus()) {
             "no_repeat" -> if (musicIndex == musicList!!.size - 1) pauseMedia() else skipToNext()
             "repeat" -> skipToNext()
             "repeat_one" -> {
@@ -732,15 +737,13 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
     }
 
     private fun loadList() {
-        if (storage != null) {
-            musicList = storage!!.loadQueueList()
-            musicIndex = storage!!.loadMusicIndex()
-        }
+        musicList = storage.loadQueueList()
+        musicIndex = storage.loadMusicIndex()
     }
 
     override fun onBufferingUpdate(mp: MediaPlayer, percent: Int) {}
     private fun showToast(s: String) {
-        (application as ApplicationClass).showToast(s)
+        ApplicationClass.instance.showToast(s)
     }
 
     override fun onError(mp: MediaPlayer, what: Int, extra: Int): Boolean {
@@ -771,7 +774,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
                 try {
                     //service is active send media with broadcast receiver
                     val encodedMessage = MusicHelper.encode(activeMusic)
-                    val broadcastIntent = Intent(MainActivity.BROADCAST_PLAY_NEW_MUSIC)
+                    val broadcastIntent = Intent(BROADCAST_PLAY_NEW_MUSIC)
                     broadcastIntent.putExtra("music", encodedMessage)
                     sendBroadcast(broadcastIntent)
                 } catch (e: Exception) {
@@ -808,12 +811,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
             audioAttributes.setUsage(AudioAttributes.USAGE_MEDIA)
             audioAttributes.setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
             mediaPlayer!!.setAudioAttributes(audioAttributes.build())
-            if (settingsStorage!!.loadEnhanceAudio()){
-                initiateEqualizerUtil().run {
-                    setBassLevel(settingsStorage!!.loadBassLevel())
-                    setVirtualizerStrength(settingsStorage!!.loadVirLevel())
-                }
-            }
+            openEqualizer(settingsStorage.loadEnhanceAudio())
         }
 
         //reset so that the media player is not pointing to another data source
@@ -828,25 +826,34 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
         }
     }
 
-    fun initiateEqualizerUtil(){
+    fun openEqualizer(shouldEnhance: Boolean) {
+        if (shouldEnhance) {
+            initiateEqualizerUtil().run {
+                setBassLevel(settingsStorage.loadBassLevel())
+                setVirtualizerStrength(settingsStorage.loadVirLevel())
+            }
+        }
+    }
+
+    private fun initiateEqualizerUtil() {
         val id = audioSessionId ?: return
-        equalizerUtil = equalizerUtil ?: EqualizerUtil(id)
+        musicEnhancerUtil = musicEnhancerUtil ?: MusicEnhancerUtil(id)
 
-        equalizerUtil?.enableEffects(true)
+        musicEnhancerUtil?.enableEffects(true)
     }
 
-    fun disableEqualizerUtil(){
-        equalizerUtil?.enableEffects(false)
-        equalizerUtil?.releaseEqualizer()
-        equalizerUtil = null
+    fun disableEqualizerUtil() {
+        musicEnhancerUtil?.enableEffects(false)
+        musicEnhancerUtil?.releaseEqualizer()
+        musicEnhancerUtil = null
     }
 
-    fun setBassLevel(level: Int){
-        equalizerUtil?.setBassBandLevel(level)
+    fun setBassLevel(level: Int) {
+        musicEnhancerUtil?.setBassBandLevel(level)
     }
 
-    fun setVirtualizerStrength(strength: Int){
-        equalizerUtil?.setVirtualizerStrength(strength)
+    fun setVirtualizerStrength(strength: Int) {
+        musicEnhancerUtil?.setVirtualizerStrength(strength)
     }
 
     /**
@@ -885,7 +892,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
      */
     fun stoppedByNotification() {
         if (isMediaPlayerNotNull && isMediaPlaying) {
-            storage!!.saveMusicLastPos(currentMediaPosition)
+            storage.saveMusicLastPos(currentMediaPosition)
             mediaPlayer!!.pause()
             is_playing = false
             setIcon(PlaybackStatus.PAUSED)
@@ -941,7 +948,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
             setSeekBar()
             var lrcMap: LRCMap? = null
             if (activeMusic != null) {
-                lrcMap = storage!!.loadLyrics(activeMusic!!.id)
+                lrcMap = storage.loadLyrics(activeMusic!!.id)
             }
             if (lrcMap != null) EventBus.getDefault().post(PrepareRunnableEvent())
         }
@@ -950,7 +957,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
         is_playing = true
 
         // set media_player seekbar to position and start media_player
-        val position = storage!!.loadMusicLastPos()
+        val position = storage.loadMusicLastPos()
         seekMediaTo(position)
         mediaPlayer!!.start()
 
@@ -970,7 +977,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
                 if (seekBarHandler != null) seekBarHandler!!.removeCallbacks(seekBarRunnable!!)
                 EventBus.getDefault().post(RemoveLyricsHandlerEvent())
             }
-            storage!!.saveMusicLastPos(currentMediaPosition)
+            storage.saveMusicLastPos(currentMediaPosition)
             mediaPlayer!!.pause()
             is_playing = false
             setIcon(PlaybackStatus.PAUSED)
@@ -1026,13 +1033,13 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
 
     fun skipToPrevious() {
         loadList()
-        val lastPos = storage!!.loadMusicLastPos()
-        storage!!.clearMusicLastPos()
+        val lastPos = storage.loadMusicLastPos()
+        storage.clearMusicLastPos()
         try {
             if (musicIndex == -1 || musicList == null) {
                 return
             }
-            if (settingsStorage!!.loadOneClickSkip()) {
+            if (settingsStorage.loadOneClickSkip()) {
                 setActiveMusicForPrevious()
             } else {
                 if (isMediaPlayerNotNull && currentMediaPosition >= 3000 || lastPos >= 3000) {
@@ -1051,17 +1058,17 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
         }
         if (file != null) {
             if (!file.exists()) {
-                storage!!.saveMusicIndex(musicIndex)
+                storage.saveMusicIndex(musicIndex)
                 skipToPrevious()
                 return
             }
         } else {
-            storage!!.saveMusicIndex(musicIndex)
+            storage.saveMusicIndex(musicIndex)
             skipToPrevious()
             return
         }
         if (activeMusic != null) {
-            storage!!.saveMusicIndex(musicIndex)
+            storage.saveMusicIndex(musicIndex)
             stopMedia()
             initiateMediaPlayer()
         }
@@ -1082,7 +1089,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
      */
     fun skipToNext() {
         loadList()
-        storage!!.clearMusicLastPos()
+        storage.clearMusicLastPos()
         try {
             if (musicIndex != -1 && musicList != null) if (musicIndex == musicList!!.size - 1) {
                 //if last in list
@@ -1101,17 +1108,17 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
         }
         if (file != null) {
             if (!file.exists()) {
-                storage!!.saveMusicIndex(musicIndex)
+                storage.saveMusicIndex(musicIndex)
                 skipToNext()
                 return
             }
         } else {
-            storage!!.saveMusicIndex(musicIndex)
+            storage.saveMusicIndex(musicIndex)
             skipToNext()
             return
         }
         if (activeMusic != null) {
-            storage!!.saveMusicIndex(musicIndex)
+            storage.saveMusicIndex(musicIndex)
             stopMedia()
             initiateMediaPlayer()
         }
@@ -1189,18 +1196,22 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
                                 Logger.normalLog("PLAY_PAUSE")
                                 if (isMediaPlaying) pauseMedia() else resumeMedia(true)
                             }
+
                             KeyEvent.KEYCODE_MEDIA_PLAY -> {
                                 Logger.normalLog("PLAY")
                                 if (!isMediaPlaying) resumeMedia(true)
                             }
+
                             KeyEvent.KEYCODE_MEDIA_PAUSE -> {
                                 Logger.normalLog("PAUSE")
                                 if (isMediaPlaying) pauseMedia()
                             }
+
                             KeyEvent.KEYCODE_MEDIA_NEXT -> {
                                 Logger.normalLog("NEXT")
                                 onSkipToNext()
                             }
+
                             KeyEvent.KEYCODE_MEDIA_PREVIOUS -> {
                                 Logger.normalLog("PREVIOUS")
                                 onSkipToPrevious()
@@ -1239,9 +1250,9 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
                 override fun onSeekTo(pos: Long) {
                     super.onSeekTo(pos)
                     try {//clearing the storage before putting new value
-                        storage!!.clearMusicLastPos()
+                        storage.clearMusicLastPos()
                         //storing the current position of seekbar in storage so we can access it from services
-                        storage!!.saveMusicLastPos(Math.toIntExact(pos))
+                        storage.saveMusicLastPos(Math.toIntExact(pos))
 
                         //first checking setting the media seek to current position of seek bar and then setting all data in UI•
                         if (MainActivity.service_bound) {
@@ -1280,7 +1291,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
                 wasPlaying = true
             }
 
-            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> if (settingsStorage!!.loadLowerVol()) {
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> if (settingsStorage.loadLowerVol()) {
                 if (isMediaPlaying) {
                     mediaPlayer!!.setVolume(0.3f, 0.3f)
                 }
@@ -1302,7 +1313,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
         //here we are stopping service after 5 minutes if app
         // is not running in background and player is not playing
         //this is a optional feature for user
-        if (settingsStorage != null && settingsStorage!!.loadSelfStop()) {
+        if (settingsStorage != null && settingsStorage.loadSelfStop()) {
             if (selfStopHandler != null && selfStopRunnable != null) {
                 selfStopRunnable = Runnable {
                     if (!is_playing && !ui_visible) {
@@ -1358,16 +1369,16 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
 
         cancelTimer()
         if (isMediaPlayerNotNull) {
-            storage?.saveMusicLastPos(currentMediaPosition)
+            storage.saveMusicLastPos(currentMediaPosition)
         }
         //disable phone state listener ♣
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            if (phoneStateCallback != null && telephonyManager != null) {
-                telephonyManager!!.unregisterTelephonyCallback(phoneStateCallback!!)
+            if (phoneStateCallback != null) {
+                telephonyManager?.unregisterTelephonyCallback(phoneStateCallback!!)
             }
         } else {
-            if (phoneStateListener != null && telephonyManager != null) {
-                telephonyManager!!.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE)
+            if (phoneStateListener != null) {
+                telephonyManager?.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE)
             }
         }
         unregisterReceiver(becomingNoisyReceiver)
@@ -1377,6 +1388,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
         unregisterReceiver(nextMusicReceiver)
         unregisterReceiver(prevMusicReceiver)
         unregisterReceiver(stopMusicReceiver)
+        unregisterReceiver(bluetoothReceiver)
         releasePlayer()
         disableEqualizerUtil()
     }
@@ -1456,5 +1468,26 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
 
         @JvmField
         var ui_visible = false
+    }
+
+    fun bluetoothConnected() {
+        if (settingsStorage.loadAutoPlayBt()) {
+            if (!is_playing) {
+                if (isMediaPlayerNotNull) {
+                    resumeMedia(true)
+                } else {
+                    try {
+                        initiateMediaSession()
+                    } catch (e: RemoteException) {
+                        e.printStackTrace()
+                    }
+                    initiateMediaPlayer()
+                }
+            }
+        }
+    }
+
+    fun bluetoothDisconnected() {
+        pauseMedia()
     }
 }

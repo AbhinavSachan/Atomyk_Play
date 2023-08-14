@@ -38,6 +38,20 @@ import com.atomykcoder.atomykplay.adapters.MusicMainAdapter
 import com.atomykcoder.atomykplay.adapters.PlaylistDialogAdapter
 import com.atomykcoder.atomykplay.classes.GlideBuilt
 import com.atomykcoder.atomykplay.classes.PhoneStateCallback
+import com.atomykcoder.atomykplay.constants.BroadcastStrings.BROADCAST_PAUSE_PLAY_MUSIC
+import com.atomykcoder.atomykplay.constants.BroadcastStrings.BROADCAST_PLAY_NEW_MUSIC
+import com.atomykcoder.atomykplay.constants.BroadcastStrings.BROADCAST_PLAY_NEXT_MUSIC
+import com.atomykcoder.atomykplay.constants.BroadcastStrings.BROADCAST_PLAY_PREVIOUS_MUSIC
+import com.atomykcoder.atomykplay.constants.BroadcastStrings.BROADCAST_STOP_MUSIC
+import com.atomykcoder.atomykplay.constants.FragmentTags.ABOUT_FRAGMENT_TAG
+import com.atomykcoder.atomykplay.constants.FragmentTags.ADD_LYRICS_FRAGMENT_TAG
+import com.atomykcoder.atomykplay.constants.FragmentTags.FAVORITE_FRAGMENT_TAG
+import com.atomykcoder.atomykplay.constants.FragmentTags.LAST_ADDED_FRAGMENT_TAG
+import com.atomykcoder.atomykplay.constants.FragmentTags.OPEN_PLAYLIST_FRAGMENT_TAG
+import com.atomykcoder.atomykplay.constants.FragmentTags.PLAYLISTS_FRAGMENT_TAG
+import com.atomykcoder.atomykplay.constants.FragmentTags.SEARCH_FRAGMENT_TAG
+import com.atomykcoder.atomykplay.constants.FragmentTags.SETTINGS_FRAGMENT_TAG
+import com.atomykcoder.atomykplay.constants.FragmentTags.TAG_EDITOR_FRAGMENT_TAG
 import com.atomykcoder.atomykplay.customScripts.CustomBottomSheet
 import com.atomykcoder.atomykplay.customScripts.LinearLayoutManagerWrapper
 import com.atomykcoder.atomykplay.data.Music
@@ -52,7 +66,6 @@ import com.atomykcoder.atomykplay.helperFunctions.CustomMethods.pickImage
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper
 import com.atomykcoder.atomykplay.repository.LoadingStatus
 import com.atomykcoder.atomykplay.repository.MusicRepo
-import com.atomykcoder.atomykplay.repository.MusicRepo.Companion.instance
 import com.atomykcoder.atomykplay.services.MediaPlayerService
 import com.atomykcoder.atomykplay.services.MediaPlayerService.LocalBinder
 import com.atomykcoder.atomykplay.utils.AndroidUtil
@@ -263,34 +276,18 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         override fun onStateChanged(bottomSheet: View, newState: Int) {
             when (newState) {
                 BottomSheetBehavior.STATE_COLLAPSED -> {
-                    val miniPlayer = bottomSheetPlayerFragment?.miniPlayView
-                    val mainPlayer = bottomSheetPlayerFragment?.playerLayout
-                    if (miniPlayer == null || mainPlayer == null) {
-                        return
-                    }
-                    mainPlayer.visibility = View.INVISIBLE
-                    miniPlayer.visibility = View.VISIBLE
-                    drawer!!.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
-                    miniPlayer.alpha = 1f
-                    shadowMain!!.alpha = 0f
-                    anchoredShadow!!.alpha = 1f
-                    mainPlayer.alpha = 0f
-                    anchoredShadow!!.elevation = 10f
-                    playerBottomSheet!!.elevation = 12f
+                    bottomSheetPlayerFragment?.onBottomSheetCollapsed()
+                    drawer?.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
+                    shadowMain?.alpha = 0f
+                    anchoredShadow?.alpha = 1f
+                    anchoredShadow?.elevation = 10f
+                    playerBottomSheet?.elevation = 12f
                     isMainPlayerCollapsed = true
                 }
 
                 BottomSheetBehavior.STATE_EXPANDED -> {
-                    val miniPlayer = bottomSheetPlayerFragment?.miniPlayView
-                    val mainPlayer = bottomSheetPlayerFragment?.playerLayout
-                    if (miniPlayer == null || mainPlayer == null) {
-                        return
-                    }
-                    miniPlayer.visibility = View.INVISIBLE
-                    mainPlayer.visibility = View.VISIBLE
+                    bottomSheetPlayerFragment?.onBottomSheetExpanded()
                     drawer!!.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
-                    miniPlayer.alpha = 0f
-                    mainPlayer.alpha = 1f
                     anchoredShadow!!.alpha = 1f
                     shadowMain!!.alpha = 1f
                     anchoredShadow!!.elevation = 10f
@@ -304,7 +301,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                     playerBottomSheet!!.elevation = 0f
                     anchoredShadow!!.elevation = 0f
                     clearStorage()
-                    bottomSheetPlayerFragment?.queueAdapter?.clearList()
+                    bottomSheetPlayerFragment?.clearQueueAdapter()
                     bottomSheetPlayerFragment?.resetMainPlayerLayout()
                     resetDataInNavigation()
                     stopMusic()
@@ -313,15 +310,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         }
 
         override fun onSlide(bottomSheet: View, slideOffset: Float) {
-            val miniPlayer = bottomSheetPlayerFragment?.miniPlayView
-            val mainPlayer = bottomSheetPlayerFragment?.playerLayout
-            if (miniPlayer == null || mainPlayer == null) {
-                return
-            }
-            miniPlayer.visibility = View.VISIBLE
-            mainPlayer.visibility = View.VISIBLE
-            miniPlayer.alpha = 1 - slideOffset * 35
-            mainPlayer.alpha = 0 + slideOffset
+            bottomSheetPlayerFragment?.onBottomSheetSliding(slideOffset)
             shadowMain!!.alpha = 0 + slideOffset
             changeNavigationColor(animateFromColor, animateToColor, slideOffset)
         }
@@ -391,7 +380,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                     pl_name,
                     coverImageUri
                 )
-                playlistFragment?.playlistAdapter?.updateView(storageUtil!!.allPlaylist)
+                playlistFragment?.updateItems(storageUtil?.allPlaylist)
             }
         }
     private val pickIntentForPLCoverChange =
@@ -404,7 +393,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                         pl_name,
                         coverImageUri
                     )
-                    playlistFragment?.playlistAdapter?.updateView(storageUtil!!.allPlaylist)
+                    playlistFragment?.updateItems(storageUtil?.allPlaylist)
                 }
             }
         }
@@ -465,11 +454,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
             if (ContextCompat.checkSelfPermission(
                     this,
                     Manifest.permission.READ_MEDIA_AUDIO
-                ) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(
+                ) != PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(
                     this,
                     Manifest.permission.READ_PHONE_STATE
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
+                ) != PackageManager.PERMISSION_GRANTED) {
                 is_granted = false
                 showRequestDialog()
             } else {
@@ -483,8 +472,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                 ) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(
                     this,
                     Manifest.permission.READ_PHONE_STATE
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
+                ) != PackageManager.PERMISSION_GRANTED) {
                 is_granted = false
                 showRequestDialog()
             } else {
@@ -578,7 +566,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         searchFragment = null
         lastAddedFragment = null
         bottomSheetPlayerFragment = null
-
     }
 
     fun changeNavigationColor(animateFrom: Int, animateTo: Int, slideOffset: Float) {
@@ -736,24 +723,14 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         setBottomSheetProperties(plSheetBehavior!!, plOptionPeekHeight, true)
     }
 
-    fun setPlayerBottomSheet() {
-        bottomSheetPlayerFragment?.miniPlayView?.let {
-            val vto: ViewTreeObserver = it.viewTreeObserver
-            vto.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
-                override fun onGlobalLayout() {
-                    val miniPlayerHeight = it.height
-                    mainPlayerSheetBehavior!!.isHideable = true
-                    mainPlayerSheetBehavior!!.peekHeight = miniPlayerHeight
-                    if (music != null) {
-                        mainPlayerSheetBehavior!!.setState(BottomSheetBehavior.STATE_COLLAPSED)
-                    } else {
-                        anchoredShadow!!.alpha = 0f
-                        mainPlayerSheetBehavior!!.setState(BottomSheetBehavior.STATE_HIDDEN)
-                    }
-                    // Remove the listener to avoid multiple callbacks
-                    it.viewTreeObserver.removeOnGlobalLayoutListener(this)
-                }
-            })
+    fun setPlayerBottomSheet(miniPlayerHeight: Int) {
+        mainPlayerSheetBehavior!!.isHideable = true
+        mainPlayerSheetBehavior!!.peekHeight = miniPlayerHeight
+        if (music != null) {
+            mainPlayerSheetBehavior!!.setState(BottomSheetBehavior.STATE_COLLAPSED)
+        } else {
+            anchoredShadow!!.alpha = 0f
+            mainPlayerSheetBehavior!!.setState(BottomSheetBehavior.STATE_HIDDEN)
         }
     }
 
@@ -904,8 +881,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                 }
             }
         } else {
-            if (bottomSheetPlayerFragment!!.queueSheetBehaviour?.state == BottomSheetBehavior.STATE_EXPANDED) {
-                bottomSheetPlayerFragment!!.queueSheetBehaviour?.setState(BottomSheetBehavior.STATE_HIDDEN)
+            if (bottomSheetPlayerFragment!!.getQueueSheetBehaviour() == BottomSheetBehavior.STATE_EXPANDED) {
+                bottomSheetPlayerFragment!!.setQueueSheetBehaviour(BottomSheetBehavior.STATE_HIDDEN)
             } else {
                 if (mainPlayerSheetBehavior!!.state != BottomSheetBehavior.STATE_HIDDEN) {
                     mainPlayerSheetBehavior!!.state = BottomSheetBehavior.STATE_COLLAPSED
@@ -1268,12 +1245,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
 
     fun updateAdaptersForRemovedItem() {
         musicMainAdapter?.removeItem(selectedItem!!)
-        if (lastAddedFragment != null && lastAddedFragment!!.adapter != null) {
-            lastAddedFragment?.adapter?.removeItem(selectedItem!!)
-        }
-        if (searchFragment != null && searchFragment!!.adapter != null) {
-            searchFragment?.adapter?.removeItem(selectedItem!!)
-        }
+        lastAddedFragment?.removeItems(selectedItem!!)
+        searchFragment?.removeItems(selectedItem)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -1293,7 +1266,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         storageUtil = StorageUtil(this@MainActivity)
         executorService = Executors.newFixedThreadPool(10)
         handler = Handler(Looper.getMainLooper())
-        musicRepo = instance
+        musicRepo = MusicRepo.instance
         glideBuilt = GlideBuilt(this)
         animateFromColor = resources.getColor(R.color.player_bg, null)
         animateToColor = resources.getColor(R.color.white, null)
@@ -1385,15 +1358,15 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     }
 
     private fun addToNextPlay(music: Music?) {
-        bottomSheetPlayerFragment!!.queueAdapter!!.updateItemInserted(music)
+        bottomSheetPlayerFragment?.addToNext(music)
     }
 
     private fun addToQueue(music: Music?) {
-        bottomSheetPlayerFragment!!.queueAdapter!!.updateItemInsertedLast(music)
+        bottomSheetPlayerFragment?.addToQueue(music)
     }
 
     private fun closeOptionSheet() {
-        optionSheetBehavior!!.state = BottomSheetBehavior.STATE_HIDDEN
+        optionSheetBehavior?.state = BottomSheetBehavior.STATE_HIDDEN
     }
 
     private fun showToast(s: String?) {
@@ -1437,7 +1410,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     private fun requestReadStorageAndPhonePermissionBelow12() {
         Dexter.withContext(this@MainActivity).withPermissions(
             Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.READ_PHONE_STATE
+            Manifest.permission.READ_PHONE_STATE,
         ).withListener(object : MultiplePermissionsListener {
             override fun onPermissionsChecked(multiplePermissionsReport: MultiplePermissionsReport) {
                 if (multiplePermissionsReport.areAllPermissionsGranted()) {
@@ -1461,12 +1434,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
             }
         }).check()
     }
-
     @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     private fun requestReadAudioAndPhonePermissionAbove12() {
         Dexter.withContext(this@MainActivity).withPermissions(
             Manifest.permission.READ_MEDIA_AUDIO,
-            Manifest.permission.READ_PHONE_STATE
+            Manifest.permission.READ_PHONE_STATE,
         ).withListener(object : MultiplePermissionsListener {
             override fun onPermissionsChecked(multiplePermissionsReport: MultiplePermissionsReport) {
                 if (multiplePermissionsReport.areAllPermissionsGranted()) {
@@ -1752,16 +1724,16 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     }
 
     private fun deletePl(playlist: Playlist?) {
-        playlistFragment!!.playlistList?.remove(playlist)
-        storageUtil!!.removePlayList(playlist!!.name)
-        val arrayList = storageUtil!!.allPlaylist
-        playlistFragment!!.playlistAdapter?.updateView(arrayList)
+        playlistFragment?.removeItems(playlist)
+        storageUtil?.removePlayList(playlist!!.name)
+        val arrayList = storageUtil?.allPlaylist
+        playlistFragment?.updateItems(arrayList)
     }
 
     private fun renamePl(playlist: Playlist?, newName: String) {
         storageUtil!!.replacePlaylist(playlist!!, newName, playlist.coverUri)
         val arrayList = storageUtil?.allPlaylist
-        playlistFragment?.playlistAdapter?.updateView(arrayList)
+        playlistFragment?.updateItems(arrayList)
     }
 
     private fun changeUriPl(playlist: Playlist?) {
@@ -1771,12 +1743,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
 
     private fun addToQueuePl(playlist: Playlist?) {
         val list = playlist!!.musicList
-        bottomSheetPlayerFragment!!.queueAdapter!!.updateListInsertedLast(list)
+        bottomSheetPlayerFragment?.addToQueue(list)
     }
 
     private fun addToNextPlayPl(playlist: Playlist?) {
         val list = playlist!!.musicList
-        bottomSheetPlayerFragment!!.queueAdapter!!.updateListInserted(list)
+        bottomSheetPlayerFragment?.addToNext(list)
     }
 
     private fun closePlOptionSheet() {
@@ -1984,20 +1956,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     }
 
     companion object {
-        const val BROADCAST_PLAY_NEW_MUSIC = "com.atomykcoder.atomykplay.PlayNewMusic"
-        const val BROADCAST_PAUSE_PLAY_MUSIC = "com.atomykcoder.atomykplay.PausePlayMusic"
-        const val BROADCAST_STOP_MUSIC = "com.atomykcoder.atomykplay.StopMusic"
-        const val BROADCAST_PLAY_NEXT_MUSIC = "com.atomykcoder.atomykplay.PlayNextMusic"
-        const val BROADCAST_PLAY_PREVIOUS_MUSIC = "com.atomykcoder.atomykplay.PlayPreviousMusic"
-        const val SETTINGS_FRAGMENT_TAG = "SettingsFragment"
-        const val ADD_LYRICS_FRAGMENT_TAG = "AddLyricsFragment"
-        const val SEARCH_FRAGMENT_TAG = "SearchFragment"
-        const val FAVORITE_FRAGMENT_TAG = "FavoritesFragment"
-        const val TAG_EDITOR_FRAGMENT_TAG = "TagEditorFragment"
-        const val PLAYLISTS_FRAGMENT_TAG = "PlaylistsFragment"
-        const val ABOUT_FRAGMENT_TAG = "AboutFragment"
-        const val OPEN_PLAYLIST_FRAGMENT_TAG = "OpenPlayListFragment"
-        const val LAST_ADDED_FRAGMENT_TAG = "LastAddedFragment"
         var service_bound = false
         var is_granted = false
         var phone_ringing = false

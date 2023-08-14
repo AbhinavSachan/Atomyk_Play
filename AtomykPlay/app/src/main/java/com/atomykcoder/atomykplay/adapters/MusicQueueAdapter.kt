@@ -36,7 +36,7 @@ class MusicQueueAdapter(
     init {
         super.items = items
         this.onDragStartListener = onDragStartListener
-        mainActivity = context as MainActivity
+        mainActivity = (context as MainActivity)
         storageUtil = StorageUtil(context)
     }
 
@@ -155,8 +155,7 @@ class MusicQueueAdapter(
                 storageUtil.saveQueueList(super.items!!)
 
                 if (super.items!!.isEmpty()) {
-                    mainActivity.bottomSheetPlayerFragment?.queueSheetBehaviour?.state =
-                        BottomSheetBehavior.STATE_HIDDEN
+                    mainActivity.bottomSheetPlayerFragment?.setQueueSheetBehaviour(BottomSheetBehavior.STATE_HIDDEN)
                     mainActivity.clearStorage()
                     mainActivity.mainPlayerSheetBehavior?.state = BottomSheetBehavior.STATE_HIDDEN
                     mainActivity.bottomSheetPlayerFragment?.resetMainPlayerLayout()

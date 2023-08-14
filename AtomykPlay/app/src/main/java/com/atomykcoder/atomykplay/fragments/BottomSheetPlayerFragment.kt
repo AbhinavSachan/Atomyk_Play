@@ -25,7 +25,6 @@ import android.view.ViewTreeObserver
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.webkit.MimeTypeMap
 import android.widget.ImageView
-import android.widget.RelativeLayout
 import android.widget.SeekBar
 import android.widget.SeekBar.GONE
 import android.widget.SeekBar.OnSeekBarChangeListener
@@ -34,7 +33,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.view.setPadding
 import androidx.fragment.app.Fragment
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -50,6 +48,7 @@ import com.atomykcoder.atomykplay.adapters.MusicLyricsAdapter
 import com.atomykcoder.atomykplay.adapters.MusicQueueAdapter
 import com.atomykcoder.atomykplay.adapters.SimpleTouchCallback
 import com.atomykcoder.atomykplay.classes.GlideBuilt
+import com.atomykcoder.atomykplay.constants.FragmentTags.ADD_LYRICS_FRAGMENT_TAG
 import com.atomykcoder.atomykplay.customScripts.CenterSmoothScrollScript.CenterSmoothScroller
 import com.atomykcoder.atomykplay.customScripts.CustomBottomSheet
 import com.atomykcoder.atomykplay.customScripts.LinearLayoutManagerWrapper
@@ -92,38 +91,110 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
 
     private val lyricsArrayList = ArrayList<String>()
 
-    @JvmField
-    var queueSheetBehaviour: CustomBottomSheet<View?>? = null
-    var lyricsRunnable: Runnable? = null
-    var lyricsHandler: Handler? = null
-    var miniProgress: LinearProgressIndicator? = null
-    var miniPause: ImageView? = null
+    private var queueSheetBehaviour: CustomBottomSheet<View?>? = null
+    private var miniNext: ImageView? = null
+    private var miniArtistText: TextView? = null
+
+    private var miniPlayView: View? = null
+    private var playerLayout: View? = null
+
+    private var infoLayout: View? = null
+
+    fun setQueueSheetBehaviour(behaviour: Int) {
+        queueSheetBehaviour?.state = behaviour
+    }
+
+    fun getQueueSheetBehaviour(): Int? = queueSheetBehaviour?.state
+
+    fun onBottomSheetCollapsed() {
+        playerLayout?.visibility = View.INVISIBLE
+        miniPlayView?.visibility = View.VISIBLE
+        miniPlayView?.alpha = 1f
+        playerLayout?.alpha = 0f
+    }
+
+    fun onBottomSheetExpanded() {
+        playerLayout?.visibility = View.VISIBLE
+        miniPlayView?.visibility = View.INVISIBLE
+        miniPlayView?.alpha = 0f
+        playerLayout?.alpha = 1f
+    }
+
+    fun onBottomSheetSliding(slideOffset: Float) {
+        miniPlayView?.visibility = View.VISIBLE
+        playerLayout?.visibility = View.VISIBLE
+        miniPlayView?.alpha = 1 - slideOffset * 35
+        playerLayout?.alpha = 0 + slideOffset
+    }
+
+    fun setInfoLayoutVisibility(visibility: Int) {
+        infoLayout?.visibility = visibility
+    }
+
+    fun setMiniArtistVisibility(visibility: Int) {
+        miniArtistText?.visibility = visibility
+    }
+
+    fun setMiniNextVisibility(visibility: Int) {
+        miniNext?.visibility = visibility
+    }
+
+    private var queueAdapter: MusicQueueAdapter? = null
+    fun clearQueueAdapter() {
+        queueAdapter?.clearList()
+    }
+
+    /**
+     * this method is only to add new music to last queue item
+     */
+    fun addToQueue(music: Music?) {
+        queueAdapter?.updateItemInsertedLast(music)
+    }
+
+    /**
+     * this method is only to add new music to next queue item
+     */
+    fun addToNext(music: Music?) {
+        queueAdapter?.updateItemInserted(music)
+    }
+
+    /**
+     * this method is only to add new music to last queue item
+     */
+    fun addToQueue(music: ArrayList<Music?>) {
+        queueAdapter?.updateListInsertedLast(music)
+    }
+
+    /**
+     * this method is only to remove music from queue
+     */
+    fun removeMusicFromQueue(music: Music?) {
+        queueAdapter?.removeItem(music)
+    }
+
+    /**
+     * this method is only to add new music to next queue item
+     */
+    fun addToNext(music: ArrayList<Music?>) {
+        queueAdapter?.updateListInserted(music)
+    }
+
+    private var lyricsRunnable: Runnable? = null
+    private var lyricsHandler: Handler? = null
+    private var miniProgress: LinearProgressIndicator? = null
+
+    private var miniPause: ImageView? = null
 
     //main player seekbar
-    var seekBarMain: SeekBar? = null
-    var playImg: ImageView? = null
-    var curPosTv: TextView? = null
-    var miniCover: ImageView? = null
+    private var seekBarMain: SeekBar? = null
+    private var playImg: ImageView? = null
+    private var curPosTv: TextView? = null
 
-    @JvmField
-    var miniNext: ImageView? = null
-    var miniNameText: TextView? = null
+    private var miniCover: ImageView? = null
 
-    @JvmField
-    var miniArtistText: TextView? = null
+    private var miniNameText: TextView? = null
 
-    @JvmField
-    var miniPlayView: View? = null
-
-    @JvmField
-    var playerLayout: View? = null
-    var optionImg: ImageView? = null
-
-    @JvmField
-    var infoLayout: View? = null
-
-    @JvmField
-    var queueAdapter: MusicQueueAdapter? = null
+    private var optionImg: ImageView? = null
     private var musicArrayList: ArrayList<Music>? = null
     private var glideBuilt: GlideBuilt? = null
     private var userScrolling = false
@@ -204,6 +275,14 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         val view = inflater.inflate(R.layout.fragment_player, container, false)
         val weakContext = WeakReference(requireContext())
         context = weakContext.get()
+        glideBuilt = GlideBuilt(requireContext())
+
+        //StorageUtil initialization
+        storageUtil = StorageUtil(requireContext())
+        executorService = Executors.newFixedThreadPool(10)
+        settingsStorage = SettingsStorage(requireContext())
+        val weakActivity = WeakReference(context as MainActivity)
+        mainActivity = weakActivity.get()
 
         //Mini player items initializations
         miniPlayView = view.findViewById(R.id.mini_player_layout) //○
@@ -250,14 +329,20 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         gradientBottom = view.findViewById(R.id.gradient_bottom)
         coverLayout = view.findViewById(R.id.coverRelativeLayout)
 
+        miniPlayView?.let {
+            val vto: ViewTreeObserver = it.viewTreeObserver
+            vto.addOnGlobalLayoutListener(object : OnGlobalLayoutListener {
+                override fun onGlobalLayout() {
+                    val miniPlayerHeight = it.height
+                    mainActivity?.setPlayerBottomSheet(miniPlayerHeight)
+                    // Remove the listener to avoid multiple callbacks
+                    it.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                }
+            })
+        }
         if (!EventBus.getDefault().isRegistered(this)) {
             EventBus.getDefault().register(this)
         }
-        glideBuilt = GlideBuilt(requireContext())
-
-        //StorageUtil initialization
-        storageUtil = StorageUtil(requireContext())
-        executorService = Executors.newFixedThreadPool(10)
         if (savedInstanceState == null) {
             if (activeMusic == null) {
                 activeMusic = currentMusic
@@ -268,10 +353,6 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         if (activeMusic != null) {
             lrcMap = storageUtil?.loadLyrics(activeMusic!!.id)
         }
-        settingsStorage = SettingsStorage(requireContext())
-        val weakActivity = WeakReference(requireActivity() as MainActivity)
-        mainActivity = weakActivity.get()
-        mainActivity?.setPlayerBottomSheet()
         playing_same_song = false
 
         setAccorToSettings()
@@ -335,14 +416,14 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         //        top right option button
         optionImg?.setOnClickListener { optionMenu(activeMusic) }
         queueRecyclerView = view.findViewById(R.id.queue_music_recycler)
-        linearLayoutManager = LinearLayoutManagerWrapper(getContext())
-        musicArrayList = storageUtil?.loadQueueList()
         queueBottomSheet = view.findViewById(R.id.queue_bottom_sheet)
-
-        //lyrics layout related initializations
         val button = view.findViewById<TextView>(R.id.btn_add_lyrics)
         lyricsRecyclerView = view.findViewById(R.id.lyrics_recycler_view)
         noLyricsLayout = view.findViewById(R.id.no_lyrics_layout)
+        linearLayoutManager = LinearLayoutManagerWrapper(getContext())
+        musicArrayList = storageUtil?.loadQueueList()
+
+        //lyrics layout related initializations
         lyricsRecyclerView?.addOnScrollListener(onScrollListener)
         button.setOnClickListener { setLyricsLayout(activeMusic) }
         seekBarMain?.setOnSeekBarChangeListener(this)
@@ -359,7 +440,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         return view
     }
 
-    private fun setSizeOfCoverLayout(view: View?){
+    private fun setSizeOfCoverLayout(view: View?) {
         view?.let {
             val vto: ViewTreeObserver = it.viewTreeObserver
             vto.addOnGlobalLayoutListener(object : OnGlobalLayoutListener {
@@ -437,6 +518,47 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         EventBus.getDefault().unregister(this)
         lyricsRecyclerView?.clearOnScrollListeners()
         executorService?.shutdown()
+
+        queueRecyclerView = null
+        queueBottomSheet = null
+        lyricsRecyclerView = null
+        noLyricsLayout = null
+        miniPlayView = null
+        miniCover = null
+        miniArtistText = null
+        miniNameText = null
+        miniNext = null
+        miniPause = null
+        miniProgress = null
+        playerLayout = null
+        infoLayout = null
+        playerCoverImage = null
+        seekBarMain = null
+        repeatImg = null
+        playImg = null
+        shuffleImg = null
+        favoriteImg = null
+        timerImg = null
+        likeAnim = null
+        optionImg = null
+        playerSongNameTv = null
+        playerArtistNameTv = null
+        bitrateTv = null
+        mimeTv = null
+        durationTv = null
+        curPosTv = null
+        lyricsImg = null
+        timerTv = null
+        queueCoverImg = null
+        songNameQueueItem = null
+        artistQueueItem = null
+        shadowPlayer = null
+        coverCardView = null
+        lyricsCardView = null
+        lyricsRelativeLayout = null
+        gradientTop = null
+        gradientBottom = null
+        coverLayout = null
     }
 
     /**
@@ -643,7 +765,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
             if (activeMusic != null) {
                 val image = result.image
 
-                executorService?.execute{//image decoder
+                executorService?.execute {//image decoder
                     val arrayOfBitmaps = arrayOf<Bitmap?>(null)
                     var art: ByteArray?
                     try {
@@ -669,10 +791,10 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
                         arrayOfBitmaps[0] = null
                     }
                     val finalImage = arrayOfBitmaps[0]
-                    requireActivity().runOnUiThread{
+                    requireActivity().runOnUiThread {
                         tempColor = if (finalImage != null) {
                             if (image == null) {
-                                setImages(SetImageInMainPlayer(finalImage,activeMusic))
+                                setImages(SetImageInMainPlayer(finalImage, activeMusic))
                             }
                             val themeColor = generateThemeColor(finalImage)
                             val palette = generatePalette(finalImage)
@@ -692,7 +814,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
 
     }
 
-    private fun setImages(result: SetImageInMainPlayer){
+    private fun setImages(result: SetImageInMainPlayer) {
         var image = result.image
         try {
             activeMusic?.let {
@@ -731,7 +853,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
     }
 
     private fun showToast(s: String) {
-        (requireContext().applicationContext as ApplicationClass).showToast(s)
+        ApplicationClass.instance.showToast(s)
     }
 
     @SuppressLint("SetTextI18n")
@@ -878,7 +1000,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
 
     fun setLyricsLayout(music: Music?) {
         val fragmentManager = requireActivity().supportFragmentManager
-        val fragment = fragmentManager.findFragmentByTag(MainActivity.ADD_LYRICS_FRAGMENT_TAG)
+        val fragment = fragmentManager.findFragmentByTag(ADD_LYRICS_FRAGMENT_TAG)
         if (fragment != null) {
             fragmentManager.popBackStackImmediate()
         }
@@ -899,7 +1021,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         transaction.replace(
             R.id.sec_container,
             addLyricsFragment,
-            MainActivity.ADD_LYRICS_FRAGMENT_TAG
+            ADD_LYRICS_FRAGMENT_TAG
         )
         transaction.addToBackStack(null)
         transaction.commit()
@@ -915,7 +1037,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         queueSheetBehaviour!!.state = BottomSheetBehavior.STATE_HIDDEN
         queueSheetBehaviour!!.addBottomSheetCallback(object : BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
-                (context as MainActivity?)!!.mainPlayerSheetBehavior?.isEnableCollapse(newState == BottomSheetBehavior.STATE_EXPANDED || newState == BottomSheetBehavior.STATE_DRAGGING)
+                mainActivity?.mainPlayerSheetBehavior?.isEnableCollapse(newState == BottomSheetBehavior.STATE_EXPANDED || newState == BottomSheetBehavior.STATE_DRAGGING)
                 if (queueSheetBehaviour!!.state == BottomSheetBehavior.STATE_EXPANDED) {
                     shadowPlayer!!.alpha = 1f
                 } else if (queueSheetBehaviour!!.state == BottomSheetBehavior.STATE_HIDDEN) {
@@ -923,6 +1045,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
                     shadowPlayer!!.alpha = 0f
                 }
             }
+
             override fun onSlide(bottomSheet: View, slideOffset: Float) {
                 bottomSheet.alpha = 0 + (slideOffset + 1f)
                 shadowPlayer!!.alpha = 0 + (slideOffset + 1f)
@@ -1331,7 +1454,8 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         setMainPlayerLayout(SetMainLayoutEvent(activeMusic))
         var finalImage: Bitmap?
         coroutineScope.launch {
-            GlideApp.with(requireContext()).load(activeMusic.path?.let { AudioFileCover(it) }).override(512)
+            GlideApp.with(requireContext()).load(activeMusic.path?.let { AudioFileCover(it) })
+                .override(512)
                 .into(object :
                     CustomTarget<Drawable>() {
                     override fun onResourceReady(
@@ -1373,8 +1497,9 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         }
     }
 
-    companion object{
+    companion object {
         var playing_same_song = false
+
         @JvmStatic
         fun newInstance() = BottomSheetPlayerFragment()
     }
