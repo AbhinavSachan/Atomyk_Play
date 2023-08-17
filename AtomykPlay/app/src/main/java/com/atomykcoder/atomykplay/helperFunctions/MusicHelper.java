@@ -4,7 +4,7 @@ import android.annotation.SuppressLint;
 import android.util.Base64;
 
 import com.atomykcoder.atomykplay.data.Music;
-import com.atomykcoder.atomykplay.dataModels.LRCMap;
+import com.atomykcoder.atomykplay.models.LRCMap;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import java.util.ArrayList;

@@ -11,11 +11,10 @@ import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.atomykcoder.atomykplay.R
-import com.atomykcoder.atomykplay.activities.MainActivity
 import com.atomykcoder.atomykplay.adapters.PlaylistAdapter
 import com.atomykcoder.atomykplay.constants.FragmentTags.FAVORITE_FRAGMENT_TAG
-import com.atomykcoder.atomykplay.customScripts.GridSpacing
-import com.atomykcoder.atomykplay.dataModels.Playlist
+import com.atomykcoder.atomykplay.scripts.GridSpacing
+import com.atomykcoder.atomykplay.models.Playlist
 import com.atomykcoder.atomykplay.utils.StorageUtil
 
 class PlaylistsFragment : Fragment() {

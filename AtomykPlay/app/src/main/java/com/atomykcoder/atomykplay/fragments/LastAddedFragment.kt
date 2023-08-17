@@ -2,7 +2,6 @@ package com.atomykcoder.atomykplay.fragments
 
 import android.annotation.SuppressLint
 import android.app.Dialog
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -14,7 +13,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.adapters.MusicMainAdapter
-import com.atomykcoder.atomykplay.customScripts.LinearLayoutManagerWrapper
+import com.atomykcoder.atomykplay.scripts.LinearLayoutManagerWrapper
 import com.atomykcoder.atomykplay.data.Music
 import com.atomykcoder.atomykplay.utils.StorageUtil
 import com.atomykcoder.atomykplay.utils.StorageUtil.SettingsStorage

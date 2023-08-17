@@ -1,4 +1,4 @@
-package com.atomykcoder.atomykplay.customScripts
+package com.atomykcoder.atomykplay.scripts
 
 import android.net.Uri
 

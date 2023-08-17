@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 
 import com.atomykcoder.atomykplay.R;
-import com.atomykcoder.atomykplay.activities.MainActivity;
+import com.atomykcoder.atomykplay.ui.MainActivity;
 import com.atomykcoder.atomykplay.adapters.generics.GenericRecyclerAdapter;
 import com.atomykcoder.atomykplay.adapters.generics.GenericViewHolder;
 import com.atomykcoder.atomykplay.adapters.viewHolders.MusicLyricsViewHolder;

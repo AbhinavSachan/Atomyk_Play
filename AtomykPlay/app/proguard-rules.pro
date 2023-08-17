@@ -41,7 +41,7 @@
 # Music player app ProGuard rules
 # keep all model classes
 -keep class com.atomykcoder.atomykplay.data.** { *; }
--keep class com.atomykcoder.atomykplay.dataModels.** { *; }
+-keep class com.atomykcoder.atomykplay.models.** { *; }
 
 # keep Glide-generated code
 -keep public class * implements com.bumptech.glide.GeneratedAppGlideModule {

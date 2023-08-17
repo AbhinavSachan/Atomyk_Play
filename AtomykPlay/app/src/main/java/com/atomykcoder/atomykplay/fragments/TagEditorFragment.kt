@@ -28,11 +28,11 @@ import androidx.lifecycle.MutableLiveData
 import com.atomykcoder.atomykplay.ApplicationClass
 import com.atomykcoder.atomykplay.BuildConfig
 import com.atomykcoder.atomykplay.R
-import com.atomykcoder.atomykplay.activities.MainActivity
+import com.atomykcoder.atomykplay.ui.MainActivity
 import com.atomykcoder.atomykplay.classes.GlideBuilt
-import com.atomykcoder.atomykplay.customScripts.ArtworkInfo
-import com.atomykcoder.atomykplay.customScripts.AudioTagInfo
-import com.atomykcoder.atomykplay.customScripts.TagWriter
+import com.atomykcoder.atomykplay.scripts.ArtworkInfo
+import com.atomykcoder.atomykplay.scripts.AudioTagInfo
+import com.atomykcoder.atomykplay.scripts.TagWriter
 import com.atomykcoder.atomykplay.data.Music
 import com.atomykcoder.atomykplay.databinding.FragmentTagEditorBinding
 import com.atomykcoder.atomykplay.helperFunctions.CustomMethods.pickImage

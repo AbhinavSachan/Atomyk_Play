@@ -477,7 +477,7 @@
         android:background="@drawable/rounded_bottom_lyric_sheet"
         android:elevation="16dp"
         android:orientation="vertical"
-        app:layout_behavior=".customScripts.CustomBottomSheet">
+        app:layout_behavior=".scripts.CustomBottomSheet">
 
         <ImageView
             android:layout_width="match_parent"

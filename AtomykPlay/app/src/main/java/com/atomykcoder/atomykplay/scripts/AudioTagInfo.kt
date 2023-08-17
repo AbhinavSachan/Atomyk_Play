@@ -1,4 +1,4 @@
-package com.atomykcoder.atomykplay.customScripts
+package com.atomykcoder.atomykplay.scripts
 
 import org.jaudiotagger.tag.FieldKey
 

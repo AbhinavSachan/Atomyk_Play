@@ -15,9 +15,9 @@ import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.adapters.OpenPlayListAdapter
 import com.atomykcoder.atomykplay.adapters.SimpleTouchCallback
 import com.atomykcoder.atomykplay.classes.GlideBuilt
-import com.atomykcoder.atomykplay.customScripts.LinearLayoutManagerWrapper
+import com.atomykcoder.atomykplay.scripts.LinearLayoutManagerWrapper
 import com.atomykcoder.atomykplay.data.Music
-import com.atomykcoder.atomykplay.dataModels.Playlist
+import com.atomykcoder.atomykplay.models.Playlist
 import com.atomykcoder.atomykplay.events.RemoveFromPlaylistEvent
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener
 import com.google.android.material.appbar.CollapsingToolbarLayout

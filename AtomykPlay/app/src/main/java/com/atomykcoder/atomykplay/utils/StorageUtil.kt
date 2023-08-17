@@ -2,9 +2,11 @@ package com.atomykcoder.atomykplay.utils
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.atomykcoder.atomykplay.constants.RepeatModes
+import com.atomykcoder.atomykplay.constants.ShuffleModes
 import com.atomykcoder.atomykplay.data.Music
-import com.atomykcoder.atomykplay.dataModels.LRCMap
-import com.atomykcoder.atomykplay.dataModels.Playlist
+import com.atomykcoder.atomykplay.models.LRCMap
+import com.atomykcoder.atomykplay.models.Playlist
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -17,19 +19,16 @@ class StorageUtil
  */(private val context: Context) {
     //Storage Locations
     private val MUSIC_LIST_STORAGE = "com.atomykcoder.atomykplay.MUSIC_LIST_STORAGE"
-    private val POSITION_STORAGE = "com.atomykcoder.atomykplay.STORAGE_POSITION"
-    private val REPEAT_STATUS_STORAGE = "com.atomykcoder.atomykplay.REPEAT_STATUS_STORAGE"
-    private val SHUFFLE_STORAGE = "com.atomykcoder.atomykplay.SHUFFLE_STORAGE"
     private val FAVORITE_STORAGE = "com.atomykcoder.atomykplay.FAVORITE_STORAGE"
     private val LYRICS_STORAGE = "com.atomykcoder.atomykplay.LYRICS_STORAGE"
     private val PLAYLIST_STORAGE = "com.atomykcoder.atomykplay.PLAYLIST_STORAGE"
     private val INITIAL_LIST_STORAGE = "com.atomykcoder.atomykplay.INITIAL_LIST_STORAGE"
     private val MUSIC_INDEX_STORAGE = "com.atomykcoder.atomykplay.MUSIC_INDEX_STORAGE"
     private val TEMP_MUSIC_LIST_STORAGE = "com.atomykcoder.atomykplay.TEMP_MUSIC_LIST_STORAGE"
-    private val musicIndex = "musicIndex"
-    private val musicPosition = "musicPosition"
-    private val repeatStatus = "repeatStatus"
-    private val shuffleStatus = "shuffleStatus"
+    private val musicIndex = "music_index"
+    private val musicPosition = "music_position"
+    private val repeatStatus = "repeat_status"
+    private val shuffleStatus = "shuffle_status"
     //region music queue list code here
     /**
      * save music queue idList in arraylist of strings
@@ -212,11 +211,11 @@ class StorageUtil
      *
      * @param status player status = (repeat, repeat_one, no_repeat)
      */
-    fun saveRepeatStatus(status: String?) {
+    fun saveRepeatStatus(status: Int) {
         indexSharedPref =
             context.getSharedPreferences(MUSIC_INDEX_STORAGE, Context.MODE_PRIVATE)
         val editor = indexSharedPref.edit()
-        editor.putString(repeatStatus, status)
+        editor.putInt(repeatStatus, status)
         editor.apply()
     }
 
@@ -225,10 +224,10 @@ class StorageUtil
      *
      * @return string => (repeat, repeat_one, no_repeat)
      */
-    fun loadRepeatStatus(): String? {
+    fun loadRepeatStatus(): Int {
         indexSharedPref =
             context.getSharedPreferences(MUSIC_INDEX_STORAGE, Context.MODE_PRIVATE)
-        return indexSharedPref.getString(repeatStatus, no_repeat)
+        return indexSharedPref.getInt(repeatStatus, RepeatModes.REPEAT_MODE_NONE)
     }
     //endregion
     //region favourite music related code here
@@ -297,10 +296,10 @@ class StorageUtil
      *
      * @param status boolean
      */
-    fun saveShuffle(status: Boolean) {
+    fun saveShuffle(status: Int) {
         indexSharedPref = context.getSharedPreferences(MUSIC_INDEX_STORAGE, Context.MODE_PRIVATE)
         val editor = indexSharedPref.edit()
-        editor.putBoolean(shuffleStatus, status)
+        editor.putInt(shuffleStatus, status)
         editor.apply()
     }
 
@@ -309,9 +308,9 @@ class StorageUtil
      *
      * @return returns boolean
      */
-    fun loadShuffle(): Boolean {
+    fun loadShuffle(): Int {
         indexSharedPref = context.getSharedPreferences(MUSIC_INDEX_STORAGE, Context.MODE_PRIVATE)
-        return indexSharedPref.getBoolean(shuffleStatus, false)
+        return indexSharedPref.getInt(shuffleStatus, ShuffleModes.SHUFFLE_MODE_NONE)
     }
     //endregion
     //region temporary music list code here
@@ -974,9 +973,6 @@ class StorageUtil
 
     companion object {
         //values
-        const val no_repeat = "no_repeat"
-        const val repeat = "repeat"
-        const val repeat_one = "repeat_one"
         lateinit var queueSharedPref: SharedPreferences
         lateinit var initialSharedPref: SharedPreferences
         lateinit var indexSharedPref: SharedPreferences

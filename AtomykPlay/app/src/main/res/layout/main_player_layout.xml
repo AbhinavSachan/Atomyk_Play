@@ -490,7 +490,7 @@
             android:elevation="4dp"
             android:focusable="true"
             android:orientation="vertical"
-            app:layout_behavior=".customScripts.CustomBottomSheet">
+            app:layout_behavior=".scripts.CustomBottomSheet">
 
             <ImageView
                 android:layout_width="match_parent"

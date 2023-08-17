@@ -22,7 +22,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.airbnb.lottie.LottieAnimationView
 import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.adapters.MusicMainAdapter
-import com.atomykcoder.atomykplay.customScripts.LinearLayoutManagerWrapper
+import com.atomykcoder.atomykplay.scripts.LinearLayoutManagerWrapper
 import com.atomykcoder.atomykplay.data.Music
 import com.atomykcoder.atomykplay.repository.MusicRepo
 import kotlinx.coroutines.CoroutineScope

@@ -1,4 +1,4 @@
-package com.atomykcoder.atomykplay.customScripts;
+package com.atomykcoder.atomykplay.scripts;
 
 import android.graphics.Rect;
 import android.view.View;

@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.recyclerview.widget.DiffUtil
 import com.atomykcoder.atomykplay.R
-import com.atomykcoder.atomykplay.activities.MainActivity
+import com.atomykcoder.atomykplay.ui.MainActivity
 import com.atomykcoder.atomykplay.adapters.generics.GenericViewHolder
 import com.atomykcoder.atomykplay.adapters.viewHolders.MusicMainViewHolder
 import com.atomykcoder.atomykplay.classes.GlideBuilt

@@ -28,10 +28,10 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.atomykcoder.atomykplay.ApplicationClass
 import com.atomykcoder.atomykplay.R
-import com.atomykcoder.atomykplay.activities.MainActivity
+import com.atomykcoder.atomykplay.ui.MainActivity
 import com.atomykcoder.atomykplay.adapters.BeautifyListAdapter
 import com.atomykcoder.atomykplay.adapters.BlockFolderListAdapter
-import com.atomykcoder.atomykplay.customScripts.LinearLayoutManagerWrapper
+import com.atomykcoder.atomykplay.scripts.LinearLayoutManagerWrapper
 import com.atomykcoder.atomykplay.utils.AndroidUtil.setSystemDrawBehindBars
 import com.atomykcoder.atomykplay.utils.AndroidUtil.setTheme
 import com.atomykcoder.atomykplay.utils.StorageUtil.SettingsStorage

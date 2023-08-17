@@ -43,17 +43,14 @@ import androidx.transition.TransitionInflater
 import com.airbnb.lottie.LottieAnimationView
 import com.atomykcoder.atomykplay.ApplicationClass
 import com.atomykcoder.atomykplay.R
-import com.atomykcoder.atomykplay.activities.MainActivity
 import com.atomykcoder.atomykplay.adapters.MusicLyricsAdapter
 import com.atomykcoder.atomykplay.adapters.MusicQueueAdapter
 import com.atomykcoder.atomykplay.adapters.SimpleTouchCallback
 import com.atomykcoder.atomykplay.classes.GlideBuilt
 import com.atomykcoder.atomykplay.constants.FragmentTags.ADD_LYRICS_FRAGMENT_TAG
-import com.atomykcoder.atomykplay.customScripts.CenterSmoothScrollScript.CenterSmoothScroller
-import com.atomykcoder.atomykplay.customScripts.CustomBottomSheet
-import com.atomykcoder.atomykplay.customScripts.LinearLayoutManagerWrapper
+import com.atomykcoder.atomykplay.constants.RepeatModes
+import com.atomykcoder.atomykplay.constants.ShuffleModes
 import com.atomykcoder.atomykplay.data.Music
-import com.atomykcoder.atomykplay.dataModels.LRCMap
 import com.atomykcoder.atomykplay.enums.OptionSheetEnum
 import com.atomykcoder.atomykplay.enums.PlaybackStatus
 import com.atomykcoder.atomykplay.events.*
@@ -61,6 +58,11 @@ import com.atomykcoder.atomykplay.helperFunctions.AudioFileCover
 import com.atomykcoder.atomykplay.helperFunctions.GlideApp
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener
+import com.atomykcoder.atomykplay.models.LRCMap
+import com.atomykcoder.atomykplay.scripts.CenterSmoothScrollScript.CenterSmoothScroller
+import com.atomykcoder.atomykplay.scripts.CustomBottomSheet
+import com.atomykcoder.atomykplay.scripts.LinearLayoutManagerWrapper
+import com.atomykcoder.atomykplay.ui.MainActivity
 import com.atomykcoder.atomykplay.utils.AbhinavAnimationUtil.buttonShakeAnimation
 import com.atomykcoder.atomykplay.utils.AndroidUtil.pxToDp
 import com.atomykcoder.atomykplay.utils.AndroidUtil.toUnscaledBitmap
@@ -196,7 +198,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
 
     private var optionImg: ImageView? = null
     private var musicArrayList: ArrayList<Music>? = null
-    private var glideBuilt: GlideBuilt? = null
+    private val glideBuilt: GlideBuilt by lazy { GlideBuilt(requireContext()) }
     private var userScrolling = false
     private var onScrollListener: RecyclerView.OnScrollListener =
         object : RecyclerView.OnScrollListener() {
@@ -239,7 +241,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
     //setting up mini player layout
     //calling it from service when player is prepared and also calling it in this fragment class
     //to set it on app start ☺
-    private var storageUtil: StorageUtil? = null
+    private val storageUtil: StorageUtil by lazy { StorageUtil(requireContext()) }
     private var itemTouchHelper: ItemTouchHelper? = null
     private var queueRecyclerView: RecyclerView? = null
     private var lyricsRelativeLayout: View? = null
@@ -251,7 +253,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
     private var shadowPlayer: View? = null
     private var songNameQueueItem: TextView? = null
     private var artistQueueItem: TextView? = null
-    private var settingsStorage: SettingsStorage? = null
+    private val settingsStorage: SettingsStorage by lazy { SettingsStorage(requireContext()) }
     private var linearLayoutManager: LinearLayoutManager? = null
     private var lyricsAdapter: MusicLyricsAdapter? = null
     private var timerDialogue: Dialog? = null
@@ -260,9 +262,9 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
     private var shouldRefreshLayout = true
     private var tempColor = 0
     private var lastClickTime: Long = 0
-    private var executorService: ExecutorService? = null
-    private val coroutineScope = CoroutineScope(Dispatchers.IO)
-    private val coroutineScopeMain = CoroutineScope(Dispatchers.Main)
+    private val executorService: ExecutorService by lazy { Executors.newFixedThreadPool(10) }
+    private val coroutineScope by lazy { CoroutineScope(Dispatchers.IO) }
+    private val coroutineScopeMain by lazy { CoroutineScope(Dispatchers.Main) }
     private var gradientTop: View? = null
     private var gradientBottom: View? = null
     private var coverLayout: View? = null
@@ -275,12 +277,8 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         val view = inflater.inflate(R.layout.fragment_player, container, false)
         val weakContext = WeakReference(requireContext())
         context = weakContext.get()
-        glideBuilt = GlideBuilt(requireContext())
 
         //StorageUtil initialization
-        storageUtil = StorageUtil(requireContext())
-        executorService = Executors.newFixedThreadPool(10)
-        settingsStorage = SettingsStorage(requireContext())
         val weakActivity = WeakReference(context as MainActivity)
         mainActivity = weakActivity.get()
 
@@ -351,7 +349,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
             activeMusic = MusicHelper.decode(savedInstanceState.getString("activeMusic"))
         }
         if (activeMusic != null) {
-            lrcMap = storageUtil?.loadLyrics(activeMusic!!.id)
+            lrcMap = storageUtil.loadLyrics(activeMusic!!.id)
         }
         playing_same_song = false
 
@@ -396,7 +394,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         shuffleImg?.setOnClickListener { shuffleList() }
         favoriteImg?.setOnClickListener {
             addFavorite(
-                storageUtil!!, activeMusic, favoriteImg
+                storageUtil, activeMusic, favoriteImg
             )
         }
         timerImg?.setOnClickListener { setTimer() }
@@ -421,7 +419,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         lyricsRecyclerView = view.findViewById(R.id.lyrics_recycler_view)
         noLyricsLayout = view.findViewById(R.id.no_lyrics_layout)
         linearLayoutManager = LinearLayoutManagerWrapper(getContext())
-        musicArrayList = storageUtil?.loadQueueList()
+        musicArrayList = storageUtil.loadQueueList()
 
         //lyrics layout related initializations
         lyricsRecyclerView?.addOnScrollListener(onScrollListener)
@@ -517,7 +515,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         super.onDestroy()
         EventBus.getDefault().unregister(this)
         lyricsRecyclerView?.clearOnScrollListeners()
-        executorService?.shutdown()
+        executorService.shutdown()
 
         queueRecyclerView = null
         queueBottomSheet = null
@@ -565,7 +563,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
      * this is for queue item click
      */
     private fun scrollToCurSong() {
-        val index = storageUtil?.loadMusicIndex() ?: 0
+        val index = storageUtil.loadMusicIndex()
         linearLayoutManager?.scrollToPositionWithOffset(index, 0)
     }
 
@@ -573,17 +571,17 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
      * This method sets elements according to settings values
      */
     private fun setAccorToSettings() {
-        if (settingsStorage!!.loadShowArtist()) {
+        if (settingsStorage.loadShowArtist()) {
             miniArtistText!!.visibility = View.VISIBLE
         } else {
             miniArtistText!!.visibility = View.GONE
         }
-        if (settingsStorage!!.loadShowInfo()) {
+        if (settingsStorage.loadShowInfo()) {
             infoLayout!!.visibility = View.VISIBLE
         } else {
             infoLayout!!.visibility = View.GONE
         }
-        if (settingsStorage!!.loadExtraCon()) {
+        if (settingsStorage.loadExtraCon()) {
             miniNext!!.visibility = View.VISIBLE
         } else {
             miniNext!!.visibility = View.GONE
@@ -599,7 +597,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
 
     private fun generateThemeColor(image: Bitmap): Int {
         val palette = Palette.Builder(image).generate()
-        if (settingsStorage!!.loadIsThemeDark()) {
+        if (settingsStorage.loadIsThemeDark()) {
             var color = palette.getDarkVibrantColor(
                 getColor(R.color.white)
             )
@@ -692,7 +690,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
                 mimeType = "MP3"
                 var bitrateInNum = 0
                 coroutineScope.launch {
-                    if (settingsStorage!!.loadExtraCon()) {
+                    if (settingsStorage.loadExtraCon()) {
                         try {
                             getMime(activeMusic!!.mimeType)!!.uppercase(Locale.getDefault())
                         } catch (_: Exception) {
@@ -717,14 +715,14 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
                         bitrateTv!!.text = finalBitrate
                     }
                 }
-                if (!storageUtil!!.checkFavourite(activeMusic)) {
+                if (!storageUtil.checkFavourite(activeMusic)) {
                     favoriteImg!!.setImageResource(R.drawable.ic_favorite_border)
-                } else if (storageUtil!!.checkFavourite(activeMusic)) {
+                } else if (storageUtil.checkFavourite(activeMusic)) {
                     favoriteImg!!.setImageResource(R.drawable.ic_favorite)
                 }
-                if (!storageUtil!!.loadShuffle()) {
+                if (storageUtil.loadShuffle() == ShuffleModes.SHUFFLE_MODE_NONE) {
                     shuffleImg!!.setImageResource(R.drawable.ic_shuffle_empty)
-                } else if (storageUtil!!.loadShuffle()) {
+                } else if (storageUtil.loadShuffle() == ShuffleModes.SHUFFLE_MODE_ALL) {
                     shuffleImg!!.setImageResource(R.drawable.ic_shuffle)
                 }
                 try {
@@ -765,7 +763,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
             if (activeMusic != null) {
                 val image = result.image
 
-                executorService?.execute {//image decoder
+                executorService.execute {//image decoder
                     val arrayOfBitmaps = arrayOf<Bitmap?>(null)
                     var art: ByteArray?
                     try {
@@ -818,14 +816,14 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         var image = result.image
         try {
             activeMusic?.let {
-                glideBuilt!!.loadFromBitmap(
+                glideBuilt.loadFromBitmap(
                     image,
                     R.drawable.ic_music,
                     playerCoverImage,
                     512,
                     true
                 )
-                glideBuilt!!.loadFromBitmap(
+                glideBuilt.loadFromBitmap(
                     image,
                     R.drawable.ic_music,
                     miniCover,
@@ -834,7 +832,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
                 )
                 queueSheetBehaviour?.let { sheet ->
                     if (sheet.state == BottomSheetBehavior.STATE_EXPANDED) {
-                        glideBuilt!!.loadFromBitmap(
+                        glideBuilt.loadFromBitmap(
                             image,
                             R.drawable.ic_music,
                             queueCoverImg,
@@ -871,15 +869,15 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         seekBarMain!!.progress = 0
         miniProgress!!.progress = 0
         if (activity?.isDestroyed == false || !isDetached) {
-            glideBuilt!!.loadFromBitmap(null, R.drawable.ic_music, playerCoverImage, 512, false)
-            glideBuilt!!.loadFromBitmap(null, R.drawable.ic_music, miniCover, 128, false)
+            glideBuilt.loadFromBitmap(null, R.drawable.ic_music, playerCoverImage, 512, false)
+            glideBuilt.loadFromBitmap(null, R.drawable.ic_music, miniCover, 128, false)
         }
     }
 
     @Subscribe
     fun runnableSyncLyrics(event: RunnableSyncLyricsEvent?) {
         if (activeMusic != null) {
-            lrcMap = storageUtil!!.loadLyrics(activeMusic!!.id)
+            lrcMap = storageUtil.loadLyrics(activeMusic!!.id)
             if (lrcMap != null) {
                 noLyricsLayout!!.visibility = View.GONE
                 lyricsRecyclerView!!.visibility = View.VISIBLE
@@ -1075,7 +1073,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
     fun updateQueueAdapter(list: ArrayList<Music>) {
         // assign class member id list to new updated _id-list
         musicArrayList = ArrayList(list)
-        queueAdapter?.updateMusicListItems(musicArrayList)
+        queueAdapter?.updateMusicListItems(musicArrayList!!)
     }
 
     /**
@@ -1087,7 +1085,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
             coverCardView!!.visibility = View.GONE
             lyricsCardView!!.visibility = View.VISIBLE
             lyricsRelativeLayout!!.visibility = View.VISIBLE
-            lyricsRelativeLayout!!.keepScreenOn = settingsStorage!!.loadKeepScreenOn()
+            lyricsRelativeLayout!!.keepScreenOn = settingsStorage.loadKeepScreenOn()
 
             lyricsCardView?.let {
                 val vto: ViewTreeObserver = it.viewTreeObserver
@@ -1227,9 +1225,9 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
 
     private val currentMusic: Music?
         get() {
-            val musicList = storageUtil!!.loadQueueList()
+            val musicList = storageUtil.loadQueueList()
             var activeMusic: Music? = null
-            val musicIndex: Int = storageUtil!!.loadMusicIndex()
+            val musicIndex: Int = storageUtil.loadMusicIndex()
             if (musicList.isNotNullAndNotEmpty()) activeMusic =
                 if (musicIndex != -1 && musicIndex < musicList.size) {
                     musicList[musicIndex]
@@ -1248,13 +1246,13 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
             return
         }
         //shuffle list program
-        if (!storageUtil!!.loadShuffle()) {
+        if (storageUtil.loadShuffle() == ShuffleModes.SHUFFLE_MODE_NONE) {
             shuffleImg!!.setImageResource(R.drawable.ic_shuffle)
-            storageUtil!!.saveShuffle(true)
+            storageUtil.saveShuffle(ShuffleModes.SHUFFLE_MODE_ALL)
             shuffleListAndSave(activeMusic)
-        } else if (storageUtil!!.loadShuffle()) {
+        } else if (storageUtil.loadShuffle() == ShuffleModes.SHUFFLE_MODE_ALL) {
             shuffleImg!!.setImageResource(R.drawable.ic_shuffle_empty)
-            storageUtil!!.saveShuffle(false)
+            storageUtil.saveShuffle(ShuffleModes.SHUFFLE_MODE_NONE)
             restoreLastListAndPos(activeMusic)
         }
     }
@@ -1269,56 +1267,51 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
     }
 
     private fun shuffleListAndSave(activeMusic: Music?) {
-        val musicList = storageUtil?.loadQueueList()
-        val musicIndex = storageUtil!!.loadMusicIndex()
-        if (musicList != null) {
-            try {
-                CompletableFuture.supplyAsync({
-                    storageUtil!!.saveTempMusicList(musicList)
-                    musicList.removeAt(musicIndex)
-                    musicList.shuffle()
-                    activeMusic?.let { musicList.add(0, it) }
-                    storageUtil!!.saveQueueList(musicList)
-                    storageUtil!!.saveMusicIndex(0)
-                    musicList
-                }, executorService).thenAcceptAsync {
-                    requireActivity().runOnUiThread {
-                        updateQueueAdapter(musicList)
-                    }
+        val musicList = storageUtil.loadQueueList()
+        val musicIndex = storageUtil.loadMusicIndex()
+        try {
+            CompletableFuture.supplyAsync({
+                storageUtil.saveTempMusicList(musicList)
+                musicList.removeAt(musicIndex)
+                musicList.shuffle()
+                activeMusic?.let { musicList.add(0, it) }
+                storageUtil.saveQueueList(musicList)
+                storageUtil.saveMusicIndex(0)
+                musicList
+            }, executorService).thenAcceptAsync {
+                requireActivity().runOnUiThread {
+                    updateQueueAdapter(musicList)
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
     private fun restoreLastListAndPos(activeMusic: Music?) {
-        val tempList = storageUtil?.loadTempMusicList()
-        if (tempList != null) {
-            // do in background code here
-            executorService!!.execute {
-                val index: Int = tempList.indexOf(activeMusic)
-                if (index != -1) {
-                    storageUtil!!.saveMusicIndex(index)
-                }
-                storageUtil!!.saveQueueList(tempList)
-                // post-execute code here
-                requireActivity().runOnUiThread { updateQueueAdapter(tempList) }
+        val tempList = storageUtil.loadTempMusicList()
+        executorService.execute {
+            val index: Int = tempList.indexOf(activeMusic)
+            if (index != -1) {
+                storageUtil.saveMusicIndex(index)
             }
+            storageUtil.saveQueueList(tempList)
+            // post-execute code here
+            requireActivity().runOnUiThread { updateQueueAdapter(tempList) }
         }
     }
 
     private fun repeatFun() {
         //function for music list and only one music repeat and save that state in sharedPreference
-        if (storageUtil!!.loadRepeatStatus() == StorageUtil.no_repeat) {
+        if (storageUtil.loadRepeatStatus() == RepeatModes.REPEAT_MODE_NONE) {
             repeatImg!!.setImageResource(R.drawable.ic_repeat)
-            storageUtil!!.saveRepeatStatus(StorageUtil.repeat)
-        } else if (storageUtil!!.loadRepeatStatus() == StorageUtil.repeat) {
+            storageUtil.saveRepeatStatus(RepeatModes.REPEAT_MODE_ALL)
+        } else if (storageUtil.loadRepeatStatus() == RepeatModes.REPEAT_MODE_ALL) {
             repeatImg!!.setImageResource(R.drawable.ic_repeat_one)
-            storageUtil!!.saveRepeatStatus(StorageUtil.repeat_one)
-        } else if (storageUtil!!.loadRepeatStatus() == StorageUtil.repeat_one) {
+            storageUtil.saveRepeatStatus(RepeatModes.REPEAT_MODE_ONE)
+        } else if (storageUtil.loadRepeatStatus() == RepeatModes.REPEAT_MODE_ONE) {
             repeatImg!!.setImageResource(R.drawable.ic_repeat_empty)
-            storageUtil!!.saveRepeatStatus(StorageUtil.no_repeat)
+            storageUtil.saveRepeatStatus(RepeatModes.REPEAT_MODE_NONE)
         }
     }
 
@@ -1327,7 +1320,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         activeMusic?.let {
             songNameQueueItem!!.text = it.name
             artistQueueItem!!.text = it.artist
-            glideBuilt!!.loadAlbumArt(it.path, R.drawable.ic_music, queueCoverImg, 128, false)
+            glideBuilt.loadAlbumArt(it.path, R.drawable.ic_music, queueCoverImg, 128, false)
         }
         queueSheetBehaviour!!.state = BottomSheetBehavior.STATE_EXPANDED
         queueBottomSheet!!.alpha = 1f
@@ -1341,24 +1334,24 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
     private fun setButton(activeMusic: Music?) {
         //setting all buttons state from storage on startup
         //for repeat button
-        if (storageUtil!!.loadRepeatStatus() == StorageUtil.no_repeat) {
+        if (storageUtil.loadRepeatStatus() == RepeatModes.REPEAT_MODE_NONE) {
             repeatImg!!.setImageResource(R.drawable.ic_repeat_empty)
-        } else if (storageUtil!!.loadRepeatStatus() == StorageUtil.repeat) {
+        } else if (storageUtil.loadRepeatStatus() == RepeatModes.REPEAT_MODE_ALL) {
             repeatImg!!.setImageResource(R.drawable.ic_repeat)
-        } else if (storageUtil!!.loadRepeatStatus() == StorageUtil.repeat_one) {
+        } else if (storageUtil.loadRepeatStatus() == RepeatModes.REPEAT_MODE_ONE) {
             repeatImg!!.setImageResource(R.drawable.ic_repeat_one)
         }
 
         //for shuffle button
-        if (!storageUtil!!.loadShuffle()) {
+        if (storageUtil.loadShuffle() == ShuffleModes.SHUFFLE_MODE_NONE) {
             shuffleImg!!.setImageResource(R.drawable.ic_shuffle_empty)
-        } else if (storageUtil!!.loadShuffle()) {
+        } else if (storageUtil.loadShuffle() == ShuffleModes.SHUFFLE_MODE_ALL) {
             shuffleImg!!.setImageResource(R.drawable.ic_shuffle)
         }
         if (activeMusic != null) {
-            if (!storageUtil!!.checkFavourite(activeMusic)) {
+            if (!storageUtil.checkFavourite(activeMusic)) {
                 favoriteImg!!.setImageResource(R.drawable.ic_favorite_border)
-            } else if (storageUtil!!.checkFavourite(activeMusic)) {
+            } else if (storageUtil.checkFavourite(activeMusic)) {
                 favoriteImg!!.setImageResource(R.drawable.ic_favorite)
             }
         }
@@ -1392,10 +1385,10 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
 
     override fun onStopTrackingTouch(seekBar: SeekBar) {
         //clearing the storage before putting new value
-        storageUtil!!.clearMusicLastPos()
+        storageUtil.clearMusicLastPos()
 
         //storing the current position of seekbar in storage so we can access it from services
-        storageUtil!!.saveMusicLastPos(seekBar.progress)
+        storageUtil.saveMusicLastPos(seekBar.progress)
 
         //first checking setting the media seek to current position of seek bar and then setting all data in UI
         if (MainActivity.service_bound) {
@@ -1426,10 +1419,10 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
             seekBarMain!!.progress = position
             curPosTv!!.text = MusicHelper.convertDuration(position.toString())
             //clearing the storage before putting new value
-            storageUtil!!.clearMusicLastPos()
+            storageUtil.clearMusicLastPos()
 
             //storing the current position of seekbar in storage so we can access it from services
-            storageUtil!!.saveMusicLastPos(position)
+            storageUtil.saveMusicLastPos(position)
 
             //first checking setting the media seek to current position of seek bar and then setting all data in UI
             if (MainActivity.service_bound) {
@@ -1482,7 +1475,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         seekBarMain!!.max = activeMusic.duration.toInt()
         miniProgress!!.max = activeMusic.duration.toInt()
         durationTv!!.text = MusicHelper.convertDuration(activeMusic.duration)
-        val resumePosition = storageUtil!!.loadMusicLastPos()
+        val resumePosition = storageUtil.loadMusicLastPos()
         if (resumePosition != -1) {
             seekBarMain!!.progress = resumePosition
             miniProgress!!.setProgress(resumePosition, true)

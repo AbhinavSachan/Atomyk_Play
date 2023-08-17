@@ -1,4 +1,4 @@
-package com.atomykcoder.atomykplay.activities
+package com.atomykcoder.atomykplay.ui
 
 import android.Manifest
 import android.animation.ArgbEvaluator
@@ -52,10 +52,8 @@ import com.atomykcoder.atomykplay.constants.FragmentTags.PLAYLISTS_FRAGMENT_TAG
 import com.atomykcoder.atomykplay.constants.FragmentTags.SEARCH_FRAGMENT_TAG
 import com.atomykcoder.atomykplay.constants.FragmentTags.SETTINGS_FRAGMENT_TAG
 import com.atomykcoder.atomykplay.constants.FragmentTags.TAG_EDITOR_FRAGMENT_TAG
-import com.atomykcoder.atomykplay.customScripts.CustomBottomSheet
-import com.atomykcoder.atomykplay.customScripts.LinearLayoutManagerWrapper
+import com.atomykcoder.atomykplay.constants.ShuffleModes
 import com.atomykcoder.atomykplay.data.Music
-import com.atomykcoder.atomykplay.dataModels.Playlist
 import com.atomykcoder.atomykplay.enums.OptionSheetEnum
 import com.atomykcoder.atomykplay.events.PrepareRunnableEvent
 import com.atomykcoder.atomykplay.events.RemoveFromFavoriteEvent
@@ -64,8 +62,11 @@ import com.atomykcoder.atomykplay.events.RemoveLyricsHandlerEvent
 import com.atomykcoder.atomykplay.fragments.*
 import com.atomykcoder.atomykplay.helperFunctions.CustomMethods.pickImage
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper
+import com.atomykcoder.atomykplay.models.Playlist
 import com.atomykcoder.atomykplay.repository.LoadingStatus
 import com.atomykcoder.atomykplay.repository.MusicRepo
+import com.atomykcoder.atomykplay.scripts.CustomBottomSheet
+import com.atomykcoder.atomykplay.scripts.LinearLayoutManagerWrapper
 import com.atomykcoder.atomykplay.services.MediaPlayerService
 import com.atomykcoder.atomykplay.services.MediaPlayerService.LocalBinder
 import com.atomykcoder.atomykplay.utils.AndroidUtil
@@ -458,7 +459,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                 || ContextCompat.checkSelfPermission(
                     this,
                     Manifest.permission.READ_PHONE_STATE
-                ) != PackageManager.PERMISSION_GRANTED) {
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
                 is_granted = false
                 showRequestDialog()
             } else {
@@ -472,7 +474,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                 ) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(
                     this,
                     Manifest.permission.READ_PHONE_STATE
-                ) != PackageManager.PERMISSION_GRANTED) {
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
                 is_granted = false
                 showRequestDialog()
             } else {
@@ -916,7 +919,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
      */
     fun playAudio(music: Music?) {
         //starting service if its not started yet otherwise it will send broadcast msg to service
-
         storageUtil?.clearMusicLastPos()
         val encodedMessage = MusicHelper.encode(music)
         if (!phone_ringing) {
@@ -947,7 +949,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
 
         executorService?.apply {
             execute {
-                storageUtil?.saveShuffle(true)
+                storageUtil?.saveShuffle(ShuffleModes.SHUFFLE_MODE_ALL)
                 storageUtil?.saveTempMusicList(songs)
                 /*
                  * Plays a random song from the given list of songs by sending a broadcast message
@@ -1434,6 +1436,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
             }
         }).check()
     }
+
     @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     private fun requestReadAudioAndPhonePermissionAbove12() {
         Dexter.withContext(this@MainActivity).withPermissions(

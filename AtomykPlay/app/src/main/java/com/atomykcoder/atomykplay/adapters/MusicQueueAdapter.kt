@@ -9,7 +9,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.recyclerview.widget.DiffUtil
 import com.atomykcoder.atomykplay.R
-import com.atomykcoder.atomykplay.activities.MainActivity
+import com.atomykcoder.atomykplay.ui.MainActivity
 import com.atomykcoder.atomykplay.adapters.generics.GenericViewHolder
 import com.atomykcoder.atomykplay.adapters.viewHolders.MusicQueueViewHolder
 import com.atomykcoder.atomykplay.classes.GlideBuilt
@@ -32,7 +32,6 @@ class MusicQueueAdapter(
     private var storageUtil: StorageUtil
     private val glideBuilt: GlideBuilt = GlideBuilt(context)
 
-
     init {
         super.items = items
         this.onDragStartListener = onDragStartListener
@@ -41,34 +40,29 @@ class MusicQueueAdapter(
     }
 
     @Synchronized
-    fun updateMusicListItems(newMusicArrayList: ArrayList<Music>?) {
+    fun updateMusicListItems(newMusicArrayList: ArrayList<Music>) {
         if (super.items == null) return
-        val diffCallback = MusicDiffCallback(super.items!!, newMusicArrayList!!)
-        val diffResult = DiffUtil.calculateDiff(diffCallback)
-        super.items!!.clear()
-        super.items!!.addAll(newMusicArrayList)
-        diffResult.dispatchUpdatesTo(this)
+        super.items?.clear()
+        super.items?.addAll(newMusicArrayList)
+        notifyItemRangeChanged(0,newMusicArrayList.size)
     }
 
     //when item starts to move it will change positions of every item in real time
+    @SuppressLint("NotifyDataSetChanged")
     override fun onItemMove(fromPos: Int, toPos: Int) {
         val savedIndex = storageUtil.loadMusicIndex()
-        super.items?.let { Collections.swap(it, fromPos, toPos) }
-        notifyItemMoved(fromPos, toPos)
-        notifyItemRangeChanged(fromPos, 1, null)
-        notifyItemChanged(toPos, null)
-        if (fromPos < savedIndex) {
-            if (toPos == savedIndex || toPos > savedIndex) {
-                storageUtil.saveMusicIndex(savedIndex - 1)
-            }
-        } else if (fromPos > savedIndex) {
-            if (toPos == savedIndex || toPos < savedIndex) {
-                storageUtil.saveMusicIndex(savedIndex + 1)
-            }
-        } else {
-            storageUtil.saveMusicIndex(toPos)
+        super.items?.let {
+            Collections.swap(it, fromPos, toPos)
+            storageUtil.saveQueueList(it) // Save the entire list after swapping
         }
-        storageUtil.saveQueueList(super.items!!)
+        if (fromPos != toPos) {
+            if (fromPos == savedIndex) {
+                storageUtil.saveMusicIndex(toPos)
+            } else if (toPos == savedIndex) {
+                storageUtil.saveMusicIndex(fromPos)
+            }
+        }
+        notifyDataSetChanged() // Notify the adapter that the dataset has changed
     }
 
     //removing item on swipe
@@ -76,7 +70,7 @@ class MusicQueueAdapter(
         //if any item has been removed this will save new list on temp list
         if (super.items != null) {
             if (position != -1 && position < super.items!!.size) {
-                removeItem(super.items!![position])
+                removeItem(super.items?.get(position))
             }
         }
     }
@@ -149,18 +143,18 @@ class MusicQueueAdapter(
         item?.let {
             val position = super.items?.indexOf(it)
             if (position != null && position >= 0) {
-                super.items?.removeAt(position)
+                super.items!!.removeAt(position)
                 notifyItemRemoved(position)
                 notifyItemRangeChanged(position, super.items!!.size - position)
                 storageUtil.saveQueueList(super.items!!)
 
                 if (super.items!!.isEmpty()) {
                     mainActivity.bottomSheetPlayerFragment?.setQueueSheetBehaviour(BottomSheetBehavior.STATE_HIDDEN)
-                    mainActivity.clearStorage()
                     mainActivity.mainPlayerSheetBehavior?.state = BottomSheetBehavior.STATE_HIDDEN
                     mainActivity.bottomSheetPlayerFragment?.resetMainPlayerLayout()
                     mainActivity.resetDataInNavigation()
                     mainActivity.stopMusic()
+                    mainActivity.clearStorage()
                 } else {
                     val savedIndex = storageUtil.loadMusicIndex()
                     if (position == savedIndex) {

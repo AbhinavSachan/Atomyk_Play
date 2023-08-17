@@ -15,9 +15,9 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import com.atomykcoder.atomykplay.R
-import com.atomykcoder.atomykplay.activities.MainActivity
+import com.atomykcoder.atomykplay.ui.MainActivity
 import com.atomykcoder.atomykplay.constants.FragmentTags.ADD_LYRICS_FRAGMENT_TAG
-import com.atomykcoder.atomykplay.dataModels.LRCMap
+import com.atomykcoder.atomykplay.models.LRCMap
 import com.atomykcoder.atomykplay.events.RunnableSyncLyricsEvent
 import com.atomykcoder.atomykplay.helperFunctions.FetchLyrics
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper

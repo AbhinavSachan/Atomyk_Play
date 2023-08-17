@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/primary_bg"
-    tools:context=".activities.MainActivity"
+    tools:context=".ui.MainActivity"
     tools:ignore="UnusedAttribute,UseCompoundDrawables">
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -314,7 +314,7 @@
             android:background="@drawable/rounded_bottom_sheet"
             android:clickable="true"
             android:focusable="true"
-            app:layout_behavior=".customScripts.CustomBottomSheet" />
+            app:layout_behavior=".scripts.CustomBottomSheet" />
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout

@@ -3,7 +3,8 @@ package com.atomykcoder.atomykplay.adapters;
 import android.os.Handler;
 import android.os.Looper;
 
-import com.atomykcoder.atomykplay.activities.MainActivity;
+import com.atomykcoder.atomykplay.constants.ShuffleModes;
+import com.atomykcoder.atomykplay.ui.MainActivity;
 import com.atomykcoder.atomykplay.adapters.generics.GenericRecyclerAdapter;
 import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.utils.StorageUtil;
@@ -37,7 +38,7 @@ public class MusicAdapter extends GenericRecyclerAdapter<Music> {
         ArrayList<Music> shuffleList = new ArrayList<>(musicList);
         canPlay = false;
         service.execute(() -> {
-            storage.saveShuffle(true);
+            storage.saveShuffle(ShuffleModes.SHUFFLE_MODE_ALL);
             storage.saveTempMusicList(shuffleList);
 
             shuffleList.remove(item);
@@ -65,7 +66,7 @@ public class MusicAdapter extends GenericRecyclerAdapter<Music> {
         ExecutorService service = Executors.newFixedThreadPool(2);
         canPlay = false;
         service.execute(() -> {
-            storage.saveShuffle(false);
+            storage.saveShuffle(ShuffleModes.SHUFFLE_MODE_NONE);
             storage.saveQueueList(musicList);
             storage.saveMusicIndex(position);
             this.musicList = musicList;

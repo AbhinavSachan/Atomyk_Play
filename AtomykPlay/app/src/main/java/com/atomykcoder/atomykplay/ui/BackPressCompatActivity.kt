@@ -1,4 +1,4 @@
-package com.atomykcoder.atomykplay.activities
+package com.atomykcoder.atomykplay.ui
 
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity

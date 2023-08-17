@@ -1,4 +1,4 @@
-package com.atomykcoder.atomykplay.dataModels;
+package com.atomykcoder.atomykplay.models;
 
 import com.atomykcoder.atomykplay.data.Music;
 
