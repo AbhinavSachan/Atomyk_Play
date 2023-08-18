@@ -26,10 +26,6 @@ import org.greenrobot.eventbus.Subscribe
 
 class OpenPlayListFragment : Fragment(), OnDragStartListener {
 
-    companion object{
-        @JvmStatic
-        fun newInstance() = OpenPlayListFragment()
-    }
     private var itemTouchHelper: ItemTouchHelper? = null
     private var openPlayListAdapter: OpenPlayListAdapter? = null
     override fun onCreateView(
@@ -47,7 +43,7 @@ class OpenPlayListFragment : Fragment(), OnDragStartListener {
             } else {
                 requireArguments().getSerializable("currentPlaylist") as Playlist
             } else null
-        val glideBuilt = GlideBuilt(requireContext())
+        val glideBuilt = GlideBuilt(requireContext().applicationContext)
         val recyclerView = view.findViewById<RecyclerView>(R.id.open_pl_music_recycler)
         val noPlLayout = view.findViewById<View>(R.id.song_not_found_layout_opl)
         val collapsingToolbarLayout =

@@ -25,7 +25,7 @@ class FavoriteListAdapter(
     private var onDragStartListener: OnDragStartListener
     var storage: StorageUtil
     var settingsStorage: SettingsStorage
-    private val glideBuilt: GlideBuilt = GlideBuilt(context)
+    private val glideBuilt: GlideBuilt = GlideBuilt(context.applicationContext)
 
     init {
         super.items = _musicList

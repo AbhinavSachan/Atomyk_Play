@@ -34,10 +34,6 @@ import java.util.*
 //Search Layout Fragment for Performing Searches and Presenting Results
 class SearchFragment : Fragment() {
 
-    companion object{
-        @JvmStatic
-        fun newInstance() = SearchFragment()
-    }
     private lateinit var manager: InputMethodManager
     private lateinit var searchView: EditText
 

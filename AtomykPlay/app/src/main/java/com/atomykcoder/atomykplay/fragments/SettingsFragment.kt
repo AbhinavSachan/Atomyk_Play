@@ -36,13 +36,9 @@ import com.atomykcoder.atomykplay.utils.AndroidUtil.setSystemDrawBehindBars
 import com.atomykcoder.atomykplay.utils.AndroidUtil.setTheme
 import com.atomykcoder.atomykplay.utils.StorageUtil.SettingsStorage
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import java.lang.ref.WeakReference
 
 class SettingsFragment : Fragment(), OnSeekBarChangeListener {
-
-    companion object {
-        @JvmStatic
-        fun newInstance() = SettingsFragment()
-    }
 
     private lateinit var light_theme_btn: RadioButton
     private lateinit var dark_theme_btn: RadioButton
@@ -111,8 +107,8 @@ class SettingsFragment : Fragment(), OnSeekBarChangeListener {
     ): View? {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_settings, container, false)
-        settingsStorage = SettingsStorage(requireContext())
-        mainActivity = context as MainActivity
+        settingsStorage = SettingsStorage(requireContext().applicationContext)
+        mainActivity = WeakReference(context as MainActivity).get()
         val toolbar = view.findViewById<Toolbar>(R.id.toolbar_settings)
         toolbar.setNavigationIcon(R.drawable.ic_back)
         toolbar.setNavigationOnClickListener { v: View? -> requireActivity().onBackPressed() }
@@ -298,37 +294,43 @@ class SettingsFragment : Fragment(), OnSeekBarChangeListener {
         hideSbSwi.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
             hideSbSwi.isChecked = isChecked
             settingsStorage?.saveHideStatusBar(isChecked)
-            setSystemDrawBehindBars(
-                mainActivity!!.window,
-                dark,
-                mainActivity!!.drawer!!,
-                Color.TRANSPARENT,
-                mainActivity!!.resources.getColor(R.color.player_bg, null),
-                isChecked,
-                hideNb
-            )
+            try {
+                setSystemDrawBehindBars(
+                    mainActivity!!.window,
+                    dark,
+                    mainActivity!!.drawer!!,
+                    Color.TRANSPARENT,
+                    mainActivity!!.resources.getColor(R.color.player_bg, null),
+                    isChecked,
+                    hideNb
+                )
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
             hideSb = isChecked
         }
         hideNbSwi.setOnCheckedChangeListener { buttonView: CompoundButton?, isChecked: Boolean ->
             hideNbSwi.isChecked = isChecked
             settingsStorage!!.saveHideNavBar(isChecked)
-            setSystemDrawBehindBars(
-                mainActivity!!.window,
-                dark,
-                mainActivity!!.drawer!!,
-                Color.TRANSPARENT,
-                mainActivity!!.resources.getColor(R.color.player_bg, null),
-                hideSb,
-                isChecked
-            )
+            try {
+                setSystemDrawBehindBars(
+                    mainActivity!!.window,
+                    dark,
+                    mainActivity!!.drawer!!,
+                    Color.TRANSPARENT,
+                    mainActivity!!.resources.getColor(R.color.player_bg, null),
+                    hideSb,
+                    isChecked
+                )
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
             hideNb = isChecked
         }
 
         //Check if any radio button is pressed
-        radioGroup.setOnCheckedChangeListener { group: RadioGroup?, checkedId: Int ->
-            setDark(
-                checkedId
-            )
+        radioGroup.setOnCheckedChangeListener { _: RadioGroup?, checkedId: Int ->
+            setDark(checkedId)
         }
         return view
     }

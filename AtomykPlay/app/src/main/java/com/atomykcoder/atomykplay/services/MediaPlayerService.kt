@@ -103,7 +103,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
 
     //for above android 10 devices
     private var phoneStateCallback: PhoneStateCallback? = null
-    private var telephonyManager: TelephonyManager? = null
+    private val telephonyManager: TelephonyManager by lazy { getSystemService(TELEPHONY_SERVICE) as TelephonyManager }
     private val audioManager: AudioManager by lazy { getSystemService(AUDIO_SERVICE) as AudioManager }
 
     //broadcast receivers
@@ -120,7 +120,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
     private var defaultMetadata: MediaMetadataCompat? = null
     private var initialNotification: Notification? = null
     private var musicNotification: Notification? = null
-    private lateinit var audioFocusRequest: AudioFocusRequest
+    private var audioFocusRequest: AudioFocusRequest? = null
 
     private val stopMusicReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -197,13 +197,11 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
             if (music != null) {
                 activeMusic = music
             }
-            if (mediaSessionManager == null) {
-                try {
-                    initiateMediaSession()
-                } catch (e: RemoteException) {
-                    e.printStackTrace()
-                    stopSelf()
-                }
+            try {
+                initiateMediaSession()
+            } catch (e: RemoteException) {
+                e.printStackTrace()
+                stopSelf()
             }
             stopMedia()
             initiateMediaPlayer()
@@ -211,23 +209,19 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
     }
 
     private fun onNextReceived() {
-        if (mediaSessionManager == null) {
-            try {
-                initiateMediaSession()
-            } catch (e: RemoteException) {
-                stopSelf()
-            }
+        try {
+            initiateMediaSession()
+        } catch (e: RemoteException) {
+            stopSelf()
         }
         skipToNext()
     }
 
     private fun onPreviousReceived() {
-        if (mediaSessionManager == null) {
-            try {
-                initiateMediaSession()
-            } catch (e: RemoteException) {
-                stopSelf()
-            }
+        try {
+            initiateMediaSession()
+        } catch (e: RemoteException) {
+            stopSelf()
         }
         skipToPrevious()
     }
@@ -580,10 +574,9 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
      * this function checks if any phone calls are on going
      */
     private fun callStateListener() {
-        telephonyManager = getSystemService(TELEPHONY_SERVICE) as TelephonyManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             phoneStateCallback = CustomCallStateListener()
-            telephonyManager!!.registerTelephonyCallback(
+            telephonyManager.registerTelephonyCallback(
                 ContextCompat.getMainExecutor(this), phoneStateCallback!!
             )
         } else {
@@ -594,7 +587,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
                     takeActionOnCall(state)
                 }
             }
-            telephonyManager!!.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE)
+            telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE)
         }
     }
 
@@ -871,7 +864,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
      * This function plays music from start
      */
     private fun playMedia() {
-        if (!requestAudioFocus()) requestAudioFocus()
+        if (!requestAudioFocus()) return
         if (MainActivity.phone_ringing) {
             showToast("Can't play while on call")
             return
@@ -912,9 +905,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
         if (initialNotification == null) {
             buildInitialNotification()
         }
-        if (notificationManager != null) {
-            notificationManager.notify(NOTIFICATION_ID, initialNotification)
-        }
+        notificationManager.notify(NOTIFICATION_ID, initialNotification)
         stopSelf()
     }
 
@@ -923,7 +914,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
      */
     fun resumeMedia(showNotification: Boolean) {
         // request audio focus if false
-        if (!requestAudioFocus()) requestAudioFocus()
+        if (!requestAudioFocus()) return
 
         //make toast if volume is off
         if (audioManager.getStreamVolume(AudioManager.STREAM_MUSIC).toFloat() == 0f) {
@@ -1316,7 +1307,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
             handleNotificationActions(intent)
             return START_STICKY
         }
-        return super.onStartCommand(intent, flags, startId)
+        return super.onStartCommand(null, flags, startId)
     }
 
     override fun onTaskRemoved(rootIntent: Intent) {
@@ -1324,8 +1315,8 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
         //here we are stopping service after 5 minutes if app
         // is not running in background and player is not playing
         //this is a optional feature for user
-        if (settingsStorage != null && settingsStorage.loadSelfStop()) {
-            if (selfStopHandler != null && selfStopRunnable != null) {
+        if (settingsStorage.loadSelfStop()) {
+            if (selfStopRunnable != null) {
                 selfStopRunnable = Runnable {
                     if (!is_playing && !ui_visible) {
                         stopSelf()
@@ -1375,8 +1366,6 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
         super.onDestroy()
         removeAudioFocus()
         MainActivity.service_stopped = true
-        selfStopHandler.removeCallbacksAndMessages(null)
-        handler.removeCallbacksAndMessages(null)
 
         cancelTimer()
         if (isMediaPlayerNotNull) {
@@ -1385,15 +1374,14 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
         //disable phone state listener ♣
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             if (phoneStateCallback != null) {
-                telephonyManager?.unregisterTelephonyCallback(phoneStateCallback!!)
+                telephonyManager.unregisterTelephonyCallback(phoneStateCallback!!)
             }
         } else {
             if (phoneStateListener != null) {
-                telephonyManager?.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE)
+                telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE)
             }
         }
-        defaultMetadata = null
-        defaultThumbnail = null
+        releaseResources()
         unregisterReceiver(becomingNoisyReceiver)
         unregisterReceiver(pluggedInDevice)
         unregisterReceiver(playNewMusicReceiver)
@@ -1402,8 +1390,26 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
         unregisterReceiver(prevMusicReceiver)
         unregisterReceiver(stopMusicReceiver)
         unregisterReceiver(bluetoothReceiver)
-        releasePlayer()
+
+    }
+
+    private fun releaseResources() {
+        selfStopHandler.removeCallbacksAndMessages(null)
+        handler.removeCallbacksAndMessages(null)
+        defaultMetadata = null
+        defaultThumbnail = null
+        mPackageValidator = null
+        seekBarRunnable = null
+        seekBarHandler = null
+        selfStopRunnable = null
+        transportControls = null
+        musicList?.clear()
+        musicList = null
+        phoneStateListener = null
+        phoneStateCallback = null
+        audioFocusRequest = null
         disableEqualizerUtil()
+        releasePlayer()
     }
 
     private fun releasePlayer() {
@@ -1429,7 +1435,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
             val builder = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
             builder.setOnAudioFocusChangeListener(this)
             audioFocusRequest = builder.build()
-            result = audioManager.requestAudioFocus(audioFocusRequest)
+            result = audioManager.requestAudioFocus(audioFocusRequest!!)
         } else {
             result = audioManager.requestAudioFocus(
                 this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN
@@ -1439,12 +1445,10 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
     }
 
     private fun removeAudioFocus() {
-        if (audioManager != null) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                audioManager.abandonAudioFocusRequest(audioFocusRequest)
-            } else {
-                audioManager.abandonAudioFocus(this)
-            }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            audioFocusRequest?.let { audioManager.abandonAudioFocusRequest(it) }
+        } else {
+            audioManager.abandonAudioFocus(this)
         }
     }
 

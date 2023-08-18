@@ -70,8 +70,4 @@ class FavoritesFragment : Fragment(), OnDragStartListener {
         playListAdapter!!.removeItem(event.music)
     }
 
-    companion object{
-        @JvmStatic
-        fun newInstance() = FavoritesFragment()
-    }
 }

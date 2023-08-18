@@ -22,8 +22,4 @@ class HelpFragment : Fragment() {
         return view
     }
 
-    companion object{
-        @JvmStatic
-        fun newInstance() = HelpFragment()
-    }
 }

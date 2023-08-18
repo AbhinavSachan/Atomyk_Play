@@ -22,7 +22,7 @@ class MusicMainAdapter(var context: Context, musicList: ArrayList<Music>?) : Mus
     private var storage: StorageUtil = StorageUtil(context)
     private var settingsStorage: SettingsStorage = SettingsStorage(context)
     private var musicRepo: MusicRepo = MusicRepo.instance!!
-    private val glideBuilt: GlideBuilt = GlideBuilt(context)
+    private val glideBuilt: GlideBuilt = GlideBuilt(context.applicationContext)
 
     init {
         super.items = musicList

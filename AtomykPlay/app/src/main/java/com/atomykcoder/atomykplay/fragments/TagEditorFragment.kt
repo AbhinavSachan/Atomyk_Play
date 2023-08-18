@@ -115,7 +115,7 @@ class TagEditorFragment : Fragment() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
             b.editSongGenreTag.visibility = View.GONE
         }
-        glideBuilt = GlideBuilt(requireContext())
+        glideBuilt = GlideBuilt(requireContext().applicationContext)
         b.editSongNameTag.setText(music?.name)
         b.editSongArtistTag.setText(music?.artist)
         b.editSongAlbumTag.setText(music?.album)
@@ -325,21 +325,4 @@ class TagEditorFragment : Fragment() {
         glideBuilt!!.loadFromUri(imageUri.toString(), 0, b.songImageViewTag, 512)
     }
 
-    companion object {
-        fun getRealPathFromImageURI(context: Context, contentUri: Uri?): String {
-            var cursor: Cursor? = null
-            return try {
-                val proj = arrayOf(MediaStore.Images.Media.DATA)
-                cursor = context.contentResolver.query(contentUri!!, proj, null, null, null)
-                cursor!!.moveToFirst()
-                val columnIndex = cursor.getColumnIndex(proj[0])
-                cursor.getString(columnIndex)
-            } finally {
-                cursor?.close()
-            }
-        }
-
-        @JvmStatic
-        fun newInstance() = TagEditorFragment()
-    }
 }

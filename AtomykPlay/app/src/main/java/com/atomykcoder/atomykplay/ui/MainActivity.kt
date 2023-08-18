@@ -61,6 +61,7 @@ import com.atomykcoder.atomykplay.events.RemoveFromPlaylistEvent
 import com.atomykcoder.atomykplay.events.RemoveLyricsHandlerEvent
 import com.atomykcoder.atomykplay.fragments.*
 import com.atomykcoder.atomykplay.helperFunctions.CustomMethods.pickImage
+import com.atomykcoder.atomykplay.helperFunctions.Logger
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper
 import com.atomykcoder.atomykplay.models.Playlist
 import com.atomykcoder.atomykplay.repository.LoadingStatus
@@ -128,7 +129,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     private var plItemSelected: Playlist? = null
     private var selectedItem: Music? = null
     private var isChecking = false
-    private var glideBuilt: GlideBuilt? = null
+    private lateinit var glideBuilt: GlideBuilt
     private var shadowLyrFound: View? = null
     private var shadowOuterSheet: View? = null
     private var shadowOuterSheet2: View? = null
@@ -149,7 +150,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
             }
         }
     private val pickIntentForPLCover =
-        registerForActivityResult<Intent?, ActivityResult>(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
             if (result.resultCode == RESULT_OK) {
                 if (result.data != null) {
                     playListImageUri = result.data!!.data
@@ -164,7 +165,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     private var phoneStateListener: PhoneStateListener? = null
     private var phoneStateCallback: PhoneStateCallback? = null
     private var progressBar: ProgressBar? = null
-    private var storageUtil: StorageUtil? = null
+    private lateinit var storageUtil: StorageUtil
     var drawer: DrawerLayout? = null
     private lateinit var settingsStorage: SettingsStorage
     private val detailsSheetCallback: BottomSheetCallback = object : BottomSheetCallback() {
@@ -376,12 +377,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
             // photo picker.
             if (uri != null) {
                 val coverImageUri = uri.toString()
-                storageUtil?.replacePlaylist(
-                    storageUtil!!.loadPlaylist(pl_name),
+                storageUtil.replacePlaylist(
+                    storageUtil.loadPlaylist(pl_name),
                     pl_name,
                     coverImageUri
                 )
-                playlistFragment?.updateItems(storageUtil?.allPlaylist)
+                playlistFragment?.updateItems(storageUtil.allPlaylist)
             }
         }
     private val pickIntentForPLCoverChange =
@@ -389,12 +390,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
             if (result.resultCode == RESULT_OK) {
                 if (result.data != null) {
                     val coverImageUri = result.data!!.data.toString()
-                    storageUtil?.replacePlaylist(
-                        storageUtil!!.loadPlaylist(pl_name),
+                    storageUtil.replacePlaylist(
+                        storageUtil.loadPlaylist(pl_name),
                         pl_name,
                         coverImageUri
                     )
-                    playlistFragment?.updateItems(storageUtil?.allPlaylist)
+                    playlistFragment?.updateItems(storageUtil.allPlaylist)
                 }
             }
         }
@@ -444,10 +445,10 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     private var executorService: ExecutorService? = null
     private var noPl_tv: TextView? = null
     fun clearStorage() {
-        storageUtil!!.clearMusicLastPos()
-        storageUtil!!.clearMusicIndex()
-        storageUtil!!.clearQueueList()
-        storageUtil!!.clearTempMusicList()
+        storageUtil.clearMusicLastPos()
+        storageUtil.clearMusicIndex()
+        storageUtil.clearQueueList()
+        storageUtil.clearTempMusicList()
     }
 
     private fun checkForPermission() {
@@ -620,11 +621,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     }
 
     private fun playShuffleSong() {
-        val list: ArrayList<Music>? = storageUtil?.loadInitialList()
-        if (list == null) {
-            showToast("No Songs")
-            return
-        }
+        val list: ArrayList<Music> = storageUtil.loadInitialList()
         if (list.isEmpty()) {
             showToast("No Songs")
             return
@@ -638,7 +635,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
             fragmentManager.findFragmentByTag(LAST_ADDED_FRAGMENT_TAG) as LastAddedFragment?
         val transaction = fragmentManager.beginTransaction()
         if (lastAddedFragment == null) {
-            lastAddedFragment = LastAddedFragment.newInstance()
+            lastAddedFragment = LastAddedFragment()
             lastAddedFragment!!.enterTransition = TransitionInflater.from(this)
                 .inflateTransition(android.R.transition.slide_bottom)
             transaction.replace(R.id.sec_container, lastAddedFragment!!, LAST_ADDED_FRAGMENT_TAG)
@@ -651,7 +648,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         val fragmentManager = supportFragmentManager
         val fragment3 = fragmentManager.findFragmentByTag(PLAYLISTS_FRAGMENT_TAG)
         val transaction = fragmentManager.beginTransaction()
-        playlistFragment = PlaylistsFragment.newInstance()
+        playlistFragment = PlaylistsFragment()
         if (fragment3 == null) {
             playlistFragment!!.enterTransition = TransitionInflater.from(this)
                 .inflateTransition(android.R.transition.slide_right)
@@ -691,50 +688,84 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     }
 
     private fun setBottomSheetProperties(
-        sheet: BottomSheetBehavior<View?>,
+        sheet: BottomSheetBehavior<View?>?,
         peekHeight: Int,
         skipCollapse: Boolean,
+        state: Int,
     ) {
-        sheet.isHideable = true
-        sheet.peekHeight = peekHeight
-        sheet.skipCollapsed = skipCollapse
-        sheet.state = BottomSheetBehavior.STATE_HIDDEN
+        sheet?.isHideable = true
+        sheet?.peekHeight = peekHeight
+        sheet?.skipCollapsed = skipCollapse
+        sheet?.state = state
     }
 
     private fun setBottomSheets() {
         val height = getDisplaySize().height
 
+        setPlayerBottomSheet((height / 11.2).toInt())
+
         val optionPeekHeight = (height / 1.3f).toInt()
         optionSheetBehavior = BottomSheetBehavior.from(optionSheet!!)
-        setBottomSheetProperties(optionSheetBehavior!!, optionPeekHeight, true)
+        setBottomSheetProperties(
+            optionSheetBehavior,
+            optionPeekHeight,
+            true,
+            BottomSheetBehavior.STATE_HIDDEN
+        )
 
         val detailsPeekHeight = (height / 1.95f).toInt()
         detailsSheetBehavior = BottomSheetBehavior.from(detailsSheet!!)
-        setBottomSheetProperties(detailsSheetBehavior!!, detailsPeekHeight, true)
+        setBottomSheetProperties(
+            detailsSheetBehavior,
+            detailsPeekHeight,
+            true,
+            BottomSheetBehavior.STATE_HIDDEN
+        )
 
         val lyricFoundPeekHeight = (height / 3.5f).toInt()
         lyricsSheet = findViewById(R.id.found_lyrics_fragments)
         lyricsListBehavior = BottomSheetBehavior.from(lyricsSheet!!)
-        setBottomSheetProperties(lyricsListBehavior!!, lyricFoundPeekHeight, false)
+        setBottomSheetProperties(
+            lyricsListBehavior,
+            lyricFoundPeekHeight,
+            false,
+            BottomSheetBehavior.STATE_HIDDEN
+        )
 
         val donationPeekHeight = (height / 1.4f).toInt()
         donationSheetBehavior = BottomSheetBehavior.from(donationSheet!!)
-        setBottomSheetProperties(donationSheetBehavior!!, donationPeekHeight, true)
+        setBottomSheetProperties(
+            donationSheetBehavior,
+            donationPeekHeight,
+            true,
+            BottomSheetBehavior.STATE_HIDDEN
+        )
 
         val plOptionPeekHeight = (height / 1.8f).toInt()
         plSheetBehavior = BottomSheetBehavior.from(plSheet!!)
-        setBottomSheetProperties(plSheetBehavior!!, plOptionPeekHeight, true)
+        setBottomSheetProperties(
+            plSheetBehavior,
+            plOptionPeekHeight,
+            true,
+            BottomSheetBehavior.STATE_HIDDEN
+        )
     }
 
     fun setPlayerBottomSheet(miniPlayerHeight: Int) {
-        mainPlayerSheetBehavior!!.isHideable = true
-        mainPlayerSheetBehavior!!.peekHeight = miniPlayerHeight
-        if (music != null) {
-            mainPlayerSheetBehavior!!.setState(BottomSheetBehavior.STATE_COLLAPSED)
+        Logger.normalLog("height - $miniPlayerHeight")
+
+        val state = if (music != null) {
+            BottomSheetBehavior.STATE_COLLAPSED
         } else {
-            anchoredShadow!!.alpha = 0f
-            mainPlayerSheetBehavior!!.setState(BottomSheetBehavior.STATE_HIDDEN)
+            anchoredShadow?.alpha = 0f
+            BottomSheetBehavior.STATE_HIDDEN
         }
+        setBottomSheetProperties(
+            mainPlayerSheetBehavior,
+            miniPlayerHeight,
+            false,
+            state
+        )
     }
 
     private fun getDisplaySize(): Size {
@@ -784,7 +815,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         navSongName!!.text = "Song Name"
         navArtistName!!.text = "Artist"
         if (!isDestroyed) {
-            glideBuilt!!.loadFromUri(null, R.drawable.ic_music, navCover, 512)
+            glideBuilt.loadFromUri(null, R.drawable.ic_music, navCover, 512)
         }
     }
 
@@ -794,19 +825,19 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     }
 
     fun setImageInNavigation(album_uri: Bitmap?) {
-        glideBuilt!!.loadFromBitmap(album_uri, R.drawable.ic_music, navCover, 512, false)
+        glideBuilt.loadFromBitmap(album_uri, R.drawable.ic_music, navCover, 512, false)
     }
 
     private val music: Music?
         get() {
-            val musicList = storageUtil?.loadQueueList()
+            val musicList = storageUtil.loadQueueList()
             var activeMusic: Music? = null
-            val musicIndex: Int = storageUtil!!.loadMusicIndex()
+            val musicIndex: Int = storageUtil.loadMusicIndex()
             if (musicList.isNotNullAndNotEmpty()) {
-                activeMusic = if (musicIndex != -1 && musicIndex < musicList!!.size) {
+                activeMusic = if (musicIndex != -1 && musicIndex < musicList.size) {
                     musicList[musicIndex]
                 } else {
-                    musicList!![0]
+                    musicList[0]
                 }
             }
             return activeMusic
@@ -919,7 +950,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
      */
     fun playAudio(music: Music?) {
         //starting service if its not started yet otherwise it will send broadcast msg to service
-        storageUtil?.clearMusicLastPos()
+        storageUtil.clearMusicLastPos()
         val encodedMessage = MusicHelper.encode(music)
         if (!phone_ringing) {
             if (service_stopped) {
@@ -949,8 +980,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
 
         executorService?.apply {
             execute {
-                storageUtil?.saveShuffle(ShuffleModes.SHUFFLE_MODE_ALL)
-                storageUtil?.saveTempMusicList(songs)
+                storageUtil.saveShuffle(ShuffleModes.SHUFFLE_MODE_ALL)
+                storageUtil.saveTempMusicList(songs)
                 /*
                  * Plays a random song from the given list of songs by sending a broadcast message
                  */
@@ -966,8 +997,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                 songs.add(0, music)
 
                 //saving list
-                storageUtil!!.saveQueueList(songs)
-                storageUtil!!.saveMusicIndex(0)
+                storageUtil.saveQueueList(songs)
+                storageUtil.saveMusicIndex(0)
                 runOnUiThread {
                     playAudio(music)
                     bottomSheetPlayerFragment!!.updateQueueAdapter(songs)
@@ -1065,7 +1096,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
      * this function sets up player bottom sheet
      */
     private fun setFragmentInSlider() {
-        bottomSheetPlayerFragment = BottomSheetPlayerFragment.newInstance()
+        bottomSheetPlayerFragment = BottomSheetPlayerFragment()
         val mainPlayerManager = supportFragmentManager
         val transaction = mainPlayerManager.beginTransaction()
         transaction.replace(R.id.player_main_container, bottomSheetPlayerFragment!!)
@@ -1073,7 +1104,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     }
 
     private fun setSearchFragment() {
-        searchFragment = SearchFragment.newInstance()
+        searchFragment = SearchFragment()
         replaceFragment(
             R.id.sec_container,
             searchFragment!!,
@@ -1132,9 +1163,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         optionTag = tag
         removeFromList!!.visibility = View.GONE
         deleteBtn!!.visibility = View.GONE
-        if (!storageUtil!!.checkFavourite(music)) {
+        if (!storageUtil.checkFavourite(music)) {
             addToFav!!.setImageResource(R.drawable.ic_favorite_border)
-        } else if (storageUtil!!.checkFavourite(music)) {
+        } else if (storageUtil.checkFavourite(music)) {
             addToFav!!.setImageResource(R.drawable.ic_favorite)
         }
         when (tag) {
@@ -1152,7 +1183,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         optionSheetBehavior!!.state = BottomSheetBehavior.STATE_COLLAPSED
         optionName!!.text = music.name
         optionArtist!!.text = music.artist
-        glideBuilt!!.loadAlbumArt(music.path, R.drawable.ic_music, optionCover, 128, true)
+        glideBuilt.loadAlbumArt(music.path, R.drawable.ic_music, optionCover, 128, true)
 
     }
 
@@ -1162,7 +1193,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         plSheetBehavior!!.state = BottomSheetBehavior.STATE_COLLAPSED
         plOptionName!!.text = currentItem.name
         optionPlCount!!.text = count
-        glideBuilt!!.loadFromUri(currentItem.coverUri, R.drawable.ic_music_list, plOptionCover, 128)
+        glideBuilt.loadFromUri(currentItem.coverUri, R.drawable.ic_music_list, plOptionCover, 128)
     }
 
     private fun deleteFromDevice(musics: List<Music?>) {
@@ -1218,7 +1249,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         builder.setView(customLayout)
         builder.setCancelable(false)
         val imageView = customLayout.findViewById<ImageView>(R.id.cover_image)
-        glideBuilt!!.loadFromUri(music.albumUri, R.drawable.ic_music_thumbnail, imageView, 512)
+        glideBuilt.loadFromUri(music.albumUri, R.drawable.ic_music_thumbnail, imageView, 512)
         builder.setPositiveButton("Allow") { dialog: DialogInterface, i: Int ->
             if (ContextCompat.checkSelfPermission(
                     this@MainActivity,
@@ -1252,9 +1283,10 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        settingsStorage = SettingsStorage(this)
         installSplashScreen()
         val window1 = window
+        storageUtil = StorageUtil(applicationContext)
+        settingsStorage = SettingsStorage(applicationContext)
 
         if (window1 != null) {
             val darkTheme = settingsStorage.loadIsThemeDark()
@@ -1263,13 +1295,13 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        glideBuilt = GlideBuilt(applicationContext)
+
         //initializations
         MediaPlayerService.ui_visible = true
-        storageUtil = StorageUtil(this@MainActivity)
         executorService = Executors.newFixedThreadPool(10)
         handler = Handler(Looper.getMainLooper())
         musicRepo = MusicRepo.instance
-        glideBuilt = GlideBuilt(this)
         animateFromColor = resources.getColor(R.color.player_bg, null)
         animateToColor = resources.getColor(R.color.white, null)
         linearLayout = findViewById(R.id.song_not_found_layout)
@@ -1318,15 +1350,15 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         navSongName = headerView.findViewById(R.id.nav_song_name)
         navArtistName = headerView.findViewById(R.id.nav_song_artist)
         navDetailLayout.setOnClickListener { v: View? ->
-            drawer!!.closeDrawer(GravityCompat.START)
+            drawer?.closeDrawer(GravityCompat.START)
             if (music != null) {
                 mainPlayerSheetBehavior!!.state = BottomSheetBehavior.STATE_EXPANDED
             }
         }
         navigationView!!.setNavigationItemSelectedListener(this)
         openDrawer.setOnClickListener {
-            if (!drawer!!.isDrawerOpen(GravityCompat.START)) {
-                drawer!!.openDrawer(GravityCompat.START)
+            if (drawer?.isDrawerOpen(GravityCompat.START) == false) {
+                drawer?.openDrawer(GravityCompat.START)
             }
         }
         searchBar.setOnClickListener { setSearchFragment() }
@@ -1534,7 +1566,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
 
                 LoadingStatus.SUCCESS -> {
                     val list: ArrayList<Music> = musicRepo!!.initialMusicList
-                    storageUtil!!.saveInitialList(list)
+                    storageUtil.saveInitialList(list)
                     if (list.isEmpty()) {
                         linearLayout!!.visibility = View.VISIBLE
                     }
@@ -1556,7 +1588,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
      */
     private fun setUpMusicScanner() {
         //Fetch Music List along with it's metadata and save it in "dataList"
-        val loadList: ArrayList<Music>? = storageUtil?.loadInitialList()
+        val loadList: ArrayList<Music> = storageUtil.loadInitialList()
         if (loadList.isNotNullAndNotEmpty()) {
             setMusicAdapter(loadList)
         } else {
@@ -1578,7 +1610,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                 musicRecyclerView?.adapter = musicMainAdapter
             } else {
                 musicMainAdapter?.updateMusicListItems(musicArrayList)
-                storageUtil?.saveInitialList(musicArrayList!!)
+                storageUtil.saveInitialList(musicArrayList!!)
             }
         }
     }
@@ -1658,7 +1690,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
             }
 
             R.id.add_to_favourites_option -> {
-                bottomSheetPlayerFragment!!.addFavorite(storageUtil!!, selectedItem, addToFav)
+                bottomSheetPlayerFragment!!.addFavorite(storageUtil, selectedItem, addToFav)
             }
 
             R.id.add_play_next_pl_option -> {
@@ -1701,7 +1733,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         val customLayout = layoutInflater.inflate(R.layout.rename_playlist_layout, null)
         builder.setView(customLayout)
         builder.setCancelable(true)
-        playlistArrayList = storageUtil!!.allPlaylist
+        playlistArrayList = storageUtil.allPlaylist
         val editText = customLayout.findViewById<EditText>(R.id.edit_playlist_rename)
         editText.setText(playlist!!.name)
         builder.setPositiveButton("OK") { dialog: DialogInterface, i: Int ->
@@ -1728,14 +1760,14 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
 
     private fun deletePl(playlist: Playlist?) {
         playlistFragment?.removeItems(playlist)
-        storageUtil?.removePlayList(playlist!!.name)
-        val arrayList = storageUtil?.allPlaylist
+        storageUtil.removePlayList(playlist!!.name)
+        val arrayList = storageUtil.allPlaylist
         playlistFragment?.updateItems(arrayList)
     }
 
     private fun renamePl(playlist: Playlist?, newName: String) {
-        storageUtil!!.replacePlaylist(playlist!!, newName, playlist.coverUri)
-        val arrayList = storageUtil?.allPlaylist
+        storageUtil.replacePlaylist(playlist!!, newName, playlist.coverUri)
+        val arrayList = storageUtil.allPlaylist
         playlistFragment?.updateItems(arrayList)
     }
 
@@ -1768,11 +1800,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         builder.setView(customLayout)
         builder.setCancelable(true)
         //Initialize Dialogue Box UI Items
-        playlistArrayList = storageUtil!!.allPlaylist
+        playlistArrayList = storageUtil.allPlaylist
         val image = customLayout.findViewById<ImageView>(R.id.add_to_fav_dialog_box_img)
-        if (!storageUtil!!.checkFavourite(music)) {
+        if (!storageUtil.checkFavourite(music)) {
             image.setImageResource(R.drawable.ic_favorite_border)
-        } else if (storageUtil!!.checkFavourite(music)) {
+        } else if (storageUtil.checkFavourite(music)) {
             image.setImageResource(R.drawable.ic_favorite)
         }
         plDialogRecyclerView = customLayout.findViewById(R.id.playlist_dialog_recycler)
@@ -1802,7 +1834,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     }
 
     private fun addToFavorite(music: Music?) {
-        storageUtil!!.saveFavorite(music)
+        storageUtil.saveFavorite(music)
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -1831,8 +1863,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
             }
             if (plKey != "") {
                 if (!playlistNames.contains(plKey)) {
-                    storageUtil!!.createPlaylist(plKey, plCoverUri)
-                    val allList = storageUtil!!.allPlaylist
+                    storageUtil.createPlaylist(plKey, plCoverUri)
+                    val allList = storageUtil.allPlaylist
                     if (playlistArrayList != null) {
                         playlistArrayList!!.clear()
                         playlistArrayList!!.addAll(allList)
@@ -1923,7 +1955,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         }
         val encodedMessage = MusicHelper.encode(itemSelected)
         if (fragment2 == null) {
-            val fragment = TagEditorFragment.newInstance()
+            val fragment = TagEditorFragment()
             val bundle = Bundle()
             bundle.putSerializable("currentMusic", encodedMessage)
             fragment.arguments = bundle
@@ -1995,7 +2027,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                 if (fragment1 == null) {
                     replaceFragment(
                         R.id.sec_container,
-                        SettingsFragment.newInstance(),
+                        SettingsFragment(),
                         android.R.transition.slide_right,
                         SETTINGS_FRAGMENT_TAG
                     )
@@ -2009,7 +2041,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                 if (fragment2 == null) {
                     replaceFragment(
                         R.id.sec_container,
-                        PlaylistsFragment.newInstance(),
+                        PlaylistsFragment(),
                         android.R.transition.slide_right,
                         PLAYLISTS_FRAGMENT_TAG
                     )
@@ -2023,7 +2055,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                 if (fragment3 == null) {
                     replaceFragment(
                         R.id.sec_container,
-                        AboutFragment.newInstance(),
+                        AboutFragment(),
                         android.R.transition.slide_right,
                         ABOUT_FRAGMENT_TAG
                     )
@@ -2037,7 +2069,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                 if (fragment6 == null) {
                     replaceFragment(
                         R.id.sec_container,
-                        LastAddedFragment.newInstance(),
+                        LastAddedFragment(),
                         android.R.transition.slide_right,
                         LAST_ADDED_FRAGMENT_TAG
                     )

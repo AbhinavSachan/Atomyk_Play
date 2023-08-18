@@ -8,7 +8,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.net.toUri
 import com.atomykcoder.atomykplay.ApplicationClass
-import com.atomykcoder.atomykplay.fragments.TagEditorFragment.Companion.getRealPathFromImageURI
+import com.atomykcoder.atomykplay.utils.AbhinavUtil.getFilePathFromContentUri
 import com.atomykcoder.atomykplay.utils.MusicUtil.deleteAlbumArt
 import com.atomykcoder.atomykplay.utils.MusicUtil.insertAlbumArt
 import kotlinx.coroutines.Dispatchers
@@ -51,12 +51,10 @@ class TagWriter {
                 var albumArtFile: File? = null
                 if (info.artworkInfo?.artwork != null) {
                     try {
-                        albumArtFile = File(
-                            getRealPathFromImageURI(
-                                context,
-                                info.artworkInfo.artwork
-                            )
-                        )
+                        albumArtFile = getFilePathFromContentUri(
+                            context,
+                            info.artworkInfo.artwork
+                        )?.let { File(it) }
                         artwork = Artwork.createArtworkFromFile(albumArtFile)
                     } catch (e: Exception) {
                         context.showToast("Something went wrong with artwork")
@@ -121,12 +119,10 @@ class TagWriter {
                 var albumArtFile: File? = null
                 if (info.artworkInfo?.artwork != null) {
                     try {
-                        albumArtFile = File(
-                            getRealPathFromImageURI(
-                                context,
-                                info.artworkInfo.artwork
-                            )
-                        )
+                        albumArtFile = getFilePathFromContentUri(
+                            context,
+                            info.artworkInfo.artwork
+                        )?.let { File(it) }
                         artwork = Artwork.createArtworkFromFile(albumArtFile)
 
                     } catch (e: IOException) {

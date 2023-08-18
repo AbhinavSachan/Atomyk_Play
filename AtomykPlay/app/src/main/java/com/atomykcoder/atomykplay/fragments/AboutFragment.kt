@@ -79,8 +79,4 @@ class AboutFragment : Fragment() {
         )
         startActivity(rateIntent)
     }
-    companion object{
-        @JvmStatic
-        fun newInstance() = AboutFragment()
-    }
 }

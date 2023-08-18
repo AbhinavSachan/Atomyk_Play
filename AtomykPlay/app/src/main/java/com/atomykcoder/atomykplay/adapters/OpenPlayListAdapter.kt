@@ -26,7 +26,7 @@ class OpenPlayListAdapter(
     var storage: StorageUtil
     var settingsStorage: SettingsStorage
     private var onDragStartListener: OnDragStartListener
-    private val glideBuilt: GlideBuilt = GlideBuilt(context)
+    private val glideBuilt: GlideBuilt = GlideBuilt(context.applicationContext)
 
 
     init {

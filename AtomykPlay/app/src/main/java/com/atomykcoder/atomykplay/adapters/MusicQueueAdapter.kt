@@ -30,7 +30,7 @@ class MusicQueueAdapter(
     private var onDragStartListener: OnDragStartListener
     var mainActivity: MainActivity
     private var storageUtil: StorageUtil
-    private val glideBuilt: GlideBuilt = GlideBuilt(context)
+    private val glideBuilt: GlideBuilt = GlideBuilt(context.applicationContext)
 
     init {
         super.items = items

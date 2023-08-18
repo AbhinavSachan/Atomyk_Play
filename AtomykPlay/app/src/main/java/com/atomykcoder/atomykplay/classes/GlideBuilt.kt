@@ -1,10 +1,9 @@
 package com.atomykcoder.atomykplay.classes
 
+import android.app.Activity
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BlurMaskFilter.Blur
 import android.widget.ImageView
-import com.airbnb.lottie.model.content.BlurEffect
 import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.helperFunctions.AudioFileCover
 import com.atomykcoder.atomykplay.helperFunctions.GlideApp
@@ -21,6 +20,7 @@ class GlideBuilt(private val context: Context) {
         imageView: ImageView?,
         image_measure: Int
     ) {
+
         Glide.with(context).load(uri).apply(
             RequestOptions().placeholder(placeholderImage).error(R.drawable.ic_music)
         )

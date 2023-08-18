@@ -49,7 +49,7 @@ class PlaylistsFragment : Fragment() {
             val fragment1 = fragmentManager.findFragmentByTag(FAVORITE_FRAGMENT_TAG)
             val transaction = fragmentManager.beginTransaction()
             if (fragment1 == null) {
-                val fragment = FavoritesFragment.newInstance()
+                val fragment = FavoritesFragment()
                 fragment.enterTransition = TransitionInflater.from(requireContext())
                     .inflateTransition(android.R.transition.slide_right)
                 transaction.add(R.id.sec_container, fragment, FAVORITE_FRAGMENT_TAG)
@@ -71,11 +71,6 @@ class PlaylistsFragment : Fragment() {
         recyclerView.adapter = playlistAdapter
 
         return view
-    }
-
-    companion object {
-        @JvmStatic
-        fun newInstance() = PlaylistsFragment()
     }
 
     override fun onDestroyView() {

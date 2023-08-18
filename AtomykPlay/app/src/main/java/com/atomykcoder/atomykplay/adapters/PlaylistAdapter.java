@@ -34,7 +34,7 @@ public class PlaylistAdapter extends GenericRecyclerAdapter<Playlist> {
     public PlaylistAdapter(Context context, ArrayList<Playlist> arrayList) {
         this.context = context;
         super.items = arrayList;
-        glideBuilt = new GlideBuilt(context);
+        glideBuilt = new GlideBuilt(context.getApplicationContext());
         mainActivity = ((MainActivity) context);
     }
 
@@ -72,7 +72,7 @@ public class PlaylistAdapter extends GenericRecyclerAdapter<Playlist> {
             if (fragment3 != null) {
                 fragmentManager.popBackStackImmediate();
             }
-            OpenPlayListFragment openPlayListFragment = OpenPlayListFragment.newInstance();
+            OpenPlayListFragment openPlayListFragment = new OpenPlayListFragment();
             openPlayListFragment.setArguments(bundle);
 
             transaction.add(R.id.sec_container, openPlayListFragment, OPEN_PLAYLIST_FRAGMENT_TAG).addToBackStack(null).commit();

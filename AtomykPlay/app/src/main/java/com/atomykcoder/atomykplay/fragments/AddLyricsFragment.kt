@@ -212,9 +212,4 @@ class AddLyricsFragment : Fragment() {
         }
     }
 
-    companion object {
-        @JvmStatic
-        fun newInstance() = AddLyricsFragment()
-    }
-
 }
