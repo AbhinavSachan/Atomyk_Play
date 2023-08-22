@@ -635,7 +635,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
             fragmentManager.findFragmentByTag(LAST_ADDED_FRAGMENT_TAG) as LastAddedFragment?
         val transaction = fragmentManager.beginTransaction()
         if (lastAddedFragment == null) {
-            lastAddedFragment = LastAddedFragment()
+            lastAddedFragment = LastAddedFragment.newInstance()
             lastAddedFragment!!.enterTransition = TransitionInflater.from(this)
                 .inflateTransition(android.R.transition.slide_bottom)
             transaction.replace(R.id.sec_container, lastAddedFragment!!, LAST_ADDED_FRAGMENT_TAG)
@@ -648,7 +648,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         val fragmentManager = supportFragmentManager
         val fragment3 = fragmentManager.findFragmentByTag(PLAYLISTS_FRAGMENT_TAG)
         val transaction = fragmentManager.beginTransaction()
-        playlistFragment = PlaylistsFragment()
+        playlistFragment = PlaylistsFragment.newInstance()
         if (fragment3 == null) {
             playlistFragment!!.enterTransition = TransitionInflater.from(this)
                 .inflateTransition(android.R.transition.slide_right)
@@ -1096,7 +1096,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
      * this function sets up player bottom sheet
      */
     private fun setFragmentInSlider() {
-        bottomSheetPlayerFragment = BottomSheetPlayerFragment()
+        bottomSheetPlayerFragment = BottomSheetPlayerFragment.newInstance()
         val mainPlayerManager = supportFragmentManager
         val transaction = mainPlayerManager.beginTransaction()
         transaction.replace(R.id.player_main_container, bottomSheetPlayerFragment!!)
@@ -1104,7 +1104,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     }
 
     private fun setSearchFragment() {
-        searchFragment = SearchFragment()
+        searchFragment = SearchFragment.newInstance()
         replaceFragment(
             R.id.sec_container,
             searchFragment!!,
@@ -1955,10 +1955,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         }
         val encodedMessage = MusicHelper.encode(itemSelected)
         if (fragment2 == null) {
-            val fragment = TagEditorFragment()
-            val bundle = Bundle()
-            bundle.putSerializable("currentMusic", encodedMessage)
-            fragment.arguments = bundle
+            val fragment = TagEditorFragment.newInstance(encodedMessage)
             replaceFragment(
                 R.id.sec_container,
                 fragment,
@@ -2027,7 +2024,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                 if (fragment1 == null) {
                     replaceFragment(
                         R.id.sec_container,
-                        SettingsFragment(),
+                        SettingsFragment.newInstance(),
                         android.R.transition.slide_right,
                         SETTINGS_FRAGMENT_TAG
                     )
@@ -2041,7 +2038,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                 if (fragment2 == null) {
                     replaceFragment(
                         R.id.sec_container,
-                        PlaylistsFragment(),
+                        PlaylistsFragment.newInstance(),
                         android.R.transition.slide_right,
                         PLAYLISTS_FRAGMENT_TAG
                     )
@@ -2055,7 +2052,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                 if (fragment3 == null) {
                     replaceFragment(
                         R.id.sec_container,
-                        AboutFragment(),
+                        AboutFragment.newInstance(),
                         android.R.transition.slide_right,
                         ABOUT_FRAGMENT_TAG
                     )
@@ -2069,7 +2066,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                 if (fragment6 == null) {
                     replaceFragment(
                         R.id.sec_container,
-                        LastAddedFragment(),
+                        LastAddedFragment.newInstance(),
                         android.R.transition.slide_right,
                         LAST_ADDED_FRAGMENT_TAG
                     )

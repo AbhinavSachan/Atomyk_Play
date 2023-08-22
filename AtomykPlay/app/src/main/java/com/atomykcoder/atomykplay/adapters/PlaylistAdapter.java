@@ -66,14 +66,10 @@ public class PlaylistAdapter extends GenericRecyclerAdapter<Playlist> {
             Fragment fragment3 = fragmentManager.findFragmentByTag(OPEN_PLAYLIST_FRAGMENT_TAG);
             FragmentTransaction transaction = fragmentManager.beginTransaction();
 
-            Bundle bundle = new Bundle();
-            bundle.putSerializable("currentPlaylist", currentItem);
-
             if (fragment3 != null) {
                 fragmentManager.popBackStackImmediate();
             }
-            OpenPlayListFragment openPlayListFragment = new OpenPlayListFragment();
-            openPlayListFragment.setArguments(bundle);
+            OpenPlayListFragment openPlayListFragment = OpenPlayListFragment.newInstance(currentItem);
 
             transaction.add(R.id.sec_container, openPlayListFragment, OPEN_PLAYLIST_FRAGMENT_TAG).addToBackStack(null).commit();
 

@@ -18,7 +18,10 @@ import com.atomykcoder.atomykplay.models.Playlist
 import com.atomykcoder.atomykplay.utils.StorageUtil
 
 class PlaylistsFragment : Fragment() {
-
+    companion object{
+        @JvmStatic
+        fun newInstance() = PlaylistsFragment()
+    }
     private var noPlLayout: View? = null
     private var playlistList: ArrayList<Playlist>? = null
     private var playlistAdapter: PlaylistAdapter? = null
@@ -49,7 +52,7 @@ class PlaylistsFragment : Fragment() {
             val fragment1 = fragmentManager.findFragmentByTag(FAVORITE_FRAGMENT_TAG)
             val transaction = fragmentManager.beginTransaction()
             if (fragment1 == null) {
-                val fragment = FavoritesFragment()
+                val fragment = FavoritesFragment.newInstance()
                 fragment.enterTransition = TransitionInflater.from(requireContext())
                     .inflateTransition(android.R.transition.slide_right)
                 transaction.add(R.id.sec_container, fragment, FAVORITE_FRAGMENT_TAG)

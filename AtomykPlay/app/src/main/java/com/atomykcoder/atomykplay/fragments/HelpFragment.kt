@@ -10,6 +10,10 @@ import androidx.fragment.app.Fragment
 import com.atomykcoder.atomykplay.R
 
 class HelpFragment : Fragment() {
+    companion object{
+        @JvmStatic
+        fun newInstance() = HelpFragment()
+    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?

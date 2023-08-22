@@ -2,10 +2,8 @@ package com.atomykcoder.atomykplay.fragments
 
 import android.Manifest
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.database.Cursor
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -28,16 +26,16 @@ import androidx.lifecycle.MutableLiveData
 import com.atomykcoder.atomykplay.ApplicationClass
 import com.atomykcoder.atomykplay.BuildConfig
 import com.atomykcoder.atomykplay.R
-import com.atomykcoder.atomykplay.ui.MainActivity
 import com.atomykcoder.atomykplay.classes.GlideBuilt
-import com.atomykcoder.atomykplay.scripts.ArtworkInfo
-import com.atomykcoder.atomykplay.scripts.AudioTagInfo
-import com.atomykcoder.atomykplay.scripts.TagWriter
 import com.atomykcoder.atomykplay.data.Music
 import com.atomykcoder.atomykplay.databinding.FragmentTagEditorBinding
 import com.atomykcoder.atomykplay.helperFunctions.CustomMethods.pickImage
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper
 import com.atomykcoder.atomykplay.repository.LoadingStatus
+import com.atomykcoder.atomykplay.scripts.ArtworkInfo
+import com.atomykcoder.atomykplay.scripts.AudioTagInfo
+import com.atomykcoder.atomykplay.scripts.TagWriter
+import com.atomykcoder.atomykplay.ui.MainActivity
 import com.atomykcoder.atomykplay.utils.MusicUtil
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
@@ -51,7 +49,17 @@ import org.jaudiotagger.tag.FieldKey
 import java.io.File
 import java.util.EnumMap
 
+private const val ARG_MUSIC = "currentMusic"
+
 class TagEditorFragment : Fragment() {
+    companion object {
+        @JvmStatic
+        fun newInstance(song:String) = TagEditorFragment().apply {
+            arguments = Bundle().apply {
+                putSerializable(ARG_MUSIC,song)
+            }
+        }
+    }
 
     private lateinit var launcher: ActivityResultLauncher<IntentSenderRequest>
     private lateinit var cacheFiles: List<File>
@@ -92,18 +100,25 @@ class TagEditorFragment : Fragment() {
         }
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        arguments?.run {
+            val decodeMessage =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    getSerializable(ARG_MUSIC, String::class.java)
+                } else {
+                    getSerializable(ARG_MUSIC) as String
+                }
+            music = MusicHelper.decode(decodeMessage)
+        }
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?,
     ): View {
         // Inflate the layout for this fragment
         b = FragmentTagEditorBinding.inflate(inflater, container, false)
-        val decodeMessage =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                arguments?.getSerializable("currentMusic", String::class.java)
-            } else {
-                arguments?.getSerializable("currentMusic") as String
-            }
-        music = MusicHelper.decode(decodeMessage)
+
         if (music == null) {
             requireActivity().supportFragmentManager.popBackStack()
             showToast(null)

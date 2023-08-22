@@ -13,8 +13,8 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.adapters.MusicMainAdapter
-import com.atomykcoder.atomykplay.scripts.LinearLayoutManagerWrapper
 import com.atomykcoder.atomykplay.data.Music
+import com.atomykcoder.atomykplay.scripts.LinearLayoutManagerWrapper
 import com.atomykcoder.atomykplay.utils.StorageUtil
 import com.atomykcoder.atomykplay.utils.StorageUtil.SettingsStorage
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -25,6 +25,10 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class LastAddedFragment : Fragment() {
+    companion object{
+        @JvmStatic
+        fun newInstance() = LastAddedFragment()
+    }
     private lateinit var recyclerView: RecyclerView
     private val firstOptionValue = 30
     private val secondOptionValue = 90
@@ -52,7 +56,11 @@ class LastAddedFragment : Fragment() {
     ): View? {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_last_added, container, false)
+        return view
+    }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         //get references
 
         recyclerView = view.findViewById(R.id.last_added_recycle_view)
@@ -66,23 +74,15 @@ class LastAddedFragment : Fragment() {
         progressDialog = view.findViewById(R.id.progress_bar_last_added)
         songCountTv = view.findViewById(R.id.count_of_lastAdded)
         // initialize/load music array lists
-        initialMusicList = StorageUtil(
-            requireContext()
-        ).loadInitialList()
+        initialMusicList = StorageUtil(requireContext()).loadInitialList()
         lastAddedMusicList = ArrayList()
 
         // back button click listener
-        backImageView.setOnClickListener {
-            requireActivity().onBackPressed()
-        }
+        backImageView.setOnClickListener { requireActivity().onBackPressed() }
 
         // filter click listener
         filterButton.setOnClickListener { openDialogFilter() }
-        return view
-    }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
         coroutineDefaultScope.launch {
             //sort initial music list by date in reverse order
             val locale: Locale = Locale.getDefault()

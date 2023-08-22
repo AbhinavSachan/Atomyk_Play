@@ -21,6 +21,10 @@ import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 
 class FavoritesFragment : Fragment(), OnDragStartListener {
+    companion object{
+        @JvmStatic
+        fun newInstance() = FavoritesFragment()
+    }
     private var itemTouchHelper: ItemTouchHelper? = null
     private var playListAdapter: FavoriteListAdapter? = null
     private var storageUtil: StorageUtil? = null
@@ -38,7 +42,7 @@ class FavoritesFragment : Fragment(), OnDragStartListener {
         val noPlLayout = view.findViewById<View>(R.id.song_not_found_layout_favorite)
         val toolbar = view.findViewById<Toolbar>(R.id.toolbar_favorites)
         toolbar.setNavigationIcon(R.drawable.ic_back)
-        toolbar.setNavigationOnClickListener { v: View? -> requireActivity().onBackPressed() }
+        toolbar.setNavigationOnClickListener { requireActivity().onBackPressed() }
         recyclerView.setHasFixedSize(true)
         val manager: LinearLayoutManager = LinearLayoutManagerWrapper(context)
         val favList: ArrayList<Music> = storageUtil!!.favouriteList

@@ -15,12 +15,13 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import com.atomykcoder.atomykplay.R
-import com.atomykcoder.atomykplay.ui.MainActivity
 import com.atomykcoder.atomykplay.constants.FragmentTags.ADD_LYRICS_FRAGMENT_TAG
-import com.atomykcoder.atomykplay.models.LRCMap
+import com.atomykcoder.atomykplay.data.Music
 import com.atomykcoder.atomykplay.events.RunnableSyncLyricsEvent
 import com.atomykcoder.atomykplay.helperFunctions.FetchLyrics
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper
+import com.atomykcoder.atomykplay.models.LRCMap
+import com.atomykcoder.atomykplay.ui.MainActivity
 import com.atomykcoder.atomykplay.utils.StorageUtil
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -31,7 +32,19 @@ import org.greenrobot.eventbus.EventBus
 import java.lang.ref.WeakReference
 import java.util.Locale
 
+private const val ARG_SONG = "selectedMusic"
+
 class AddLyricsFragment : Fragment() {
+    companion object {
+        @JvmStatic
+        fun newInstance(song: String) = AddLyricsFragment().apply {
+            arguments = Bundle().apply {
+                putSerializable(ARG_SONG, song)
+            }
+        }
+    }
+
+    private var selectedMusic: Music? = null
     private val lrcMap = LRCMap()
     private var songName: String? = null
     private var editTextLyrics: EditText? = null
@@ -49,18 +62,25 @@ class AddLyricsFragment : Fragment() {
     private lateinit var view: View
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
     private val coroutineScopeMain = CoroutineScope(Dispatchers.Main)
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        arguments?.let {
+            val decodeMessage = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                it.getSerializable(ARG_SONG, String::class.java)
+            } else {
+                it.getSerializable(ARG_SONG) as String
+            }
+            selectedMusic = MusicHelper.decode(decodeMessage)
+        }
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_add_lyrics, container, false)
-        val decodeMessage = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            requireArguments().getSerializable("selectedMusic", String::class.java)
-        } else {
-            requireArguments().getSerializable("selectedMusic") as String
-        }
-        val selectedMusic = MusicHelper.decode(decodeMessage)
         editTextLyrics = view.findViewById(R.id.edit_lyrics)
         mainActivity = WeakReference(context as? MainActivity)
         val saveBtn = view.findViewById<Button>(R.id.btn_save)
@@ -78,9 +98,9 @@ class AddLyricsFragment : Fragment() {
                 mainActivity?.get()?.onBackPressed()
             }
         }
-        name = if (selectedMusic != null) selectedMusic.name else ""
-        artist = if (selectedMusic != null) selectedMusic.artist else ""
-        musicId = if (selectedMusic != null) selectedMusic.id else ""
+        name = selectedMusic?.name ?: ""
+        artist = selectedMusic?.artist ?: ""
+        musicId = selectedMusic?.id ?: ""
         val nameText = view.findViewById<TextView>(R.id.song_name_tv)
         nameText.text = name
         saveBtn.setOnClickListener { saveMusic() }

@@ -537,7 +537,6 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
 
     override fun onDestroyView() {
         super.onDestroyView()
-
         EventBus.getDefault().unregister(this)
         lyricsRecyclerView?.clearOnScrollListeners()
         executorService.shutdown()
@@ -884,16 +883,16 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
     fun resetMainPlayerLayout() {
         playerSongNameTv!!.text = "Song"
         playerArtistNameTv!!.text = "Artist"
-        mimeTv!!.text = "MP3"
-        bitrateTv!!.text = "0 KBPS"
-        curPosTv!!.text = "00:00"
-        durationTv!!.text = "-00:00"
-        miniNameText!!.text = "Song Name"
-        miniArtistText!!.text = "Artist Name"
-        seekBarMain!!.max = 0
-        miniProgress!!.max = 0
-        seekBarMain!!.progress = 0
-        miniProgress!!.progress = 0
+        mimeTv?.text = "MP3"
+        bitrateTv?.text = "0 KBPS"
+        curPosTv?.text = "00:00"
+        durationTv?.text = "-00:00"
+        miniNameText?.text = "Song Name"
+        miniArtistText?.text = "Artist Name"
+        seekBarMain?.max = 0
+        miniProgress?.max = 0
+        seekBarMain?.progress = 0
+        miniProgress?.progress = 0
         if (activity?.isDestroyed == false || !isDetached) {
             glideBuilt.loadFromBitmap(null, R.drawable.ic_music, playerCoverImage, 512, false)
             glideBuilt.loadFromBitmap(null, R.drawable.ic_music, miniCover, 128, false)
@@ -905,16 +904,16 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         if (activeMusic != null) {
             lrcMap = storageUtil.loadLyrics(activeMusic!!.id)
             if (lrcMap != null) {
-                noLyricsLayout!!.visibility = View.GONE
-                lyricsRecyclerView!!.visibility = View.VISIBLE
+                noLyricsLayout?.visibility = View.GONE
+                lyricsRecyclerView?.visibility = View.VISIBLE
                 lyricsArrayList.clear()
                 lyricsArrayList.addAll(lrcMap!!.lyrics)
                 setLyricsAdapter()
                 lyricsHandler = Handler(Looper.getMainLooper())
                 EventBus.getDefault().post(PrepareRunnableEvent())
             } else {
-                lyricsRecyclerView!!.visibility = View.GONE
-                noLyricsLayout!!.visibility = View.VISIBLE
+                lyricsRecyclerView?.visibility = View.GONE
+                noLyricsLayout?.visibility = View.VISIBLE
             }
         }
     }
@@ -943,31 +942,31 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
                         }
                     }
                 }
-                lyricsHandler!!.postDelayed(
+                lyricsHandler?.postDelayed(
                     lyricsRunnable!!,
                     (nextStampInMillis - currPosInMillis).toLong()
                 )
             }
-            lyricsHandler!!.postDelayed(lyricsRunnable!!, 0)
+            lyricsHandler?.postDelayed(lyricsRunnable!!, 0)
         }
     }
 
     @Subscribe
     fun handleMusicProgressUpdate(event: UpdateMusicProgressEvent) {
-        miniProgress!!.progress = event.position
-        seekBarMain!!.progress = event.position
+        miniProgress?.progress = event.position
+        seekBarMain?.progress = event.position
         val cur = MusicHelper.convertDuration(event.position.toString())
-        curPosTv!!.text = cur
+        curPosTv?.text = cur
     }
 
     @Subscribe
     fun handleMusicImageUpdate(event: UpdateMusicImageEvent) {
         if (event.shouldDisplayPlayImage) {
-            miniPause!!.setImageResource(R.drawable.ic_play_mini)
-            playImg!!.setImageResource(R.drawable.ic_play_main)
+            miniPause?.setImageResource(R.drawable.ic_play_mini)
+            playImg?.setImageResource(R.drawable.ic_play_main)
         } else {
-            miniPause!!.setImageResource(R.drawable.ic_pause_mini)
-            playImg!!.setImageResource(R.drawable.ic_pause_main)
+            miniPause?.setImageResource(R.drawable.ic_pause_mini)
+            playImg?.setImageResource(R.drawable.ic_pause_main)
         }
     }
 
@@ -998,7 +997,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         val smoothScroller: SmoothScroller = CenterSmoothScroller(context)
         smoothScroller.targetPosition = position
         try {
-            lm!!.startSmoothScroll(smoothScroller)
+            lm?.startSmoothScroll(smoothScroller)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -1028,13 +1027,10 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         if (fragment != null) {
             fragmentManager.popBackStackImmediate()
         }
-        val bundle = Bundle()
 
         //encode music
         val encodedMessage = MusicHelper.encode(music)
-        bundle.putSerializable("selectedMusic", encodedMessage)
-        val addLyricsFragment = AddLyricsFragment()
-        addLyricsFragment.arguments = bundle
+        val addLyricsFragment = AddLyricsFragment.newInstance(encodedMessage)
         addLyricsFragment.enterTransition =
             TransitionInflater.from(requireContext())
                 .inflateTransition(android.R.transition.slide_top)
@@ -1518,5 +1514,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
 
     companion object {
         var playing_same_song = false
+        @JvmStatic
+        fun newInstance() = BottomSheetPlayerFragment()
     }
 }

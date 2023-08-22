@@ -20,6 +20,10 @@ import com.google.android.material.card.MaterialCardView
 import de.hdodenhof.circleimageview.CircleImageView
 
 class AboutFragment : Fragment() {
+    companion object{
+        @JvmStatic
+        fun newInstance() = AboutFragment()
+    }
     private val flatIconUri = Uri.parse("https://www.flaticon.com/")
     private val svgRepoUri = Uri.parse("https://www.svgrepo.com/")
     private val lottieFilesUri = Uri.parse("https://lottiefiles.com/")

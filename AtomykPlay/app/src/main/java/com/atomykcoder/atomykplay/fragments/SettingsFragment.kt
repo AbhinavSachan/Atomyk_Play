@@ -39,7 +39,10 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.lang.ref.WeakReference
 
 class SettingsFragment : Fragment(), OnSeekBarChangeListener {
-
+    companion object{
+        @JvmStatic
+        fun newInstance() = SettingsFragment()
+    }
     private lateinit var light_theme_btn: RadioButton
     private lateinit var dark_theme_btn: RadioButton
     private lateinit var songInfoSwi: SwitchCompat
