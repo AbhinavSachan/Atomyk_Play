@@ -22,8 +22,8 @@ android {
         applicationId "com.atomykcoder.atomykplay"
         minSdk 24
         targetSdk 34
-        versionCode 25
-        versionName '1.6.18'
+        versionCode 26
+        versionName '1.7.18'
     }
 
     buildTypes {

@@ -1,10 +1,13 @@
 package com.atomykcoder.atomykplay.fragments
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.DialogInterface
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.text.TextUtils
 import android.view.LayoutInflater
@@ -21,28 +24,37 @@ import android.widget.SeekBar.OnSeekBarChangeListener
 import android.widget.TextView
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SwitchCompat
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.atomykcoder.atomykplay.ApplicationClass
 import com.atomykcoder.atomykplay.R
-import com.atomykcoder.atomykplay.ui.MainActivity
 import com.atomykcoder.atomykplay.adapters.BeautifyListAdapter
 import com.atomykcoder.atomykplay.adapters.BlockFolderListAdapter
 import com.atomykcoder.atomykplay.scripts.LinearLayoutManagerWrapper
+import com.atomykcoder.atomykplay.ui.MainActivity
 import com.atomykcoder.atomykplay.utils.AndroidUtil.setSystemDrawBehindBars
 import com.atomykcoder.atomykplay.utils.AndroidUtil.setTheme
 import com.atomykcoder.atomykplay.utils.StorageUtil.SettingsStorage
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.karumi.dexter.Dexter
+import com.karumi.dexter.MultiplePermissionsReport
+import com.karumi.dexter.PermissionToken
+import com.karumi.dexter.listener.PermissionRequest
+import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import java.lang.ref.WeakReference
 
 class SettingsFragment : Fragment(), OnSeekBarChangeListener {
-    companion object{
+    companion object {
         @JvmStatic
         fun newInstance() = SettingsFragment()
     }
+
+    private var isGranted: Boolean = false
     private lateinit var light_theme_btn: RadioButton
     private lateinit var dark_theme_btn: RadioButton
     private lateinit var songInfoSwi: SwitchCompat
@@ -134,7 +146,11 @@ class SettingsFragment : Fragment(), OnSeekBarChangeListener {
         enhanceAudio = settingsStorage!!.loadEnhanceAudio()
         bassLevel = settingsStorage!!.loadBassLevel()
         virtualizerStrength = settingsStorage!!.loadVirLevel()
-
+        isGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            isGranted()
+        } else {
+            true
+        }
         //Player settings
         songInfoSwi = view.findViewById(R.id.show_file_info_swi)
         val songInfoLl = view.findViewById<View>(R.id.show_file_info_ll)
@@ -189,31 +205,37 @@ class SettingsFragment : Fragment(), OnSeekBarChangeListener {
         setButtonState()
 
         //listeners
-        songInfoLl.setOnClickListener { v: View? -> songInfoSwi.isChecked = !songInfoSwi.isChecked }
-        artistLl.setOnClickListener { v: View? -> artistSwi.isChecked = !artistSwi.isChecked }
-        extraLl.setOnClickListener { v: View? -> extraSwi.isChecked = !extraSwi.isChecked }
-        autoPlayLl.setOnClickListener { v: View? -> autoPlaySwi.isChecked = !autoPlaySwi.isChecked }
-        autoPlayBtLl.setOnClickListener { v: View? ->
-            autoPlayBtSwi.isChecked = !autoPlayBtSwi.isChecked
+        songInfoLl.setOnClickListener { songInfoSwi.isChecked = !songInfoSwi.isChecked }
+        artistLl.setOnClickListener { artistSwi.isChecked = !artistSwi.isChecked }
+        extraLl.setOnClickListener { extraSwi.isChecked = !extraSwi.isChecked }
+        autoPlayLl.setOnClickListener { autoPlaySwi.isChecked = !autoPlaySwi.isChecked }
+        autoPlayBtLl.setOnClickListener {
+            if (isGranted) {
+                autoPlayBtSwi.isChecked = !autoPlayBtSwi.isChecked
+            } else {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    rationalDialog()
+                }
+            }
         }
-        keepShuffleLl.setOnClickListener { v: View? ->
+        keepShuffleLl.setOnClickListener {
             keepShuffleSwi.isChecked = !keepShuffleSwi.isChecked
         }
-        lowerVolLl.setOnClickListener { v: View? -> lowerVolSwi.isChecked = !lowerVolSwi.isChecked }
-        selfStopLl.setOnClickListener { v: View? -> selfStopSwi.isChecked = !selfStopSwi.isChecked }
-        keepScreenOnLl.setOnClickListener { v: View? ->
+        lowerVolLl.setOnClickListener { lowerVolSwi.isChecked = !lowerVolSwi.isChecked }
+        selfStopLl.setOnClickListener { selfStopSwi.isChecked = !selfStopSwi.isChecked }
+        keepScreenOnLl.setOnClickListener {
             keepScreenOnSwi.isChecked = !keepScreenOnSwi.isChecked
         }
-        oneClickSkipLl.setOnClickListener { v: View? ->
+        oneClickSkipLl.setOnClickListener {
             oneClickSkipSwi.isChecked = !oneClickSkipSwi.isChecked
         }
-        beautifyLl.setOnClickListener { v: View? -> beautifySwi.isChecked = !beautifySwi.isChecked }
-        enhanceAudioLl.setOnClickListener { v: View? ->
+        beautifyLl.setOnClickListener { beautifySwi.isChecked = !beautifySwi.isChecked }
+        enhanceAudioLl.setOnClickListener {
             enhanceAudioSwi.isChecked = !enhanceAudioSwi.isChecked
         }
 
-        addBeautifyTags.setOnClickListener { v: View? -> showBeatifyTagDialog() }
-        scanAllLl.setOnClickListener { v: View? -> scanAllSwi.isChecked = !scanAllSwi.isChecked }
+        addBeautifyTags.setOnClickListener { showBeatifyTagDialog() }
+        scanAllLl.setOnClickListener { scanAllSwi.isChecked = !scanAllSwi.isChecked }
         hideSbLl.setOnClickListener { v: View? -> hideSbSwi.isChecked = !hideSbSwi.isChecked }
         hideNbLl.setOnClickListener { v: View? -> hideNbSwi.isChecked = !hideNbSwi.isChecked }
         blackListLl.setOnClickListener { v: View? -> openBlackListDialogue() }
@@ -238,8 +260,14 @@ class SettingsFragment : Fragment(), OnSeekBarChangeListener {
             settingsStorage!!.autoPlay(isChecked)
         }
         autoPlayBtSwi.setOnCheckedChangeListener { buttonView: CompoundButton?, isChecked: Boolean ->
-            autoPlayBtSwi.isChecked = isChecked
-            settingsStorage!!.autoPlayBt(isChecked)
+            if (isGranted) {
+                autoPlayBtSwi.isChecked = isChecked
+                settingsStorage!!.autoPlayBt(isChecked)
+            } else {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    rationalDialog()
+                }
+            }
         }
         keepShuffleSwi.setOnCheckedChangeListener { buttonView: CompoundButton?, isChecked: Boolean ->
             keepShuffleSwi.isChecked = isChecked
@@ -336,6 +364,52 @@ class SettingsFragment : Fragment(), OnSeekBarChangeListener {
             setDark(checkedId)
         }
         return view
+    }
+
+    @RequiresApi(Build.VERSION_CODES.S)
+    private fun requestPermission() {
+        Dexter.withContext(context).withPermissions(
+            Manifest.permission.BLUETOOTH_CONNECT,
+        ).withListener(object : MultiplePermissionsListener {
+            override fun onPermissionsChecked(multiplePermissionsReport: MultiplePermissionsReport) {
+                if (multiplePermissionsReport.areAllPermissionsGranted()) {
+
+                    isGranted = true
+                    autoPlayBtSwi.isChecked = true
+                } else {
+                    isGranted = false
+                    autoPlayBtSwi.isChecked = false
+                    showToast("Permissions denied!")
+                }
+            }
+
+            override fun onPermissionRationaleShouldBeShown(
+                list: List<PermissionRequest>,
+                permissionToken: PermissionToken,
+            ) {
+                isGranted = false
+                permissionToken.continuePermissionRequest()
+            }
+        }).check()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.S)
+    private fun rationalDialog() {
+        val builder = MaterialAlertDialogBuilder(requireContext())
+        builder.setTitle("Permission Needed!")
+        builder.setMessage("BLUETOOTH Permission needed to use this feature.")
+        builder.setPositiveButton("Ok") { _, _ ->
+            requestPermission()
+        }
+        builder.create().show()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.S)
+    private fun isGranted(): Boolean {
+        return ContextCompat.checkSelfPermission(
+            requireContext(),
+            Manifest.permission.BLUETOOTH_CONNECT
+        ) == PackageManager.PERMISSION_GRANTED
     }
 
     private fun setSeekLayout(enhanceAudio: Boolean, view: View) {
