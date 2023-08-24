@@ -146,5 +146,5 @@
     <string name="info_for_lyrics">In case of no results, kindly attempt the search without specifying the artist\'s name. Please be aware that we do not utilize any paid lyric retrieval service. Thus, for certain tracks, lyrics might not be available. Should you wish to manually input lyrics, kindly visit the <i><b>https://www.megalobiz.com</b></i> website. There, you can search for your desired song, click on it, press the copy button, and subsequently paste it here.</string>
     <string name="bass_lvl">Bass Level</string>
     <string name="vir_strgnth">Virtualizer Strength</string>
-    <string name="enhance_des"><![CDATA[Add some bass & virtualization, make it more enjoyable.]]></string>
+    <string name="enhance_des"><![CDATA[Add some bass & virtualization, make it more enjoyable.(Beta Feature)]]></string>
 </resources>
