@@ -1,16 +1,16 @@
 package com.atomykcoder.atomykplay.utils
 
-import android.media.audiofx.Equalizer
+import android.media.audiofx.BassBoost
 import android.media.audiofx.Virtualizer
 
 class MusicEnhancerUtil(audioSessionId: Int) {
 
-    private var equalizer: Equalizer? = null
+    private var bassBoost: BassBoost? = null
     private var virtualizer: Virtualizer? = null
 
     init {
-        equalizer = try {
-            Equalizer(0, audioSessionId)
+        bassBoost = try {
+            BassBoost(0, audioSessionId)
         } catch (e: Exception) {
             null
         }
@@ -23,7 +23,7 @@ class MusicEnhancerUtil(audioSessionId: Int) {
 
     fun enableEffects(enable: Boolean) {
         try {
-            equalizer?.enabled = enable
+            bassBoost?.enabled = enable
         } catch (_: Exception) {
         }
         try {
@@ -36,13 +36,11 @@ class MusicEnhancerUtil(audioSessionId: Int) {
      * sets the bass band level of the equalizer, level can be between 0 and 100
      * throws IllegalArgumentException if the bandLevel is not between 0 and 100
      */
-    fun setBassBandLevel(bandLevel: Int) {
-        require(bandLevel <= 100 || bandLevel >= 0) { "Band level must be between 0 to 100" }
-        val bandRange = equalizer?.bandLevelRange
-        val onePart = (bandRange?.get(1) ?: 1000) / 100
-        val totalIncrease = (onePart * bandLevel).toShort()
+    fun setBassBandLevel(bassLevel: Int) {
+        require(bassLevel <= 100 || bassLevel >= 0) { "Band level must be between 0 to 100" }
+        val totalIncrease = (100 * bassLevel).toShort()
         try {
-            equalizer?.setBandLevel(0, totalIncrease)
+            bassBoost!!.setStrength(totalIncrease)
         } catch (_: Exception) {
         }
     }
@@ -53,8 +51,7 @@ class MusicEnhancerUtil(audioSessionId: Int) {
      */
     fun setVirtualizerStrength(strength: Int) {
         require(strength <= 100 || strength >= 0) { "Strength must be between 0 to 100" }
-        val onePart = 1000 / 100
-        val totalIncrease = (onePart * strength).toShort()
+        val totalIncrease = (100 * strength).toShort()
         try {
             virtualizer?.setStrength(totalIncrease)
         } catch (_: Exception) {
@@ -62,9 +59,9 @@ class MusicEnhancerUtil(audioSessionId: Int) {
     }
 
     fun releaseEqualizer() {
-        equalizer?.release()
+        bassBoost?.release()
         virtualizer?.release()
-        equalizer = null
+        bassBoost = null
         virtualizer = null
     }
 }
