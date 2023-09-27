@@ -1,10 +1,15 @@
 package com.atomykcoder.atomykplay.services
 
+import android.Manifest
 import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothHeadset
+import android.bluetooth.BluetoothManager
 import android.content.*
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
@@ -23,6 +28,7 @@ import android.telephony.TelephonyManager
 import android.view.KeyEvent
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.media.MediaBrowserServiceCompat
@@ -122,29 +128,29 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
     private var musicNotification: Notification? = null
     private var audioFocusRequest: AudioFocusRequest? = null
 
-    private val stopMusicReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+    private val stopMusicReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             stoppedByNotification()
         }
     }
 
     //to pause when output device is unplugged
-    private val becomingNoisyReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+    private val becomingNoisyReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             pauseMedia()
         }
     } //to play when output device is plugged
-    private val nextMusicReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+    private val nextMusicReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             onNextReceived()
         }
     }
-    private val prevMusicReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+    private val prevMusicReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             onPreviousReceived()
         }
     }
-    private val pluggedInDevice: BroadcastReceiver = object : BroadcastReceiver() {
+    private val pluggedInDevice = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent?.action == Intent.ACTION_HEADSET_PLUG) {
                 val state = intent.getIntExtra("state", -1)
@@ -168,6 +174,26 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
             }
         }
     }
+
+    private val isBluetoothHeadsetConnected: Boolean
+        get() {
+            val bluetoothManager =
+                applicationContext.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+            val mBluetoothAdapter = bluetoothManager.adapter
+//        val mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+            if (ActivityCompat.checkSelfPermission(
+                    applicationContext,
+                    Manifest.permission.BLUETOOTH_CONNECT
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                ApplicationClass.instance.showToast("Please Allow Bluetooth Permission")
+                return false
+            }
+            return (mBluetoothAdapter != null && mBluetoothAdapter.isEnabled && mBluetoothAdapter.getProfileConnectionState(
+                BluetoothHeadset.HEADSET
+            ) == BluetoothAdapter.STATE_CONNECTED)
+        }
+
     private val bluetoothReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val action = intent?.action
@@ -185,12 +211,12 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
             }
         }
     }
-    private val pausePlayMusicReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+    private val pausePlayMusicReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             onPlayPauseReceived()
         }
     }
-    private val playNewMusicReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+    private val playNewMusicReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             val encodedMessage = intent.getStringExtra("music")
             val music = MusicHelper.decode(encodedMessage)
@@ -601,7 +627,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
                 MainActivity.phone_ringing = true
             }
 
-            TelephonyManager.CALL_STATE_IDLE -> if (isMediaPlayerNotNull) {
+            TelephonyManager.CALL_STATE_IDLE -> {
                 MainActivity.phone_ringing = false
                 if (wasPlaying) {
                     resumeMedia(true)
@@ -666,6 +692,16 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
                 startForeground(NOTIFICATION_ID, initialNotification)
             } catch (e: Exception) {
                 e.printStackTrace()
+            }
+        }
+        if (settingsStorage.loadAutoPlayBt()){
+            if (isBluetoothHeadsetConnected){
+                try {
+                    initiateMediaSession()
+                } catch (e: RemoteException) {
+                    e.printStackTrace()
+                }
+                initiateMediaPlayer()
             }
         }
     }
@@ -1364,7 +1400,17 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
 
     override fun onDestroy() {
         super.onDestroy()
+        releaseMediaService()
+    }
+
+    private fun releaseMediaService() {
         removeAudioFocus()
+        finalizeThings()
+        nullifyResources()
+        unregisterReceivers()
+    }
+
+    private fun finalizeThings() {
         MainActivity.service_stopped = true
 
         cancelTimer()
@@ -1381,7 +1427,9 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
                 telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE)
             }
         }
-        releaseResources()
+    }
+
+    private fun unregisterReceivers() {
         unregisterReceiver(becomingNoisyReceiver)
         unregisterReceiver(pluggedInDevice)
         unregisterReceiver(playNewMusicReceiver)
@@ -1390,10 +1438,9 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
         unregisterReceiver(prevMusicReceiver)
         unregisterReceiver(stopMusicReceiver)
         unregisterReceiver(bluetoothReceiver)
-
     }
 
-    private fun releaseResources() {
+    private fun nullifyResources() {
         selfStopHandler.removeCallbacksAndMessages(null)
         handler.removeCallbacksAndMessages(null)
         defaultMetadata = null
@@ -1409,10 +1456,10 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
         phoneStateCallback = null
         audioFocusRequest = null
         disableEqualizerUtil()
-        releasePlayer()
+        nullifyPlayer()
     }
 
-    private fun releasePlayer() {
+    private fun nullifyPlayer() {
         mediaPlayer?.release()
         mediaSession?.release()
 

@@ -22,8 +22,8 @@ android {
         applicationId "com.atomykcoder.atomykplay"
         minSdk 24
         targetSdk 34
-        versionCode 27
-        versionName '1.7.19'
+        versionCode 28
+        versionName '1.8.19'
     }
 
     buildTypes {
@@ -88,15 +88,15 @@ dependencies {
     //jetBrain problem solution
 
 
-    implementation 'com.github.bumptech.glide:glide:4.15.1'
-    kapt 'com.github.bumptech.glide:compiler:4.15.1'
+    implementation 'com.github.bumptech.glide:glide:4.16.0'
+    kapt 'com.github.bumptech.glide:compiler:4.16.0'
 
     //permission
     implementation 'com.karumi:dexter:6.2.3'
 
     //navigation bars
-    implementation 'androidx.navigation:navigation-fragment-ktx:2.7.0'
-    implementation 'androidx.navigation:navigation-ui-ktx:2.7.0'
+    implementation 'androidx.navigation:navigation-fragment-ktx:2.7.3'
+    implementation 'androidx.navigation:navigation-ui-ktx:2.7.3'
 
 
     implementation 'com.google.code.gson:gson:2.10.1'
@@ -104,7 +104,7 @@ dependencies {
     implementation 'org.jsoup:jsoup:1.16.1'
     implementation 'androidx.palette:palette-ktx:1.0.0'
     implementation 'de.hdodenhof:circleimageview:3.1.0'
-    implementation 'com.google.firebase:firebase-crashlytics:18.4.0'
+    implementation 'com.google.firebase:firebase-crashlytics:18.4.3'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3'
     implementation 'androidx.core:core-splashscreen:1.0.1'
 

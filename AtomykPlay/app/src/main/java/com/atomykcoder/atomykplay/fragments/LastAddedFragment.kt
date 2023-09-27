@@ -2,6 +2,7 @@ package com.atomykcoder.atomykplay.fragments
 
 import android.annotation.SuppressLint
 import android.app.Dialog
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -25,10 +26,17 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class LastAddedFragment : Fragment() {
-    companion object{
+    companion object {
         @JvmStatic
         fun newInstance() = LastAddedFragment()
     }
+
+    private var _context:Context? = null
+    private val context1:Context?
+        get() {
+            return _context
+        }
+
     private lateinit var recyclerView: RecyclerView
     private val firstOptionValue = 30
     private val secondOptionValue = 90
@@ -48,7 +56,6 @@ class LastAddedFragment : Fragment() {
         selectedItem?.let { adapter?.removeItem(it) }
     }
 
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -67,14 +74,14 @@ class LastAddedFragment : Fragment() {
         //set recyclerview and adapter
         recyclerView.setHasFixedSize(true)
         recyclerView.setItemViewCacheSize(5)
-        recyclerView.layoutManager = LinearLayoutManagerWrapper(context)
-        settingsStorage = SettingsStorage(requireContext())
+        recyclerView.layoutManager = LinearLayoutManagerWrapper(context1)
+        settingsStorage = context1?.let { SettingsStorage(it) }
         val filterButton = view.findViewById<View>(R.id.filter_last_added_btn)
         val backImageView = view.findViewById<ImageView>(R.id.close_filter_btn)
         progressDialog = view.findViewById(R.id.progress_bar_last_added)
         songCountTv = view.findViewById(R.id.count_of_lastAdded)
         // initialize/load music array lists
-        initialMusicList = StorageUtil(requireContext()).loadInitialList()
+        initialMusicList = context1?.let { StorageUtil(it).loadInitialList() }
         lastAddedMusicList = ArrayList()
 
         // back button click listener
@@ -105,11 +112,21 @@ class LastAddedFragment : Fragment() {
             })
             lastAddedMusicList = initialMusicList?.let { ArrayList(it) }
             coroutineMainScope.launch {
-                adapter = MusicMainAdapter(requireContext(), lastAddedMusicList)
+                adapter = context1?.let { MusicMainAdapter(it, lastAddedMusicList) }
                 recyclerView.adapter = adapter
                 loadLastAddedList(settingsStorage?.loadLastAddedDur())
             }
         }
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        _context = context
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        _context = null
     }
 
     override fun onStop() {
@@ -123,16 +140,16 @@ class LastAddedFragment : Fragment() {
 
     @SuppressLint("SetTextI18n")
     private fun openDialogFilter() {
-        val builder = MaterialAlertDialogBuilder(requireContext())
-        builder.setTitle("Filter")
+        val builder = context1?.let { MaterialAlertDialogBuilder(it) }
+        builder?.setTitle("Filter")
         val savedState = settingsStorage?.loadLastAddedDur() ?: 0
         val options = arrayOf("Last month", "Last three months", "Last six months", "Last year")
-        builder.setSingleChoiceItems(options, savedState) { dialog, which ->
+        builder?.setSingleChoiceItems(options, savedState) { dialog, which ->
             loadLastAddedList(which)
             dialog.dismiss()
         }
 
-        filterDialog = builder.create()
+        filterDialog = builder?.create()
         filterDialog?.show()
     }
 
@@ -157,18 +174,18 @@ class LastAddedFragment : Fragment() {
      * @param maxValue clamp at max value
      */
     private fun startThread(maxValue: Int) {
-        progressDialog!!.visibility = View.VISIBLE
+        progressDialog?.visibility = View.VISIBLE
         coroutineDefaultScope.launch {
-            lastAddedMusicList!!.clear()
+            lastAddedMusicList?.clear()
             try {
-                lastAddedMusicList!!.addAll(getLastAddedMusicList(maxValue.toLong()))
+                lastAddedMusicList?.addAll(getLastAddedMusicList(maxValue.toLong()))
             } catch (e: ParseException) {
                 e.printStackTrace()
             }
             coroutineMainScope.launch {
-                progressDialog!!.visibility = View.GONE
+                progressDialog?.visibility = View.GONE
                 val num = lastAddedMusicList?.size?.toString() + " Songs"
-                songCountTv!!.text = num
+                songCountTv?.text = num
                 notifyAdapter()
             }
         }
@@ -204,6 +221,6 @@ class LastAddedFragment : Fragment() {
 
     @SuppressLint("NotifyDataSetChanged")
     private fun notifyAdapter() {
-        adapter!!.notifyDataSetChanged()
+        adapter?.notifyDataSetChanged()
     }
 }

@@ -50,7 +50,11 @@ class SearchFragment : Fragment() {
     private var isSearching = false
     private var noResultAnim: LottieAnimationView? = null
     private val searchList = MutableLiveData<ArrayList<Music>>()
-
+    private var _context:Context? = null
+    private val context1:Context?
+        get() {
+            return _context
+        }
     fun removeItems(selectedItem: Music?) {
         selectedItem?.let { adapter?.removeItem(it) }
     }
@@ -83,6 +87,15 @@ class SearchFragment : Fragment() {
             //search if any radio button is pressed
             search(query, dataList)
         }
+    }
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        _context = context
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        _context = null
     }
 
     override fun onCreateView(
@@ -134,10 +147,10 @@ class SearchFragment : Fragment() {
             requireActivity().onBackPressed()
         }
         recyclerView.setHasFixedSize(true)
-        val layoutManager: LinearLayoutManager = LinearLayoutManagerWrapper(requireContext())
+        val layoutManager: LinearLayoutManager = LinearLayoutManagerWrapper(context1)
         recyclerView.layoutManager = layoutManager
-        adapter = MusicMainAdapter(requireContext(), searchedMusicList)
-        adapter!!.setHasStableIds(true)
+        adapter = context1?.let { MusicMainAdapter(it, searchedMusicList) }
+        adapter?.setHasStableIds(true)
         recyclerView.setItemViewCacheSize(5)
         recyclerView.adapter = adapter
         songButton?.isChecked = true
@@ -247,7 +260,7 @@ class SearchFragment : Fragment() {
             }
             coroutineMainScope.launch {
                 setNumText(id)
-                adapter!!.notifyDataSetChanged()
+                adapter?.notifyDataSetChanged()
                 setSearchList(searchedMusicList)
                 isSearching = false
             }

@@ -3,6 +3,7 @@ package com.atomykcoder.atomykplay.fragments
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -115,6 +116,23 @@ class SettingsFragment : Fragment(), OnSeekBarChangeListener {
     private var noTagTV: TextView? = null
     private var beautifyList: ArrayList<String?>? = null
     private var replacingTagList: ArrayList<String>? = null
+    private var _context: Context? = null
+    private val context1: Context?
+        get() {
+            return _context
+        }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        _context = context
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        _context = null
+    }
+
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -122,11 +140,11 @@ class SettingsFragment : Fragment(), OnSeekBarChangeListener {
     ): View? {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_settings, container, false)
-        settingsStorage = SettingsStorage(requireContext().applicationContext)
-        mainActivity = WeakReference(context as MainActivity).get()
+        settingsStorage = context1?.applicationContext?.let { SettingsStorage(it) }
+        mainActivity = WeakReference(context1 as MainActivity).get()
         val toolbar = view.findViewById<Toolbar>(R.id.toolbar_settings)
         toolbar.setNavigationIcon(R.drawable.ic_back)
-        toolbar.setNavigationOnClickListener { v: View? -> requireActivity().onBackPressed() }
+        toolbar.setNavigationOnClickListener { mainActivity?.onBackPressed() }
         //saved values
         dark = settingsStorage!!.loadIsThemeDark()
         showInfo = settingsStorage!!.loadShowInfo()
@@ -147,7 +165,7 @@ class SettingsFragment : Fragment(), OnSeekBarChangeListener {
         bassLevel = settingsStorage!!.loadBassLevel()
         virtualizerStrength = settingsStorage!!.loadVirLevel()
         isGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            isGranted()
+            (context1?.let { isGranted(it) }) == true
         } else {
             true
         }
@@ -240,26 +258,26 @@ class SettingsFragment : Fragment(), OnSeekBarChangeListener {
         hideNbLl.setOnClickListener { v: View? -> hideNbSwi.isChecked = !hideNbSwi.isChecked }
         blackListLl.setOnClickListener { v: View? -> openBlackListDialogue() }
         filterDurLl.setOnClickListener { v: View? -> openFilterDurationDialog() }
-        songInfoSwi.setOnCheckedChangeListener { buttonView: CompoundButton?, isChecked: Boolean ->
+        songInfoSwi.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
             songInfoSwi.isChecked = isChecked
             settingsStorage!!.showInfo(isChecked)
             hideInfo(isChecked)
         }
-        artistSwi.setOnCheckedChangeListener { buttonView: CompoundButton?, isChecked: Boolean ->
+        artistSwi.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
             artistSwi.isChecked = isChecked
             settingsStorage!!.showArtist(isChecked)
             hideArtist(isChecked)
         }
-        extraSwi.setOnCheckedChangeListener { buttonView: CompoundButton?, isChecked: Boolean ->
+        extraSwi.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
             extraSwi.isChecked = isChecked
             settingsStorage!!.showExtraCon(isChecked)
             hideExtra(isChecked)
         }
-        autoPlaySwi.setOnCheckedChangeListener { buttonView: CompoundButton?, isChecked: Boolean ->
+        autoPlaySwi.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
             autoPlaySwi.isChecked = isChecked
             settingsStorage!!.autoPlay(isChecked)
         }
-        autoPlayBtSwi.setOnCheckedChangeListener { buttonView: CompoundButton?, isChecked: Boolean ->
+        autoPlayBtSwi.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
             if (isGranted) {
                 autoPlayBtSwi.isChecked = isChecked
                 settingsStorage!!.autoPlayBt(isChecked)
@@ -269,7 +287,7 @@ class SettingsFragment : Fragment(), OnSeekBarChangeListener {
                 }
             }
         }
-        keepShuffleSwi.setOnCheckedChangeListener { buttonView: CompoundButton?, isChecked: Boolean ->
+        keepShuffleSwi.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
             keepShuffleSwi.isChecked = isChecked
             settingsStorage!!.keepShuffle(isChecked)
         }
@@ -405,9 +423,9 @@ class SettingsFragment : Fragment(), OnSeekBarChangeListener {
     }
 
     @RequiresApi(Build.VERSION_CODES.S)
-    private fun isGranted(): Boolean {
+    private fun isGranted(context: Context): Boolean {
         return ContextCompat.checkSelfPermission(
-            requireContext(),
+            context,
             Manifest.permission.BLUETOOTH_CONNECT
         ) == PackageManager.PERMISSION_GRANTED
     }
@@ -435,10 +453,10 @@ class SettingsFragment : Fragment(), OnSeekBarChangeListener {
     }
 
     private fun showBeatifyTagDialog() {
-        val builder = MaterialAlertDialogBuilder(requireContext())
+        val builder = context1?.let { MaterialAlertDialogBuilder(it) }
         val customLayout = layoutInflater.inflate(R.layout.black_list_dialog, null)
-        builder.setView(customLayout)
-        builder.setCancelable(true)
+        builder?.setView(customLayout)
+        builder?.setCancelable(true)
         val directory_icon =
             customLayout.findViewById<ImageView>(R.id.blacklist_open_directory_icon)
         val recyclerView = customLayout.findViewById<RecyclerView>(R.id.blacklist_recycler)
@@ -463,20 +481,20 @@ class SettingsFragment : Fragment(), OnSeekBarChangeListener {
         // adapter to load in spinner dropdown
 
         // start "SELECT FOLDER" activity when we click on directory icon
-        directory_icon.setOnClickListener { view: View? -> showAddTagDialog() }
-        builder.setNegativeButton("OK", null)
-        val dialog = builder.create()
-        dialog.show()
+        directory_icon.setOnClickListener { showAddTagDialog() }
+        builder?.setNegativeButton("OK", null)
+        val dialog = builder?.create()
+        dialog?.show()
     }
 
     private fun showAddTagDialog() {
-        val builder = MaterialAlertDialogBuilder(requireContext())
+        val builder = context1?.let { MaterialAlertDialogBuilder(it) }
         val customLayout = layoutInflater.inflate(R.layout.replacing_tag_layout, null)
-        builder.setView(customLayout)
-        builder.setCancelable(true)
+        builder?.setView(customLayout)
+        builder?.setCancelable(true)
         val editText = customLayout.findViewById<EditText>(R.id.edit_tag_name)
         val editText1 = customLayout.findViewById<EditText>(R.id.edit_replacing_tag)
-        builder.setPositiveButton("OK") { dialog: DialogInterface, i: Int ->
+        builder?.setPositiveButton("OK") { dialog: DialogInterface, i: Int ->
             val tag = editText.text.toString()
             val replacingTag = editText1.text.toString()
             if (TextUtils.isEmpty(tag)) {
@@ -496,16 +514,16 @@ class SettingsFragment : Fragment(), OnSeekBarChangeListener {
                 dialog.cancel()
             }
         }
-        builder.setNegativeButton("Cancel", null)
-        val dialog = builder.create()
-        dialog.show()
+        builder?.setNegativeButton("Cancel", null)
+        val dialog = builder?.create()
+        dialog?.show()
     }
 
     private fun openFilterDurationDialog() {
-        val builder = MaterialAlertDialogBuilder(requireContext())
+        val builder = context1?.let { MaterialAlertDialogBuilder(it) }
         val customLayout = layoutInflater.inflate(R.layout.filter_duration_dialog, null)
-        builder.setView(customLayout)
-        builder.setCancelable(true)
+        builder?.setView(customLayout)
+        builder?.setCancelable(true)
         val filter_time_tv = customLayout.findViewById<TextView>(R.id.filter_time_textview)
         val filter_dur_seekbar = customLayout.findViewById<SeekBar>(R.id.filter_dur_seekBar)
 
@@ -526,32 +544,32 @@ class SettingsFragment : Fragment(), OnSeekBarChangeListener {
             override fun onStartTrackingTouch(seekBar: SeekBar) {}
             override fun onStopTrackingTouch(seekBar: SeekBar) {}
         })
-        builder.setPositiveButton("Filter") { dialog: DialogInterface, _: Int ->
+        builder?.setPositiveButton("Filter") { dialog: DialogInterface, _: Int ->
             settingsStorage!!.saveFilterDur(filter_time_tv.text.toString().toInt())
             mainActivity!!.checkForUpdateList(true)
             dialog.cancel()
         }
-        filterDurDialog = builder.create()
+        filterDurDialog = builder?.create()
         filterDurDialog!!.show()
     }
 
     private fun openBlackListDialogue() {
-        val builder = MaterialAlertDialogBuilder(requireContext())
+        val builder = context1?.let { MaterialAlertDialogBuilder(it) }
         val customLayout = layoutInflater.inflate(R.layout.black_list_dialog, null)
-        builder.setView(customLayout)
-        builder.setCancelable(true)
+        builder?.setView(customLayout)
+        builder?.setCancelable(true)
         val directory_icon =
             customLayout.findViewById<ImageView>(R.id.blacklist_open_directory_icon)
         val recyclerView = customLayout.findViewById<RecyclerView>(R.id.blacklist_recycler)
         val textView = customLayout.findViewById<TextView>(R.id.text_no_folders)
         val blacklist = settingsStorage!!.loadBlackList()
-        val adapter = BlockFolderListAdapter(blacklist, requireContext())
+        val adapter = BlockFolderListAdapter(blacklist, context1)
         if (blacklist.isEmpty()) {
             textView.visibility = View.VISIBLE
         } else {
             textView.visibility = View.GONE
         }
-        recyclerView.layoutManager = LinearLayoutManagerWrapper(context)
+        recyclerView.layoutManager = LinearLayoutManagerWrapper(context1)
         recyclerView.adapter = adapter
         // adapter to load in spinner dropdown
 
@@ -561,9 +579,9 @@ class SettingsFragment : Fragment(), OnSeekBarChangeListener {
             intent.addCategory(Intent.CATEGORY_DEFAULT)
             mGetTreeLauncher.launch(intent)
         }
-        builder.setNegativeButton("OK", null)
+        builder?.setNegativeButton("OK", null)
         //finally show the blacklistDialog
-        blacklistDialog = builder.create()
+        blacklistDialog = builder?.create()
         blacklistDialog?.show()
     }
 
@@ -662,7 +680,7 @@ class SettingsFragment : Fragment(), OnSeekBarChangeListener {
                 dark = true
             }
         }
-        settingsStorage!!.saveThemeDark(dark)
+        settingsStorage?.saveThemeDark(dark)
     }
 
     override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {

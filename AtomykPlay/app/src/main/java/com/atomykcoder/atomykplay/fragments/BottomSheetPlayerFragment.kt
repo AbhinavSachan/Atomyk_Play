@@ -23,7 +23,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
-import android.view.ViewTreeObserver.OnPreDrawListener
 import android.webkit.MimeTypeMap
 import android.widget.ImageView
 import android.widget.SeekBar
@@ -32,7 +31,6 @@ import android.widget.SeekBar.OnSeekBarChangeListener
 import android.widget.SeekBar.VISIBLE
 import android.widget.TextView
 import android.widget.Toast
-import androidx.annotation.MainThread
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
@@ -217,7 +215,22 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
             }
 
         }
-    private var context: Context? = null
+    private var _context: Context? = null
+    private val context1: Context?
+        get() {
+            return _context
+        }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        _context = context
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        _context = null
+    }
+
     private var durationTv: TextView? = null
     private var playerCoverImage: ImageView? = null
     private var favoriteImg: ImageView? = null
@@ -280,10 +293,8 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         savedInstanceState: Bundle?,
     ): View? {
         val view = inflater.inflate(R.layout.fragment_player, container, false)
-        val weakContext = WeakReference(requireContext())
-        context = weakContext.get()
 
-        context?.let {
+        context1?.let {
             storageUtil = StorageUtil(it.applicationContext)
             settingsStorage = SettingsStorage(it.applicationContext)
             glideBuilt =  GlideBuilt(it.applicationContext)
@@ -292,7 +303,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         executorService = Executors.newFixedThreadPool(10)
 
         //StorageUtil initialization
-        mainActivity = WeakReference(context as MainActivity).get()
+        mainActivity = WeakReference(context1 as MainActivity).get()
 
         handler = Handler(Looper.getMainLooper())
 
@@ -994,7 +1005,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         if (position == -1) {
             return
         }
-        val smoothScroller: SmoothScroller = CenterSmoothScroller(context)
+        val smoothScroller: SmoothScroller = CenterSmoothScroller(context1)
         smoothScroller.targetPosition = position
         try {
             lm?.startSmoothScroll(smoothScroller)
@@ -1010,9 +1021,9 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
     }
 
     private fun setLyricsAdapter() {
-        lm = LinearLayoutManagerWrapper(context) // or whatever layout manager you need
+        lm = LinearLayoutManagerWrapper(context1) // or whatever layout manager you need
         lyricsRecyclerView!!.layoutManager = lm
-        lyricsAdapter = MusicLyricsAdapter(context, lyricsArrayList)
+        lyricsAdapter = MusicLyricsAdapter(context1, lyricsArrayList)
         if (lyricsArrayList.isEmpty()) {
             noLyricsLayout!!.visibility = View.VISIBLE
         } else {
@@ -1078,7 +1089,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
      */
     private fun setQueueAdapter() {
         if (musicArrayList != null) {
-            queueAdapter = MusicQueueAdapter(requireContext(), musicArrayList, this)
+            queueAdapter = context1?.let { MusicQueueAdapter(it, musicArrayList, this) }
             queueAdapter?.setHasStableIds(true)
             queueRecyclerView?.setHasFixedSize(true)
             queueRecyclerView?.setItemViewCacheSize(5)
@@ -1140,7 +1151,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
 
     private fun isMusicNotAvailable(currentItem: Music?): Boolean {
         if (!doesMusicExists(currentItem)) {
-            Toast.makeText(context, "Song is unavailable", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context1, "Song is unavailable", Toast.LENGTH_SHORT).show()
             mainActivity!!.updateAdaptersForRemovedItem()
             return true
         }
@@ -1160,10 +1171,10 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
 
     //region Timer setup
     private fun setTimer() {
-        val builder = MaterialAlertDialogBuilder(requireContext())
+        val builder = context1?.let { MaterialAlertDialogBuilder(it) }
         val customLayout = layoutInflater.inflate(R.layout.timer_dialog, null)
-        builder.setView(customLayout)
-        builder.setCancelable(true)
+        builder?.setView(customLayout)
+        builder?.setCancelable(true)
 
         //Initialize Dialogue Box UI Items
         val showTimeText = customLayout.findViewById<TextView>(R.id.timer_time_textview)
@@ -1187,7 +1198,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         })
 
         //Dialogue Box Confirm Button Listener
-        builder.setPositiveButton("Start") { dialog: DialogInterface, i: Int ->
+        builder?.setPositiveButton("Start") { dialog: DialogInterface, i: Int ->
             dialog.cancel()
             if (MainActivity.media_player_service != null) {
                 MainActivity.media_player_service?.setTimer(timerSeekBar.progress)
@@ -1196,7 +1207,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
             }
         }
         //Show Timer Dialogue Box
-        timerDialogue = builder.create()
+        timerDialogue = builder?.create()
         timerDialogue?.show()
     }
 
