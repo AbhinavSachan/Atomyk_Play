@@ -49,7 +49,7 @@
     <string name="auto_play">Auto Play</string>
     <string name="enhance_audio">Enhance Audio</string>
     <string name="autoplay_des">Wired AutoPlay: Play on device connect. (Music starts with app)</string>
-    <string name="autoplayBt_des">Bluetooth AutoPlay: Connect &amp; play music. (After app open)</string>
+    <string name="autoplayBt_des">Bluetooth AutoPlay: Play on device connect. (Music starts with app)</string>
     <string name="keep_shuffle_on">Keep Shuffle</string>
     <string name="shuffle_des">Shuffle remains during new song selection.</string>
     <string name="lowerVol">Lower Volume</string>

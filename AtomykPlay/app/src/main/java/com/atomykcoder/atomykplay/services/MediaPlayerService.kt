@@ -31,6 +31,8 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
+import androidx.core.graphics.drawable.toBitmapOrNull
 import androidx.media.MediaBrowserServiceCompat
 import com.atomykcoder.atomykplay.ApplicationClass
 import com.atomykcoder.atomykplay.BuildConfig
@@ -716,7 +718,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
     override fun onPrepared(mp: MediaPlayer) {
         EventBus.getDefault().post(SetMainLayoutEvent(activeMusic))
         resumeMedia(false)
-        var finalImage: Bitmap?
+        var finalImage: Bitmap? = null
         coroutineScope.launch {
             GlideApp.with(applicationContext).load(activeMusic?.path?.let { AudioFileCover(it) })
                 .override(512).into(object : CustomTarget<Drawable>() {
@@ -724,31 +726,38 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
                         resource: Drawable,
                         transition: Transition<in Drawable>?
                     ) {
-                        finalImage = resource.toUnscaledBitmap()
-                        if (MainActivity.service_bound) {
-                            EventBus.getDefault()
-                                .post(SetImageInMainPlayer(finalImage, activeMusic))
-                        }
+                        finalImage = resource.toBitmapOrNull()
+                        postImageInMainPlayer(finalImage, activeMusic)
                         updateMetaData(activeMusic, finalImage)
-                        finalImage = null
+                        clearResources()
                     }
 
                     override fun onLoadCleared(placeholder: Drawable?) {
-                        if (MainActivity.service_bound) {
-                            EventBus.getDefault().post(SetImageInMainPlayer(null, activeMusic))
-                        }
+                        postImageInMainPlayer(null, activeMusic)
                         updateMetaData(activeMusic, null)
-                        finalImage = null
+                        finalImage?.recycle()
+                        clearResources()
+                        Logger.normalLog("====================Cleared=====================")
                     }
 
                     override fun onLoadFailed(errorDrawable: Drawable?) {
-                        if (MainActivity.service_bound) {
-                            EventBus.getDefault().post(SetImageInMainPlayer(null, activeMusic))
-                        }
+                        postImageInMainPlayer(null, activeMusic)
                         updateMetaData(activeMusic, null)
+                        clearResources()
+                    }
+                    // Function to post image in MainPlayer using EventBus
+                    private fun postImageInMainPlayer(image: Bitmap?, activeMusic: Music?) {
+                        if (MainActivity.service_bound) {
+                            EventBus.getDefault().post(SetImageInMainPlayer(image, activeMusic))
+                        }
+                    }
+
+                    // Function to clear resources
+                    private fun clearResources() {
                         finalImage = null
                     }
                 })
+
         }
 
     }

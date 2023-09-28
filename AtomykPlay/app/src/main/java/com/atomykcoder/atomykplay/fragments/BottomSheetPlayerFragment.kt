@@ -297,7 +297,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         context1?.let {
             storageUtil = StorageUtil(it.applicationContext)
             settingsStorage = SettingsStorage(it.applicationContext)
-            glideBuilt =  GlideBuilt(it.applicationContext)
+            glideBuilt = GlideBuilt(it.applicationContext)
         }
 
         executorService = Executors.newFixedThreadPool(10)
@@ -678,6 +678,8 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
                 )
             } else -1
         } catch (e: NotFoundException) {
+            -1
+        } catch (e: IllegalStateException) {
             -1
         }
     }
@@ -1525,6 +1527,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
 
     companion object {
         var playing_same_song = false
+
         @JvmStatic
         fun newInstance() = BottomSheetPlayerFragment()
     }
