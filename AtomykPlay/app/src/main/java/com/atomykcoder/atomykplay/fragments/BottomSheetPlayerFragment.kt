@@ -508,6 +508,18 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
 
     override fun onResume() {
         super.onResume()
+        appPaused = false
+
+        if (mainActivity?.mainPlayerSheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
+            miniPlayView?.alpha = 0f
+            miniPlayView?.visibility = View.INVISIBLE
+        } else if (mainActivity?.mainPlayerSheetBehavior?.state == BottomSheetBehavior.STATE_COLLAPSED) {
+            playerLayout?.alpha = 0f
+            playerLayout?.visibility = View.INVISIBLE
+        }
+        if (queueSheetBehaviour?.state == BottomSheetBehavior.STATE_EXPANDED) {
+            queueRecyclerView?.visibility = View.VISIBLE
+        }
         if (shouldRefreshLayout) {
             setButton(activeMusic)
             setPreviousData(activeMusic)
@@ -515,19 +527,12 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         animateText()
     }
 
-    override fun onStart() {
-        super.onStart()
-        appPaused = false
-
-        if (mainActivity?.mainPlayerSheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
-            miniPlayView!!.alpha = 0f
-            miniPlayView!!.visibility = View.INVISIBLE
-        } else if (mainActivity?.mainPlayerSheetBehavior?.state == BottomSheetBehavior.STATE_COLLAPSED) {
-            playerLayout!!.alpha = 0f
-            playerLayout!!.visibility = View.INVISIBLE
-        }
+    override fun onPause() {
+        super.onPause()
+        appPaused = true
+        stopAnimText(StopTextAnim())
         if (queueSheetBehaviour!!.state == BottomSheetBehavior.STATE_EXPANDED) {
-            queueRecyclerView!!.visibility = View.VISIBLE
+            queueRecyclerView!!.visibility = View.GONE
         }
     }
 
@@ -535,15 +540,6 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         super.onSaveInstanceState(outState)
         val music = MusicHelper.encode(activeMusic)
         outState.putString("activeMusic", music)
-    }
-
-    override fun onStop() {
-        super.onStop()
-        appPaused = true
-        stopAnimText(StopTextAnim())
-        if (queueSheetBehaviour!!.state == BottomSheetBehavior.STATE_EXPANDED) {
-            queueRecyclerView!!.visibility = View.GONE
-        }
     }
 
     override fun onDestroyView() {
