@@ -4,10 +4,10 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.atomykcoder.atomykplay.R
-import com.atomykcoder.atomykplay.ui.MainActivity
 import com.atomykcoder.atomykplay.adapters.generics.GenericRecyclerAdapter
 import com.atomykcoder.atomykplay.adapters.generics.GenericViewHolder
 import com.atomykcoder.atomykplay.adapters.viewHolders.BeautifyListViewHolder
+import com.atomykcoder.atomykplay.ui.MainActivity
 import com.atomykcoder.atomykplay.utils.StorageUtil.SettingsStorage
 
 class BeautifyListAdapter(

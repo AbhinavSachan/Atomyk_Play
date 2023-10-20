@@ -42,11 +42,11 @@
                 android:focusable="true"
                 android:paddingHorizontal="8dp"
                 android:paddingVertical="8dp"
-                app:tint="@color/sub_text_grey"
                 android:src="@drawable/ic_back"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                app:tint="@color/sub_text_grey" />
 
             <TextView
                 android:id="@+id/count_of_lastAdded"

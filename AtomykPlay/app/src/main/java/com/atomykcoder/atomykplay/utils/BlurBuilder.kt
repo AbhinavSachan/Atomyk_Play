@@ -16,7 +16,8 @@ object BlurBuilder {
     fun blur(v: View): Bitmap {
         return blurrer(v.context, getScreenshot(v))
     }
-    fun blur(context: Context?,v: Bitmap): Bitmap {
+
+    fun blur(context: Context?, v: Bitmap): Bitmap {
         return blurrer(context, v)
     }
 

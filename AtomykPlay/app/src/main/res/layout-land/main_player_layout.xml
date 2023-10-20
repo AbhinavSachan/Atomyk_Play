@@ -238,10 +238,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:padding="8dp"
                     android:background="@drawable/play_roundbg"
                     android:contentDescription="@string/imageView"
                     android:elevation="2dp"
+                    android:padding="8dp"
                     android:src="@drawable/ic_play_main" />
 
             </RelativeLayout>

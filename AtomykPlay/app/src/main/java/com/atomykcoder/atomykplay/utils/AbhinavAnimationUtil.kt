@@ -18,13 +18,30 @@ object AbhinavAnimationUtil {
         val resetDuration = 250.toLong()
 
         // Idea from: https://stackoverflow.com/a/27943288/5475354
-        val shakeXHolder = PropertyValuesHolder.ofFloat(View.TRANSLATION_X, 0f, 25f, -25f, 25f, -25f, 15f, -15f, 6f, -6f, 0f)//EARTHQUAKE IMITATION
+        val shakeXHolder = PropertyValuesHolder.ofFloat(
+            View.TRANSLATION_X,
+            0f,
+            25f,
+            -25f,
+            25f,
+            -25f,
+            15f,
+            -15f,
+            6f,
+            -6f,
+            0f
+        )//EARTHQUAKE IMITATION
         val scaleXHolder = PropertyValuesHolder.ofFloat(View.SCALE_X, 1.1f)
         val scaleYHolder = PropertyValuesHolder.ofFloat(View.SCALE_Y, 1.1f)
 
         // Animation shaking horizontally, and scaling up the button in both XY together
         ObjectAnimator
-            .ofPropertyValuesHolder(this@buttonShakeAnimation, shakeXHolder, scaleXHolder, scaleYHolder)
+            .ofPropertyValuesHolder(
+                this@buttonShakeAnimation,
+                shakeXHolder,
+                scaleXHolder,
+                scaleYHolder
+            )
             .setDuration(shakeDuration)
             .start();
 

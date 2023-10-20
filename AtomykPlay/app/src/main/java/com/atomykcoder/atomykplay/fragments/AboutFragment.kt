@@ -20,10 +20,11 @@ import com.google.android.material.card.MaterialCardView
 import de.hdodenhof.circleimageview.CircleImageView
 
 class AboutFragment : Fragment() {
-    companion object{
+    companion object {
         @JvmStatic
         fun newInstance() = AboutFragment()
     }
+
     private val flatIconUri = Uri.parse("https://www.flaticon.com/")
     private val svgRepoUri = Uri.parse("https://www.svgrepo.com/")
     private val lottieFilesUri = Uri.parse("https://lottiefiles.com/")
@@ -48,12 +49,12 @@ class AboutFragment : Fragment() {
         val abh = BitmapFactory.decodeResource(resources, R.drawable.abhinav)
         abh_img.setImageBitmap(abh)
         abhinav_card.setCardBackgroundColor(getColor(abh))
-        flatIcon.setOnClickListener { v: View? -> openLinkInChrome(flatIconUri) }
-        svgRepo.setOnClickListener { v: View? -> openLinkInChrome(svgRepoUri) }
-        lottie.setOnClickListener { v: View? -> openLinkInChrome(lottieFilesUri) }
-        rateUs.setOnClickListener { v: View? -> rateUs() }
-        changelog.setOnClickListener { v: View? -> changes() }
-        openLicense.setOnClickListener { v: View? -> changes() }
+        flatIcon.setOnClickListener { openLinkInChrome(flatIconUri) }
+        svgRepo.setOnClickListener { openLinkInChrome(svgRepoUri) }
+        lottie.setOnClickListener { openLinkInChrome(lottieFilesUri) }
+        rateUs.setOnClickListener { rateUs() }
+        changelog.setOnClickListener { changes() }
+        openLicense.setOnClickListener { changes() }
         verTv.text = BuildConfig.VERSION_NAME
         return view
     }

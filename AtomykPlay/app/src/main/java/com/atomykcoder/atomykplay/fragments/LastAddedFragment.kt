@@ -31,8 +31,8 @@ class LastAddedFragment : Fragment() {
         fun newInstance() = LastAddedFragment()
     }
 
-    private var _context:Context? = null
-    private val context1:Context?
+    private var _context: Context? = null
+    private val context1: Context?
         get() {
             return _context
         }

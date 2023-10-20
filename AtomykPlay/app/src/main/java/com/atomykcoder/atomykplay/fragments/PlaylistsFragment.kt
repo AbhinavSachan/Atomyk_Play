@@ -13,15 +13,16 @@ import androidx.recyclerview.widget.RecyclerView
 import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.adapters.PlaylistAdapter
 import com.atomykcoder.atomykplay.constants.FragmentTags.FAVORITE_FRAGMENT_TAG
-import com.atomykcoder.atomykplay.scripts.GridSpacing
 import com.atomykcoder.atomykplay.models.Playlist
+import com.atomykcoder.atomykplay.scripts.GridSpacing
 import com.atomykcoder.atomykplay.utils.StorageUtil
 
 class PlaylistsFragment : Fragment() {
-    companion object{
+    companion object {
         @JvmStatic
         fun newInstance() = PlaylistsFragment()
     }
+
     private var noPlLayout: View? = null
     private var playlistList: ArrayList<Playlist>? = null
     private var playlistAdapter: PlaylistAdapter? = null

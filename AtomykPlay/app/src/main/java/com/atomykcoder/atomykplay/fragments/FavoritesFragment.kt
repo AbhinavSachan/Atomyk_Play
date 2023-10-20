@@ -12,19 +12,20 @@ import androidx.recyclerview.widget.RecyclerView
 import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.adapters.FavoriteListAdapter
 import com.atomykcoder.atomykplay.adapters.SimpleTouchCallback
-import com.atomykcoder.atomykplay.scripts.LinearLayoutManagerWrapper
 import com.atomykcoder.atomykplay.data.Music
 import com.atomykcoder.atomykplay.events.RemoveFromFavoriteEvent
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener
+import com.atomykcoder.atomykplay.scripts.LinearLayoutManagerWrapper
 import com.atomykcoder.atomykplay.utils.StorageUtil
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 
 class FavoritesFragment : Fragment(), OnDragStartListener {
-    companion object{
+    companion object {
         @JvmStatic
         fun newInstance() = FavoritesFragment()
     }
+
     private var itemTouchHelper: ItemTouchHelper? = null
     private var playListAdapter: FavoriteListAdapter? = null
     private var storageUtil: StorageUtil? = null

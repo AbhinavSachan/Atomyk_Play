@@ -4,7 +4,6 @@ import static com.atomykcoder.atomykplay.constants.FragmentTags.OPEN_PLAYLIST_FR
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,14 +14,14 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.atomykcoder.atomykplay.R;
-import com.atomykcoder.atomykplay.ui.MainActivity;
 import com.atomykcoder.atomykplay.adapters.generics.GenericRecyclerAdapter;
 import com.atomykcoder.atomykplay.adapters.generics.GenericViewHolder;
 import com.atomykcoder.atomykplay.adapters.viewHolders.PlaylistViewHolder;
 import com.atomykcoder.atomykplay.classes.GlideBuilt;
 import com.atomykcoder.atomykplay.data.Music;
-import com.atomykcoder.atomykplay.models.Playlist;
 import com.atomykcoder.atomykplay.fragments.OpenPlayListFragment;
+import com.atomykcoder.atomykplay.models.Playlist;
+import com.atomykcoder.atomykplay.ui.MainActivity;
 
 import java.util.ArrayList;
 

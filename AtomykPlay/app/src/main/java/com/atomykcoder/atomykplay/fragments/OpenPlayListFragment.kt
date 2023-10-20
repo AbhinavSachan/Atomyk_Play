@@ -15,11 +15,11 @@ import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.adapters.OpenPlayListAdapter
 import com.atomykcoder.atomykplay.adapters.SimpleTouchCallback
 import com.atomykcoder.atomykplay.classes.GlideBuilt
-import com.atomykcoder.atomykplay.scripts.LinearLayoutManagerWrapper
 import com.atomykcoder.atomykplay.data.Music
-import com.atomykcoder.atomykplay.models.Playlist
 import com.atomykcoder.atomykplay.events.RemoveFromPlaylistEvent
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener
+import com.atomykcoder.atomykplay.models.Playlist
+import com.atomykcoder.atomykplay.scripts.LinearLayoutManagerWrapper
 import com.google.android.material.appbar.CollapsingToolbarLayout
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
@@ -27,11 +27,11 @@ import org.greenrobot.eventbus.Subscribe
 private const val ARG_CURRENT_PLAYLIST = "currentPlaylist"
 
 class OpenPlayListFragment : Fragment(), OnDragStartListener {
-    companion object{
+    companion object {
         @JvmStatic
-        fun newInstance(playlist:Playlist?) = OpenPlayListFragment().apply {
+        fun newInstance(playlist: Playlist?) = OpenPlayListFragment().apply {
             arguments = Bundle().apply {
-                putSerializable(ARG_CURRENT_PLAYLIST,playlist)
+                putSerializable(ARG_CURRENT_PLAYLIST, playlist)
             }
         }
     }
@@ -44,11 +44,11 @@ class OpenPlayListFragment : Fragment(), OnDragStartListener {
         super.onCreate(savedInstanceState)
         arguments?.run {
             playlist = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    getSerializable(ARG_CURRENT_PLAYLIST, Playlist::class.java)
-                } else {
-                    getSerializable(ARG_CURRENT_PLAYLIST) as Playlist
-                }
+                getSerializable(ARG_CURRENT_PLAYLIST, Playlist::class.java)
+            } else {
+                getSerializable(ARG_CURRENT_PLAYLIST) as Playlist
             }
+        }
 
     }
 

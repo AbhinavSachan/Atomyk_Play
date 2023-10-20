@@ -20,7 +20,7 @@
 
     <style name="CustomSplashScreen" parent="Theme.SplashScreen">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_music_thumbnail</item>
-<!--        <item name="splashScreenIconSize">60dp</item>-->
+        <!--        <item name="splashScreenIconSize">60dp</item>-->
         <item name="windowSplashScreenBackground">@color/primary_bg</item>
         <item name="postSplashScreenTheme">@style/Theme.AtomykPlay</item>
     </style>

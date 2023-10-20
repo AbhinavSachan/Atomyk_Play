@@ -1,19 +1,18 @@
 package com.atomykcoder.atomykplay.adapters
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.recyclerview.widget.DiffUtil
 import com.atomykcoder.atomykplay.R
-import com.atomykcoder.atomykplay.ui.MainActivity
 import com.atomykcoder.atomykplay.adapters.generics.GenericViewHolder
 import com.atomykcoder.atomykplay.adapters.viewHolders.MusicMainViewHolder
 import com.atomykcoder.atomykplay.classes.GlideBuilt
 import com.atomykcoder.atomykplay.data.Music
 import com.atomykcoder.atomykplay.enums.OptionSheetEnum
-import com.atomykcoder.atomykplay.helperFunctions.MusicDiffCallback
 import com.atomykcoder.atomykplay.repository.MusicRepo
+import com.atomykcoder.atomykplay.ui.MainActivity
 import com.atomykcoder.atomykplay.utils.StorageUtil
 import com.atomykcoder.atomykplay.utils.StorageUtil.SettingsStorage
 
@@ -28,12 +27,11 @@ class MusicMainAdapter(var context: Context, musicList: ArrayList<Music>?) : Mus
         super.items = musicList
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     fun updateMusicListItems(newMusicArrayList: ArrayList<Music>?) {
-        val diffCallback = MusicDiffCallback(super.items!!, newMusicArrayList)
-        val diffResult = DiffUtil.calculateDiff(diffCallback)
         super.items?.clear()
         newMusicArrayList?.let { super.items?.addAll(it) }
-        diffResult.dispatchUpdatesTo(this)
+        notifyDataSetChanged()
     }
 
 

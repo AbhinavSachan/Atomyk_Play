@@ -54,9 +54,9 @@ private const val ARG_MUSIC = "currentMusic"
 class TagEditorFragment : Fragment() {
     companion object {
         @JvmStatic
-        fun newInstance(song:String) = TagEditorFragment().apply {
+        fun newInstance(song: String) = TagEditorFragment().apply {
             arguments = Bundle().apply {
-                putSerializable(ARG_MUSIC,song)
+                putSerializable(ARG_MUSIC, song)
             }
         }
     }

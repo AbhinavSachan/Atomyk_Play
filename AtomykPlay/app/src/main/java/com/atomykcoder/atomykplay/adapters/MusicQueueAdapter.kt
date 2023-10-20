@@ -7,17 +7,15 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.recyclerview.widget.DiffUtil
 import com.atomykcoder.atomykplay.R
-import com.atomykcoder.atomykplay.ui.MainActivity
 import com.atomykcoder.atomykplay.adapters.generics.GenericViewHolder
 import com.atomykcoder.atomykplay.adapters.viewHolders.MusicQueueViewHolder
 import com.atomykcoder.atomykplay.classes.GlideBuilt
 import com.atomykcoder.atomykplay.data.Music
 import com.atomykcoder.atomykplay.enums.OptionSheetEnum
-import com.atomykcoder.atomykplay.helperFunctions.MusicDiffCallback
 import com.atomykcoder.atomykplay.interfaces.ItemTouchHelperAdapter
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener
+import com.atomykcoder.atomykplay.ui.MainActivity
 import com.atomykcoder.atomykplay.utils.StorageUtil
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import java.util.*
@@ -44,7 +42,7 @@ class MusicQueueAdapter(
         if (super.items == null) return
         super.items?.clear()
         super.items?.addAll(newMusicArrayList)
-        notifyItemRangeChanged(0,newMusicArrayList.size)
+        notifyItemRangeChanged(0, newMusicArrayList.size)
     }
 
     //when item starts to move it will change positions of every item in real time
@@ -106,8 +104,8 @@ class MusicQueueAdapter(
             mainActivity.playAudio(currentItem)
         }
         queueViewHolder.cardView.setOnLongClickListener {
-            if (!isMusicAvailable(currentItem))return@setOnLongClickListener true
-            mainActivity.openOptionMenu(currentItem,OptionSheetEnum.MAIN_LIST)
+            if (!isMusicAvailable(currentItem)) return@setOnLongClickListener true
+            mainActivity.openOptionMenu(currentItem, OptionSheetEnum.MAIN_LIST)
             true
         }
         queueViewHolder.dragButton.setOnTouchListener { _: View?, event: MotionEvent ->
@@ -149,7 +147,9 @@ class MusicQueueAdapter(
                 storageUtil.saveQueueList(super.items!!)
 
                 if (super.items!!.isEmpty()) {
-                    mainActivity.bottomSheetPlayerFragment?.setQueueSheetBehaviour(BottomSheetBehavior.STATE_HIDDEN)
+                    mainActivity.bottomSheetPlayerFragment?.setQueueSheetBehaviour(
+                        BottomSheetBehavior.STATE_HIDDEN
+                    )
                     mainActivity.mainPlayerSheetBehavior?.state = BottomSheetBehavior.STATE_HIDDEN
                     mainActivity.bottomSheetPlayerFragment?.resetMainPlayerLayout()
                     mainActivity.resetDataInNavigation()
@@ -161,7 +161,7 @@ class MusicQueueAdapter(
                         if (savedIndex == super.items!!.size) {
                             mainActivity.playAudio(super.items!![savedIndex - 1])
                             storageUtil.saveMusicIndex(savedIndex - 1)
-                        }else{
+                        } else {
                             mainActivity.playAudio(super.items!![savedIndex])
                         }
                     } else if (position < savedIndex) {

@@ -270,7 +270,7 @@ class SettingsFragment : Fragment(), OnSeekBarChangeListener {
             settingsStorage!!.autoPlay(isChecked)
         }
         autoPlayBtSwi.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
-            if (bluetoothBtnClicked){
+            if (bluetoothBtnClicked) {
                 if (isGranted) {
                     settingsStorage!!.autoPlayBt(isChecked)
                 } else {
@@ -405,7 +405,7 @@ class SettingsFragment : Fragment(), OnSeekBarChangeListener {
         builder.setPositiveButton("Allow") { _, _ ->
             requestPermission()
         }
-        builder.setNegativeButton("Deny"){ _, _->
+        builder.setNegativeButton("Deny") { _, _ ->
             bluetoothBtnClicked = false
             autoPlayBtSwi.isChecked = false
         }

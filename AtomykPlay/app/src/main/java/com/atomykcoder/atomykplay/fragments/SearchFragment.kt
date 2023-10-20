@@ -22,9 +22,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.airbnb.lottie.LottieAnimationView
 import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.adapters.MusicMainAdapter
-import com.atomykcoder.atomykplay.scripts.LinearLayoutManagerWrapper
 import com.atomykcoder.atomykplay.data.Music
 import com.atomykcoder.atomykplay.repository.MusicRepo
+import com.atomykcoder.atomykplay.scripts.LinearLayoutManagerWrapper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -33,10 +33,11 @@ import java.util.*
 
 //Search Layout Fragment for Performing Searches and Presenting Results
 class SearchFragment : Fragment() {
-    companion object{
+    companion object {
         @JvmStatic
         fun newInstance() = SearchFragment()
     }
+
     private lateinit var manager: InputMethodManager
     private lateinit var searchView: EditText
 
@@ -50,11 +51,12 @@ class SearchFragment : Fragment() {
     private var isSearching = false
     private var noResultAnim: LottieAnimationView? = null
     private val searchList = MutableLiveData<ArrayList<Music>>()
-    private var _context:Context? = null
-    private val context1:Context?
+    private var _context: Context? = null
+    private val context1: Context?
         get() {
             return _context
         }
+
     fun removeItems(selectedItem: Music?) {
         selectedItem?.let { adapter?.removeItem(it) }
     }
@@ -88,6 +90,7 @@ class SearchFragment : Fragment() {
             search(query, dataList)
         }
     }
+
     override fun onAttach(context: Context) {
         super.onAttach(context)
         _context = context
@@ -115,7 +118,8 @@ class SearchFragment : Fragment() {
         genreButton = view.findViewById(R.id.genre_button)
         radioGroup = view.findViewById(R.id.radio_group)
         noResultAnim = view.findViewById(R.id.noResultAnim)
-        manager = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        manager =
+            requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         searchView = view.findViewById(R.id.search_view_search)
         val closeSearch = view.findViewById<ImageView>(R.id.close_search_btn)
 
@@ -127,7 +131,10 @@ class SearchFragment : Fragment() {
                 if (!isSearching) {
                     handler.postDelayed({
                         isSearching = true
-                        handleSearchEvent(query.toString().lowercase(Locale.getDefault()), MusicRepo.instance?.initialMusicList)
+                        handleSearchEvent(
+                            query.toString().lowercase(Locale.getDefault()),
+                            MusicRepo.instance?.initialMusicList
+                        )
                     }, 200)
                 }
             }
@@ -174,7 +181,7 @@ class SearchFragment : Fragment() {
             searchView.requestFocus()
             try {
                 manager.showSoftInput(searchView, InputMethodManager.SHOW_IMPLICIT)
-            } catch (_:Exception) {
+            } catch (_: Exception) {
 
             }
         })
@@ -192,6 +199,7 @@ class SearchFragment : Fragment() {
             e.printStackTrace()
         }
     }
+
     //Function that adds music to an arraylist which is being used to show music in recycler view
     private fun addMusicToSearchList(song: Music) {
         searchedMusicList.add(song)

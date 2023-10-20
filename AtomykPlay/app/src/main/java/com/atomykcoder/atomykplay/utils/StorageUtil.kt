@@ -5,9 +5,9 @@ import android.content.SharedPreferences
 import com.atomykcoder.atomykplay.constants.RepeatModes
 import com.atomykcoder.atomykplay.constants.ShuffleModes
 import com.atomykcoder.atomykplay.data.Music
+import com.atomykcoder.atomykplay.helperFunctions.MusicHelper
 import com.atomykcoder.atomykplay.models.LRCMap
 import com.atomykcoder.atomykplay.models.Playlist
-import com.atomykcoder.atomykplay.helperFunctions.MusicHelper
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
@@ -818,6 +818,7 @@ class StorageUtil
                 context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE)
             return sharedPreferences.getInt("bass_level", 30)
         }
+
         fun saveVirLevel(b: Int) {
             val sharedPreferences =
                 context.getSharedPreferences(SETTINGS_STORAGE, Context.MODE_PRIVATE)

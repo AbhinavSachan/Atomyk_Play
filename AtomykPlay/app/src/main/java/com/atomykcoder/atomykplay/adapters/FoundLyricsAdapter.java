@@ -11,9 +11,9 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.atomykcoder.atomykplay.R;
-import com.atomykcoder.atomykplay.ui.MainActivity;
 import com.atomykcoder.atomykplay.adapters.viewHolders.FoundLyricsViewHolder;
 import com.atomykcoder.atomykplay.fragments.AddLyricsFragment;
+import com.atomykcoder.atomykplay.ui.MainActivity;
 
 import java.util.ArrayList;
 

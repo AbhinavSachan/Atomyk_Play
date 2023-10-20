@@ -137,9 +137,9 @@
                         android:id="@+id/show_file_info_swi"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_gravity="center"
                         android:clickable="false"
                         android:focusable="false"
-                        android:layout_gravity="center"
                         android:gravity="center"
                         android:thumb="@drawable/custom_switch_thumb"
                         app:track="@drawable/custom_track_switch" />
@@ -288,9 +288,9 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:gravity="center"
                         android:clickable="false"
                         android:focusable="false"
+                        android:gravity="center"
                         android:thumb="@drawable/custom_switch_thumb"
                         app:track="@drawable/custom_track_switch" />
                 </LinearLayout>
@@ -452,10 +452,10 @@
                     <androidx.appcompat.widget.SwitchCompat
                         android:id="@+id/hide_status_bar_swi"
                         android:layout_width="wrap_content"
-                        android:clickable="false"
-                        android:focusable="false"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
+                        android:clickable="false"
+                        android:focusable="false"
                         android:gravity="center"
                         android:thumb="@drawable/custom_switch_thumb"
                         app:track="@drawable/custom_track_switch" />
@@ -572,10 +572,10 @@
                         <androidx.appcompat.widget.SwitchCompat
                             android:id="@+id/autoPlay_swi"
                             android:layout_width="wrap_content"
-                            android:clickable="false"
-                            android:focusable="false"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
+                            android:clickable="false"
+                            android:focusable="false"
                             android:gravity="center"
                             android:thumb="@drawable/custom_switch_thumb"
                             app:track="@drawable/custom_track_switch" />
@@ -606,9 +606,9 @@
                             android:id="@+id/autoPlayBt_swi"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_gravity="center"
                             android:clickable="false"
                             android:focusable="false"
-                            android:layout_gravity="center"
                             android:gravity="center"
                             android:thumb="@drawable/custom_switch_thumb"
                             app:track="@drawable/custom_track_switch" />
@@ -769,10 +769,10 @@
                     <androidx.appcompat.widget.SwitchCompat
                         android:id="@+id/keep_shuffle_swi"
                         android:layout_width="wrap_content"
-                        android:clickable="false"
-                        android:focusable="false"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
+                        android:clickable="false"
+                        android:focusable="false"
                         android:gravity="center"
                         android:thumb="@drawable/custom_switch_thumb"
                         app:track="@drawable/custom_track_switch" />
@@ -870,9 +870,9 @@
                         android:id="@+id/self_stop_swi"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_gravity="center"
                         android:clickable="false"
                         android:focusable="false"
-                        android:layout_gravity="center"
                         android:gravity="center"
                         android:thumb="@drawable/custom_switch_thumb"
                         app:track="@drawable/custom_track_switch" />
@@ -920,9 +920,9 @@
                         android:id="@+id/one_click_skip_swi"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_gravity="center"
                         android:clickable="false"
                         android:focusable="false"
-                        android:layout_gravity="center"
                         android:gravity="center"
                         android:thumb="@drawable/custom_switch_thumb"
                         app:track="@drawable/custom_track_switch" />
