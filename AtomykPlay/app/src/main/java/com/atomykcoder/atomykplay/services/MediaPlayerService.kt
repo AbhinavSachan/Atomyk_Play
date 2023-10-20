@@ -15,6 +15,7 @@ import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
 import android.media.*
 import android.media.AudioManager.OnAudioFocusChangeListener
+import android.media.AudioManager.STREAM_MUSIC
 import android.media.MediaPlayer.*
 import android.media.session.MediaSessionManager
 import android.os.*
@@ -31,7 +32,6 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.drawable.toBitmapOrNull
 import androidx.media.MediaBrowserServiceCompat
 import com.atomykcoder.atomykplay.ApplicationClass
@@ -54,7 +54,6 @@ import com.atomykcoder.atomykplay.helperFunctions.Logger
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper
 import com.atomykcoder.atomykplay.models.LRCMap
 import com.atomykcoder.atomykplay.ui.MainActivity
-import com.atomykcoder.atomykplay.utils.AndroidUtil.toUnscaledBitmap
 import com.atomykcoder.atomykplay.utils.MusicEnhancerUtil
 import com.atomykcoder.atomykplay.utils.StorageUtil
 import com.atomykcoder.atomykplay.utils.StorageUtil.SettingsStorage
@@ -622,7 +621,8 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
     private fun takeActionOnCall(state: Int) {
         when (state) {
             TelephonyManager.CALL_STATE_OFFHOOK, TelephonyManager.CALL_STATE_RINGING -> {
-                if (isMediaPlaying) {
+                Logger.normalLog("RINGING $isMediaPlaying $isMediaPlayerNotNull")
+                if (is_playing) {
                     wasPlaying = true
                 }
                 pauseMedia()
@@ -630,10 +630,39 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
             }
 
             TelephonyManager.CALL_STATE_IDLE -> {
+                Logger.normalLog("IDLE $wasPlaying")
+
                 MainActivity.phone_ringing = false
                 if (wasPlaying) {
                     resumeMedia(true)
                     wasPlaying = false
+                }
+            }
+        }
+    }
+
+    override fun onAudioFocusChange(focusState: Int) {
+        when (focusState) {
+            AudioManager.AUDIOFOCUS_GAIN -> if (wasPlaying) {
+                isFocused = true
+                Logger.normalLog("AUDIOFOCUS_GAIN")
+                if (isMediaPlayerNotNull) {
+                    resumeMedia(true)
+                }
+                wasPlaying = false
+            }
+
+            AudioManager.AUDIOFOCUS_LOSS, AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> if (isMediaPlaying) {
+                isFocused = false
+                Logger.normalLog("AUDIOFOCUS_LOSS")
+                pauseMedia()
+                wasPlaying = true
+            }
+
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> if (settingsStorage.loadLowerVol()) {
+                Logger.normalLog("AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK")
+                if (isMediaPlaying) {
+                    mediaPlayer!!.setVolume(0.3f, 0.3f)
                 }
             }
         }
@@ -696,8 +725,8 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
                 e.printStackTrace()
             }
         }
-        if (settingsStorage.loadAutoPlayBt()){
-            if (isBluetoothHeadsetConnected){
+        if (settingsStorage.loadAutoPlayBt()) {
+            if (isBluetoothHeadsetConnected) {
                 try {
                     initiateMediaSession()
                 } catch (e: RemoteException) {
@@ -745,6 +774,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
                         updateMetaData(activeMusic, null)
                         clearResources()
                     }
+
                     // Function to post image in MainPlayer using EventBus
                     private fun postImageInMainPlayer(image: Bitmap?, activeMusic: Music?) {
                         if (MainActivity.service_bound) {
@@ -856,7 +886,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
             mediaPlayer!!.setOnCompletionListener(this)
 
             val audioAttributes = AudioAttributes.Builder()
-            audioAttributes.setLegacyStreamType(AudioManager.STREAM_MUSIC)
+            audioAttributes.setLegacyStreamType(STREAM_MUSIC)
             audioAttributes.setUsage(AudioAttributes.USAGE_MEDIA)
             audioAttributes.setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
             mediaPlayer!!.setAudioAttributes(audioAttributes.build())
@@ -909,7 +939,11 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
      * This function plays music from start
      */
     private fun playMedia() {
-        if (!requestAudioFocus()) return
+        if (!isFocused) {
+            requestAudioFocus()
+            Logger.normalLog("Requesting focus")
+        }
+
         if (MainActivity.phone_ringing) {
             showToast("Can't play while on call")
             return
@@ -959,10 +993,14 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
      */
     fun resumeMedia(showNotification: Boolean) {
         // request audio focus if false
-        if (!requestAudioFocus()) return
+        if (!isFocused) {
+            requestAudioFocus()
+            Logger.normalLog("Requesting focus")
+        }
+
 
         //make toast if volume is off
-        if (audioManager.getStreamVolume(AudioManager.STREAM_MUSIC).toFloat() == 0f) {
+        if (audioManager.getStreamVolume(STREAM_MUSIC).toFloat() == 0f) {
             showToast("Please turn the volume UP")
         }
 
@@ -974,6 +1012,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
 
         // initiate player and return early if media_player is null
         if (!isMediaPlayerNotNull) {
+            Logger.normalLog("Player was null")
             initiateMediaPlayer()
             return
         }
@@ -987,6 +1026,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
                 return
             }
         } else {
+            Logger.normalLog("Skipped to next")
             skipToNext()
             return
         }
@@ -1003,10 +1043,14 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
         // set is_playing to true
         is_playing = true
 
+        Logger.normalLog("Finally")
+
         // set media_player seekbar to position and start media_player
         val position = storage.loadMusicLastPos()
         seekMediaTo(position)
-        mediaPlayer!!.start()
+        mediaPlayer?.start()
+
+        Logger.normalLog("Started playing")
 
         // set icon to playing and build notification
         setIcon(PlaybackStatus.PLAYING)
@@ -1026,6 +1070,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
             }
             storage.saveMusicLastPos(currentMediaPosition)
             mediaPlayer!!.pause()
+            Logger.normalLog("Paused playing")
             is_playing = false
             setIcon(PlaybackStatus.PAUSED)
             buildNotification(PlaybackStatus.PAUSED, 0f)
@@ -1324,27 +1369,6 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
         }
     }
 
-    override fun onAudioFocusChange(focusState: Int) {
-        when (focusState) {
-            AudioManager.AUDIOFOCUS_GAIN -> if (wasPlaying) {
-                if (isMediaPlayerNotNull) {
-                    resumeMedia(true)
-                }
-                wasPlaying = false
-            }
-
-            AudioManager.AUDIOFOCUS_LOSS, AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> if (isMediaPlaying) {
-                pauseMedia()
-                wasPlaying = true
-            }
-
-            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> if (settingsStorage.loadLowerVol()) {
-                if (isMediaPlaying) {
-                    mediaPlayer!!.setVolume(0.3f, 0.3f)
-                }
-            }
-        }
-    }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         //Handle Intent action from MediaSession.TransportControls
@@ -1479,6 +1503,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
         stopForeground(STOP_FOREGROUND_REMOVE)
     }
 
+    private var isFocused: Boolean = false
 
     /**
      * this function requests focus to play the music
@@ -1490,11 +1515,15 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val builder = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
             builder.setOnAudioFocusChangeListener(this)
+            builder.setAudioAttributes(
+                AudioAttributes.Builder().setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                    .setLegacyStreamType(STREAM_MUSIC).build()
+            )
             audioFocusRequest = builder.build()
             result = audioManager.requestAudioFocus(audioFocusRequest!!)
         } else {
             result = audioManager.requestAudioFocus(
-                this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN
+                this, STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN
             )
         }
         return result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED

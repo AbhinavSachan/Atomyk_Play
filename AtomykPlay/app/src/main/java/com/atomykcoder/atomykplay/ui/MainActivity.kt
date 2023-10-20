@@ -97,6 +97,7 @@ import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity(), View.OnClickListener,
     NavigationView.OnNavigationItemSelectedListener, DrawerLayout.DrawerListener {
+    private var sorryTv: TextView? = null
     private var serviceConnection: ServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
             val binder = service as LocalBinder
@@ -159,7 +160,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
             }
         }
     private var musicMainAdapter: MusicMainAdapter? = null
-    private var linearLayout: LinearLayout? = null
+    private var sorryLayout: LinearLayout? = null
     private var musicRecyclerView: RecyclerView? = null
     private var telephonyManager: TelephonyManager? = null
     private var phoneStateListener: PhoneStateListener? = null
@@ -1304,7 +1305,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         musicRepo = MusicRepo.instance
         animateFromColor = resources.getColor(R.color.player_bg, null)
         animateToColor = resources.getColor(R.color.white, null)
-        linearLayout = findViewById(R.id.song_not_found_layout)
+        sorryLayout = findViewById(R.id.song_not_found_layout)
+        sorryTv = findViewById(R.id.sorry_text)
         musicRecyclerView = findViewById(R.id.music_recycler)
         playerBottomSheet = findViewById(R.id.player_main_container)
         progressBar = findViewById(R.id.progress_bar_main_activity)
@@ -1455,6 +1457,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                     setUpServiceAndScanner()
                 } else {
                     is_granted = false
+                    sorryLayout?.visibility = View.VISIBLE
+                    sorryTv?.text = "Permission Denied"
                     showToast("Permissions denied!")
                 }
             }
@@ -1482,6 +1486,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                     setUpServiceAndScanner()
                 } else {
                     is_granted = false
+                    sorryLayout?.visibility = View.VISIBLE
+                    sorryTv?.text = "Permission Denied"
                     showToast("Permissions denied!")
                 }
             }
@@ -1556,26 +1562,29 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         service.shutdown()
     }
 
+    @SuppressLint("SetTextI18n")
     private fun setObserver() {
         musicRepo!!.getStatus().observe(this) {
             when (it) {
                 LoadingStatus.LOADING -> {
-                    progressBar!!.visibility = View.VISIBLE
-                    linearLayout!!.visibility = View.GONE
+                    progressBar?.visibility = View.VISIBLE
+                    sorryLayout?.visibility = View.GONE
                 }
 
                 LoadingStatus.SUCCESS -> {
                     val list: ArrayList<Music> = musicRepo!!.initialMusicList
                     storageUtil.saveInitialList(list)
                     if (list.isEmpty()) {
-                        linearLayout!!.visibility = View.VISIBLE
+                        sorryLayout?.visibility = View.VISIBLE
+                        sorryTv?.text = "Offline Music Unavailable"
                     }
-                    progressBar!!.visibility = View.GONE
+                    progressBar?.visibility = View.GONE
                 }
 
                 LoadingStatus.FAILURE -> {
-                    linearLayout!!.visibility = View.VISIBLE
-                    progressBar!!.visibility = View.GONE
+                    sorryLayout?.visibility = View.VISIBLE
+                    sorryTv?.text = "Offline Music Unavailable"
+                    progressBar?.visibility = View.GONE
                 }
 
                 else -> {}

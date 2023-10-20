@@ -75,6 +75,7 @@ class SettingsFragment : Fragment(), OnSeekBarChangeListener {
     private lateinit var enhanceAudioSwi: SwitchCompat
     private lateinit var bassLevelSeekbar: SeekBar
     private lateinit var virtualizerStrengthSeekbar: SeekBar
+    private var bluetoothBtnClicked: Boolean = false
     private var dark = false
     private var showInfo = false
     private var showArtist = false
@@ -228,13 +229,8 @@ class SettingsFragment : Fragment(), OnSeekBarChangeListener {
         extraLl.setOnClickListener { extraSwi.isChecked = !extraSwi.isChecked }
         autoPlayLl.setOnClickListener { autoPlaySwi.isChecked = !autoPlaySwi.isChecked }
         autoPlayBtLl.setOnClickListener {
-            if (isGranted) {
-                autoPlayBtSwi.isChecked = !autoPlayBtSwi.isChecked
-            } else {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    rationalDialog()
-                }
-            }
+            bluetoothBtnClicked = true
+            autoPlayBtSwi.isChecked = !autoPlayBtSwi.isChecked
         }
         keepShuffleLl.setOnClickListener {
             keepShuffleSwi.isChecked = !keepShuffleSwi.isChecked
@@ -254,61 +250,52 @@ class SettingsFragment : Fragment(), OnSeekBarChangeListener {
 
         addBeautifyTags.setOnClickListener { showBeatifyTagDialog() }
         scanAllLl.setOnClickListener { scanAllSwi.isChecked = !scanAllSwi.isChecked }
-        hideSbLl.setOnClickListener { v: View? -> hideSbSwi.isChecked = !hideSbSwi.isChecked }
-        hideNbLl.setOnClickListener { v: View? -> hideNbSwi.isChecked = !hideNbSwi.isChecked }
-        blackListLl.setOnClickListener { v: View? -> openBlackListDialogue() }
-        filterDurLl.setOnClickListener { v: View? -> openFilterDurationDialog() }
+        hideSbLl.setOnClickListener { hideSbSwi.isChecked = !hideSbSwi.isChecked }
+        hideNbLl.setOnClickListener { hideNbSwi.isChecked = !hideNbSwi.isChecked }
+        blackListLl.setOnClickListener { openBlackListDialogue() }
+        filterDurLl.setOnClickListener { openFilterDurationDialog() }
         songInfoSwi.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
-            songInfoSwi.isChecked = isChecked
             settingsStorage!!.showInfo(isChecked)
             hideInfo(isChecked)
         }
         artistSwi.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
-            artistSwi.isChecked = isChecked
             settingsStorage!!.showArtist(isChecked)
             hideArtist(isChecked)
         }
         extraSwi.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
-            extraSwi.isChecked = isChecked
             settingsStorage!!.showExtraCon(isChecked)
             hideExtra(isChecked)
         }
         autoPlaySwi.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
-            autoPlaySwi.isChecked = isChecked
             settingsStorage!!.autoPlay(isChecked)
         }
         autoPlayBtSwi.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
-            if (isGranted) {
-                autoPlayBtSwi.isChecked = isChecked
-                settingsStorage!!.autoPlayBt(isChecked)
-            } else {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    rationalDialog()
+            if (bluetoothBtnClicked){
+                if (isGranted) {
+                    settingsStorage!!.autoPlayBt(isChecked)
+                } else {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        rationalDialog()
+                    }
                 }
             }
         }
         keepShuffleSwi.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
-            keepShuffleSwi.isChecked = isChecked
             settingsStorage!!.keepShuffle(isChecked)
         }
         lowerVolSwi.setOnCheckedChangeListener { buttonView: CompoundButton?, isChecked: Boolean ->
-            lowerVolSwi.isChecked = isChecked
             settingsStorage!!.lowerVol(isChecked)
         }
         selfStopSwi.setOnCheckedChangeListener { buttonView: CompoundButton?, isChecked: Boolean ->
-            selfStopSwi.isChecked = isChecked
             settingsStorage!!.setSelfStop(isChecked)
         }
         keepScreenOnSwi.setOnCheckedChangeListener { buttonView: CompoundButton?, isChecked: Boolean ->
-            keepScreenOnSwi.isChecked = isChecked
             settingsStorage!!.keepScreenOn(isChecked)
         }
         oneClickSkipSwi.setOnCheckedChangeListener { buttonView: CompoundButton?, isChecked: Boolean ->
-            oneClickSkipSwi.isChecked = isChecked
             settingsStorage!!.oneClickSkip(isChecked)
         }
         beautifySwi.setOnCheckedChangeListener { buttonView: CompoundButton?, isChecked: Boolean ->
-            beautifySwi.isChecked = isChecked
             settingsStorage?.beautifyName(isChecked)
             if (!isChecked) {
                 settingsStorage?.clearBeautifyTags()
@@ -318,7 +305,6 @@ class SettingsFragment : Fragment(), OnSeekBarChangeListener {
             mainActivity?.checkForUpdateList(false)
         }
         scanAllSwi.setOnCheckedChangeListener { buttonView: CompoundButton?, isChecked: Boolean ->
-            scanAllSwi.isChecked = isChecked
             settingsStorage?.scanAllMusic(isChecked)
             mainActivity?.checkForUpdateList(false)
         }
@@ -329,7 +315,6 @@ class SettingsFragment : Fragment(), OnSeekBarChangeListener {
         setSeekbarMax(virtualizerStrengthSeekbar)
 
         enhanceAudioSwi.setOnCheckedChangeListener { buttonView: CompoundButton?, isChecked: Boolean ->
-            enhanceAudioSwi.isChecked = isChecked
             setSeekLayout(isChecked, levelLayout)
             if (isChecked) {
                 MainActivity.media_player_service?.apply {
@@ -341,7 +326,6 @@ class SettingsFragment : Fragment(), OnSeekBarChangeListener {
             settingsStorage?.enableEnhanceAudio(isChecked)
         }
         hideSbSwi.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
-            hideSbSwi.isChecked = isChecked
             settingsStorage?.saveHideStatusBar(isChecked)
             try {
                 setSystemDrawBehindBars(
@@ -359,7 +343,6 @@ class SettingsFragment : Fragment(), OnSeekBarChangeListener {
             hideSb = isChecked
         }
         hideNbSwi.setOnCheckedChangeListener { buttonView: CompoundButton?, isChecked: Boolean ->
-            hideNbSwi.isChecked = isChecked
             settingsStorage!!.saveHideNavBar(isChecked)
             try {
                 setSystemDrawBehindBars(
@@ -393,10 +376,12 @@ class SettingsFragment : Fragment(), OnSeekBarChangeListener {
                 if (multiplePermissionsReport.areAllPermissionsGranted()) {
 
                     isGranted = true
-                    autoPlayBtSwi.isChecked = true
+                    autoPlayBtSwi.isChecked = isGranted
+                    settingsStorage!!.autoPlayBt(isGranted)
                 } else {
                     isGranted = false
-                    autoPlayBtSwi.isChecked = false
+                    autoPlayBtSwi.isChecked = isGranted
+                    settingsStorage!!.autoPlayBt(isGranted)
                     showToast("Permissions denied!")
                 }
             }
@@ -415,9 +400,14 @@ class SettingsFragment : Fragment(), OnSeekBarChangeListener {
     private fun rationalDialog() {
         val builder = MaterialAlertDialogBuilder(requireContext())
         builder.setTitle("Permission Needed!")
+        builder.setCancelable(false)
         builder.setMessage("BLUETOOTH Permission needed to use this feature.")
-        builder.setPositiveButton("Ok") { _, _ ->
+        builder.setPositiveButton("Allow") { _, _ ->
             requestPermission()
+        }
+        builder.setNegativeButton("Deny"){ _, _->
+            bluetoothBtnClicked = false
+            autoPlayBtSwi.isChecked = false
         }
         builder.create().show()
     }
