@@ -88,6 +88,8 @@ import com.karumi.dexter.listener.PermissionGrantedResponse
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import com.karumi.dexter.listener.single.PermissionListener
+import com.l4digital.fastscroll.FastScrollRecyclerView
+import com.l4digital.fastscroll.FastScroller
 import org.greenrobot.eventbus.EventBus
 import java.io.File
 import java.util.*
@@ -161,7 +163,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         }
     private var musicMainAdapter: MusicMainAdapter? = null
     private var sorryLayout: LinearLayout? = null
-    private var musicRecyclerView: RecyclerView? = null
     private var telephonyManager: TelephonyManager? = null
     private var phoneStateListener: PhoneStateListener? = null
     private var phoneStateCallback: PhoneStateCallback? = null
@@ -1307,7 +1308,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         animateToColor = resources.getColor(R.color.white, null)
         sorryLayout = findViewById(R.id.song_not_found_layout)
         sorryTv = findViewById(R.id.sorry_text)
-        musicRecyclerView = findViewById(R.id.music_recycler)
         playerBottomSheet = findViewById(R.id.player_main_container)
         progressBar = findViewById(R.id.progress_bar_main_activity)
         shadowMain = findViewById(R.id.shadow_main)
@@ -1383,6 +1383,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         plSheetBehavior!!.addBottomSheetCallback(plSheetCallback)
         donationSheetBehavior!!.addBottomSheetCallback(donationCallback)
         mainPlayerSheetBehavior!!.addBottomSheetCallback(mainPlayerSheetCallback)
+
+
         if (savedInstanceState == null) {
             navigationView!!.setCheckedItem(R.id.navigation_home)
         }
@@ -1613,10 +1615,23 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                 val manager = LinearLayoutManager(this@MainActivity)
                 musicMainAdapter = MusicMainAdapter(this@MainActivity, musicArrayList)
                 musicMainAdapter!!.setHasStableIds(true)
-                musicRecyclerView?.setHasFixedSize(true)
-                musicRecyclerView?.setItemViewCacheSize(5)
-                musicRecyclerView?.layoutManager = manager
-                musicRecyclerView?.adapter = musicMainAdapter
+                findViewById<FastScrollRecyclerView>(R.id.fast_rec_view).apply {
+                    setHasFixedSize(true)
+                    setItemViewCacheSize(5)
+                    layoutManager = manager
+                    adapter = musicMainAdapter
+                    setFastScrollListener(object : FastScroller.FastScrollListener {
+                        override fun onFastScrollStart(fastScroller: FastScroller) {
+                            // fast scroll started
+                            glideBuilt.pauseRequest()
+                        }
+
+                        override fun onFastScrollStop(fastScroller: FastScroller) {
+                            // fast scroll stopped
+                            glideBuilt.resumeRequest()
+                        }
+                    })
+                }
             } else {
                 musicMainAdapter?.updateMusicListItems(musicArrayList)
                 storageUtil.saveInitialList(musicArrayList!!)

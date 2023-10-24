@@ -15,8 +15,10 @@ import com.atomykcoder.atomykplay.repository.MusicRepo
 import com.atomykcoder.atomykplay.ui.MainActivity
 import com.atomykcoder.atomykplay.utils.StorageUtil
 import com.atomykcoder.atomykplay.utils.StorageUtil.SettingsStorage
+import com.l4digital.fastscroll.FastScroller
 
-class MusicMainAdapter(var context: Context, musicList: ArrayList<Music>?) : MusicAdapter() {
+class MusicMainAdapter(var context: Context, musicList: ArrayList<Music>?) : MusicAdapter(),
+    FastScroller.SectionIndexer {
     private var mainActivity = context as MainActivity
     private var storage: StorageUtil = StorageUtil(context)
     private var settingsStorage: SettingsStorage = SettingsStorage(context)
@@ -34,11 +36,14 @@ class MusicMainAdapter(var context: Context, musicList: ArrayList<Music>?) : Mus
         notifyDataSetChanged()
     }
 
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GenericViewHolder<Music> {
         val view =
             LayoutInflater.from(parent.context).inflate(R.layout.music_item_layout, parent, false)
         return MusicMainViewHolder(view)
+    }
+
+    override fun getSectionText(position: Int): CharSequence {
+        return super.items?.get(position)?.name?.get(0).toString()
     }
 
     override fun onBindViewHolder(holder: GenericViewHolder<Music>, position: Int) {

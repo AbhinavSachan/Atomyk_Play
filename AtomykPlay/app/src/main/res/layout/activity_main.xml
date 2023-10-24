@@ -57,12 +57,22 @@
                 android:indeterminateTint="@color/icons_bg"
                 android:visibility="gone" />
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/music_recycler"
+            <com.l4digital.fastscroll.FastScrollRecyclerView
+                android:id="@+id/fast_rec_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:clipToPadding="false"
-                android:paddingBottom="@dimen/most_bottom_padding" />
+                android:paddingBottom="@dimen/most_bottom_padding"
+                app:bubbleColor="@color/accent_color_bg"
+                app:bubbleTextColor="@color/material_dynamic_neutral95"
+                app:handleColor="@color/accent_color_bg" />
+
+<!--            <androidx.recyclerview.widget.RecyclerView-->
+<!--                android:id="@+id/music_recycler"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="match_parent"-->
+<!--                android:clipToPadding="false"-->
+<!--                android:paddingBottom="@dimen/most_bottom_padding" />-->
         </RelativeLayout>
 
         <com.google.android.material.appbar.AppBarLayout
