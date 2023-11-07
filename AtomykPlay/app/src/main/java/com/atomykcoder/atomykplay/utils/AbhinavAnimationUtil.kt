@@ -23,12 +23,10 @@ object AbhinavAnimationUtil {
             0f,
             25f,
             -25f,
-            25f,
-            -25f,
             15f,
             -15f,
-            6f,
-            -6f,
+            5f,
+            -5f,
             0f
         )//EARTHQUAKE IMITATION
         val scaleXHolder = PropertyValuesHolder.ofFloat(View.SCALE_X, 1.1f)
@@ -41,16 +39,15 @@ object AbhinavAnimationUtil {
                 shakeXHolder,
                 scaleXHolder,
                 scaleYHolder
-            )
-            .setDuration(shakeDuration)
-            .start();
+            ).setDuration(shakeDuration)
+            .start()
 
         // Reset the button scale in XY to 1f and then make button clickable again.
         val resetAnimatorSet = AnimatorSet()
         resetAnimatorSet.apply {
             playTogether(
-                ObjectAnimator.ofFloat(this@buttonShakeAnimation, "scaleX", 1f),
-                ObjectAnimator.ofFloat(this@buttonShakeAnimation, "scaleY", 1f)
+                ObjectAnimator.ofFloat(this@buttonShakeAnimation, View.SCALE_X, 1f),
+                ObjectAnimator.ofFloat(this@buttonShakeAnimation, View.SCALE_Y, 1f)
             )
             interpolator = DecelerateInterpolator()
             duration = resetDuration
