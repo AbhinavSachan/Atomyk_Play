@@ -20,6 +20,7 @@ import android.os.Looper
 import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.OnClickListener
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
@@ -31,6 +32,7 @@ import android.widget.SeekBar.OnSeekBarChangeListener
 import android.widget.SeekBar.VISIBLE
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
@@ -51,6 +53,7 @@ import com.atomykcoder.atomykplay.constants.FragmentTags.ADD_LYRICS_FRAGMENT_TAG
 import com.atomykcoder.atomykplay.constants.RepeatModes
 import com.atomykcoder.atomykplay.constants.ShuffleModes
 import com.atomykcoder.atomykplay.data.Music
+import com.atomykcoder.atomykplay.databinding.FragmentPlayerBinding
 import com.atomykcoder.atomykplay.enums.OptionSheetEnum
 import com.atomykcoder.atomykplay.enums.PlaybackStatus
 import com.atomykcoder.atomykplay.events.*
@@ -90,7 +93,7 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 
-class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragStartListener {
+class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragStartListener,OnClickListener {
 
     private val lyricsArrayList = ArrayList<String>()
 
@@ -287,25 +290,59 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
     private var gradientBottom: View? = null
     private var coverLayout: View? = null
 
+//    private var _binding:FragmentPlayerBinding? = null
+//    private val binding get() = _binding!!
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        init(savedInstanceState)
+    }
+
+    private fun init(savedInstanceState: Bundle?) {
+        initComponents()
+        if (savedInstanceState == null) {
+            if (activeMusic == null) {
+                activeMusic = currentMusic
+            }
+        } else {
+            activeMusic = MusicHelper.decode(savedInstanceState.getString("activeMusic"))
+        }
+    }
+
+    private fun initComponents() {
+        if (!EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().register(this)
+        }
+        context1?.let {
+            storageUtil = StorageUtil(it.applicationContext)
+            settingsStorage = SettingsStorage(it.applicationContext)
+            glideBuilt = GlideBuilt(it.applicationContext)
+            linearLayoutManager = LinearLayoutManagerWrapper(it)
+            mainActivity = WeakReference(it as MainActivity).get()
+        }
+
+        executorService = Executors.newFixedThreadPool(10)
+
+        //StorageUtil initialization
+
+        handler = Handler(Looper.getMainLooper())
+
+        if (activeMusic != null) {
+            lrcMap = storageUtil.loadLyrics(activeMusic!!.id)
+        }
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View? {
         val view = inflater.inflate(R.layout.fragment_player, container, false)
+        return view
+    }
 
-        context1?.let {
-            storageUtil = StorageUtil(it.applicationContext)
-            settingsStorage = SettingsStorage(it.applicationContext)
-            glideBuilt = GlideBuilt(it.applicationContext)
-        }
-
-        executorService = Executors.newFixedThreadPool(10)
-
-        //StorageUtil initialization
-        mainActivity = WeakReference(context1 as MainActivity).get()
-
-        handler = Handler(Looper.getMainLooper())
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         //Mini player items initializations
         miniPlayView = view.findViewById(R.id.mini_player_layout) //○
@@ -351,21 +388,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         gradientTop = view.findViewById(R.id.gradient_top)
         gradientBottom = view.findViewById(R.id.gradient_bottom)
         coverLayout = view.findViewById(R.id.coverRelativeLayout)
-        Logger.normalLog("Created new activity")
 
-        if (!EventBus.getDefault().isRegistered(this)) {
-            EventBus.getDefault().register(this)
-        }
-        if (savedInstanceState == null) {
-            if (activeMusic == null) {
-                activeMusic = currentMusic
-            }
-        } else {
-            activeMusic = MusicHelper.decode(savedInstanceState.getString("activeMusic"))
-        }
-        if (activeMusic != null) {
-            lrcMap = storageUtil.loadLyrics(activeMusic!!.id)
-        }
         playing_same_song = false
 
         setAccorToSettings()
@@ -434,7 +457,6 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         val button = view.findViewById<TextView>(R.id.btn_add_lyrics)
         lyricsRecyclerView = view.findViewById(R.id.lyrics_recycler_view)
         noLyricsLayout = view.findViewById(R.id.no_lyrics_layout)
-        linearLayoutManager = LinearLayoutManagerWrapper(getContext())
         musicArrayList = storageUtil.loadQueueList()
 
         //lyrics layout related initializations
@@ -451,7 +473,10 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
         }
         tempColor = resources.getColor(R.color.player_bg, Resources.getSystem().newTheme())
         setupQueueBottomSheet()
-        return view
+    }
+
+    override fun onClick(p0: View?) {
+
     }
 
     private fun setObserverForBottomSheetHeight(view: View?) {
@@ -482,7 +507,6 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
                         layoutParams.matchConstraintMaxHeight = viewSize
                         view.layoutParams = layoutParams
                     }
-                    Logger.normalLog("cover size bf - $viewSize")
 
                     // Remove the listener to avoid multiple callbacks
                     it.viewTreeObserver.removeOnGlobalLayoutListener(this)
@@ -822,7 +846,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
                         arrayOfBitmaps[0] = null
                     }
                     val finalImage = arrayOfBitmaps[0]
-                    requireActivity().runOnUiThread {
+                    (context1 as AppCompatActivity?)?.runOnUiThread {
                         tempColor = if (finalImage != null) {
                             if (image == null) {
                                 setImages(SetImageInMainPlayer(finalImage, activeMusic))

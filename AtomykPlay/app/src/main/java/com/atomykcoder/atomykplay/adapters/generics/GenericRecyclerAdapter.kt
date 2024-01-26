@@ -5,18 +5,13 @@ import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import java.util.ArrayList
 
 open class GenericRecyclerAdapter<T> : RecyclerView.Adapter<GenericViewHolder<T>>() {
     @JvmField
     protected var items: ArrayList<T>? = null
     private var delay = 600
     private var lastClickTime: Long = 0
-
-    @SuppressLint("NotifyDataSetChanged")
-    fun addItems(_items: ArrayList<T>?) {
-        items?.addAll(_items!!)
-        notifyDataSetChanged()
-    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GenericViewHolder<T> {
         val inflater = LayoutInflater.from(parent.context)
@@ -25,7 +20,7 @@ open class GenericRecyclerAdapter<T> : RecyclerView.Adapter<GenericViewHolder<T>
     }
 
     override fun onBindViewHolder(holder: GenericViewHolder<T>, position: Int) {
-        holder.onBind(items!![position])
+        items?.get(position)?.let { holder.onBind(it) }
     }
 
     override fun getItemCount(): Int {
