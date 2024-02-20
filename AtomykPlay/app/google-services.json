@@ -1,36 +1,26 @@
 {
   "project_info": {
-    "project_number": "693750021408",
-    "project_id": "atomyk-play-c1ab0",
-    "storage_bucket": "atomyk-play-c1ab0.appspot.com"
+    "project_number": "18585604977",
+    "project_id": "atomyk-play-21fb1",
+    "storage_bucket": "atomyk-play-21fb1.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:693750021408:android:4db1678cdda2e2f70cab45",
+        "mobilesdk_app_id": "1:18585604977:android:4662275f37a3f64cf75cd0",
         "android_client_info": {
           "package_name": "com.atomykcoder.atomykplay"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "693750021408-qmb80qpt3b0j9pvs8r138erg6b2ph5ls.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCxnJ0q5eVGsEXnGMqWKiy43vrP7eTrdqk"
+          "current_key": "AIzaSyBlc-D9T_FkJhQCQeZB8mn3JWFd_VkPMZ0"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "693750021408-qmb80qpt3b0j9pvs8r138erg6b2ph5ls.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }

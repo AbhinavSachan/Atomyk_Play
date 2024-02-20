@@ -185,6 +185,9 @@ class MusicQueueAdapter(
             mainActivity.openBottomPlayer()
             notifyItemInserted(0)
         } else {
+            if (super.items!!.contains(music)){
+                super.items!!.remove(music)
+            }
             super.items!!.add(pos + 1, music)
             notifyItemInserted(pos + 1)
             notifyItemRangeChanged(pos + 1, super.items!!.size - (pos + 2))
@@ -202,6 +205,11 @@ class MusicQueueAdapter(
             notifyItemRangeInserted(1, list.size)
             notifyItemRangeChanged(list.size + 1, super.items!!.size - (pos + list.size + 2))
         } else {
+            list.forEach {
+                if (super.items!!.contains(it)){
+                    super.items!!.remove(it)
+                }
+            }
             super.items!!.addAll(pos + 1, list)
             notifyItemRangeInserted(pos + 1, list.size)
             notifyItemRangeChanged(pos + list.size + 1, super.items!!.size - (pos + list.size + 2))
@@ -215,6 +223,11 @@ class MusicQueueAdapter(
             mainActivity.playAudio(list[0])
             mainActivity.openBottomPlayer()
         }
+        list.forEach {
+            if (super.items!!.contains(it)){
+                super.items!!.remove(it)
+            }
+        }
         super.items!!.addAll(list)
         val pos = super.items!!.lastIndexOf(list[0])
         notifyItemRangeInserted(pos, list.size)
@@ -226,6 +239,9 @@ class MusicQueueAdapter(
             storageUtil.saveMusicIndex(0)
             mainActivity.playAudio(music)
             mainActivity.openBottomPlayer()
+        }
+        if (super.items!!.contains(music)){
+            super.items!!.remove(music)
         }
         super.items!!.add(music)
         val pos = super.items!!.lastIndexOf(music)
