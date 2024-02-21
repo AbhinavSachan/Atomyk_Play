@@ -23,7 +23,6 @@ import androidx.activity.result.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.GravityCompat
@@ -53,6 +52,7 @@ import com.atomykcoder.atomykplay.constants.FragmentTags.SEARCH_FRAGMENT_TAG
 import com.atomykcoder.atomykplay.constants.FragmentTags.SETTINGS_FRAGMENT_TAG
 import com.atomykcoder.atomykplay.constants.FragmentTags.TAG_EDITOR_FRAGMENT_TAG
 import com.atomykcoder.atomykplay.constants.ShuffleModes
+import com.atomykcoder.atomykplay.data.BaseActivity
 import com.atomykcoder.atomykplay.data.Music
 import com.atomykcoder.atomykplay.enums.OptionSheetEnum
 import com.atomykcoder.atomykplay.events.PrepareRunnableEvent
@@ -97,7 +97,7 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 
-class MainActivity : AppCompatActivity(), View.OnClickListener,
+class MainActivity : BaseActivity(), View.OnClickListener,
     NavigationView.OnNavigationItemSelectedListener, DrawerLayout.DrawerListener {
     private var sorryTv: TextView? = null
     private var serviceConnection: ServiceConnection = object : ServiceConnection {

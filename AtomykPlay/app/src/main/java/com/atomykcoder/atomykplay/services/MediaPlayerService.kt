@@ -57,6 +57,7 @@ import com.atomykcoder.atomykplay.ui.MainActivity
 import com.atomykcoder.atomykplay.utils.MusicEnhancerUtil
 import com.atomykcoder.atomykplay.utils.StorageUtil
 import com.atomykcoder.atomykplay.utils.StorageUtil.SettingsStorage
+import com.atomykcoder.atomykplay.utils.showToast
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import kotlinx.coroutines.CoroutineScope
@@ -183,11 +184,10 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
             val mBluetoothAdapter = bluetoothManager.adapter
 //        val mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
             if (ActivityCompat.checkSelfPermission(
-                    applicationContext,
-                    Manifest.permission.BLUETOOTH_CONNECT
+                    applicationContext, Manifest.permission.BLUETOOTH_CONNECT
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
-                ApplicationClass.instance.showToast("Please Allow Bluetooth Permission")
+                showToast("Please Allow Bluetooth Permission")
                 return false
             }
             return (mBluetoothAdapter != null && mBluetoothAdapter.isEnabled && mBluetoothAdapter.getProfileConnectionState(
@@ -467,10 +467,8 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
                 .setChannelId(ApplicationClass.CHANNEL_ID) //set control
                 .addAction(prevAction).addAction(notificationAction, "Pause", playPauseAction)
                 .addAction(R.drawable.ic_next_for_noti, "Next", playbackAction(2))
-                .addAction(stopAction)
-                .setCategory(NotificationCompat.CATEGORY_SERVICE)
-                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                .setContentIntent(
+                .addAction(stopAction).setCategory(NotificationCompat.CATEGORY_SERVICE)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC).setContentIntent(
                     PendingIntent.getActivity(
                         this,
                         0,
@@ -488,14 +486,8 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
                         currentMediaPosition.toLong(),
                         playbackSpeed
                     ).setActions(
-                        PlaybackStateCompat.ACTION_SEEK_TO
-                                or PlaybackStateCompat.ACTION_PLAY_PAUSE
-                                or PlaybackStateCompat.ACTION_PLAY
-                                or PlaybackStateCompat.ACTION_PAUSE
-                                or PlaybackStateCompat.ACTION_SKIP_TO_NEXT
-                                or PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
-                    )
-                        .build()
+                        PlaybackStateCompat.ACTION_SEEK_TO or PlaybackStateCompat.ACTION_PLAY_PAUSE or PlaybackStateCompat.ACTION_PLAY or PlaybackStateCompat.ACTION_PAUSE or PlaybackStateCompat.ACTION_SKIP_TO_NEXT or PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
+                    ).build()
                 )
             }
         } else if (playbackStatus == PlaybackStatus.PAUSED) {
@@ -506,12 +498,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
                         currentMediaPosition.toLong(),
                         playbackSpeed
                     ).setActions(
-                        PlaybackStateCompat.ACTION_SEEK_TO
-                                or PlaybackStateCompat.ACTION_PLAY_PAUSE
-                                or PlaybackStateCompat.ACTION_PLAY
-                                or PlaybackStateCompat.ACTION_PAUSE
-                                or PlaybackStateCompat.ACTION_SKIP_TO_NEXT
-                                or PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
+                        PlaybackStateCompat.ACTION_SEEK_TO or PlaybackStateCompat.ACTION_PLAY_PAUSE or PlaybackStateCompat.ACTION_PLAY or PlaybackStateCompat.ACTION_PAUSE or PlaybackStateCompat.ACTION_SKIP_TO_NEXT or PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
                     ).build()
                 )
             }
@@ -752,8 +739,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
             GlideApp.with(applicationContext).load(activeMusic?.path?.let { AudioFileCover(it) })
                 .override(512).into(object : CustomTarget<Drawable>() {
                     override fun onResourceReady(
-                        resource: Drawable,
-                        transition: Transition<in Drawable>?
+                        resource: Drawable, transition: Transition<in Drawable>?
                     ) {
                         finalImage = resource.toBitmapOrNull()
                         postImageInMainPlayer(finalImage, activeMusic)
@@ -822,7 +808,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
 
     override fun onBufferingUpdate(mp: MediaPlayer, percent: Int) {}
     private fun showToast(s: String) {
-        ApplicationClass.instance.showToast(s)
+        applicationContext.showToast(s)
     }
 
     override fun onError(mp: MediaPlayer, what: Int, extra: Int): Boolean {

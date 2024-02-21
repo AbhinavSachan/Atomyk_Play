@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.appcompat.widget.Toolbar
-import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -15,6 +14,7 @@ import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.adapters.OpenPlayListAdapter
 import com.atomykcoder.atomykplay.adapters.SimpleTouchCallback
 import com.atomykcoder.atomykplay.classes.GlideBuilt
+import com.atomykcoder.atomykplay.data.BaseFragment
 import com.atomykcoder.atomykplay.data.Music
 import com.atomykcoder.atomykplay.events.RemoveFromPlaylistEvent
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener
@@ -26,7 +26,7 @@ import org.greenrobot.eventbus.Subscribe
 
 private const val ARG_CURRENT_PLAYLIST = "currentPlaylist"
 
-class OpenPlayListFragment : Fragment(), OnDragStartListener {
+class OpenPlayListFragment : BaseFragment(), OnDragStartListener {
     companion object {
         @JvmStatic
         fun newInstance(playlist: Playlist?) = OpenPlayListFragment().apply {

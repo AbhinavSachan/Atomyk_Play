@@ -10,10 +10,10 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
-import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.adapters.MusicMainAdapter
+import com.atomykcoder.atomykplay.data.BaseFragment
 import com.atomykcoder.atomykplay.data.Music
 import com.atomykcoder.atomykplay.scripts.LinearLayoutManagerWrapper
 import com.atomykcoder.atomykplay.utils.StorageUtil
@@ -25,7 +25,7 @@ import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
 
-class LastAddedFragment : Fragment() {
+class LastAddedFragment : BaseFragment() {
     companion object {
         @JvmStatic
         fun newInstance() = LastAddedFragment()

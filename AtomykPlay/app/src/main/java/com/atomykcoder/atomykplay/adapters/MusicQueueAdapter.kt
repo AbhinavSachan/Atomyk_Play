@@ -185,7 +185,7 @@ class MusicQueueAdapter(
             mainActivity.openBottomPlayer()
             notifyItemInserted(0)
         } else {
-            if (super.items!!.contains(music)){
+            if (super.items!!.contains(music)) {
                 super.items!!.remove(music)
             }
             super.items!!.add(pos + 1, music)
@@ -206,7 +206,7 @@ class MusicQueueAdapter(
             notifyItemRangeChanged(list.size + 1, super.items!!.size - (pos + list.size + 2))
         } else {
             list.forEach {
-                if (super.items!!.contains(it)){
+                if (super.items!!.contains(it)) {
                     super.items!!.remove(it)
                 }
             }
@@ -224,7 +224,7 @@ class MusicQueueAdapter(
             mainActivity.openBottomPlayer()
         }
         list.forEach {
-            if (super.items!!.contains(it)){
+            if (super.items!!.contains(it)) {
                 super.items!!.remove(it)
             }
         }
@@ -240,7 +240,7 @@ class MusicQueueAdapter(
             mainActivity.playAudio(music)
             mainActivity.openBottomPlayer()
         }
-        if (super.items!!.contains(music)){
+        if (super.items!!.contains(music)) {
             super.items!!.remove(music)
         }
         super.items!!.add(music)

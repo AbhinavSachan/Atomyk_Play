@@ -30,17 +30,17 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SwitchCompat
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
-import com.atomykcoder.atomykplay.ApplicationClass
 import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.adapters.BeautifyListAdapter
 import com.atomykcoder.atomykplay.adapters.BlockFolderListAdapter
+import com.atomykcoder.atomykplay.data.BaseFragment
 import com.atomykcoder.atomykplay.scripts.LinearLayoutManagerWrapper
 import com.atomykcoder.atomykplay.ui.MainActivity
 import com.atomykcoder.atomykplay.utils.AndroidUtil.setSystemDrawBehindBars
 import com.atomykcoder.atomykplay.utils.AndroidUtil.setTheme
 import com.atomykcoder.atomykplay.utils.StorageUtil.SettingsStorage
+import com.atomykcoder.atomykplay.utils.showToast
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
@@ -49,7 +49,7 @@ import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import java.lang.ref.WeakReference
 
-class SettingsFragment : Fragment(), OnSeekBarChangeListener {
+class SettingsFragment : BaseFragment(), OnSeekBarChangeListener {
     companion object {
         @JvmStatic
         fun newInstance() = SettingsFragment()
@@ -573,10 +573,6 @@ class SettingsFragment : Fragment(), OnSeekBarChangeListener {
         //finally show the blacklistDialog
         blacklistDialog = builder?.create()
         blacklistDialog?.show()
-    }
-
-    private fun showToast(s: String) {
-        ApplicationClass.instance.showToast(s)
     }
 
     private fun hideExtra(v: Boolean) {

@@ -67,12 +67,12 @@
                 app:bubbleTextColor="@color/white"
                 app:handleColor="@color/accent_color_bg" />
 
-<!--            <androidx.recyclerview.widget.RecyclerView-->
-<!--                android:id="@+id/music_recycler"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="match_parent"-->
-<!--                android:clipToPadding="false"-->
-<!--                android:paddingBottom="@dimen/most_bottom_padding" />-->
+            <!--            <androidx.recyclerview.widget.RecyclerView-->
+            <!--                android:id="@+id/music_recycler"-->
+            <!--                android:layout_width="match_parent"-->
+            <!--                android:layout_height="match_parent"-->
+            <!--                android:clipToPadding="false"-->
+            <!--                android:paddingBottom="@dimen/most_bottom_padding" />-->
         </RelativeLayout>
 
         <com.google.android.material.appbar.AppBarLayout

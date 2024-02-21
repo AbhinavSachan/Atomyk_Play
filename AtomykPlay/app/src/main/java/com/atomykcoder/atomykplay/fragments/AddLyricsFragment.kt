@@ -13,9 +13,9 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
-import androidx.fragment.app.Fragment
 import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.constants.FragmentTags.ADD_LYRICS_FRAGMENT_TAG
+import com.atomykcoder.atomykplay.data.BaseFragment
 import com.atomykcoder.atomykplay.data.Music
 import com.atomykcoder.atomykplay.events.RunnableSyncLyricsEvent
 import com.atomykcoder.atomykplay.helperFunctions.FetchLyrics
@@ -34,7 +34,7 @@ import java.util.Locale
 
 private const val ARG_SONG = "selectedMusic"
 
-class AddLyricsFragment : Fragment() {
+class AddLyricsFragment : BaseFragment() {
     companion object {
         @JvmStatic
         fun newInstance(song: String) = AddLyricsFragment().apply {

@@ -35,7 +35,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.fragment.app.Fragment
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -43,7 +42,6 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.SmoothScroller
 import androidx.transition.TransitionInflater
 import com.airbnb.lottie.LottieAnimationView
-import com.atomykcoder.atomykplay.ApplicationClass
 import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.adapters.MusicLyricsAdapter
 import com.atomykcoder.atomykplay.adapters.MusicQueueAdapter
@@ -52,8 +50,8 @@ import com.atomykcoder.atomykplay.classes.GlideBuilt
 import com.atomykcoder.atomykplay.constants.FragmentTags.ADD_LYRICS_FRAGMENT_TAG
 import com.atomykcoder.atomykplay.constants.RepeatModes
 import com.atomykcoder.atomykplay.constants.ShuffleModes
+import com.atomykcoder.atomykplay.data.BaseFragment
 import com.atomykcoder.atomykplay.data.Music
-import com.atomykcoder.atomykplay.databinding.FragmentPlayerBinding
 import com.atomykcoder.atomykplay.enums.OptionSheetEnum
 import com.atomykcoder.atomykplay.enums.PlaybackStatus
 import com.atomykcoder.atomykplay.events.*
@@ -72,6 +70,7 @@ import com.atomykcoder.atomykplay.utils.AndroidUtil.pxToDp
 import com.atomykcoder.atomykplay.utils.AndroidUtil.toUnscaledBitmap
 import com.atomykcoder.atomykplay.utils.StorageUtil
 import com.atomykcoder.atomykplay.utils.StorageUtil.SettingsStorage
+import com.atomykcoder.atomykplay.utils.showToast
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -93,7 +92,8 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 
-class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragStartListener,OnClickListener {
+class BottomSheetPlayerFragment : BaseFragment(), OnSeekBarChangeListener, OnDragStartListener,
+    OnClickListener {
 
     private val lyricsArrayList = ArrayList<String>()
 
@@ -798,7 +798,7 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
                     seekBarMain!!.max = duration!!.toInt()
                     miniProgress!!.max = duration!!.toInt()
                 } catch (e: NumberFormatException) {
-                    showToast("Something went wrong")
+                    showToast()
                 }
                 animateText()
                 mainActivity!!.setDataInNavigation(songName, artistName)
@@ -906,10 +906,6 @@ class BottomSheetPlayerFragment : Fragment(), OnSeekBarChangeListener, OnDragSta
             //Don't remove this it will prevent app from crashing if bitmap was trying to recycle from instance
             image = null
         }
-    }
-
-    private fun showToast(s: String) {
-        ApplicationClass.instance.showToast(s)
     }
 
     @SuppressLint("SetTextI18n")

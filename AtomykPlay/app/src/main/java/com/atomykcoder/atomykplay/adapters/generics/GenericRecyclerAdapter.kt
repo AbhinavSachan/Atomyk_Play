@@ -1,11 +1,9 @@
 package com.atomykcoder.atomykplay.adapters.generics
 
-import android.annotation.SuppressLint
 import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import java.util.ArrayList
 
 open class GenericRecyclerAdapter<T> : RecyclerView.Adapter<GenericViewHolder<T>>() {
     @JvmField

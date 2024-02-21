@@ -20,13 +20,12 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.atomykcoder.atomykplay.ApplicationClass
 import com.atomykcoder.atomykplay.BuildConfig
 import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.classes.GlideBuilt
+import com.atomykcoder.atomykplay.data.BaseFragment
 import com.atomykcoder.atomykplay.data.Music
 import com.atomykcoder.atomykplay.databinding.FragmentTagEditorBinding
 import com.atomykcoder.atomykplay.helperFunctions.CustomMethods.pickImage
@@ -37,6 +36,7 @@ import com.atomykcoder.atomykplay.scripts.AudioTagInfo
 import com.atomykcoder.atomykplay.scripts.TagWriter
 import com.atomykcoder.atomykplay.ui.MainActivity
 import com.atomykcoder.atomykplay.utils.MusicUtil
+import com.atomykcoder.atomykplay.utils.showToast
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
@@ -51,7 +51,7 @@ import java.util.EnumMap
 
 private const val ARG_MUSIC = "currentMusic"
 
-class TagEditorFragment : Fragment() {
+class TagEditorFragment : BaseFragment() {
     companion object {
         @JvmStatic
         fun newInstance(song: String) = TagEditorFragment().apply {
@@ -229,10 +229,6 @@ class TagEditorFragment : Fragment() {
             }).check()
     }
 
-    private fun showToast(s: String?) {
-        ApplicationClass.instance.showToast(s)
-    }
-
     private fun saveMusicChanges(music: Music?) {
         setLoadingStatus(LoadingStatus.LOADING)
         val fieldKeyValueMap = EnumMap<FieldKey, String>(FieldKey::class.java)
@@ -321,13 +317,13 @@ class TagEditorFragment : Fragment() {
                 }
 
                 LoadingStatus.FAILURE -> {
-                    showToast("Something went wrong")
+                    showToast()
                     b.progressBarTag.visibility = View.GONE
                     fragmentManager.popBackStack()
                 }
 
                 else -> {
-                    showToast("Something went wrong")
+                    showToast()
                     b.progressBarTag.visibility = View.GONE
                     fragmentManager.popBackStack()
                 }

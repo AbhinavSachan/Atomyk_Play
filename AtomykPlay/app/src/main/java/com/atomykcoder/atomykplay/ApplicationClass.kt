@@ -4,7 +4,6 @@ import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
-import android.widget.Toast
 
 class ApplicationClass : Application() {
     init {
@@ -32,10 +31,6 @@ class ApplicationClass : Application() {
             val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
             manager.createNotificationChannel(notificationChannel)
         }
-    }
-
-    fun showToast(s: String?) {
-        applicationContext?.let { Toast.makeText(it, s, Toast.LENGTH_SHORT).show() }
     }
 
     companion object {

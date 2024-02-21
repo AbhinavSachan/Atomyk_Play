@@ -7,10 +7,10 @@ import android.net.Uri
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.net.toUri
-import com.atomykcoder.atomykplay.ApplicationClass
 import com.atomykcoder.atomykplay.utils.AbhinavUtil.getFilePathFromContentUri
 import com.atomykcoder.atomykplay.utils.MusicUtil.deleteAlbumArt
 import com.atomykcoder.atomykplay.utils.MusicUtil.insertAlbumArt
+import com.atomykcoder.atomykplay.utils.showToast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jaudiotagger.audio.AudioFileIO
@@ -187,8 +187,4 @@ class TagWriter {
                 cacheFiles
             }
     }
-}
-
-private fun Context.showToast(s: String) {
-    ApplicationClass.instance.showToast(s)
 }

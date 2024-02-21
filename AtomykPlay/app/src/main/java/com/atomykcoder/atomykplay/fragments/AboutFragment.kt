@@ -12,14 +12,14 @@ import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.Toolbar
-import androidx.fragment.app.Fragment
 import androidx.palette.graphics.Palette
 import com.atomykcoder.atomykplay.BuildConfig
 import com.atomykcoder.atomykplay.R
+import com.atomykcoder.atomykplay.data.BaseFragment
 import com.google.android.material.card.MaterialCardView
 import de.hdodenhof.circleimageview.CircleImageView
 
-class AboutFragment : Fragment() {
+class AboutFragment : BaseFragment() {
     companion object {
         @JvmStatic
         fun newInstance() = AboutFragment()

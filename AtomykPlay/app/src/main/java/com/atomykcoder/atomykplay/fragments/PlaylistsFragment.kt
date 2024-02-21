@@ -6,18 +6,18 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.Toolbar
-import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.adapters.PlaylistAdapter
 import com.atomykcoder.atomykplay.constants.FragmentTags.FAVORITE_FRAGMENT_TAG
+import com.atomykcoder.atomykplay.data.BaseFragment
 import com.atomykcoder.atomykplay.models.Playlist
 import com.atomykcoder.atomykplay.scripts.GridSpacing
 import com.atomykcoder.atomykplay.utils.StorageUtil
 
-class PlaylistsFragment : Fragment() {
+class PlaylistsFragment : BaseFragment() {
     companion object {
         @JvmStatic
         fun newInstance() = PlaylistsFragment()

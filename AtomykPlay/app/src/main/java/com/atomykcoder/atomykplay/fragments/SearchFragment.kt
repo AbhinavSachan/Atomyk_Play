@@ -14,7 +14,6 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.RadioButton
 import android.widget.RadioGroup
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -22,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.airbnb.lottie.LottieAnimationView
 import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.adapters.MusicMainAdapter
+import com.atomykcoder.atomykplay.data.BaseFragment
 import com.atomykcoder.atomykplay.data.Music
 import com.atomykcoder.atomykplay.repository.MusicRepo
 import com.atomykcoder.atomykplay.scripts.LinearLayoutManagerWrapper
@@ -32,7 +32,7 @@ import java.util.*
 
 
 //Search Layout Fragment for Performing Searches and Presenting Results
-class SearchFragment : Fragment() {
+class SearchFragment : BaseFragment() {
     companion object {
         @JvmStatic
         fun newInstance() = SearchFragment()
