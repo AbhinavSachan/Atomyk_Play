@@ -1,6 +1,5 @@
 package com.atomykcoder.atomykplay.adapters.viewHolders;
 
-import static com.atomykcoder.atomykplay.helperFunctions.MusicHelper.convertDuration;
 
 import android.view.View;
 import android.widget.ImageView;
@@ -10,7 +9,8 @@ import androidx.annotation.NonNull;
 
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.adapters.generics.GenericViewHolder;
-import com.atomykcoder.atomykplay.data.Music;
+import com.atomykcoder.atomykplay.helperFunctions.MusicHelper;
+import com.atomykcoder.atomykplay.models.Music;
 
 public class FavoriteViewHolder extends GenericViewHolder<Music> {
     public final ImageView albumCoverIV;
@@ -32,6 +32,6 @@ public class FavoriteViewHolder extends GenericViewHolder<Music> {
     public void onBind(Music item) {
         nameText.setText(item.getName());
         artistText.setText(item.getArtist());
-        durationText.setText(convertDuration(item.getDuration()));
+        durationText.setText(MusicHelper.convertDuration(item.getDuration()));
     }
 }

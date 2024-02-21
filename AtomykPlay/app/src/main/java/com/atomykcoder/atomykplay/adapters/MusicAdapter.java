@@ -5,7 +5,7 @@ import android.os.Looper;
 
 import com.atomykcoder.atomykplay.adapters.generics.GenericRecyclerAdapter;
 import com.atomykcoder.atomykplay.constants.ShuffleModes;
-import com.atomykcoder.atomykplay.data.Music;
+import com.atomykcoder.atomykplay.models.Music;
 import com.atomykcoder.atomykplay.ui.MainActivity;
 import com.atomykcoder.atomykplay.utils.StorageUtil;
 

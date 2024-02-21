@@ -15,7 +15,6 @@ import com.atomykcoder.atomykplay.adapters.OpenPlayListAdapter
 import com.atomykcoder.atomykplay.adapters.SimpleTouchCallback
 import com.atomykcoder.atomykplay.classes.GlideBuilt
 import com.atomykcoder.atomykplay.data.BaseFragment
-import com.atomykcoder.atomykplay.data.Music
 import com.atomykcoder.atomykplay.events.RemoveFromPlaylistEvent
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener
 import com.atomykcoder.atomykplay.models.Playlist
@@ -74,7 +73,7 @@ class OpenPlayListFragment : BaseFragment(), OnDragStartListener {
         recyclerView.setHasFixedSize(true)
         val manager: LinearLayoutManager = LinearLayoutManagerWrapper(context)
 
-        val musicList: ArrayList<Music?>? = playlist?.musicList
+        val musicList = playlist?.musicList
         collapsingToolbarLayout.title = playlist?.name
         glideBuilt.loadFromUri(playlist?.coverUri, 0, imageView, 512)
 

@@ -1,6 +1,5 @@
 plugins {
     id 'com.android.application'
-    id 'com.google.protobuf'
     id 'com.google.gms.google-services'
     id 'com.google.firebase.crashlytics'
 }
@@ -57,9 +56,6 @@ android {
             java {
                 srcDirs += "build/generated/source/proto/main/java"
             }
-            proto {
-                srcDir("src/main/proto") // default value
-            }
         }
     }
     namespace("com.atomykcoder.atomykplay")
@@ -71,9 +67,6 @@ dependencies {
 
     //event bus implementations
     implementation("org.greenrobot:eventbus:3.3.1")
-
-    //protobuf
-    implementation("com.google.protobuf:protobuf-javalite:3.25.2")
 
     // https://mvnrepository.com/artifact/org/jaudiotagger
     implementation group: 'org', name: 'jaudiotagger', version: '2.0.3'
@@ -117,19 +110,4 @@ dependencies {
     // OkHttp Profiler (for network request profiling)
     implementation("com.localebro:okhttpprofiler:1.0.8")
 
-}
-
-protobuf {
-    protoc {
-        artifact = ("com.google.protobuf:protoc:3.21.12")
-    }
-    generateProtoTasks {
-        all().each { task ->
-            task.builtins {
-                java {
-                    option("lite")
-                }
-            }
-        }
-    }
 }

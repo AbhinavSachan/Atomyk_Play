@@ -18,8 +18,8 @@ import com.atomykcoder.atomykplay.adapters.generics.GenericRecyclerAdapter;
 import com.atomykcoder.atomykplay.adapters.generics.GenericViewHolder;
 import com.atomykcoder.atomykplay.adapters.viewHolders.PlaylistViewHolder;
 import com.atomykcoder.atomykplay.classes.GlideBuilt;
-import com.atomykcoder.atomykplay.data.Music;
 import com.atomykcoder.atomykplay.fragments.OpenPlayListFragment;
+import com.atomykcoder.atomykplay.models.Music;
 import com.atomykcoder.atomykplay.models.Playlist;
 import com.atomykcoder.atomykplay.ui.MainActivity;
 
@@ -51,11 +51,11 @@ public class PlaylistAdapter extends GenericRecyclerAdapter<Playlist> {
 
         Playlist currentItem = super.items.get(position);
 
-        ArrayList<Music> musicList = currentItem.getMusicList();
+        ArrayList<Music> musicList = currentItem.musicList;
 
-        glideBuilt.loadFromUri(currentItem.getCoverUri(), R.drawable.ic_music_list, holder.coverIV, 412);
+        glideBuilt.loadFromUri(currentItem.coverUri, R.drawable.ic_music_list, holder.coverIV, 412);
         String count = musicList.size() + " Songs";
-        holder.playlistName.setText(currentItem.getName());
+        holder.playlistName.setText(currentItem.name);
         holder.songCount.setText(count);
 
         holder.cardView.setOnClickListener(v -> {

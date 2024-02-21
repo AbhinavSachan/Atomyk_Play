@@ -5,8 +5,8 @@ import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import android.text.TextUtils
-import com.atomykcoder.atomykplay.data.Music
 import com.atomykcoder.atomykplay.interfaces.MusicDaoI
+import com.atomykcoder.atomykplay.models.Music
 import com.atomykcoder.atomykplay.utils.StorageUtil.SettingsStorage
 import java.io.File
 import java.text.SimpleDateFormat
@@ -62,11 +62,7 @@ class MusicDaoImpl : MusicDaoI {
 
         //Creating a cursor to store all data of a song
         val audioCursor = context.contentResolver.query(
-            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-            projection,
-            selection,
-            null,
-            null
+            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, projection, selection, null, null
         )
         //If cursor is not null then storing data inside a data list.
         if (audioCursor != null) {
@@ -86,10 +82,9 @@ class MusicDaoImpl : MusicDaoI {
                         var sTitle: String
                         sTitle = audioCursor.getString(0)
                         if (settingsStorage.loadBeautifyName()) {
-                            sTitle = sTitle.replace("&#039;", "'")
-                                .replace("%20", " ")
-                                .replace("_", " ")
-                                .replace("&amp;", ",").trim { it <= ' ' }
+                            sTitle =
+                                sTitle.replace("&#039;", "'").replace("%20", " ").replace("_", " ")
+                                    .replace("&amp;", ",").trim { it <= ' ' }
                             val beautifyTags = settingsStorage.allBeautifyTag
                             val replacingTags = settingsStorage.allReplacingTag
                             if (beautifyTags.isNotEmpty() && replacingTags.isNotEmpty()) {
@@ -127,22 +122,22 @@ class MusicDaoImpl : MusicDaoI {
                         val filter = SettingsStorage(context).loadFilterDur() * 1000
                         if (file.exists()) {
                             if (sDuration != null && filter <= sDuration.toInt()) {
-                                val music = Music.newBuilder()
-                                    .setName(sTitle)
-                                    .setArtist(sArtist)
-                                    .setAlbum(sAlbum)
-                                    .setAlbumUri(sAlbumUri)
-                                    .setDuration(sDuration)
-                                    .setPath(sPath)
-                                    .setBitrate(sBitrate ?: "")
-                                    .setMimeType(sMimeType)
-                                    .setSize(sSize)
-                                    .setGenre(sGenre ?: "")
-                                    .setId(sId)
-                                    .setDateAdded(sDateAdded)
-                                    .setYear(sYear ?: "")
-                                    .setAlbumId(sAlbumId ?: "")
-                                    .build()
+                                val music = Music(
+                                    name = sTitle,
+                                    artist = sArtist ?: "",
+                                    album = sAlbum ?: "",
+                                    albumUri = sAlbumUri ?: "",
+                                    duration = sDuration,
+                                    path = sPath ?: "",
+                                    bitrate = sBitrate ?: "",
+                                    mimeType = sMimeType ?: "",
+                                    size = sSize ?: "",
+                                    genre = sGenre ?: "",
+                                    id = sId ?: "",
+                                    dateAdded = sDateAdded ?: "",
+                                    year = sYear ?: "",
+                                    albumId = sAlbumId ?: "",
+                                )
                                 dataList.add(music)
                             }
                         }
@@ -168,13 +163,10 @@ class MusicDaoImpl : MusicDaoI {
         return try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 DateTimeFormatter.ofPattern("dd MMMM yyyy").format(
-                    Instant.ofEpochMilli(time * 1000)
-                        .atZone(ZoneId.systemDefault())
-                        .toLocalDate()
+                    Instant.ofEpochMilli(time * 1000).atZone(ZoneId.systemDefault()).toLocalDate()
                 )
             } else {
-                SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
-                    .format(Date(time * 1000))
+                SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).format(Date(time * 1000))
             }
         } catch (_: Exception) {
             null

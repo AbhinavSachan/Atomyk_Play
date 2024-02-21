@@ -16,11 +16,11 @@ import androidx.appcompat.widget.Toolbar
 import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.constants.FragmentTags.ADD_LYRICS_FRAGMENT_TAG
 import com.atomykcoder.atomykplay.data.BaseFragment
-import com.atomykcoder.atomykplay.data.Music
 import com.atomykcoder.atomykplay.events.RunnableSyncLyricsEvent
 import com.atomykcoder.atomykplay.helperFunctions.FetchLyrics
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper
 import com.atomykcoder.atomykplay.models.LRCMap
+import com.atomykcoder.atomykplay.models.Music
 import com.atomykcoder.atomykplay.ui.MainActivity
 import com.atomykcoder.atomykplay.utils.StorageUtil
 import com.google.android.material.bottomsheet.BottomSheetBehavior

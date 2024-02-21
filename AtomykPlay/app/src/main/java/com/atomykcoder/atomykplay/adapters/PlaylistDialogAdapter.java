@@ -12,7 +12,7 @@ import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.adapters.generics.GenericRecyclerAdapter;
 import com.atomykcoder.atomykplay.adapters.generics.GenericViewHolder;
 import com.atomykcoder.atomykplay.adapters.viewHolders.PlayListDialogViewHolder;
-import com.atomykcoder.atomykplay.data.Music;
+import com.atomykcoder.atomykplay.models.Music;
 import com.atomykcoder.atomykplay.models.Playlist;
 import com.atomykcoder.atomykplay.ui.MainActivity;
 import com.atomykcoder.atomykplay.utils.StorageUtil;
@@ -44,13 +44,13 @@ public class PlaylistDialogAdapter extends GenericRecyclerAdapter<Playlist> {
         Playlist playlist = super.items.get(position);
         MainActivity mainActivity = ((MainActivity) context);
         StorageUtil storageUtil = new StorageUtil(context);
-        holder.textView.setText(playlist.getName());
+        holder.textView.setText(playlist.name);
         holder.view.setOnClickListener(v -> {
-            storageUtil.saveItemInPlayList(music, playlist.getName());
+            storageUtil.saveItemInPlayList(music, playlist.name);
             if (mainActivity.addToPlDialog != null) {
                 mainActivity.addToPlDialog.dismiss();
             }
-            Toast.makeText(context, "added to " + playlist.getName(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "added to " + playlist.name, Toast.LENGTH_SHORT).show();
         });
     }
 

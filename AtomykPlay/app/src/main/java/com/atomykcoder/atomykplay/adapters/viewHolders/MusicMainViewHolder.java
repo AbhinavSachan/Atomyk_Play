@@ -11,7 +11,7 @@ import androidx.annotation.NonNull;
 
 import com.atomykcoder.atomykplay.R;
 import com.atomykcoder.atomykplay.adapters.generics.GenericViewHolder;
-import com.atomykcoder.atomykplay.data.Music;
+import com.atomykcoder.atomykplay.models.Music;
 
 public class MusicMainViewHolder extends GenericViewHolder<Music> {
     public final ImageView albumCoverIV;

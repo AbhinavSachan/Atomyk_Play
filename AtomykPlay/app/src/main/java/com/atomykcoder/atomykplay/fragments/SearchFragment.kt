@@ -22,7 +22,7 @@ import com.airbnb.lottie.LottieAnimationView
 import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.adapters.MusicMainAdapter
 import com.atomykcoder.atomykplay.data.BaseFragment
-import com.atomykcoder.atomykplay.data.Music
+import com.atomykcoder.atomykplay.models.Music
 import com.atomykcoder.atomykplay.repository.MusicRepo
 import com.atomykcoder.atomykplay.scripts.LinearLayoutManagerWrapper
 import kotlinx.coroutines.CoroutineScope

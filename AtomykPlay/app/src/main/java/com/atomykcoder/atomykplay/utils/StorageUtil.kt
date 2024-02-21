@@ -4,9 +4,9 @@ import android.content.Context
 import android.content.SharedPreferences
 import com.atomykcoder.atomykplay.constants.RepeatModes
 import com.atomykcoder.atomykplay.constants.ShuffleModes
-import com.atomykcoder.atomykplay.data.Music
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper
 import com.atomykcoder.atomykplay.models.LRCMap
+import com.atomykcoder.atomykplay.models.Music
 import com.atomykcoder.atomykplay.models.Playlist
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -59,7 +59,7 @@ class StorageUtil
         for (i in 0 until map.size) {
             val encodedData = queueSharedPref.getString(i.toString(), null)
             val music = MusicHelper.decode(encodedData)
-            musicList.add(music)
+            music?.let { musicList.add(it) }
         }
         return musicList
     }
@@ -68,8 +68,7 @@ class StorageUtil
      * clear saved music queue list
      */
     fun clearQueueList() {
-        queueSharedPref =
-            context.getSharedPreferences(MUSIC_LIST_STORAGE, Context.MODE_PRIVATE)
+        queueSharedPref = context.getSharedPreferences(MUSIC_LIST_STORAGE, Context.MODE_PRIVATE)
         val editor = queueSharedPref.edit()
         editor.clear()
         editor.apply()
@@ -83,8 +82,7 @@ class StorageUtil
      */
     fun saveInitialList(list: ArrayList<Music>) {
         clearInitialList()
-        initialSharedPref =
-            context.getSharedPreferences(INITIAL_LIST_STORAGE, Context.MODE_PRIVATE)
+        initialSharedPref = context.getSharedPreferences(INITIAL_LIST_STORAGE, Context.MODE_PRIVATE)
         val editor = initialSharedPref.edit()
         editor.clear()
         //don't use for each loop it will throw ConcurrentModificationException some times
@@ -103,8 +101,7 @@ class StorageUtil
      */
     fun loadInitialList(): ArrayList<Music> {
         val musicList = ArrayList<Music>()
-        initialSharedPref =
-            context.getSharedPreferences(INITIAL_LIST_STORAGE, Context.MODE_PRIVATE)
+        initialSharedPref = context.getSharedPreferences(INITIAL_LIST_STORAGE, Context.MODE_PRIVATE)
         try {
             val keys: Set<String> = initialSharedPref.all.keys
             for (key in keys) {
@@ -127,16 +124,14 @@ class StorageUtil
      * clear saved music Initial list
      */
     private fun clearInitialList() {
-        initialSharedPref =
-            context.getSharedPreferences(INITIAL_LIST_STORAGE, Context.MODE_PRIVATE)
+        initialSharedPref = context.getSharedPreferences(INITIAL_LIST_STORAGE, Context.MODE_PRIVATE)
         val editor = initialSharedPref.edit()
         editor.clear()
         editor.apply()
     }
 
     fun removeFromInitialList(music: Music) {
-        initialSharedPref =
-            context.getSharedPreferences(INITIAL_LIST_STORAGE, Context.MODE_PRIVATE)
+        initialSharedPref = context.getSharedPreferences(INITIAL_LIST_STORAGE, Context.MODE_PRIVATE)
         val editor = initialSharedPref.edit()
         editor.remove(music.id)
         editor.apply()
@@ -148,8 +143,7 @@ class StorageUtil
      * @param index index of queue array list
      */
     fun saveMusicIndex(index: Int) {
-        indexSharedPref =
-            context.getSharedPreferences(MUSIC_INDEX_STORAGE, Context.MODE_PRIVATE)
+        indexSharedPref = context.getSharedPreferences(MUSIC_INDEX_STORAGE, Context.MODE_PRIVATE)
         val editor = indexSharedPref.edit()
         editor.putInt(musicIndex, index)
         editor.apply()
@@ -159,14 +153,12 @@ class StorageUtil
      * load Music index of queue array list
      */
     fun loadMusicIndex(): Int {
-        indexSharedPref =
-            context.getSharedPreferences(MUSIC_INDEX_STORAGE, Context.MODE_PRIVATE)
+        indexSharedPref = context.getSharedPreferences(MUSIC_INDEX_STORAGE, Context.MODE_PRIVATE)
         return indexSharedPref.getInt(musicIndex, 0)
     }
 
     fun clearMusicIndex() {
-        indexSharedPref =
-            context.getSharedPreferences(MUSIC_INDEX_STORAGE, Context.MODE_PRIVATE)
+        indexSharedPref = context.getSharedPreferences(MUSIC_INDEX_STORAGE, Context.MODE_PRIVATE)
         val editor = indexSharedPref.edit()
         editor.remove(musicIndex)
         editor.apply()
@@ -212,8 +204,7 @@ class StorageUtil
      * @param status player status = (repeat, repeat_one, no_repeat)
      */
     fun saveRepeatStatus(status: Int) {
-        indexSharedPref =
-            context.getSharedPreferences(MUSIC_INDEX_STORAGE, Context.MODE_PRIVATE)
+        indexSharedPref = context.getSharedPreferences(MUSIC_INDEX_STORAGE, Context.MODE_PRIVATE)
         val editor = indexSharedPref.edit()
         editor.putInt(repeatStatus, status)
         editor.apply()
@@ -225,8 +216,7 @@ class StorageUtil
      * @return string => (repeat, repeat_one, no_repeat)
      */
     fun loadRepeatStatus(): Int {
-        indexSharedPref =
-            context.getSharedPreferences(MUSIC_INDEX_STORAGE, Context.MODE_PRIVATE)
+        indexSharedPref = context.getSharedPreferences(MUSIC_INDEX_STORAGE, Context.MODE_PRIVATE)
         return indexSharedPref.getInt(repeatStatus, RepeatModes.REPEAT_MODE_NONE)
     }
     //endregion
@@ -285,7 +275,7 @@ class StorageUtil
             val keys = favouriteSharedPref.all
             for ((key) in keys) {
                 val music = MusicHelper.decode(key)
-                favouriteList.add(music)
+                music?.let { favouriteList.add(it) }
             }
             return favouriteList
         }
@@ -345,7 +335,7 @@ class StorageUtil
         for (i in 0 until map.size) {
             val encodedMessage = tempListSharedPref.getString(i.toString(), null)
             val music = MusicHelper.decode(encodedMessage)
-            list.add(music)
+            music?.let { list.add(it) }
         }
         return list
     }
@@ -433,7 +423,7 @@ class StorageUtil
      * @param coverUri     cover uri for playlist
      * @param musicList    songs in arraylist<string> format
     </string> */
-    fun createPlaylist(playlistName: String?, coverUri: String?, musicList: ArrayList<Music?>?) {
+    fun createPlaylist(playlistName: String?, coverUri: String?, musicList: ArrayList<Music>?) {
         playlistSharedPref = context.getSharedPreferences(PLAYLIST_STORAGE, Context.MODE_PRIVATE)
         val editor = playlistSharedPref.edit()
         val gson = Gson()

@@ -11,10 +11,10 @@ import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.adapters.generics.GenericViewHolder
 import com.atomykcoder.atomykplay.adapters.viewHolders.MusicQueueViewHolder
 import com.atomykcoder.atomykplay.classes.GlideBuilt
-import com.atomykcoder.atomykplay.data.Music
 import com.atomykcoder.atomykplay.enums.OptionSheetEnum
 import com.atomykcoder.atomykplay.interfaces.ItemTouchHelperAdapter
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener
+import com.atomykcoder.atomykplay.models.Music
 import com.atomykcoder.atomykplay.ui.MainActivity
 import com.atomykcoder.atomykplay.utils.StorageUtil
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -195,7 +195,7 @@ class MusicQueueAdapter(
         storageUtil.saveQueueList(super.items!!)
     }
 
-    fun updateListInserted(list: ArrayList<Music?>) {
+    fun updateListInserted(list: ArrayList<Music>) {
         val pos = storageUtil.loadMusicIndex()
         if (super.items!!.isEmpty()) {
             super.items!!.addAll(0, list)
@@ -217,7 +217,7 @@ class MusicQueueAdapter(
         storageUtil.saveQueueList(super.items!!)
     }
 
-    fun updateListInsertedLast(list: ArrayList<Music?>) {
+    fun updateListInsertedLast(list: ArrayList<Music>) {
         if (super.items!!.isEmpty()) {
             storageUtil.saveMusicIndex(0)
             mainActivity.playAudio(list[0])

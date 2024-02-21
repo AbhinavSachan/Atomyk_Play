@@ -2,7 +2,7 @@ package com.atomykcoder.atomykplay.interfaces;
 
 import android.content.Context;
 
-import com.atomykcoder.atomykplay.data.Music;
+import com.atomykcoder.atomykplay.models.Music;
 
 import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;

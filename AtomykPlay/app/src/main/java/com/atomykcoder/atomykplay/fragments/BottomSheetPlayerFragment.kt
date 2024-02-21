@@ -51,7 +51,6 @@ import com.atomykcoder.atomykplay.constants.FragmentTags.ADD_LYRICS_FRAGMENT_TAG
 import com.atomykcoder.atomykplay.constants.RepeatModes
 import com.atomykcoder.atomykplay.constants.ShuffleModes
 import com.atomykcoder.atomykplay.data.BaseFragment
-import com.atomykcoder.atomykplay.data.Music
 import com.atomykcoder.atomykplay.enums.OptionSheetEnum
 import com.atomykcoder.atomykplay.enums.PlaybackStatus
 import com.atomykcoder.atomykplay.events.*
@@ -61,6 +60,7 @@ import com.atomykcoder.atomykplay.helperFunctions.Logger
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener
 import com.atomykcoder.atomykplay.models.LRCMap
+import com.atomykcoder.atomykplay.models.Music
 import com.atomykcoder.atomykplay.scripts.CenterSmoothScrollScript.CenterSmoothScroller
 import com.atomykcoder.atomykplay.scripts.CustomBottomSheet
 import com.atomykcoder.atomykplay.scripts.LinearLayoutManagerWrapper
@@ -167,7 +167,7 @@ class BottomSheetPlayerFragment : BaseFragment(), OnSeekBarChangeListener, OnDra
     /**
      * this method is only to add new music to last queue item
      */
-    fun addToQueue(music: ArrayList<Music?>) {
+    fun addToQueue(music: ArrayList<Music>) {
         queueAdapter?.updateListInsertedLast(music)
     }
 
@@ -181,7 +181,7 @@ class BottomSheetPlayerFragment : BaseFragment(), OnSeekBarChangeListener, OnDra
     /**
      * this method is only to add new music to next queue item
      */
-    fun addToNext(music: ArrayList<Music?>) {
+    fun addToNext(music: ArrayList<Music>) {
         queueAdapter?.updateListInserted(music)
     }
 
@@ -728,7 +728,7 @@ class BottomSheetPlayerFragment : BaseFragment(), OnSeekBarChangeListener, OnDra
     @Subscribe
     fun setMainPlayerLayout(event: SetMainLayoutEvent) {
         if (playing_same_song) {
-            if (activeMusic!!.id == event.activeMusic.id) {
+            if (activeMusic!!.id == event.activeMusic?.id) {
                 animateText()
                 return
             }
@@ -754,7 +754,7 @@ class BottomSheetPlayerFragment : BaseFragment(), OnSeekBarChangeListener, OnDra
                     }
                     var convertedDur: String? = "00:00"
                     try {
-                        convertedDur = MusicHelper.convertDuration(duration)
+                        convertedDur = MusicHelper.convertDuration(duration!!)
                     } catch (ignored: Exception) {
                     }
                     try {

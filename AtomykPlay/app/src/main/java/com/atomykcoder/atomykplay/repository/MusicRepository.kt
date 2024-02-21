@@ -1,8 +1,8 @@
 package com.atomykcoder.atomykplay.repository
 
 import android.content.Context
-import com.atomykcoder.atomykplay.data.Music
 import com.atomykcoder.atomykplay.interfaces.MusicDaoI
+import com.atomykcoder.atomykplay.models.Music
 import java.util.concurrent.CompletableFuture
 
 class MusicRepository(context: Context) {

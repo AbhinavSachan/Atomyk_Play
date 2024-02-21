@@ -44,7 +44,6 @@ import com.atomykcoder.atomykplay.constants.BroadcastStrings.BROADCAST_PLAY_NEXT
 import com.atomykcoder.atomykplay.constants.BroadcastStrings.BROADCAST_PLAY_PREVIOUS_MUSIC
 import com.atomykcoder.atomykplay.constants.BroadcastStrings.BROADCAST_STOP_MUSIC
 import com.atomykcoder.atomykplay.constants.RepeatModes
-import com.atomykcoder.atomykplay.data.Music
 import com.atomykcoder.atomykplay.enums.PlaybackStatus
 import com.atomykcoder.atomykplay.events.*
 import com.atomykcoder.atomykplay.fragments.BottomSheetPlayerFragment
@@ -53,6 +52,7 @@ import com.atomykcoder.atomykplay.helperFunctions.GlideApp
 import com.atomykcoder.atomykplay.helperFunctions.Logger
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper
 import com.atomykcoder.atomykplay.models.LRCMap
+import com.atomykcoder.atomykplay.models.Music
 import com.atomykcoder.atomykplay.ui.MainActivity
 import com.atomykcoder.atomykplay.utils.MusicEnhancerUtil
 import com.atomykcoder.atomykplay.utils.StorageUtil

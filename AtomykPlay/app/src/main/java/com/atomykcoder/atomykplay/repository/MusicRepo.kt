@@ -3,7 +3,7 @@ package com.atomykcoder.atomykplay.repository
 import android.app.Activity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.atomykcoder.atomykplay.data.Music
+import com.atomykcoder.atomykplay.models.Music
 import java.util.concurrent.CompletableFuture
 
 class MusicRepo {

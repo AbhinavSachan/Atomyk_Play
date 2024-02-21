@@ -26,10 +26,10 @@ import com.atomykcoder.atomykplay.BuildConfig
 import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.classes.GlideBuilt
 import com.atomykcoder.atomykplay.data.BaseFragment
-import com.atomykcoder.atomykplay.data.Music
 import com.atomykcoder.atomykplay.databinding.FragmentTagEditorBinding
 import com.atomykcoder.atomykplay.helperFunctions.CustomMethods.pickImage
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper
+import com.atomykcoder.atomykplay.models.Music
 import com.atomykcoder.atomykplay.repository.LoadingStatus
 import com.atomykcoder.atomykplay.scripts.ArtworkInfo
 import com.atomykcoder.atomykplay.scripts.AudioTagInfo

@@ -9,8 +9,8 @@ import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.adapters.generics.GenericViewHolder
 import com.atomykcoder.atomykplay.adapters.viewHolders.MusicMainViewHolder
 import com.atomykcoder.atomykplay.classes.GlideBuilt
-import com.atomykcoder.atomykplay.data.Music
 import com.atomykcoder.atomykplay.enums.OptionSheetEnum
+import com.atomykcoder.atomykplay.models.Music
 import com.atomykcoder.atomykplay.repository.MusicRepo
 import com.atomykcoder.atomykplay.ui.MainActivity
 import com.atomykcoder.atomykplay.utils.StorageUtil

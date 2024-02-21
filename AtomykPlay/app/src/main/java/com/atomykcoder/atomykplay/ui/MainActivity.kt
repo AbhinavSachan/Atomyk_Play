@@ -53,7 +53,6 @@ import com.atomykcoder.atomykplay.constants.FragmentTags.SETTINGS_FRAGMENT_TAG
 import com.atomykcoder.atomykplay.constants.FragmentTags.TAG_EDITOR_FRAGMENT_TAG
 import com.atomykcoder.atomykplay.constants.ShuffleModes
 import com.atomykcoder.atomykplay.data.BaseActivity
-import com.atomykcoder.atomykplay.data.Music
 import com.atomykcoder.atomykplay.enums.OptionSheetEnum
 import com.atomykcoder.atomykplay.events.PrepareRunnableEvent
 import com.atomykcoder.atomykplay.events.RemoveFromFavoriteEvent
@@ -63,6 +62,7 @@ import com.atomykcoder.atomykplay.fragments.*
 import com.atomykcoder.atomykplay.helperFunctions.CustomMethods.pickImage
 import com.atomykcoder.atomykplay.helperFunctions.Logger
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper
+import com.atomykcoder.atomykplay.models.Music
 import com.atomykcoder.atomykplay.models.Playlist
 import com.atomykcoder.atomykplay.repository.LoadingStatus
 import com.atomykcoder.atomykplay.repository.MusicRepo
@@ -380,9 +380,7 @@ class MainActivity : BaseActivity(), View.OnClickListener,
             if (uri != null) {
                 val coverImageUri = uri.toString()
                 storageUtil.replacePlaylist(
-                    storageUtil.loadPlaylist(pl_name),
-                    pl_name,
-                    coverImageUri
+                    storageUtil.loadPlaylist(pl_name), pl_name, coverImageUri
                 )
                 playlistFragment?.updateItems(storageUtil.allPlaylist)
             }
@@ -393,9 +391,7 @@ class MainActivity : BaseActivity(), View.OnClickListener,
                 if (result.data != null) {
                     val coverImageUri = result.data!!.data.toString()
                     storageUtil.replacePlaylist(
-                        storageUtil.loadPlaylist(pl_name),
-                        pl_name,
-                        coverImageUri
+                        storageUtil.loadPlaylist(pl_name), pl_name, coverImageUri
                     )
                     playlistFragment?.updateItems(storageUtil.allPlaylist)
                 }
@@ -456,12 +452,9 @@ class MainActivity : BaseActivity(), View.OnClickListener,
     private fun checkForPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.READ_MEDIA_AUDIO
-                ) != PackageManager.PERMISSION_GRANTED
-                || ContextCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.READ_PHONE_STATE
+                    this, Manifest.permission.READ_MEDIA_AUDIO
+                ) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(
+                    this, Manifest.permission.READ_PHONE_STATE
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
                 is_granted = false
@@ -472,11 +465,9 @@ class MainActivity : BaseActivity(), View.OnClickListener,
             }
         } else {
             if (ContextCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.READ_EXTERNAL_STORAGE
+                    this, Manifest.permission.READ_EXTERNAL_STORAGE
                 ) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.READ_PHONE_STATE
+                    this, Manifest.permission.READ_PHONE_STATE
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
                 is_granted = false
@@ -559,8 +550,7 @@ class MainActivity : BaseActivity(), View.OnClickListener,
         } else {
             phoneStateListener?.let {
                 telephonyManager?.listen(
-                    it,
-                    PhoneStateListener.LISTEN_NONE
+                    it, PhoneStateListener.LISTEN_NONE
                 )
             }
         }
@@ -638,8 +628,8 @@ class MainActivity : BaseActivity(), View.OnClickListener,
         val transaction = fragmentManager.beginTransaction()
         if (lastAddedFragment == null) {
             lastAddedFragment = LastAddedFragment.newInstance()
-            lastAddedFragment!!.enterTransition = TransitionInflater.from(this)
-                .inflateTransition(android.R.transition.slide_bottom)
+            lastAddedFragment!!.enterTransition =
+                TransitionInflater.from(this).inflateTransition(android.R.transition.slide_bottom)
             transaction.replace(R.id.sec_container, lastAddedFragment!!, LAST_ADDED_FRAGMENT_TAG)
                 .addToBackStack(null).commit()
             navigationView!!.setCheckedItem(R.id.navigation_last_added)
@@ -652,8 +642,8 @@ class MainActivity : BaseActivity(), View.OnClickListener,
         val transaction = fragmentManager.beginTransaction()
         playlistFragment = PlaylistsFragment.newInstance()
         if (fragment3 == null) {
-            playlistFragment!!.enterTransition = TransitionInflater.from(this)
-                .inflateTransition(android.R.transition.slide_right)
+            playlistFragment!!.enterTransition =
+                TransitionInflater.from(this).inflateTransition(android.R.transition.slide_right)
             transaction.replace(R.id.sec_container, playlistFragment!!, PLAYLISTS_FRAGMENT_TAG)
                 .addToBackStack(null).commit()
             navigationView!!.setCheckedItem(R.id.navigation_playlist)
@@ -709,47 +699,32 @@ class MainActivity : BaseActivity(), View.OnClickListener,
         val optionPeekHeight = (height / 1.3f).toInt()
         optionSheetBehavior = BottomSheetBehavior.from(optionSheet!!)
         setBottomSheetProperties(
-            optionSheetBehavior,
-            optionPeekHeight,
-            true,
-            BottomSheetBehavior.STATE_HIDDEN
+            optionSheetBehavior, optionPeekHeight, true, BottomSheetBehavior.STATE_HIDDEN
         )
 
         val detailsPeekHeight = (height / 1.95f).toInt()
         detailsSheetBehavior = BottomSheetBehavior.from(detailsSheet!!)
         setBottomSheetProperties(
-            detailsSheetBehavior,
-            detailsPeekHeight,
-            true,
-            BottomSheetBehavior.STATE_HIDDEN
+            detailsSheetBehavior, detailsPeekHeight, true, BottomSheetBehavior.STATE_HIDDEN
         )
 
         val lyricFoundPeekHeight = (height / 3.5f).toInt()
         lyricsSheet = findViewById(R.id.found_lyrics_fragments)
         lyricsListBehavior = BottomSheetBehavior.from(lyricsSheet!!)
         setBottomSheetProperties(
-            lyricsListBehavior,
-            lyricFoundPeekHeight,
-            false,
-            BottomSheetBehavior.STATE_HIDDEN
+            lyricsListBehavior, lyricFoundPeekHeight, false, BottomSheetBehavior.STATE_HIDDEN
         )
 
         val donationPeekHeight = (height / 1.4f).toInt()
         donationSheetBehavior = BottomSheetBehavior.from(donationSheet!!)
         setBottomSheetProperties(
-            donationSheetBehavior,
-            donationPeekHeight,
-            true,
-            BottomSheetBehavior.STATE_HIDDEN
+            donationSheetBehavior, donationPeekHeight, true, BottomSheetBehavior.STATE_HIDDEN
         )
 
         val plOptionPeekHeight = (height / 1.8f).toInt()
         plSheetBehavior = BottomSheetBehavior.from(plSheet!!)
         setBottomSheetProperties(
-            plSheetBehavior,
-            plOptionPeekHeight,
-            true,
-            BottomSheetBehavior.STATE_HIDDEN
+            plSheetBehavior, plOptionPeekHeight, true, BottomSheetBehavior.STATE_HIDDEN
         )
     }
 
@@ -763,10 +738,7 @@ class MainActivity : BaseActivity(), View.OnClickListener,
             BottomSheetBehavior.STATE_HIDDEN
         }
         setBottomSheetProperties(
-            mainPlayerSheetBehavior,
-            miniPlayerHeight,
-            false,
-            state
+            mainPlayerSheetBehavior, miniPlayerHeight, false, state
         )
     }
 
@@ -785,15 +757,13 @@ class MainActivity : BaseActivity(), View.OnClickListener,
             // Legacy size that Display#getSize reports
             val bounds = metrics1.bounds
             return Size(
-                bounds.width() - insetsWidth,
-                bounds.height() - insetsHeight
+                bounds.width() - insetsWidth, bounds.height() - insetsHeight
             )
         } else {
             val metrics = DisplayMetrics()
             windowManager.defaultDisplay.getMetrics(metrics)
             return Size(
-                metrics.widthPixels,
-                metrics.heightPixels
+                metrics.widthPixels, metrics.heightPixels
             )
         }
     }
@@ -983,8 +953,7 @@ class MainActivity : BaseActivity(), View.OnClickListener,
         executorService?.apply {
             execute {
                 storageUtil.saveShuffle(ShuffleModes.SHUFFLE_MODE_ALL)
-                storageUtil.saveTempMusicList(songs)
-                /*
+                storageUtil.saveTempMusicList(songs)/*
                  * Plays a random song from the given list of songs by sending a broadcast message
                  */
                 val rand = Random()
@@ -1108,10 +1077,7 @@ class MainActivity : BaseActivity(), View.OnClickListener,
     private fun setSearchFragment() {
         searchFragment = SearchFragment.newInstance()
         replaceFragment(
-            R.id.sec_container,
-            searchFragment!!,
-            android.R.transition.fade,
-            SEARCH_FRAGMENT_TAG
+            R.id.sec_container, searchFragment!!, android.R.transition.fade, SEARCH_FRAGMENT_TAG
         )
     }
 
@@ -1125,9 +1091,7 @@ class MainActivity : BaseActivity(), View.OnClickListener,
             builder.setCancelable(true)
             builder.setPositiveButton("OK") { _: DialogInterface?, _: Int ->
                 RingtoneManager.setActualDefaultRingtoneUri(
-                    this@MainActivity,
-                    RingtoneManager.TYPE_RINGTONE,
-                    newUri
+                    this@MainActivity, RingtoneManager.TYPE_RINGTONE, newUri
                 )
                 showToast("Ringtone set successfully")
             }
@@ -1191,7 +1155,7 @@ class MainActivity : BaseActivity(), View.OnClickListener,
 
     fun openPlOptionMenu(currentItem: Playlist) {
         plItemSelected = currentItem
-        val count = currentItem.musicList.size.toString() + " Songs"
+        val count = currentItem.musicList?.size.toString() + " Songs"
         plSheetBehavior!!.state = BottomSheetBehavior.STATE_COLLAPSED
         plOptionName!!.text = currentItem.name
         optionPlCount!!.text = count
@@ -1254,8 +1218,7 @@ class MainActivity : BaseActivity(), View.OnClickListener,
         glideBuilt.loadFromUri(music.albumUri, R.drawable.ic_music_thumbnail, imageView, 512)
         builder.setPositiveButton("Allow") { dialog: DialogInterface, i: Int ->
             if (ContextCompat.checkSelfPermission(
-                    this@MainActivity,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    this@MainActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
                 requestWriteStoragePermissionBelow11()
@@ -1264,9 +1227,7 @@ class MainActivity : BaseActivity(), View.OnClickListener,
                 val selectionArgs = arrayOf(music.id)
                 if (contentUri != null) {
                     contentResolver.delete(
-                        contentUri,
-                        MediaStore.Audio.Media._ID + "=?",
-                        selectionArgs
+                        contentUri, MediaStore.Audio.Media._ID + "=?", selectionArgs
                     )
                     updateAdaptersForRemovedItem()
                 }
@@ -1416,8 +1377,7 @@ class MainActivity : BaseActivity(), View.OnClickListener,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             phoneStateCallback = CustomCallStateListener()
             telephonyManager!!.registerTelephonyCallback(
-                ContextCompat.getMainExecutor(this),
-                phoneStateCallback!!
+                ContextCompat.getMainExecutor(this), phoneStateCallback!!
             )
         } else {
             phoneStateListener = object : PhoneStateListener() {
@@ -1660,8 +1620,7 @@ class MainActivity : BaseActivity(), View.OnClickListener,
         val fragmentManager = supportFragmentManager
         val transaction = fragmentManager.beginTransaction()
 
-        fragment.enterTransition =
-            TransitionInflater.from(this).inflateTransition(animation)
+        fragment.enterTransition = TransitionInflater.from(this).inflateTransition(animation)
         transaction.replace(container, fragment, tag).addToBackStack(null).commit()
     }
 
@@ -1764,7 +1723,7 @@ class MainActivity : BaseActivity(), View.OnClickListener,
             val plKey = editText.text.toString().trim { it <= ' ' }
             val playlistNames = ArrayList<String>()
             for (playlist1 in playlistArrayList!!) {
-                playlistNames.add(playlist1.name)
+                playlist1.name?.let { playlistNames.add(it) }
             }
             if (plKey != "") {
                 if (!playlistNames.contains(plKey)) {
@@ -1802,12 +1761,12 @@ class MainActivity : BaseActivity(), View.OnClickListener,
 
     private fun addToQueuePl(playlist: Playlist?) {
         val list = playlist!!.musicList
-        bottomSheetPlayerFragment?.addToQueue(list)
+        list?.let { bottomSheetPlayerFragment?.addToQueue(it) }
     }
 
     private fun addToNextPlayPl(playlist: Playlist?) {
         val list = playlist!!.musicList
-        bottomSheetPlayerFragment?.addToNext(list)
+        list?.let { bottomSheetPlayerFragment?.addToNext(it) }
     }
 
     private fun closePlOptionSheet() {
@@ -1872,8 +1831,7 @@ class MainActivity : BaseActivity(), View.OnClickListener,
         val playerPickCover_l = customLayout.findViewById<View>(R.id.playlist_cover_pick)
         playerPickCover_l.setOnClickListener { v: View? ->
             pickImage(
-                pickIntentForPLCover,
-                mediaPickerForPLCover
+                pickIntentForPLCover, mediaPickerForPLCover
             )
         }
 
@@ -1883,7 +1841,7 @@ class MainActivity : BaseActivity(), View.OnClickListener,
             val plCoverUri = if (playListImageUri != null) playListImageUri.toString() else ""
             val playlistNames = ArrayList<String>()
             for (playlist in playlistArrayList!!) {
-                playlistNames.add(playlist.name)
+                playlist.name?.let { playlistNames.add(it) }
             }
             if (plKey != "") {
                 if (!playlistNames.contains(plKey)) {

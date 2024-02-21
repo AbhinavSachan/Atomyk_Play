@@ -12,9 +12,9 @@ import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.adapters.FavoriteListAdapter
 import com.atomykcoder.atomykplay.adapters.SimpleTouchCallback
 import com.atomykcoder.atomykplay.data.BaseFragment
-import com.atomykcoder.atomykplay.data.Music
 import com.atomykcoder.atomykplay.events.RemoveFromFavoriteEvent
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener
+import com.atomykcoder.atomykplay.models.Music
 import com.atomykcoder.atomykplay.scripts.LinearLayoutManagerWrapper
 import com.atomykcoder.atomykplay.utils.StorageUtil
 import org.greenrobot.eventbus.EventBus
