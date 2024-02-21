@@ -64,7 +64,7 @@
                 android:clipToPadding="false"
                 android:paddingBottom="@dimen/most_bottom_padding"
                 app:bubbleColor="@color/accent_color_bg"
-                app:bubbleTextColor="@color/material_dynamic_neutral95"
+                app:bubbleTextColor="@color/white"
                 app:handleColor="@color/accent_color_bg" />
 
 <!--            <androidx.recyclerview.widget.RecyclerView-->
