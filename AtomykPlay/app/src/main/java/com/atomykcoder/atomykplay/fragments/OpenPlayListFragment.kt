@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.adapters.OpenPlayListAdapter
 import com.atomykcoder.atomykplay.adapters.SimpleTouchCallback
-import com.atomykcoder.atomykplay.classes.GlideBuilt
+import com.atomykcoder.atomykplay.utils.loadImageFromUri
 import com.atomykcoder.atomykplay.data.BaseFragment
 import com.atomykcoder.atomykplay.events.RemoveFromPlaylistEvent
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener
@@ -61,7 +61,6 @@ class OpenPlayListFragment : BaseFragment(), OnDragStartListener {
             EventBus.getDefault().register(this)
         }
 
-        val glideBuilt = GlideBuilt(requireContext().applicationContext)
         val recyclerView = view.findViewById<RecyclerView>(R.id.open_pl_music_recycler)
         val noPlLayout = view.findViewById<View>(R.id.song_not_found_layout_opl)
         val collapsingToolbarLayout =
@@ -75,7 +74,7 @@ class OpenPlayListFragment : BaseFragment(), OnDragStartListener {
 
         val musicList = playlist?.musicList
         collapsingToolbarLayout.title = playlist?.name
-        glideBuilt.loadFromUri(playlist?.coverUri, 0, imageView, 512)
+        imageView.loadImageFromUri(playlist?.coverUri, 0, 512)
 
         if (musicList != null) {
             openPlayListAdapter =

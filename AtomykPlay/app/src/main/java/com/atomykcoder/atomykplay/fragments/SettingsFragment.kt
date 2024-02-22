@@ -115,7 +115,7 @@ class SettingsFragment : BaseFragment(), OnSeekBarChangeListener {
     private var filterDurDialog: AlertDialog? = null
     private var beautifyListAdapter: BeautifyListAdapter? = null
     private var noTagTV: TextView? = null
-    private var beautifyList: ArrayList<String?>? = null
+    private var beautifyList: ArrayList<String>? = null
     private var replacingTagList: ArrayList<String>? = null
     private var _context: Context? = null
     private val context1: Context?
@@ -454,7 +454,7 @@ class SettingsFragment : BaseFragment(), OnSeekBarChangeListener {
         val heading = customLayout.findViewById<TextView>(R.id.textview_black_list)
         heading.text = getString(R.string.add_tag_removal)
         replacingTagList = settingsStorage?.allReplacingTag
-        beautifyList = settingsStorage?.allBeautifyTag as ArrayList<String?>?
+        beautifyList = settingsStorage?.allBeautifyTag
         beautifyListAdapter =
             BeautifyListAdapter(beautifyList, requireContext(), replacingTagList!!)
         if (beautifyList != null) {
@@ -553,7 +553,7 @@ class SettingsFragment : BaseFragment(), OnSeekBarChangeListener {
         val recyclerView = customLayout.findViewById<RecyclerView>(R.id.blacklist_recycler)
         val textView = customLayout.findViewById<TextView>(R.id.text_no_folders)
         val blacklist = settingsStorage!!.loadBlackList()
-        val adapter = BlockFolderListAdapter(blacklist, context1)
+        val adapter = BlockFolderListAdapter(blacklist)
         if (blacklist.isEmpty()) {
             textView.visibility = View.VISIBLE
         } else {

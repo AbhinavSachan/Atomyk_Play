@@ -35,7 +35,6 @@ import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.adapters.FoundLyricsAdapter
 import com.atomykcoder.atomykplay.adapters.MusicMainAdapter
 import com.atomykcoder.atomykplay.adapters.PlaylistDialogAdapter
-import com.atomykcoder.atomykplay.classes.GlideBuilt
 import com.atomykcoder.atomykplay.classes.PhoneStateCallback
 import com.atomykcoder.atomykplay.constants.BroadcastStrings.BROADCAST_PAUSE_PLAY_MUSIC
 import com.atomykcoder.atomykplay.constants.BroadcastStrings.BROADCAST_PLAY_NEW_MUSIC
@@ -75,6 +74,11 @@ import com.atomykcoder.atomykplay.utils.AndroidUtil.setSystemDrawBehindBars
 import com.atomykcoder.atomykplay.utils.MusicUtil
 import com.atomykcoder.atomykplay.utils.StorageUtil
 import com.atomykcoder.atomykplay.utils.StorageUtil.SettingsStorage
+import com.atomykcoder.atomykplay.utils.loadAlbumArt
+import com.atomykcoder.atomykplay.utils.loadImageFromBitmap
+import com.atomykcoder.atomykplay.utils.loadImageFromUri
+import com.atomykcoder.atomykplay.utils.pauseGlideRequest
+import com.atomykcoder.atomykplay.utils.resumeGlideRequest
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCallback
 import com.google.android.material.card.MaterialCardView
@@ -112,27 +116,25 @@ class MainActivity : BaseActivity(), View.OnClickListener,
             media_player_service = null
         }
     }
-    var mainPlayerSheetBehavior: CustomBottomSheet<View?>? = null
+    var mainPlayerSheetBehavior: CustomBottomSheet<View>? = null
 
     @JvmField
     var bottomSheetPlayerFragment: BottomSheetPlayerFragment? = null
     private var lastAddedFragment: LastAddedFragment? = null
 
     @JvmField
-    var lyricsListBehavior: BottomSheetBehavior<View?>? = null
-    private var optionSheetBehavior: BottomSheetBehavior<View?>? = null
-    private var donationSheetBehavior: BottomSheetBehavior<View?>? = null
-    private var detailsSheetBehavior: BottomSheetBehavior<View?>? = null
-    private var plSheetBehavior: BottomSheetBehavior<View?>? = null
+    var lyricsListBehavior: BottomSheetBehavior<View>? = null
+    private var optionSheetBehavior: BottomSheetBehavior<View>? = null
+    private var donationSheetBehavior: BottomSheetBehavior<View>? = null
+    private var detailsSheetBehavior: BottomSheetBehavior<View>? = null
+    private var plSheetBehavior: BottomSheetBehavior<View>? = null
 
-    @JvmField
-    var addToPlDialog: AlertDialog? = null
-    var plSheet: View? = null
-    var playerBottomSheet: View? = null
+    private var addToPlDialog: AlertDialog? = null
+    private var plSheet: View? = null
+    private var playerBottomSheet: View? = null
     private var plItemSelected: Playlist? = null
     private var selectedItem: Music? = null
     private var isChecking = false
-    private lateinit var glideBuilt: GlideBuilt
     private var shadowLyrFound: View? = null
     private var shadowOuterSheet: View? = null
     private var shadowOuterSheet2: View? = null
@@ -680,7 +682,7 @@ class MainActivity : BaseActivity(), View.OnClickListener,
     }
 
     private fun setBottomSheetProperties(
-        sheet: BottomSheetBehavior<View?>?,
+        sheet: BottomSheetBehavior<View>?,
         peekHeight: Int,
         skipCollapse: Boolean,
         state: Int,
@@ -769,7 +771,7 @@ class MainActivity : BaseActivity(), View.OnClickListener,
     }
 
     private fun closeSheetWhenClickOutSide(
-        sheetBehavior: BottomSheetBehavior<View?>?,
+        sheetBehavior: BottomSheetBehavior<View>?,
         sheet: View?,
         event: MotionEvent,
     ) {
@@ -787,7 +789,7 @@ class MainActivity : BaseActivity(), View.OnClickListener,
         navSongName!!.text = "Song Name"
         navArtistName!!.text = "Artist"
         if (!isDestroyed) {
-            glideBuilt.loadFromUri(null, R.drawable.ic_music, navCover, 512)
+            navCover?.loadImageFromUri(null, R.drawable.ic_music, 512)
         }
     }
 
@@ -797,7 +799,7 @@ class MainActivity : BaseActivity(), View.OnClickListener,
     }
 
     fun setImageInNavigation(album_uri: Bitmap?) {
-        glideBuilt.loadFromBitmap(album_uri, R.drawable.ic_music, navCover, 512, false)
+        navCover?.loadImageFromBitmap(album_uri, R.drawable.ic_music, 512, false)
     }
 
     private val music: Music?
@@ -1149,7 +1151,7 @@ class MainActivity : BaseActivity(), View.OnClickListener,
         optionSheetBehavior!!.state = BottomSheetBehavior.STATE_COLLAPSED
         optionName!!.text = music.name
         optionArtist!!.text = music.artist
-        glideBuilt.loadAlbumArt(music.path, R.drawable.ic_music, optionCover, 128, true)
+        optionCover?.loadAlbumArt(music.path, R.drawable.ic_music, 128, true)
 
     }
 
@@ -1159,7 +1161,7 @@ class MainActivity : BaseActivity(), View.OnClickListener,
         plSheetBehavior!!.state = BottomSheetBehavior.STATE_COLLAPSED
         plOptionName!!.text = currentItem.name
         optionPlCount!!.text = count
-        glideBuilt.loadFromUri(currentItem.coverUri, R.drawable.ic_music_list, plOptionCover, 128)
+        plOptionCover?.loadImageFromUri(currentItem.coverUri, R.drawable.ic_music_list, 128)
     }
 
     private fun deleteFromDevice(musics: List<Music?>) {
@@ -1215,7 +1217,7 @@ class MainActivity : BaseActivity(), View.OnClickListener,
         builder.setView(customLayout)
         builder.setCancelable(false)
         val imageView = customLayout.findViewById<ImageView>(R.id.cover_image)
-        glideBuilt.loadFromUri(music.albumUri, R.drawable.ic_music_thumbnail, imageView, 512)
+        imageView.loadImageFromUri(music.albumUri, R.drawable.ic_music_thumbnail, 512)
         builder.setPositiveButton("Allow") { dialog: DialogInterface, i: Int ->
             if (ContextCompat.checkSelfPermission(
                     this@MainActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE
@@ -1258,8 +1260,6 @@ class MainActivity : BaseActivity(), View.OnClickListener,
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        glideBuilt = GlideBuilt(applicationContext)
-
         //initializations
         MediaPlayerService.ui_visible = true
         executorService = Executors.newFixedThreadPool(10)
@@ -1281,7 +1281,7 @@ class MainActivity : BaseActivity(), View.OnClickListener,
         detailsSheet = findViewById(R.id.file_details_sheet)
         anchoredShadow = findViewById(R.id.anchored_player_shadow)
         mainPlayerSheetBehavior =
-            BottomSheetBehavior.from(playerBottomSheet!!) as CustomBottomSheet<View?>
+            BottomSheetBehavior.from(playerBottomSheet!!) as? CustomBottomSheet<View>
         mainPlayerSheetBehavior?.peekHeight = 0
 
         val openDrawer = findViewById<ImageView>(R.id.open_drawer_btn)
@@ -1312,7 +1312,7 @@ class MainActivity : BaseActivity(), View.OnClickListener,
         navCover = headerView.findViewById(R.id.nav_cover_img)
         navSongName = headerView.findViewById(R.id.nav_song_name)
         navArtistName = headerView.findViewById(R.id.nav_song_artist)
-        navDetailLayout.setOnClickListener { v: View? ->
+        navDetailLayout.setOnClickListener {
             drawer?.closeDrawer(GravityCompat.START)
             if (music != null) {
                 mainPlayerSheetBehavior!!.state = BottomSheetBehavior.STATE_EXPANDED
@@ -1583,12 +1583,12 @@ class MainActivity : BaseActivity(), View.OnClickListener,
                     setFastScrollListener(object : FastScroller.FastScrollListener {
                         override fun onFastScrollStart(fastScroller: FastScroller) {
                             // fast scroll started
-                            glideBuilt.pauseRequest()
+                            pauseGlideRequest()
                         }
 
                         override fun onFastScrollStop(fastScroller: FastScroller) {
                             // fast scroll stopped
-                            glideBuilt.resumeRequest()
+                            resumeGlideRequest()
                         }
                     })
                 }
@@ -1797,7 +1797,7 @@ class MainActivity : BaseActivity(), View.OnClickListener,
         createPlaylistBtnDialog.setOnClickListener { v: View? -> openCreatePlaylistDialog(music) }
         addFavBtnDialog.setOnClickListener { v: View? ->
             addToFavorite(music)
-            addToPlDialog!!.dismiss()
+            addToPlDialog?.dismiss()
         }
         val manager: LinearLayoutManager = LinearLayoutManagerWrapper(this)
         plDialogRecyclerView?.layoutManager = manager
@@ -1813,7 +1813,11 @@ class MainActivity : BaseActivity(), View.OnClickListener,
             noPl_tv?.visibility = View.VISIBLE
         }
         addToPlDialog = builder.create()
-        addToPlDialog!!.show()
+        addToPlDialog?.show()
+    }
+
+    fun dismissPlDialog(){
+        addToPlDialog?.dismiss()
     }
 
     private fun addToFavorite(music: Music?) {

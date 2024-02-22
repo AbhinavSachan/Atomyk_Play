@@ -8,7 +8,7 @@ import android.widget.Toast
 import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.adapters.generics.GenericViewHolder
 import com.atomykcoder.atomykplay.adapters.viewHolders.MusicMainViewHolder
-import com.atomykcoder.atomykplay.classes.GlideBuilt
+import com.atomykcoder.atomykplay.utils.loadAlbumArt
 import com.atomykcoder.atomykplay.enums.OptionSheetEnum
 import com.atomykcoder.atomykplay.models.Music
 import com.atomykcoder.atomykplay.repository.MusicRepo
@@ -23,7 +23,6 @@ class MusicMainAdapter(var context: Context, musicList: ArrayList<Music>?) : Mus
     private var storage: StorageUtil = StorageUtil(context)
     private var settingsStorage: SettingsStorage = SettingsStorage(context)
     private var musicRepo: MusicRepo = MusicRepo.instance!!
-    private val glideBuilt: GlideBuilt = GlideBuilt(context.applicationContext)
 
     init {
         super.items = musicList
@@ -51,10 +50,9 @@ class MusicMainAdapter(var context: Context, musicList: ArrayList<Music>?) : Mus
         val musicViewHolder = holder as MusicMainViewHolder
         val currentItem = super.items?.get(position)
         currentItem?.let {
-            glideBuilt.loadAlbumArt(
+            musicViewHolder.albumCoverIV.loadAlbumArt(
                 currentItem.path,
                 R.drawable.ic_music,
-                musicViewHolder.albumCoverIV,
                 128,
                 true
             )

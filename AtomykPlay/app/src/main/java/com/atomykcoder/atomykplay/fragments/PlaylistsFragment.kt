@@ -31,8 +31,10 @@ class PlaylistsFragment : BaseFragment() {
         playlistList?.remove(playlist)
     }
 
-    fun updateItems(list: ArrayList<Playlist>?) {
-        playlistAdapter?.updateView(list)
+    fun updateItems(list: ArrayList<Playlist>) {
+        val shadow:ArrayList<Playlist?> = arrayListOf()
+        shadow.addAll(list)
+        playlistAdapter?.updateView(shadow)
     }
 
 
@@ -71,7 +73,7 @@ class PlaylistsFragment : BaseFragment() {
         if (playlistList!!.isEmpty()) {
             noPlLayout?.visibility = View.VISIBLE
         }
-        playlistAdapter = PlaylistAdapter(context, playlistList)
+        playlistAdapter = PlaylistAdapter(requireContext(), playlistList)
         recyclerView.adapter = playlistAdapter
 
         return view

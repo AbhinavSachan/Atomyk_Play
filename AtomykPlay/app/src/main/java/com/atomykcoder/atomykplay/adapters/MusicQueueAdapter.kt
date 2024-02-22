@@ -10,13 +10,13 @@ import android.widget.Toast
 import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.adapters.generics.GenericViewHolder
 import com.atomykcoder.atomykplay.adapters.viewHolders.MusicQueueViewHolder
-import com.atomykcoder.atomykplay.classes.GlideBuilt
 import com.atomykcoder.atomykplay.enums.OptionSheetEnum
 import com.atomykcoder.atomykplay.interfaces.ItemTouchHelperAdapter
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener
 import com.atomykcoder.atomykplay.models.Music
 import com.atomykcoder.atomykplay.ui.MainActivity
 import com.atomykcoder.atomykplay.utils.StorageUtil
+import com.atomykcoder.atomykplay.utils.loadAlbumArt
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import java.util.*
 
@@ -28,7 +28,6 @@ class MusicQueueAdapter(
     private var onDragStartListener: OnDragStartListener
     var mainActivity: MainActivity
     private var storageUtil: StorageUtil
-    private val glideBuilt: GlideBuilt = GlideBuilt(context.applicationContext)
 
     init {
         super.items = items
@@ -86,10 +85,10 @@ class MusicQueueAdapter(
         val currentItem = super.items!![position]
         val index = "${position + 1}"
         queueViewHolder.musicIndex.text = index
-        glideBuilt.loadAlbumArt(
+
+        queueViewHolder.albumCoverIV.loadAlbumArt(
             currentItem.path,
             R.drawable.ic_music,
-            queueViewHolder.albumCoverIV,
             128,
             true
         )
@@ -150,7 +149,7 @@ class MusicQueueAdapter(
                     mainActivity.bottomSheetPlayerFragment?.setQueueSheetBehaviour(
                         BottomSheetBehavior.STATE_HIDDEN
                     )
-                    mainActivity.mainPlayerSheetBehavior?.state = BottomSheetBehavior.STATE_HIDDEN
+                    mainActivity.mainPlayerSheetBehavior?.setState(BottomSheetBehavior.STATE_HIDDEN)
                     mainActivity.bottomSheetPlayerFragment?.resetMainPlayerLayout()
                     mainActivity.resetDataInNavigation()
                     mainActivity.stopMusic()
@@ -177,6 +176,7 @@ class MusicQueueAdapter(
     }
 
     fun updateItemInserted(music: Music?) {
+        if (music == null) return
         val pos = storageUtil.loadMusicIndex()
         if (super.items!!.isEmpty()) {
             super.items!!.add(0, music)
@@ -235,6 +235,7 @@ class MusicQueueAdapter(
     }
 
     fun updateItemInsertedLast(music: Music?) {
+        if (music == null) return
         if (super.items!!.isEmpty()) {
             storageUtil.saveMusicIndex(0)
             mainActivity.playAudio(music)

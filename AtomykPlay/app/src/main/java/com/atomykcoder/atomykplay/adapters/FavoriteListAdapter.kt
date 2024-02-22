@@ -7,7 +7,6 @@ import android.widget.Toast
 import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.adapters.generics.GenericViewHolder
 import com.atomykcoder.atomykplay.adapters.viewHolders.FavoriteViewHolder
-import com.atomykcoder.atomykplay.classes.GlideBuilt
 import com.atomykcoder.atomykplay.enums.OptionSheetEnum
 import com.atomykcoder.atomykplay.interfaces.ItemTouchHelperAdapter
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener
@@ -15,6 +14,7 @@ import com.atomykcoder.atomykplay.models.Music
 import com.atomykcoder.atomykplay.ui.MainActivity
 import com.atomykcoder.atomykplay.utils.StorageUtil
 import com.atomykcoder.atomykplay.utils.StorageUtil.SettingsStorage
+import com.atomykcoder.atomykplay.utils.loadAlbumArt
 
 class FavoriteListAdapter(
     private val context: Context,
@@ -25,7 +25,6 @@ class FavoriteListAdapter(
     private var onDragStartListener: OnDragStartListener
     var storage: StorageUtil
     var settingsStorage: SettingsStorage
-    private val glideBuilt: GlideBuilt = GlideBuilt(context.applicationContext)
 
     init {
         super.items = _musicList
@@ -58,10 +57,9 @@ class FavoriteListAdapter(
         super.onBindViewHolder(_holder, position)
         val holder = _holder as FavoriteViewHolder
         val currentItem = super.items!![position]
-        glideBuilt.loadAlbumArt(
+        holder.albumCoverIV.loadAlbumArt(
             currentItem.path,
             R.drawable.ic_music,
-            holder.albumCoverIV,
             128,
             true
         )

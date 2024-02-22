@@ -46,7 +46,6 @@ import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.adapters.MusicLyricsAdapter
 import com.atomykcoder.atomykplay.adapters.MusicQueueAdapter
 import com.atomykcoder.atomykplay.adapters.SimpleTouchCallback
-import com.atomykcoder.atomykplay.classes.GlideBuilt
 import com.atomykcoder.atomykplay.constants.FragmentTags.ADD_LYRICS_FRAGMENT_TAG
 import com.atomykcoder.atomykplay.constants.RepeatModes
 import com.atomykcoder.atomykplay.constants.ShuffleModes
@@ -70,6 +69,8 @@ import com.atomykcoder.atomykplay.utils.AndroidUtil.pxToDp
 import com.atomykcoder.atomykplay.utils.AndroidUtil.toUnscaledBitmap
 import com.atomykcoder.atomykplay.utils.StorageUtil
 import com.atomykcoder.atomykplay.utils.StorageUtil.SettingsStorage
+import com.atomykcoder.atomykplay.utils.loadAlbumArt
+import com.atomykcoder.atomykplay.utils.loadImageFromBitmap
 import com.atomykcoder.atomykplay.utils.showToast
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
@@ -97,7 +98,7 @@ class BottomSheetPlayerFragment : BaseFragment(), OnSeekBarChangeListener, OnDra
 
     private val lyricsArrayList = ArrayList<String>()
 
-    private var queueSheetBehaviour: CustomBottomSheet<View?>? = null
+    private var queueSheetBehaviour: CustomBottomSheet<View>? = null
     private var miniNext: ImageView? = null
     private var miniArtistText: TextView? = null
 
@@ -204,14 +205,13 @@ class BottomSheetPlayerFragment : BaseFragment(), OnSeekBarChangeListener, OnDra
 
     private var optionImg: ImageView? = null
     private var musicArrayList: ArrayList<Music>? = null
-    private lateinit var glideBuilt: GlideBuilt
     private var userScrolling = false
     private var onScrollListener: RecyclerView.OnScrollListener =
         object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                if (newState == 0) {
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                     userScrolling = false
-                } else if (newState == 1 || newState == 2) {
+                } else if (newState == RecyclerView.SCROLL_STATE_DRAGGING || newState == RecyclerView.SCROLL_STATE_SETTLING) {
                     userScrolling = true
                 }
                 super.onScrollStateChanged(recyclerView, newState)
@@ -316,7 +316,6 @@ class BottomSheetPlayerFragment : BaseFragment(), OnSeekBarChangeListener, OnDra
         context1?.let {
             storageUtil = StorageUtil(it.applicationContext)
             settingsStorage = SettingsStorage(it.applicationContext)
-            glideBuilt = GlideBuilt(it.applicationContext)
             linearLayoutManager = LinearLayoutManagerWrapper(it)
             mainActivity = WeakReference(it as MainActivity).get()
         }
@@ -465,7 +464,7 @@ class BottomSheetPlayerFragment : BaseFragment(), OnSeekBarChangeListener, OnDra
         seekBarMain?.setOnSeekBarChangeListener(this)
         miniPlayView?.setOnClickListener {
             val sheet = mainActivity?.mainPlayerSheetBehavior
-            if (sheet?.state == BottomSheetBehavior.STATE_COLLAPSED) {
+            if (sheet?.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
                 sheet.setState(BottomSheetBehavior.STATE_EXPANDED)
             } else {
                 sheet?.setState(BottomSheetBehavior.STATE_COLLAPSED)
@@ -534,10 +533,10 @@ class BottomSheetPlayerFragment : BaseFragment(), OnSeekBarChangeListener, OnDra
         super.onResume()
         appPaused = false
 
-        if (mainActivity?.mainPlayerSheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
+        if (mainActivity?.mainPlayerSheetBehavior?.getState() == BottomSheetBehavior.STATE_EXPANDED) {
             miniPlayView?.alpha = 0f
             miniPlayView?.visibility = View.INVISIBLE
-        } else if (mainActivity?.mainPlayerSheetBehavior?.state == BottomSheetBehavior.STATE_COLLAPSED) {
+        } else if (mainActivity?.mainPlayerSheetBehavior?.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
             playerLayout?.alpha = 0f
             playerLayout?.visibility = View.INVISIBLE
         }
@@ -873,26 +872,23 @@ class BottomSheetPlayerFragment : BaseFragment(), OnSeekBarChangeListener, OnDra
             var image = result.image
             try {
                 activeMusic?.let {
-                    glideBuilt.loadFromBitmap(
+                    playerCoverImage?.loadImageFromBitmap(
                         image,
                         R.drawable.ic_music,
-                        playerCoverImage,
                         512,
                         true
                     )
-                    glideBuilt.loadFromBitmap(
+                    miniCover?.loadImageFromBitmap(
                         image,
                         R.drawable.ic_music,
-                        miniCover,
                         128,
                         true
                     )
                     queueSheetBehaviour?.let { sheet ->
                         if (sheet.state == BottomSheetBehavior.STATE_EXPANDED) {
-                            glideBuilt.loadFromBitmap(
+                            queueCoverImg?.loadImageFromBitmap(
                                 image,
                                 R.drawable.ic_music,
-                                queueCoverImg,
                                 128,
                                 false
                             )
@@ -923,8 +919,8 @@ class BottomSheetPlayerFragment : BaseFragment(), OnSeekBarChangeListener, OnDra
         seekBarMain?.progress = 0
         miniProgress?.progress = 0
         if (activity?.isDestroyed == false || !isDetached) {
-            glideBuilt.loadFromBitmap(null, R.drawable.ic_music, playerCoverImage, 512, false)
-            glideBuilt.loadFromBitmap(null, R.drawable.ic_music, miniCover, 128, false)
+            playerCoverImage?.loadImageFromBitmap(null, R.drawable.ic_music, 512, false)
+            miniCover?.loadImageFromBitmap(null, R.drawable.ic_music, 128, false)
         }
     }
 
@@ -1040,14 +1036,14 @@ class BottomSheetPlayerFragment : BaseFragment(), OnSeekBarChangeListener, OnDra
 
     private fun setLyricsAdapter() {
         lm = LinearLayoutManagerWrapper(context1) // or whatever layout manager you need
-        lyricsRecyclerView!!.layoutManager = lm
-        lyricsAdapter = MusicLyricsAdapter(context1, lyricsArrayList)
+        lyricsRecyclerView?.layoutManager = lm
+        lyricsAdapter = context1?.let { MusicLyricsAdapter(it, lyricsArrayList) }
         if (lyricsArrayList.isEmpty()) {
-            noLyricsLayout!!.visibility = View.VISIBLE
+            noLyricsLayout?.visibility = View.VISIBLE
         } else {
-            noLyricsLayout!!.visibility = View.GONE
+            noLyricsLayout?.visibility = View.GONE
         }
-        lyricsRecyclerView!!.adapter = lyricsAdapter
+        lyricsRecyclerView?.adapter = lyricsAdapter
     }
 
     fun setLyricsLayout(music: Music?) {
@@ -1063,8 +1059,8 @@ class BottomSheetPlayerFragment : BaseFragment(), OnSeekBarChangeListener, OnDra
         addLyricsFragment.enterTransition =
             TransitionInflater.from(requireContext())
                 .inflateTransition(android.R.transition.slide_top)
-        if (mainActivity!!.mainPlayerSheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
-            mainActivity!!.mainPlayerSheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
+        if (mainActivity!!.mainPlayerSheetBehavior?.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+            mainActivity!!.mainPlayerSheetBehavior?.setState(BottomSheetBehavior.STATE_COLLAPSED)
         }
         val transaction = fragmentManager.beginTransaction()
         transaction.replace(
@@ -1080,7 +1076,7 @@ class BottomSheetPlayerFragment : BaseFragment(), OnSeekBarChangeListener, OnDra
         queueRecyclerView!!.layoutManager = linearLayoutManager
         setQueueAdapter()
         queueSheetBehaviour =
-            BottomSheetBehavior.from(queueBottomSheet!!) as CustomBottomSheet<View?>
+            BottomSheetBehavior.from(queueBottomSheet!!) as? CustomBottomSheet<View>
         queueSheetBehaviour!!.isHideable = true
         queueSheetBehaviour!!.skipCollapsed = true
         queueSheetBehaviour!!.state = BottomSheetBehavior.STATE_HIDDEN
@@ -1371,7 +1367,7 @@ class BottomSheetPlayerFragment : BaseFragment(), OnSeekBarChangeListener, OnDra
         activeMusic?.let {
             songNameQueueItem!!.text = it.name
             artistQueueItem!!.text = it.artist
-            glideBuilt.loadAlbumArt(it.path, R.drawable.ic_music, queueCoverImg, 128, false)
+            queueCoverImg?.loadAlbumArt(it.path, R.drawable.ic_music, 128, false)
         }
         queueSheetBehaviour!!.state = BottomSheetBehavior.STATE_EXPANDED
         queueBottomSheet!!.alpha = 1f

@@ -7,7 +7,6 @@ import android.widget.Toast
 import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.adapters.generics.GenericViewHolder
 import com.atomykcoder.atomykplay.adapters.viewHolders.OpenPlayListViewHolder
-import com.atomykcoder.atomykplay.classes.GlideBuilt
 import com.atomykcoder.atomykplay.enums.OptionSheetEnum
 import com.atomykcoder.atomykplay.interfaces.ItemTouchHelperAdapter
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener
@@ -15,6 +14,7 @@ import com.atomykcoder.atomykplay.models.Music
 import com.atomykcoder.atomykplay.ui.MainActivity
 import com.atomykcoder.atomykplay.utils.StorageUtil
 import com.atomykcoder.atomykplay.utils.StorageUtil.SettingsStorage
+import com.atomykcoder.atomykplay.utils.loadAlbumArt
 
 class OpenPlayListAdapter(
     val context: Context,
@@ -26,7 +26,6 @@ class OpenPlayListAdapter(
     var storage: StorageUtil
     var settingsStorage: SettingsStorage
     private var onDragStartListener: OnDragStartListener
-    private val glideBuilt: GlideBuilt = GlideBuilt(context.applicationContext)
 
 
     init {
@@ -61,10 +60,9 @@ class OpenPlayListAdapter(
         super.onBindViewHolder(holder, position)
         val playListViewHolder = holder as OpenPlayListViewHolder
         val currentItem = super.items!![position]
-        glideBuilt.loadAlbumArt(
+        playListViewHolder.albumCoverIV.loadAlbumArt(
             currentItem.path,
             R.drawable.ic_music,
-            playListViewHolder.albumCoverIV,
             128,
             true
         )

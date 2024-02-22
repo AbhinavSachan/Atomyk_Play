@@ -10,13 +10,12 @@ import com.atomykcoder.atomykplay.models.Music
 import com.atomykcoder.atomykplay.models.Playlist
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-
-class StorageUtil
 /**
  * constructor of storage util
  *
  * @param context context of activity or application is valid
- */(private val context: Context) {
+ */
+class StorageUtil(private val context: Context) {
     //Storage Locations
     private val MUSIC_LIST_STORAGE = "com.atomykcoder.atomykplay.MUSIC_LIST_STORAGE"
     private val FAVORITE_STORAGE = "com.atomykcoder.atomykplay.FAVORITE_STORAGE"

@@ -24,7 +24,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.atomykcoder.atomykplay.BuildConfig
 import com.atomykcoder.atomykplay.R
-import com.atomykcoder.atomykplay.classes.GlideBuilt
+import com.atomykcoder.atomykplay.utils.loadAlbumArt
+import com.atomykcoder.atomykplay.utils.loadImageFromUri
 import com.atomykcoder.atomykplay.data.BaseFragment
 import com.atomykcoder.atomykplay.databinding.FragmentTagEditorBinding
 import com.atomykcoder.atomykplay.helperFunctions.CustomMethods.pickImage
@@ -66,7 +67,6 @@ class TagEditorFragment : BaseFragment() {
     private val loadingStatus = MutableLiveData<LoadingStatus>()
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
     private val coroutineMainScope = CoroutineScope(Dispatchers.Main)
-    private var glideBuilt: GlideBuilt? = null
     private lateinit var b: FragmentTagEditorBinding
     private var music: Music? = null
     private var imageUri: Uri? = null
@@ -130,7 +130,6 @@ class TagEditorFragment : BaseFragment() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
             b.editSongGenreTag.visibility = View.GONE
         }
-        glideBuilt = GlideBuilt(requireContext().applicationContext)
         b.editSongNameTag.setText(music?.name)
         b.editSongArtistTag.setText(music?.artist)
         b.editSongAlbumTag.setText(music?.album)
@@ -138,8 +137,8 @@ class TagEditorFragment : BaseFragment() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             b.editSongGenreTag.setText(music?.genre)
         }
-        glideBuilt!!.loadAlbumArt(
-            music!!.path, R.drawable.ic_music, b.songImageViewTag, 412, false
+        b.songImageViewTag.loadAlbumArt(
+            music!!.path, R.drawable.ic_music, 412, false
         )
         b.pickCoverTag.setOnClickListener {
             deleteAlbumArt = false
@@ -191,7 +190,7 @@ class TagEditorFragment : BaseFragment() {
     }
 
     private fun deleteCoverArt() {
-        glideBuilt!!.loadFromUri(null, R.drawable.ic_choose_artwork, b.songImageViewTag, 512)
+        b.songImageViewTag.loadImageFromUri(null, R.drawable.ic_choose_artwork, 512)
         deleteAlbumArt = true
         imageUri = null
     }
@@ -333,7 +332,7 @@ class TagEditorFragment : BaseFragment() {
 
     private fun setImageUri(album_uri: Uri?) {
         imageUri = album_uri
-        glideBuilt!!.loadFromUri(imageUri.toString(), 0, b.songImageViewTag, 512)
+        b.songImageViewTag.loadImageFromUri(imageUri.toString(), 0, 512)
     }
 
 }
