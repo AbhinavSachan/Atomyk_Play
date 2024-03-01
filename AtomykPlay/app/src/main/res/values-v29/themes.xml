@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base application theme. -->
+    <style name="Theme.AtomykPlay" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/accent_color_bg</item>
+        <item name="colorPrimaryVariant">@color/primary_bg</item>
+        <item name="colorOnPrimary">@color/tertiary_bg</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/accent_color_bg</item>
+        <item name="colorSecondaryVariant">@color/primary_bg</item>
+        <item name="colorOnSecondary">@color/tertiary_bg</item>
+        <!-- Status bar color. -->
+        <item name="android:navigationBarColor">@color/player_bg</item>
+        <item name="android:forceDarkAllowed">false</item>
+
+        <!-- Customize your theme here. -->
+
+
+    </style> <!-- Base application theme. -->
+
+
+    <style name="CustomSplashScreen" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_music_thumbnail</item>
+        <!--        <item name="splashScreenIconSize">60dp</item>-->
+        <item name="windowSplashScreenBackground">@color/primary_bg</item>
+        <item name="postSplashScreenTheme">@style/Theme.AtomykPlay</item>
+        <item name="android:forceDarkAllowed">false</item>
+    </style>
+
+</resources>

@@ -15,72 +15,78 @@
         android:layout_height="match_parent"
         android:background="@color/primary_bg">
 
-        <RelativeLayout
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/swipe_refresh_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
-            <LinearLayout
-                android:id="@+id/song_not_found_layout"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:layout_gravity="center"
-                android:orientation="vertical"
-                android:visibility="gone">
-
-                <ImageView
-                    android:layout_width="250dp"
-                    android:layout_height="250dp"
-                    android:contentDescription="@string/empty"
-                    android:padding="2dp"
-                    android:src="@drawable/no_song_image" />
-
-                <TextView
-                    android:id="@+id/sorry_text"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:text="@string/nothing_to_show"
-                    android:textColor="@color/text_color"
-                    android:textSize="@dimen/d_28sp"
-                    android:textStyle="bold" />
-
-            </LinearLayout>
-
-            <ProgressBar
-                android:id="@+id/progress_bar_main_activity"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:layout_gravity="center"
-                android:indeterminateTint="@color/icons_bg"
-                android:visibility="gone" />
-
-            <com.l4digital.fastscroll.FastScrollRecyclerView
-                android:id="@+id/fast_rec_view"
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:clipToPadding="false"
-                android:paddingBottom="@dimen/most_bottom_padding"
-                app:bubbleColor="@color/accent_color_bg"
-                app:bubbleTextColor="@color/white"
-                app:handleColor="@color/accent_color_bg" />
+                android:layout_height="match_parent">
 
-            <!--            <androidx.recyclerview.widget.RecyclerView-->
-            <!--                android:id="@+id/music_recycler"-->
-            <!--                android:layout_width="match_parent"-->
-            <!--                android:layout_height="match_parent"-->
-            <!--                android:clipToPadding="false"-->
-            <!--                android:paddingBottom="@dimen/most_bottom_padding" />-->
-        </RelativeLayout>
+                <LinearLayout
+                    android:id="@+id/song_not_found_layout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:layout_gravity="center"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <ImageView
+                        android:layout_width="250dp"
+                        android:layout_height="250dp"
+                        android:contentDescription="@string/empty"
+                        android:padding="2dp"
+                        android:src="@drawable/no_song_image" />
+
+                    <TextView
+                        android:id="@+id/sorry_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="@string/nothing_to_show"
+                        android:textColor="@color/text_color"
+                        android:textSize="@dimen/d_28sp"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
+
+                <ProgressBar
+                    android:id="@+id/progress_bar_main_activity"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:layout_gravity="center"
+                    android:indeterminateTint="@color/icons_bg"
+                    android:visibility="gone" />
+
+                <com.l4digital.fastscroll.FastScrollRecyclerView
+                    android:id="@+id/fast_rec_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clipToPadding="false"
+                    android:paddingBottom="@dimen/most_bottom_padding"
+                    app:bubbleColor="@color/accent_color_bg"
+                    app:bubbleTextColor="@color/white"
+                    app:handleColor="@color/accent_color_bg" />
+
+                <!--            <androidx.recyclerview.widget.RecyclerView-->
+                <!--                android:id="@+id/music_recycler"-->
+                <!--                android:layout_width="match_parent"-->
+                <!--                android:layout_height="match_parent"-->
+                <!--                android:clipToPadding="false"-->
+                <!--                android:paddingBottom="@dimen/most_bottom_padding" />-->
+            </RelativeLayout>
+
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/appBar_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/primary_bg"
-            android:elevation="4dp">
+            android:background="@color/primary_bg">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"

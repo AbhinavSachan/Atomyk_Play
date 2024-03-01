@@ -30,6 +30,7 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.transition.TransitionInflater
 import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.adapters.FoundLyricsAdapter
@@ -359,6 +360,7 @@ class MainActivity : BaseActivity(), View.OnClickListener,
         }
     }
     private var removeFromList: View? = null
+    private var swipeRefreshLayout: SwipeRefreshLayout? = null
     private var optionCover: ImageView? = null
     private var plOptionCover: ImageView? = null
     private var addToFav: ImageView? = null
@@ -517,9 +519,9 @@ class MainActivity : BaseActivity(), View.OnClickListener,
             if (musicMainAdapter == null) {
                 setUpMusicScanner()
             } else {
-                if (!isChecking) {
-                    checkForUpdateList(true)
-                }
+//                if (!isChecking) {
+//                    checkForUpdateList(true)
+//                }
             }
         }
         if (service_bound) {
@@ -1280,6 +1282,7 @@ class MainActivity : BaseActivity(), View.OnClickListener,
         plSheet = findViewById(R.id.pl_option_bottom_sheet)
         detailsSheet = findViewById(R.id.file_details_sheet)
         anchoredShadow = findViewById(R.id.anchored_player_shadow)
+        swipeRefreshLayout = findViewById(R.id.swipe_refresh_layout)
         mainPlayerSheetBehavior =
             BottomSheetBehavior.from(playerBottomSheet!!) as? CustomBottomSheet<View>
         mainPlayerSheetBehavior?.peekHeight = 0
@@ -1328,6 +1331,13 @@ class MainActivity : BaseActivity(), View.OnClickListener,
         plCard.setOnClickListener { setPlaylistFragment() }
         lastAddCard.setOnClickListener { setLastAddFragment() }
         shuffleCard.setOnClickListener { playShuffleSong() }
+        swipeRefreshLayout?.setOnRefreshListener {
+            if (is_granted && !isChecking) {
+                checkForUpdateList(false)
+            } else {
+                swipeRefreshLayout?.isRefreshing = false
+            }
+        }
 
         drawer?.addDrawerListener(this)
 
@@ -1349,10 +1359,8 @@ class MainActivity : BaseActivity(), View.OnClickListener,
         if (savedInstanceState == null) {
             navigationView!!.setCheckedItem(R.id.navigation_home)
         }
-        if (is_granted) {
-            if (!isChecking) {
-                checkForUpdateList(false)
-            }
+        if (is_granted && !isChecking) {
+            checkForUpdateList(false)
         }
     }
 
@@ -1514,9 +1522,11 @@ class MainActivity : BaseActivity(), View.OnClickListener,
         service.execute {
             musicRepo!!.fetchMusic(this).thenAccept {
                 setMusicAdapter(musicRepo!!.initialMusicList)
+                swipeRefreshLayout?.isRefreshing = false
                 isChecking = false
             }.exceptionally {
                 showToast(it.message)
+                swipeRefreshLayout?.isRefreshing = false
                 isChecking = false
                 null
             }
@@ -1816,7 +1826,7 @@ class MainActivity : BaseActivity(), View.OnClickListener,
         addToPlDialog?.show()
     }
 
-    fun dismissPlDialog(){
+    fun dismissPlDialog() {
         addToPlDialog?.dismiss()
     }
 
