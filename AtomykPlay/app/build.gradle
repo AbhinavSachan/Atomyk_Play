@@ -65,8 +65,8 @@ dependencies {
     implementation group: 'org', name: 'jaudiotagger', version: '2.0.3'
 
     //legacy implementations
-    implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.google.android.material:material:1.11.0")
+    implementation("androidx.appcompat:appcompat:1.7.0")
+    implementation("com.google.android.material:material:1.12.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.legacy:legacy-support-v4:1.0.0")
     implementation("androidx.media:media:1.7.0")
@@ -90,18 +90,16 @@ dependencies {
     implementation("org.jsoup:jsoup:1.17.2")
     implementation("androidx.palette:palette-ktx:1.0.0")
     implementation("de.hdodenhof:circleimageview:3.1.0")
-    implementation("com.google.firebase:firebase-crashlytics:18.6.2")
+    implementation("com.google.firebase:firebase-crashlytics:19.0.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
     implementation("androidx.core:core-splashscreen:1.0.1")
 
-    implementation("com.airbnb.android:lottie:6.3.0")
+    implementation("com.airbnb.android:lottie:6.4.0")
     // Retrofit
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-scalars:2.9.0")
 
     implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.9")
     implementation("io.github.l4digital:fastscroll:2.1.0")
-    // OkHttp Profiler (for network request profiling)
-    implementation("com.localebro:okhttpprofiler:1.0.8")
 
 }

@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.View
 import android.widget.ProgressBar
 import com.atomykcoder.atomykplay.interfaces.ApiService
-import com.localebro.okhttpprofiler.OkHttpProfilerInterceptor
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
 import org.jsoup.Jsoup
@@ -35,7 +34,6 @@ class FetchLyrics {
         return OkHttpClient.Builder()
             .readTimeout(45, TimeUnit.SECONDS)
             .callTimeout(45, TimeUnit.SECONDS)
-            .addInterceptor(OkHttpProfilerInterceptor())
             .build()
     }
 

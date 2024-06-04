@@ -1220,7 +1220,7 @@ class MainActivity : BaseActivity(), View.OnClickListener,
         builder.setCancelable(false)
         val imageView = customLayout.findViewById<ImageView>(R.id.cover_image)
         imageView.loadImageFromUri(music.albumUri, R.drawable.ic_music_thumbnail, 512)
-        builder.setPositiveButton("Allow") { dialog: DialogInterface, i: Int ->
+        builder.setPositiveButton(getString(R.string.allow)) { dialog: DialogInterface, i: Int ->
             if (ContextCompat.checkSelfPermission(
                     this@MainActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE
                 ) != PackageManager.PERMISSION_GRANTED
@@ -1238,7 +1238,7 @@ class MainActivity : BaseActivity(), View.OnClickListener,
                 dialog.cancel()
             }
         }
-        builder.setNegativeButton("Deny", null)
+        builder.setNegativeButton(getString(R.string.deny), null)
         val dialog: AlertDialog = builder.create()
         dialog.show()
     }
