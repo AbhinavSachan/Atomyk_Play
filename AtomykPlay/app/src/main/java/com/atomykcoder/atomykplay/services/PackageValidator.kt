@@ -19,7 +19,7 @@ import org.xmlpull.v1.XmlPullParserException
 import java.io.IOException
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
-import java.util.*
+import java.util.Locale
 
 /**
  * Validates that the calling package is authorized to browse a [MediaBrowserServiceCompat].

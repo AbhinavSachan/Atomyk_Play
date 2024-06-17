@@ -18,7 +18,7 @@ import com.atomykcoder.atomykplay.ui.MainActivity
 import com.atomykcoder.atomykplay.utils.StorageUtil
 import com.atomykcoder.atomykplay.utils.loadAlbumArt
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import java.util.*
+import java.util.Collections
 
 class MusicQueueAdapter(
     var context: Context,

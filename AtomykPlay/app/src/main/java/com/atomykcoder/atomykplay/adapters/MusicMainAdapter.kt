@@ -8,13 +8,13 @@ import android.widget.Toast
 import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.adapters.generics.GenericViewHolder
 import com.atomykcoder.atomykplay.adapters.viewHolders.MusicMainViewHolder
-import com.atomykcoder.atomykplay.utils.loadAlbumArt
 import com.atomykcoder.atomykplay.enums.OptionSheetEnum
 import com.atomykcoder.atomykplay.models.Music
 import com.atomykcoder.atomykplay.repository.MusicRepo
 import com.atomykcoder.atomykplay.ui.MainActivity
 import com.atomykcoder.atomykplay.utils.StorageUtil
 import com.atomykcoder.atomykplay.utils.StorageUtil.SettingsStorage
+import com.atomykcoder.atomykplay.utils.loadAlbumArt
 import com.l4digital.fastscroll.FastScroller
 
 class MusicMainAdapter(var context: Context, musicList: ArrayList<Music>?) : MusicAdapter(),

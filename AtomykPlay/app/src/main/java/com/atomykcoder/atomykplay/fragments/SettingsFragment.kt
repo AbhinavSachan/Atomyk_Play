@@ -7,7 +7,6 @@ import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.text.TextUtils
@@ -37,6 +36,7 @@ import com.atomykcoder.atomykplay.adapters.BlockFolderListAdapter
 import com.atomykcoder.atomykplay.data.BaseFragment
 import com.atomykcoder.atomykplay.scripts.LinearLayoutManagerWrapper
 import com.atomykcoder.atomykplay.ui.MainActivity
+import com.atomykcoder.atomykplay.utils.AndroidUtil.hideSystemUi
 import com.atomykcoder.atomykplay.utils.AndroidUtil.setSystemDrawBehindBars
 import com.atomykcoder.atomykplay.utils.AndroidUtil.setTheme
 import com.atomykcoder.atomykplay.utils.StorageUtil.SettingsStorage
@@ -70,7 +70,6 @@ class SettingsFragment : BaseFragment(), OnSeekBarChangeListener {
     private lateinit var oneClickSkipSwi: SwitchCompat
     private lateinit var scanAllSwi: SwitchCompat
     private lateinit var beautifySwi: SwitchCompat
-    private lateinit var hideNbSwi: SwitchCompat
     private lateinit var hideSbSwi: SwitchCompat
     private lateinit var enhanceAudioSwi: SwitchCompat
     private lateinit var bassLevelSeekbar: SeekBar
@@ -90,7 +89,6 @@ class SettingsFragment : BaseFragment(), OnSeekBarChangeListener {
     private var beautify = false
     private var scanAll = false
     private var hideSb = false
-    private var hideNb = false
     private var enhanceAudio = false
     private var bassLevel = 0
     private var virtualizerStrength = 0
@@ -161,7 +159,6 @@ class SettingsFragment : BaseFragment(), OnSeekBarChangeListener {
         beautify = settingsStorage!!.loadBeautifyName()
         scanAll = settingsStorage!!.loadScanAllMusic()
         hideSb = settingsStorage!!.loadIsStatusBarHidden()
-        hideNb = settingsStorage!!.loadIsNavBarHidden()
         enhanceAudio = settingsStorage!!.loadEnhanceAudio()
         bassLevel = settingsStorage!!.loadBassLevel()
         virtualizerStrength = settingsStorage!!.loadVirLevel()
@@ -186,8 +183,6 @@ class SettingsFragment : BaseFragment(), OnSeekBarChangeListener {
         val scanAllLl = view.findViewById<View>(R.id.should_scan_all_ll)
         hideSbSwi = view.findViewById(R.id.hide_status_bar_swi)
         val hideSbLl = view.findViewById<View>(R.id.hide_status_bar_ll)
-        hideNbSwi = view.findViewById(R.id.hide_nav_bar_swi)
-        val hideNbLl = view.findViewById<View>(R.id.hide_nav_bar_ll)
         enhanceAudioSwi = view.findViewById(R.id.enhanceAudio_swi)
         val enhanceAudioLl = view.findViewById<View>(R.id.enhanceAudio_ll)
 
@@ -251,7 +246,6 @@ class SettingsFragment : BaseFragment(), OnSeekBarChangeListener {
         addBeautifyTags.setOnClickListener { showBeatifyTagDialog() }
         scanAllLl.setOnClickListener { scanAllSwi.isChecked = !scanAllSwi.isChecked }
         hideSbLl.setOnClickListener { hideSbSwi.isChecked = !hideSbSwi.isChecked }
-        hideNbLl.setOnClickListener { hideNbSwi.isChecked = !hideNbSwi.isChecked }
         blackListLl.setOnClickListener { openBlackListDialogue() }
         filterDurLl.setOnClickListener { openFilterDurationDialog() }
         songInfoSwi.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
@@ -328,38 +322,16 @@ class SettingsFragment : BaseFragment(), OnSeekBarChangeListener {
         hideSbSwi.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
             settingsStorage?.saveHideStatusBar(isChecked)
             try {
-                setSystemDrawBehindBars(
-                    mainActivity!!.window,
-                    dark,
-                    mainActivity!!.drawer!!,
-                    Color.TRANSPARENT,
-                    mainActivity!!.resources.getColor(R.color.player_bg, null),
-                    isChecked,
-                    hideNb
-                )
+                val window = mainActivity?.window
+                if (window != null) {
+                    window.hideSystemUi(isChecked)
+                    setSystemDrawBehindBars(window, dark, mainActivity!!.drawer!!)
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
             }
             hideSb = isChecked
         }
-        hideNbSwi.setOnCheckedChangeListener { buttonView: CompoundButton?, isChecked: Boolean ->
-            settingsStorage!!.saveHideNavBar(isChecked)
-            try {
-                setSystemDrawBehindBars(
-                    mainActivity!!.window,
-                    dark,
-                    mainActivity!!.drawer!!,
-                    Color.TRANSPARENT,
-                    mainActivity!!.resources.getColor(R.color.player_bg, null),
-                    hideSb,
-                    isChecked
-                )
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-            hideNb = isChecked
-        }
-
         //Check if any radio button is pressed
         radioGroup.setOnCheckedChangeListener { _: RadioGroup?, checkedId: Int ->
             setDark(checkedId)
@@ -616,7 +588,6 @@ class SettingsFragment : BaseFragment(), OnSeekBarChangeListener {
         beautifySwi.isChecked = beautify
         scanAllSwi.isChecked = scanAll
         hideSbSwi.isChecked = hideSb
-        hideNbSwi.isChecked = hideNb
         enhanceAudioSwi.isChecked = enhanceAudio
         bassLevelSeekbar.progress = bassLevel
         virtualizerStrengthSeekbar.progress = virtualizerStrength

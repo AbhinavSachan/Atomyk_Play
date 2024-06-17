@@ -36,11 +36,11 @@ class FoundLyricsAdapter(
             mainActivity.setBottomSheetState()
             val fragment =
                 mainActivity.supportFragmentManager.findFragmentByTag(ADD_LYRICS_FRAGMENT_TAG) as AddLyricsFragment?
-            fragment?.loadSelectedLyrics(urls?.get(holder.bindingAdapterPosition))
+            fragment?.loadSelectedLyrics(urls?.get(holder.absoluteAdapterPosition))
         }
     }
 
     override fun getItemCount(): Int {
-        return titles?.size ?:0
+        return titles?.size ?: 0
     }
 }

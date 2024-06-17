@@ -52,7 +52,16 @@ import com.atomykcoder.atomykplay.constants.ShuffleModes
 import com.atomykcoder.atomykplay.data.BaseFragment
 import com.atomykcoder.atomykplay.enums.OptionSheetEnum
 import com.atomykcoder.atomykplay.enums.PlaybackStatus
-import com.atomykcoder.atomykplay.events.*
+import com.atomykcoder.atomykplay.events.PrepareRunnableEvent
+import com.atomykcoder.atomykplay.events.RemoveLyricsHandlerEvent
+import com.atomykcoder.atomykplay.events.RunnableSyncLyricsEvent
+import com.atomykcoder.atomykplay.events.SetImageInMainPlayer
+import com.atomykcoder.atomykplay.events.SetMainLayoutEvent
+import com.atomykcoder.atomykplay.events.SetTimerText
+import com.atomykcoder.atomykplay.events.StopTextAnim
+import com.atomykcoder.atomykplay.events.TimerFinished
+import com.atomykcoder.atomykplay.events.UpdateMusicImageEvent
+import com.atomykcoder.atomykplay.events.UpdateMusicProgressEvent
 import com.atomykcoder.atomykplay.helperFunctions.AudioFileCover
 import com.atomykcoder.atomykplay.helperFunctions.GlideApp
 import com.atomykcoder.atomykplay.helperFunctions.Logger
@@ -87,7 +96,7 @@ import org.greenrobot.eventbus.Subscribe
 import java.io.File
 import java.io.IOException
 import java.lang.ref.WeakReference
-import java.util.*
+import java.util.Locale
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -464,7 +473,7 @@ class BottomSheetPlayerFragment : BaseFragment(), OnSeekBarChangeListener, OnDra
         seekBarMain?.setOnSeekBarChangeListener(this)
         miniPlayView?.setOnClickListener {
             val sheet = mainActivity?.mainPlayerSheetBehavior
-            if (sheet?.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
+            if (sheet?.state == BottomSheetBehavior.STATE_COLLAPSED) {
                 sheet.setState(BottomSheetBehavior.STATE_EXPANDED)
             } else {
                 sheet?.setState(BottomSheetBehavior.STATE_COLLAPSED)
@@ -533,10 +542,10 @@ class BottomSheetPlayerFragment : BaseFragment(), OnSeekBarChangeListener, OnDra
         super.onResume()
         appPaused = false
 
-        if (mainActivity?.mainPlayerSheetBehavior?.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+        if (mainActivity?.mainPlayerSheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
             miniPlayView?.alpha = 0f
             miniPlayView?.visibility = View.INVISIBLE
-        } else if (mainActivity?.mainPlayerSheetBehavior?.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
+        } else if (mainActivity?.mainPlayerSheetBehavior?.state == BottomSheetBehavior.STATE_COLLAPSED) {
             playerLayout?.alpha = 0f
             playerLayout?.visibility = View.INVISIBLE
         }
@@ -1059,7 +1068,7 @@ class BottomSheetPlayerFragment : BaseFragment(), OnSeekBarChangeListener, OnDra
         addLyricsFragment.enterTransition =
             TransitionInflater.from(requireContext())
                 .inflateTransition(android.R.transition.slide_top)
-        if (mainActivity!!.mainPlayerSheetBehavior?.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+        if (mainActivity!!.mainPlayerSheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
             mainActivity!!.mainPlayerSheetBehavior?.setState(BottomSheetBehavior.STATE_COLLAPSED)
         }
         val transaction = fragmentManager.beginTransaction()
@@ -1212,7 +1221,7 @@ class BottomSheetPlayerFragment : BaseFragment(), OnSeekBarChangeListener, OnDra
         })
 
         //Dialogue Box Confirm Button Listener
-        builder?.setPositiveButton("Start") { dialog: DialogInterface, i: Int ->
+        builder?.setPositiveButton("Start") { dialog: DialogInterface, _: Int ->
             dialog.cancel()
             if (MainActivity.media_player_service != null) {
                 MainActivity.media_player_service?.setTimer(timerSeekBar.progress)
@@ -1494,7 +1503,7 @@ class BottomSheetPlayerFragment : BaseFragment(), OnSeekBarChangeListener, OnDra
         setMainPlayerLayout(SetMainLayoutEvent(activeMusic))
         var finalImage: Bitmap?
         coroutineScope.launch {
-            GlideApp.with(requireContext()).load(activeMusic.path?.let { AudioFileCover(it) })
+            GlideApp.with(requireContext()).load(AudioFileCover(activeMusic.path))
                 .override(512)
                 .into(object :
                     CustomTarget<Drawable>() {

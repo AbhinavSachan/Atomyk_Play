@@ -1,4 +1,5 @@
 package com.atomykcoder.atomykplay.helperFunctions
+
 import android.annotation.SuppressLint
 import com.atomykcoder.atomykplay.models.LRCMap
 import com.atomykcoder.atomykplay.models.Music

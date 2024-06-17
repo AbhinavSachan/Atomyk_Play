@@ -17,7 +17,7 @@
         android:paddingBottom="@dimen/most_bottom_padding"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
-        <LinearLayout
+        <androidx.appcompat.widget.LinearLayoutCompat
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/tertiary_bg"
@@ -25,7 +25,7 @@
             android:focusable="true"
             android:orientation="vertical">
 
-            <LinearLayout
+            <androidx.appcompat.widget.LinearLayoutCompat
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="6dp"
@@ -74,9 +74,9 @@
 
                 </RadioGroup>
 
-            </LinearLayout>
+            </androidx.appcompat.widget.LinearLayoutCompat>
 
-            <LinearLayout
+            <androidx.appcompat.widget.LinearLayoutCompat
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
@@ -95,7 +95,7 @@
                     android:textSize="@dimen/d_20sp"
                     android:textStyle="bold" />
 
-                <LinearLayout
+                <androidx.appcompat.widget.LinearLayoutCompat
                     android:id="@+id/show_file_info_ll"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -106,7 +106,7 @@
                     android:paddingHorizontal="16dp"
                     android:paddingVertical="4dp">
 
-                    <LinearLayout
+                    <androidx.appcompat.widget.LinearLayoutCompat
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
@@ -131,7 +131,7 @@
                             android:textColor="@color/sub_text_grey"
                             android:textSize="@dimen/d_15sp" />
 
-                    </LinearLayout>
+                    </androidx.appcompat.widget.LinearLayoutCompat>
 
                     <androidx.appcompat.widget.SwitchCompat
                         android:id="@+id/show_file_info_swi"
@@ -143,9 +143,9 @@
                         android:gravity="center"
                         android:thumb="@drawable/custom_switch_thumb"
                         app:track="@drawable/custom_track_switch" />
-                </LinearLayout>
+                </androidx.appcompat.widget.LinearLayoutCompat>
 
-                <LinearLayout
+                <androidx.appcompat.widget.LinearLayoutCompat
                     android:id="@+id/show_artist_ll"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -156,7 +156,7 @@
                     android:paddingHorizontal="16dp"
                     android:paddingVertical="4dp">
 
-                    <LinearLayout
+                    <androidx.appcompat.widget.LinearLayoutCompat
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
@@ -181,7 +181,7 @@
                             android:textColor="@color/sub_text_grey"
                             android:textSize="@dimen/d_15sp" />
 
-                    </LinearLayout>
+                    </androidx.appcompat.widget.LinearLayoutCompat>
 
                     <androidx.appcompat.widget.SwitchCompat
                         android:id="@+id/show_artist_swi"
@@ -193,9 +193,9 @@
                         android:gravity="center"
                         android:thumb="@drawable/custom_switch_thumb"
                         app:track="@drawable/custom_track_switch" />
-                </LinearLayout>
+                </androidx.appcompat.widget.LinearLayoutCompat>
 
-                <LinearLayout
+                <androidx.appcompat.widget.LinearLayoutCompat
                     android:id="@+id/show_extra_ll"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -206,7 +206,7 @@
                     android:paddingHorizontal="16dp"
                     android:paddingVertical="4dp">
 
-                    <LinearLayout
+                    <androidx.appcompat.widget.LinearLayoutCompat
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
@@ -231,7 +231,7 @@
                             android:textColor="@color/sub_text_grey"
                             android:textSize="@dimen/d_15sp" />
 
-                    </LinearLayout>
+                    </androidx.appcompat.widget.LinearLayoutCompat>
 
                     <androidx.appcompat.widget.SwitchCompat
                         android:id="@+id/show_extra_swi"
@@ -243,9 +243,9 @@
                         android:gravity="center"
                         android:thumb="@drawable/custom_switch_thumb"
                         app:track="@drawable/custom_track_switch" />
-                </LinearLayout>
+                </androidx.appcompat.widget.LinearLayoutCompat>
 
-                <LinearLayout
+                <androidx.appcompat.widget.LinearLayoutCompat
                     android:id="@+id/keep_screen_ll"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -256,7 +256,7 @@
                     android:paddingHorizontal="16dp"
                     android:paddingVertical="4dp">
 
-                    <LinearLayout
+                    <androidx.appcompat.widget.LinearLayoutCompat
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
@@ -281,7 +281,7 @@
                             android:textColor="@color/sub_text_grey"
                             android:textSize="@dimen/d_15sp" />
 
-                    </LinearLayout>
+                    </androidx.appcompat.widget.LinearLayoutCompat>
 
                     <androidx.appcompat.widget.SwitchCompat
                         android:id="@+id/keep_screen_swi"
@@ -293,14 +293,14 @@
                         android:gravity="center"
                         android:thumb="@drawable/custom_switch_thumb"
                         app:track="@drawable/custom_track_switch" />
-                </LinearLayout>
+                </androidx.appcompat.widget.LinearLayoutCompat>
 
-                <LinearLayout
+                <androidx.appcompat.widget.LinearLayoutCompat
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <LinearLayout
+                    <androidx.appcompat.widget.LinearLayoutCompat
                         android:id="@+id/beautify_ll"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -311,7 +311,7 @@
                         android:paddingHorizontal="16dp"
                         android:paddingVertical="4dp">
 
-                        <LinearLayout
+                        <androidx.appcompat.widget.LinearLayoutCompat
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
@@ -336,7 +336,7 @@
                                 android:textColor="@color/sub_text_grey"
                                 android:textSize="@dimen/d_15sp" />
 
-                        </LinearLayout>
+                        </androidx.appcompat.widget.LinearLayoutCompat>
 
                         <androidx.appcompat.widget.SwitchCompat
                             android:id="@+id/beautify_swi"
@@ -348,7 +348,7 @@
                             android:gravity="center"
                             android:thumb="@drawable/custom_switch_thumb"
                             app:track="@drawable/custom_track_switch" />
-                    </LinearLayout>
+                    </androidx.appcompat.widget.LinearLayoutCompat>
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/beautify_add_tag_btn"
@@ -359,9 +359,9 @@
                         android:layout_marginVertical="4dp"
                         android:text="@string/add_tag_removal" />
 
-                </LinearLayout>
+                </androidx.appcompat.widget.LinearLayoutCompat>
 
-                <LinearLayout
+                <androidx.appcompat.widget.LinearLayoutCompat
                     android:id="@+id/should_scan_all_ll"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -372,7 +372,7 @@
                     android:paddingHorizontal="16dp"
                     android:paddingVertical="4dp">
 
-                    <LinearLayout
+                    <androidx.appcompat.widget.LinearLayoutCompat
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
@@ -397,7 +397,7 @@
                             android:textColor="@color/sub_text_grey"
                             android:textSize="@dimen/d_15sp" />
 
-                    </LinearLayout>
+                    </androidx.appcompat.widget.LinearLayoutCompat>
 
                     <androidx.appcompat.widget.SwitchCompat
                         android:id="@+id/should_scan_all_swi"
@@ -409,9 +409,9 @@
                         android:gravity="center"
                         android:thumb="@drawable/custom_switch_thumb"
                         app:track="@drawable/custom_track_switch" />
-                </LinearLayout>
+                </androidx.appcompat.widget.LinearLayoutCompat>
 
-                <LinearLayout
+                <androidx.appcompat.widget.LinearLayoutCompat
                     android:id="@+id/hide_status_bar_ll"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -422,7 +422,7 @@
                     android:paddingHorizontal="16dp"
                     android:paddingVertical="4dp">
 
-                    <LinearLayout
+                    <androidx.appcompat.widget.LinearLayoutCompat
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
@@ -447,7 +447,7 @@
                             android:textColor="@color/sub_text_grey"
                             android:textSize="@dimen/d_15sp" />
 
-                    </LinearLayout>
+                    </androidx.appcompat.widget.LinearLayoutCompat>
 
                     <androidx.appcompat.widget.SwitchCompat
                         android:id="@+id/hide_status_bar_swi"
@@ -459,61 +459,11 @@
                         android:gravity="center"
                         android:thumb="@drawable/custom_switch_thumb"
                         app:track="@drawable/custom_track_switch" />
-                </LinearLayout>
+                </androidx.appcompat.widget.LinearLayoutCompat>
 
-                <LinearLayout
-                    android:id="@+id/hide_nav_bar_ll"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:foreground="?attr/selectableItemBackground"
-                    android:orientation="horizontal"
-                    android:paddingHorizontal="16dp"
-                    android:paddingVertical="4dp">
+            </androidx.appcompat.widget.LinearLayoutCompat>
 
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="sans-serif"
-                            android:paddingVertical="4dp"
-                            android:text="@string/hide_nb"
-                            android:textColor="@color/text_color"
-                            android:textSize="@dimen/d_18sp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="sans-serif"
-                            android:paddingStart="2dp"
-                            android:paddingEnd="16dp"
-                            android:text="@string/hide_nb_des"
-                            android:textColor="@color/sub_text_grey"
-                            android:textSize="@dimen/d_15sp" />
-
-                    </LinearLayout>
-
-                    <androidx.appcompat.widget.SwitchCompat
-                        android:id="@+id/hide_nav_bar_swi"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:clickable="false"
-                        android:focusable="false"
-                        android:gravity="center"
-                        android:thumb="@drawable/custom_switch_thumb"
-                        app:track="@drawable/custom_track_switch" />
-                </LinearLayout>
-
-            </LinearLayout>
-
-            <LinearLayout
+            <androidx.appcompat.widget.LinearLayoutCompat
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
@@ -532,7 +482,7 @@
                     android:textSize="@dimen/d_20sp"
                     android:textStyle="bold" />
 
-                <LinearLayout
+                <androidx.appcompat.widget.LinearLayoutCompat
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
@@ -548,7 +498,7 @@
                         android:textColor="@color/text_color"
                         android:textSize="@dimen/d_18sp" />
 
-                    <LinearLayout
+                    <androidx.appcompat.widget.LinearLayoutCompat
                         android:id="@+id/autoPlay_ll"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -579,9 +529,9 @@
                             android:gravity="center"
                             android:thumb="@drawable/custom_switch_thumb"
                             app:track="@drawable/custom_track_switch" />
-                    </LinearLayout>
+                    </androidx.appcompat.widget.LinearLayoutCompat>
 
-                    <LinearLayout
+                    <androidx.appcompat.widget.LinearLayoutCompat
                         android:id="@+id/autoPlayBt_ll"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -612,16 +562,16 @@
                             android:gravity="center"
                             android:thumb="@drawable/custom_switch_thumb"
                             app:track="@drawable/custom_track_switch" />
-                    </LinearLayout>
+                    </androidx.appcompat.widget.LinearLayoutCompat>
 
-                </LinearLayout>
+                </androidx.appcompat.widget.LinearLayoutCompat>
 
-                <LinearLayout
+                <androidx.appcompat.widget.LinearLayoutCompat
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <LinearLayout
+                    <androidx.appcompat.widget.LinearLayoutCompat
                         android:id="@+id/enhanceAudio_ll"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -632,7 +582,7 @@
                         android:paddingHorizontal="16dp"
                         android:paddingVertical="4dp">
 
-                        <LinearLayout
+                        <androidx.appcompat.widget.LinearLayoutCompat
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
@@ -657,7 +607,7 @@
                                 android:textColor="@color/sub_text_grey"
                                 android:textSize="@dimen/d_15sp" />
 
-                        </LinearLayout>
+                        </androidx.appcompat.widget.LinearLayoutCompat>
 
                         <androidx.appcompat.widget.SwitchCompat
                             android:id="@+id/enhanceAudio_swi"
@@ -669,9 +619,9 @@
                             android:gravity="center"
                             android:thumb="@drawable/custom_switch_thumb"
                             app:track="@drawable/custom_track_switch" />
-                    </LinearLayout>
+                    </androidx.appcompat.widget.LinearLayoutCompat>
 
-                    <LinearLayout
+                    <androidx.appcompat.widget.LinearLayoutCompat
                         android:id="@+id/level_layout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -724,11 +674,11 @@
                             android:thumbTint="@color/accent_color_bg" />
 
 
-                    </LinearLayout>
+                    </androidx.appcompat.widget.LinearLayoutCompat>
 
-                </LinearLayout>
+                </androidx.appcompat.widget.LinearLayoutCompat>
 
-                <LinearLayout
+                <androidx.appcompat.widget.LinearLayoutCompat
                     android:id="@+id/keep_shuffle_ll"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -739,7 +689,7 @@
                     android:paddingHorizontal="16dp"
                     android:paddingVertical="4dp">
 
-                    <LinearLayout
+                    <androidx.appcompat.widget.LinearLayoutCompat
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
@@ -764,7 +714,7 @@
                             android:textColor="@color/sub_text_grey"
                             android:textSize="@dimen/d_15sp" />
 
-                    </LinearLayout>
+                    </androidx.appcompat.widget.LinearLayoutCompat>
 
                     <androidx.appcompat.widget.SwitchCompat
                         android:id="@+id/keep_shuffle_swi"
@@ -776,9 +726,9 @@
                         android:gravity="center"
                         android:thumb="@drawable/custom_switch_thumb"
                         app:track="@drawable/custom_track_switch" />
-                </LinearLayout>
+                </androidx.appcompat.widget.LinearLayoutCompat>
 
-                <LinearLayout
+                <androidx.appcompat.widget.LinearLayoutCompat
                     android:id="@+id/lower_vol_ll"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -789,7 +739,7 @@
                     android:paddingHorizontal="16dp"
                     android:paddingVertical="4dp">
 
-                    <LinearLayout
+                    <androidx.appcompat.widget.LinearLayoutCompat
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
@@ -814,7 +764,7 @@
                             android:textColor="@color/sub_text_grey"
                             android:textSize="@dimen/d_15sp" />
 
-                    </LinearLayout>
+                    </androidx.appcompat.widget.LinearLayoutCompat>
 
                     <androidx.appcompat.widget.SwitchCompat
                         android:id="@+id/lower_vol_swi"
@@ -826,9 +776,9 @@
                         android:gravity="center"
                         android:thumb="@drawable/custom_switch_thumb"
                         app:track="@drawable/custom_track_switch" />
-                </LinearLayout>
+                </androidx.appcompat.widget.LinearLayoutCompat>
 
-                <LinearLayout
+                <androidx.appcompat.widget.LinearLayoutCompat
                     android:id="@+id/self_stop_ll"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -839,7 +789,7 @@
                     android:paddingHorizontal="16dp"
                     android:paddingVertical="4dp">
 
-                    <LinearLayout
+                    <androidx.appcompat.widget.LinearLayoutCompat
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
@@ -864,7 +814,7 @@
                             android:textColor="@color/sub_text_grey"
                             android:textSize="@dimen/d_15sp" />
 
-                    </LinearLayout>
+                    </androidx.appcompat.widget.LinearLayoutCompat>
 
                     <androidx.appcompat.widget.SwitchCompat
                         android:id="@+id/self_stop_swi"
@@ -876,9 +826,9 @@
                         android:gravity="center"
                         android:thumb="@drawable/custom_switch_thumb"
                         app:track="@drawable/custom_track_switch" />
-                </LinearLayout>
+                </androidx.appcompat.widget.LinearLayoutCompat>
 
-                <LinearLayout
+                <androidx.appcompat.widget.LinearLayoutCompat
                     android:id="@+id/one_click_skip_ll"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -889,7 +839,7 @@
                     android:paddingHorizontal="16dp"
                     android:paddingVertical="4dp">
 
-                    <LinearLayout
+                    <androidx.appcompat.widget.LinearLayoutCompat
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
@@ -914,7 +864,7 @@
                             android:textColor="@color/sub_text_grey"
                             android:textSize="@dimen/d_15sp" />
 
-                    </LinearLayout>
+                    </androidx.appcompat.widget.LinearLayoutCompat>
 
                     <androidx.appcompat.widget.SwitchCompat
                         android:id="@+id/one_click_skip_swi"
@@ -926,11 +876,11 @@
                         android:gravity="center"
                         android:thumb="@drawable/custom_switch_thumb"
                         app:track="@drawable/custom_track_switch" />
-                </LinearLayout>
+                </androidx.appcompat.widget.LinearLayoutCompat>
 
-            </LinearLayout>
+            </androidx.appcompat.widget.LinearLayoutCompat>
 
-            <LinearLayout
+            <androidx.appcompat.widget.LinearLayoutCompat
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
@@ -949,7 +899,7 @@
                     android:textSize="@dimen/d_20sp"
                     android:textStyle="bold" />
 
-                <LinearLayout
+                <androidx.appcompat.widget.LinearLayoutCompat
                     android:id="@+id/blacklist_ll"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -979,9 +929,9 @@
                         android:textColor="@color/sub_text_grey"
                         android:textSize="@dimen/d_15sp" />
 
-                </LinearLayout>
+                </androidx.appcompat.widget.LinearLayoutCompat>
 
-                <LinearLayout
+                <androidx.appcompat.widget.LinearLayoutCompat
                     android:id="@+id/filter_dur_ll"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -1011,11 +961,11 @@
                         android:textColor="@color/sub_text_grey"
                         android:textSize="@dimen/d_15sp" />
 
-                </LinearLayout>
+                </androidx.appcompat.widget.LinearLayoutCompat>
 
-            </LinearLayout>
+            </androidx.appcompat.widget.LinearLayoutCompat>
 
-        </LinearLayout>
+        </androidx.appcompat.widget.LinearLayoutCompat>
 
     </androidx.core.widget.NestedScrollView>
 

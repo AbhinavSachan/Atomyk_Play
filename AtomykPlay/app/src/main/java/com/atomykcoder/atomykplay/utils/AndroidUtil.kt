@@ -27,9 +27,7 @@ object AndroidUtil {
         }
 
         val bitmap = Bitmap.createBitmap(
-            intrinsicWidth,
-            intrinsicHeight,
-            Bitmap.Config.RGB_565
+            intrinsicWidth, intrinsicHeight, Bitmap.Config.RGB_565
         )
 
         val canvas = Canvas(bitmap)
@@ -73,12 +71,10 @@ object AndroidUtil {
             controller?.apply {
                 if (isDarkTheme) {
                     setSystemBarsAppearance(
-                        0,
-                        WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+                        0, WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
                     )
                     setSystemBarsAppearance(
-                        0,
-                        WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
+                        0, WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
                     )
                 } else {
                     setSystemBarsAppearance(
@@ -99,35 +95,12 @@ object AndroidUtil {
 
     }
 
-    fun setSystemDrawBehindBars(
-        window: Window,
-        isDarkTheme: Boolean,
-        root: View,
-        statusBarColor: Int,
-        navigationBarColor: Int,
-        hideStatusBar: Boolean,
-        hideNavigationBar: Boolean
-    ) {
+    fun setSystemDrawBehindBars(window: Window, isDarkTheme: Boolean, root: View) {
         // Alternate flags for Android API level 30 and above
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 val controller = window.insetsController
                 controller?.apply {
-                    // Hide the status bar and enable transparent system bars
-                    if (hideStatusBar) {
-                        hide(WindowInsetsCompat.Type.statusBars())
-                        window.statusBarColor = Color.TRANSPARENT
-                    } else {
-                        show(WindowInsetsCompat.Type.statusBars())
-                        window.statusBarColor = statusBarColor
-                    }
-                    if (hideNavigationBar) {
-                        hide(WindowInsetsCompat.Type.navigationBars())
-                        window.navigationBarColor = Color.TRANSPARENT
-                    } else {
-                        show(WindowInsetsCompat.Type.navigationBars())
-                        window.navigationBarColor = navigationBarColor
-                    }
                     systemBarsBehavior =
                         WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
                     // Set light or dark status bar based on theme
@@ -135,25 +108,26 @@ object AndroidUtil {
                     // Set window insets to draw behind status bar but not navigation bar
                     window.attributes.layoutInDisplayCutoutMode =
                         WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
-                    window.let { WindowCompat.setDecorFitsSystemWindows(it, false) }
-                    /* Making the Navigation system bar not overlapping with the activity */
+                    window.let {
+                        WindowCompat.setDecorFitsSystemWindows(
+                            it, false
+                        )
+                    }/* Making the Navigation system bar not overlapping with the activity */
                     // Root ViewGroup of my activity
                     ViewCompat.setOnApplyWindowInsetsListener(root) { view, windowInsets ->
 
-                        val insets =
-                            windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+                        val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
 
                         // Apply the insets as a margin to the view. Here the system is setting
                         // only the bottom, left, and right dimensions, but apply whichever insets are
                         // appropriate to your layout. You can also update the view padding
                         // if that's more appropriate.
 
-                        view.layoutParams =
-                            (view.layoutParams as FrameLayout.LayoutParams).apply {
-                                leftMargin = insets.left
-                                bottomMargin = insets.bottom
-                                rightMargin = insets.right
-                            }
+                        view.layoutParams = (view.layoutParams as FrameLayout.LayoutParams).apply {
+                            leftMargin = insets.left
+                            bottomMargin = insets.bottom
+                            rightMargin = insets.right
+                        }
 
                         // Return CONSUMED if you don't want want the window insets to keep being
                         // passed down to descendant views.
@@ -163,39 +137,50 @@ object AndroidUtil {
             } else {
                 window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
                 if (isDarkTheme) {
-                    window.decorView.systemUiVisibility =
-                        View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                 } else {
                     window.decorView.systemUiVisibility =
                         View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
                 }
-
-                // Hide the status bar
-                if (hideStatusBar) {
-                    window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_FULLSCREEN
-                            or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
-                    window.statusBarColor = Color.TRANSPARENT
-
-                } else {
-                    window.statusBarColor = statusBarColor
-
-                }
-                // Hide the navigation bar
-                if (hideNavigationBar) {
-                    window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                            or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
-                    window.navigationBarColor = Color.TRANSPARENT
-
-                } else {
-                    window.navigationBarColor = statusBarColor
-
-                }
-
             }
         } catch (e: Exception) {
-            Toast.makeText(window.context, "Unable to perform the task", Toast.LENGTH_SHORT)
-                .show()
+            Toast.makeText(window.context, "Unable to perform the task", Toast.LENGTH_SHORT).show()
             e.printStackTrace()
+        }
+    }
+
+    fun Window.hideSystemUi(
+        hideSystemUi: Boolean
+    ) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            val controller = insetsController
+            controller?.apply {
+                if (hideSystemUi) {
+                    hide(WindowInsetsCompat.Type.statusBars())
+                    statusBarColor = Color.TRANSPARENT
+
+                    hide(WindowInsetsCompat.Type.navigationBars())
+                    navigationBarColor = Color.TRANSPARENT
+                } else {
+                    show(WindowInsetsCompat.Type.statusBars())
+                    statusBarColor = Color.TRANSPARENT
+
+                    show(WindowInsetsCompat.Type.navigationBars())
+                    navigationBarColor = context.getColor(R.color.player_bg)
+                }
+            }
+        } else {
+
+            // Hide the status bar
+            if (hideSystemUi) {
+                decorView.systemUiVisibility =
+                    (View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
+                statusBarColor = Color.TRANSPARENT
+                navigationBarColor = Color.TRANSPARENT
+            } else {
+                statusBarColor = Color.TRANSPARENT
+                navigationBarColor = context.getColor(R.color.player_bg)
+            }
         }
     }
 

@@ -5,6 +5,7 @@ import java.io.Serializable
 class Playlist : Serializable {
     @JvmField
     val name: String?
+
     @JvmField
     val coverUri: String?
 

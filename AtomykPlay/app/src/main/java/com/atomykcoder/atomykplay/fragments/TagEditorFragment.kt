@@ -13,10 +13,8 @@ import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
-import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
@@ -24,11 +22,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.atomykcoder.atomykplay.BuildConfig
 import com.atomykcoder.atomykplay.R
-import com.atomykcoder.atomykplay.utils.loadAlbumArt
-import com.atomykcoder.atomykplay.utils.loadImageFromUri
 import com.atomykcoder.atomykplay.data.BaseFragment
 import com.atomykcoder.atomykplay.databinding.FragmentTagEditorBinding
-import com.atomykcoder.atomykplay.helperFunctions.CustomMethods.pickImage
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper
 import com.atomykcoder.atomykplay.models.Music
 import com.atomykcoder.atomykplay.repository.LoadingStatus
@@ -36,7 +31,10 @@ import com.atomykcoder.atomykplay.scripts.ArtworkInfo
 import com.atomykcoder.atomykplay.scripts.AudioTagInfo
 import com.atomykcoder.atomykplay.scripts.TagWriter
 import com.atomykcoder.atomykplay.ui.MainActivity
+import com.atomykcoder.atomykplay.utils.ImagePickerUtil
 import com.atomykcoder.atomykplay.utils.MusicUtil
+import com.atomykcoder.atomykplay.utils.loadAlbumArt
+import com.atomykcoder.atomykplay.utils.loadImageFromUri
 import com.atomykcoder.atomykplay.utils.showToast
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
@@ -73,22 +71,17 @@ class TagEditorFragment : BaseFragment() {
     private var songPaths: List<String>? = null
     private var deleteAlbumArt: Boolean = false
 
-
     // Registers a photo picker activity launcher in single-select mode.
-    private val mediaPicker =
-        registerForActivityResult<PickVisualMediaRequest?, Uri>(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
-            // Callback is invoked after the user selects a media item or closes the
-            // photo picker.
-            uri?.let { setImageUri(it) }
+    private val mediaPicker by lazy {
+        ImagePickerUtil.registerMediaPicker(requireActivity()) {
+            setImageUri(it)
         }
-    private val pickIntent =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                if (result.data != null) {
-                    setImageUri(result.data!!.data)
-                }
-            }
+    }
+    private val pickIntent by lazy {
+        ImagePickerUtil.registerPickIntent(requireActivity()) {
+            setImageUri(it)
         }
+    }
 
     private fun getLoadingStatus(): LiveData<LoadingStatus> {
         return loadingStatus
@@ -142,7 +135,7 @@ class TagEditorFragment : BaseFragment() {
         )
         b.pickCoverTag.setOnClickListener {
             deleteAlbumArt = false
-            pickImage(pickIntent, mediaPicker)
+            ImagePickerUtil.pickImage(pickIntent, mediaPicker)
         }
         b.deleteCoverTag.setOnClickListener { deleteCoverArt() }
         b.tagEditorSaveButton.setOnClickListener {
@@ -330,8 +323,8 @@ class TagEditorFragment : BaseFragment() {
         }
     }
 
-    private fun setImageUri(album_uri: Uri?) {
-        imageUri = album_uri
+    private fun setImageUri(albumUri: Uri?) {
+        imageUri = albumUri
         b.songImageViewTag.loadImageFromUri(imageUri.toString(), 0, 512)
     }
 

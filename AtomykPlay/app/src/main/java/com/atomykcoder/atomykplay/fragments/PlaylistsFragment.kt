@@ -32,7 +32,7 @@ class PlaylistsFragment : BaseFragment() {
     }
 
     fun updateItems(list: ArrayList<Playlist>) {
-        val shadow:ArrayList<Playlist?> = arrayListOf()
+        val shadow: ArrayList<Playlist?> = arrayListOf()
         shadow.addAll(list)
         playlistAdapter?.updateView(shadow)
     }

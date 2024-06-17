@@ -2,7 +2,9 @@ package com.atomykcoder.atomykplay.fragments
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.os.*
+import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
@@ -28,7 +30,7 @@ import com.atomykcoder.atomykplay.scripts.LinearLayoutManagerWrapper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.util.*
+import java.util.Locale
 
 
 //Search Layout Fragment for Performing Searches and Presenting Results

@@ -4,12 +4,23 @@ import android.Manifest
 import android.animation.ArgbEvaluator
 import android.annotation.SuppressLint
 import android.app.RecoverableSecurityException
-import android.content.*
+import android.content.ComponentName
+import android.content.ContentResolver
+import android.content.DialogInterface
+import android.content.Intent
+import android.content.ServiceConnection
 import android.content.pm.PackageManager
-import android.graphics.*
+import android.graphics.Bitmap
+import android.graphics.Insets
+import android.graphics.Rect
 import android.media.RingtoneManager
 import android.net.Uri
-import android.os.*
+import android.os.Build
+import android.os.Bundle
+import android.os.Handler
+import android.os.IBinder
+import android.os.Looper
+import android.os.SystemClock
 import android.provider.MediaStore
 import android.provider.Settings
 import android.telephony.PhoneStateListener
@@ -17,9 +28,18 @@ import android.telephony.TelephonyManager
 import android.text.TextUtils
 import android.util.DisplayMetrics
 import android.util.Size
-import android.view.*
-import android.widget.*
-import androidx.activity.result.*
+import android.view.MenuItem
+import android.view.MotionEvent
+import android.view.View
+import android.view.WindowInsets
+import android.widget.EditText
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.ProgressBar
+import android.widget.TextView
+import android.widget.Toast
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
@@ -58,8 +78,13 @@ import com.atomykcoder.atomykplay.events.PrepareRunnableEvent
 import com.atomykcoder.atomykplay.events.RemoveFromFavoriteEvent
 import com.atomykcoder.atomykplay.events.RemoveFromPlaylistEvent
 import com.atomykcoder.atomykplay.events.RemoveLyricsHandlerEvent
-import com.atomykcoder.atomykplay.fragments.*
-import com.atomykcoder.atomykplay.helperFunctions.CustomMethods.pickImage
+import com.atomykcoder.atomykplay.fragments.AboutFragment
+import com.atomykcoder.atomykplay.fragments.BottomSheetPlayerFragment
+import com.atomykcoder.atomykplay.fragments.LastAddedFragment
+import com.atomykcoder.atomykplay.fragments.PlaylistsFragment
+import com.atomykcoder.atomykplay.fragments.SearchFragment
+import com.atomykcoder.atomykplay.fragments.SettingsFragment
+import com.atomykcoder.atomykplay.fragments.TagEditorFragment
 import com.atomykcoder.atomykplay.helperFunctions.Logger
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper
 import com.atomykcoder.atomykplay.models.Music
@@ -71,7 +96,9 @@ import com.atomykcoder.atomykplay.scripts.LinearLayoutManagerWrapper
 import com.atomykcoder.atomykplay.services.MediaPlayerService
 import com.atomykcoder.atomykplay.services.MediaPlayerService.LocalBinder
 import com.atomykcoder.atomykplay.utils.AndroidUtil
+import com.atomykcoder.atomykplay.utils.AndroidUtil.hideSystemUi
 import com.atomykcoder.atomykplay.utils.AndroidUtil.setSystemDrawBehindBars
+import com.atomykcoder.atomykplay.utils.ImagePickerUtil
 import com.atomykcoder.atomykplay.utils.MusicUtil
 import com.atomykcoder.atomykplay.utils.StorageUtil
 import com.atomykcoder.atomykplay.utils.StorageUtil.SettingsStorage
@@ -97,7 +124,7 @@ import com.l4digital.fastscroll.FastScrollRecyclerView
 import com.l4digital.fastscroll.FastScroller
 import org.greenrobot.eventbus.EventBus
 import java.io.File
-import java.util.*
+import java.util.Random
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -146,24 +173,23 @@ class MainActivity : BaseActivity(), View.OnClickListener,
     private var playListImageUri: Uri? = null
 
     // Registers a photo picker activity launcher in single-select mode.
-    private val mediaPickerForPLCover =
-        registerForActivityResult<PickVisualMediaRequest?, Uri>(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
-            // Callback is invoked after the user selects a media item or closes the
-            // photo picker.
-            if (uri != null) {
-                playListImageUri = uri
-                playlistImageView!!.setImageURI(playListImageUri)
-            }
+    private val mediaPickerForPLCover by lazy {
+        ImagePickerUtil.registerMediaPicker(this) {
+            setPLCoverImage(it)
         }
-    private val pickIntentForPLCover =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
-            if (result.resultCode == RESULT_OK) {
-                if (result.data != null) {
-                    playListImageUri = result.data!!.data
-                    playlistImageView!!.setImageURI(playListImageUri)
-                }
-            }
+    }
+
+    private val pickIntentForPLCover by lazy {
+        ImagePickerUtil.registerPickIntent(this) {
+            setPLCoverImage(it)
         }
+    }
+
+    private fun setPLCoverImage(uri: Uri) {
+        playListImageUri = uri
+        playlistImageView?.setImageURI(playListImageUri)
+    }
+
     private var musicMainAdapter: MusicMainAdapter? = null
     private var sorryLayout: LinearLayout? = null
     private var telephonyManager: TelephonyManager? = null
@@ -377,30 +403,24 @@ class MainActivity : BaseActivity(), View.OnClickListener,
     private var pl_name: String? = null
 
     // Registers a photo picker activity launcher in single-select mode.
-    private val mediaPickerForPLCoverChange =
-        registerForActivityResult<PickVisualMediaRequest?, Uri>(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
-            // Callback is invoked after the user selects a media item or closes the
-            // photo picker.
-            if (uri != null) {
-                val coverImageUri = uri.toString()
-                storageUtil.replacePlaylist(
-                    storageUtil.loadPlaylist(pl_name), pl_name, coverImageUri
-                )
-                playlistFragment?.updateItems(storageUtil.allPlaylist)
-            }
+    private val mediaPickerForPLCoverChange by lazy {
+        ImagePickerUtil.registerMediaPicker(this) { uri ->
+            setPLCoverChangeImage(uri)
         }
-    private val pickIntentForPLCoverChange =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
-            if (result.resultCode == RESULT_OK) {
-                if (result.data != null) {
-                    val coverImageUri = result.data!!.data.toString()
-                    storageUtil.replacePlaylist(
-                        storageUtil.loadPlaylist(pl_name), pl_name, coverImageUri
-                    )
-                    playlistFragment?.updateItems(storageUtil.allPlaylist)
-                }
-            }
+    }
+    private val pickIntentForPLCoverChange by lazy {
+        ImagePickerUtil.registerPickIntent(this) { uri ->
+            setPLCoverChangeImage(uri)
         }
+    }
+
+    private fun setPLCoverChangeImage(uri: Uri) {
+        storageUtil.replacePlaylist(
+            storageUtil.loadPlaylist(pl_name), pl_name, uri.toString()
+        )
+        playlistFragment?.updateItems(storageUtil.allPlaylist)
+    }
+
     private var optionTag: OptionSheetEnum? = null
     private var songPathTv: TextView? = null
     private var songNameTv: TextView? = null
@@ -1298,15 +1318,8 @@ class MainActivity : BaseActivity(), View.OnClickListener,
 
         // Directly call setSystemDrawBehindBars without the let block
         if (window1 != null) {
-            setSystemDrawBehindBars(
-                window1,
-                settingsStorage.loadIsThemeDark(),
-                drawer!!,
-                Color.TRANSPARENT,
-                resources.getColor(R.color.player_bg, null),
-                hideStatusBar = settingsStorage.loadIsStatusBarHidden(),
-                hideNavigationBar = settingsStorage.loadIsNavBarHidden()
-            )
+            setSystemDrawBehindBars(window1, settingsStorage.loadIsThemeDark(), drawer!!)
+            window1.hideSystemUi(settingsStorage.loadIsStatusBarHidden())
         }
 
 
@@ -1766,7 +1779,7 @@ class MainActivity : BaseActivity(), View.OnClickListener,
 
     private fun changeUriPl(playlist: Playlist?) {
         pl_name = playlist!!.name
-        pickImage(pickIntentForPLCoverChange, mediaPickerForPLCoverChange)
+        ImagePickerUtil.pickImage(pickIntentForPLCoverChange, mediaPickerForPLCoverChange)
     }
 
     private fun addToQueuePl(playlist: Playlist?) {
@@ -1844,7 +1857,7 @@ class MainActivity : BaseActivity(), View.OnClickListener,
         playlistImageView = customLayout.findViewById(R.id.playlist_image_view)
         val playerPickCover_l = customLayout.findViewById<View>(R.id.playlist_cover_pick)
         playerPickCover_l.setOnClickListener { v: View? ->
-            pickImage(
+            ImagePickerUtil.pickImage(
                 pickIntentForPLCover, mediaPickerForPLCover
             )
         }

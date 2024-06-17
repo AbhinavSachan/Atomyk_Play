@@ -13,12 +13,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.adapters.OpenPlayListAdapter
 import com.atomykcoder.atomykplay.adapters.SimpleTouchCallback
-import com.atomykcoder.atomykplay.utils.loadImageFromUri
 import com.atomykcoder.atomykplay.data.BaseFragment
 import com.atomykcoder.atomykplay.events.RemoveFromPlaylistEvent
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener
 import com.atomykcoder.atomykplay.models.Playlist
 import com.atomykcoder.atomykplay.scripts.LinearLayoutManagerWrapper
+import com.atomykcoder.atomykplay.utils.loadImageFromUri
 import com.google.android.material.appbar.CollapsingToolbarLayout
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
