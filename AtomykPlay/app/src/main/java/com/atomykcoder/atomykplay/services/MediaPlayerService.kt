@@ -10,6 +10,7 @@ import android.bluetooth.BluetoothHeadset
 import android.bluetooth.BluetoothManager
 import android.content.*
 import android.content.pm.PackageManager
+import android.content.pm.ServiceInfo
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
@@ -31,6 +32,7 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
+import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmapOrNull
 import androidx.media.MediaBrowserServiceCompat
@@ -698,16 +700,21 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
                 .putString(MediaMetadataCompat.METADATA_KEY_TITLE, "")
                 .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, 0).build()
         }
+        val foregroundServiceType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
+        } else {
+            0
+        }
         if (musicNotification != null) {
             try {
-                startForeground(NOTIFICATION_ID, musicNotification)
+                ServiceCompat.startForeground(this, NOTIFICATION_ID, musicNotification!!, foregroundServiceType)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         } else {
             buildInitialNotification()
             try {
-                startForeground(NOTIFICATION_ID, initialNotification)
+                ServiceCompat.startForeground(this, NOTIFICATION_ID, initialNotification!!, foregroundServiceType)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
