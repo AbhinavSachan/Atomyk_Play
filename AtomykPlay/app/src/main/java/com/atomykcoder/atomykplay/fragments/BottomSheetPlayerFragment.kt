@@ -1470,22 +1470,22 @@ class BottomSheetPlayerFragment : BaseFragment(), OnSeekBarChangeListener, OnDra
      */
     fun skipToPosition(pos: Int) {
         scrollToPosition(pos)
-        val position = MusicHelper.convertToMillis(lrcMap!!.getStampAt(pos))
+        val stamp = MusicHelper.convertToMillis(lrcMap!!.getStampAt(pos))
         if (lrcMap != null) {
-            seekBarMain?.progress = position
-            curPosTv?.text = MusicHelper.convertDuration(position.toString())
+            seekBarMain?.progress = stamp
+            curPosTv?.text = MusicHelper.convertDuration(stamp.toString())
             //clearing the storage before putting new value
             storageUtil.clearMusicLastPos()
 
             //storing the current position of seekbar in storage so we can access it from services
-            storageUtil.saveMusicLastPos(position)
+            storageUtil.saveMusicLastPos(stamp)
 
             //first checking setting the media seek to current position of seek bar and then setting all data in UI
             if (MainActivity.service_bound) {
                 MainActivity.media_player_service?.seekBarRunnable?.let {
                     MainActivity.media_player_service?.seekBarHandler?.removeCallbacks(it)
                 }
-                MainActivity.media_player_service?.seekMediaTo(position)
+                MainActivity.media_player_service?.seekMediaTo(stamp)
                 if (MainActivity.media_player_service?.isMediaPlaying!!) {
                     MainActivity.media_player_service?.buildNotification(PlaybackStatus.PLAYING, 1f)
                 } else {
@@ -1493,7 +1493,7 @@ class BottomSheetPlayerFragment : BaseFragment(), OnSeekBarChangeListener, OnDra
                 }
                 MainActivity.media_player_service?.setSeekBar()
             } else {
-                miniProgress?.progress = position
+                miniProgress?.progress = stamp
             }
         }
     }

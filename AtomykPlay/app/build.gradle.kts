@@ -28,8 +28,8 @@ android {
         applicationId = "com.atomykcoder.atomykplay"
         minSdk = 24
         targetSdk = 34
-        versionCode = 28
-        versionName = "1.8.19"
+        versionCode = 1
+        versionName = "0.1"
         multiDexEnabled = true
 
         vectorDrawables.useSupportLibrary = true
