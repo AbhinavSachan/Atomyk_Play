@@ -26,7 +26,8 @@
 -dontwarn javax.annotation.**
 -dontwarn org.jcodec.**
 -dontwarn org.jaudiotagger.**
-
+-dontwarn com.google.re2j.Matcher
+-dontwarn com.google.re2j.Pattern
 
 -keep class org.jaudiotagger.** { *; }
 -keep class org.jcodec.** { *; }
