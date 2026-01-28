@@ -8,19 +8,42 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothHeadset
 import android.bluetooth.BluetoothManager
-import android.content.*
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
-import android.media.*
+import android.media.AudioAttributes
+import android.media.AudioFocusRequest
+import android.media.AudioManager
 import android.media.AudioManager.OnAudioFocusChangeListener
 import android.media.AudioManager.STREAM_MUSIC
-import android.media.MediaPlayer.*
+import android.media.MediaPlayer
+import android.media.MediaPlayer.MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK
+import android.media.MediaPlayer.MEDIA_ERROR_SERVER_DIED
+import android.media.MediaPlayer.MEDIA_ERROR_UNKNOWN
+import android.media.MediaPlayer.OnBufferingUpdateListener
+import android.media.MediaPlayer.OnCompletionListener
+import android.media.MediaPlayer.OnErrorListener
+import android.media.MediaPlayer.OnInfoListener
+import android.media.MediaPlayer.OnPreparedListener
+import android.media.MediaPlayer.OnSeekCompleteListener
+import android.media.ThumbnailUtils
 import android.media.session.MediaSessionManager
-import android.os.*
+import android.os.Binder
+import android.os.Build
+import android.os.Bundle
+import android.os.CountDownTimer
+import android.os.Handler
+import android.os.IBinder
+import android.os.Looper
+import android.os.RemoteException
 import android.support.v4.media.MediaBrowserCompat
+import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.MediaSessionCompat
@@ -35,6 +58,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmapOrNull
+import androidx.core.net.toUri
 import androidx.media.MediaBrowserServiceCompat
 import com.atomykcoder.atomykplay.ApplicationClass
 import com.atomykcoder.atomykplay.BuildConfig
@@ -47,7 +71,14 @@ import com.atomykcoder.atomykplay.constants.BroadcastStrings.BROADCAST_PLAY_PREV
 import com.atomykcoder.atomykplay.constants.BroadcastStrings.BROADCAST_STOP_MUSIC
 import com.atomykcoder.atomykplay.constants.RepeatModes
 import com.atomykcoder.atomykplay.enums.PlaybackStatus
-import com.atomykcoder.atomykplay.events.*
+import com.atomykcoder.atomykplay.events.PrepareRunnableEvent
+import com.atomykcoder.atomykplay.events.RemoveLyricsHandlerEvent
+import com.atomykcoder.atomykplay.events.SetImageInMainPlayer
+import com.atomykcoder.atomykplay.events.SetMainLayoutEvent
+import com.atomykcoder.atomykplay.events.SetTimerText
+import com.atomykcoder.atomykplay.events.TimerFinished
+import com.atomykcoder.atomykplay.events.UpdateMusicImageEvent
+import com.atomykcoder.atomykplay.events.UpdateMusicProgressEvent
 import com.atomykcoder.atomykplay.fragments.BottomSheetPlayerFragment
 import com.atomykcoder.atomykplay.helperFunctions.AudioFileCover
 import com.atomykcoder.atomykplay.helperFunctions.GlideApp
@@ -182,7 +213,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
     private val isBluetoothHeadsetConnected: Boolean
         get() {
             val bluetoothManager =
-                applicationContext.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+                applicationContext.getSystemService(BLUETOOTH_SERVICE) as BluetoothManager
             val mBluetoothAdapter = bluetoothManager.adapter
 //        val mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
             if (ActivityCompat.checkSelfPermission(
@@ -290,7 +321,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             registerReceiver(playNewMusicReceiver, filter)
         } else {
-            registerReceiver(playNewMusicReceiver, filter, Context.RECEIVER_EXPORTED)
+            registerReceiver(playNewMusicReceiver, filter, RECEIVER_EXPORTED)
         }
     }
 
@@ -299,7 +330,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             registerReceiver(pausePlayMusicReceiver, filter)
         } else {
-            registerReceiver(pausePlayMusicReceiver, filter, Context.RECEIVER_EXPORTED)
+            registerReceiver(pausePlayMusicReceiver, filter, RECEIVER_EXPORTED)
         }
     }
 
@@ -308,7 +339,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             registerReceiver(stopMusicReceiver, filter)
         } else {
-            registerReceiver(stopMusicReceiver, filter, Context.RECEIVER_EXPORTED)
+            registerReceiver(stopMusicReceiver, filter, RECEIVER_EXPORTED)
         }
     }
 
@@ -317,7 +348,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             registerReceiver(nextMusicReceiver, filter)
         } else {
-            registerReceiver(nextMusicReceiver, filter, Context.RECEIVER_EXPORTED)
+            registerReceiver(nextMusicReceiver, filter, RECEIVER_EXPORTED)
         }
     }
 
@@ -326,7 +357,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             registerReceiver(prevMusicReceiver, filter)
         } else {
-            registerReceiver(prevMusicReceiver, filter, Context.RECEIVER_EXPORTED)
+            registerReceiver(prevMusicReceiver, filter, RECEIVER_EXPORTED)
         }
     }
 
@@ -336,7 +367,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             registerReceiver(becomingNoisyReceiver, i)
         } else {
-            registerReceiver(becomingNoisyReceiver, i, Context.RECEIVER_EXPORTED)
+            registerReceiver(becomingNoisyReceiver, i, RECEIVER_EXPORTED)
         }
     }
 
@@ -346,7 +377,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             registerReceiver(pluggedInDevice, i)
         } else {
-            registerReceiver(pluggedInDevice, i, Context.RECEIVER_EXPORTED)
+            registerReceiver(pluggedInDevice, i, RECEIVER_EXPORTED)
         }
     }
 
@@ -357,7 +388,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             registerReceiver(bluetoothReceiver, i)
         } else {
-            registerReceiver(bluetoothReceiver, i, Context.RECEIVER_EXPORTED)
+            registerReceiver(bluetoothReceiver, i, RECEIVER_EXPORTED)
         }
     }
 
@@ -477,35 +508,24 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
                         Intent(applicationContext, MainActivity::class.java),
                         PendingIntent.FLAG_IMMUTABLE
                     )
-                ).setSilent(true).setPriority(NotificationCompat.PRIORITY_MAX)
+                ).setSilent(true).setOngoing(true).setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
                 .build()
-        if (playbackStatus == PlaybackStatus.PLAYING) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                mediaSession!!.setPlaybackState(
-                    PlaybackStateCompat.Builder().setState(
-                        PlaybackStateCompat.STATE_PLAYING,
-                        currentMediaPosition.toLong(),
-                        playbackSpeed
-                    ).setActions(
-                        PlaybackStateCompat.ACTION_SEEK_TO or PlaybackStateCompat.ACTION_PLAY_PAUSE or PlaybackStateCompat.ACTION_PLAY or PlaybackStateCompat.ACTION_PAUSE or PlaybackStateCompat.ACTION_SKIP_TO_NEXT or PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
-                    ).build()
-                )
-            }
-        } else if (playbackStatus == PlaybackStatus.PAUSED) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                mediaSession!!.setPlaybackState(
-                    PlaybackStateCompat.Builder().setState(
-                        PlaybackStateCompat.STATE_PAUSED,
-                        currentMediaPosition.toLong(),
-                        playbackSpeed
-                    ).setActions(
-                        PlaybackStateCompat.ACTION_SEEK_TO or PlaybackStateCompat.ACTION_PLAY_PAUSE or PlaybackStateCompat.ACTION_PLAY or PlaybackStateCompat.ACTION_PAUSE or PlaybackStateCompat.ACTION_SKIP_TO_NEXT or PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
-                    ).build()
-                )
-            }
+        //update media playback
+        val playState = if (playbackStatus == PlaybackStatus.PLAYING) {
+            PlaybackStateCompat.STATE_PLAYING
+        } else {
+            PlaybackStateCompat.STATE_PAUSED
         }
-        notificationManager.notify(NOTIFICATION_ID, musicNotification)
+        mediaSession!!.setPlaybackState(
+            PlaybackStateCompat.Builder().setState(
+                playState, currentMediaPosition.toLong(), playbackSpeed
+            ).setActions(
+                PlaybackStateCompat.ACTION_SEEK_TO or PlaybackStateCompat.ACTION_PLAY_PAUSE or PlaybackStateCompat.ACTION_PLAY or PlaybackStateCompat.ACTION_PAUSE or PlaybackStateCompat.ACTION_SKIP_TO_NEXT or PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
+            ).build()
+        )
+
+        startForeground(NOTIFICATION_ID, musicNotification)
     }
 
     private fun buildInitialNotification() {
@@ -707,14 +727,18 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
         }
         if (musicNotification != null) {
             try {
-                ServiceCompat.startForeground(this, NOTIFICATION_ID, musicNotification!!, foregroundServiceType)
+                ServiceCompat.startForeground(
+                    this, NOTIFICATION_ID, musicNotification!!, foregroundServiceType
+                )
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         } else {
             buildInitialNotification()
             try {
-                ServiceCompat.startForeground(this, NOTIFICATION_ID, initialNotification!!, foregroundServiceType)
+                ServiceCompat.startForeground(
+                    this, NOTIFICATION_ID, initialNotification!!, foregroundServiceType
+                )
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -1260,7 +1284,31 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
             mediaSession = MediaSessionCompat(this, BuildConfig.APPLICATION_ID)
             transportControls = mediaSession!!.controller.transportControls
             mediaSession!!.isActive = true
-            mediaSession!!.setFlags(MediaSessionCompat.FLAG_HANDLES_QUEUE_COMMANDS)
+            mediaSession!!.setFlags(
+                MediaSessionCompat.FLAG_HANDLES_QUEUE_COMMANDS or MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS or MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS
+            )
+
+            // Set initial playback state
+            val playbackStateBuilder = PlaybackStateCompat.Builder()
+                .setState(
+                    PlaybackStateCompat.STATE_NONE,
+                    0,
+                    1.0f
+                )
+                .setActions(
+                    PlaybackStateCompat.ACTION_PLAY_PAUSE or
+                            PlaybackStateCompat.ACTION_PLAY or
+                            PlaybackStateCompat.ACTION_PAUSE or
+                            PlaybackStateCompat.ACTION_SKIP_TO_NEXT or
+                            PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS or
+                            PlaybackStateCompat.ACTION_SEEK_TO or
+                            PlaybackStateCompat.ACTION_STOP
+                )
+            mediaSession!!.setPlaybackState(playbackStateBuilder.build())
+
+            // Set initial metadata
+            mediaSession!!.setMetadata(defaultMetadata)
+
             mediaSession!!.setCallback(object : MediaSessionCompat.Callback() {
                 override fun onMediaButtonEvent(mediaButtonEvent: Intent): Boolean {
                     val intentAction = mediaButtonEvent.action
@@ -1414,14 +1462,29 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
         parentId: String,
         result: Result<MutableList<MediaBrowserCompat.MediaItem>>,
     ) {
+        val mediaItems = mutableListOf<MediaBrowserCompat.MediaItem>()
+
+        // Return current playing song if available
+        activeMusic?.let { music ->
+            val description = MediaDescriptionCompat.Builder()
+                .setMediaId(music.id)
+                .setTitle(music.name)
+                .setSubtitle(music.artist)
+                .setIconUri(music.albumUri.toUri()) // Add album art URI if available
+                .build()
+
+            val mediaItem = MediaBrowserCompat.MediaItem(
+                description,
+                MediaBrowserCompat.MediaItem.FLAG_PLAYABLE
+            )
+            mediaItems.add(mediaItem)
+        }
+
+        result.sendResult(mediaItems)
     }
 
     override fun onUnbind(intent: Intent): Boolean {
         return isMediaPlaying
-    }
-
-    override fun onRebind(intent: Intent) {
-        super.onRebind(intent)
     }
 
     override fun onDestroy() {

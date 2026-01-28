@@ -23,11 +23,11 @@ android {
         }
     }
     namespace = "com.atomykcoder.atomykplay"
-    compileSdk = 34
+    compileSdk = 36
     defaultConfig {
         applicationId = "com.atomykcoder.atomykplay"
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "0.1"
         multiDexEnabled = true

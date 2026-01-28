@@ -77,8 +77,8 @@ class FetchLyrics {
                     }
                     // Get sample Lyrics
                     if (lyricsElements != null && !lyricsElements.isEmpty()) {
-                        var lyricsLink = lyricsElements[i].select("div")[2]
-                        lyricsLink = lyricsLink.select("span").first()
+                        var lyricsLink: Element? = lyricsElements[i].select("div")[2]
+                        lyricsLink = lyricsLink?.select("span")?.firstOrNull()
                         if (lyricsLink != null) {
                             val lyrics = MusicHelper.splitLyricsByNewLine(lyricsLink.text())
                             sampleLyrics.add(lyrics)
