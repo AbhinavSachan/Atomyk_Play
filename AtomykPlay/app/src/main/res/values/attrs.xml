@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="GraphView">
+        <attr name="graphType" format="enum">
+            <enum name="waveform" value="0"/>
+            <enum name="fft" value="1"/>
+        </attr>
+        <attr name="waveformColor" format="color"/>
+        <attr name="fftColor" format="color"/>
+        <attr name="lineWidth" format="dimension"/>
+        <attr name="scaleFactor" format="float"/>
+    </declare-styleable>
+</resources>

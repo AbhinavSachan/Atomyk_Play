@@ -1,0 +1,638 @@
+{
+  "AtomykPlay/app/build.gradle.kts": {
+    "mtime": 1769620983.8936493,
+    "seen": 1788109330.253676,
+    "ast_hash": "c4a349126464efa5943489930b4e56e5",
+    "semantic_hash": "c4a349126464efa5943489930b4e56e5"
+  },
+  "AtomykPlay/app/google-services.json": {
+    "mtime": 1708407762.3023274,
+    "seen": 1788109330.2536802,
+    "ast_hash": "cbf125c6593b85fb7357263590f6d48a",
+    "semantic_hash": "cbf125c6593b85fb7357263590f6d48a"
+  },
+  "AtomykPlay/app/release/output-metadata.json": {
+    "mtime": 1769627196.2797432,
+    "seen": 1788109330.2536821,
+    "ast_hash": "941879bc646cd1a2ffa83c923c4ff82d",
+    "semantic_hash": "941879bc646cd1a2ffa83c923c4ff82d"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/ApplicationClass.kt": {
+    "mtime": 1708500072.903644,
+    "seen": 1788109330.253683,
+    "ast_hash": "377511a1bffeac0bdd2cb45b8183fbdc",
+    "semantic_hash": "377511a1bffeac0bdd2cb45b8183fbdc"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/adapters/BeautifyListAdapter.kt": {
+    "mtime": 1708587676.3542025,
+    "seen": 1788109330.2536843,
+    "ast_hash": "3f2f8c2acfa4f670c13038779a9f634e",
+    "semantic_hash": "3f2f8c2acfa4f670c13038779a9f634e"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/adapters/BlockFolderListAdapter.kt": {
+    "mtime": 1708586185.1489654,
+    "seen": 1788109330.253685,
+    "ast_hash": "f75ee7cac757397c7dd318effec14802",
+    "semantic_hash": "f75ee7cac757397c7dd318effec14802"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/adapters/FavoriteListAdapter.kt": {
+    "mtime": 1708586185.1099682,
+    "seen": 1788109330.253686,
+    "ast_hash": "ec94c360bb04d5f72e8080ea500e190e",
+    "semantic_hash": "ec94c360bb04d5f72e8080ea500e190e"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/adapters/FoundLyricsAdapter.kt": {
+    "mtime": 1718626833.5745246,
+    "seen": 1788109330.2536867,
+    "ast_hash": "1e378ce247234718b004aae3a496f7b0",
+    "semantic_hash": "1e378ce247234718b004aae3a496f7b0"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/adapters/MusicAdapter.kt": {
+    "mtime": 1708586836.6436434,
+    "seen": 1788109330.2536876,
+    "ast_hash": "c49dbb0bb8e2ae505928a758e274faf7",
+    "semantic_hash": "c49dbb0bb8e2ae505928a758e274faf7"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/adapters/MusicLyricsAdapter.kt": {
+    "mtime": 1708587361.7258153,
+    "seen": 1788109330.2536883,
+    "ast_hash": "fbfd91657f419d335df43b6174fa2ff2",
+    "semantic_hash": "fbfd91657f419d335df43b6174fa2ff2"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/adapters/MusicMainAdapter.kt": {
+    "mtime": 1718626833.5725238,
+    "seen": 1788109330.253689,
+    "ast_hash": "d43f950a7d5ccfaabbdcdb819ebef5bb",
+    "semantic_hash": "d43f950a7d5ccfaabbdcdb819ebef5bb"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/adapters/MusicQueueAdapter.kt": {
+    "mtime": 1718626833.5585186,
+    "seen": 1788109330.25369,
+    "ast_hash": "ccf432c324bd892418d8c7a221176c32",
+    "semantic_hash": "ccf432c324bd892418d8c7a221176c32"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/adapters/OpenPlayListAdapter.kt": {
+    "mtime": 1708586836.6406448,
+    "seen": 1788109330.253691,
+    "ast_hash": "dd5efd43ee065f82a3dffa8734098c87",
+    "semantic_hash": "dd5efd43ee065f82a3dffa8734098c87"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/adapters/PlaylistAdapter.kt": {
+    "mtime": 1708586368.9073467,
+    "seen": 1788109330.253692,
+    "ast_hash": "1ef219c4281407778f74c8568b074c01",
+    "semantic_hash": "1ef219c4281407778f74c8568b074c01"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/adapters/PlaylistDialogAdapter.kt": {
+    "mtime": 1708587361.729805,
+    "seen": 1788109330.2536926,
+    "ast_hash": "40fc492218d4db7458a8f1b1b6c7d42f",
+    "semantic_hash": "40fc492218d4db7458a8f1b1b6c7d42f"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/adapters/SimpleTouchCallback.kt": {
+    "mtime": 1708587393.704483,
+    "seen": 1788109330.2536933,
+    "ast_hash": "a0e5ec32f47f8ab6832a169061cbede1",
+    "semantic_hash": "a0e5ec32f47f8ab6832a169061cbede1"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/adapters/generics/GenericRecyclerAdapter.kt": {
+    "mtime": 1708500072.8780034,
+    "seen": 1788109330.2536945,
+    "ast_hash": "99103f9ae58d00d1ab88af160fc5da6b",
+    "semantic_hash": "99103f9ae58d00d1ab88af160fc5da6b"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/adapters/generics/GenericViewHolder.kt": {
+    "mtime": 1708414102.9411762,
+    "seen": 1788109330.2536952,
+    "ast_hash": "cd2c17a37a0e015cbb813112ade647e7",
+    "semantic_hash": "cd2c17a37a0e015cbb813112ade647e7"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/adapters/viewHolders/BeautifyListViewHolder.kt": {
+    "mtime": 1708587676.3522022,
+    "seen": 1788109330.253696,
+    "ast_hash": "412ef546d1d42b7f97ac29be2278c2f9",
+    "semantic_hash": "412ef546d1d42b7f97ac29be2278c2f9"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/adapters/viewHolders/BlackListViewHolder.kt": {
+    "mtime": 1708587676.3474505,
+    "seen": 1788109330.2536967,
+    "ast_hash": "79005662be88266dedde6dec2bb9c37a",
+    "semantic_hash": "79005662be88266dedde6dec2bb9c37a"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/adapters/viewHolders/FavoriteViewHolder.kt": {
+    "mtime": 1708587676.3501909,
+    "seen": 1788109330.2536976,
+    "ast_hash": "523f8267e1dbdd42e484493f068c4c33",
+    "semantic_hash": "523f8267e1dbdd42e484493f068c4c33"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/adapters/viewHolders/FoundLyricsViewHolder.kt": {
+    "mtime": 1708587676.3582003,
+    "seen": 1788109330.2536983,
+    "ast_hash": "3994e64db48414a0749e8a3aeff134bb",
+    "semantic_hash": "3994e64db48414a0749e8a3aeff134bb"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/adapters/viewHolders/MusicLyricsViewHolder.kt": {
+    "mtime": 1708587676.3713074,
+    "seen": 1788109330.2536995,
+    "ast_hash": "48cafcb455569d7ce7515c09f1f5a4ea",
+    "semantic_hash": "48cafcb455569d7ce7515c09f1f5a4ea"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/adapters/viewHolders/MusicMainViewHolder.kt": {
+    "mtime": 1708587676.373312,
+    "seen": 1788109330.2537005,
+    "ast_hash": "9b29ba91d8e8442767a3302d5a34a98a",
+    "semantic_hash": "9b29ba91d8e8442767a3302d5a34a98a"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/adapters/viewHolders/MusicQueueViewHolder.kt": {
+    "mtime": 1708587676.3602026,
+    "seen": 1788109330.2537014,
+    "ast_hash": "c8fc5eab7ccef69b16a3a3edb8c97d28",
+    "semantic_hash": "c8fc5eab7ccef69b16a3a3edb8c97d28"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/adapters/viewHolders/OpenPlayListViewHolder.kt": {
+    "mtime": 1708587676.3662014,
+    "seen": 1788109330.2537024,
+    "ast_hash": "cc065a129450b659adf10b4b85379866",
+    "semantic_hash": "cc065a129450b659adf10b4b85379866"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/adapters/viewHolders/PlayListDialogViewHolder.kt": {
+    "mtime": 1708587676.3753107,
+    "seen": 1788109330.253703,
+    "ast_hash": "c78bc061160f41ddf2235abbc8c462a5",
+    "semantic_hash": "c78bc061160f41ddf2235abbc8c462a5"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/adapters/viewHolders/PlaylistViewHolder.kt": {
+    "mtime": 1708587676.3682592,
+    "seen": 1788109330.2537043,
+    "ast_hash": "1e093ba1ee8c02ad6a00db55837106b8",
+    "semantic_hash": "1e093ba1ee8c02ad6a00db55837106b8"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/classes/PhoneStateCallback.kt": {
+    "mtime": 1708585451.3263662,
+    "seen": 1788109330.253705,
+    "ast_hash": "4dc77c5a0fae53fb46640ba64f33ef39",
+    "semantic_hash": "4dc77c5a0fae53fb46640ba64f33ef39"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/constants/BroadcastStrings.kt": {
+    "mtime": 1708414102.9437544,
+    "seen": 1788109330.2537057,
+    "ast_hash": "d895c50e523f1ee6ff10afdfb3c6cb04",
+    "semantic_hash": "d895c50e523f1ee6ff10afdfb3c6cb04"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/constants/FragmentTags.kt": {
+    "mtime": 1708414102.9437544,
+    "seen": 1788109330.2537065,
+    "ast_hash": "a0b85c6ad39a9bc89bdebfa49be665e4",
+    "semantic_hash": "a0b85c6ad39a9bc89bdebfa49be665e4"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/constants/RepeatModes.kt": {
+    "mtime": 1708414102.9437544,
+    "seen": 1788109330.2537074,
+    "ast_hash": "8aaeab6b69fe53091b121527f322bf9f",
+    "semantic_hash": "8aaeab6b69fe53091b121527f322bf9f"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/constants/ShuffleModes.kt": {
+    "mtime": 1708414102.9437544,
+    "seen": 1788109330.2537081,
+    "ast_hash": "b6f9f5451b41cc21d10da8e085c95edf",
+    "semantic_hash": "b6f9f5451b41cc21d10da8e085c95edf"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/data/BaseActivity.kt": {
+    "mtime": 1708500072.8880098,
+    "seen": 1788109330.2537088,
+    "ast_hash": "53af39fe9d9363e7ce64fb49d6614182",
+    "semantic_hash": "53af39fe9d9363e7ce64fb49d6614182"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/data/BaseFragment.kt": {
+    "mtime": 1708500072.8719978,
+    "seen": 1788109330.2537096,
+    "ast_hash": "49188067cddbcfd70a7abfaa8d32c50b",
+    "semantic_hash": "49188067cddbcfd70a7abfaa8d32c50b"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/enums/OptionSheetEnum.java": {
+    "mtime": 1708414102.9447534,
+    "seen": 1788109330.2537103,
+    "ast_hash": "6d5f93474a975b69273ff3746d14b00a",
+    "semantic_hash": "6d5f93474a975b69273ff3746d14b00a"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/enums/PlaybackStatus.java": {
+    "mtime": 1708414102.9447534,
+    "seen": 1788109330.253711,
+    "ast_hash": "6466ca897be862b5af5bf28af2a29823",
+    "semantic_hash": "6466ca897be862b5af5bf28af2a29823"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/events/PrepareRunnableEvent.java": {
+    "mtime": 1708414102.9447534,
+    "seen": 1788109330.253712,
+    "ast_hash": "9fe1c68283907181097e960a91dc6746",
+    "semantic_hash": "9fe1c68283907181097e960a91dc6746"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/events/RemoveFromFavoriteEvent.kt": {
+    "mtime": 1708503256.0661507,
+    "seen": 1788109330.2537127,
+    "ast_hash": "d3943813adf7905128d8cc9255d29a9f",
+    "semantic_hash": "d3943813adf7905128d8cc9255d29a9f"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/events/RemoveFromPlaylistEvent.kt": {
+    "mtime": 1708503256.0741494,
+    "seen": 1788109330.2537134,
+    "ast_hash": "6ff7417ff3bf32a9f84a5364ba1d5182",
+    "semantic_hash": "6ff7417ff3bf32a9f84a5364ba1d5182"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/events/RemoveLyricsHandlerEvent.kt": {
+    "mtime": 1708502882.7184918,
+    "seen": 1788109330.253714,
+    "ast_hash": "dd99c5feb56ca345fd783946abdfb559",
+    "semantic_hash": "dd99c5feb56ca345fd783946abdfb559"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/events/RunnableSyncLyricsEvent.kt": {
+    "mtime": 1708502888.5892599,
+    "seen": 1788109330.2537153,
+    "ast_hash": "60030d68beef0270ab44b4e24430b3a4",
+    "semantic_hash": "60030d68beef0270ab44b4e24430b3a4"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/events/SetImageInMainPlayer.kt": {
+    "mtime": 1708503256.180668,
+    "seen": 1788109330.253716,
+    "ast_hash": "4e6d634a54512f822af19ed57d3c04af",
+    "semantic_hash": "4e6d634a54512f822af19ed57d3c04af"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/events/SetMainLayoutEvent.kt": {
+    "mtime": 1708503256.04915,
+    "seen": 1788109330.2537172,
+    "ast_hash": "00d8dab10b71ef82fd995a602e786cf2",
+    "semantic_hash": "00d8dab10b71ef82fd995a602e786cf2"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/events/SetTimerText.kt": {
+    "mtime": 1708502914.6431537,
+    "seen": 1788109330.253718,
+    "ast_hash": "4c4373e223c9791962401fafd85d1ecd",
+    "semantic_hash": "4c4373e223c9791962401fafd85d1ecd"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/events/StopTextAnim.kt": {
+    "mtime": 1708414102.9457188,
+    "seen": 1788109330.253719,
+    "ast_hash": "0d0ce04486ab12c48332e8e0307dec5a",
+    "semantic_hash": "0d0ce04486ab12c48332e8e0307dec5a"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/events/TimerFinished.kt": {
+    "mtime": 1708502922.2524025,
+    "seen": 1788109330.2537203,
+    "ast_hash": "bd721bdc4d74f2400f70729be2c820d4",
+    "semantic_hash": "bd721bdc4d74f2400f70729be2c820d4"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/events/UpdateMusicImageEvent.kt": {
+    "mtime": 1708503256.1516633,
+    "seen": 1788109330.253721,
+    "ast_hash": "7d87750faf030b6ff65bdd534bdb6ad8",
+    "semantic_hash": "7d87750faf030b6ff65bdd534bdb6ad8"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/events/UpdateMusicProgressEvent.kt": {
+    "mtime": 1708587695.144685,
+    "seen": 1788109330.253722,
+    "ast_hash": "83057fbf11da9898c1d3fd4b12911b0a",
+    "semantic_hash": "83057fbf11da9898c1d3fd4b12911b0a"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/fragments/AboutFragment.kt": {
+    "mtime": 1708500072.903644,
+    "seen": 1788109330.2537227,
+    "ast_hash": "708d92d08122b61c9a8b565de45bc33d",
+    "semantic_hash": "708d92d08122b61c9a8b565de45bc33d"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/fragments/AddLyricsFragment.kt": {
+    "mtime": 1708503256.079152,
+    "seen": 1788109330.2537234,
+    "ast_hash": "d85b995b7c91884ba495496f56cadc6a",
+    "semantic_hash": "d85b995b7c91884ba495496f56cadc6a"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/fragments/BottomSheetPlayerFragment.kt": {
+    "mtime": 1788108116.204304,
+    "seen": 1788109330.2537243,
+    "ast_hash": "bac45269927fd36c94ca628fb6b07a06",
+    "semantic_hash": "bac45269927fd36c94ca628fb6b07a06"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/fragments/FavoritesFragment.kt": {
+    "mtime": 1708503256.082151,
+    "seen": 1788109330.2537253,
+    "ast_hash": "67e1330f3a2fb28e9ea6f8863133b5b4",
+    "semantic_hash": "67e1330f3a2fb28e9ea6f8863133b5b4"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/fragments/HelpFragment.kt": {
+    "mtime": 1708500072.8880098,
+    "seen": 1788109330.2537262,
+    "ast_hash": "b4aed5042130d2ea1c7604303f9b8baf",
+    "semantic_hash": "b4aed5042130d2ea1c7604303f9b8baf"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/fragments/LastAddedFragment.kt": {
+    "mtime": 1708503256.1076643,
+    "seen": 1788109330.253727,
+    "ast_hash": "178a00636506dd0a9dd31905f2d0def9",
+    "semantic_hash": "178a00636506dd0a9dd31905f2d0def9"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/fragments/OpenPlayListFragment.kt": {
+    "mtime": 1718626833.5645194,
+    "seen": 1788109330.253728,
+    "ast_hash": "06c16346d5d0ff95fb52ca711c6ca9df",
+    "semantic_hash": "06c16346d5d0ff95fb52ca711c6ca9df"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/fragments/PlaylistsFragment.kt": {
+    "mtime": 1718626833.5475187,
+    "seen": 1788109330.2537289,
+    "ast_hash": "8bf9448ef97613484b53a318c63d3e6c",
+    "semantic_hash": "8bf9448ef97613484b53a318c63d3e6c"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/fragments/SearchFragment.kt": {
+    "mtime": 1718626833.5545225,
+    "seen": 1788109330.2537298,
+    "ast_hash": "8347cc57e5e74a4fc1c5fa178af07f2a",
+    "semantic_hash": "8347cc57e5e74a4fc1c5fa178af07f2a"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/fragments/SettingsFragment.kt": {
+    "mtime": 1718626231.1143956,
+    "seen": 1788109330.2537305,
+    "ast_hash": "4d04c1047d3847b7972581d8791677ea",
+    "semantic_hash": "4d04c1047d3847b7972581d8791677ea"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/fragments/TagEditorFragment.kt": {
+    "mtime": 1718623937.1771357,
+    "seen": 1788109330.2537315,
+    "ast_hash": "3fb25173f9f8022876b4d5416a238832",
+    "semantic_hash": "3fb25173f9f8022876b4d5416a238832"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/helperFunctions/AtomykMusicGlideModule.kt": {
+    "mtime": 1708414102.9488776,
+    "seen": 1788109330.2537324,
+    "ast_hash": "86f074bd09bdd04659e308a66a81b365",
+    "semantic_hash": "86f074bd09bdd04659e308a66a81b365"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/helperFunctions/AudioFileCover.kt": {
+    "mtime": 1708414102.9488776,
+    "seen": 1788109330.2537332,
+    "ast_hash": "b978afa72bd1b684f2b69343aed91f03",
+    "semantic_hash": "b978afa72bd1b684f2b69343aed91f03"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/helperFunctions/AudioFileCoverFetcher.kt": {
+    "mtime": 1708414102.9498775,
+    "seen": 1788109330.253734,
+    "ast_hash": "2d7c09c3389811e065d2704eff5864b6",
+    "semantic_hash": "2d7c09c3389811e065d2704eff5864b6"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/helperFunctions/AudioFileCoverLoader.kt": {
+    "mtime": 1708414102.9498775,
+    "seen": 1788109330.2537348,
+    "ast_hash": "2260ecf50b7f27408291bb6447e96c70",
+    "semantic_hash": "2260ecf50b7f27408291bb6447e96c70"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/helperFunctions/AudioFileCoverUtils.kt": {
+    "mtime": 1708414102.9498775,
+    "seen": 1788109330.253736,
+    "ast_hash": "2db7b5142c406ef0ebbb26a438b26eb2",
+    "semantic_hash": "2db7b5142c406ef0ebbb26a438b26eb2"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/helperFunctions/FetchLyrics.kt": {
+    "mtime": 1769622673.1980994,
+    "seen": 1788109330.253737,
+    "ast_hash": "0c9913c703a4a4ee7caa17e3a3d5ad57",
+    "semantic_hash": "0c9913c703a4a4ee7caa17e3a3d5ad57"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/helperFunctions/Logger.kt": {
+    "mtime": 1708585480.7803342,
+    "seen": 1788109330.2537377,
+    "ast_hash": "e7d5e219755e0889dbf4e109eca6b481",
+    "semantic_hash": "e7d5e219755e0889dbf4e109eca6b481"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/helperFunctions/MusicHelper.kt": {
+    "mtime": 1723878703.0026221,
+    "seen": 1788109330.2537384,
+    "ast_hash": "245ad7d656df98044072df9b7f6f6482",
+    "semantic_hash": "245ad7d656df98044072df9b7f6f6482"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/interfaces/ApiService.kt": {
+    "mtime": 1708414102.950878,
+    "seen": 1788109330.2537394,
+    "ast_hash": "d54609246e322582b76c924be031e701",
+    "semantic_hash": "d54609246e322582b76c924be031e701"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/interfaces/IBindableViewHolder.java": {
+    "mtime": 1708414102.950878,
+    "seen": 1788109330.25374,
+    "ast_hash": "ac16b433ec597f50b218b1ece5211761",
+    "semantic_hash": "ac16b433ec597f50b218b1ece5211761"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/interfaces/ItemTouchHelperAdapter.java": {
+    "mtime": 1708414102.950878,
+    "seen": 1788109330.2537408,
+    "ast_hash": "92bfc65b1e4214103adfbc5f66054252",
+    "semantic_hash": "92bfc65b1e4214103adfbc5f66054252"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/interfaces/MusicDaoI.java": {
+    "mtime": 1708500714.211502,
+    "seen": 1788109330.2537415,
+    "ast_hash": "7d8e0d68da8762723dd093ddaf38f3ef",
+    "semantic_hash": "7d8e0d68da8762723dd093ddaf38f3ef"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/interfaces/OnDragStartListener.java": {
+    "mtime": 1708414102.950878,
+    "seen": 1788109330.2537427,
+    "ast_hash": "df637e57857c9aa948e57b99c987cdba",
+    "semantic_hash": "df637e57857c9aa948e57b99c987cdba"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/models/LRCMap.kt": {
+    "mtime": 1708500158.2513857,
+    "seen": 1788109330.2537434,
+    "ast_hash": "18307e98b63c1f7826c2330c5e7ae3d5",
+    "semantic_hash": "18307e98b63c1f7826c2330c5e7ae3d5"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/models/Music.kt": {
+    "mtime": 1708500714.2035017,
+    "seen": 1788109330.2537441,
+    "ast_hash": "36544b6598a0ee5ed3e999a51232d588",
+    "semantic_hash": "36544b6598a0ee5ed3e999a51232d588"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/models/Playlist.kt": {
+    "mtime": 1718626833.5665226,
+    "seen": 1788109330.2537448,
+    "ast_hash": "a3c53a4b3ece4ae7d94e297ebbf3faaf",
+    "semantic_hash": "a3c53a4b3ece4ae7d94e297ebbf3faaf"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/repository/LoadingStatus.kt": {
+    "mtime": 1708414102.9518774,
+    "seen": 1788109330.2537456,
+    "ast_hash": "076cca3f62d5cd63e86a12783a2923d9",
+    "semantic_hash": "076cca3f62d5cd63e86a12783a2923d9"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/repository/MusicDaoImpl.kt": {
+    "mtime": 1708500714.234503,
+    "seen": 1788109330.2537467,
+    "ast_hash": "f7e78e236a9b6b35efd96c7a574e5eff",
+    "semantic_hash": "f7e78e236a9b6b35efd96c7a574e5eff"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/repository/MusicRepo.kt": {
+    "mtime": 1708500875.5798168,
+    "seen": 1788109330.2537475,
+    "ast_hash": "b648782cd9f7412dc63d556e2b05241f",
+    "semantic_hash": "b648782cd9f7412dc63d556e2b05241f"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/repository/MusicRepository.kt": {
+    "mtime": 1708500714.2065024,
+    "seen": 1788109330.2537484,
+    "ast_hash": "a7551138e494ca1515671b25bf8c4ec2",
+    "semantic_hash": "a7551138e494ca1515671b25bf8c4ec2"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/scripts/ArtworkInfo.kt": {
+    "mtime": 1708414102.9528773,
+    "seen": 1788109330.2537491,
+    "ast_hash": "87f3e74734e702ee11d03a96763a54b1",
+    "semantic_hash": "87f3e74734e702ee11d03a96763a54b1"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/scripts/AudioTagInfo.kt": {
+    "mtime": 1708414102.9528773,
+    "seen": 1788109330.25375,
+    "ast_hash": "c440d491f40d33cce800a558305b70ad",
+    "semantic_hash": "c440d491f40d33cce800a558305b70ad"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/scripts/CenterSmoothScrollScript.kt": {
+    "mtime": 1708584872.2741017,
+    "seen": 1788109330.2537508,
+    "ast_hash": "63ce64ad6f2e3da8abb29105ea1669c3",
+    "semantic_hash": "63ce64ad6f2e3da8abb29105ea1669c3"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/scripts/CustomBottomSheet.kt": {
+    "mtime": 1708585066.3154974,
+    "seen": 1788109330.2537518,
+    "ast_hash": "0d96898abb48d6c9edb3d575c2848e28",
+    "semantic_hash": "0d96898abb48d6c9edb3d575c2848e28"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/scripts/GridSpacing.kt": {
+    "mtime": 1708585066.3208127,
+    "seen": 1788109330.2537525,
+    "ast_hash": "2f6e8fd9e7b994aeb6172dbfc0d76c69",
+    "semantic_hash": "2f6e8fd9e7b994aeb6172dbfc0d76c69"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/scripts/LinearLayoutManagerWrapper.kt": {
+    "mtime": 1708585066.3188026,
+    "seen": 1788109330.2537537,
+    "ast_hash": "646455ad6c7499976a07b97def0b4983",
+    "semantic_hash": "646455ad6c7499976a07b97def0b4983"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/scripts/TagWriter.kt": {
+    "mtime": 1708500072.856372,
+    "seen": 1788109330.2537553,
+    "ast_hash": "8d8c1d3e93c6eb5bf3e563e30e3fcd0c",
+    "semantic_hash": "8d8c1d3e93c6eb5bf3e563e30e3fcd0c"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/services/MediaPlayerService.kt": {
+    "mtime": 1769626487.6790347,
+    "seen": 1788109330.2537565,
+    "ast_hash": "219da446a3ca2a4b9fc1a941d41aad51",
+    "semantic_hash": "219da446a3ca2a4b9fc1a941d41aad51"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/services/PackageValidator.kt": {
+    "mtime": 1769622837.039568,
+    "seen": 1788109330.2537572,
+    "ast_hash": "c84ffbce4627ed47923b8041b2769903",
+    "semantic_hash": "c84ffbce4627ed47923b8041b2769903"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/ui/BackPressCompatActivity.kt": {
+    "mtime": 1708414102.9548776,
+    "seen": 1788109330.2537582,
+    "ast_hash": "69c6cb706b1cd02eaf137d67983e9ff5",
+    "semantic_hash": "69c6cb706b1cd02eaf137d67983e9ff5"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/ui/MainActivity.kt": {
+    "mtime": 1718626231.1223965,
+    "seen": 1788109330.253759,
+    "ast_hash": "4090287cb284f82c319abbe6b80c8d0f",
+    "semantic_hash": "4090287cb284f82c319abbe6b80c8d0f"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/utils/AbhinavAnimationUtil.kt": {
+    "mtime": 1708414102.9548776,
+    "seen": 1788109330.2537599,
+    "ast_hash": "3d9f7a0c3cd8157756915a4a51e111e6",
+    "semantic_hash": "3d9f7a0c3cd8157756915a4a51e111e6"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/utils/AbhinavUtil.kt": {
+    "mtime": 1708584442.1319733,
+    "seen": 1788109330.2537608,
+    "ast_hash": "433b14713a06abfd5e0d4cf142ceab29",
+    "semantic_hash": "433b14713a06abfd5e0d4cf142ceab29"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/utils/AndroidUtil.kt": {
+    "mtime": 1718626401.6861987,
+    "seen": 1788109330.2537615,
+    "ast_hash": "67b18087133b0624749e1d2038aed9ea",
+    "semantic_hash": "67b18087133b0624749e1d2038aed9ea"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/utils/BlurBuilder.kt": {
+    "mtime": 1708414102.9558775,
+    "seen": 1788109330.2537622,
+    "ast_hash": "d296c597236ccc3051f0eb7a7e5a0ee9",
+    "semantic_hash": "d296c597236ccc3051f0eb7a7e5a0ee9"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/utils/Extensions.kt": {
+    "mtime": 1718623937.1611352,
+    "seen": 1788109330.253763,
+    "ast_hash": "ab647ba8d444e032c77751b859592476",
+    "semantic_hash": "ab647ba8d444e032c77751b859592476"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/utils/GlideExtensions.kt": {
+    "mtime": 1708584442.1349747,
+    "seen": 1788109330.253764,
+    "ast_hash": "3e86e4229065cd651093956d4772dfee",
+    "semantic_hash": "3e86e4229065cd651093956d4772dfee"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/utils/ImagePickerUtil.kt": {
+    "mtime": 1718623937.1581416,
+    "seen": 1788109330.2537646,
+    "ast_hash": "47e957831374ba50940b0c758734a99b",
+    "semantic_hash": "47e957831374ba50940b0c758734a99b"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/utils/MusicEnhancerUtil.kt": {
+    "mtime": 1708414102.9558775,
+    "seen": 1788109330.253767,
+    "ast_hash": "dd7a03659761a7756610ad0f2b086ac0",
+    "semantic_hash": "dd7a03659761a7756610ad0f2b086ac0"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/utils/MusicUtil.kt": {
+    "mtime": 1708503256.1696627,
+    "seen": 1788109330.2537677,
+    "ast_hash": "0d7b15c2412504bab25ee7ec2ac7d3e2",
+    "semantic_hash": "0d7b15c2412504bab25ee7ec2ac7d3e2"
+  },
+  "AtomykPlay/app/src/main/java/com/atomykcoder/atomykplay/utils/StorageUtil.kt": {
+    "mtime": 1718626833.579518,
+    "seen": 1788109330.2537684,
+    "ast_hash": "c72d69f3310ac4c0fabf5a9947ae3aec",
+    "semantic_hash": "c72d69f3310ac4c0fabf5a9947ae3aec"
+  },
+  "AtomykPlay/app/src/main/res/raw/like_anim_click_effect.json": {
+    "mtime": 1708414102.9842162,
+    "seen": 1788109330.2537692,
+    "ast_hash": "8cd7545547dd3a097e656566a90c3a78",
+    "semantic_hash": "8cd7545547dd3a097e656566a90c3a78"
+  },
+  "AtomykPlay/app/src/main/res/raw/no_result_green.json": {
+    "mtime": 1708414102.9852157,
+    "seen": 1788109330.2537699,
+    "ast_hash": "5c837df5bb45fd8c5da16738dd7e7576",
+    "semantic_hash": "5c837df5bb45fd8c5da16738dd7e7576"
+  },
+  "AtomykPlay/build.gradle.kts": {
+    "mtime": 1718622625.8724988,
+    "seen": 1788109330.2537708,
+    "ast_hash": "4d21292fb5578780877df608068be57d",
+    "semantic_hash": "4d21292fb5578780877df608068be57d"
+  },
+  "AtomykPlay/gradlew": {
+    "mtime": 1708414102.9925566,
+    "seen": 1788109330.2537715,
+    "ast_hash": "c6ea21dea2d500b277296894708cf792",
+    "semantic_hash": "c6ea21dea2d500b277296894708cf792"
+  },
+  "AtomykPlay/settings.gradle.kts": {
+    "mtime": 1788107028.1254785,
+    "seen": 1788109330.2537723,
+    "ast_hash": "0335d3afb3959a660001ed7e061cc552",
+    "semantic_hash": "0335d3afb3959a660001ed7e061cc552"
+  }
+}
