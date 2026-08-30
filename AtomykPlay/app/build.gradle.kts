@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.konan.properties.Properties
 
 plugins {
@@ -23,11 +24,11 @@ android {
         }
     }
     namespace = "com.atomykcoder.atomykplay"
-    compileSdk = 36
+    compileSdk = 37
     defaultConfig {
         applicationId = "com.atomykcoder.atomykplay"
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "0.1"
         multiDexEnabled = true
@@ -61,8 +62,10 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "17"
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
+        }
     }
     buildFeatures {
         buildConfig = true
