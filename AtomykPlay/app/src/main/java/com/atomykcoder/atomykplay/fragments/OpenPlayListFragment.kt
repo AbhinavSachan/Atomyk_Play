@@ -14,14 +14,12 @@ import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.adapters.OpenPlayListAdapter
 import com.atomykcoder.atomykplay.adapters.SimpleTouchCallback
 import com.atomykcoder.atomykplay.data.BaseFragment
-import com.atomykcoder.atomykplay.events.RemoveFromPlaylistEvent
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener
+import com.atomykcoder.atomykplay.models.Music
 import com.atomykcoder.atomykplay.models.Playlist
 import com.atomykcoder.atomykplay.scripts.LinearLayoutManagerWrapper
 import com.atomykcoder.atomykplay.utils.loadImageFromUri
 import com.google.android.material.appbar.CollapsingToolbarLayout
-import org.greenrobot.eventbus.EventBus
-import org.greenrobot.eventbus.Subscribe
 
 private const val ARG_CURRENT_PLAYLIST = "currentPlaylist"
 
@@ -57,9 +55,6 @@ class OpenPlayListFragment : BaseFragment(), OnDragStartListener {
     ): View? {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_open_play_list, container, false)
-        if (!EventBus.getDefault().isRegistered(this)) {
-            EventBus.getDefault().register(this)
-        }
 
         val recyclerView = view.findViewById<RecyclerView>(R.id.open_pl_music_recycler)
         val noPlLayout = view.findViewById<View>(R.id.song_not_found_layout_opl)
@@ -94,14 +89,8 @@ class OpenPlayListFragment : BaseFragment(), OnDragStartListener {
         return view
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        EventBus.getDefault().unregister(this)
-    }
-
-    @Subscribe
-    fun removeMusicFromList(event: RemoveFromPlaylistEvent) {
-        openPlayListAdapter!!.removeItem(event.music)
+    fun removeMusicFromList(music: Music?) {
+        openPlayListAdapter?.removeItem(music)
     }
 
     override fun onDragStart(viewHolder: RecyclerView.ViewHolder) {

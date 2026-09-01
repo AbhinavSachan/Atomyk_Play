@@ -12,13 +12,13 @@ import com.atomykcoder.atomykplay.R
 import com.atomykcoder.atomykplay.adapters.FavoriteListAdapter
 import com.atomykcoder.atomykplay.adapters.SimpleTouchCallback
 import com.atomykcoder.atomykplay.data.BaseFragment
-import com.atomykcoder.atomykplay.events.RemoveFromFavoriteEvent
 import com.atomykcoder.atomykplay.interfaces.OnDragStartListener
 import com.atomykcoder.atomykplay.models.Music
 import com.atomykcoder.atomykplay.scripts.LinearLayoutManagerWrapper
+import com.atomykcoder.atomykplay.state.StateHolder
 import com.atomykcoder.atomykplay.utils.StorageUtil
-import org.greenrobot.eventbus.EventBus
-import org.greenrobot.eventbus.Subscribe
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.flow.collectLatest
 
 class FavoritesFragment : BaseFragment(), OnDragStartListener {
     companion object {
@@ -35,9 +35,6 @@ class FavoritesFragment : BaseFragment(), OnDragStartListener {
     ): View? {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_favorites, container, false)
-        if (!EventBus.getDefault().isRegistered(this)) {
-            EventBus.getDefault().register(this)
-        }
         storageUtil = StorageUtil(requireContext())
         val recyclerView = view.findViewById<RecyclerView>(R.id.favorite_music_recycler)
         val noPlLayout = view.findViewById<View>(R.id.song_not_found_layout_favorite)
@@ -58,21 +55,19 @@ class FavoritesFragment : BaseFragment(), OnDragStartListener {
         val callback: ItemTouchHelper.Callback = SimpleTouchCallback(playListAdapter)
         itemTouchHelper = ItemTouchHelper(callback)
         itemTouchHelper!!.attachToRecyclerView(recyclerView)
-        return view
-    }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        EventBus.getDefault().unregister(this)
+        // Keep the list in sync with FavoriteStateManager - e.g. when a song is removed
+        // from favorites via the option sheet elsewhere in the app while this list is open.
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            StateHolder.favoriteStateManager.favoriteIds.collectLatest { ids ->
+                playListAdapter?.removeItemsNotIn(ids)
+            }
+        }
+        return view
     }
 
     override fun onDragStart(viewHolder: RecyclerView.ViewHolder) {
         itemTouchHelper!!.startDrag(viewHolder)
-    }
-
-    @Subscribe
-    fun removeFromPlaylist(event: RemoveFromFavoriteEvent) {
-        playListAdapter!!.removeItem(event.music)
     }
 
 }

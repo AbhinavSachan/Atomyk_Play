@@ -106,4 +106,22 @@ class FavoriteListAdapter(
         notifyItemRangeChanged(position, super.items!!.size - (position + 1))
         notifyItemRemoved(position)
     }
+
+    /**
+     * Removes any displayed item whose id is no longer in [ids], without touching storage
+     * (the caller is reacting to a favorite removal that already happened elsewhere).
+     */
+    fun removeItemsNotIn(ids: Set<String>) {
+        val items = super.items ?: return
+        var index = items.size - 1
+        var removedAny = false
+        while (index >= 0) {
+            if (items[index].id !in ids) {
+                items.removeAt(index)
+                removedAny = true
+            }
+            index--
+        }
+        if (removedAny) notifyDataSetChanged()
+    }
 }
