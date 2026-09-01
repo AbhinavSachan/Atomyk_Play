@@ -4,14 +4,21 @@
 `./gradlew.bat :app:assembleDebug` succeeds and produces `app/build/outputs/apk/debug/app-debug.apk`.
 This was NOT true at the start of this session — the working tree had ~40 real compile errors
 spread across 4 files, left by an earlier session that ran out of context mid-edit. All are now
-fixed (see "Fixed this session" below).
+fixed (see "Fixed this session" / "Fixed in round 2" / "Fixed in round 3" below).
+
+**All of this session's work is committed and pushed to `origin/new_ui`** (commits `4425c41`
+through `f25a4bc`, in the order described below — see `git log new_ui` for the full list with
+detailed per-commit messages). Nothing is uncommitted as of the last edit to this file.
 
 **Manual verification (user-reported, 2026-09-02, later in the same day): music plays and the
 player UI updates correctly.** This confirms the core `currentTrack`/`playbackState`/`position`
-StateFlow wiring in `BottomSheetPlayerFragment`/`MainActivity` works end to end. Favorites
-list sync, the "remove from playlist" option-sheet action, and the sleep timer countdown text
-(all fixed in the second round of changes below, *after* that manual test) have **not**
-specifically been re-verified — the manual test predates those fixes.
+StateFlow wiring in `BottomSheetPlayerFragment`/`MainActivity` works end to end. This was the
+**only** manual test done this entire session. Everything else below — favorites list sync, the
+"remove from playlist" fix, the sleep timer, the `is_playing` cleanup, and especially the round-3
+StateFlow-collector bug fixes (queue/repeatMode/shuffleMode) — was fixed *after* that test and
+has **not** been manually re-verified. Round 3 in particular fixes bugs that were actively
+shipping in what the user tested, so re-testing play/pause, repeat, shuffle, and opening the
+"Up Next" queue sheet should be the first thing done next.
 
 ## Architecture direction
 See [NEW_PLAN.md](../NEW_PLAN.md) (repo root) for the full target architecture and 5-phase
@@ -160,13 +167,69 @@ consumed as plain parameter objects passed to direct method calls within the sam
 bug, just slightly misleading names inherited from the old EventBus design (see follow-up #2
 below).
 
+## Fixed in round 3 (same day, continuing after round 2's commit+push)
+Went hunting specifically for "is this StateFlow's producer side actually wired to real code, or
+does it just sit at its initial value forever" — the technique that found round 2's playlist-removal
+regression — and applied it to every `StateFlow` in `PlaybackStateManager`. Found two more real,
+currently-shipping bugs, both **more severe than anything found in rounds 1–2**: they were live
+in exactly the setup the user manually tested (a track playing, UI updating).
+
+21. **CRITICAL: opening the player screen wiped the real "Up Next" queue to empty, every time.**
+    `PlaybackStateManager.queue` is never written to by any real code path — `setQueue()`/
+    `removeFromQueue()` are only called from the unused `PlayerServiceImpl` scaffold, never from
+    `MediaPlayerService`. So the StateFlow sat at its initial `emptyList()` forever. Meanwhile
+    `BottomSheetPlayerFragment.onViewCreated` loads the *real* queue via
+    `storageUtil.loadQueueList()` and builds `queueAdapter` from it — but the `queue.collectLatest`
+    block added during the WIP StateFlow migration would then immediately receive that permanent
+    `emptyList()` (StateFlow always replays its current value to a new collector) and call
+    `queueAdapter.updateMusicListItems(emptyList())`, **clearing the just-loaded real queue** on
+    every single fragment creation. The "highlight current song in queue" text/cover it also set
+    was redundant besides — `setMainPlayerLayout` and other existing code already keep
+    `songNameQueueItem`/`artistQueueItem`/`queueCoverImg` in sync through the real, working
+    mechanism (`updateQueueAdapter()`, called from `MainActivity`/`MusicAdapter` on every real
+    queue change). Removed the collector entirely rather than wire it up live — doing that
+    correctly means auditing every place `MediaPlayerService` builds/changes its queue, which is
+    its own verified change (see follow-up #6).
+22. **`repeatMode`/`shuffleMode` StateFlow collectors could force the repeat/shuffle icons to
+    "off" on every fragment creation**, same root cause: nothing calls `setRepeatMode()`/
+    `setShuffleMode()` from real code, so both StateFlows are permanently stuck at `NONE`.
+    Collecting them meant `repeatImg`/`shuffleImg` got reset to the "off" icon regardless of the
+    actual persisted repeat/shuffle setting, overwriting what `setButton()`/`repeatFun()`/
+    `shuffleList()` (driven directly by `StorageUtil`, the real source of truth for these two
+    settings) had already set correctly. Removed both collectors. `loadState`'s collector was left
+    alone — same dead-StateFlow situation, but its body is a no-op today, so it's inert rather
+    than destructive.
+23. **Confirmed but NOT fixed: `FavoriteStateManager.addFavorite()` is dead code, but harmlessly
+    so.** The real "add to favorites" flow (`BottomSheetPlayerFragment.addFavorite()`,
+    `MainActivity` line ~1912) calls `storageUtil.saveFavorite(music)` directly, bypassing
+    `StateHolder.favoriteStateManager` entirely — only *removal* goes through the state manager
+    (the option-sheet path fixed in round 2). This means `favoriteIds` only ever shrinks, never
+    grows, while `FavoritesFragment` is open: favoriting a new song elsewhere won't make it appear
+    live in an already-open Favorites screen. Not a regression (the old EventBus code had the
+    same one-directional limitation — only ever handled removal), so left as-is; see follow-up #7
+    if this should be made fully bidirectional.
+24. **Verified as correctly wired** (no bug found, for the record so nobody re-investigates from
+    scratch): `currentTrack` ← `setCurrentTrack()` from `MediaPlayerService.onPrepared`;
+    `playbackState` ← `setPlaybackState()` from `setIcon()`/`playMedia()`/`stopMedia()`/
+    `stoppedByNotification()`; `position` ← `setPosition()` from `setSeekBar()`'s coroutine loop;
+    `timerText` ← `setTimerText()` from the sleep timer (wired in round 2, fix #19).
+25. **Removed the dual-sourced static `is_playing` field** (follow-up #4). It was a static mirror
+    of playback state, already half-migrated: `playMedia()`/`stopMedia()`/`stoppedByNotification()`
+    called `StateHolder.playbackStateManager.setPlaybackState()` directly, but `resumeMedia()`/
+    `pauseMedia()` still only set the raw static field (harmlessly, since both also call
+    `setIcon()`, which independently keeps `PlaybackStateManager` correct). Replaced every read
+    (4 in `MediaPlayerService.kt`, 2 in `MainActivity.kt`) with
+    `StateHolder.playbackStateManager.playbackState.value.isPlaying` and deleted the field.
+    `ui_visible` was investigated and correctly left alone — it isn't dual-sourced, it's the sole
+    source of truth for whether `MainActivity` is foregrounded (an unrelated UI-lifecycle concern).
+
 ## Known follow-ups (not yet done)
-1. **No emulator/UI verification of round 2's changes.** The user's manual test ("music plays,
-   UI updates") happened *before* round 2 (favorites sync, playlist removal fix, timer StateFlow,
-   dead code deletion). Specifically still unverified: removing a song from a saved playlist via
-   the option sheet (fix #17), the favorites list updating live when a favorite is removed
-   elsewhere while `FavoritesFragment` is open (fix #18), and the sleep timer countdown text
-   actually appearing/counting down/hiding on finish (fix #19).
+1. **No emulator/UI verification of rounds 2 or 3.** The user's one manual test ("music plays, UI
+   updates") happened *before* both rounds. Round 3 fixed bugs that were live during that very
+   test (queue wipe, repeat/shuffle icon reset) — re-verifying play/pause, repeat, shuffle, and
+   opening the "Up Next" queue sheet is now the highest-value thing to check. Round 2's changes
+   (removing a song from a saved playlist, live favorites sync, sleep timer countdown) are still
+   unverified too.
 2. **Rename or repurpose the 5 remaining `*Event` classes** (`PrepareRunnableEvent`,
    `RunnableSyncLyricsEvent`, `SetImageInMainPlayer`, `SetMainLayoutEvent`, `StopTextAnim`) — pure
    naming/clarity cleanup now that they're plain parameter objects, not EventBus events. Low
@@ -177,14 +240,32 @@ below).
    `MainViewModel`'s own `ViewModel()` base is pointless this way — its `viewModelScope` is tied
    to nothing and it won't survive `MainActivity` recreation. Not a compile bug, just not
    idiomatic; revisit when doing real DI (see NEW_PLAN.md Phase 3).
-4. **`MediaPlayerService.kt` / `MainActivity.kt` still use static `is_playing` / `ui_visible`**
-   fields alongside the new `PlaybackStateManager` StateFlows (comment at the `companion object`
-   says "kept for backward compatibility but should be migrated away from"). Not broken, just
-   dual-sourced state — migrate call sites to read from `StateHolder.playbackStateManager`
-   instead, then delete the static fields.
+4. ~~`is_playing`/`ui_visible` dual-sourced state~~ — **done in round 3**: `is_playing` removed
+   entirely (see fix #25 below); `ui_visible` investigated and correctly left alone (it's not
+   dual-sourced, it's the sole source of truth for MainActivity's foreground state).
 5. **Minor redundant work in `currentTrack.collectLatest`** (see fix #15) — `miniNameText`/
    `miniArtistText`/favorite icon get set twice per track change (once directly in the collector,
-   once inside `setMainPlayerLayout` via `setPreviousData`). Harmless, low priority.
+   once inside `setMainPlayerLayout` via `setPreviousData`). Investigated further in round 3:
+   this is intentionally left alone, NOT the same situation as the queue/repeatMode/shuffleMode
+   bugs — `setMainPlayerLayout` has a `playing_same_song` short-circuit (for repeat-one replaying
+   the identical track) that may skip its own body, and the collector's redundant lines might be
+   the only thing keeping those fields updated in that specific case. Removing them needs live
+   testing of repeat-one mode specifically, not just static analysis. Harmless as-is; leave it.
+6. **`PlaybackStateManager.queue`/`repeatMode`/`shuffleMode` have no real producer.** Their
+   collectors were removed from `BottomSheetPlayerFragment` in round 3 because they were actively
+   destructive while unwired (see fixes #21/#22) — but the underlying gap NEW_PLAN.md Phase 1
+   describes (`MediaPlayerService` as the single source of truth pushing into
+   `PlaybackStateManager`) is still open for these three. To do this properly: audit every place
+   `MediaPlayerService` builds/changes the queue (`playMedia`/skip-next/skip-previous/shuffle/
+   `updateQueueAdapter`'s real callers) and every place repeat/shuffle mode changes
+   (`repeatFun()`/`shuffleList()`, currently `StorageUtil`-only) and call `setQueue()`/
+   `setRepeatMode()`/`setShuffleMode()` from each. Only then re-add the fragment-side collectors.
+   This is real work requiring device testing — don't attempt it as a quick "wire it up" pass.
+7. **`FavoriteStateManager.addFavorite()` is unused** (see fix #23) — the real add-to-favorites
+   flow bypasses it and calls `storageUtil.saveFavorite()` directly. Low priority: wire
+   `BottomSheetPlayerFragment.addFavorite()`/`MainActivity`'s add-favorite call site to also call
+   `StateHolder.favoriteStateManager.addFavorite()`, so `FavoritesFragment`'s live-sync collector
+   (fix #18) becomes bidirectional instead of removal-only. Not urgent — matches old behavior.
 
 ## Files touched this session
 Round 1 (compile fixes):
@@ -205,30 +286,53 @@ Round 2 (EventBus completion + timer StateFlow, on top of the same files plus):
   `events/UpdateMusicImageEvent.kt`, `events/UpdateMusicProgressEvent.kt`,
   `events/SetTimerText.kt`, `events/TimerFinished.kt`, `events/RemoveLyricsHandlerEvent.kt`
 
+Round 3 (found+fixed the queue/repeatMode/shuffleMode StateFlow bugs, plus `is_playing` cleanup):
+- `app/src/main/java/com/atomykcoder/atomykplay/services/MediaPlayerService.kt` (is_playing removal)
+- `app/src/main/java/com/atomykcoder/atomykplay/ui/MainActivity.kt` (is_playing removal)
+- `app/src/main/java/com/atomykcoder/atomykplay/fragments/BottomSheetPlayerFragment.kt`
+  (removed the queue/repeatMode/shuffleMode collectors)
+
 (`fragments/AddLyricsFragment.kt` was already correct from an earlier session — only referenced
 in this report because it's what exposed bug #1.)
 
+**Commits** (all pushed to `origin/new_ui`): `4425c41` (state managers/service interfaces),
+`2f9a060` (round 1 compile fixes), `93ac985` (round 2 EventBus completion + timer), `1772a83`
+(NEW_PLAN.md/PROGRESS.md), `28e3f7e` (is_playing removal), `d4fa923` (queue StateFlow fix),
+`f25a4bc` (repeatMode/shuffleMode fix).
+
 ## Next session focus (in priority order)
-1. Run the app and manually verify round 2's changes specifically: remove a song from a saved
-   playlist (option sheet → "remove from list" while viewing a `Playlist`, not the queue), remove
-   a favorite while `FavoritesFragment` is open and confirm it disappears live, and start a sleep
-   timer and confirm the countdown text appears/updates/hides correctly on finish.
-2. Follow-up #4: migrate `is_playing`/`ui_visible` static-field call sites to
-   `StateHolder.playbackStateManager` and delete the static fields.
-3. Follow-up #2/#5: cosmetic cleanup (rename leftover `*Event` classes, dedupe the
-   `currentTrack.collectLatest` redundancy) — low priority, do only if nothing higher-value is
-   pending.
-4. Re-check NEW_PLAN.md's Phase 2/3 (service decomposition, domain layer) — Phase 5 (EventBus
+1. **Run the app and manually verify round 3's fixes first** — they're the highest-severity ones
+   and were live in the exact setup the user already tested once: play a song, open the "Up Next"
+   queue sheet and confirm it's NOT empty; set repeat/shuffle, background and reopen the app, and
+   confirm the icons still show the correct state (not reset to "off").
+2. Then verify round 2: remove a song from a saved playlist (option sheet → "remove from list"
+   while viewing a `Playlist`, not the queue), remove a favorite while `FavoritesFragment` is open
+   and confirm it disappears live, start a sleep timer and confirm the countdown text appears/
+   updates/hides correctly on finish.
+3. Follow-up #6 (the real one left): wire `MediaPlayerService` to actually call `setQueue()`/
+   `setRepeatMode()`/`setShuffleMode()` on `PlaybackStateManager`, then re-add the fragment-side
+   collectors this session removed. Needs device testing — don't do this blind.
+4. Follow-up #2/#5/#7: cosmetic/low-priority cleanup — do only if nothing higher-value is pending.
+5. Re-check NEW_PLAN.md's Phase 2/3 (service decomposition, domain layer) — Phase 5 (EventBus
    removal) is now functionally done; decide whether to start on `AudioSourceResolver`/
-   `LyricsService`/`MusicLibraryService` extraction from `MediaPlayerService`, or on real DI to
-   fix follow-up #3.
+   `LyricsService`/`MusicLibraryService` extraction from `MediaPlayerService` (note:
+   `AudioFocusManager`/`AudioSourceResolver` already exist as scaffolding but are NOT wired into
+   `MediaPlayerService` yet — it still does its own inline audio-focus handling), or on real DI
+   to fix follow-up #3.
 
 ## Architecture notes
 - Moving toward clean separation: UI → ViewModel → StateManagers/UseCases → Repositories
 - StateFlows provide reactive state updates without EventBus, **but every StateFlow collector
   block that observes more than one flow must `launch { }` each one separately** —
   `collectLatest` never returns, so sharing one coroutine across multiple `.collectLatest` calls
-  silently drops every flow after the first. (This was the single biggest bug found in round 1.)
+  silently drops every flow after the first. (Single biggest bug found in round 1.)
+- **Before trusting a StateFlow collector, verify its producer side is real.** A collector that
+  looks correct can still be actively destructive if nothing ever calls the corresponding
+  `setXxx()` — the StateFlow just replays its hardcoded initial value (often `emptyList()`/`NONE`)
+  to every new subscriber, silently overwriting whatever the real, working (often
+  `StorageUtil`-backed) code had already set correctly. Round 3's two worst bugs (queue wipe,
+  repeat/shuffle icon reset) were both this exact pattern. Check: grep for real (non-scaffold)
+  callers of every `setXxx()` on a state manager before trusting or extending any collector of it.
 - ViewModels mediate between UI and business logic
 - StateManagers (like `PlaybackStateManager`, `FavoriteStateManager`) hold single source of truth
   state, but the real backing storage stays `StorageUtil` (SharedPreferences) for now — double
@@ -238,3 +342,7 @@ in this report because it's what exposed bug #1.)
   parameter is dead, grep for **direct** calls to it too (by method name, not just for
   `EventBus.post(...)` of its event type) — `setMainPlayerLayout`/`setPlayerImages` looked
   orphaned at a glance but weren't (see fix #15). Grep for both before deleting anything.
+- `PlayerServiceImpl`/`MainViewModel`/`AudioFocusManager`/`AudioSourceResolver` are all NEW_PLAN.md
+  Phase 2/3 scaffolding — they compile and look complete, but are NOT wired into the real
+  `MediaPlayerService`/`MainActivity` flow yet. Don't assume a class exists means it's in use;
+  grep for real callers first (this is what surfaced follow-ups #6 and #7).
