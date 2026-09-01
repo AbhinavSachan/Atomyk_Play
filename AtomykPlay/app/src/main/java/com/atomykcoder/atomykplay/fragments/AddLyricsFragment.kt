@@ -28,7 +28,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.greenrobot.eventbus.EventBus
 import java.lang.ref.WeakReference
 import java.util.Locale
 
@@ -140,7 +139,8 @@ class AddLyricsFragment : BaseFragment() {
             storageUtil?.saveLyrics(musicId, lrcMap)
         }
         showToast("Saved")
-        EventBus.getDefault().post(RunnableSyncLyricsEvent())
+        // Instead of using EventBus, call the method in MainActivity to refresh lyrics in bottom sheet
+        (activity as MainActivity).refreshLyricsInBottomSheet()
     }
 
     private fun setDialogBox() {

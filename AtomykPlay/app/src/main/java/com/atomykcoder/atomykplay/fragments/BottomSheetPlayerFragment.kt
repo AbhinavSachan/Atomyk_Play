@@ -53,15 +53,14 @@ import com.atomykcoder.atomykplay.data.BaseFragment
 import com.atomykcoder.atomykplay.enums.OptionSheetEnum
 import com.atomykcoder.atomykplay.enums.PlaybackStatus
 import com.atomykcoder.atomykplay.events.PrepareRunnableEvent
-import com.atomykcoder.atomykplay.events.RemoveLyricsHandlerEvent
 import com.atomykcoder.atomykplay.events.RunnableSyncLyricsEvent
 import com.atomykcoder.atomykplay.events.SetImageInMainPlayer
 import com.atomykcoder.atomykplay.events.SetMainLayoutEvent
-import com.atomykcoder.atomykplay.events.SetTimerText
 import com.atomykcoder.atomykplay.events.StopTextAnim
-import com.atomykcoder.atomykplay.events.TimerFinished
-import com.atomykcoder.atomykplay.events.UpdateMusicImageEvent
-import com.atomykcoder.atomykplay.events.UpdateMusicProgressEvent
+import com.atomykcoder.atomykplay.state.PlaybackStateManager
+import com.atomykcoder.atomykplay.state.StateHolder
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.flow.collectLatest
 import com.atomykcoder.atomykplay.helperFunctions.AudioFileCover
 import com.atomykcoder.atomykplay.helperFunctions.GlideApp
 import com.atomykcoder.atomykplay.helperFunctions.Logger
@@ -91,7 +90,6 @@ import com.google.android.material.progressindicator.LinearProgressIndicator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import java.io.File
 import java.io.IOException
@@ -319,9 +317,6 @@ class BottomSheetPlayerFragment : BaseFragment(), OnSeekBarChangeListener, OnDra
     }
 
     private fun initComponents() {
-        if (!EventBus.getDefault().isRegistered(this)) {
-            EventBus.getDefault().register(this)
-        }
         context1?.let {
             storageUtil = StorageUtil(it.applicationContext)
             settingsStorage = SettingsStorage(it.applicationContext)
@@ -481,6 +476,124 @@ class BottomSheetPlayerFragment : BaseFragment(), OnSeekBarChangeListener, OnDra
         }
         tempColor = resources.getColor(R.color.player_bg, Resources.getSystem().newTheme())
         setupQueueBottomSheet()
+
+        // Setup StateFlow observation for playback state. Each flow gets its own child
+        // coroutine since collectLatest suspends forever - sharing one coroutine would
+        // starve every collector after the first.
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            launch {
+                StateHolder.playbackStateManager.currentTrack.collectLatest { track ->
+                    // Update UI with current track info
+                    activeMusic = track
+                    if (track != null) {
+                        setPreviousData(track)
+                        animateText()
+                        // Update mini player
+                        miniNameText?.text = track.name
+                        miniArtistText?.text = track.artist
+                        // Update favorite state
+                        if (!storageUtil.checkFavourite(track)) {
+                            favoriteImg?.setImageResource(R.drawable.ic_favorite_border)
+                        } else {
+                            favoriteImg?.setImageResource(R.drawable.ic_favorite)
+                        }
+                    }
+                }
+            }
+
+            launch {
+                StateHolder.playbackStateManager.playbackState.collectLatest { state ->
+                    // Update play/pause button based on playback state
+                    val isPlaying = state.isPlaying
+                    miniPause?.setImageResource(if (isPlaying) R.drawable.ic_pause_mini else R.drawable.ic_play_mini)
+                    playImg?.setImageResource(if (isPlaying) R.drawable.ic_pause_main else R.drawable.ic_play_main)
+
+                    // Update button shake animation state
+                    if (!isPlaying) {
+                        miniPause?.clearAnimation()
+                        playImg?.clearAnimation()
+                    }
+                }
+            }
+
+            launch {
+                StateHolder.playbackStateManager.position.collectLatest { position ->
+                    // Update seekbar and current position text
+                    val (currentPos, duration) = position
+                    seekBarMain?.progress = currentPos
+                    miniProgress?.progress = currentPos
+                    curPosTv?.text = MusicHelper.convertDuration(currentPos.toString())
+
+                    // Update mini progress
+                    if (duration > 0) {
+                        miniProgress?.max = duration
+                    }
+                }
+            }
+
+            launch {
+                StateHolder.playbackStateManager.queue.collectLatest { queue ->
+                    // Update queue adapter
+                    musicArrayList = ArrayList(queue)
+                    queueAdapter?.updateMusicListItems(musicArrayList ?: ArrayList())
+
+                    // Update current song in queue UI
+                    val currentTrackId = StateHolder.playbackStateManager.currentTrack.value?.id
+                    val currentIndex = queue.indexOfFirst { it.id == currentTrackId }
+                    if (currentIndex >= 0 && currentIndex < queue.size) {
+                        val currentMusic = queue[currentIndex]
+                        songNameQueueItem?.text = currentMusic.name
+                        artistQueueItem?.text = currentMusic.artist
+                        queueCoverImg?.loadAlbumArt(currentMusic.path, R.drawable.ic_music, 128, false)
+                    }
+                }
+            }
+
+            launch {
+                StateHolder.playbackStateManager.repeatMode.collectLatest { mode ->
+                    // Update repeat button icon
+                    when (mode) {
+                        PlaybackStateManager.RepeatMode.NONE -> repeatImg?.setImageResource(R.drawable.ic_repeat_empty)
+                        PlaybackStateManager.RepeatMode.ALL -> repeatImg?.setImageResource(R.drawable.ic_repeat)
+                        PlaybackStateManager.RepeatMode.ONE -> repeatImg?.setImageResource(R.drawable.ic_repeat_one)
+                    }
+                }
+            }
+
+            launch {
+                StateHolder.playbackStateManager.shuffleMode.collectLatest { mode ->
+                    // Update shuffle button icon
+                    when (mode) {
+                        PlaybackStateManager.ShuffleMode.NONE -> shuffleImg?.setImageResource(R.drawable.ic_shuffle_empty)
+                        PlaybackStateManager.ShuffleMode.ALL -> shuffleImg?.setImageResource(R.drawable.ic_shuffle)
+                    }
+                }
+            }
+
+            launch {
+                StateHolder.playbackStateManager.loadState.collectLatest { loadState ->
+                    // Update loading indicator
+                    val isLoading = loadState.isLoading
+                    // You could show a loading spinner here if needed
+                }
+            }
+
+            launch {
+                StateHolder.playbackStateManager.timerText.collectLatest { text ->
+                    // Update sleep timer countdown display
+                    if (text != null) {
+                        if (timerTv?.visibility == View.GONE) {
+                            timerTv?.visibility = View.VISIBLE
+                            timerImg?.visibility = View.GONE
+                        }
+                        timerTv?.text = text
+                    } else {
+                        timerTv?.visibility = View.GONE
+                        timerImg?.visibility = View.VISIBLE
+                    }
+                }
+            }
+        }
     }
 
     override fun onClick(p0: View?) {
@@ -531,13 +644,13 @@ class BottomSheetPlayerFragment : BaseFragment(), OnSeekBarChangeListener, OnDra
 
     }
 
-    @Subscribe
     fun stopAnimText(result: StopTextAnim) {
         playerSongNameTv?.isSelected = false
         miniNameText?.isSelected = false
         songNameQueueItem?.isSelected = false
     }
 
+    
     override fun onResume() {
         super.onResume()
         appPaused = false
@@ -576,7 +689,6 @@ class BottomSheetPlayerFragment : BaseFragment(), OnSeekBarChangeListener, OnDra
 
     override fun onDestroyView() {
         super.onDestroyView()
-        EventBus.getDefault().unregister(this)
         lyricsRecyclerView?.clearOnScrollListeners()
         executorService.shutdown()
 
@@ -651,13 +763,7 @@ class BottomSheetPlayerFragment : BaseFragment(), OnSeekBarChangeListener, OnDra
         }
     }
 
-    @Subscribe
-    fun removeLyricsHandler(event: RemoveLyricsHandlerEvent?) {
-        if (lyricsHandler != null) {
-            lyricsHandler!!.removeCallbacks(lyricsRunnable!!)
-        }
-    }
-
+    
     private fun generateThemeColor(image: Bitmap): Int {
         val palette = Palette.Builder(image).generate()
         if (settingsStorage.loadIsThemeDark()) {
@@ -933,7 +1039,6 @@ class BottomSheetPlayerFragment : BaseFragment(), OnSeekBarChangeListener, OnDra
         }
     }
 
-    @Subscribe
     fun runnableSyncLyrics(event: RunnableSyncLyricsEvent?) {
         if (activeMusic != null) {
             lrcMap = storageUtil.loadLyrics(activeMusic!!.id)
@@ -944,7 +1049,7 @@ class BottomSheetPlayerFragment : BaseFragment(), OnSeekBarChangeListener, OnDra
                 lyricsArrayList.addAll(lrcMap!!.lyrics)
                 setLyricsAdapter()
                 lyricsHandler = Handler(Looper.getMainLooper())
-                EventBus.getDefault().post(PrepareRunnableEvent())
+                prepareRunnable(null)
             } else {
                 lyricsRecyclerView?.visibility = View.GONE
                 noLyricsLayout?.visibility = View.VISIBLE
@@ -952,7 +1057,6 @@ class BottomSheetPlayerFragment : BaseFragment(), OnSeekBarChangeListener, OnDra
         }
     }
 
-    @Subscribe
     fun prepareRunnable(event: PrepareRunnableEvent?) {
         if (lyricsHandler != null) {
             lyricsRunnable = Runnable {
@@ -982,25 +1086,6 @@ class BottomSheetPlayerFragment : BaseFragment(), OnSeekBarChangeListener, OnDra
                 )
             }
             lyricsHandler?.postDelayed(lyricsRunnable!!, 0)
-        }
-    }
-
-    @Subscribe
-    fun handleMusicProgressUpdate(event: UpdateMusicProgressEvent) {
-        miniProgress?.progress = event.position
-        seekBarMain?.progress = event.position
-        val cur = MusicHelper.convertDuration(event.position.toString())
-        curPosTv?.text = cur
-    }
-
-    @Subscribe
-    fun handleMusicImageUpdate(event: UpdateMusicImageEvent) {
-        if (event.shouldDisplayPlayImage) {
-            miniPause?.setImageResource(R.drawable.ic_play_mini)
-            playImg?.setImageResource(R.drawable.ic_play_main)
-        } else {
-            miniPause?.setImageResource(R.drawable.ic_pause_mini)
-            playImg?.setImageResource(R.drawable.ic_pause_main)
         }
     }
 
@@ -1234,21 +1319,6 @@ class BottomSheetPlayerFragment : BaseFragment(), OnSeekBarChangeListener, OnDra
         timerDialogue?.show()
     }
 
-    @Subscribe
-    fun setTimerLiveText(setTimerText: SetTimerText) {
-        if (timerTv!!.visibility == View.GONE) {
-            timerTv!!.visibility = View.VISIBLE
-            timerImg!!.visibility = View.GONE
-        }
-        timerTv!!.text = setTimerText.liveTimerText
-    }
-
-    @Subscribe
-    fun setTimerFinished(timerFinished: TimerFinished?) {
-        timerTv!!.visibility = View.GONE
-        timerImg!!.visibility = View.VISIBLE
-    }
-
     fun addFavorite(storageUtil: StorageUtil, music: Music?, imageView: ImageView?) {
         if (music != null) {
             if (!storageUtil.checkFavourite(music)) {
@@ -1429,13 +1499,9 @@ class BottomSheetPlayerFragment : BaseFragment(), OnSeekBarChangeListener, OnDra
     }
 
     override fun onStartTrackingTouch(seekBar: SeekBar) {
-        //removing handler so we can change position of seekbar
+        //removing position updates so we can change position of seekbar
         if (MainActivity.service_bound) {
-            MainActivity.media_player_service?.seekBarRunnable?.let {
-                MainActivity.media_player_service?.seekBarHandler?.removeCallbacks(
-                    it
-                )
-            }
+            MainActivity.media_player_service?.cancelPositionUpdates()
         }
     }
 
@@ -1448,9 +1514,7 @@ class BottomSheetPlayerFragment : BaseFragment(), OnSeekBarChangeListener, OnDra
 
         //first checking setting the media seek to current position of seek bar and then setting all data in UI
         if (MainActivity.service_bound) {
-            MainActivity.media_player_service?.seekBarRunnable?.let {
-                MainActivity.media_player_service?.seekBarHandler?.removeCallbacks(it)
-            }
+            MainActivity.media_player_service?.cancelPositionUpdates()
             MainActivity.media_player_service?.seekMediaTo(seekBar.progress)
             if (MainActivity.media_player_service?.isMediaPlaying!!) {
                 MainActivity.media_player_service?.buildNotification(PlaybackStatus.PLAYING, 1f)
@@ -1482,9 +1546,7 @@ class BottomSheetPlayerFragment : BaseFragment(), OnSeekBarChangeListener, OnDra
 
             //first checking setting the media seek to current position of seek bar and then setting all data in UI
             if (MainActivity.service_bound) {
-                MainActivity.media_player_service?.seekBarRunnable?.let {
-                    MainActivity.media_player_service?.seekBarHandler?.removeCallbacks(it)
-                }
+                MainActivity.media_player_service?.cancelPositionUpdates()
                 MainActivity.media_player_service?.seekMediaTo(stamp)
                 if (MainActivity.media_player_service?.isMediaPlaying!!) {
                     MainActivity.media_player_service?.buildNotification(PlaybackStatus.PLAYING, 1f)

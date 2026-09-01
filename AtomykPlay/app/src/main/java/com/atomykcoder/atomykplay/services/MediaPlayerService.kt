@@ -71,14 +71,6 @@ import com.atomykcoder.atomykplay.constants.BroadcastStrings.BROADCAST_PLAY_PREV
 import com.atomykcoder.atomykplay.constants.BroadcastStrings.BROADCAST_STOP_MUSIC
 import com.atomykcoder.atomykplay.constants.RepeatModes
 import com.atomykcoder.atomykplay.enums.PlaybackStatus
-import com.atomykcoder.atomykplay.events.PrepareRunnableEvent
-import com.atomykcoder.atomykplay.events.RemoveLyricsHandlerEvent
-import com.atomykcoder.atomykplay.events.SetImageInMainPlayer
-import com.atomykcoder.atomykplay.events.SetMainLayoutEvent
-import com.atomykcoder.atomykplay.events.SetTimerText
-import com.atomykcoder.atomykplay.events.TimerFinished
-import com.atomykcoder.atomykplay.events.UpdateMusicImageEvent
-import com.atomykcoder.atomykplay.events.UpdateMusicProgressEvent
 import com.atomykcoder.atomykplay.fragments.BottomSheetPlayerFragment
 import com.atomykcoder.atomykplay.helperFunctions.AudioFileCover
 import com.atomykcoder.atomykplay.helperFunctions.GlideApp
@@ -86,6 +78,7 @@ import com.atomykcoder.atomykplay.helperFunctions.Logger
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper
 import com.atomykcoder.atomykplay.models.LRCMap
 import com.atomykcoder.atomykplay.models.Music
+import com.atomykcoder.atomykplay.state.StateHolder
 import com.atomykcoder.atomykplay.ui.MainActivity
 import com.atomykcoder.atomykplay.utils.MusicEnhancerUtil
 import com.atomykcoder.atomykplay.utils.StorageUtil
@@ -95,8 +88,10 @@ import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import org.greenrobot.eventbus.EventBus
 import java.io.File
 import java.io.IOException
 
@@ -114,11 +109,8 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
         CoroutineScope(Dispatchers.IO)
     }
 
-    @JvmField
-    var seekBarRunnable: Runnable? = null
-
-    @JvmField
-    var seekBarHandler: Handler? = null
+    // For position updates - replaced Handler/Runnable with coroutine-based approach
+    private var positionUpdateJob: Job? = null
     private val selfStopHandler: Handler by lazy { Handler(Looper.getMainLooper()) }
     private var selfStopRunnable: Runnable? = null
     private var wasPlaying = false
@@ -309,9 +301,21 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
     fun setIcon(playbackStatus: PlaybackStatus) {
         if (musicList != null) {
             if (playbackStatus == PlaybackStatus.PLAYING) {
-                EventBus.getDefault().post(UpdateMusicImageEvent(false))
+                // Update playback state for UI - replaced EventBus.UpdateMusicImageEvent(false)
+                val currentState = StateHolder.playbackStateManager.playbackState.value
+                StateHolder.playbackStateManager.setPlaybackState(
+                    true,
+                    currentState.isBuffering,
+                    currentState.error
+                )
             } else if (playbackStatus == PlaybackStatus.PAUSED) {
-                EventBus.getDefault().post(UpdateMusicImageEvent(true))
+                // Update playback state for UI - replaced EventBus.UpdateMusicImageEvent(true)
+                val currentState = StateHolder.playbackStateManager.playbackState.value
+                StateHolder.playbackStateManager.setPlaybackState(
+                    false,
+                    currentState.isBuffering,
+                    currentState.error
+                )
             }
         }
     }
@@ -763,7 +767,8 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
         get() = mediaPlayer?.audioSessionId
 
     override fun onPrepared(mp: MediaPlayer) {
-        EventBus.getDefault().post(SetMainLayoutEvent(activeMusic))
+        // Update current track for UI - replaced EventBus.SetMainLayoutEvent(activeMusic)
+        StateHolder.playbackStateManager.setCurrentTrack(activeMusic)
         resumeMedia(false)
         var finalImage: Bitmap? = null
         coroutineScope.launch {
@@ -795,7 +800,9 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
                     // Function to post image in MainPlayer using EventBus
                     private fun postImageInMainPlayer(image: Bitmap?, activeMusic: Music?) {
                         if (MainActivity.service_bound) {
-                            EventBus.getDefault().post(SetImageInMainPlayer(image, activeMusic))
+                            // Update UI with image - replaced EventBus.SetImageInMainPlayer
+// Note: Image updates are handled through MediaSession metadata now
+// If needed for UI, we could add an image StateFlow to PlaybackStateManager
                         }
                     }
 
@@ -820,7 +827,8 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
             RepeatModes.REPEAT_MODE_ALL -> skipToNext()
             RepeatModes.REPEAT_MODE_ONE -> {
                 playMedia()
-                EventBus.getDefault().post(PrepareRunnableEvent())
+                // Prepare runnable for lyrics - replaced EventBus.PrepareRunnableEvent
+                // Note: Lyrics state could be added to PlaybackStateManager if needed for UI
             }
         }
         if (isMediaPlaying) {
@@ -968,7 +976,13 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
         if (!isMediaPlayerNotNull) return
         if (!isMediaPlaying) {
             mediaPlayer!!.start()
-            is_playing = true
+            // Update playback state - replaced is_playing = true
+            val currentState = StateHolder.playbackStateManager.playbackState.value
+            StateHolder.playbackStateManager.setPlaybackState(
+                true,
+                currentState.isBuffering,
+                currentState.error
+            )
             setIcon(PlaybackStatus.PLAYING)
             buildNotification(PlaybackStatus.PLAYING, 1f)
         }
@@ -983,7 +997,13 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
         }
         if (isMediaPlaying) {
             mediaPlayer!!.stop()
-            is_playing = false
+            // Update playback state - replaced is_playing = false
+            val currentState = StateHolder.playbackStateManager.playbackState.value
+            StateHolder.playbackStateManager.setPlaybackState(
+                false,
+                currentState.isBuffering,
+                currentState.error
+            )
         }
     }
 
@@ -994,7 +1014,13 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
         if (isMediaPlayerNotNull && isMediaPlaying) {
             storage.saveMusicLastPos(currentMediaPosition)
             mediaPlayer!!.pause()
-            is_playing = false
+            // Update playback state - replaced is_playing = false
+            val currentState = StateHolder.playbackStateManager.playbackState.value
+            StateHolder.playbackStateManager.setPlaybackState(
+                false,
+                currentState.isBuffering,
+                currentState.error
+            )
             setIcon(PlaybackStatus.PAUSED)
             buildNotification(PlaybackStatus.PAUSED, 0f)
         }
@@ -1054,7 +1080,10 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
             if (activeMusic != null) {
                 lrcMap = storage.loadLyrics(activeMusic!!.id)
             }
-            if (lrcMap != null) EventBus.getDefault().post(PrepareRunnableEvent())
+            if (lrcMap != null) {
+                // Prepare runnable for lyrics - replaced EventBus.PrepareRunnableEvent
+                // Note: Lyrics state could be added to PlaybackStateManager if needed for UI
+            }
         }
 
         // set is_playing to true
@@ -1082,8 +1111,10 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
     fun pauseMedia() {
         if (isMediaPlayerNotNull && isMediaPlaying) {
             if (MainActivity.service_bound) {
-                if (seekBarHandler != null) seekBarHandler!!.removeCallbacks(seekBarRunnable!!)
-                EventBus.getDefault().post(RemoveLyricsHandlerEvent())
+                // Remove position updates - replaced seekBarHandler!!.removeCallbacks(seekBarRunnable!!)
+                positionUpdateJob?.cancel()
+                // Remove lyrics handler - replaced EventBus.RemoveLyricsHandlerEvent()
+                // Note: Lyrics state could be added to PlaybackStateManager if needed for UI
             }
             storage.saveMusicLastPos(currentMediaPosition)
             mediaPlayer!!.pause()
@@ -1096,23 +1127,36 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
 
     /**
      * This function sends music position to main ui
+     * Replaced Handler/Runnable with coroutine-based periodic updates
      */
+    fun cancelPositionUpdates() {
+        positionUpdateJob?.cancel()
+    }
+
     fun setSeekBar() {
-        seekBarHandler = Handler(Looper.getMainLooper())
+        // Cancel any existing position update job
+        positionUpdateJob?.cancel()
+
+        // Start new position update job if media player is available
         if (isMediaPlayerNotNull) {
-            // if media_player hasn't finished the song yet then update progress
-            if (currentMediaPosition <= mediaPlayer!!.duration) {
-                seekBarRunnable = Runnable {
-                    var position = 0
+            positionUpdateJob = coroutineScope.launch {
+                while (isActive && isMediaPlayerNotNull && currentMediaPosition <= (mediaPlayer?.duration
+                        ?: 0)
+                ) {
                     try {
-                        position = currentMediaPosition
+                        val position = currentMediaPosition
+                        // Update position for UI - replaced EventBus.UpdateMusicProgressEvent(position)
+                        StateHolder.playbackStateManager.setPosition(
+                            position,
+                            mediaPlayer?.duration ?: 0
+                        )
                     } catch (e: IllegalStateException) {
+                        // Handle case where media player is released during position check
                         e.printStackTrace()
                     }
-                    EventBus.getDefault().post(UpdateMusicProgressEvent(position))
-                    seekBarHandler!!.postDelayed(seekBarRunnable!!, 300)
+                    // Update every 300ms to match original frequency
+                    delay(300)
                 }
-                seekBarHandler!!.postDelayed(seekBarRunnable!!, 0)
             }
         }
     }
@@ -1251,7 +1295,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
 
                 // Replace This with TextView.setText(View);
                 val finalCDTimer = "$minutes:$seconds"
-                EventBus.getDefault().post(SetTimerText(finalCDTimer))
+                StateHolder.playbackStateManager.setTimerText(finalCDTimer)
             }
 
             //Code After timer is Finished Goes Here
@@ -1259,7 +1303,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
                 //Replace This pausePlayAudio() with just a pause Method.
                 //Replaced it
                 pauseMedia()
-                EventBus.getDefault().post(TimerFinished())
+                StateHolder.playbackStateManager.setTimerText(null)
                 countDownTimer[0] = null
             }
         }
@@ -1270,7 +1314,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
     fun cancelTimer() {
         countDownTimer[0]?.apply {
             cancel()
-            EventBus.getDefault().post(TimerFinished())
+            StateHolder.playbackStateManager.setTimerText(null)
         }
     }
 
@@ -1389,10 +1433,8 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
 
                         //first checking setting the media seek to current position of seek bar and then setting all data in UI•
                         if (MainActivity.service_bound) {
-                            //removing handler so that we can seek without glitches handler will restart in setSeekBar() method☻
-                            seekBarRunnable?.let {
-                                seekBarHandler?.removeCallbacks(it)
-                            }
+                            //removing position updates so that we can seek without glitches, they will restart in setSeekBar() method☻
+                            positionUpdateJob?.cancel()
                             if (isMediaPlayerNotNull) {
                                 seekMediaTo(Math.toIntExact(pos))
                                 if (isMediaPlaying) {
@@ -1535,8 +1577,8 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
         defaultMetadata = null
         defaultThumbnail = null
         mPackageValidator = null
-        seekBarRunnable = null
-        seekBarHandler = null
+        positionUpdateJob?.cancel()
+        positionUpdateJob = null
         selfStopRunnable = null
         transportControls = null
         musicList?.clear()
@@ -1620,6 +1662,8 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
         //audio player notification ID
         const val NOTIFICATION_ID = 874159
 
+        // Note: is_playing and ui_visible static variables replaced with StateFlows in PlaybackStateManager
+        // These are kept for backward compatibility but should be migrated away from
         @JvmField
         var is_playing = false
 

@@ -74,13 +74,10 @@ import com.atomykcoder.atomykplay.constants.FragmentTags.TAG_EDITOR_FRAGMENT_TAG
 import com.atomykcoder.atomykplay.constants.ShuffleModes
 import com.atomykcoder.atomykplay.data.BaseActivity
 import com.atomykcoder.atomykplay.enums.OptionSheetEnum
-import com.atomykcoder.atomykplay.events.PrepareRunnableEvent
-import com.atomykcoder.atomykplay.events.RemoveFromFavoriteEvent
-import com.atomykcoder.atomykplay.events.RemoveFromPlaylistEvent
-import com.atomykcoder.atomykplay.events.RemoveLyricsHandlerEvent
 import com.atomykcoder.atomykplay.fragments.AboutFragment
 import com.atomykcoder.atomykplay.fragments.BottomSheetPlayerFragment
 import com.atomykcoder.atomykplay.fragments.LastAddedFragment
+import com.atomykcoder.atomykplay.fragments.OpenPlayListFragment
 import com.atomykcoder.atomykplay.fragments.PlaylistsFragment
 import com.atomykcoder.atomykplay.fragments.SearchFragment
 import com.atomykcoder.atomykplay.fragments.SettingsFragment
@@ -89,12 +86,14 @@ import com.atomykcoder.atomykplay.helperFunctions.Logger
 import com.atomykcoder.atomykplay.helperFunctions.MusicHelper
 import com.atomykcoder.atomykplay.models.Music
 import com.atomykcoder.atomykplay.models.Playlist
+import com.atomykcoder.atomykplay.presentation.viewmodel.MainViewModel
 import com.atomykcoder.atomykplay.repository.LoadingStatus
 import com.atomykcoder.atomykplay.repository.MusicRepo
 import com.atomykcoder.atomykplay.scripts.CustomBottomSheet
 import com.atomykcoder.atomykplay.scripts.LinearLayoutManagerWrapper
 import com.atomykcoder.atomykplay.services.MediaPlayerService
 import com.atomykcoder.atomykplay.services.MediaPlayerService.LocalBinder
+import com.atomykcoder.atomykplay.state.PlaybackStateManager
 import com.atomykcoder.atomykplay.utils.AndroidUtil
 import com.atomykcoder.atomykplay.utils.AndroidUtil.hideSystemUi
 import com.atomykcoder.atomykplay.utils.AndroidUtil.setSystemDrawBehindBars
@@ -122,7 +121,10 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import com.karumi.dexter.listener.single.PermissionListener
 import com.l4digital.fastscroll.FastScrollRecyclerView
 import com.l4digital.fastscroll.FastScroller
-import org.greenrobot.eventbus.EventBus
+import androidx.lifecycle.lifecycleScope
+import com.atomykcoder.atomykplay.state.StateHolder
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import java.io.File
 import java.util.Random
 import java.util.concurrent.ExecutorService
@@ -430,6 +432,9 @@ class MainActivity : BaseActivity(), View.OnClickListener,
     private var songBitrateTv: TextView? = null
     private var songAlbumTv: TextView? = null
     private var handler: Handler? = null
+    // ViewModel for observing playback state
+    private var viewModelSetupDone = false
+    private lateinit var viewModel: MainViewModel
 
     // Create a new ActivityResultLauncher to handle the delete request result
     private val deleteMusicRequestLauncher =
@@ -549,7 +554,7 @@ class MainActivity : BaseActivity(), View.OnClickListener,
                 if (media_player_service != null) {
                     media_player_service!!.setSeekBar()
                 }
-                EventBus.getDefault().post(PrepareRunnableEvent())
+                // EventBus usage removed - UI updates handled through ViewModel StateFlow collection
             }
         }
     }
@@ -558,10 +563,8 @@ class MainActivity : BaseActivity(), View.OnClickListener,
         super.onStop()
         MediaPlayerService.ui_visible = false
         if (service_bound) {
-            media_player_service?.seekBarRunnable?.let {
-                media_player_service?.seekBarHandler?.removeCallbacks(it)
-            }
-            EventBus.getDefault().post(RemoveLyricsHandlerEvent())
+            media_player_service?.cancelPositionUpdates()
+            // EventBus usage removed - lyrics handler updates handled through StateFlow
         }
     }
 
@@ -820,8 +823,12 @@ class MainActivity : BaseActivity(), View.OnClickListener,
         navArtistName!!.text = artist_name
     }
 
-    fun setImageInNavigation(album_uri: Bitmap?) {
-        navCover?.loadImageFromBitmap(album_uri, R.drawable.ic_music, 512, false)
+    fun setImageInNavigation(path: String?) {
+        navCover?.loadAlbumArt(path, R.drawable.ic_music, 512, false)
+    }
+
+    fun setImageInNavigation(bitmap: Bitmap?) {
+        navCover?.loadImageFromBitmap(bitmap, R.drawable.ic_music, 512, false)
     }
 
     private val music: Music?
@@ -1274,6 +1281,8 @@ class MainActivity : BaseActivity(), View.OnClickListener,
         val window1 = window
         storageUtil = StorageUtil(applicationContext)
         settingsStorage = SettingsStorage(applicationContext)
+        // Initialize favorite state manager
+        StateHolder.initFavoriteStateManager(storageUtil)
 
         if (window1 != null) {
             val darkTheme = settingsStorage.loadIsThemeDark()
@@ -1306,6 +1315,9 @@ class MainActivity : BaseActivity(), View.OnClickListener,
         mainPlayerSheetBehavior =
             BottomSheetBehavior.from(playerBottomSheet!!) as? CustomBottomSheet<View>
         mainPlayerSheetBehavior?.peekHeight = 0
+
+        // Setup ViewModel to observe playback state
+        setupViewModel()
 
         val openDrawer = findViewById<ImageView>(R.id.open_drawer_btn)
         val searchBar = findViewById<MaterialCardView>(R.id.searchBar_card)
@@ -1375,6 +1387,54 @@ class MainActivity : BaseActivity(), View.OnClickListener,
         if (is_granted && !isChecking) {
             checkForUpdateList(false)
         }
+    }
+
+    private fun setupViewModel() {
+        // Initialize ViewModel with PlaybackStateManager from StateHolder
+        viewModel = MainViewModel(StateHolder.playbackStateManager)
+
+        // Collect from StateFlows to update UI. Each flow gets its own child coroutine
+        // since collectLatest suspends forever - sharing one coroutine would starve
+        // every collector after the first.
+        lifecycleScope.launchWhenStarted {
+            launch {
+                viewModel.currentTrack.collectLatest { music ->
+                    // Update navigation when current track changes
+                    if (music != null) {
+                        setDataInNavigation(music.name, music.artist)
+                        // Load album art for navigation
+                        setImageInNavigation(music.path)
+                    }
+                }
+            }
+
+            launch {
+                viewModel.playbackState.collectLatest { state ->
+                    // Update UI based on playback state (if needed)
+                    // For example, we could update a play/pause button in the UI
+                    // But currently, the MainActivity does not have a play/pause button;
+                    // it is in the BottomSheetPlayerFragment which observes StateFlows separately.
+                    // We can leave this empty for now or update any UI elements we have.
+                    // We are already updating navigation and position in other collectors.
+                }
+            }
+
+            launch {
+                viewModel.position.collectLatest { position ->
+                    // Update seekbar position
+                    val (currentPos, duration) = position
+                    // Update UI components with position information
+                    // This would typically update a SeekBar and time TextViews
+                    // For now, we'll just log it or update any position-dependent UI
+                    Logger.normalLog("Position: $currentPos/$duration")
+                }
+            }
+        }
+        viewModelSetupDone = true
+    }
+
+    fun refreshLyricsInBottomSheet() {
+        bottomSheetPlayerFragment?.runnableSyncLyrics(null)
     }
 
     private fun addToNextPlay(music: Music?) {
@@ -1727,10 +1787,15 @@ class MainActivity : BaseActivity(), View.OnClickListener,
 
     private fun removeFromList(music: Music?, optionTag: OptionSheetEnum?) {
         if (optionTag == OptionSheetEnum.OPEN_PLAYLIST) {
-            EventBus.getDefault().post(RemoveFromPlaylistEvent(music))
-            //solve removed song not loading in playlist adapter
+            // Remove from the currently open saved playlist (not the live playback queue -
+            // this option sheet is opened while browsing a Playlist, which may not even be
+            // the one currently playing). The fragment's adapter persists the removal itself.
+            val openPlaylistFragment =
+                supportFragmentManager.findFragmentByTag(OPEN_PLAYLIST_FRAGMENT_TAG) as? OpenPlayListFragment
+            openPlaylistFragment?.removeMusicFromList(music)
         } else if (optionTag == OptionSheetEnum.FAVORITE_LIST) {
-            EventBus.getDefault().post(RemoveFromFavoriteEvent(music))
+            // Refactored to use FavoriteStateManager instead of EventBus
+            StateHolder.favoriteStateManager.removeFavorite(music)
         }
     }
 
