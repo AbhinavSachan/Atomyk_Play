@@ -531,23 +531,14 @@ class BottomSheetPlayerFragment : BaseFragment(), OnSeekBarChangeListener, OnDra
                 }
             }
 
-            launch {
-                StateHolder.playbackStateManager.queue.collectLatest { queue ->
-                    // Update queue adapter
-                    musicArrayList = ArrayList(queue)
-                    queueAdapter?.updateMusicListItems(musicArrayList ?: ArrayList())
-
-                    // Update current song in queue UI
-                    val currentTrackId = StateHolder.playbackStateManager.currentTrack.value?.id
-                    val currentIndex = queue.indexOfFirst { it.id == currentTrackId }
-                    if (currentIndex >= 0 && currentIndex < queue.size) {
-                        val currentMusic = queue[currentIndex]
-                        songNameQueueItem?.text = currentMusic.name
-                        artistQueueItem?.text = currentMusic.artist
-                        queueCoverImg?.loadAlbumArt(currentMusic.path, R.drawable.ic_music, 128, false)
-                    }
-                }
-            }
+            // NOTE: PlaybackStateManager.queue is intentionally NOT observed here.
+            // Nothing in MediaPlayerService calls setQueue()/removeFromQueue() yet, so this
+            // StateFlow is permanently emptyList() - collecting it here used to immediately
+            // wipe the real queue (loaded via storageUtil.loadQueueList() in onViewCreated,
+            // and kept live via updateQueueAdapter() from MainActivity/MusicAdapter) with an
+            // empty list the moment this fragment's view was created. Re-add this collector
+            // only once MediaPlayerService actually keeps PlaybackStateManager.queue in sync
+            // with real playback (see NEW_PLAN.md Phase 1/2).
 
             launch {
                 StateHolder.playbackStateManager.repeatMode.collectLatest { mode ->
