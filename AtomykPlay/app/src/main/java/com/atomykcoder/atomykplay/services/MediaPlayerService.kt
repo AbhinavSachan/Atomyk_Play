@@ -183,7 +183,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
                 val state = intent.getIntExtra("state", -1)
                 if (state == 1) {
                     if (settingsStorage.loadAutoPlay()) {
-                        if (!is_playing) {
+                        if (!StateHolder.playbackStateManager.playbackState.value.isPlaying) {
                             if (isMediaPlayerNotNull) {
                                 resumeMedia(true)
                             } else {
@@ -635,7 +635,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
         when (state) {
             TelephonyManager.CALL_STATE_OFFHOOK, TelephonyManager.CALL_STATE_RINGING -> {
                 Logger.normalLog("RINGING $isMediaPlaying $isMediaPlayerNotNull")
-                if (is_playing) {
+                if (StateHolder.playbackStateManager.playbackState.value.isPlaying) {
                     wasPlaying = true
                 }
                 pauseMedia()
@@ -1086,9 +1086,6 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
             }
         }
 
-        // set is_playing to true
-        is_playing = true
-
         Logger.normalLog("Finally")
 
         // set media_player seekbar to position and start media_player
@@ -1119,7 +1116,6 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
             storage.saveMusicLastPos(currentMediaPosition)
             mediaPlayer!!.pause()
             Logger.normalLog("Paused playing")
-            is_playing = false
             setIcon(PlaybackStatus.PAUSED)
             buildNotification(PlaybackStatus.PAUSED, 0f)
         }
@@ -1470,7 +1466,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
         if (settingsStorage.loadSelfStop()) {
             if (selfStopRunnable != null) {
                 selfStopRunnable = Runnable {
-                    if (!is_playing && !ui_visible) {
+                    if (!StateHolder.playbackStateManager.playbackState.value.isPlaying && !ui_visible) {
                         stopSelf()
                     }
                     selfStopHandler.postDelayed(selfStopRunnable!!, (5 * 60 * 1000).toLong())
@@ -1662,18 +1658,16 @@ class MediaPlayerService : MediaBrowserServiceCompat(), OnCompletionListener,
         //audio player notification ID
         const val NOTIFICATION_ID = 874159
 
-        // Note: is_playing and ui_visible static variables replaced with StateFlows in PlaybackStateManager
-        // These are kept for backward compatibility but should be migrated away from
-        @JvmField
-        var is_playing = false
-
+        // Note: is_playing was replaced by StateHolder.playbackStateManager.playbackState.value.isPlaying.
+        // ui_visible tracks whether MainActivity is in the foreground - a separate UI-lifecycle
+        // concern, not playback state, so it stays a plain static flag.
         @JvmField
         var ui_visible = false
     }
 
     fun bluetoothConnected() {
         if (settingsStorage.loadAutoPlayBt()) {
-            if (!is_playing) {
+            if (!StateHolder.playbackStateManager.playbackState.value.isPlaying) {
                 if (isMediaPlayerNotNull) {
                     resumeMedia(true)
                 } else {

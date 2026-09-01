@@ -550,7 +550,7 @@ class MainActivity : BaseActivity(), View.OnClickListener,
             }
         }
         if (service_bound) {
-            if (MediaPlayerService.is_playing) {
+            if (StateHolder.playbackStateManager.playbackState.value.isPlaying) {
                 if (media_player_service != null) {
                     media_player_service!!.setSeekBar()
                 }
@@ -908,7 +908,7 @@ class MainActivity : BaseActivity(), View.OnClickListener,
                         if (fragment1 != null || fragment2 != null || fragment3 != null || fragment4 != null || fragment5 != null || fragment6 != null || fragment7 != null || fragment8 != null || fragment9 != null) {
                             fragmentManager.popBackStackImmediate()
                         } else {
-                            if (MediaPlayerService.is_playing) {
+                            if (StateHolder.playbackStateManager.playbackState.value.isPlaying) {
                                 moveTaskToBack(false)
                             } else {
                                 super.onBackPressed()
