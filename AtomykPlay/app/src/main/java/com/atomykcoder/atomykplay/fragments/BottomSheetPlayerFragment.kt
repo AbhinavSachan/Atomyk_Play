@@ -540,26 +540,15 @@ class BottomSheetPlayerFragment : BaseFragment(), OnSeekBarChangeListener, OnDra
             // only once MediaPlayerService actually keeps PlaybackStateManager.queue in sync
             // with real playback (see NEW_PLAN.md Phase 1/2).
 
-            launch {
-                StateHolder.playbackStateManager.repeatMode.collectLatest { mode ->
-                    // Update repeat button icon
-                    when (mode) {
-                        PlaybackStateManager.RepeatMode.NONE -> repeatImg?.setImageResource(R.drawable.ic_repeat_empty)
-                        PlaybackStateManager.RepeatMode.ALL -> repeatImg?.setImageResource(R.drawable.ic_repeat)
-                        PlaybackStateManager.RepeatMode.ONE -> repeatImg?.setImageResource(R.drawable.ic_repeat_one)
-                    }
-                }
-            }
-
-            launch {
-                StateHolder.playbackStateManager.shuffleMode.collectLatest { mode ->
-                    // Update shuffle button icon
-                    when (mode) {
-                        PlaybackStateManager.ShuffleMode.NONE -> shuffleImg?.setImageResource(R.drawable.ic_shuffle_empty)
-                        PlaybackStateManager.ShuffleMode.ALL -> shuffleImg?.setImageResource(R.drawable.ic_shuffle)
-                    }
-                }
-            }
+            // NOTE: PlaybackStateManager.repeatMode/shuffleMode are also NOT observed here,
+            // for the same reason as queue above: nothing calls setRepeatMode()/
+            // setShuffleMode() from real code (only the unused PlayerServiceImpl scaffold
+            // does), so both StateFlows are permanently stuck at NONE. Collecting them here
+            // would force repeatImg/shuffleImg to "off" every time this fragment's view is
+            // created, even if repeat/shuffle was actually on - overwriting the real,
+            // already-correct icon state that setButton()/repeatFun()/shuffleList() (driven
+            // directly by StorageUtil, the actual persisted source of truth) set. Re-add once
+            // MediaPlayerService actually keeps these StateFlows in sync with StorageUtil.
 
             launch {
                 StateHolder.playbackStateManager.loadState.collectLatest { loadState ->
